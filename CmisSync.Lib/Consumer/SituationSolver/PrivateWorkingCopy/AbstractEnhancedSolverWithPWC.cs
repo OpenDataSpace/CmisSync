@@ -100,7 +100,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             return remotePWCDocument;
         }
 
-        private void SaveRemotePWCDocument(IFileInfo localFile, IDocument remoteDocument, IDocument remotePWCDocument, byte[] checksum, TransmissionController transmissionEvent) {
+        private void SaveRemotePWCDocument(IFileInfo localFile, IDocument remoteDocument, IDocument remotePWCDocument, byte[] checksum, Transmission transmissionEvent) {
             if (this.TransmissionStorage == null) {
                 return;
             }
@@ -128,7 +128,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
         /// <param name="transmissionManager">Transmission manager.</param>
         /// <param name="transmissionEvent">File Transmission event.</param>
         /// <param name="mappedObject">Mapped object saved in <c>Storage</c></param>
-        protected byte[] UploadFileWithPWC(IFileInfo localFile, ref IDocument doc, TransmissionController transmission, IMappedObject mappedObject = null) {
+        protected byte[] UploadFileWithPWC(IFileInfo localFile, ref IDocument doc, Transmission transmission, IMappedObject mappedObject = null) {
             byte[] checksum = null;
             IDocument docPWC = this.LoadRemotePWCDocument(doc, ref checksum);
 

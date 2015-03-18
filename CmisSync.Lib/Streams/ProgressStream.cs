@@ -31,7 +31,7 @@ namespace CmisSync.Lib.Streams {
         /// <summary>
         /// The transmission controller which is used to report the status.
         /// </summary>
-        private TransmissionController transmission;
+        private Transmission transmission;
 
         /// <summary>
         /// The start time of the usage.
@@ -58,7 +58,7 @@ namespace CmisSync.Lib.Streams {
         /// <param name='e'>
         /// Transmission event where the progress should be reported to.
         /// </param>
-        public ProgressStream(Stream stream, TransmissionController e) : base(stream) {
+        public ProgressStream(Stream stream, Transmission e) : base(stream) {
             if (e == null) {
                 throw new ArgumentNullException("The event, where to publish the prgress cannot be null");
             }
@@ -203,7 +203,7 @@ namespace CmisSync.Lib.Streams {
         /// Close this instance and calculates the bandwidth of the last second.
         /// </summary>
         public override void Close() {
-            long? result = TransmissionController.CalcBitsPerSecond(this.start, DateTime.Now.AddMilliseconds(1), this.bytesTransmittedSinceLastSecond);
+            long? result = Transmission.CalcBitsPerSecond(this.start, DateTime.Now.AddMilliseconds(1), this.bytesTransmittedSinceLastSecond);
             this.transmission.BitsPerSecond = result;
             this.blockingDetectionTimer.Stop();
             this.transmission.BitsPerSecond = null;
@@ -231,7 +231,7 @@ namespace CmisSync.Lib.Streams {
             }
 
             if (diff.Seconds >= 1) {
-                long? result = TransmissionController.CalcBitsPerSecond(this.start, DateTime.Now, this.bytesTransmittedSinceLastSecond);
+                long? result = Transmission.CalcBitsPerSecond(this.start, DateTime.Now, this.bytesTransmittedSinceLastSecond);
                 this.transmission.Position = pos;
                 this.transmission.Length = length;
                 this.transmission.BitsPerSecond = result;

@@ -25,6 +25,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -83,7 +84,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             this.VerifySavedFolder(this.oldChangeToken, localDirectory.Object.LastWriteTimeUtc);
             localDirectory.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            this.manager.Verify(m => m.AddTransmission(It.IsAny<TransmissionController>()), Times.Never());
+            this.manager.Verify(m => m.AddTransmission(It.IsAny<Transmission>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -96,7 +97,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
             localDirectory.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            this.manager.Verify(m => m.AddTransmission(It.IsAny<TransmissionController>()), Times.Never());
+            this.manager.Verify(m => m.AddTransmission(It.IsAny<Transmission>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -110,7 +111,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             this.VerifySavedFolder(this.oldChangeToken, localDirectory.Object.LastWriteTimeUtc);
             localDirectory.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            this.manager.Verify(m => m.AddTransmission(It.IsAny<TransmissionController>()), Times.Never());
+            this.manager.Verify(m => m.AddTransmission(It.IsAny<Transmission>()), Times.Never());
             this.storage.Verify(s => s.GetObjectByLocalPath(It.IsAny<IFileSystemInfo>()), Times.Never());
         }
 
@@ -139,7 +140,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             }
 
             localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            this.manager.Verify(m => m.AddTransmission(It.IsAny<TransmissionController>()), Times.Once());
+            this.manager.Verify(m => m.AddTransmission(It.IsAny<Transmission>()), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -159,7 +160,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 this.underTest.Solve(localFile.Object, Mock.Of<IDocument>(d => d.ChangeToken == this.oldChangeToken));
 
                 this.VerifySavedFile(this.oldChangeToken, localFile.Object.LastWriteTimeUtc, (DateTime)mappedObject.LastRemoteWriteTimeUtc, expectedHash, fileLength);
-                this.manager.Verify(m => m.AddTransmission(It.IsAny<TransmissionController>()), Times.Never());
+                this.manager.Verify(m => m.AddTransmission(It.IsAny<Transmission>()), Times.Never());
             }
 
             localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
@@ -196,7 +197,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 remoteFile.VerifySetContentStream();
                 Assert.That(uploadedContent.ToArray(), Is.EqualTo(content));
                 localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-                this.manager.Verify(m => m.AddTransmission(It.IsAny<TransmissionController>()), Times.Once());
+                this.manager.Verify(m => m.AddTransmission(It.IsAny<Transmission>()), Times.Once());
                 this.VerifySavedFile(this.newChangeToken, localFile.Object.LastWriteTimeUtc, localFile.Object.LastWriteTimeUtc, expectedHash, fileLength);
             }
         }
@@ -272,7 +273,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
             localDirectory.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            this.manager.Verify(m => m.AddTransmission(It.IsAny<TransmissionController>()), Times.Never());
+            this.manager.Verify(m => m.AddTransmission(It.IsAny<Transmission>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]

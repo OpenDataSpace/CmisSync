@@ -76,7 +76,6 @@
     <Compile Include="AccumulatorTests\LocalObjectFetcherTest.cs" />
     <Compile Include="AccumulatorTests\RemoteObjectFetcherTest.cs" />
     <Compile Include="AccumulatorTests\RemoteObjectMovedOrRenamedAccumulatorTest.cs" />
-    <Compile Include="ActiveActivitiesManagerTest.cs" />
     <Compile Include="AlgorithmsTests\CyclicDependencies\NoCycleDetectionTests.cs" />
     <Compile Include="AlgorithmsTests\CyclicDependencies\SimpleCycleDetectionTests.cs" />
     <Compile Include="AlgorithmsTests\StringTarjanNode.cs" />
@@ -124,7 +123,6 @@
     <Compile Include="EventsTests\EventHandlerPrioritiesTest.cs" />
     <Compile Include="EventsTests\FileEventTest.cs" />
     <Compile Include="EventsTests\FileOrFolderEventFactoryTest.cs" />
-    <Compile Include="EventsTests\FileTransmissionEventTest.cs" />
     <Compile Include="EventsTests\FolderEventTest.cs" />
     <Compile Include="EventsTests\FsEventTest.cs" />
     <Compile Include="EventsTests\FullSyncCompletedEventTest.cs" />
@@ -262,6 +260,8 @@
     <Compile Include="TestUtils\IDocumentAssertUtils.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\PrivateWorkingCopyTests\LocalObjectChangedRemoteObjectChangedWithPWCTest.cs" />
     <Compile Include="TestUtils\MockOfIFileTransmissionStorageUtil.cs" />
+    <Compile Include="FileTransmissionTests\TransmissionTest.cs" />
+    <Compile Include="FileTransmissionTests\TransmissionManagerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

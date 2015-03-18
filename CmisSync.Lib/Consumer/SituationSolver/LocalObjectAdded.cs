@@ -137,7 +137,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             var localFile = localFileSystemInfo as IFileInfo;
 
             if (localFile != null) {
-                TransmissionController transmission = new TransmissionController(TransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
+                Transmission transmission = new Transmission(TransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
                 this.transmissionManager.AddTransmission(transmission);
                 if (localFile.Length > 0) {
                     Stopwatch watch = new Stopwatch();

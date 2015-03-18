@@ -61,7 +61,7 @@ namespace CmisSync.Lib.FileTransmission
         ///  If true, the local content will overwrite the existing content.
         /// </param>
         /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">If upload fails</exception>
-        public virtual IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, TransmissionController status, HashAlgorithm hashAlg, bool overwrite = true, UpdateChecksum update = null) {
+        public virtual IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, Transmission status, HashAlgorithm hashAlg, bool overwrite = true, UpdateChecksum update = null) {
             if (remoteDocument == null) {
                 throw new ArgumentException("remoteDocument can not be null");
             }
@@ -115,7 +115,7 @@ namespace CmisSync.Lib.FileTransmission
         ///  Hash alg which should be used to calculate a checksum over the appended content.
         /// </param>
         /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">If Upload fails</exception>
-        public virtual IDocument AppendFile(IDocument remoteDocument, Stream localFileStream, TransmissionController status, HashAlgorithm hashAlg) {
+        public virtual IDocument AppendFile(IDocument remoteDocument, Stream localFileStream, Transmission status, HashAlgorithm hashAlg) {
             using(ProgressStream progressstream = new ProgressStream(localFileStream, status))
             using(CryptoStream hashstream = new CryptoStream(progressstream, hashAlg, CryptoStreamMode.Read))
             {

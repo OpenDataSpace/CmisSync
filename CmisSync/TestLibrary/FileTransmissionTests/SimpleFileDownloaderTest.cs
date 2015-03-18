@@ -17,14 +17,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.FileTransmissionTests
-{
+namespace TestLibrary.FileTransmissionTests {
     using System;
     using System.IO;
     using System.Security.Cryptography;
     using System.Threading;
     using System.Threading.Tasks;
 
+    using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Events;
@@ -38,10 +38,9 @@ namespace TestLibrary.FileTransmissionTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class SimpleFileDownloaderTest : IDisposable
-    {
+    public class SimpleFileDownloaderTest : IDisposable {
         private bool disposed = false;
-        private TransmissionController transmissionEvent;
+        private Transmission transmission;
         private MemoryStream localFileStream;
         private HashAlgorithm hashAlg;
         private long remoteLength;
@@ -52,9 +51,8 @@ namespace TestLibrary.FileTransmissionTests
         private Mock<MemoryStream> mockedMemStream;
 
         [SetUp]
-        public void SetUp()
-        {
-            this.transmissionEvent = new TransmissionController(TransmissionType.DOWNLOAD_NEW_FILE, "testfile");
+        public void SetUp() {
+            this.transmission = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "testfile");
             if (this.localFileStream != null) {
                 this.localFileStream.Dispose();
             }
@@ -83,31 +81,30 @@ namespace TestLibrary.FileTransmissionTests
         }
 
         [Test, Category("Fast")]
-        public void NormalDownloadTest()
-        {
+        public void NormalDownload() {
             double lastPercent = 0;
-            this.transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
-                if (e.ActualPosition != null) {
-                    Assert.GreaterOrEqual((long)e.ActualPosition, 0);
-                    Assert.LessOrEqual((long)e.ActualPosition, this.remoteLength);
+            this.transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
+                var t = sender as Transmission;
+                if (e.PropertyName == Utils.NameOf(() => t.Position)) {
+                    Assert.GreaterOrEqual((long)t.Position, 0);
+                    Assert.LessOrEqual((long)t.Position, this.remoteLength);
                 }
 
-                if (e.Percent != null) {
-                    Assert.GreaterOrEqual(e.Percent, 0);
-                    Assert.LessOrEqual(e.Percent, 100);
-                    Assert.GreaterOrEqual(e.Percent, lastPercent);
-                    lastPercent = (double)e.Percent;
+                if (e.PropertyName == Utils.NameOf(() => t.Percent)) {
+                    Assert.GreaterOrEqual(t.Percent, 0);
+                    Assert.LessOrEqual(t.Percent, 100);
+                    Assert.GreaterOrEqual(t.Percent, lastPercent);
+                    lastPercent = (double)t.Percent;
                 }
 
-                if (e.Length != null) {
-                    Assert.GreaterOrEqual(e.Length, 0);
-                    Assert.LessOrEqual(e.Length, this.remoteLength);
+                if (e.PropertyName == Utils.NameOf(() => t.Length)) {
+                    Assert.GreaterOrEqual(t.Length, 0);
+                    Assert.LessOrEqual(t.Length, this.remoteLength);
                 }
             };
 
-            using (IFileDownloader downloader = new SimpleFileDownloader())
-            {
-                downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
+            using (IFileDownloader downloader = new SimpleFileDownloader()) {
+                downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg);
                 Assert.AreEqual(this.remoteContent.Length, this.localFileStream.Length);
                 Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.remoteContent), this.hashAlg.Hash);
                 Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.localFileStream.ToArray()), this.hashAlg.Hash);
@@ -115,63 +112,55 @@ namespace TestLibrary.FileTransmissionTests
         }
 
         [Test, Category("Fast")]
-        public void ServerFailedExceptionTest()
-        {
+        public void ServerFailedException() {
             this.mockedMemStream.Setup(memstream => memstream.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Throws<CmisConnectionException>();
-            using (IFileDownloader downloader = new SimpleFileDownloader())
-            {
-                Assert.Throws<CmisConnectionException>(() => downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg));
+            using (IFileDownloader downloader = new SimpleFileDownloader()) {
+                Assert.Throws<CmisConnectionException>(() => downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg));
             }
         }
 
         [Test, Category("Fast")]
-        public void IOExceptionThrownIfIOExceptionOccursOnRead()
-        {
+        public void IOExceptionThrownIfIOExceptionOccursOnRead() {
             this.mockedMemStream.Setup(memstream => memstream.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Throws<IOException>();
             using (IFileDownloader downloader = new SimpleFileDownloader()) {
-                Assert.Throws<IOException>(() => downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg));
+                Assert.Throws<IOException>(() => downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg));
             }
         }
 
         [Test, Category("Fast")]
-        public void DisposeWhileDownloadTest()
-        {
+        public void DisposeWhileDownload() {
             this.mockedMemStream.Setup(memstream => memstream.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback(() => Thread.Sleep(1)).Returns(1);
             try {
                 Task t;
                 using (IFileDownloader downloader = new SimpleFileDownloader()) {
-                    t = Task.Factory.StartNew(() => downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg));
+                    t = Task.Factory.StartNew(() => downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg));
                 }
 
                 t.Wait();
                 Assert.Fail();
-            }
-            catch (AggregateException e)
-            {
+            } catch (AggregateException e) {
                 Assert.IsInstanceOf(typeof(ObjectDisposedException), e.InnerException);
             }
         }
 
         [Test, Category("Medium")]
-        public void AbortWhileDownloadTest()
-        {
+        public void AbortWhileDownload() {
             this.mockedMemStream.Setup(memstream => memstream.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback(() => Thread.Sleep(1)).Returns(1);
-            this.transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
-                Assert.That(e.Completed, Is.Null);
+            this.transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
+                Assert.That((sender as Transmission).Status, Is.Not.EqualTo(TransmissionStatus.FINISHED));
             };
 
             try {
                 Task t;
                 IFileDownloader downloader = new SimpleFileDownloader();
-                t = Task.Factory.StartNew(() => downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg));
+                t = Task.Factory.StartNew(() => downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg));
                 t.Wait(100);
-                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true });
+                this.transmission.Abort();
                 t.Wait();
                 Assert.Fail();
             } catch (AggregateException e) {
                 Assert.IsInstanceOf(typeof(AbortException), e.InnerException);
-                Assert.That(this.transmissionEvent.Status.Aborted.GetValueOrDefault(), Is.True);
-                Assert.That(this.transmissionEvent.Status.Aborting, Is.False);
+                Assert.That(this.transmission.Status, Is.EqualTo(TransmissionStatus.ABORTED));
                 return;
             }
 
@@ -183,8 +172,7 @@ namespace TestLibrary.FileTransmissionTests
         // Implement IDisposable.
         // Do not make this method virtual.
         // A derived class should not be able to override this method.
-        public void Dispose()
-        {
+        public void Dispose() {
             this.Dispose(true);
         }
 
@@ -195,8 +183,7 @@ namespace TestLibrary.FileTransmissionTests
         // If disposing equals false, the method has been called by the
         // runtime from inside the finalizer and you should not reference
         // other objects. Only unmanaged resources can be disposed.
-        protected virtual void Dispose(bool disposing)
-        {
+        protected virtual void Dispose(bool disposing) {
             if (disposing) {
                 if (!this.disposed) {
                     if (this.localFileStream != null) {

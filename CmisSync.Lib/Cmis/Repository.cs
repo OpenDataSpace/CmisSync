@@ -546,8 +546,8 @@ namespace CmisSync.Lib.Cmis {
                             Thread.Sleep(10);
                         }
                         transmissionRun = false;
-                        List<TransmissionController> transmissions = this.activityListener.TransmissionManager.ActiveTransmissionsAsList();
-                        foreach (TransmissionController transmission in transmissions) {
+                        List<Transmission> transmissions = this.activityListener.TransmissionManager.ActiveTransmissionsAsList();
+                        foreach (Transmission transmission in transmissions) {
                             string localFolder = this.RepoInfo.LocalPath;
                             if (!localFolder.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString())) {
                                 localFolder = localFolder + System.IO.Path.DirectorySeparatorChar.ToString();

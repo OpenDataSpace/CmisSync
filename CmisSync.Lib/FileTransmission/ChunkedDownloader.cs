@@ -79,7 +79,7 @@ namespace CmisSync.Lib.FileTransmission
         /// <exception cref="DisposeException">If the remote object has been disposed before the dowload is finished</exception>
         /// <exception cref="AbortException">If download is aborted</exception>
         /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
-        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, TransmissionController status, HashAlgorithm hashAlg) {
+        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, Transmission status, HashAlgorithm hashAlg) {
             {
                 byte[] buffer = new byte[8 * 1024];
                 int len;
@@ -139,7 +139,7 @@ namespace CmisSync.Lib.FileTransmission
             }
         }
 
-        private int DownloadNextChunk(IDocument remoteDocument, long offset, long remainingBytes, TransmissionController transmission, Stream outputstream, HashAlgorithm hashAlg) {
+        private int DownloadNextChunk(IDocument remoteDocument, long offset, long remainingBytes, Transmission transmission, Stream outputstream, HashAlgorithm hashAlg) {
             lock(this.disposeLock)
             {
                 if (this.disposed) {

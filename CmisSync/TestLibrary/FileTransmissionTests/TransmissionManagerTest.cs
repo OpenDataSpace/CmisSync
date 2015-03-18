@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="ActiveActivitiesManagerTest.cs" company="GRAU DATA AG">
+// <copyright file="TransmissionManagerTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,12 +16,14 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace TestLibrary {
     using System;
     using System.Collections.Generic;
     using System.Text;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
 
     using Moq;
@@ -29,7 +31,7 @@ namespace TestLibrary {
     using NUnit.Framework;
 
     [TestFixture]
-    public class ActiveActivitiesManagerTest {
+    public class TransmissionManagerTest {
         [Test, Category("Fast")]
         public void DefaultConstructorDoesNotFail() {
             new TransmissionManager();
@@ -46,7 +48,7 @@ namespace TestLibrary {
         public void AddSingleTransmissionIncreasesListCountByOne() {
             var manager = new TransmissionManager();
 
-            Assert.IsTrue(manager.AddTransmission(new TransmissionController(TransmissionType.DOWNLOAD_NEW_FILE, "path")));
+            Assert.IsTrue(manager.AddTransmission(new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path")));
 
             Assert.That(manager.ActiveTransmissions.Count, Is.EqualTo(1));
         }
@@ -54,7 +56,7 @@ namespace TestLibrary {
         [Test, Category("Fast")]
         public void ListedTransmissionIsEqualToAdded() {
             var manager = new TransmissionManager();
-            var trans = new TransmissionController(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
 
             Assert.That(manager.AddTransmission(trans), Is.True);
 
@@ -65,10 +67,10 @@ namespace TestLibrary {
         [Test, Category("Fast")]
         public void AFinishedTransmissionIsRemovedFromList() {
             var manager = new TransmissionManager();
-            var trans = new TransmissionController(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
             manager.AddTransmission(trans);
 
-            trans.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
+            trans.Status = TransmissionStatus.FINISHED;
 
             Assert.That(manager.ActiveTransmissions, Is.Empty);
         }
@@ -76,7 +78,7 @@ namespace TestLibrary {
         [Test, Category("Fast")]
         public void AddingTheSameInstanceASecondTimeReturnsFalseAndIsNotListed() {
             var manager = new TransmissionManager();
-            var trans = new TransmissionController(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
 
             Assert.That(manager.AddTransmission(trans), Is.True);
 
@@ -89,10 +91,10 @@ namespace TestLibrary {
         [Test, Category("Fast")]
         public void AnAbortedTransmissionIsRemovedFromList() {
             var manager = new TransmissionManager();
-            var trans = new TransmissionController(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
             manager.AddTransmission(trans);
 
-            trans.ReportProgress(new TransmissionProgressEventArgs { Aborted = true });
+            trans.Status = TransmissionStatus.ABORTED;
 
             Assert.That(manager.ActiveTransmissions, Is.Empty);
         }
@@ -100,8 +102,8 @@ namespace TestLibrary {
         [Test, Category("Fast")]
         public void AddingNonEqualTransmissionProducesNewEntryInList() {
             var manager = new TransmissionManager();
-            var trans = new TransmissionController(TransmissionType.DOWNLOAD_NEW_FILE, "path");
-            var trans2 = new TransmissionController(TransmissionType.DOWNLOAD_NEW_FILE, "path2");
+            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans2 = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path2");
 
             Assert.That(manager.AddTransmission(trans), Is.True);
             Assert.That(manager.AddTransmission(trans2), Is.True);
@@ -112,7 +114,7 @@ namespace TestLibrary {
         [Test, Category("Fast")]
         public void AddingATransmissionFiresEvent() {
             var manager = new TransmissionManager();
-            var trans = new TransmissionController(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
             int eventCounter = 0;
 
             manager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
@@ -128,7 +130,7 @@ namespace TestLibrary {
         [Test, Category("Fast")]
         public void AFinishedTransmissionFiresEvent() {
             var manager = new TransmissionManager();
-            var trans = new TransmissionController(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
             int eventCounter = 0;
             manager.AddTransmission(trans);
 
@@ -138,7 +140,7 @@ namespace TestLibrary {
                 Assert.That(e.OldItems.Count, Is.EqualTo(1));
                 Assert.That(e.OldItems[0], Is.EqualTo(trans));
             };
-            trans.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
+            trans.Status = TransmissionStatus.FINISHED;
 
             Assert.That(eventCounter, Is.EqualTo(1));
         }

@@ -23,6 +23,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
@@ -132,7 +133,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             }
 
             public byte[] Upload(IFileInfo localFile, IDocument doc, TransmissionManager transmissionManager) {
-                TransmissionController transmissionEvent = new TransmissionController(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                Transmission transmissionEvent = new Transmission(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
                 transmissionManager.AddTransmission(transmissionEvent);
                 return this.UploadFile(localFile, doc, transmissionEvent);
             }

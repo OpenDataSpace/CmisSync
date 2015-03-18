@@ -16,9 +16,9 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+using CmisSync.Lib;
 
-namespace TestLibrary.FileTransmissionTests
-{
+namespace TestLibrary.FileTransmissionTests {
     using System;
     using System.IO;
     using System.Security.Cryptography;
@@ -38,10 +38,9 @@ namespace TestLibrary.FileTransmissionTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class SimpleFileUploaderTest : IDisposable
-    {
+    public class SimpleFileUploaderTest : IDisposable {
         private bool disposed = false;
-        private TransmissionController transmissionEvent;
+        private Transmission transmission;
         private MemoryStream localFileStream;
         private HashAlgorithm hashAlg;
         private long fileLength;
@@ -51,9 +50,8 @@ namespace TestLibrary.FileTransmissionTests
         private Mock<IContentStream> mockedStream;
 
         [SetUp]
-        public void SetUp()
-        {
-            this.transmissionEvent = new TransmissionController(TransmissionType.UPLOAD_NEW_FILE, "testfile");
+        public void SetUp() {
+            this.transmission = new Transmission(TransmissionType.UPLOAD_NEW_FILE, "testfile");
             this.fileLength = 1024 * 1024;
             this.localContent = new byte[this.fileLength];
             if (this.localFileStream != null) {
@@ -66,8 +64,7 @@ namespace TestLibrary.FileTransmissionTests
             }
 
             this.hashAlg = new SHA1Managed();
-            using (RandomNumberGenerator random = RandomNumberGenerator.Create())
-            {
+            using (RandomNumberGenerator random = RandomNumberGenerator.Create()) {
                 random.GetBytes(this.localContent);
             }
 
@@ -80,38 +77,36 @@ namespace TestLibrary.FileTransmissionTests
         }
 
         [Test, Category("Fast")]
-        public void ConstructorTest()
-        {
-            using (new SimpleFileUploader())
-            {
+        public void Constructor() {
+            using (new SimpleFileUploader()) {
             }
         }
 
         [Test, Category("Medium")]
-        public void NormalUploadTest()
-        {
+        public void NormalUploadTest() {
             this.mockedDocument.Setup(doc => doc.SetContentStream(It.IsAny<IContentStream>(), It.Is<bool>(b => b == true), It.Is<bool>(b => b == true)))
                 .Callback<IContentStream, bool, bool>((s, b, r) => s.Stream.CopyTo(this.mockedMemStream.Object))
                 .Returns(new Mock<IObjectId>().Object);
             using (IFileUploader uploader = new SimpleFileUploader()) {
-                this.transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
-                    if (e.Length != null) {
-                        Assert.GreaterOrEqual(e.Length, 0);
-                        Assert.LessOrEqual(e.Length, this.localContent.Length);
+                this.transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
+                    var t = sender as Transmission;
+                    if (e.PropertyName == Utils.NameOf(() => t.Length)) {
+                        Assert.GreaterOrEqual(t.Length, 0);
+                        Assert.LessOrEqual(t.Length, this.localContent.Length);
                     }
 
-                    if (e.Percent != null) {
-                        Assert.GreaterOrEqual(e.Percent, 0);
-                        Assert.LessOrEqual(e.Percent, 100);
+                    if (e.PropertyName == Utils.NameOf(() => t.Percent)) {
+                        Assert.GreaterOrEqual(t.Percent, 0);
+                        Assert.LessOrEqual(t.Percent, 100);
                     }
 
-                    if (e.ActualPosition != null) {
-                        Assert.GreaterOrEqual(e.ActualPosition, 0);
-                        Assert.LessOrEqual(e.ActualPosition, this.localContent.Length);
+                    if (e.PropertyName == Utils.NameOf(() => t.Position)) {
+                        Assert.GreaterOrEqual(t.Position, 0);
+                        Assert.LessOrEqual(t.Position, this.localContent.Length);
                     }
                 };
 
-                IDocument result = uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
+                IDocument result = uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg);
                 Assert.AreEqual(result, this.mockedDocument.Object);
                 Assert.AreEqual(this.localContent.Length, this.mockedMemStream.Object.Length);
                 Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.localContent), this.hashAlg.Hash);
@@ -121,13 +116,12 @@ namespace TestLibrary.FileTransmissionTests
         }
 
         [Test, Category("Fast")]
-        public void IOExceptionTest()
-        {
+        public void IOExceptionTest() {
             this.mockedDocument.Setup(doc => doc.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.Is<bool>(b => b == true)))
                 .Throws<IOException>();
             using (IFileUploader uploader = new SimpleFileUploader()) {
                 try {
-                    uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
+                    uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg);
                     Assert.Fail();
                 } catch (UploadFailedException e) {
                     Assert.IsInstanceOf(typeof(IOException), e.InnerException);
@@ -137,32 +131,26 @@ namespace TestLibrary.FileTransmissionTests
         }
 
         [Test, Category("Medium")]
-        public void AbortTest()
-        {
+        public void AbortTest() {
             this.mockedDocument.Setup(doc => doc.SetContentStream(It.IsAny<IContentStream>(), It.Is<bool>(b => b == true), It.Is<bool>(b => b == true)))
                 .Callback<IContentStream, bool, bool>((s, b, r) => s.Stream.CopyTo(this.mockedMemStream.Object))
                 .Returns(new Mock<IObjectId>().Object);
             this.mockedMemStream.Setup(memstream => memstream.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback(() => Thread.Sleep(100));
-            this.transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e)
-            {
-                Assert.AreEqual(null, e.Completed);
+            this.transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
+                Assert.That((sender as Transmission).Status, Is.Not.EqualTo(TransmissionStatus.FINISHED));
             };
-            try
-            {
+            try {
                 Task t;
                 IFileUploader uploader = new SimpleFileUploader();
-                t = Task.Factory.StartNew(() => uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg));
+                t = Task.Factory.StartNew(() => uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg));
                 t.Wait(10);
-                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true });
+                this.transmission.Abort();
                 t.Wait();
                 Assert.Fail();
-            }
-            catch (AggregateException e)
-            {
+            } catch (AggregateException e) {
                 Assert.IsInstanceOf(typeof(UploadFailedException), e.InnerException);
                 Assert.IsInstanceOf(typeof(AbortException), e.InnerException.InnerException);
-                Assert.True(this.transmissionEvent.Status.Aborted.GetValueOrDefault());
-                Assert.AreEqual(false, this.transmissionEvent.Status.Aborting);
+                Assert.That(this.transmission.Status, Is.EqualTo(TransmissionStatus.ABORTED));
                 return;
             }
 
@@ -174,8 +162,7 @@ namespace TestLibrary.FileTransmissionTests
         // Implement IDisposable.
         // Do not make this method virtual.
         // A derived class should not be able to override this method.
-        public void Dispose()
-        {
+        public void Dispose() {
             this.Dispose(true);
         }
 
@@ -186,8 +173,7 @@ namespace TestLibrary.FileTransmissionTests
         // If disposing equals false, the method has been called by the
         // runtime from inside the finalizer and you should not reference
         // other objects. Only unmanaged resources can be disposed.
-        protected virtual void Dispose(bool disposing)
-        {
+        protected virtual void Dispose(bool disposing) {
             if (disposing) {
                 if (!this.disposed) {
                     if (this.localFileStream != null) {

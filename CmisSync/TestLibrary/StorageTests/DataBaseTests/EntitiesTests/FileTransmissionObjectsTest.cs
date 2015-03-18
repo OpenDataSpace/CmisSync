@@ -17,14 +17,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
-{
+namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests {
     using System;
     using System.Collections.Generic;
     using System.Security.Cryptography;
     using System.IO;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -36,13 +36,11 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
     using NUnit.Framework;
     
     [TestFixture]
-    public class FileTransmissionObjectsTest
-    {
+    public class FileTransmissionObjectsTest {
         private Mock<IFileInfo> LocalFile;
 
         [SetUp]
-        public void SetUp()
-        {
+        public void SetUp() {
             LocalFile = new Mock<IFileInfo>();
             LocalFile.SetupAllProperties();
             LocalFile.Setup(f => f.Length).Returns(1024);
@@ -52,14 +50,8 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
             LocalFile.Object.LastWriteTimeUtc = DateTime.UtcNow;
         }
 
-        [TearDown]
-        public void TearDown()
-        {
-        }
-
         [Test, Category("Fast"), Category("FileTransmissionObjects")]
-        public void ConstructorTakesData()
-        {
+        public void ConstructorTakesData() {
             var remoteFile = new Mock<IDocument>();
             remoteFile.Setup(m => m.Paths).Returns(new List<string>() { "/RemoteFile" });
             remoteFile.Setup(m => m.Id).Returns("RemoteId");
@@ -83,18 +75,18 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
             obj.ChecksumAlgorithmName = "SHA1";
             Assert.AreEqual("SHA1", obj.ChecksumAlgorithmName);
             obj.LastChecksum = new byte[32];
-            using (var random = RandomNumberGenerator.Create())
-            {
+            using (var random = RandomNumberGenerator.Create()) {
                 random.GetBytes(obj.LastChecksum);
             }
+
             Assert.IsFalse(obj.Equals(obj2));
 
             obj2.ChecksumAlgorithmName = "SHA1";
             obj2.LastChecksum = new byte[32];
-            using (var random = RandomNumberGenerator.Create())
-            {
+            using (var random = RandomNumberGenerator.Create()) {
                 random.GetBytes(obj.LastChecksum);
             }
+
             Assert.IsFalse(obj.Equals(obj2));
 
             Buffer.BlockCopy(obj2.LastChecksum, 0, obj.LastChecksum, 0, 32);
@@ -102,8 +94,7 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
         }
 
         [Test, Category("Fast"), Category("FileTransmissionObjects")]
-        public void ConstructorThrowsExceptionIfLocalFileIsInvalid()
-        {
+        public void ConstructorThrowsExceptionIfLocalFileIsInvalid() {
             //Local file is null
             Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(TransmissionType.UPLOAD_NEW_FILE, null, Mock.Of<IDocument>()));
 

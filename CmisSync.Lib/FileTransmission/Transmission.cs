@@ -85,7 +85,7 @@ namespace CmisSync.Lib.FileTransmission {
     /// This event should be queued only once. The progress will not be reported on the queue.
     /// Interested entities should add themselfs as TransmissionEventHandler on the event TransmissionStatus to get informed about the progress.
     /// </summary>
-    public class TransmissionController : INotifyPropertyChanged {
+    public class Transmission : INotifyPropertyChanged {
         private readonly TransmissionType type;
         private TransmissionStatus status = TransmissionStatus.TRANSMITTING;
         private long? length = null;
@@ -106,7 +106,7 @@ namespace CmisSync.Lib.FileTransmission {
         /// <param name='cachePath'>
         /// If a download runs and a cache file is used, this should be the path to the cache file
         /// </param>
-        public TransmissionController(TransmissionType type, string path, string cachePath = null) {
+        public Transmission(TransmissionType type, string path, string cachePath = null) {
             if (path == null) {
                 throw new ArgumentNullException("Argument null in FSEvent Constructor", "path");
             }

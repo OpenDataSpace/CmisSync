@@ -523,8 +523,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             long length = 0;
             stream.Setup(f => f.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback((byte[] buffer, int offset, int count) => {
                 if (length > 0) {
-                    foreach (TransmissionController transmissionEvent in this.manager.ActiveTransmissions) {
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = true });
+                    foreach (Transmission transmission in this.manager.ActiveTransmissions) {
+                        transmission.Abort();
                     }
                 }
 

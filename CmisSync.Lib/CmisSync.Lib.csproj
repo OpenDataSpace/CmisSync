@@ -299,8 +299,8 @@
     <Compile Include="Consumer\SituationSolver\PrivateWorkingCopy\LocalObjectChangedWithPWC.cs" />
     <Compile Include="Consumer\SituationSolver\PrivateWorkingCopy\AbstractEnhancedSolverWithPWC.cs" />
     <Compile Include="Consumer\SituationSolver\PrivateWorkingCopy\LocalObjectChangedRemoteObjectChangedWithPWC.cs" />
-    <Compile Include="FileTransmission\TransmissionController.cs" />
     <Compile Include="FileTransmission\TransmissionManager.cs" />
+    <Compile Include="FileTransmission\Transmission.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

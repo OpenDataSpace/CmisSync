@@ -22,6 +22,7 @@ namespace TestLibrary.StorageTests.DataBaseTests {
     using System.Collections.Generic;
     using System.IO;
 
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
@@ -124,7 +125,7 @@ namespace TestLibrary.StorageTests.DataBaseTests {
                 var remoteFile = new Mock<DotCMIS.Client.IDocument>();
                 remoteFile.Setup(m => m.Id).Returns("RemoteObjectId");
                 remoteFile.Setup(m => m.Paths).Returns(new List<string>() { "/RemoteFile" });
-                var data = new FileTransmissionObject(CmisSync.Lib.Events.TransmissionType.UPLOAD_NEW_FILE, this.file.Object, remoteFile.Object);
+                var data = new FileTransmissionObject(TransmissionType.UPLOAD_NEW_FILE, this.file.Object, remoteFile.Object);
                 tran.Insert<string, DbCustomSerializer<FileTransmissionObject>>("objects", key, data);
                 Assert.That((tran.Select<string, DbCustomSerializer<FileTransmissionObject>>("objects", key).Value.Get as FileTransmissionObject).Equals(data));
             }

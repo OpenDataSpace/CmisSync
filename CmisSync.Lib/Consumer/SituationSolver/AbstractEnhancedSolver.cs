@@ -108,7 +108,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent,
             ContentChangeType remoteContent);
 
-        private void SaveCacheFile(IFileInfo target, IDocument remoteDocument, byte[] hash, TransmissionController transmissionEvent) {
+        private void SaveCacheFile(IFileInfo target, IDocument remoteDocument, byte[] hash, Transmission transmissionEvent) {
             if (this.TransmissionStorage == null) {
                 return;
             }
@@ -172,7 +172,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             }
         }
 
-        protected byte[] DownloadCacheFile(IFileInfo target, IDocument remoteDocument, TransmissionController transmissionEvent, IFileSystemInfoFactory fsFactory) {
+        protected byte[] DownloadCacheFile(IFileInfo target, IDocument remoteDocument, Transmission transmissionEvent, IFileSystemInfoFactory fsFactory) {
             if (!this.LoadCacheFile(target, remoteDocument, fsFactory)) {
                 if (target.Exists) {
                     target.Delete();
@@ -208,7 +208,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             byte[] hash = null;
 
             var cacheFile = fsFactory.CreateDownloadCacheFileInfo(target);
-            var transmissionEvent = new TransmissionController(TransmissionType.DOWNLOAD_MODIFIED_FILE, target.FullName, cacheFile.FullName);
+            var transmissionEvent = new Transmission(TransmissionType.DOWNLOAD_MODIFIED_FILE, target.FullName, cacheFile.FullName);
             transmissonManager.AddTransmission(transmissionEvent);
             hash = this.DownloadCacheFile(cacheFile, remoteDocument, transmissionEvent, fsFactory);
             obj.ChecksumAlgorithmName = "SHA-1";
@@ -259,7 +259,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <param name="doc">Remote document.</param>
         /// <param name="transmissionManager">Transmission manager.</param>
         /// <param name="transmissionEvent">File Transmission event.</param>
-        protected byte[] UploadFile(IFileInfo localFile, IDocument doc, TransmissionController transmissionEvent) {
+        protected byte[] UploadFile(IFileInfo localFile, IDocument doc, Transmission transmissionEvent) {
             using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
                 byte[] hash = null;
                 IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();

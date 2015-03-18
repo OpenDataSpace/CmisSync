@@ -133,7 +133,7 @@ SOURCES =  \
 	FileTransmission/IFileUploader.cs \
 	FileTransmission/SimpleFileDownloader.cs \
 	FileTransmission/SimpleFileUploader.cs \
-	FileTransmission/TransmissionController.cs \
+	FileTransmission/Transmission.cs \
 	FileTransmission/TransmissionManager.cs \
 	FileTransmission/UploadFailedException.cs \
 	Filter/AbstractFileFilter.cs \

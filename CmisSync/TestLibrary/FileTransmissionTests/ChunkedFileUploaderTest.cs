@@ -17,14 +17,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.FileTransmissionTests
-{
+namespace TestLibrary.FileTransmissionTests {
     using System;
     using System.IO;
     using System.Security.Cryptography;
     using System.Threading;
     using System.Threading.Tasks;
 
+    using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Events;
@@ -38,12 +38,11 @@ namespace TestLibrary.FileTransmissionTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class ChunkedFileUploaderTest : IDisposable
-    {
+    public class ChunkedFileUploaderTest : IDisposable {
         private readonly long fileLength = 1024 * 1024;
         private readonly long chunkSize = 1024;
         private bool disposed = false;
-        private TransmissionController transmissionEvent;
+        private Transmission transmission;
         private MemoryStream localFileStream;
         private HashAlgorithm hashAlg;
         private MemoryStream remoteStream;
@@ -54,9 +53,8 @@ namespace TestLibrary.FileTransmissionTests
         private Mock<IObjectId> returnedObjectId;
 
         [SetUp]
-        public void SetUp()
-        {
-            this.transmissionEvent = new TransmissionController(TransmissionType.UPLOAD_NEW_FILE, "testfile");
+        public void SetUp() {
+            this.transmission = new Transmission(TransmissionType.UPLOAD_NEW_FILE, "testfile");
             this.lastChunk = 0;
             this.localContent = new byte[this.fileLength];
             if (this.localFileStream != null) {
@@ -94,44 +92,37 @@ namespace TestLibrary.FileTransmissionTests
         }
 
         [Test, Category("Fast")]
-        public void ContructorWorksWithValidInput()
-        {
+        public void ContructorWorksWithoutInput() {
             using (var uploader = new ChunkedUploader()) {
-                Assert.Greater(uploader.ChunkSize, 0);
+                Assert.That(uploader.ChunkSize, Is.GreaterThan(0));
             }
+        }
 
+        [Test, Category("Fast")]
+        public void ContructorWorksWithValidInput() {
             using (var uploader = new ChunkedUploader(this.chunkSize)) {
-                Assert.AreEqual(this.chunkSize, uploader.ChunkSize);
+                Assert.That(uploader.ChunkSize, Is.EqualTo(this.chunkSize));
             }
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentException))]
-        public void ConstructorFailsWithZeroChunkSize()
-        {
-            using (new ChunkedUploader(0))
-            {
-            }
+        public void ConstructorFailsWithZeroChunkSize() {
+            Assert.Throws<ArgumentException>(() => {using (new ChunkedUploader(0));});
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentException))]
-        public void ConstructorFailsWithNegativeChunkSize()
-        {
-            using (new ChunkedUploader(-1))
-            {
-            }
+        public void ConstructorFailsWithNegativeChunkSize() {
+            Assert.Throws<ArgumentException>(() => {using (new ChunkedUploader(-1));});
         }
 
         [Test, Category("Medium")]
-        public void NormalUpload()
-        {
-            this.transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
-                this.AssertThatProgressFitsMinimumLimits(e, 0, 0, 0);
+        public void NormalUpload() {
+            this.transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
+                this.AssertThatProgressFitsMinimumLimits(sender as Transmission, e, 0, 0, 0);
             };
 
             using (IFileUploader uploader = new ChunkedUploader(this.chunkSize)) {
-                uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
+                uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg);
             }
 
             this.AssertThatLocalAndRemoteContentAreEqualToHash();
@@ -145,8 +136,8 @@ namespace TestLibrary.FileTransmissionTests
             double successfulUploadPart = 0.5;
             int successfulUploaded = (int)(this.fileLength * successfulUploadPart);
             double minPercent = 100 * successfulUploadPart;
-            this.transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
-                this.AssertThatProgressFitsMinimumLimits(e, successfulUploaded, minPercent, successfulUploaded);
+            this.transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
+                this.AssertThatProgressFitsMinimumLimits(sender as Transmission, e, successfulUploaded, minPercent, successfulUploaded);
             };
 
             // Copy half of data before start uploading
@@ -155,7 +146,7 @@ namespace TestLibrary.FileTransmissionTests
             this.localFileStream.Seek(successfulUploaded, SeekOrigin.Begin);
 
             using (IFileUploader uploader = new ChunkedUploader(this.chunkSize)) {
-                uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
+                uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg);
             }
 
             this.AssertThatLocalAndRemoteContentAreEqualToHash();
@@ -169,13 +160,13 @@ namespace TestLibrary.FileTransmissionTests
             int successfulUploaded = (int)(this.fileLength * successfulUploadPart);
             double minPercent = 100 * successfulUploadPart;
             this.InitRemoteChunkWithSize(successfulUploaded);
-            this.transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
-                this.AssertThatProgressFitsMinimumLimits(e, successfulUploaded, minPercent, successfulUploaded);
+            this.transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
+                this.AssertThatProgressFitsMinimumLimits(sender as Transmission, e, successfulUploaded, minPercent, successfulUploaded);
             };
 
             using (IFileUploader uploader = new ChunkedUploader(this.chunkSize)) {
                 ContentTaskUtils.PrepareResume(successfulUploaded, this.localFileStream, this.hashAlg);
-                uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
+                uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg);
             }
 
             this.AssertThatLocalAndRemoteContentAreEqualToHash();
@@ -189,7 +180,7 @@ namespace TestLibrary.FileTransmissionTests
                 .Throws(new IOException());
             using (IFileUploader uploader = new ChunkedUploader(this.chunkSize)) {
                 try {
-                    uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
+                    uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg);
                     Assert.Fail();
                 }
                 catch (Exception e)
@@ -214,12 +205,12 @@ namespace TestLibrary.FileTransmissionTests
             }).Returns(this.mockedDocument.Object);
 
             this.remoteStream.WriteByte(1);
-            this.transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
-                this.AssertThatProgressFitsMinimumLimits(e, 0, 0, 0);
+            this.transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
+                this.AssertThatProgressFitsMinimumLimits(sender as Transmission, e, 0, 0, 0);
             };
 
             using (IFileUploader uploader = new ChunkedUploader(this.chunkSize)) {
-                uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
+                uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg);
             }
 
             this.mockedDocument.Verify(doc => doc.DeleteContentStream(It.IsAny<bool>()), Times.Once());
@@ -266,30 +257,27 @@ namespace TestLibrary.FileTransmissionTests
         }
         #endregion
 
-        private void InitRemoteChunkWithSize(int successfulUploaded)
-        {
+        private void InitRemoteChunkWithSize(int successfulUploaded) {
             byte[] buffer = new byte[successfulUploaded];
             this.localFileStream.Read(buffer, 0, successfulUploaded);
             this.remoteStream.Write(buffer, 0, successfulUploaded);
             this.localFileStream.Seek(0, SeekOrigin.Begin);
         }
 
-        private void AssertThatProgressFitsMinimumLimits(TransmissionProgressEventArgs args, long minLength, double minPercent, long minPos)
-        {
-            // Console.WriteLine(e.ToString());
-            if (args.Length != null) {
-                Assert.GreaterOrEqual(args.Length, minLength);
-                Assert.LessOrEqual(args.Length, this.localContent.Length);
+        private void AssertThatProgressFitsMinimumLimits(Transmission t, System.ComponentModel.PropertyChangedEventArgs args, long minLength, double minPercent, long minPos) {
+            if (args.PropertyName == Utils.NameOf(() => t.Length)) {
+                Assert.GreaterOrEqual(t.Length, minLength);
+                Assert.LessOrEqual(t.Length, this.localContent.Length);
             }
 
-            if (args.Percent != null) {
-                Assert.GreaterOrEqual(args.Percent, minPercent);
-                Assert.LessOrEqual(args.Percent, 100);
+            if (args.PropertyName == Utils.NameOf(() => t.Percent)) {
+                Assert.GreaterOrEqual(t.Percent, minPercent);
+                Assert.LessOrEqual(t.Percent, 100);
             }
 
-            if (args.ActualPosition != null) {
-                Assert.GreaterOrEqual(args.ActualPosition, minPos);
-                Assert.LessOrEqual(args.ActualPosition, this.localContent.Length);
+            if (args.PropertyName == Utils.NameOf(() => t.Position)) {
+                Assert.GreaterOrEqual(t.Position, minPos);
+                Assert.LessOrEqual(t.Position, this.localContent.Length);
             }
         }
 

@@ -39,7 +39,7 @@ namespace CmisSync.Lib.Queueing {
 
         private object collectionLock = new object();
 
-        private ObservableCollection<TransmissionController> activeTransmissions = new ObservableCollection<TransmissionController>();
+        private ObservableCollection<Transmission> activeTransmissions = new ObservableCollection<Transmission>();
 
         /// <summary>
         /// Gets the active transmissions. This Collection can be obsered for changes.
@@ -47,7 +47,7 @@ namespace CmisSync.Lib.Queueing {
         /// <value>
         /// The active transmissions.
         /// </value>
-        public ObservableCollection<TransmissionController> ActiveTransmissions {
+        public ObservableCollection<Transmission> ActiveTransmissions {
             get {
                 return this.activeTransmissions;
             }
@@ -59,9 +59,9 @@ namespace CmisSync.Lib.Queueing {
         /// <returns>
         /// The transmissions as list.
         /// </returns>
-        public List<TransmissionController> ActiveTransmissionsAsList() {
+        public List<Transmission> ActiveTransmissionsAsList() {
             lock (this.collectionLock) {
-                return this.activeTransmissions.ToList<TransmissionController>();
+                return this.activeTransmissions.ToList<Transmission>();
             }
         }
 
@@ -70,7 +70,7 @@ namespace CmisSync.Lib.Queueing {
         /// </summary>
         /// <param name="transmission">transmission which should be added</param>
         /// <returns>true if added</returns>
-        public virtual bool AddTransmission(TransmissionController transmission) {
+        public virtual bool AddTransmission(Transmission transmission) {
             if (transmission == null) {
                 throw new ArgumentNullException();
             }
@@ -104,11 +104,11 @@ namespace CmisSync.Lib.Queueing {
         /// The progress parameters of the transmission.
         /// </param>
         private void TransmissionFinished(object sender, PropertyChangedEventArgs e) {
-            if (e.PropertyName != Utils.NameOf((TransmissionController t) => t.Status)) {
+            if (e.PropertyName != Utils.NameOf((Transmission t) => t.Status)) {
                 return;
             }
 
-            var transmission = (sender as TransmissionController);
+            var transmission = (sender as Transmission);
             if (transmission != null &&
                 (transmission.Status == TransmissionStatus.ABORTED || transmission.Status == TransmissionStatus.FINISHED)) {
                 lock (this.collectionLock) {
