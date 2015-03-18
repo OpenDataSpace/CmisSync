@@ -257,6 +257,7 @@ namespace CmisSync.Lib.FileTransmission {
                 if (this.failedException != value) {
                     this.failedException = value;
                     this.NotifyPropertyChanged(Utils.NameOf(() => this.FailedException));
+                    this.Status = TransmissionStatus.ABORTED;
                 }
             }
         }

@@ -135,6 +135,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                     remoteFile.Setup(f => f.LastModificationDate).Returns(newModificationDate);
                     remoteFile.Setup(f => f.ChangeToken).Returns(this.newChangeToken);
                 });
+                this.manager.SetupCreateTransmissionOnce(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.Object.FullName);
 
                 this.underTest.Solve(localFile.Object, remoteFile.Object);
             }
@@ -190,6 +191,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                     remoteFile.Setup(f => f.ChangeToken).Returns(this.newChangeToken);
                 });
                 remoteFile.SetupUpdateModificationDate();
+                this.manager.SetupCreateTransmissionOnce(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.Object.FullName);
 
                 this.underTest.Solve(localFile.Object, remoteFile.Object);
 
@@ -217,6 +219,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 this.storage.AddMappedFile(mappedObject);
                 var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.remoteId, this.objectName, this.parentId, fileLength, new byte[20], this.oldChangeToken);
                 remoteFile.SetupReadOnly();
+                this.manager.SetupCreateTransmissionOnce(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.Object.FullName);
 
                 this.underTest.Solve(localFile.Object, remoteFile.Object);
 
@@ -240,6 +243,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 this.storage.AddMappedFile(mappedObject);
                 var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.remoteId, this.objectName, this.parentId, fileLength, new byte[20], this.oldChangeToken);
                 remoteFile.Setup(r => r.SetContentStream(It.IsAny<IContentStream>(), true, true)).Throws(new CmisStorageException());
+                this.manager.SetupCreateTransmissionOnce(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.Object.FullName);
 
                 this.underTest.Solve(localFile.Object, remoteFile.Object);
 

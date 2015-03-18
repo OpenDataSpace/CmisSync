@@ -187,6 +187,22 @@ namespace TestLibrary.FileTransmissionTests {
             Assert.That(changed, Is.EqualTo(1));
         }
 
+        [Test, Category("Fast")]
+        public void SettingFailedTransmissionExceptionAlsoSetsTheAbortFlag() {
+            var underTest = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, this.path);
+            bool changed = false;
+            underTest.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) => {
+                if (e.PropertyName == Utils.NameOf((Transmission t) => t.Status)) {
+                    Assert.That((sender as Transmission).Status, Is.EqualTo(TransmissionStatus.ABORTED));
+                    changed = true;
+                }
+            };
+
+            underTest.FailedException = new Exception("generic test exception");
+
+            Assert.That(changed, Is.True, "The status must be changed if an exception is added");
+        }
+
         public Array GetAllTypes(){
             return Enum.GetValues(typeof(TransmissionType));
         }
