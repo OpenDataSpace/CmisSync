@@ -46,6 +46,7 @@ namespace CmisSync {
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.FileSystem;
@@ -280,7 +281,7 @@ namespace CmisSync {
         /// List of actives transmissions.
         /// </summary>
         /// <returns>The transmissions.</returns>
-        public List<TransmissionController> ActiveTransmissions() {
+        public List<Transmission> ActiveTransmissions() {
             return this.transmissionManager.ActiveTransmissionsAsList();
         }
 
@@ -389,15 +390,9 @@ namespace CmisSync {
                 Logger.Debug("Start to stop all active file transmissions");
                 int wait = 0;
                 do {
-                    List<TransmissionController> activeList = this.transmissionManager.ActiveTransmissionsAsList();
-                    foreach (TransmissionController transmissionEvent in activeList) {
-                        if (transmissionEvent.Status.Aborted.GetValueOrDefault()) {
-                            continue;
-                        }
-
-                        if (!transmissionEvent.Status.Aborting.GetValueOrDefault()) {
-                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = true });
-                        }
+                    List<Transmission> activeList = this.transmissionManager.ActiveTransmissionsAsList();
+                    foreach (var transmission in activeList) {
+                        transmission.Abort();
                     }
 
                     if (activeList.Count > 0) {
@@ -647,20 +642,6 @@ namespace CmisSync {
         private void AddRepository(RepoInfo repositoryInfo) {
             try {
                 Repository repo = new Repository(repositoryInfo, this.activityListenerAggregator);
-                repo.Queue.EventManager.AddEventHandler(
-                    new GenericSyncEventHandler<TransmissionController>(
-                    50,
-                    delegate(ISyncEvent e) {
-                    TransmissionController transEvent = e as TransmissionController;
-                    transEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
-                        if (args.Aborted == true && args.FailedException != null) {
-                            this.ShowException(
-                                string.Format(Properties_Resources.TransmissionFailedOnRepo, repo.Name),
-                                string.Format("{0}{1}{2}", transEvent.Path, Environment.NewLine, args.FailedException.Message));
-                        }
-                    };
-                    return false;
-                }));
                 repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>());
                 repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<ProxyAuthRequiredEvent, SuccessfulLoginEvent>());
                 repo.Queue.EventManager.AddEventHandler(

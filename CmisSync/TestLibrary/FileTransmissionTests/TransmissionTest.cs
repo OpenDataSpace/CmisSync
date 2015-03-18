@@ -16,7 +16,6 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using CmisSync.Lib;
 
 namespace TestLibrary.FileTransmissionTests {
     using System;
@@ -25,6 +24,7 @@ namespace TestLibrary.FileTransmissionTests {
     using System.Linq;
     using System.Text;
 
+    using CmisSync.Lib;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.FileTransmission;
 
@@ -168,6 +168,23 @@ namespace TestLibrary.FileTransmissionTests {
             underTest.Status = TransmissionStatus.ABORTED;
             underTest.Resume();
             Assert.That(underTest.Status == TransmissionStatus.ABORTED);
+        }
+
+        [Test, Category("Fast")]
+        public void LastModificationDate() {
+            var past = DateTime.Now - TimeSpan.FromDays(1);
+            int changed = 0;
+            var underTest = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, this.path);
+            Assert.That(underTest.LastModification, Is.EqualTo(DateTime.Now).Within(1).Seconds);
+            underTest.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) => {
+                if (e.PropertyName == Utils.NameOf((Transmission t) => t.LastModification)) {
+                    Assert.That((sender as Transmission).LastModification, Is.EqualTo(past));
+                    changed++;
+                }
+            };
+            underTest.LastModification = past;
+            Assert.That(underTest.LastModification, Is.EqualTo(past));
+            Assert.That(changed, Is.EqualTo(1));
         }
 
         public Array GetAllTypes(){

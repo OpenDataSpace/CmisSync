@@ -87,6 +87,8 @@ namespace CmisSync.Lib.FileTransmission {
     /// </summary>
     public class Transmission : INotifyPropertyChanged {
         private readonly TransmissionType type;
+        private string relativePath = string.Empty;
+        private string repo = string.Empty;
         private TransmissionStatus status = TransmissionStatus.TRANSMITTING;
         private long? length = null;
         private long? position = null;
@@ -130,6 +132,40 @@ namespace CmisSync.Lib.FileTransmission {
         public TransmissionType Type {
             get {
                 return this.type;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the repository.
+        /// </summary>
+        /// <value>The repository.</value>
+        public string Repository {
+            get {
+                return this.repo;
+            }
+
+            set {
+                if (this.repo != value) {
+                    this.repo = value;
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.Repository));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the relative path.
+        /// </summary>
+        /// <value>The relative path.</value>
+        public string RelativePath {
+            get {
+                return this.relativePath;
+            }
+
+            set {
+                if (this.relativePath != value) {
+                    this.relativePath = value;
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.RelativePath));
+                }
             }
         }
 

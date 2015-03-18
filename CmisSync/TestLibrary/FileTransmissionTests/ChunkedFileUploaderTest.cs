@@ -131,8 +131,7 @@ namespace TestLibrary.FileTransmissionTests {
 
         // Resumes to upload a file half uploaded in the past
         [Test, Category("Medium")]
-        public void ResumeUpload()
-        {
+        public void ResumeUpload() {
             double successfulUploadPart = 0.5;
             int successfulUploaded = (int)(this.fileLength * successfulUploadPart);
             double minPercent = 100 * successfulUploadPart;
@@ -154,8 +153,7 @@ namespace TestLibrary.FileTransmissionTests {
         }
 
         [Test, Category("Medium")]
-        public void ResumeUploadWithUtils()
-        {
+        public void ResumeUploadWithUtils() {
             double successfulUploadPart = 0.2;
             int successfulUploaded = (int)(this.fileLength * successfulUploadPart);
             double minPercent = 100 * successfulUploadPart;
@@ -174,8 +172,7 @@ namespace TestLibrary.FileTransmissionTests {
         }
 
         [Test, Category("Fast")]
-        public void IOExceptionOnUploadTest()
-        {
+        public void IOExceptionOnUploadTest() {
             this.mockedDocument.Setup(doc => doc.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.Is<bool>(b => b == true)))
                 .Throws(new IOException());
             using (IFileUploader uploader = new ChunkedUploader(this.chunkSize)) {
@@ -193,8 +190,7 @@ namespace TestLibrary.FileTransmissionTests {
         }
 
         [Test, Category("Medium")]
-        public void NormalUploadReplacesRemoteStreamIfRemoteStreamExists()
-        {
+        public void NormalUploadReplacesRemoteStreamIfRemoteStreamExists() {
             this.mockedDocument.Setup(doc => doc.ContentStreamId).Returns("StreamId");
             this.mockedDocument.Setup(doc => doc.DeleteContentStream(It.IsAny<bool>())).Callback(() => {
                 if (this.remoteStream != null) {
@@ -223,8 +219,7 @@ namespace TestLibrary.FileTransmissionTests {
         // Implement IDisposable.
         // Do not make this method virtual.
         // A derived class should not be able to override this method.
-        public void Dispose()
-        {
+        public void Dispose() {
             this.Dispose(true);
         }
 
@@ -235,8 +230,7 @@ namespace TestLibrary.FileTransmissionTests {
         // If disposing equals false, the method has been called by the
         // runtime from inside the finalizer and you should not reference
         // other objects. Only unmanaged resources can be disposed.
-        protected virtual void Dispose(bool disposing)
-        {
+        protected virtual void Dispose(bool disposing) {
             if (disposing) {
                 if (!this.disposed) {
                     if (this.localFileStream != null) {
