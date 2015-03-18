@@ -16,13 +16,13 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.ComponentModel;
 
 namespace CmisSync.Lib.Queueing {
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Collections.Specialized;
+    using System.ComponentModel;
     using System.Linq;
     using System.Text;
 
@@ -34,11 +34,10 @@ namespace CmisSync.Lib.Queueing {
     /// <summary>
     /// Transmission manager.
     /// </summary>
-    public class TransmissionManager {
+    public class TransmissionManager : ITransmissionManager {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(TransmissionManager));
 
         private object collectionLock = new object();
-
         private ObservableCollection<Transmission> activeTransmissions = new ObservableCollection<Transmission>();
 
         /// <summary>
@@ -86,6 +85,14 @@ namespace CmisSync.Lib.Queueing {
 
             return true;
         }
+
+        public Transmission CreateTransmission(TransmissionType type, string path, string cachePath = null) {
+            var transmission = new Transmission(type, path, cachePath);
+            transmission.PropertyChanged += this.TransmissionFinished;
+            this.activeTransmissions.Add(transmission);
+            return transmission;
+        }
+
 
         /// <summary>
         /// Aborts all open HTTP requests.

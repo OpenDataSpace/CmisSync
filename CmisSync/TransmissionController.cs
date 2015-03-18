@@ -112,8 +112,8 @@ namespace CmisSync {
                 transmissionLimit = TransmissionLimitLeast;
             }
 
-            List<TransmissionController> transmissions = Program.Controller.ActiveTransmissions();
-            foreach (TransmissionController transmission in transmissions) {
+            var transmissions = Program.Controller.ActiveTransmissions();
+            foreach (var transmission in transmissions) {
                 string fullPath = transmission.Path;
                 if (FullPathList.Contains(fullPath)) {
                     TransmissionItem itemOld = TransmissionList.Find(t => t.FullPath == fullPath);
