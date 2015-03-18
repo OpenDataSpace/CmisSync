@@ -54,7 +54,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileTransmissionStorage> transmissionStorage;
-        private Mock<ActiveActivitiesManager> manager;
+        private ActiveActivitiesManager manager;
         private Mock<ISolver> folderOrFileContentUnchangedAddedSolver;
 
         private string parentPath;
@@ -80,7 +80,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager.Object,
+                this.manager,
                 null));
         }
 
@@ -93,7 +93,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager.Object,
+                this.manager,
                 Mock.Of<ISolver>()));
         }
 
@@ -115,25 +115,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
         [Test, Category("Fast"), Category("Solver")]
         public void SolveCallIsDeniedIfRemoteFileIsChanged([Values(123456)]long fileSize) {
-            Assert.Ignore("TODO");
             this.SetUpMocks();
 
             this.SetupFile();
-            byte[] content = new byte[fileSize];
-            var hash = SHA1.Create().ComputeHash(content);
-            this.localFile.SetupStream(content);
+            Mock.Get(this.storage.Object.GetObjectByLocalPath(this.localFile.Object)).Setup(o => o.LastChangeToken).Returns(this.changeTokenOld + ".change");
 
             var underTest = this.CreateSolver();
-            this.folderOrFileContentUnchangedAddedSolver.Setup(
-                s =>
-                s.Solve(It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>(), It.IsAny<ContentChangeType>(), It.IsAny<ContentChangeType>()));
-            var folder = new Mock<IDirectoryInfo>(MockBehavior.Strict).Object;
-            var remoteId = new Mock<IFolder>(MockBehavior.Strict).Object;
-
-            underTest.Solve(folder, remoteId, localContent: ContentChangeType.NONE, remoteContent: ContentChangeType.NONE);
-
-            this.folderOrFileContentUnchangedAddedSolver.Verify(
-                s => s.Solve(folder, remoteId, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
+            Assert.Throws<ArgumentException>(() => underTest.Solve(this.localFile.Object, this.remoteDocument.Object, ContentChangeType.CHANGED));
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -147,7 +135,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
             this.remoteDocument.SetupCheckout(this.remoteDocumentPWC, this.changeTokenNew, this.objectIdNew);
 
-            var mappedFile = this.storage.AddLocalFile(this.localFile.Object, this.remoteDocument.Object.Id);
             var underTest = this.CreateSolver();
             underTest.Solve(this.localFile.Object, this.remoteDocument.Object, ContentChangeType.CHANGED);
 
@@ -194,7 +181,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager.Object,
+                this.manager,
                 this.folderOrFileContentUnchangedAddedSolver.Object);
         }
 
@@ -203,8 +190,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.session.SetupTypeSystem(serverCanModifyLastModificationDate: serverCanModifyLastModificationDate);
             this.session.SetupPrivateWorkingCopyCapability(isPwcUpdateable: isPwcUpdateable);
             this.storage = new Mock<IMetaDataStorage>();
+            this.chunkSize = 4096;
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();
-            this.manager = new Mock<ActiveActivitiesManager>();
+            this.transmissionStorage.Setup(f => f.ChunkSize).Returns(this.chunkSize);
+            this.manager = new ActiveActivitiesManager();
             this.folderOrFileContentUnchangedAddedSolver = new Mock<ISolver>(MockBehavior.Strict);
         }
 
@@ -238,6 +227,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 d.Parents == parents &&
                 d.ChangeToken == this.changeTokenOld);
             this.remoteDocument = Mock.Get(doc);
+            this.session.AddRemoteObject(doc);
 
             var docPWC = Mock.Of<IDocument>(
                 d =>
@@ -251,7 +241,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 length += stream.Stream.Read(buffer, 0, buffer.Length);
             });
             this.remoteDocumentPWC.Setup(d => d.ContentStreamLength).Returns(() => { return length; });
+            this.session.AddRemoteObject(docPWC);
 
+            this.remoteDocument.SetupCheckout(this.remoteDocumentPWC, this.changeTokenNew, this.objectIdNew);
+
+            Mock<IMappedObject> mapped = this.storage.AddLocalFile(this.localFile.Object, this.objectIdOld);
+            mapped.Setup(o => o.LastChangeToken).Returns(this.changeTokenOld);
+            mapped.Setup(o => o.ParentId).Returns(this.parentId);
         }
 
 
