@@ -33,6 +33,8 @@ namespace CmisSync {
     using System.Windows.Navigation;
     using System.Windows.Shapes;
 
+    using CmisSync.Lib.FileTransmission;
+
     /// <summary>
     /// Interaction logic for TransmissionWPF.xaml
     /// </summary>
@@ -53,17 +55,17 @@ namespace CmisSync {
 
         private void ListViewItem_Open(object sender, RoutedEventArgs e) {
             foreach (object item in ListView.SelectedItems) {
-                Transmission.TransmissionData data = item as Transmission.TransmissionData;
-                if (data.Done) {
-                    Process.Start(data.FullPath);
+                var transmission = item as Transmission;
+                if (transmission.Done()) {
+                    Process.Start(transmission.Path);
                 }
             }
         }
 
         private void ListViewItem_OpenFileLocation(object sender, RoutedEventArgs e) {
             foreach (object item in ListView.SelectedItems) {
-                Transmission.TransmissionData data = item as Transmission.TransmissionData;
-                Process.Start("explorer.exe", "/select,\"" + data.FullPath + "\"");
+                var transmission = item as Transmission;
+                Process.Start("explorer.exe", "/select,\"" + transmission.Path + "\"");
             }
         }
     }

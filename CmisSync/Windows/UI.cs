@@ -70,7 +70,7 @@ namespace CmisSync {
         /// <summary>
         /// Window showing transmissions.
         /// </summary>
-        public Transmission Transmission;
+        public TransmissionWindow Transmission;
         
         /// <summary>
         /// Constructor.
@@ -79,7 +79,7 @@ namespace CmisSync {
             Setup      = new Setup();
             About      = new About();
             Setting    = new Setting();
-            Transmission   = new Transmission();
+            Transmission   = new TransmissionWindow();
             Program.Controller.UIHasLoaded();
         }
 
