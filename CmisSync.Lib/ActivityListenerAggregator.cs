@@ -58,7 +58,7 @@ namespace CmisSync.Lib {
         /// </summary>
         /// <param name="overallListener">The activity listener to which aggregated activity will be sent.</param>
         /// <param name="transmissionManager">Transmission manager.</param>
-        public ActivityListenerAggregator(IActivityListener overallListener, ActiveActivitiesManager transmissionManager) {
+        public ActivityListenerAggregator(IActivityListener overallListener, TransmissionManager transmissionManager) {
             if (overallListener == null) {
                 throw new ArgumentNullException("Given listener is null");
             }
@@ -75,7 +75,7 @@ namespace CmisSync.Lib {
         /// Gets the transmission manager.
         /// </summary>
         /// <value>The transmission manager.</value>
-        public ActiveActivitiesManager TransmissionManager { get; private set; }
+        public TransmissionManager TransmissionManager { get; private set; }
 
         /// <summary>
         /// Call this method to indicate that activity has started.

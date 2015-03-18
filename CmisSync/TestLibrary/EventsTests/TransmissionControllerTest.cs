@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.EventsTests
-{
+namespace TestLibrary.FileTransmissionTests {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -29,13 +28,10 @@ namespace TestLibrary.EventsTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class FileTransmissionEventTest
-    {
-        private TransmissionProgressEventArgs expectedArgs = null;
+    public class TransmissionControllerTest {
 
         [SetUp]
-        public void TestInit()
-        {
+        public void TestInit() {
             this.expectedArgs = null;
         }
 
@@ -43,7 +39,7 @@ namespace TestLibrary.EventsTests
         public void ReportProgressTest()
         {
             string filename = "test.txt";
-            FileTransmissionEvent transmission = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, filename);
+            TransmissionController transmission = new TransmissionController(TransmissionType.DOWNLOAD_NEW_FILE, filename);
             transmission.TransmissionStatus += this.TransmissionEventHandler;
             this.expectedArgs = new TransmissionProgressEventArgs()
             {
@@ -121,7 +117,7 @@ namespace TestLibrary.EventsTests
         public void PercentTest()
         {
             string filename = "test.txt";
-            FileTransmissionEvent transmission = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, filename);
+            TransmissionController transmission = new TransmissionController(TransmissionType.DOWNLOAD_NEW_FILE, filename);
             double? percent = null;
             transmission.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e)
             {
@@ -151,24 +147,24 @@ namespace TestLibrary.EventsTests
         public void ConstructorAndPropertiesTest()
         {
             string path = "file";
-            FileTransmissionEvent e = new FileTransmissionEvent(TransmissionType.DOWNLOAD_MODIFIED_FILE, path);
+            TransmissionController e = new TransmissionController(TransmissionType.DOWNLOAD_MODIFIED_FILE, path);
             Assert.AreEqual(path, e.Path);
             Assert.AreEqual(TransmissionType.DOWNLOAD_MODIFIED_FILE, e.Type);
             Assert.IsNull(e.CachePath);
-            e = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, path);
+            e = new TransmissionController(TransmissionType.DOWNLOAD_NEW_FILE, path);
             Assert.AreEqual(path, e.Path);
             Assert.AreEqual(TransmissionType.DOWNLOAD_NEW_FILE, e.Type);
             Assert.IsNull(e.CachePath);
-            e = new FileTransmissionEvent(TransmissionType.UPLOAD_MODIFIED_FILE, path);
+            e = new TransmissionController(TransmissionType.UPLOAD_MODIFIED_FILE, path);
             Assert.AreEqual(path, e.Path);
             Assert.AreEqual(TransmissionType.UPLOAD_MODIFIED_FILE, e.Type);
             Assert.IsNull(e.CachePath);
-            e = new FileTransmissionEvent(TransmissionType.UPLOAD_NEW_FILE, path);
+            e = new TransmissionController(TransmissionType.UPLOAD_NEW_FILE, path);
             Assert.AreEqual(path, e.Path);
             Assert.AreEqual(TransmissionType.UPLOAD_NEW_FILE, e.Type);
             Assert.IsNull(e.CachePath);
             string cachepath = "file.sync";
-            e = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, path, cachepath);
+            e = new TransmissionController(TransmissionType.DOWNLOAD_NEW_FILE, path, cachepath);
             Assert.AreEqual(path, e.Path);
             Assert.AreEqual(TransmissionType.DOWNLOAD_NEW_FILE, e.Type);
             Assert.AreEqual(cachepath, e.CachePath);

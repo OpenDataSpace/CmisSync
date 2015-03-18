@@ -46,7 +46,7 @@ namespace TestLibrary.FileTransmissionTests
         private readonly long remoteLength = 1024 * 1024;
         private readonly long chunkSize = 1024;
         private bool disposed = false;
-        private FileTransmissionEvent transmissionEvent;
+        private TransmissionController transmissionEvent;
         private MemoryStream localFileStream;
         private string localFile;
         private HashAlgorithm hashAlg;
@@ -60,7 +60,7 @@ namespace TestLibrary.FileTransmissionTests
         [SetUp]
         public void SetUp()
         {
-            this.transmissionEvent = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, "testfile");
+            this.transmissionEvent = new TransmissionController(TransmissionType.DOWNLOAD_NEW_FILE, "testfile");
             if (this.localFileStream != null) {
                 this.localFileStream.Dispose();
             }

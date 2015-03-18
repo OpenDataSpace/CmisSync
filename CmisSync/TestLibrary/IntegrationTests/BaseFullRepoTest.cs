@@ -58,7 +58,7 @@ namespace TestLibrary.IntegrationTests {
         protected IFolder remoteRootDir;
         protected ISession session;
         protected FullRepoTests.CmisRepoMock repo;
-        protected ActiveActivitiesManager transmissionManager;
+        protected TransmissionManager transmissionManager;
 
         private static dynamic config;
         private string subfolder;
@@ -140,7 +140,7 @@ namespace TestLibrary.IntegrationTests {
 
             // Repo
             var activityListener = new Mock<IActivityListener>();
-            this.transmissionManager = new ActiveActivitiesManager();
+            this.transmissionManager = new TransmissionManager();
             var activityAggregator = new ActivityListenerAggregator(activityListener.Object, this.transmissionManager);
             var queue = new SingleStepEventQueue(new SyncEventManager());
 

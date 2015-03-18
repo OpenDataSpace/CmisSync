@@ -55,7 +55,7 @@ namespace TestLibrary.QueueingTests {
         [SetUp]
         public void SetUp() {
             this.queue = new Mock<ISyncEventQueue>();
-            this.listener = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), new ActiveActivitiesManager());
+            this.listener = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), new TransmissionManager());
         }
 
         [Test, Category("Fast")]

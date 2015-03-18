@@ -284,7 +284,7 @@ namespace CmisSync {
         private DateTime updateTime;
         private string typeString;
 
-        public TransmissionMenuItem(FileTransmissionEvent e) : base(e.Type.ToString()) {
+        public TransmissionMenuItem(TransmissionController e) : base(e.Type.ToString()) {
             this.Path = e.Path;
             this.Type = e.Type;
             this.typeString = this.Type.ToString();

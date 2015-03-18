@@ -51,6 +51,6 @@ namespace CmisSync.Lib.FileTransmission
         /// <exception cref="DisposeException">If the remote object has been disposed before the dowload is finished</exception>
         /// <exception cref="AbortException">If download is aborted</exception>
         /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
-        void DownloadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent transmissionStatus, HashAlgorithm hashAlg);
+        void DownloadFile(IDocument remoteDocument, Stream localFileStream, TransmissionController transmissionStatus, HashAlgorithm hashAlg);
     }
 }

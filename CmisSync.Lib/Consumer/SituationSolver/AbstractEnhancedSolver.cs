@@ -108,7 +108,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent,
             ContentChangeType remoteContent);
 
-        private void SaveCacheFile(IFileInfo target, IDocument remoteDocument, byte[] hash, FileTransmissionEvent transmissionEvent) {
+        private void SaveCacheFile(IFileInfo target, IDocument remoteDocument, byte[] hash, TransmissionController transmissionEvent) {
             if (this.TransmissionStorage == null) {
                 return;
             }
@@ -172,7 +172,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             }
         }
 
-        protected byte[] DownloadCacheFile(IFileInfo target, IDocument remoteDocument, FileTransmissionEvent transmissionEvent, IFileSystemInfoFactory fsFactory) {
+        protected byte[] DownloadCacheFile(IFileInfo target, IDocument remoteDocument, TransmissionController transmissionEvent, IFileSystemInfoFactory fsFactory) {
             if (!this.LoadCacheFile(target, remoteDocument, fsFactory)) {
                 if (target.Exists) {
                     target.Delete();
@@ -190,10 +190,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     } catch (FileTransmission.AbortException ex) {
                         target.Refresh();
                         this.SaveCacheFile(target, remoteDocument, hashAlg.Hash, transmissionEvent);
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                        transmissionEvent.FailedException = ex;
                         throw;
                     } catch (Exception ex) {
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                        transmissionEvent.FailedException = ex;
                         throw;
                     }
                 }
@@ -203,12 +203,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             }
         }
 
-        protected byte[] DownloadChanges(IFileInfo target, IDocument remoteDocument, IMappedObject obj, IFileSystemInfoFactory fsFactory, ActiveActivitiesManager transmissonManager, ILog logger) {
+        protected byte[] DownloadChanges(IFileInfo target, IDocument remoteDocument, IMappedObject obj, IFileSystemInfoFactory fsFactory, TransmissionManager transmissonManager, ILog logger) {
             // Download changes
             byte[] hash = null;
 
             var cacheFile = fsFactory.CreateDownloadCacheFileInfo(target);
-            var transmissionEvent = new FileTransmissionEvent(TransmissionType.DOWNLOAD_MODIFIED_FILE, target.FullName, cacheFile.FullName);
+            var transmissionEvent = new TransmissionController(TransmissionType.DOWNLOAD_MODIFIED_FILE, target.FullName, cacheFile.FullName);
             transmissonManager.AddTransmission(transmissionEvent);
             hash = this.DownloadCacheFile(cacheFile, remoteDocument, transmissionEvent, fsFactory);
             obj.ChecksumAlgorithmName = "SHA-1";
@@ -243,11 +243,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1}", target.FullName, remoteDocument.Id));
                 }
             } catch(Exception ex) {
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                transmissionEvent.FailedException = ex;
                 throw;
             }
 
-            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
+            transmissionEvent.Status = TransmissionStatus.FINISHED;
             return hash;
         }
 
@@ -259,22 +259,21 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <param name="doc">Remote document.</param>
         /// <param name="transmissionManager">Transmission manager.</param>
         /// <param name="transmissionEvent">File Transmission event.</param>
-        protected byte[] UploadFile(IFileInfo localFile, IDocument doc, FileTransmissionEvent transmissionEvent) {
+        protected byte[] UploadFile(IFileInfo localFile, IDocument doc, TransmissionController transmissionEvent) {
             using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
                 byte[] hash = null;
                 IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
                 using (var hashAlg = new SHA1Managed()) {
                     try {
                         uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
                         hash = hashAlg.Hash;
                     } catch (Exception ex) {
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                        transmissionEvent.FailedException = ex;
                         throw;
                     }
                 }
 
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
+                transmissionEvent.Status = TransmissionStatus.FINISHED;
                 return hash;
             }
         }

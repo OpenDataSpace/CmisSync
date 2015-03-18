@@ -356,7 +356,7 @@ namespace TestLibrary.IntegrationTests {
 
             var localDetection = new LocalSituationDetection();
             var remoteDetection = new RemoteSituationDetection();
-            var transmissionManager = new ActiveActivitiesManager();
+            var transmissionManager = new TransmissionManager();
             var activityAggregator = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), transmissionManager);
 
             var ignoreFolderFilter = new IgnoredFoldersFilter();

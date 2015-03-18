@@ -96,7 +96,7 @@ namespace DataSpaceSync.Console
             Logger.Info("Starting.");
 
             List<Repository> repositories = new List<Repository>();
-            var transmissionManager = new ActiveActivitiesManager();
+            var transmissionManager = new TransmissionManager();
             foreach (RepoInfo repoInfo in ConfigManager.CurrentConfig.Folders) {
                 string path = repoInfo.LocalPath;
                 if (!Directory.Exists(path)) {

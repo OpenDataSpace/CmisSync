@@ -48,7 +48,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private readonly string lastChangeToken = "token";
 
         private string path;
-        private ActiveActivitiesManager manager;
+        private TransmissionManager manager;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileTransmissionStorage> transmissionStorage;
@@ -58,7 +58,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         [SetUp]
         public void SetUp() {
             this.path = Path.Combine(Path.GetTempPath(), this.objectName);
-            this.manager = new ActiveActivitiesManager();
+            this.manager = new TransmissionManager();
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
@@ -523,7 +523,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             long length = 0;
             stream.Setup(f => f.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback((byte[] buffer, int offset, int count) => {
                 if (length > 0) {
-                    foreach (FileTransmissionEvent transmissionEvent in this.manager.ActiveTransmissions) {
+                    foreach (TransmissionController transmissionEvent in this.manager.ActiveTransmissions) {
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = true });
                     }
                 }

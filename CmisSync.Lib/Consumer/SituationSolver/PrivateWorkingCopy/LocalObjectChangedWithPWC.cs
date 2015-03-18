@@ -41,7 +41,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ActiveActivitiesManager manager,
+            TransmissionManager manager,
             ISolver folderOrFileContentUnchangedSolver) : base(session, storage, transmissionStorage) {
             if (folderOrFileContentUnchangedSolver == null) {
                 throw new ArgumentNullException("Given solver for folder or unchanged file content situations is null");

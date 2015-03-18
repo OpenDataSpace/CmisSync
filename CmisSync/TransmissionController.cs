@@ -26,6 +26,7 @@ namespace CmisSync {
 
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
 
     public class TransmissionItem : IDisposable {
         public string FullPath { get; private set; }
@@ -41,7 +42,7 @@ namespace CmisSync {
 
         private static readonly double UpdateIntervalSeconds = 1;
 
-        private FileTransmissionEvent Transmission;
+        private TransmissionController Transmission;
 
         private TransmissionType Type;
         private string State;
@@ -64,8 +65,8 @@ namespace CmisSync {
             }
         }
 
-        public TransmissionItem(FileTransmissionEvent transmission) {
-            Transmission = transmission;
+        public TransmissionItem(TransmissionController transmission) {
+            this.Transmission = transmission;
             this.UpdateTime = new DateTime(1970, 1, 1);
 
             FullPath = transmission.Path;
@@ -87,7 +88,7 @@ namespace CmisSync {
 
             Update(this, transmission.Status);
 
-            Transmission.TransmissionStatus += Update;
+            this.Transmission.PropertyChanged += Update;
         }
 
         ~TransmissionItem() {
@@ -259,8 +260,8 @@ namespace CmisSync {
                 transmissionLimit = TransmissionLimitLeast;
             }
 
-            List<FileTransmissionEvent> transmissions = Program.Controller.ActiveTransmissions();
-            foreach (FileTransmissionEvent transmission in transmissions) {
+            List<TransmissionController> transmissions = Program.Controller.ActiveTransmissions();
+            foreach (TransmissionController transmission in transmissions) {
                 string fullPath = transmission.Path;
                 if (FullPathList.Contains(fullPath)) {
                     TransmissionItem itemOld = TransmissionList.Find(t => t.FullPath == fullPath);

@@ -43,7 +43,7 @@ namespace TestLibrary.FileTransmissionTests
         private readonly long fileLength = 1024 * 1024;
         private readonly long chunkSize = 1024;
         private bool disposed = false;
-        private FileTransmissionEvent transmissionEvent;
+        private TransmissionController transmissionEvent;
         private MemoryStream localFileStream;
         private HashAlgorithm hashAlg;
         private MemoryStream remoteStream;
@@ -56,7 +56,7 @@ namespace TestLibrary.FileTransmissionTests
         [SetUp]
         public void SetUp()
         {
-            this.transmissionEvent = new FileTransmissionEvent(TransmissionType.UPLOAD_NEW_FILE, "testfile");
+            this.transmissionEvent = new TransmissionController(TransmissionType.UPLOAD_NEW_FILE, "testfile");
             this.lastChunk = 0;
             this.localContent = new byte[this.fileLength];
             if (this.localFileStream != null) {

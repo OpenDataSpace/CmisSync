@@ -44,7 +44,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectChanged));
 
         private IFileSystemInfoFactory fsFactory;
-        private ActiveActivitiesManager transmissonManager;
+        private TransmissionManager transmissonManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.RemoteObjectChanged"/> class.
@@ -57,7 +57,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ActiveActivitiesManager transmissonManager,
+            TransmissionManager transmissonManager,
             IFileSystemInfoFactory fsFactory = null) : base(session, storage, transmissionStorage)
         {
             if (transmissonManager == null) {

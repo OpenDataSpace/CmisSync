@@ -37,12 +37,12 @@ namespace TestLibrary.EventsTests {
 
         [Test, Category("Fast")]
         public void ConstructorThrowsExceptionIfActivityListenerIsNull() {
-            Assert.Throws<ArgumentNullException>(() => new ActivityListenerAggregator(null, new ActiveActivitiesManager()));
+            Assert.Throws<ArgumentNullException>(() => new ActivityListenerAggregator(null, new TransmissionManager()));
         }
 
         [Test, Category("Fast")]
         public void ConstructorTakesTransmissionManager() {
-            var manager = new ActiveActivitiesManager();
+            var manager = new TransmissionManager();
             var agg = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), manager);
             Assert.That(agg.TransmissionManager, Is.EqualTo(manager));
         }

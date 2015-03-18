@@ -79,7 +79,7 @@ namespace CmisSync.Lib.FileTransmission {
         /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">
         /// Contains the last successful remote document state. This is needed for continue a failed upload.
         /// </exception>
-        public override IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg, bool overwrite = true, UpdateChecksum update = null) {
+        public override IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, TransmissionController transmission, HashAlgorithm hashAlg, bool overwrite = true, UpdateChecksum update = null) {
             IDocument result = remoteDocument;
             for (long offset = localFileStream.Position; offset < localFileStream.Length; offset += this.ChunkSize) {
                 bool isFirstChunk = offset == 0;
@@ -87,9 +87,9 @@ namespace CmisSync.Lib.FileTransmission {
                 using (NonClosingHashStream hashstream = new NonClosingHashStream(localFileStream, hashAlg, CryptoStreamMode.Read))
                 using (ChunkedStream chunkstream = new ChunkedStream(hashstream, this.ChunkSize))
                 using (OffsetStream offsetstream = new OffsetStream(chunkstream, offset))
-                using (ProgressStream progressstream = new ProgressStream(offsetstream, status)) {
-                    status.Status.Length = localFileStream.Length;
-                    status.Status.ActualPosition = offset;
+                using (ProgressStream progressstream = new ProgressStream(offsetstream, transmission)) {
+                    transmission.Length = localFileStream.Length;
+                    transmission.Position = offset;
                     chunkstream.ChunkPosition = offset;
 
                     ContentStream contentStream = new ContentStream();

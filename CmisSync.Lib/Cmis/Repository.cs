@@ -32,6 +32,7 @@ namespace CmisSync.Lib.Cmis {
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Producer.ContentChange;
@@ -434,7 +435,7 @@ namespace CmisSync.Lib.Cmis {
                     }
 
                     if (transmission.Path.StartsWith(localFolder)) {
-                        transmission.ReportProgress(new TransmissionProgressEventArgs { Paused = true });
+                        transmission.Pause();
                     }
                 }
             }
@@ -457,7 +458,7 @@ namespace CmisSync.Lib.Cmis {
                     }
 
                     if (transmission.Path.StartsWith(localFolder)) {
-                        transmission.ReportProgress(new TransmissionProgressEventArgs { Paused = false });
+                        transmission.Resume();
                     }
                 }
             }
@@ -545,16 +546,16 @@ namespace CmisSync.Lib.Cmis {
                             Thread.Sleep(10);
                         }
                         transmissionRun = false;
-                        List<FileTransmissionEvent> transmissionEvents = this.activityListener.TransmissionManager.ActiveTransmissionsAsList();
-                        foreach (FileTransmissionEvent transmissionEvent in transmissionEvents) {
+                        List<TransmissionController> transmissions = this.activityListener.TransmissionManager.ActiveTransmissionsAsList();
+                        foreach (TransmissionController transmission in transmissions) {
                             string localFolder = this.RepoInfo.LocalPath;
                             if (!localFolder.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString())) {
                                 localFolder = localFolder + System.IO.Path.DirectorySeparatorChar.ToString();
                             }
 
-                            if (transmissionEvent.Path.StartsWith(localFolder)) {
+                            if (transmission.Path.StartsWith(localFolder)) {
                                 transmissionRun = true;
-                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = true });
+                                transmission.Abort();
                             }
                         }
                     } while (transmissionRun);

@@ -79,7 +79,7 @@ namespace CmisSync.Lib.FileTransmission
         /// <exception cref="DisposeException">If the remote object has been disposed before the dowload is finished</exception>
         /// <exception cref="AbortException">If download is aborted</exception>
         /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
-        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg) {
+        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, TransmissionController status, HashAlgorithm hashAlg) {
             {
                 byte[] buffer = new byte[8 * 1024];
                 int len;
@@ -139,25 +139,22 @@ namespace CmisSync.Lib.FileTransmission
             }
         }
 
-        private int DownloadNextChunk(IDocument remoteDocument, long offset, long remainingBytes, FileTransmissionEvent status, Stream outputstream, HashAlgorithm hashAlg) {
+        private int DownloadNextChunk(IDocument remoteDocument, long offset, long remainingBytes, TransmissionController transmission, Stream outputstream, HashAlgorithm hashAlg) {
             lock(this.disposeLock)
             {
                 if (this.disposed) {
-                    status.ReportProgress(new TransmissionProgressEventArgs() { Aborted = true });
-                    throw new ObjectDisposedException(status.Path);
+                    transmission.Status = TransmissionStatus.ABORTED;
+                    throw new ObjectDisposedException(transmission.Path);
                 }
 
                 IContentStream contentStream = remoteDocument.GetContentStream(remoteDocument.ContentStreamId, offset, remainingBytes);
-                status.ReportProgress(new TransmissionProgressEventArgs {
-                    Length = remoteDocument.ContentStreamLength,
-                    ActualPosition = offset,
-                    Resumed = offset > 0
-                });
+                transmission.Length = remoteDocument.ContentStreamLength;
+                transmission.Position = offset;
 
                 using (Stream remoteStream = contentStream.Stream)
                 using (ForwardReadingStream forwardstream = new ForwardReadingStream(remoteStream))
                 using (OffsetStream offsetstream = new OffsetStream(forwardstream, offset))
-                using (ProgressStream progress = new ProgressStream(offsetstream, status))
+                using (ProgressStream progress = new ProgressStream(offsetstream, transmission))
                 {
                     byte[] buffer = new byte[8 * 1024];
                     int result = 0;

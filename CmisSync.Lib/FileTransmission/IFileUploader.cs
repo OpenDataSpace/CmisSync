@@ -55,7 +55,7 @@ namespace CmisSync.Lib.FileTransmission
         /// <param name='overwrite'>
         /// If true, the local content will overwrite the existing content.
         /// </param>
-        IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg, bool overwrite = true, UpdateChecksum update = null);
+        IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, TransmissionController status, HashAlgorithm hashAlg, bool overwrite = true, UpdateChecksum update = null);
 
         /// <summary>
         /// Appends the localFileStream to the remoteDocument.
@@ -75,6 +75,6 @@ namespace CmisSync.Lib.FileTransmission
         /// <param name='hashAlg'>
         /// Hash alg which should be used to calculate a checksum over the appended content.
         /// </param>
-        IDocument AppendFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg);
+        IDocument AppendFile(IDocument remoteDocument, Stream localFileStream, TransmissionController status, HashAlgorithm hashAlg);
     }
 }

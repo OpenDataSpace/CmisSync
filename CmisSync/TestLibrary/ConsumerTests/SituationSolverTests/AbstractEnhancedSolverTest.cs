@@ -131,8 +131,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 return this.TransmissionStorage;
             }
 
-            public byte[] Upload(IFileInfo localFile, IDocument doc, ActiveActivitiesManager transmissionManager) {
-                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+            public byte[] Upload(IFileInfo localFile, IDocument doc, TransmissionManager transmissionManager) {
+                TransmissionController transmissionEvent = new TransmissionController(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
                 transmissionManager.AddTransmission(transmissionEvent);
                 return this.UploadFile(localFile, doc, transmissionEvent);
             }

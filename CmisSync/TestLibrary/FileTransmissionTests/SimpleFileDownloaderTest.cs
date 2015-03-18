@@ -41,7 +41,7 @@ namespace TestLibrary.FileTransmissionTests
     public class SimpleFileDownloaderTest : IDisposable
     {
         private bool disposed = false;
-        private FileTransmissionEvent transmissionEvent;
+        private TransmissionController transmissionEvent;
         private MemoryStream localFileStream;
         private HashAlgorithm hashAlg;
         private long remoteLength;
@@ -54,7 +54,7 @@ namespace TestLibrary.FileTransmissionTests
         [SetUp]
         public void SetUp()
         {
-            this.transmissionEvent = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, "testfile");
+            this.transmissionEvent = new TransmissionController(TransmissionType.DOWNLOAD_NEW_FILE, "testfile");
             if (this.localFileStream != null) {
                 this.localFileStream.Dispose();
             }

@@ -25,6 +25,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -41,7 +42,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     public class LocalObjectChangedRemoteObjectChanged : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChangedRemoteObjectChanged));
 
-        private ActiveActivitiesManager transmissionManager;
+        private TransmissionManager transmissionManager;
         private IFileSystemInfoFactory fsFactory;
 
         /// <summary>
@@ -57,7 +58,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ActiveActivitiesManager transmissionManager,
+            TransmissionManager transmissionManager,
             IFileSystemInfoFactory fsFactory = null) : base(session, storage, transmissionStorage) {
             if (transmissionManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
@@ -97,9 +98,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                         // Upload local content
                         updateRemoteDate = true;
                         try {
-                            FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(TransmissionType.UPLOAD_MODIFIED_FILE, fileInfo.FullName);
-                            this.transmissionManager.AddTransmission(transmissionEvent);
-                            obj.LastChecksum = this.UploadFile(fileInfo, doc, transmissionEvent);
+                            var transmission = new TransmissionController(TransmissionType.UPLOAD_MODIFIED_FILE, fileInfo.FullName);
+                            this.transmissionManager.AddTransmission(transmission);
+                            obj.LastChecksum = this.UploadFile(fileInfo, doc, transmission);
                             obj.LastContentSize = doc.ContentStreamLength ?? fileInfo.Length;
                         } catch(Exception ex) {
                             if (ex.InnerException is CmisPermissionDeniedException) {

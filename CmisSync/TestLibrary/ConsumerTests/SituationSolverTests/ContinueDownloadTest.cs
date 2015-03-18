@@ -54,7 +54,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private Mock<IFileSystemInfoFactory> fsFactory;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileTransmissionStorage> transmissionStorage;
-        private ActiveActivitiesManager transmissionManager;
+        private TransmissionManager transmissionManager;
 
         private string parentPath;
         private string localPath;
@@ -74,7 +74,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.fsFactory = new Mock<IFileSystemInfoFactory>(MockBehavior.Strict);
             this.storage = new Mock<IMetaDataStorage>();
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();
-            this.transmissionManager = new ActiveActivitiesManager();
+            this.transmissionManager = new TransmissionManager();
 
             this.transmissionStorage.Setup(f => f.SaveObject(It.IsAny<IFileTransmissionObject>())).Callback<IFileTransmissionObject>((o) => {
                 this.transmissionStorage.Setup(f => f.GetObjectByRemoteObjectId(It.IsAny<string>())).Returns(o);
@@ -243,7 +243,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.localFileLength = 0;
             stream.Setup(f => f.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback((byte[] buffer, int offset, int count) => {
                 if (this.localFileLength > 0) {
-                    foreach (FileTransmissionEvent transmissionEvent in this.transmissionManager.ActiveTransmissions) {
+                    foreach (TransmissionController transmissionEvent in this.transmissionManager.ActiveTransmissions) {
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = true });
                     }
                 }

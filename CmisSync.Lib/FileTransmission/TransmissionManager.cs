@@ -16,27 +16,30 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+using System.ComponentModel;
 
 namespace CmisSync.Lib.Queueing {
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Collections.Specialized;
     using System.Linq;
     using System.Text;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
 
     using log4net;
 
     /// <summary>
-    /// Active activities manager.
+    /// Transmission manager.
     /// </summary>
-    public class ActiveActivitiesManager {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(ActiveActivitiesManager));
+    public class TransmissionManager {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(TransmissionManager));
 
         private object collectionLock = new object();
 
-        private ObservableCollection<FileTransmissionEvent> activeTransmissions = new ObservableCollection<FileTransmissionEvent>();
+        private ObservableCollection<TransmissionController> activeTransmissions = new ObservableCollection<TransmissionController>();
 
         /// <summary>
         /// Gets the active transmissions. This Collection can be obsered for changes.
@@ -44,7 +47,7 @@ namespace CmisSync.Lib.Queueing {
         /// <value>
         /// The active transmissions.
         /// </value>
-        public ObservableCollection<FileTransmissionEvent> ActiveTransmissions {
+        public ObservableCollection<TransmissionController> ActiveTransmissions {
             get {
                 return this.activeTransmissions;
             }
@@ -56,9 +59,9 @@ namespace CmisSync.Lib.Queueing {
         /// <returns>
         /// The transmissions as list.
         /// </returns>
-        public List<FileTransmissionEvent> ActiveTransmissionsAsList() {
+        public List<TransmissionController> ActiveTransmissionsAsList() {
             lock (this.collectionLock) {
-                return this.activeTransmissions.ToList<FileTransmissionEvent>();
+                return this.activeTransmissions.ToList<TransmissionController>();
             }
         }
 
@@ -67,7 +70,7 @@ namespace CmisSync.Lib.Queueing {
         /// </summary>
         /// <param name="transmission">transmission which should be added</param>
         /// <returns>true if added</returns>
-        public virtual bool AddTransmission(FileTransmissionEvent transmission) {
+        public virtual bool AddTransmission(TransmissionController transmission) {
             if (transmission == null) {
                 throw new ArgumentNullException();
             }
@@ -77,11 +80,10 @@ namespace CmisSync.Lib.Queueing {
                     return false;
                 }
 
-                transmission.TransmissionStatus += this.TransmissionFinished;
+                transmission.PropertyChanged += this.TransmissionFinished;
                 this.activeTransmissions.Add(transmission);
             }
 
-            transmission.ReportProgress(transmission.Status);
             return true;
         }
 
@@ -101,15 +103,18 @@ namespace CmisSync.Lib.Queueing {
         /// <param name='e'>
         /// The progress parameters of the transmission.
         /// </param>
-        private void TransmissionFinished(object sender, TransmissionProgressEventArgs e) {
-            if (e.Aborted == true || e.Completed == true || e.FailedException != null) {
+        private void TransmissionFinished(object sender, PropertyChangedEventArgs e) {
+            if (e.PropertyName != Utils.NameOf((TransmissionController t) => t.Status)) {
+                return;
+            }
+
+            var transmission = (sender as TransmissionController);
+            if (transmission != null &&
+                (transmission.Status == TransmissionStatus.ABORTED || transmission.Status == TransmissionStatus.FINISHED)) {
                 lock (this.collectionLock) {
-                    FileTransmissionEvent transmission = sender as FileTransmissionEvent;
-                    if (transmission != null && this.activeTransmissions.Contains(transmission)) {
-                        this.activeTransmissions.Remove(transmission);
-                        transmission.TransmissionStatus -= this.TransmissionFinished;
-                        Logger.Debug("Transmission removed");
-                    }
+                    this.activeTransmissions.Remove(transmission);
+                    transmission.PropertyChanged -= TransmissionFinished;
+                    Logger.Debug("Transmission removed");
                 }
             }
         }

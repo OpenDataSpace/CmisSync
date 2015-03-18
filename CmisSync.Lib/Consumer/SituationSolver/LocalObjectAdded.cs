@@ -50,7 +50,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     /// </summary>
     public class LocalObjectAdded : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAdded));
-        private ActiveActivitiesManager transmissionManager;
+        private TransmissionManager transmissionManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectAdded"/> class.
@@ -63,7 +63,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ActiveActivitiesManager manager) : base(session, storage, transmissionStorage)
+            TransmissionManager manager) : base(session, storage, transmissionStorage)
         {
             if (manager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
@@ -137,14 +137,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             var localFile = localFileSystemInfo as IFileInfo;
 
             if (localFile != null) {
-                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(TransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
-                this.transmissionManager.AddTransmission(transmissionEvent);
+                TransmissionController transmission = new TransmissionController(TransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
+                this.transmissionManager.AddTransmission(transmission);
                 if (localFile.Length > 0) {
                     Stopwatch watch = new Stopwatch();
                     OperationsLogger.Debug(string.Format("Uploading file content of {0}", localFile.FullName));
                     watch.Start();
                     try {
-                        mapped.LastChecksum = this.UploadFile(localFile, addedObject as IDocument, transmissionEvent);
+                        mapped.LastChecksum = this.UploadFile(localFile, addedObject as IDocument, transmission);
                         mapped.ChecksumAlgorithmName = "SHA-1";
                     } catch (Exception ex) {
                         if (ex is UploadFailedException && (ex as UploadFailedException).InnerException is CmisStorageException) {
@@ -169,7 +169,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     this.Storage.SaveMappedObject(mapped);
                     OperationsLogger.Info(string.Format("Uploaded file content of {0} in [{1} msec]", localFile.FullName, watch.ElapsedMilliseconds));
                 } else {
-                    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
+                    transmission.Status = TransmissionStatus.FINISHED;
                 }
             }
 

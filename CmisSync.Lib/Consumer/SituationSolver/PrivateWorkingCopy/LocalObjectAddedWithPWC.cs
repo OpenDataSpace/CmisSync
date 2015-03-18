@@ -46,7 +46,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     /// </summary>
     public class LocalObjectAddedWithPWC : AbstractEnhancedSolverWithPWC {
         private readonly ISolver folderOrEmptyFileAddedSolver;
-        private readonly ActiveActivitiesManager transmissionManager;
+        private readonly TransmissionManager transmissionManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.PWC.LocalObjectAddedWithPWC"/> class.
@@ -60,7 +60,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ActiveActivitiesManager manager,
+            TransmissionManager manager,
             ISolver localFolderOrEmptyFileAddedSolver) : base(session, storage, transmissionStorage)
         {
             if (localFolderOrEmptyFileAddedSolver == null) {
@@ -119,7 +119,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
                 Guid uuid = this.WriteOrUseUuidIfSupported(localFile);
 
-                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(TransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
+                TransmissionController transmissionEvent = new TransmissionController(TransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
                 this.transmissionManager.AddTransmission(transmissionEvent);
 
                 MappedObject mapped = new MappedObject(

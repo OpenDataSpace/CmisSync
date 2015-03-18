@@ -62,7 +62,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorWithGivenQueueAndActivityManager() {
             this.SetUpMocks();
-            new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, new ActiveActivitiesManager());
+            new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, new TransmissionManager());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -151,7 +151,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFolderAddingFailsBecauseOfAConflict() {
             this.SetUpMocks();
-            var transmissionManager = new ActiveActivitiesManager();
+            var transmissionManager = new TransmissionManager();
             var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, transmissionManager);
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.Exists).Returns(true);
@@ -170,7 +170,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFolderAddingFailsBecauseUtf8Character() {
             this.SetUpMocks();
-            var transmissionManager = new ActiveActivitiesManager();
+            var transmissionManager = new TransmissionManager();
             var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, transmissionManager);
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.Exists).Returns(true);
@@ -282,7 +282,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             fileInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(this.withExtendedAttributes);
 
             fileInfo.Setup(d => d.Directory).Returns(parentDirInfo);
-            var transmissionManager = new ActiveActivitiesManager();
+            var transmissionManager = new TransmissionManager();
             var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, transmissionManager);
             solver.Solve(fileInfo.Object, null);
             this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
@@ -325,7 +325,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             fileInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(this.withExtendedAttributes);
 
             fileInfo.Setup(d => d.Directory).Returns(parentDirInfo.Object);
-            var transmissionManager = new ActiveActivitiesManager();
+            var transmissionManager = new TransmissionManager();
             var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, transmissionManager);
             solver.Solve(fileInfo.Object, null);
             this.storage.VerifyThatNoObjectIsManipulated();
@@ -356,7 +356,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             fileInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(this.withExtendedAttributes);
 
             fileInfo.Setup(d => d.Directory).Returns(parentDirInfo.Object);
-            var transmissionManager = new ActiveActivitiesManager();
+            var transmissionManager = new TransmissionManager();
             var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, transmissionManager);
             Assert.Throws<ArgumentException>(() => solver.Solve(fileInfo.Object, null));
             this.storage.VerifyThatNoObjectIsManipulated();
@@ -393,7 +393,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             fileSystemInfo.Setup(f => f.Refresh());
             fileSystemInfo.Setup(f => f.Exists).Returns(false);
             fileSystemInfo.Setup(f => f.FullName).Returns(path);
-            var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, Mock.Of<IFileTransmissionStorage>(), new ActiveActivitiesManager());
+            var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, Mock.Of<IFileTransmissionStorage>(), new TransmissionManager());
 
             Assert.Throws<FileNotFoundException>(() => solver.Solve(fileSystemInfo.Object, null));
         }
@@ -473,9 +473,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             documentMock = Mock.Get(futureRemoteDoc);
         }
 
-        private void RunSolveFile(Mock<IFileInfo> fileInfo, ActiveActivitiesManager transmissionManager = null) {
+        private void RunSolveFile(Mock<IFileInfo> fileInfo, TransmissionManager transmissionManager = null) {
             if (transmissionManager == null) {
-                transmissionManager = new ActiveActivitiesManager();
+                transmissionManager = new TransmissionManager();
             }
 
             var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, transmissionManager);
@@ -484,10 +484,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             Assert.That(transmissionManager.ActiveTransmissions, Is.Empty);
         }
 
-        private void RunSolveFileChanged(Mock<IFileInfo> fileInfo, Mock<IDocument> document, ActiveActivitiesManager transmissionManager = null)
+        private void RunSolveFileChanged(Mock<IFileInfo> fileInfo, Mock<IDocument> document, TransmissionManager transmissionManager = null)
         {
             if (transmissionManager == null) {
-                transmissionManager = new ActiveActivitiesManager();
+                transmissionManager = new TransmissionManager();
             }
 
             var solver = new LocalObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, transmissionManager);
@@ -516,7 +516,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             bool extendedAttributes,
             out Mock<IFolder> folderMock,
             Guid? existingGuid = null,
-                ActiveActivitiesManager transmissionManager = null)
+                TransmissionManager transmissionManager = null)
         {
             string path = Path.Combine(Path.GetTempPath(), folderName);
             var futureRemoteFolder = Mock.Of<IFolder>(
@@ -544,7 +544,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             var parentDirInfo = this.SetupParentFolder(parentId);
             dirInfo.Setup(d => d.Parent).Returns(parentDirInfo);
             if (transmissionManager == null) {
-                transmissionManager = new ActiveActivitiesManager();
+                transmissionManager = new TransmissionManager();
             }
 
             var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, transmissionManager);

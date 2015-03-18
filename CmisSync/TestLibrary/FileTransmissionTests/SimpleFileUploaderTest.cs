@@ -41,7 +41,7 @@ namespace TestLibrary.FileTransmissionTests
     public class SimpleFileUploaderTest : IDisposable
     {
         private bool disposed = false;
-        private FileTransmissionEvent transmissionEvent;
+        private TransmissionController transmissionEvent;
         private MemoryStream localFileStream;
         private HashAlgorithm hashAlg;
         private long fileLength;
@@ -53,7 +53,7 @@ namespace TestLibrary.FileTransmissionTests
         [SetUp]
         public void SetUp()
         {
-            this.transmissionEvent = new FileTransmissionEvent(TransmissionType.UPLOAD_NEW_FILE, "testfile");
+            this.transmissionEvent = new TransmissionController(TransmissionType.UPLOAD_NEW_FILE, "testfile");
             this.fileLength = 1024 * 1024;
             this.localContent = new byte[this.fileLength];
             if (this.localFileStream != null) {

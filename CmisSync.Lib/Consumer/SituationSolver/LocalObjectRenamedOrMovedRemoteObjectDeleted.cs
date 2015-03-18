@@ -40,7 +40,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ActiveActivitiesManager manager,
+            TransmissionManager manager,
             ISolver secondSolver = null) : base(session, storage) {
                 this.secondSolver = secondSolver ?? new LocalObjectAdded(session, storage, transmissionStorage, manager);
         }

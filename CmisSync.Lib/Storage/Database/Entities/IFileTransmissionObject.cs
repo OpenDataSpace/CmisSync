@@ -23,7 +23,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
     using System.Linq;
     using System.Text;
 
-    using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
 
     /// <summary>
     /// Interface for a file transmission object. A file transmission object is a record for a upload/download file transmission.

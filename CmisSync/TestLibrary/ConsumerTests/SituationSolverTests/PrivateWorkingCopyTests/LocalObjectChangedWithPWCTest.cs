@@ -54,7 +54,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileTransmissionStorage> transmissionStorage;
-        private Mock<ActiveActivitiesManager> manager;
+        private Mock<TransmissionManager> manager;
         private Mock<ISolver> folderOrFileContentUnchangedAddedSolver;
 
         private string parentPath;
@@ -204,7 +204,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.session.SetupPrivateWorkingCopyCapability(isPwcUpdateable: isPwcUpdateable);
             this.storage = new Mock<IMetaDataStorage>();
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();
-            this.manager = new Mock<ActiveActivitiesManager>();
+            this.manager = new Mock<TransmissionManager>();
             this.folderOrFileContentUnchangedAddedSolver = new Mock<ISolver>(MockBehavior.Strict);
         }
 

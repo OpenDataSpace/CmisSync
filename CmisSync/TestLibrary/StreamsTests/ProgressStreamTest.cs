@@ -54,7 +54,7 @@ namespace TestLibrary.StreamsTests {
         public void ConstructorWorksWithNonNullParams() {
             Array values = Enum.GetValues(typeof(TransmissionType));
             foreach (TransmissionType val in values) {
-                using (new ProgressStream(new Mock<Stream>().Object, new Mock<FileTransmissionEvent>(val, this.filename, null).Object)) {
+                using (new ProgressStream(new Mock<Stream>().Object, new Mock<TransmissionController>(val, this.filename, null).Object)) {
                 }
             }
         }
@@ -69,7 +69,7 @@ namespace TestLibrary.StreamsTests {
         [Test, Category("Fast"), Category("Streams")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnStreamIsNull() {
-            using (new ProgressStream(null, new Mock<FileTransmissionEvent>(this.transmissionType, this.filename, null).Object)) {
+            using (new ProgressStream(null, new Mock<TransmissionController>(this.transmissionType, this.filename, null).Object)) {
             }
         }
 
@@ -83,7 +83,7 @@ namespace TestLibrary.StreamsTests {
         [Test, Category("Fast"), Category("Streams")]
         public void SetLengthTest() {
             var mockedStream = new Mock<Stream>();
-            FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
+            TransmissionController transmissionEvent = new TransmissionController(this.transmissionType, this.filename);
             transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
                 if (args.Length != null) {
                     this.lengthCalls++;
@@ -100,7 +100,7 @@ namespace TestLibrary.StreamsTests {
         [Test, Category("Fast"), Category("Streams")]
         public void PositionTest() {
             var mockedStream = new Mock<Stream>();
-            FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
+            TransmissionController transmissionEvent = new TransmissionController(this.transmissionType, this.filename);
             transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
                 if (args.Length != null && args.Length != this.length) {
                     this.lengthCalls++;
@@ -129,7 +129,7 @@ namespace TestLibrary.StreamsTests {
         [Test, Category("Fast"), Category("Streams")]
         public void ReadTest() {
             using (Stream stream = new MemoryStream()) {
-                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
+                TransmissionController transmissionEvent = new TransmissionController(this.transmissionType, this.filename);
                 transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
                     if (args.ActualPosition != null) {
                         this.positionCalls++;
@@ -169,7 +169,7 @@ namespace TestLibrary.StreamsTests {
         [Test, Category("Fast"), Category("Streams")]
         public void WriteTest() {
             using (Stream stream = new MemoryStream()) {
-                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
+                TransmissionController transmissionEvent = new TransmissionController(this.transmissionType, this.filename);
                 transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
                     if (args.ActualPosition != null) {
                         this.positionCalls++;
@@ -209,7 +209,7 @@ namespace TestLibrary.StreamsTests {
         [Test, Category("Fast"), Category("Streams")]
         public void SeekTest() {
             using (Stream stream = new MemoryStream()) {
-                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
+                TransmissionController transmissionEvent = new TransmissionController(this.transmissionType, this.filename);
                 transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
                     if (args.ActualPosition != null) {
                         this.positionCalls++;
@@ -255,7 +255,7 @@ namespace TestLibrary.StreamsTests {
             long offset = 100;
             using (Stream stream = new MemoryStream(inputContent)) 
             using (OffsetStream offsetstream = new OffsetStream(stream, offset)) {
-                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
+                TransmissionController transmissionEvent = new TransmissionController(this.transmissionType, this.filename);
                 transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
                     if (args.ActualPosition != null && args.Percent != null) {
                         this.position = (long)args.ActualPosition;
@@ -288,7 +288,7 @@ namespace TestLibrary.StreamsTests {
         public void EnsureBandwidthIsReportedIfProgressIsShorterThanOneSecond() {
             byte[] inputContent = new byte[1024];
             bool isMoreThanZeroReported = false;
-            FileTransmissionEvent transmission = new FileTransmissionEvent(this.transmissionType, this.filename);
+            TransmissionController transmission = new TransmissionController(this.transmissionType, this.filename);
             transmission.TransmissionStatus += (object sender, TransmissionProgressEventArgs e) => {
                 if (e.BitsPerSecond > 0) {
                     isMoreThanZeroReported = true;
@@ -308,7 +308,7 @@ namespace TestLibrary.StreamsTests {
         [Test, Category("Fast"), Category("Streams")]
         public void AbortReadIfTransmissionEventIsAborting() {
             byte[] content = new byte[1024];
-            var transmission = new FileTransmissionEvent(this.transmissionType, this.filename);
+            var transmission = new TransmissionController(this.transmissionType, this.filename);
             using (var stream = new MemoryStream(content))
             using (var progressStream = new ProgressStream(stream, transmission)) {
                 transmission.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true });
@@ -318,7 +318,7 @@ namespace TestLibrary.StreamsTests {
 
         [Test, Category("Fast"), Category("Streams")]
         public void AbortWriteIfTransmissionEventIsAborting() {
-            var transmission = new FileTransmissionEvent(this.transmissionType, this.filename);
+            var transmission = new TransmissionController(this.transmissionType, this.filename);
             using (var stream = new MemoryStream())
             using (var progressStream = new ProgressStream(stream, transmission)) {
                 transmission.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true });
@@ -329,7 +329,7 @@ namespace TestLibrary.StreamsTests {
         [Test, Category("Fast"), Category("Streams")]
         public void UpdateLengthIfInputStreamGrowsAfterStartReading() {
             using (Stream stream = new MemoryStream()) {
-                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
+                TransmissionController transmissionEvent = new TransmissionController(this.transmissionType, this.filename);
                 long initialLength = 100;
                 long length = initialLength;
                 transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
@@ -360,7 +360,7 @@ namespace TestLibrary.StreamsTests {
             int length = 1024;
             var start = DateTime.Now;
             byte[] content = new byte[length];
-            var transmission = new FileTransmissionEvent(this.transmissionType, this.filename);
+            var transmission = new TransmissionController(this.transmissionType, this.filename);
             using (var stream = new MemoryStream(content))
             using (var progressStream = new ProgressStream(stream, transmission)) {
                 transmission.ReportProgress(new TransmissionProgressEventArgs() { Paused = true });
@@ -382,7 +382,7 @@ namespace TestLibrary.StreamsTests {
         public void BandwidthAfterCloseIsZero([Values(1024, 4096, 1234, 123456)]int length) {
             long? bandwidth = null;
             byte[] content = new byte[length];
-            var transmission = new FileTransmissionEvent(this.transmissionType, this.filename);
+            var transmission = new TransmissionController(this.transmissionType, this.filename);
             transmission.TransmissionStatus += (object sender, TransmissionProgressEventArgs e) => {
                 bandwidth = e.BitsPerSecond ?? bandwidth;
             };

@@ -42,7 +42,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private Mock<IFileTransmissionStorage> transmissionStorage;
         private Mock<ISession> session;
         private Mock<ISolver> secondSolver;
-        private Mock<ActiveActivitiesManager> manager;
+        private Mock<TransmissionManager> manager;
         private LocalObjectRenamedOrMovedRemoteObjectDeleted underTest;
 
         [SetUp]
@@ -51,7 +51,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();
-            this.manager = new Mock<ActiveActivitiesManager> { CallBase = true };
+            this.manager = new Mock<TransmissionManager> { CallBase = true };
             this.secondSolver = new Mock<ISolver>();
             this.underTest = new LocalObjectRenamedOrMovedRemoteObjectDeleted(
                 this.session.Object,
@@ -67,7 +67,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 this.session.Object,
                 Mock.Of<IMetaDataStorage>(),
                 Mock.Of<IFileTransmissionStorage>(),
-                Mock.Of<ActiveActivitiesManager>());
+                Mock.Of<TransmissionManager>());
         }
 
         [Test, Category("Fast")]
@@ -76,7 +76,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 this.session.Object,
                 Mock.Of<IMetaDataStorage>(),
                 Mock.Of<IFileTransmissionStorage>(),
-                Mock.Of<ActiveActivitiesManager>());
+                Mock.Of<TransmissionManager>());
         }
 
         [Test, Category("Fast")]

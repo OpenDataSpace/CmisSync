@@ -17,14 +17,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
     using System.Linq;
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
@@ -38,12 +38,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Solver to handle a new object which has been found on the server
     /// </summary>
-    public class RemoteObjectAdded : AbstractEnhancedSolver
-    {
+    public class RemoteObjectAdded : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectAdded));
 
         private IFileSystemInfoFactory fsFactory;
-        private ActiveActivitiesManager manager;
+        private TransmissionManager manager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.RemoteObjectAdded"/> class.
@@ -56,7 +55,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ActiveActivitiesManager transmissonManager,
+            TransmissionManager transmissonManager,
             IFileSystemInfoFactory fsFactory = null) : base(session, storage, transmissionStorage) {
             if (transmissonManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
@@ -143,9 +142,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 var cacheFile = this.fsFactory.CreateDownloadCacheFileInfo(guid);
 
                 IDocument remoteDoc = remoteId as IDocument;
-                var transmissionEvent = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName, cacheFile.FullName);
-                this.manager.AddTransmission(transmissionEvent);
-                byte[] hash = DownloadCacheFile(cacheFile, remoteDoc, transmissionEvent, this.fsFactory);
+                var transmission = new TransmissionController(TransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName, cacheFile.FullName);
+                this.manager.AddTransmission(transmission);
+                byte[] hash = DownloadCacheFile(cacheFile, remoteDoc, transmission, this.fsFactory);
 
                 try {
                     cacheFile.Uuid = guid;
@@ -183,7 +182,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                                     Logger.Debug("Could not retore the last modification date of " + targetFile.FullName, restoreException);
                                 }
                             } catch (Exception ex) {
-                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                                transmission.FailedException = ex;
                                 throw;
                             }
 
@@ -194,7 +193,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                             }
                         }
                     } else {
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = e });
+                        transmission.FailedException = e;
                         throw;
                     }
                 }
@@ -224,7 +223,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 };
                 this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local file {0} created and mapped to remote file {1}", file.FullName, remoteId.Id));
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
+                transmission.Status = TransmissionStatus.FINISHED;
             }
         }
 

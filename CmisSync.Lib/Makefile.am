@@ -101,8 +101,6 @@ SOURCES =  \
 	Events/FileEvent.cs \
 	Events/FileMovedEvent.cs \
 	Events/FileOrFolderEventFactory.cs \
-	Events/FileTransmissionEvent.cs \
-	Events/FileTransmissionEventArgs.cs \
 	Events/FolderEvent.cs \
 	Events/FolderMovedEvent.cs \
 	Events/FSEvent.cs \
@@ -135,6 +133,8 @@ SOURCES =  \
 	FileTransmission/IFileUploader.cs \
 	FileTransmission/SimpleFileDownloader.cs \
 	FileTransmission/SimpleFileUploader.cs \
+	FileTransmission/TransmissionController.cs \
+	FileTransmission/TransmissionManager.cs \
 	FileTransmission/UploadFailedException.cs \
 	Filter/AbstractFileFilter.cs \
 	Filter/FilterAggregator.cs \
@@ -172,7 +172,6 @@ SOURCES =  \
 	Producer/Watcher/RenamedFileSystemEventHandler.cs \
 	Producer/Watcher/WatcherConsumer.cs \
 	Queueing/AbstractEventProducer.cs \
-	Queueing/ActiveActivitiesManager.cs \
 	Queueing/ConnectionScheduler.cs \
 	Queueing/DebugLoggingHandler.cs \
 	Queueing/DelayRetryAndNextSyncEventHandler.cs \

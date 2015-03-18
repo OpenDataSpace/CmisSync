@@ -61,7 +61,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileTransmissionStorage> transmissionStorage;
 
-        private ActiveActivitiesManager transmissionManager;
+        private TransmissionManager transmissionManager;
 
         private string parentPath;
         private string localPath;
@@ -94,7 +94,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.session.Setup(f => f.RepositoryInfo.Capabilities.IsPwcUpdatableSupported).Returns(true);
             this.transmissionStorage.Setup(f => f.ChunkSize).Returns(this.chunkSize);
 
-            this.transmissionManager = new ActiveActivitiesManager();
+            this.transmissionManager = new TransmissionManager();
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -245,7 +245,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             long readLength = 0;
             stream.Setup(s => s.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Returns((byte[] buffer, int offset, int count) => {
                 if (readLength > 0) {
-                    foreach (FileTransmissionEvent transmissionEvent in this.transmissionManager.ActiveTransmissions) {
+                    foreach (TransmissionController transmissionEvent in this.transmissionManager.ActiveTransmissions) {
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = true });
                     }
                 }

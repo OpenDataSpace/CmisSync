@@ -22,16 +22,16 @@ namespace CmisSync.Lib.Streams {
     using System.IO;
     using System.Timers;
 
-    using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
 
     /// <summary>
     /// Progress reporting stream.
     /// </summary>
     public class ProgressStream : StreamWrapper {
         /// <summary>
-        /// The transmission event which is used to report the status.
+        /// The transmission controller which is used to report the status.
         /// </summary>
-        private FileTransmissionEvent transmissionEvent;
+        private TransmissionController transmission;
 
         /// <summary>
         /// The start time of the usage.
@@ -58,25 +58,21 @@ namespace CmisSync.Lib.Streams {
         /// <param name='e'>
         /// Transmission event where the progress should be reported to.
         /// </param>
-        public ProgressStream(Stream stream, FileTransmissionEvent e) : base(stream) {
+        public ProgressStream(Stream stream, TransmissionController e) : base(stream) {
             if (e == null) {
                 throw new ArgumentNullException("The event, where to publish the prgress cannot be null");
             }
 
             try {
-                e.Status.Length = stream.Length;
+                e.Length = stream.Length;
             } catch (NotSupportedException) {
-                e.Status.Length = null;
+                e.Length = null;
             }
 
-            this.transmissionEvent = e;
+            this.transmission = e;
             this.blockingDetectionTimer = new Timer(2000);
             this.blockingDetectionTimer.Elapsed += delegate(object sender, ElapsedEventArgs args) {
-                var transmissionArgs = new TransmissionProgressEventArgs {
-                    BitsPerSecond = (long)(this.bytesTransmittedSinceLastSecond / this.blockingDetectionTimer.Interval)
-                };
-
-                this.transmissionEvent.ReportProgress(transmissionArgs);
+                this.transmission.BitsPerSecond = (long)((this.bytesTransmittedSinceLastSecond * 8) / this.blockingDetectionTimer.Interval);
                 this.bytesTransmittedSinceLastSecond = 0;
             };
         }
@@ -91,11 +87,8 @@ namespace CmisSync.Lib.Streams {
         public override long Length {
             get {
                 long length = this.Stream.Length;
-                if (length > this.transmissionEvent.Status.Length) {
-                    var transmissionArgs = new TransmissionProgressEventArgs {
-                        Length = length
-                    };
-                    this.transmissionEvent.ReportProgress(transmissionArgs);
+                if (length > this.transmission.Length) {
+                    this.transmission.Length = length;
                 }
 
                 return length;
@@ -111,8 +104,8 @@ namespace CmisSync.Lib.Streams {
         public override long Position {
             get {
                 long pos = this.Stream.Position;
-                if (pos != this.transmissionEvent.Status.ActualPosition) {
-                    this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { ActualPosition = pos });
+                if (pos != this.transmission.Position) {
+                    this.transmission.Position = pos;
                 }
 
                 return pos;
@@ -120,8 +113,8 @@ namespace CmisSync.Lib.Streams {
 
             set {
                 this.Stream.Position = value;
-                if (value != this.transmissionEvent.Status.ActualPosition) {
-                    this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { ActualPosition = value });
+                if (value != this.transmission.Position) {
+                    this.transmission.Length = value;
                 }
             }
         }
@@ -137,7 +130,7 @@ namespace CmisSync.Lib.Streams {
         /// </param>
         public override long Seek(long offset, SeekOrigin origin) {
             long result = this.Stream.Seek(offset, origin);
-            this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { ActualPosition = this.Stream.Position });
+            this.transmission.Position = this.Stream.Position;
             return result;
         }
 
@@ -154,9 +147,9 @@ namespace CmisSync.Lib.Streams {
         /// Count.
         /// </param>
         public override int Read(byte[] buffer, int offset, int count) {
-            if (this.transmissionEvent.Status.Aborting.GetValueOrDefault()) {
-                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = false, Aborted = true });
-                throw new FileTransmission.AbortException(this.transmissionEvent.Path);
+            if (this.transmission.Status == TransmissionStatus.ABORTING) {
+                this.transmission.Status = TransmissionStatus.ABORTED;
+                throw new FileTransmission.AbortException(this.transmission.Path);
             }
 
             this.PauseIfRequested();
@@ -175,8 +168,8 @@ namespace CmisSync.Lib.Streams {
         /// </param>
         public override void SetLength(long value) {
             this.Stream.SetLength(value);
-            if (this.transmissionEvent.Status.Length == null || value > (long)this.transmissionEvent.Status.Length) {
-                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Length = value });
+            if (this.transmission.Length == null || value > (long)this.transmission.Length) {
+                this.transmission.Length = value;
             }
         }
 
@@ -197,9 +190,9 @@ namespace CmisSync.Lib.Streams {
             this.Stream.Write(buffer, offset, count);
             this.CalculateBandwidth(count);
 
-            if (this.transmissionEvent.Status.Aborting.GetValueOrDefault()) {
-                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Aborting = false, Aborted = true });
-                throw new FileTransmission.AbortException(this.transmissionEvent.Path);
+            if (this.transmission.Status == TransmissionStatus.ABORTING) {
+                this.transmission.Status = TransmissionStatus.ABORTED;
+                throw new FileTransmission.AbortException(this.transmission.Path);
             }
 
             this.PauseIfRequested();
@@ -210,10 +203,10 @@ namespace CmisSync.Lib.Streams {
         /// Close this instance and calculates the bandwidth of the last second.
         /// </summary>
         public override void Close() {
-            long? result = TransmissionProgressEventArgs.CalcBitsPerSecond(this.start, DateTime.Now.AddMilliseconds(1), this.bytesTransmittedSinceLastSecond);
-            this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { BitsPerSecond = result });
+            long? result = TransmissionController.CalcBitsPerSecond(this.start, DateTime.Now.AddMilliseconds(1), this.bytesTransmittedSinceLastSecond);
+            this.transmission.BitsPerSecond = result;
             this.blockingDetectionTimer.Stop();
-            this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { BitsPerSecond = 0 });
+            this.transmission.BitsPerSecond = null;
             base.Close();
         }
 
@@ -230,7 +223,7 @@ namespace CmisSync.Lib.Streams {
             long? length = null;
             try {
                 pos = Stream.Position;
-                if (pos > this.transmissionEvent.Status.Length) {
+                if (pos > this.transmission.Length) {
                     length = this.Stream.Length;
                 }
             } catch (NotSupportedException) {
@@ -238,24 +231,22 @@ namespace CmisSync.Lib.Streams {
             }
 
             if (diff.Seconds >= 1) {
-                long? result = TransmissionProgressEventArgs.CalcBitsPerSecond(this.start, DateTime.Now, this.bytesTransmittedSinceLastSecond);
-                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { ActualPosition = pos, BitsPerSecond = result, Length = length });
+                long? result = TransmissionController.CalcBitsPerSecond(this.start, DateTime.Now, this.bytesTransmittedSinceLastSecond);
+                this.transmission.Position = pos;
+                this.transmission.Length = length;
+                this.transmission.BitsPerSecond = result;
                 this.bytesTransmittedSinceLastSecond = 0;
                 this.start = this.start + diff;
                 this.blockingDetectionTimer.Stop();
                 this.blockingDetectionTimer.Start();
             } else {
-                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { ActualPosition = pos, Length = length });
+                this.transmission.Length = length;
+                this.transmission.Position = pos;
             }
         }
 
         private void PauseIfRequested() {
-            while (this.transmissionEvent.Status.Paused.GetValueOrDefault()) {
-                if (this.transmissionEvent.Status.Aborting.GetValueOrDefault()) {
-                    this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Aborting = false, Aborted = true });
-                    throw new FileTransmission.AbortException(this.transmissionEvent.Path);
-                }
-
+            while (this.transmission.Status == TransmissionStatus.PAUSED) {
                 System.Threading.Thread.Sleep(250);
             }
         }

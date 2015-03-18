@@ -42,7 +42,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     public class LocalObjectChanged : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChanged));
 
-        private ActiveActivitiesManager transmissionManager;
+        private TransmissionManager transmissionManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectChanged"/> class.
@@ -54,7 +54,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ActiveActivitiesManager transmissionManager) : base(session, storage, transmissionStorage)
+            TransmissionManager transmissionManager) : base(session, storage, transmissionStorage)
         {
             if (transmissionManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
@@ -98,7 +98,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
                 var doc = remoteId as IDocument;
                 try {
-                    FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                    TransmissionController transmissionEvent = new TransmissionController(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
                     this.transmissionManager.AddTransmission(transmissionEvent);
                     mappedObject.LastChecksum = UploadFile(localFile, doc, transmissionEvent);
                 } catch(Exception ex) {

@@ -41,7 +41,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
     [TestFixture]
     public class RemoteObjectChangedTest {
-        private ActiveActivitiesManager manager;
+        private TransmissionManager manager;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileSystemInfoFactory> fsFactory;
@@ -49,7 +49,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
         [SetUp]
         public void SetUp() {
-            this.manager = new ActiveActivitiesManager();
+            this.manager = new TransmissionManager();
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();

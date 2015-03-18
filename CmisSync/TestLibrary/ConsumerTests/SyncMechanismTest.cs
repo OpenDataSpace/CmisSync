@@ -61,7 +61,7 @@ namespace TestLibrary.ConsumerTests {
             this.storage = new Mock<IMetaDataStorage>();
             this.fileTransmissionStorage = new Mock<IFileTransmissionStorage>();
             this.activityListener = new Mock<IActivityListener>();
-            this.listener = new ActivityListenerAggregator(this.activityListener.Object, new ActiveActivitiesManager());
+            this.listener = new ActivityListenerAggregator(this.activityListener.Object, new TransmissionManager());
             this.filters = new Mock<IFilterAggregator>();
         }
 

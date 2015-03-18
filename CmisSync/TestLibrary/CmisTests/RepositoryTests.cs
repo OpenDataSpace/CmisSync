@@ -134,7 +134,7 @@ namespace TestLibrary.CmisTests {
         }
 
         private void SetupMocks() {
-            this.listener = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), new ActiveActivitiesManager());
+            this.listener = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), new TransmissionManager());
             var subfolder = Guid.NewGuid().ToString();
             this.queue = new SingleStepEventQueue(new SyncEventManager());
             this.queue.SwallowExceptions = true;

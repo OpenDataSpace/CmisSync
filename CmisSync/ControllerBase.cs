@@ -77,7 +77,7 @@ namespace CmisSync {
         /// </summary>
         private ActivityListenerAggregator activityListenerAggregator;
 
-        private ActiveActivitiesManager transmissionManager;
+        private TransmissionManager transmissionManager;
 
         /// <summary>
         /// Concurrency locks.
@@ -174,7 +174,7 @@ namespace CmisSync {
         /// </summary>
         public ControllerBase() {
             this.FoldersPath = ConfigManager.CurrentConfig.GetFoldersPath();
-            this.transmissionManager = new ActiveActivitiesManager();
+            this.transmissionManager = new TransmissionManager();
             this.activityListenerAggregator = new ActivityListenerAggregator(this, this.transmissionManager);
             this.transmissionManager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
                 this.OnTransmissionListChanged();
@@ -280,7 +280,7 @@ namespace CmisSync {
         /// List of actives transmissions.
         /// </summary>
         /// <returns>The transmissions.</returns>
-        public List<FileTransmissionEvent> ActiveTransmissions() {
+        public List<TransmissionController> ActiveTransmissions() {
             return this.transmissionManager.ActiveTransmissionsAsList();
         }
 
@@ -389,8 +389,8 @@ namespace CmisSync {
                 Logger.Debug("Start to stop all active file transmissions");
                 int wait = 0;
                 do {
-                    List<FileTransmissionEvent> activeList = this.transmissionManager.ActiveTransmissionsAsList();
-                    foreach (FileTransmissionEvent transmissionEvent in activeList) {
+                    List<TransmissionController> activeList = this.transmissionManager.ActiveTransmissionsAsList();
+                    foreach (TransmissionController transmissionEvent in activeList) {
                         if (transmissionEvent.Status.Aborted.GetValueOrDefault()) {
                             continue;
                         }
@@ -648,10 +648,10 @@ namespace CmisSync {
             try {
                 Repository repo = new Repository(repositoryInfo, this.activityListenerAggregator);
                 repo.Queue.EventManager.AddEventHandler(
-                    new GenericSyncEventHandler<FileTransmissionEvent>(
+                    new GenericSyncEventHandler<TransmissionController>(
                     50,
                     delegate(ISyncEvent e) {
-                    FileTransmissionEvent transEvent = e as FileTransmissionEvent;
+                    TransmissionController transEvent = e as TransmissionController;
                     transEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
                         if (args.Aborted == true && args.FailedException != null) {
                             this.ShowException(
