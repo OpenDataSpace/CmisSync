@@ -31,62 +31,58 @@
 //
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Collections.Generic;
-
-using MonoMac.Foundation;
-using MonoMac.AppKit;
-using MonoMac.ObjCRuntime;
-
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Config;
+using System.ComponentModel;
 
 namespace CmisSync {
+    using System;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Collections.Generic;
+
+    using MonoMac.Foundation;
+    using MonoMac.AppKit;
+    using MonoMac.ObjCRuntime;
+
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Config;
+    using CmisSync.Lib.FileTransmission;
 
     public class Controller : ControllerBase {
-
         private NSUserNotificationCenter notificationCenter;
-        private Dictionary<string,DateTime> transmissionFiles = new Dictionary<string, DateTime> ();
-        private HashSet<string> startedTransmissions = new HashSet<string> ();
-        private Object transmissionLock = new object ();
+        private Dictionary<string, DateTime> transmissionFiles = new Dictionary<string, DateTime>();
+        private HashSet<string> startedTransmissions = new HashSet<string>();
+        private Object transmissionLock = new object();
         private int notificationInterval = 5;
         private int notificationKeep = 5;
         private readonly string notificationType = "Type";
         private readonly string notificationTypeCredentials = "Credentials";
         private readonly string notificationTypeTransmission = "Transmission";
 
-        private class ComparerNSUserNotification : IComparer<NSUserNotification>
-        {
-            public int Compare (NSUserNotification x, NSUserNotification y)
-            {
+        private class ComparerNSUserNotification : IComparer<NSUserNotification> {
+            public int Compare(NSUserNotification x, NSUserNotification y) {
                 DateTime xDate = x.DeliveryDate;
                 DateTime yDate = y.DeliveryDate;
-                return xDate.CompareTo (yDate);
+                return xDate.CompareTo(yDate);
             }
         }
 
-        public bool IsNotificationTransmission(NSUserNotification notification)
-        {
-            if (null != notification.UserInfo && notification.UserInfo.ContainsKey ((NSString)notificationType)) {
-                return notificationTypeTransmission == (string)(notification.UserInfo [notificationType] as NSString);
+        public bool IsNotificationTransmission(NSUserNotification notification) {
+            if (null != notification.UserInfo && notification.UserInfo.ContainsKey((NSString)notificationType)) {
+                return notificationTypeTransmission == (string)(notification.UserInfo[notificationType] as NSString);
             }
+
             return false;
         }
 
-        private bool IsNotificationCredentials(NSUserNotification notification)
-        {
-            if (null != notification.UserInfo && notification.UserInfo.ContainsKey ((NSString)notificationType)) {
-                return notificationTypeCredentials == (string)(notification.UserInfo [notificationType] as NSString);
+        private bool IsNotificationCredentials(NSUserNotification notification) {
+            if (null != notification.UserInfo && notification.UserInfo.ContainsKey((NSString)notificationType)) {
+                return notificationTypeCredentials == (string)(notification.UserInfo[notificationType] as NSString);
             }
+
             return false;
         }
 
-        private void RemoveNotificationCredentials(string reponame)
-        {
+        private void RemoveNotificationCredentials(string reponame) {
             using (var a = new NSAutoreleasePool()) {
                 notificationCenter.BeginInvokeOnMainThread(delegate {
                     NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
@@ -94,17 +90,17 @@ namespace CmisSync {
                         if (!IsNotificationCredentials(notification)) {
                             continue;
                         }
-                        if (notification.Title==reponame) {
-                            notificationCenter.RemoveDeliveredNotification (notification);
+
+                        if (notification.Title == reponame) {
+                            notificationCenter.RemoveDeliveredNotification(notification);
                         }
                     }
                 });
             }
         }
 
-        private void InsertNotificationCredentials(string reponame)
-        {
-            RemoveNotificationCredentials (reponame);
+        private void InsertNotificationCredentials(string reponame) {
+            RemoveNotificationCredentials(reponame);
             using (var a = new NSAutoreleasePool()) {
                 notificationCenter.BeginInvokeOnMainThread(delegate {
                     NSUserNotification notification = new NSUserNotification();
@@ -112,34 +108,30 @@ namespace CmisSync {
                     notification.Subtitle = String.Format(Properties_Resources.NotificationCredentialsError, reponame);
                     notification.InformativeText = Properties_Resources.NotificationChangeCredentials;
                     NSMutableDictionary userInfo = new NSMutableDictionary();
-                    userInfo.Add ((NSString)notificationType, (NSString)notificationTypeCredentials);
+                    userInfo.Add((NSString)notificationType, (NSString)notificationTypeCredentials);
                     notification.UserInfo = userInfo;
                     notification.DeliveryDate = NSDate.Now;
-                    notificationCenter.DeliverNotification (notification);
+                    notificationCenter.DeliverNotification(notification);
                 });
             }
         }
 
-        public Controller () : base ()
-        {
-            using (var a = new NSAutoreleasePool ())
-            {
+        public Controller() : base() {
+            using (var a = new NSAutoreleasePool()) {
                 NSApplication.Init ();
             }
 
             NSWorkspace.SharedWorkspace.NotificationCenter.AddObserver(
                 NSWorkspace.WillSleepNotification,
-                delegate
-                {
-                    Logger.Info (String.Format ("Machine sleep event detected, stop all repositories"));
+                delegate {
+                    Logger.Info(String.Format("Machine sleep event detected, stop all repositories"));
                     StopAll();
                 }
             );
 
             NSWorkspace.SharedWorkspace.NotificationCenter.AddObserver(
                 NSWorkspace.DidWakeNotification,
-                delegate
-                {
+                delegate {
                     Logger.Info (String.Format ("Machine sleep event detected, start all repositories"));
                     StartAll();
                 }
@@ -148,13 +140,11 @@ namespace CmisSync {
             // We get the Default notification Center
             notificationCenter = NSUserNotificationCenter.DefaultUserNotificationCenter;
 
-            notificationCenter.DidDeliverNotification += (s, e) => 
-            {
+            notificationCenter.DidDeliverNotification += (s, e) => {
                 //Console.WriteLine("Notification Delivered");
             };
 
-            notificationCenter.DidActivateNotification += (s, e) => 
-            {
+            notificationCenter.DidActivateNotification += (s, e) => {
                 if (IsNotificationTransmission(e.Notification)) {
                     LocalFolderClicked (Path.GetDirectoryName (e.Notification.InformativeText));
                 }
@@ -178,21 +168,22 @@ namespace CmisSync {
             };
 
             OnTransmissionListChanged += delegate {
-                if(!ConfigManager.CurrentConfig.Notifications) {
+                if (!ConfigManager.CurrentConfig.Notifications) {
                     return;
                 }
 
                 using (var a = new NSAutoreleasePool()) {
                     notificationCenter.BeginInvokeOnMainThread(delegate {
                         lock (transmissionLock) {
-                            List<FileTransmissionEvent> transmissions = ActiveTransmissions();
+                            var transmissions = ActiveTransmissions();
                             NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
                             List<NSUserNotification> finishedNotifications = new List<NSUserNotification>();
                             foreach (NSUserNotification notification in notifications) {
                                 if (!IsNotificationTransmission(notification)) {
                                     continue;
                                 }
-                                FileTransmissionEvent transmission = transmissions.Find((FileTransmissionEvent e)=>{return (e.Path == notification.InformativeText);});
+
+                                var transmission = transmissions.Find((Transmission e) => { return e.Path == notification.InformativeText; });
                                 if (transmission == null) {
                                     finishedNotifications.Add(notification);
                                 } else {
@@ -209,16 +200,12 @@ namespace CmisSync {
                                 notificationCenter.RemoveDeliveredNotification (finishedNotifications[i]);
                             }
 
-                            foreach (FileTransmissionEvent transmission in transmissions) {
-                                if (transmission.Status.Aborted == true) {
+                            foreach (var transmission in transmissions) {
+                                if (transmission.Status == TransmissionStatus.ABORTED) {
                                     continue;
                                 }
 
-                                if (transmission.Status.FailedException != null) {
-                                    continue;
-                                }
-
-                                if(startedTransmissions.Contains(transmission.Path)) {
+                                if (startedTransmissions.Contains(transmission.Path)) {
                                     continue;
                                 }
 
@@ -226,16 +213,16 @@ namespace CmisSync {
 
                                 NSUserNotification notification = new NSUserNotification();
                                 notification.Title = Path.GetFileName (transmission.Path);
-                                notification.Subtitle = TransmissionStatus(transmission);
+                                notification.Subtitle = GetTransmissionStatus(transmission);
                                 notification.InformativeText = transmission.Path;
                                 NSMutableDictionary userInfo = new NSMutableDictionary();
-                                userInfo.Add ((NSString)notificationType, (NSString)notificationTypeTransmission);
+                                userInfo.Add((NSString)notificationType, (NSString)notificationTypeTransmission);
                                 notification.UserInfo = userInfo;
                                 notification.DeliveryDate = NSDate.Now;
                                 notificationCenter.DeliverNotification (notification);
 
-                                transmissionFiles.Add (transmission.Path, NSDate.Now);
-                                transmission.TransmissionStatus += TransmissionReport;
+                                transmissionFiles.Add(transmission.Path, NSDate.Now);
+                                transmission.PropertyChanged += TransmissionReport;
                             }
                         }
                     });
@@ -243,101 +230,74 @@ namespace CmisSync {
             };
         }
 
-        private void UpdateFileStatus(FileTransmissionEvent transmission, TransmissionProgressEventArgs e)
-        {
-            if (e == null) {
-                e = transmission.Status;
-            }
-
-            string filePath = transmission.CachePath;
-            if (filePath == null || !File.Exists (filePath)) {
-                filePath = transmission.Path;
-            }
-            if (!File.Exists (filePath)) {
-                Logger.Debug (String.Format ("None exist {0} for file status update", filePath));
-                return;
-            }
-            if ((e.Aborted == true || e.Completed == true || e.FailedException != null)) {
-                Notifications.FileSystemProgress.RemoveFileProgress(filePath);
-            } else {
-                double percent = transmission.Status.Percent.GetValueOrDefault() / 100;
-                if (percent < 1) {
-                    Notifications.FileSystemProgress.SetFileProgress(filePath, percent);
-                } else {
-                    Notifications.FileSystemProgress.RemoveFileProgress(filePath);
-                }
-            }
-
-        }
-
-        private string TransmissionStatus(FileTransmissionEvent transmission)
-        {
+        private string GetTransmissionStatus(Transmission transmission) {
             string type = "Unknown";
             switch (transmission.Type) {
-            case FileTransmissionType.UPLOAD_NEW_FILE:
+            case TransmissionType.UPLOAD_NEW_FILE:
                 type = Properties_Resources.NotificationFileUpload;
                 break;
-            case FileTransmissionType.UPLOAD_MODIFIED_FILE:
+            case TransmissionType.UPLOAD_MODIFIED_FILE:
                 type = Properties_Resources.NotificationFileUpdateRemote;
                 break;
-            case FileTransmissionType.DOWNLOAD_NEW_FILE:
+            case TransmissionType.DOWNLOAD_NEW_FILE:
                 type = Properties_Resources.NotificationFileDownload;
                 break;
-            case FileTransmissionType.DOWNLOAD_MODIFIED_FILE:
+            case TransmissionType.DOWNLOAD_MODIFIED_FILE:
                 type = Properties_Resources.NotificationFileUpdateLocal;
                 break;
             }
 
-            string status = "";
-            if (transmission.Status.Aborted == true) {
-                status = Properties_Resources.NotificationFileStatusAborted;
-            } else if (transmission.Status.Completed == true) {
-                status = Properties_Resources.NotificationFileStatusCompleted;
-                //startedTransmissions.Remove (transmission.Path);
-            } else if (transmission.Status.FailedException != null) {
-                status = Properties_Resources.NotificationFileStatusFailed;
+            string status = string.Empty;
+            switch (transmission.Status) {
+                case TransmissionStatus.ABORTED:
+                    status = transmission.FailedException == null ? Properties_Resources.NotificationFileStatusAborted : Properties_Resources.NotificationFileStatusFailed;
+                    break;
+                case TransmissionStatus.FINISHED:
+                    status = Properties_Resources.NotificationFileStatusCompleted;
+                    break;
             }
 
             return String.Format("{0} {1}",
                 type, status);
         }
 
-        private void TransmissionReport(object sender, TransmissionProgressEventArgs e)
-        {
+        private void TransmissionReport(object sender, PropertyChangedEventArgs e) {
             using (var a = new NSAutoreleasePool()) {
-                FileTransmissionEvent transmission = sender as FileTransmissionEvent;
+                var transmission = sender as Transmission;
                 if (transmission == null) {
                     return;
                 }
+
                 lock (transmissionLock) {
-                    if ((e.Aborted == true || e.Completed == true || e.FailedException != null)) {
-                        transmission.TransmissionStatus -= TransmissionReport;
-                        transmissionFiles.Remove (transmission.Path);
+                    if (transmission.Done()) {
+                        transmission.PropertyChanged -= TransmissionReport;
+                        transmissionFiles.Remove(transmission.Path);
                     } else {
-                        TimeSpan diff = NSDate.Now - transmissionFiles [transmission.Path];
+                        TimeSpan diff = NSDate.Now - transmissionFiles[transmission.Path];
                         if (diff.Seconds < notificationInterval) {
                             return;
                         }
-                        transmissionFiles [transmission.Path] = NSDate.Now;
+
+                        transmissionFiles[transmission.Path] = NSDate.Now;
                     }
-                    // UpdateFileStatus (transmission, e);
                 }
-                notificationCenter.BeginInvokeOnMainThread (delegate
-                {
+
+                notificationCenter.BeginInvokeOnMainThread(delegate {
                     lock (transmissionLock) {
                         NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
                         foreach (NSUserNotification notification in notifications) {
                             if (!IsNotificationTransmission(notification)) {
                                 continue;
                             }
+
                             bool pathCorrect = notification.InformativeText == transmission.Path;
-                            bool isCompleted = transmission.Status.Completed == true;
+                            bool isCompleted = transmission.Status == TransmissionStatus.FINISHED;
                             bool isAlreadyStarted = startedTransmissions.Contains(transmission.Path);
                             if (pathCorrect && (!isAlreadyStarted || isCompleted)) {
-                                notificationCenter.RemoveDeliveredNotification (notification);
+                                notificationCenter.RemoveDeliveredNotification(notification);
                                 notification.DeliveryDate = NSDate.Now;
-                                notification.Subtitle = TransmissionStatus (transmission);
-                                notificationCenter.DeliverNotification (notification);
+                                notification.Subtitle = GetTransmissionStatus(transmission);
+                                notificationCenter.DeliverNotification(notification);
                                 return;
                             }
                         }
@@ -346,8 +306,7 @@ namespace CmisSync {
             }
         }
 
-        public override void CreateStartupItem ()
-        {
+        public override void CreateStartupItem() {
             // There aren't any bindings in MonoMac to support this yet, so
             // we call out to an applescript to do the job
             Process process = new Process ();
@@ -416,37 +375,28 @@ namespace CmisSync {
             }
         }
 
-        public void OpenCmisSyncFolder (string reponame)
-        {
-            foreach (var repo in Program.Controller.Repositories)
-            {
-                if(repo.Name.Equals(reponame))
-                {
+        public void OpenCmisSyncFolder(string reponame) {
+            foreach (var repo in Program.Controller.Repositories) {
+                if (repo.Name.Equals(reponame)) {
                     LocalFolderClicked(repo.LocalPath);
                     break;
                 }
             }
         }
 
-        public void ShowLog (string str)
-        {
+        public void ShowLog(string str) {
             System.Diagnostics.Process.Start("/usr/bin/open", "-a Console " + str);
         }
 
-        public void LocalFolderClicked (string path)
-        {
-            notificationCenter.BeginInvokeOnMainThread (delegate
-
-            {
+        public void LocalFolderClicked(string path) {
+            notificationCenter.BeginInvokeOnMainThread(delegate {
                 NSWorkspace.SharedWorkspace.OpenFile (path);
             });
         }
 
-        public void OpenFile (string path)
-        {
-            path = Uri.UnescapeDataString (path);
-            NSWorkspace.SharedWorkspace.BeginInvokeOnMainThread (delegate
-            {
+        public void OpenFile(string path) {
+            path = Uri.UnescapeDataString(path);
+            NSWorkspace.SharedWorkspace.BeginInvokeOnMainThread(delegate {
                 NSWorkspace.SharedWorkspace.OpenFile (path);
             });
         }
