@@ -265,8 +265,8 @@ namespace TestLibrary.FileTransmissionTests {
             }
 
             if (args.PropertyName == Utils.NameOf(() => t.Percent)) {
-                Assert.GreaterOrEqual(t.Percent, minPercent);
-                Assert.LessOrEqual(t.Percent, 100);
+                Assert.That(t.Percent, Is.Null.Or.GreaterThanOrEqualTo(minPercent));
+                Assert.That(t.Percent, Is.Null.Or.LessThanOrEqualTo(100));
             }
 
             if (args.PropertyName == Utils.NameOf(() => t.Position)) {

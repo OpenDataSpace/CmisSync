@@ -250,13 +250,13 @@ namespace TestLibrary.FileTransmissionTests {
                 }
 
                 if (e.PropertyName == Utils.NameOf(() => t.Percent)) {
-                    Assert.GreaterOrEqual(t.Percent, 0);
-                    Assert.LessOrEqual(t.Percent, 100);
+                    Assert.That(t.Percent, Is.Null.Or.GreaterThanOrEqualTo(0));
+                    Assert.That(t.Percent, Is.Null.Or.LessThanOrEqualTo(100));
                 }
 
                 if (e.PropertyName == Utils.NameOf(() => t.Length)) {
-                    Assert.GreaterOrEqual(t.Length, 0);
-                    Assert.LessOrEqual(t.Length, this.remoteLength);
+                    Assert.That(t.Length, Is.Null.Or.GreaterThanOrEqualTo(0));
+                    Assert.That(t.Length, Is.Null.Or.LessThanOrEqualTo(this.remoteLength));
                 }
             };
         }
@@ -289,13 +289,13 @@ namespace TestLibrary.FileTransmissionTests {
                 }
 
                 if (e.PropertyName == Utils.NameOf(() => t.Percent)) {
-                    Assert.GreaterOrEqual(t.Percent, startPos * 100 / this.remoteLength);
-                    Assert.LessOrEqual(t.Percent, 100);
+                    Assert.That(t.Percent, Is.Null.Or.GreaterThanOrEqualTo(startPos * 100 / this.remoteLength));
+                    Assert.That(t.Percent, Is.Null.Or.LessThanOrEqualTo(100));
                 }
 
                 if (e.PropertyName == Utils.NameOf(() => t.Length)) {
-                    Assert.GreaterOrEqual(t.Length, startPos);
-                    Assert.LessOrEqual(t.Length, this.remoteLength);
+                    Assert.That(t.Length, Is.Null.Or.GreaterThanOrEqualTo(startPos));
+                    Assert.That(t.Length, Is.Null.Or.LessThanOrEqualTo(this.remoteLength));
                 }
             };
         }
