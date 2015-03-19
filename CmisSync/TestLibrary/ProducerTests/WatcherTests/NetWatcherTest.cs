@@ -18,8 +18,7 @@
 //-----------------------------------------------------------------------
 
 #if ! __COCOA__
-namespace TestLibrary.ProducerTests.WatcherTests
-{
+namespace TestLibrary.ProducerTests.WatcherTests {
     using System;
     using System.IO;
 
@@ -37,8 +36,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class NetWatcherTest : BaseWatcherTest
-    {
+    public class NetWatcherTest : BaseWatcherTest {
         private Mock<IMetaDataStorage> storage;
 
         [SetUp]
