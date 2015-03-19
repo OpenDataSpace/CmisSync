@@ -152,7 +152,7 @@
     <Compile Include="StatusIcon.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Transmission.cs" />
+    <Compile Include="TransmissionWindow.cs" />
     <Compile Include="TransmissionWPF.xaml.cs">
       <DependentUpon>TransmissionWPF.xaml</DependentUpon>
     </Compile>

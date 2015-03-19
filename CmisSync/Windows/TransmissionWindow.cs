@@ -30,17 +30,18 @@ namespace CmisSync {
     using System.Windows.Controls;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
 
     /// <summary>
     /// Tranmission widget
     /// </summary>
-    public class Transmission : Window {
+    public class TransmissionWindow : Window {
         private TransmissionController Controller = new TransmissionController();
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public Transmission() {
+        public TransmissionWindow() {
             Title = Properties_Resources.Transmission;
             Height = 480;
             Width = 640;
@@ -84,81 +85,24 @@ namespace CmisSync {
             });
         }
 
-        public class TransmissionData : INotifyPropertyChanged {
+        private ObservableCollection<Transmission> TransmissionList = new ObservableCollection<Transmission>();
 
-            public event PropertyChangedEventHandler PropertyChanged = delegate { };
-
-            public TransmissionData(TransmissionItem item) {
-                Update(item);
-            }
-
-            public DateTime UpdateTime { get; private set; }
-            public string FullPath { get; private set; }
-            public string Repo { get; private set; }
-            public string Path { get; private set; }
-            public string Status { get; private set; }
-            public string Progress { get; private set; }
-            public bool Done { get; private set; }
-
-            public void Update(TransmissionItem item) {
-                UpdateTime = item.UpdateTime;
-                FullPath = item.FullPath;
-                Repo = item.Repo;
-                Path = item.Path;
-                Status = item.Status;
-                Progress = item.Progress;
-                Done = item.Done;
-                var changeHandler = PropertyChanged;
-                if (changeHandler != null) {
-                    changeHandler(this, new PropertyChangedEventArgs("Repo"));
-                    changeHandler(this, new PropertyChangedEventArgs("Path"));
-                    changeHandler(this, new PropertyChangedEventArgs("Status"));
-                    changeHandler(this, new PropertyChangedEventArgs("Progress"));
-                    changeHandler(this, new PropertyChangedEventArgs("UpdateTime"));
-                }
-            }
-        }
-
-        private ObservableCollection<TransmissionData> TransmissionList = new ObservableCollection<TransmissionData>();
-
-        private void Controller_DeleteTransmissionEvent(TransmissionItem item) {
+        private void Controller_DeleteTransmissionEvent(Transmission item) {
             Dispatcher.BeginInvoke((Action)delegate {
-                for (int i = TransmissionList.Count - 1; i >= 0; --i) {
-                    if (TransmissionList[i].FullPath == item.FullPath) {
-                        TransmissionList.RemoveAt(i);
-                        return;
-                    }
-                }
+                this.TransmissionList.Remove(item);
             });
         }
 
-        private void Controller_InsertTransmissionEvent(TransmissionItem item) {
+        private void Controller_InsertTransmissionEvent(Transmission item) {
             Dispatcher.BeginInvoke((Action)delegate {
-                TransmissionList.Insert(0, new TransmissionData(item));
+                TransmissionList.Insert(0, item);
             });
         }
 
-        private void Controller_UpdateTransmissionEvent(TransmissionItem item) {
+        private void Controller_UpdateTransmissionEvent(Transmission item) {
             Dispatcher.BeginInvoke((Action)delegate {
-                for (int i = 0; i < TransmissionList.Count; ++i) {
-                    if (TransmissionList[i].FullPath == item.FullPath) {
-                        TransmissionList[i].Update(item);
-                        if (item.Done) {
-                            //  put finished TransmissionData to the tail
-                            for (; i + 1 < TransmissionList.Count; ++i) {
-                                if (TransmissionList[i + 1].Done) {
-                                    break;
-                                }
-
-                                TransmissionData data = TransmissionList[i];
-                                TransmissionList[i] = TransmissionList[i + 1];
-                                TransmissionList[i + 1] = data;
-                            }
-                        }
-
-                        ListView_SelectionChanged(this, null);
-                        return;
-                    }
+                if (TransmissionList.Contains(item)) {
+                    ListView_SelectionChanged(this, null);
                 }
             });
         }
@@ -184,8 +128,8 @@ namespace CmisSync {
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             bool open = false;
             foreach (object item in ListView.SelectedItems) {
-                Transmission.TransmissionData data = item as Transmission.TransmissionData;
-                if (data.Done) {
+                Transmission data = item as Transmission;
+                if (data.Done()) {
                     open = true;
                     break;
                 }

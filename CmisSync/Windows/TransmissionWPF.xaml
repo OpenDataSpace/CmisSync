@@ -16,11 +16,11 @@
             </ListView.Resources>
             <ListView.View>
                 <GridView>
-                    <GridViewColumn x:Name="ColumnRepo" Header="Repo" DisplayMemberBinding="{Binding Repo}" Width="150"/>
-                    <GridViewColumn x:Name="ColumnPath" Header="Path" DisplayMemberBinding="{Binding Path}" Width="200"/>
+                    <GridViewColumn x:Name="ColumnRepo" Header="Repo" DisplayMemberBinding="{Binding Repository}" Width="150"/>
+                    <GridViewColumn x:Name="ColumnPath" Header="Path" DisplayMemberBinding="{Binding RelativePath}" Width="200"/>
                     <GridViewColumn x:Name="ColumnStatus" Header="Status" DisplayMemberBinding="{Binding Status}" Width="150"/>
                     <GridViewColumn x:Name="ColumnProgress" Header="Progress" DisplayMemberBinding="{Binding Progress}" Width="100"/>
-                    <GridViewColumn x:Name="ColumnDate" Header="UpdateTime" DisplayMemberBinding="{Binding UpdateTime}" Width="100"/>
+                    <GridViewColumn x:Name="ColumnDate" Header="UpdateTime" DisplayMemberBinding="{Binding LastModification}" Width="100"/>
                 </GridView>
             </ListView.View>
             <ListView.ItemContainerStyle>
