@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.StreamsTests
-{
+namespace TestLibrary.StreamsTests {
     using System;
     using System.IO;
 
@@ -30,79 +29,60 @@ namespace TestLibrary.StreamsTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class BandwidthLimitedStreamTest
-    {
+    public class BandwidthLimitedStreamTest {
         private int length;
         private byte[] buffer;
 
         [SetUp]
-        public void Setup()
-        {
+        public void Setup() {
             this.length = 1024 * 1024;
             this.buffer = new byte[this.length];
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        [ExpectedException(typeof(ArgumentException))]
-        public void ConstructorThrowsExceptionIfLimitIsZero()
-        {
-            using (BandwidthLimitedStream limited = new BandwidthLimitedStream(Mock.Of<Stream>(), 0))
-            {
-            }
+        public void ConstructorThrowsExceptionIfLimitIsZero() {
+            Assert.Throws<ArgumentException>(() => {using (var limited = new BandwidthLimitedStream(Mock.Of<Stream>(), 0));});
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        [ExpectedException(typeof(ArgumentException))]
-        public void ConstructorThrowsExceptionIfLimitIsNegative()
-        {
-            using (BandwidthLimitedStream limited = new BandwidthLimitedStream(Mock.Of<Stream>(), -1))
-            {
-            }
+        public void ConstructorThrowsExceptionIfLimitIsNegative() {
+            Assert.Throws<ArgumentException>(() => {using (var limited = new BandwidthLimitedStream(Mock.Of<Stream>(), -1));});
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfStreamIsNull()
-        {
-            using (BandwidthLimitedStream limited = new BandwidthLimitedStream(null, 1))
-            {
-            }
+        public void ConstructorThrowsExceptionIfStreamIsNull() {
+            Assert.Throws<ArgumentNullException>(() => {using (var limited = new BandwidthLimitedStream(null, 1));});
         }
 
         [Test, Category("Fast"), Category("Streams")]
         [ExpectedException(typeof(Exception))]
-        public void ConstructorThrowsExceptionIfBothParametersAreInvalid()
-        {
-            try
-            {
-                using (BandwidthLimitedStream limited = new BandwidthLimitedStream(null, -10))
-                {
+        public void ConstructorThrowsExceptionIfBothParametersAreInvalid() {
+            try {
+                using (var limited = new BandwidthLimitedStream(null, -10)) {
                 }
-            }
-            catch (ArgumentNullException)
-            {
+            } catch (ArgumentNullException) {
                 throw new Exception();
-            }
-            catch (ArgumentException)
-            {
+            } catch (ArgumentException) {
                 throw new Exception();
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void ConstructorTest()
-        {
+        public void ConstructorWithLimit() {
             long limit = 0;
 
             limit = this.length;
-            using (Stream memory = new MemoryStream(this.buffer))
-            using (BandwidthLimitedStream limited = new BandwidthLimitedStream(memory, limit)) {
+            using (var memory = new MemoryStream(this.buffer))
+            using (var limited = new BandwidthLimitedStream(memory, limit)) {
                 Assert.AreEqual(limit, limited.ReadLimit);
                 Assert.AreEqual(limit, limited.WriteLimit);
             }
+        }
 
-            using (Stream memory = new MemoryStream(this.buffer))
-            using (BandwidthLimitedStream limited = new BandwidthLimitedStream(memory)) {
+        [Test, Category("Fast"), Category("Streams")]
+        public void Constructor() {
+            using (var memory = new MemoryStream(this.buffer))
+            using (var limited = new BandwidthLimitedStream(memory)) {
                 Assert.Less(limited.ReadLimit, 0);
                 Assert.Less(limited.WriteLimit, 0);
             }
@@ -110,13 +90,12 @@ namespace TestLibrary.StreamsTests
 
         [Ignore]
         [Test, Category("Slow"), Category("Streams")]
-        public void ReadTest()
-        {
+        public void ReadTest() {
             byte[] buf = new byte[this.length];
             int counter = 0;
-            using (MemoryStream memstream = new MemoryStream(this.buffer))
-            using (BandwidthLimitedStream stream = new BandwidthLimitedStream(memstream, limit: this.length)) {
-                DateTime start = DateTime.Now;
+            using (var memstream = new MemoryStream(this.buffer))
+            using (var stream = new BandwidthLimitedStream(memstream, limit: this.length)) {
+                var start = DateTime.Now;
                 while (counter < this.length) {
                     counter += stream.Read(buf, 0, this.length - counter);
                 }
@@ -129,7 +108,7 @@ namespace TestLibrary.StreamsTests
             counter = 0;
             using (MemoryStream memstream = new MemoryStream(this.buffer))
             using (BandwidthLimitedStream stream = new BandwidthLimitedStream(memstream)) {
-                DateTime start = DateTime.Now;
+                var start = DateTime.Now;
                 while (counter < this.length) {
                     counter += stream.Read(buf, 0, this.length - counter);
                 }
@@ -142,31 +121,29 @@ namespace TestLibrary.StreamsTests
 
         [Ignore]
         [Test, Category("Slow"), Category("Streams")]
-        public void WriteTest()
-        {
+        public void WriteTest() {
             byte[] buf = new byte[this.length];
-            using (MemoryStream memstream = new MemoryStream(this.buffer))
-            using (BandwidthLimitedStream stream = new BandwidthLimitedStream(memstream, limit: this.length)) {
-                DateTime start = DateTime.Now;
+            using (var memstream = new MemoryStream(this.buffer))
+            using (var stream = new BandwidthLimitedStream(memstream, limit: this.length)) {
+                var start = DateTime.Now;
                 stream.Write(buf, 0, this.length);
                 TimeSpan duration = DateTime.Now - start;
                 Assert.GreaterOrEqual(duration.TotalMilliseconds, 1000);
                 Assert.AreEqual(1, duration.TotalSeconds);
             }
 
-            using (MemoryStream memstream = new MemoryStream(this.buffer))
-            using (BandwidthLimitedStream stream = new BandwidthLimitedStream(memstream)) {
-                DateTime start = DateTime.Now;
+            using (var memstream = new MemoryStream(this.buffer))
+            using (var stream = new BandwidthLimitedStream(memstream)) {
+                var start = DateTime.Now;
                 stream.Write(buf, 0, this.length);
-                TimeSpan duration = DateTime.Now - start;
+                var duration = DateTime.Now - start;
                 Assert.GreaterOrEqual(duration.TotalMilliseconds, 1000);
                 Assert.AreEqual(1, duration.TotalSeconds);
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void ConfigureLimitsTest()
-        {
+        public void ConfigureLimitsTest() {
             long limit = this.length;
             using (Stream memory = new MemoryStream(this.buffer))
             using (BandwidthLimitedStream limited = new BandwidthLimitedStream(memory)) {

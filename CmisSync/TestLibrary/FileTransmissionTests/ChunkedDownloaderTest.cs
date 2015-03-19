@@ -40,6 +40,8 @@ namespace TestLibrary.FileTransmissionTests {
 
     using NUnit.Framework;
 
+    using TestUtils;
+
     [TestFixture]
     public class ChunkedDownloaderTest : IDisposable {
         private readonly long remoteLength = 1024 * 1024;
@@ -59,6 +61,7 @@ namespace TestLibrary.FileTransmissionTests {
         [SetUp]
         public void SetUp() {
             this.transmission = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "testfile");
+            this.transmission.AddDefaultConstraints();
             if (this.localFileStream != null) {
                 this.localFileStream.Dispose();
             }

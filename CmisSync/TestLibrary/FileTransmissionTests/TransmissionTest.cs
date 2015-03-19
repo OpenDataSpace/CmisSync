@@ -136,6 +136,10 @@ namespace TestLibrary.FileTransmissionTests {
             underTest.Position = 1000;
             underTest.Length = 2000;
             Assert.That(percent, Is.EqualTo(50));
+
+            underTest.Position = 501;
+            underTest.Length = 1000;
+            Assert.That(percent, Is.EqualTo(50.1));
         }
 
         [Test, Category("Fast")]

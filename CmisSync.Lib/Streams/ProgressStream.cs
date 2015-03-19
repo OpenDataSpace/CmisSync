@@ -114,7 +114,7 @@ namespace CmisSync.Lib.Streams {
             set {
                 this.Stream.Position = value;
                 if (value != this.transmission.Position) {
-                    this.transmission.Length = value;
+                    this.transmission.Position = value;
                 }
             }
         }
@@ -230,18 +230,15 @@ namespace CmisSync.Lib.Streams {
                 pos = null;
             }
 
+            this.transmission.Position = pos;
+            this.transmission.Length = length;
             if (diff.Seconds >= 1) {
                 long? result = Transmission.CalcBitsPerSecond(this.start, DateTime.Now, this.bytesTransmittedSinceLastSecond);
-                this.transmission.Position = pos;
-                this.transmission.Length = length;
                 this.transmission.BitsPerSecond = result;
                 this.bytesTransmittedSinceLastSecond = 0;
                 this.start = this.start + diff;
                 this.blockingDetectionTimer.Stop();
                 this.blockingDetectionTimer.Start();
-            } else {
-                this.transmission.Length = length;
-                this.transmission.Position = pos;
             }
         }
 

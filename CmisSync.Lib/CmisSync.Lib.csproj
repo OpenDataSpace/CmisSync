@@ -302,6 +302,9 @@
     <Compile Include="FileTransmission\TransmissionManager.cs" />
     <Compile Include="FileTransmission\Transmission.cs" />
     <Compile Include="FileTransmission\ITransmissionManager.cs" />
+    <Compile Include="Streams\AbortableStream.cs" />
+    <Compile Include="Streams\PausableStream.cs" />
+    <Compile Include="Streams\BandwidthNotifyingStream.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

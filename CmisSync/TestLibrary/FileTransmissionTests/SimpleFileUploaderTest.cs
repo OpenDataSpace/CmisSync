@@ -37,6 +37,8 @@ namespace TestLibrary.FileTransmissionTests {
 
     using NUnit.Framework;
 
+    using TestUtils;
+
     [TestFixture]
     public class SimpleFileUploaderTest : IDisposable {
         private bool disposed = false;
@@ -52,6 +54,7 @@ namespace TestLibrary.FileTransmissionTests {
         [SetUp]
         public void SetUp() {
             this.transmission = new Transmission(TransmissionType.UPLOAD_NEW_FILE, "testfile");
+            this.transmission.AddDefaultConstraints();
             this.fileLength = 1024 * 1024;
             this.localContent = new byte[this.fileLength];
             if (this.localFileStream != null) {
@@ -88,25 +91,11 @@ namespace TestLibrary.FileTransmissionTests {
                 .Callback<IContentStream, bool, bool>((s, b, r) => s.Stream.CopyTo(this.mockedMemStream.Object))
                 .Returns(new Mock<IObjectId>().Object);
             using (IFileUploader uploader = new SimpleFileUploader()) {
-                this.transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
-                    var t = sender as Transmission;
-                    if (e.PropertyName == Utils.NameOf(() => t.Length)) {
-                        Assert.GreaterOrEqual(t.Length, 0);
-                        Assert.LessOrEqual(t.Length, this.localContent.Length);
-                    }
-
-                    if (e.PropertyName == Utils.NameOf(() => t.Percent)) {
-                        Assert.GreaterOrEqual(t.Percent, 0);
-                        Assert.LessOrEqual(t.Percent, 100);
-                    }
-
-                    if (e.PropertyName == Utils.NameOf(() => t.Position)) {
-                        Assert.GreaterOrEqual(t.Position, 0);
-                        Assert.LessOrEqual(t.Position, this.localContent.Length);
-                    }
-                };
+                transmission.AddLengthConstraint(Is.EqualTo(0).Or.EqualTo(this.localContent.Length));
+                transmission.AddPositionConstraint(Is.LessThanOrEqualTo(this.localContent.Length));
 
                 IDocument result = uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg);
+
                 Assert.AreEqual(result, this.mockedDocument.Object);
                 Assert.AreEqual(this.localContent.Length, this.mockedMemStream.Object.Length);
                 Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.localContent), this.hashAlg.Hash);

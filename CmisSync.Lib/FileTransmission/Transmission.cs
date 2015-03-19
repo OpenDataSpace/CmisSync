@@ -297,7 +297,7 @@ namespace CmisSync.Lib.FileTransmission {
                     return 100d;
                 }
 
-                return ((double)this.Position * 100d) / (double)this.Length;
+                return Math.Round(((double)this.Position * 100d) / (double)this.Length, 1);
             }
         }
 

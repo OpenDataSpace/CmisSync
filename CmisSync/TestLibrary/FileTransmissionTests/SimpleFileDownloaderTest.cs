@@ -37,6 +37,8 @@ namespace TestLibrary.FileTransmissionTests {
 
     using NUnit.Framework;
 
+    using TestUtils;
+
     [TestFixture]
     public class SimpleFileDownloaderTest : IDisposable {
         private bool disposed = false;
@@ -53,6 +55,7 @@ namespace TestLibrary.FileTransmissionTests {
         [SetUp]
         public void SetUp() {
             this.transmission = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "testfile");
+            this.transmission.AddDefaultConstraints();
             if (this.localFileStream != null) {
                 this.localFileStream.Dispose();
             }
@@ -83,23 +86,14 @@ namespace TestLibrary.FileTransmissionTests {
         [Test, Category("Fast")]
         public void NormalDownload() {
             double lastPercent = 0;
+            this.transmission.AddPositionConstraint(Is.LessThanOrEqualTo(this.remoteLength));
+            this.transmission.AddLengthConstraint(Is.EqualTo(this.remoteLength).Or.EqualTo(0));
+
             this.transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
                 var t = sender as Transmission;
-                if (e.PropertyName == Utils.NameOf(() => t.Position)) {
-                    Assert.GreaterOrEqual((long)t.Position, 0);
-                    Assert.LessOrEqual((long)t.Position, this.remoteLength);
-                }
-
                 if (e.PropertyName == Utils.NameOf(() => t.Percent)) {
-                    Assert.GreaterOrEqual(t.Percent, 0);
-                    Assert.LessOrEqual(t.Percent, 100);
-                    Assert.GreaterOrEqual(t.Percent, lastPercent);
-                    lastPercent = (double)t.Percent;
-                }
-
-                if (e.PropertyName == Utils.NameOf(() => t.Length)) {
-                    Assert.GreaterOrEqual(t.Length, 0);
-                    Assert.LessOrEqual(t.Length, this.remoteLength);
+                    Assert.That(t.Percent, Is.Null.Or.GreaterThanOrEqualTo(lastPercent));
+                    lastPercent = t.Percent.GetValueOrDefault();
                 }
             };
 

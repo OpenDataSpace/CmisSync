@@ -242,11 +242,14 @@ SOURCES =  \
 	Storage/FileSystem/ReadOnlyIgnoringFileInfoDecorator.cs \
 	Storage/FileSystem/ReadOnlyIgnoringFileSystemInfoDecorator.cs \
 	Storage/FileSystem/RestoreModificationDateException.cs \
+	Streams/AbortableStream.cs \
 	Streams/BandwidthLimitedStream.cs \
+	Streams/BandwidthNotifyingStream.cs \
 	Streams/ChunkedStream.cs \
 	Streams/ForwardReadingStream.cs \
 	Streams/NonClosingHashStream.cs \
 	Streams/OffsetStream.cs \
+	Streams/PausableStream.cs \
 	Streams/ProgressStream.cs \
 	Streams/StreamWrapper.cs \
 	Utils.cs

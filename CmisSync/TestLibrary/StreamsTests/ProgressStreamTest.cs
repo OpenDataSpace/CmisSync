@@ -31,6 +31,8 @@ namespace TestLibrary.StreamsTests {
 
     using NUnit.Framework;
 
+    using TestUtils;
+
     [TestFixture]
     public class ProgressStreamTest {
         private readonly string filename = "filename";
@@ -80,14 +82,14 @@ namespace TestLibrary.StreamsTests {
         [Test, Category("Fast"), Category("Streams")]
         public void SetLength() {
             var mockedStream = new Mock<Stream>();
-            Transmission transmission = new Transmission(this.transmissionType, this.filename);
-            transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs args) {
-                if (args.PropertyName == Utils.NameOf((Transmission t) => t.Length)) {
-                    this.lengthCalls++;
-                }
-            };
+            Transmission transmission = new Transmission(this.transmissionType, this.filename).AddDefaultConstraints();
             mockedStream.Setup(s => s.SetLength(It.IsAny<long>()));
             using (ProgressStream progress = new ProgressStream(mockedStream.Object, transmission)) {
+                transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs args) {
+                    if (args.PropertyName == Utils.NameOf((Transmission t) => t.Length)) {
+                        this.lengthCalls++;
+                    }
+                };
                 progress.SetLength(100);
                 progress.SetLength(100);
                 Assert.AreEqual(1, this.lengthCalls);
@@ -97,21 +99,20 @@ namespace TestLibrary.StreamsTests {
         [Test, Category("Fast"), Category("Streams")]
         public void Position() {
             var mockedStream = new Mock<Stream>();
-            Transmission transmission = new Transmission(this.transmissionType, this.filename);
-            transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
-                var t = sender as Transmission;
-                if (e.PropertyName == Utils.NameOf(() => t.Length)) {
-                    this.lengthCalls++;
-                    this.length = (long)t.Length;
-                }
-
-                if (e.PropertyName == Utils.NameOf(() => t.Position)) {
-                    this.positionCalls++;
-                }
-            };
+            var transmission = new Transmission(this.transmissionType, this.filename).AddDefaultConstraints();
             mockedStream.Setup(s => s.SetLength(It.IsAny<long>()));
             mockedStream.SetupProperty(s => s.Position);
-            using (ProgressStream progress = new ProgressStream(mockedStream.Object, transmission)) {
+            using (var progress = new ProgressStream(mockedStream.Object, transmission)) {
+                transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
+                    var t = sender as Transmission;
+                    if (e.PropertyName == Utils.NameOf(() => t.Length)) {
+                        this.lengthCalls++;
+                    }
+
+                    if (e.PropertyName == Utils.NameOf(() => t.Position)) {
+                        this.positionCalls++;
+                    }
+                };
                 progress.SetLength(100);
                 Assert.AreEqual(1, this.lengthCalls);
                 Assert.AreEqual(0, this.positionCalls);
@@ -126,59 +127,58 @@ namespace TestLibrary.StreamsTests {
 
         [Test, Category("Fast"), Category("Streams")]
         public void Read() {
-            using (Stream stream = new MemoryStream()) {
-                Transmission transmission = new Transmission(this.transmissionType, this.filename);
+            using (var stream = new MemoryStream()) {
+                var transmission = new Transmission(this.transmissionType, this.filename).AddDefaultConstraints();
                 transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
                     var t = sender as Transmission;
                     if (e.PropertyName == Utils.NameOf(() => t.Position)) {
                         this.positionCalls++;
                         this.position = (long)t.Position;
-                        this.percent = (double)t.Percent;
                     }
                 };
                 byte[] buffer = new byte[10];
-                using (ProgressStream progress = new ProgressStream(stream, transmission)) {
+                using (var progress = new ProgressStream(stream, transmission)) {
                     progress.SetLength(buffer.Length * 10);
                     progress.Read(buffer, 0, buffer.Length);
                     Assert.AreEqual(buffer.Length, this.position);
-                    Assert.AreEqual(10, this.percent);
+                    Assert.AreEqual(10, transmission.Percent);
                     progress.Read(buffer, 0, buffer.Length);
                     Assert.AreEqual(buffer.Length * 2, this.position);
-                    Assert.AreEqual(20, this.percent);
+                    Assert.AreEqual(20, transmission.Percent);
                     progress.Read(buffer, 0, buffer.Length);
                     Assert.AreEqual(buffer.Length * 3, this.position);
-                    Assert.AreEqual(30, this.percent);
+                    Assert.AreEqual(30, transmission.Percent);
                     progress.Read(buffer, 0, buffer.Length);
                     Assert.AreEqual(buffer.Length * 4, this.position);
-                    Assert.AreEqual(40, this.percent);
+                    Assert.AreEqual(40, transmission.Percent);
                     progress.Read(buffer, 0, buffer.Length / 2);
                     Assert.AreEqual((buffer.Length * 4) + (buffer.Length / 2), this.position);
-                    Assert.AreEqual(45, this.percent);
+                    Assert.AreEqual(45, transmission.Percent);
                     progress.Read(buffer, 0, buffer.Length);
                     Assert.AreEqual((buffer.Length * 5) + (buffer.Length / 2), this.position);
-                    Assert.AreEqual(55, this.percent);
+                    Assert.AreEqual(55, transmission.Percent);
                     progress.SetLength(buffer.Length * 100);
                     progress.Read(buffer, 0, buffer.Length);
                     Assert.AreEqual((buffer.Length * 6) + (buffer.Length / 2), this.position);
-                    Assert.AreEqual(6.5, this.percent);
+                    Assert.AreEqual(6.5, transmission.Percent);
                 }
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
         public void Write() {
-            using (Stream stream = new MemoryStream()) {
-                Transmission transmission = new Transmission(this.transmissionType, this.filename);
+            using (var stream = new MemoryStream()) {
+                var transmission = new Transmission(this.transmissionType, this.filename).AddDefaultConstraints();
                 transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
                     var t = sender as Transmission;
                     if (e.PropertyName == Utils.NameOf(() => t.Position)) {
                         this.positionCalls++;
                         this.position = (long)t.Position;
-                        this.percent = (double)t.Percent;
+                        this.percent = (double)t.Percent.GetValueOrDefault();
                     }
                 };
                 byte[] buffer = new byte[10];
-                using (ProgressStream progress = new ProgressStream(stream, transmission)) {
+                using (var progress = new ProgressStream(stream, transmission)) {
                     progress.SetLength(buffer.Length * 10);
                     progress.Write(buffer, 0, buffer.Length);
                     Assert.AreEqual(buffer.Length, this.position);
@@ -208,8 +208,8 @@ namespace TestLibrary.StreamsTests {
 
         [Test, Category("Fast"), Category("Streams")]
         public void SeekTest() {
-            using (Stream stream = new MemoryStream()) {
-                Transmission transmission = new Transmission(this.transmissionType, this.filename);
+            using (var stream = new MemoryStream()) {
+                var transmission = new Transmission(this.transmissionType, this.filename);
                 transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
                     var t = sender as Transmission;
                     if (e.PropertyName == Utils.NameOf(() => t.Position)) {
@@ -218,7 +218,7 @@ namespace TestLibrary.StreamsTests {
                         this.percent = (double)t.Percent;
                     }
                 };
-                using (ProgressStream progress = new ProgressStream(stream, transmission)) {
+                using (var progress = new ProgressStream(stream, transmission)) {
                     progress.SetLength(100);
                     progress.Seek(10, SeekOrigin.Begin);
                     Assert.AreEqual(10, this.position);
@@ -254,17 +254,17 @@ namespace TestLibrary.StreamsTests {
         public void ResumeTest() {
             byte[] inputContent = new byte[100];
             long offset = 100;
-            using (Stream stream = new MemoryStream(inputContent)) 
-            using (OffsetStream offsetstream = new OffsetStream(stream, offset)) {
-                Transmission transmission = new Transmission(this.transmissionType, this.filename);
+            using (var stream = new MemoryStream(inputContent)) 
+            using (var offsetstream = new OffsetStream(stream, offset)) {
+                var transmission = new Transmission(this.transmissionType, this.filename).AddDefaultConstraints();
                 transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
                     var t = sender as Transmission;
                     if (e.PropertyName == Utils.NameOf(() => t.Position)) {
                         this.position = (long)t.Position;
-                        this.percent = (double)t.Percent;
+                        this.percent = t.Percent.GetValueOrDefault();
                     }
                 };
-                using (ProgressStream progress = new ProgressStream(offsetstream, transmission)) {
+                using (var progress = new ProgressStream(offsetstream, transmission)) {
                     progress.Seek(0, SeekOrigin.Begin);
                     Assert.AreEqual(offset, this.position);
                     Assert.AreEqual(50, this.percent);
@@ -290,7 +290,7 @@ namespace TestLibrary.StreamsTests {
         public void EnsureBandwidthIsReportedIfProgressIsShorterThanOneSecond() {
             byte[] inputContent = new byte[1024];
             bool isMoreThanZeroReported = false;
-            Transmission transmission = new Transmission(this.transmissionType, this.filename);
+            var transmission = new Transmission(this.transmissionType, this.filename);
             transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs args) {
                 if ((sender as Transmission).BitsPerSecond > 0) {
                     isMoreThanZeroReported = true;
@@ -304,7 +304,7 @@ namespace TestLibrary.StreamsTests {
             }
 
             Assert.That(isMoreThanZeroReported, Is.True);
-            Assert.That(transmission.BitsPerSecond, Is.EqualTo(0));
+            Assert.That(transmission.BitsPerSecond, Is.Null);
         }
 
         [Test, Category("Fast"), Category("Streams")]
@@ -330,21 +330,20 @@ namespace TestLibrary.StreamsTests {
 
         [Test, Category("Fast"), Category("Streams")]
         public void UpdateLengthIfInputStreamGrowsAfterStartReading() {
-            using (Stream stream = new MemoryStream()) {
-                Transmission transmission = new Transmission(this.transmissionType, this.filename);
+            using (var stream = new MemoryStream()) {
+                var transmission = new Transmission(this.transmissionType, this.filename).AddDefaultConstraints();
                 long initialLength = 100;
                 long length = initialLength;
-                transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
-                    var t = sender as Transmission;
-                    if (e.PropertyName == Utils.NameOf(() => t.Position)) {
-                        Assert.That(t.Position, Is.LessThanOrEqualTo(length));
-                        Assert.That(t.Length, Is.LessThanOrEqualTo(length));
-                        Assert.That(t.Percent, Is.LessThanOrEqualTo(100));
-                    }
-                };
                 byte[] buffer = new byte[initialLength];
                 stream.Write(buffer, 0, buffer.Length);
-                using (ProgressStream progress = new ProgressStream(stream, transmission)) {
+                using (var progress = new ProgressStream(stream, transmission)) {
+                    transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
+                        var t = sender as Transmission;
+                        if (e.PropertyName == Utils.NameOf(() => t.Position)) {
+                            Assert.That(t.Position, Is.LessThanOrEqualTo(length));
+                            Assert.That(t.Length, Is.Null.Or.LessThanOrEqualTo(length));
+                        }
+                    };
                     progress.Read(buffer, 0, buffer.Length / 2);
                     stream.Write(buffer, 0, buffer.Length);
                     length = length + buffer.Length;
@@ -363,7 +362,7 @@ namespace TestLibrary.StreamsTests {
             int length = 1024;
             var start = DateTime.Now;
             byte[] content = new byte[length];
-            var transmission = new Transmission(this.transmissionType, this.filename);
+            var transmission = new Transmission(this.transmissionType, this.filename).AddDefaultConstraints();
             using (var stream = new MemoryStream(content))
             using (var progressStream = new ProgressStream(stream, transmission)) {
                 transmission.Pause();
@@ -382,12 +381,12 @@ namespace TestLibrary.StreamsTests {
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void BandwidthAfterCloseIsZero([Values(1024, 4096, 1234, 123456)]int length) {
+        public void BandwidthAfterCloseIsNull([Values(1024, 4096, 1234, 123456)]int length) {
             long? bandwidth = null;
             byte[] content = new byte[length];
-            var transmission = new Transmission(this.transmissionType, this.filename);
+            var transmission = new Transmission(this.transmissionType, this.filename).AddDefaultConstraints();
             transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs args) {
-                bandwidth = (sender as Transmission).BitsPerSecond ?? bandwidth;
+                bandwidth = (sender as Transmission).BitsPerSecond;
             };
             using (var stream = new MemoryStream(content))
                 using (var progressStream = new ProgressStream(stream, transmission)) {
@@ -399,7 +398,7 @@ namespace TestLibrary.StreamsTests {
                 task.Wait();
             }
 
-            Assert.That(bandwidth, Is.EqualTo(0));
+            Assert.That(bandwidth, Is.Null);
         }
 
         public Array GetAllTypes(){
