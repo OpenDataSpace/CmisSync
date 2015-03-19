@@ -323,7 +323,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             this.remotePWCDocument.Verify(d => d.DeleteContentStream(), Times.Exactly(1));
             this.remotePWCDocument.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Exactly(3)); // 1 for one AppendContentStream is aborted, and 2 for the last upload having two AppendContentStream
-            this.remotePWCDocument.Verify(d => d.CheckIn(It.IsAny<bool>(), It.Is<IDictionary<string, object>>(p => p.ContainsKey(PropertyIds.LastModificationDate)), null, It.IsAny<string>()), Times.Once());
+            this.remotePWCDocument.Verify(d => d.CheckIn(It.IsAny<bool>(), It.IsAny<IDictionary<string, object>>(), null, It.IsAny<string>()), Times.Never());
         }
 
         private void SetupToChangeLocal() {

@@ -55,7 +55,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
         private IDocument CreateRemotePWCDocument(IDocument remoteDocument) {
             try {
                 if (this.TransmissionStorage != null) {
-                    this.TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
+                    if (this.TransmissionStorage.GetObjectByRemoteObjectId(remoteDocument.Id) != null) {
+                        this.TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
+                    }
                 }
 
                 if (string.IsNullOrEmpty(remoteDocument.VersionSeriesCheckedOutId)) {
