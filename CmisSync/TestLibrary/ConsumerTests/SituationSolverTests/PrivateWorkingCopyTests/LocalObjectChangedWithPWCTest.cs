@@ -125,7 +125,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void SolverUploadsFileContentByCreatingNewPWC([Values(123456)]long fileSize) {
+        public void SolverUploadsFileContentByCreatingNewPWC([Values(1, 1024, 123456)]long fileSize) {
             this.SetUpMocks();
 
             this.SetupFile();
@@ -244,10 +244,17 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.session.AddRemoteObject(docPWC);
 
             this.remoteDocument.SetupCheckout(this.remoteDocumentPWC, this.changeTokenNew, this.objectIdNew);
+            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == this.objectIdNew))).Returns<IObjectId>((id) => {
+                Assert.AreEqual(id.Id, doc.Id);
+                return doc;
+            });
 
             Mock<IMappedObject> mapped = this.storage.AddLocalFile(this.localFile.Object, this.objectIdOld);
-            mapped.Setup(o => o.LastChangeToken).Returns(this.changeTokenOld);
-            mapped.Setup(o => o.ParentId).Returns(this.parentId);
+            mapped.SetupAllProperties();
+            mapped.Object.Name = this.fileName;
+            mapped.Object.LastChangeToken = this.changeTokenOld;
+            mapped.Object.ParentId = this.parentId;
+            mapped.Object.Guid = Guid.NewGuid();
         }
 
 

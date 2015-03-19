@@ -83,6 +83,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                         FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
                         this.transmissionManager.AddTransmission(transmissionEvent);
                         mappedObject.LastChecksum = UploadFileWithPWC(localFile, ref remoteDocument, transmissionEvent);
+                        mappedObject.ChecksumAlgorithmName = "SHA-1";
                         if (remoteDocument.Id != mappedObject.RemoteObjectId) {
                             this.TransmissionStorage.RemoveObjectByRemoteObjectId(mappedObject.RemoteObjectId);
                             mappedObject.RemoteObjectId = remoteDocument.Id;
@@ -107,7 +108,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 }
 
                 mappedObject.LastChangeToken = remoteDocument.ChangeToken;
-                mappedObject.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+                mappedObject.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
                 this.Storage.SaveMappedObject(mappedObject);
             } else {
                 this.folderOrFileContentUnchangedSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
