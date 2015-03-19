@@ -16,8 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Filter
-{
+namespace CmisSync.Lib.Filter {
     using System;
 
     using CmisSync.Lib.Events;
@@ -47,10 +46,8 @@ namespace CmisSync.Lib.Filter
         /// <value>
         /// The priority.
         /// </value>
-        public override int Priority
-        {
-            get
-            {
+        public override int Priority {
+            get {
                 return EventHandlerPriorities.GetPriority(typeof(GenericHandleDublicatedEventsFilter<,>));
             }
         }
@@ -64,23 +61,17 @@ namespace CmisSync.Lib.Filter
         /// <returns>
         /// True, if this Event Type has already been seen since the last Reset Type or Initialization occured.
         /// </returns>
-        public override bool Handle(ISyncEvent e)
-        {
-            if (e is TFilter)
-            {
-                if (this.firstOccurence)
-                {
+        public override bool Handle(ISyncEvent e) {
+            if (e is TFilter) {
+                if (this.firstOccurence) {
                     this.firstOccurence = false;
                     return false;
-                }
-                else
-                {
+                } else {
                     return true;
                 }
             }
 
-            if (e is TReset)
-            {
+            if (e is TReset) {
                 this.firstOccurence = true;
             }
 
