@@ -17,10 +17,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Filter
-{
+namespace CmisSync.Lib.Filter {
     using System;
-    
+
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
 
@@ -29,8 +28,7 @@ namespace CmisSync.Lib.Filter
     /// <summary>
     /// Reporting filter.
     /// </summary>
-    public class ReportingFilter : ReportingSyncEventHandler
-    {
+    public class ReportingFilter : ReportingSyncEventHandler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ReportingSyncEventHandler));
 
         /// <summary>
@@ -95,8 +93,7 @@ namespace CmisSync.Lib.Filter
         /// </summary>
         /// <param name="e">The event to handle.</param>
         /// <returns>true if handled</returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             string reason;
             try {
                 var nameEvent = e as IFilterableNameEvent;
