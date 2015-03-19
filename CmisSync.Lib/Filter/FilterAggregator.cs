@@ -17,15 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Filter
-{
+namespace CmisSync.Lib.Filter {
     using System;
 
     /// <summary>
     /// Filter aggregator.
     /// </summary>
-    public class FilterAggregator : IFilterAggregator
-    {
+    public class FilterAggregator : IFilterAggregator {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Filter.FilterAggregator"/> class.
         /// </summary>
