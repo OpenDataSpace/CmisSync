@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Filter
-{
+namespace CmisSync.Lib.Filter {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -27,8 +26,7 @@ namespace CmisSync.Lib.Filter
     /// <summary>
     /// Ignored file names filter.
     /// </summary>
-    public class IgnoredFileNamesFilter
-    {
+    public class IgnoredFileNamesFilter {
         /// <summary>
         /// The required wildcards are at the moment *.sync files
         /// </summary>
@@ -59,12 +57,9 @@ namespace CmisSync.Lib.Filter
         /// <value>
         /// The wildcards.
         /// </value>
-        public List<string> Wildcards
-        {
-            set
-            {
-                lock (this.wildCardLock)
-                {
+        public List<string> Wildcards {
+            set {
+                lock (this.wildCardLock) {
                     this.wildcards.Clear();
                     foreach (var required in this.requiredWildcards) {
                         if (!value.Contains(required)) {
@@ -72,8 +67,7 @@ namespace CmisSync.Lib.Filter
                         }
                     }
 
-                    foreach (var wildcard in value)
-                    {
+                    foreach (var wildcard in value) {
                         this.wildcards.Add(Utils.IgnoreLineToRegex(wildcard));
                     }
                 }
@@ -92,21 +86,16 @@ namespace CmisSync.Lib.Filter
         /// <param name='reason'>
         /// Is set to the reason if <c>true</c> is returned.
         /// </param>
-        public virtual bool CheckFile(string name, out string reason)
-        {
-            lock (this.wildCardLock)
-            {
+        public virtual bool CheckFile(string name, out string reason) {
+            lock (this.wildCardLock) {
                 reason = string.Empty;
-                if (!Utils.WorthSyncing(name, new List<string>()))
-                {
+                if (!Utils.WorthSyncing(name, new List<string>())) {
                     reason = string.Format("Invalid file name: {0}", name);
                     return true;
                 }
 
-                foreach (var wildcard in this.wildcards)
-                {
-                    if (wildcard.IsMatch(name))
-                    {
+                foreach (var wildcard in this.wildcards) {
+                    if (wildcard.IsMatch(name)) {
                         reason = string.Format("filename {1} matches: {0}", wildcard.ToString(), name);
                         return true;
                     }
