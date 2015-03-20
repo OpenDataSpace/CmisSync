@@ -92,6 +92,7 @@ SOURCES =  \
 	FilterTests/IgnoredFoldersFilterTest.cs \
 	FilterTests/InvalidFolderNameFilterTest.cs \
 	FilterTests/ReportingFilterTest.cs \
+	FilterTests/RepositoryRootDeletedDetectionTest.cs \
 	IntegrationTests/AllHandlersIT.cs \
 	IntegrationTests/AllowableActionsTests/ReadingActionsTests.cs \
 	IntegrationTests/BaseFullRepoTest.cs \

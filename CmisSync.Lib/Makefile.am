@@ -143,6 +143,7 @@ SOURCES =  \
 	Filter/IgnoredFoldersFilter.cs \
 	Filter/InvalidFolderNameFilter.cs \
 	Filter/ReportingFilter.cs \
+	Filter/RepositoryRootDeletedDetection.cs \
 	HttpProxyUtils.cs \
 	IActivityListener.cs \
 	PathMatcher/IPathMatcher.cs \
