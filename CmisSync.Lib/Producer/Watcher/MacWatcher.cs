@@ -18,29 +18,24 @@
 //-----------------------------------------------------------------------
 
 #if __COCOA__
+namespace CmisSync.Lib.Producer.Watcher {
+    using System;
+    using System.IO;
+    using System.Threading;
 
-using System;
-using System.IO;
-using System.Threading;
+    using MonoMac.Foundation;
+    using MonoMac.CoreServices;
+    using MonoMac.AppKit;
 
-using MonoMac.Foundation;
-using MonoMac.CoreServices;
-using MonoMac.AppKit;
+    using log4net;
 
-using log4net;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
 
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Queueing;
-
-
-namespace CmisSync.Lib.Producer.Watcher
-{
     /// <summary>
     /// Implementation of a Mac OS specific file system watcher.
     /// </summary>
-    public class MacWatcher : IWatcherProducer
-    {
-
+    public class MacWatcher : IWatcherProducer {
         private FSEventStream FsStream;
         private bool isStarted = false;
         private bool disposed = false;
@@ -62,6 +57,7 @@ namespace CmisSync.Lib.Producer.Watcher
                 if (value == isStarted) {
                     return;
                 }
+
                 if (value) {
                     isStarted = FsStream.Start();
                     if (isStarted) {
@@ -71,7 +67,7 @@ namespace CmisSync.Lib.Producer.Watcher
                 } else {
                     FsStream.Events -= OnFSEventStreamEvents;
                     FsStream.FlushSync();
-                    FsStream.Stop ();
+                    FsStream.Stop();
                     isStarted = false;
                 }
             }
@@ -83,8 +79,8 @@ namespace CmisSync.Lib.Producer.Watcher
         /// </summary>
         /// <param name="pathname">Path to be monitored.</param>
         /// <param name="queue">Queue to pass the new events to.</param>
-        public MacWatcher(string pathname, ISyncEventQueue queue) : this(pathname, queue, TimeSpan.FromSeconds(1))
-        { }
+        public MacWatcher(string pathname, ISyncEventQueue queue) : this(pathname, queue, TimeSpan.FromSeconds(1)) {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.MacWatcher"/> class.
@@ -92,8 +88,7 @@ namespace CmisSync.Lib.Producer.Watcher
         /// <param name="pathname">Path to be monitored.</param>
         /// <param name="queue">Queue to pass the new events to.</param>
         /// <param name="latency">Maximum latency for file system events.</param>
-        public MacWatcher(string pathname, ISyncEventQueue queue, TimeSpan latency)
-        {
+        public MacWatcher(string pathname, ISyncEventQueue queue, TimeSpan latency) {
             if (string.IsNullOrEmpty(pathname)) {
                 throw new ArgumentNullException("The given fs stream must not be null");
             }
@@ -103,8 +98,7 @@ namespace CmisSync.Lib.Producer.Watcher
             }
 
             this.Queue = queue;
-            this.RunLoopThread = new Thread(() =>
-            {
+            this.RunLoopThread = new Thread(() => {
                 this.RunLoop = NSRunLoop.Current;
                 while (!this.StopRunLoop) {
                     this.RunLoop.RunUntil(NSDate.FromTimeIntervalSinceNow(1));
@@ -126,8 +120,7 @@ namespace CmisSync.Lib.Producer.Watcher
         /// Dispose the FsStream.
         /// </summary>
         /// <param name="disposing">If set to <c>true</c> disposing.</param>
-        protected void Dispose(bool disposing)
-        {
+        protected void Dispose(bool disposing) {
             if (!disposed) {
                 if (disposing) {
                     // Dispose of any managed resources of the derived class here.
@@ -141,7 +134,7 @@ namespace CmisSync.Lib.Producer.Watcher
                 // Dispose of any unmanaged resources of the derived class here.
             }
         }
-        
+
         /// <summary>
         /// Releases all resource used by the <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> object.
         /// </summary>
@@ -150,14 +143,12 @@ namespace CmisSync.Lib.Producer.Watcher
         /// state. After calling <see cref="Dispose"/>, you must release all references to the
         /// <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> so the garbage collector can reclaim the memory that the
         /// <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> was occupying.</remarks>
-        public void Dispose()
-        {
+        public void Dispose() {
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        private void OnFSEventStreamEvents (object sender, FSEventStreamEventsArgs e)
-        {
+        private void OnFSEventStreamEvents(object sender, FSEventStreamEventsArgs e) {
             foreach (MonoMac.CoreServices.FSEvent fsEvent in e.Events) {
                 bool isFile = (fsEvent.Flags & FSEventStreamEventFlags.ItemIsFile) != 0;
                 if ((fsEvent.Flags & FSEventStreamEventFlags.ItemRemoved) != 0 && !FileOrDirectoryExists(fsEvent.Path, isFile)) {
@@ -198,16 +189,14 @@ namespace CmisSync.Lib.Producer.Watcher
         /// Cleans the last rename event. If no corresponding second rename event has been found yet, the rename has been a sign for a deletion.
         /// </summary>
         private void CleanLastRenameEvent() {
-            if (this.LastRenameEvent != null)
-            {
+            if (this.LastRenameEvent != null) {
                 bool isFile = (((MonoMac.CoreServices.FSEvent)this.LastRenameEvent).Flags & FSEventStreamEventFlags.ItemIsFile) != 0;
                 this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent(WatcherChangeTypes.Deleted, this.LastRenameEvent.Value.Path, !isFile));
                 this.LastRenameEvent = null;
             }
         }
 
-        internal static bool FileOrDirectoryExists(string path, bool isFile)
-        {
+        internal static bool FileOrDirectoryExists(string path, bool isFile) {
             return isFile ? File.Exists(path) : Directory.Exists(path);
         }
     }

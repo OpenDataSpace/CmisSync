@@ -27,6 +27,7 @@ SOURCES =  \
 	Cmis/MimeType.cs \
 	Cmis/OperationContextFactory.cs \
 	Cmis/Repository.cs \
+	Cmis/RepositoryExceptionEventArgs.cs \
 	Cmis/RepositoryStatus.cs \
 	Cmis/RepositoryStatusAggregator.cs \
 	Cmis/UiUtils/CmisPermissionDeniedException.cs \
@@ -147,6 +148,7 @@ SOURCES =  \
 	Filter/IgnoredFoldersFilter.cs \
 	Filter/InvalidFolderNameFilter.cs \
 	Filter/ReportingFilter.cs \
+	Filter/RepositoryRootDeletedDetection.cs \
 	HashAlgorithm/HashAlgorithmReuse.cs \
 	HashAlgorithm/SHA1Reuse.cs \
 	HttpProxyUtils.cs \

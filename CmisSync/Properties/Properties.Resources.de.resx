@@ -418,4 +418,16 @@ Dies kann bei der Synchronisation zu Konfliktdateien führen.</value>
   <data name="TransmissionTitleLastChange" xml:space="preserve">
     <value>Letzte Änderung</value>
   </data>
+  <data name="FatalExceptionTitle" xml:space="preserve">
+    <value>{0}: Fataler Fehler ist aufgetreten</value>
+  </data>
+  <data name="LocalRootFolderUnavailable" xml:space="preserve">
+    <value>Synchronisationsziel "{0}" nicht mehr vorhanden. Synchronisation abgebrochen!</value>
+  </data>
+  <data name="UnknownExceptionOccured" xml:space="preserve">
+    <value>Unbekannter Fehler aufgetreten</value>
+  </data>
+  <data name="WarningExceptionTitle" xml:space="preserve">
+    <value>{0}: Fehler aufgetreten</value>
+  </data>
 </root>

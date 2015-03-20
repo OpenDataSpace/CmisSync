@@ -16,8 +16,8 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Producer.Watcher
-{
+
+namespace CmisSync.Lib.Producer.Watcher {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
@@ -36,8 +36,7 @@ namespace CmisSync.Lib.Producer.Watcher
     /// <summary>
     /// Watcher sync.
     /// </summary>
-    public class WatcherConsumer : ReportingSyncEventHandler
-    {
+    public class WatcherConsumer : ReportingSyncEventHandler {
         private IFileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
 
         /// <summary>
@@ -46,8 +45,7 @@ namespace CmisSync.Lib.Producer.Watcher
         /// <param name='queue'>
         /// Queue where the FSEvents and also the FileEvents and FolderEvents are reported.
         /// </param>
-        public WatcherConsumer(ISyncEventQueue queue) : base(queue)
-        {
+        public WatcherConsumer(ISyncEventQueue queue) : base(queue) {
         }
 
         /// <summary>
@@ -59,8 +57,7 @@ namespace CmisSync.Lib.Producer.Watcher
         /// <returns>
         /// True if handled.
         /// </returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             var fsevent = e as IFSEvent;
             if (fsevent == null) {
                 return false;
@@ -75,8 +72,7 @@ namespace CmisSync.Lib.Producer.Watcher
             return true;
         }
 
-        private void HandleFolderEvents(IFSEvent e)
-        {
+        private void HandleFolderEvents(IFSEvent e) {
             var movedEvent = e as IFSMovedEvent;
             FolderEvent folderEvent;
             if (movedEvent != null) {
@@ -114,8 +110,7 @@ namespace CmisSync.Lib.Producer.Watcher
         /// <param name='e'>
         /// The FSEvent.
         /// </param>
-        private void HandleFileEvents(IFSEvent e)
-        {
+        private void HandleFileEvents(IFSEvent e) {
             var movedEvent = e as IFSMovedEvent;
             if (movedEvent != null) {
                 var oldfile = this.fsFactory.CreateFileInfo(movedEvent.OldPath);
