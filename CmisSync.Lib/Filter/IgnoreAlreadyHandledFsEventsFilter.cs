@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Filter
-{
+namespace CmisSync.Lib.Filter {
     using System;
     using System.IO;
 
@@ -31,8 +30,7 @@ namespace CmisSync.Lib.Filter
     /// <summary>
     /// Already added objects fs event filter.
     /// </summary>
-    public class IgnoreAlreadyHandledFsEventsFilter : SyncEventHandler
-    {
+    public class IgnoreAlreadyHandledFsEventsFilter : SyncEventHandler {
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
 
@@ -41,8 +39,7 @@ namespace CmisSync.Lib.Filter
         /// </summary>
         /// <param name="storage">Storage instance.</param>
         /// <param name="fsFactory">Fs factory.</param>
-        public IgnoreAlreadyHandledFsEventsFilter(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null)
-        {
+        public IgnoreAlreadyHandledFsEventsFilter(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) {
             if (storage == null) {
                 throw new ArgumentNullException("Given storage is null");
             }
@@ -57,8 +54,7 @@ namespace CmisSync.Lib.Filter
         /// </summary>
         /// <param name="e">Sync event</param>
         /// <returns><c>true</c> if the storage contains an entry for this object</returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             if (e is IFSEvent) {
                 var fsEvent = e as IFSEvent;
                 IFileSystemInfo path = fsEvent.IsDirectory ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(fsEvent.LocalPath) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(fsEvent.LocalPath);

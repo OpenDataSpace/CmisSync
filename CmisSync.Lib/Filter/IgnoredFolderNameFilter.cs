@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Filter
-{
+namespace CmisSync.Lib.Filter {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -27,8 +26,7 @@ namespace CmisSync.Lib.Filter
     /// <summary>
     /// Ignored folder name filter.
     /// </summary>
-    public class IgnoredFolderNameFilter
-    {
+    public class IgnoredFolderNameFilter {
         /// <summary>
         /// The lock to prevent multiple parallel access on the wildcard list
         /// </summary>
@@ -45,16 +43,13 @@ namespace CmisSync.Lib.Filter
         /// <value>
         /// The wildcards.
         /// </value>
-        public List<string> Wildcards
-        {
-            set
-            {
+        public List<string> Wildcards {
+            set {
                 if (value == null) {
                     throw new ArgumentNullException("Given wildcards are null");
                 }
 
-                lock (this.listLock)
-                {
+                lock (this.listLock) {
                     this.wildcards.Clear();
                     foreach (string wildcard in value) {
                         this.wildcards.Add(Utils.IgnoreLineToRegex(wildcard));
@@ -70,8 +65,7 @@ namespace CmisSync.Lib.Filter
         /// <param name="name">Name of the folder.</param>
         /// <param name="reason">Reason why <c>true</c> was returned.</param>
         public virtual bool CheckFolderName(string name, out string reason) {
-            lock (this.listLock)
-            {
+            lock (this.listLock) {
                 reason = string.Empty;
                 foreach (Regex wildcard in this.wildcards) {
                     if (wildcard.IsMatch(name)) {
