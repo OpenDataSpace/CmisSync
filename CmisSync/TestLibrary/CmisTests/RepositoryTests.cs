@@ -62,10 +62,17 @@ namespace TestLibrary.CmisTests {
         [Test, Category("Fast")]
         public void SyncStatusIsDeactivatedIfRootFolderDoesNotExists() {
             this.SetupMocks();
-            this.localPath.Delete();
+
             var underTest = new TestRepository(this.repoInfo, this.listener, this.queue);
 
+            this.localPath.Delete();
+            this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, this.localPath.FullName, true));
+            this.queue.Run();
             Assert.That(underTest.Status, Is.EqualTo(SyncStatus.Deactivated));
+            this.localPath.Create();
+            this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, this.localPath.FullName, true));
+            this.queue.Run();
+            Assert.That(underTest.Status, Is.EqualTo(SyncStatus.Disconnected));
         }
 
         [Test, Category("Fast")]

@@ -123,6 +123,8 @@ namespace CmisSync.Lib.Cmis {
 
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Repository));
 
+        private RepositoryRootDeletedDetection rootFolderMonitor;
+
         /// <summary>
         /// The ignored folders filter.
         /// </summary>
@@ -234,10 +236,8 @@ namespace CmisSync.Lib.Cmis {
             this.Name = repoInfo.DisplayName;
             this.RemoteUrl = repoInfo.Address;
 
-            var rootFolderMonitor = new RepositoryRootDeletedDetection(this.fileSystemFactory.CreateDirectoryInfo(this.LocalPath), () => {
-                /*this.repoStatus.Deactivated = true;
-                this.Status = this.repoStatus.Status;*/
-            });
+            this.rootFolderMonitor = new RepositoryRootDeletedDetection(this.fileSystemFactory.CreateDirectoryInfo(this.LocalPath));
+            this.rootFolderMonitor.RepoRootDeleted += this.RootFolderAvailablilityChanged;
 
             if (!this.fileSystemFactory.CreateDirectoryInfo(this.LocalPath).IsExtendedAttributeAvailable()) {
                 throw new ExtendedAttributeException("Extended Attributes are not available on the local path: " + this.LocalPath);
@@ -597,10 +597,19 @@ namespace CmisSync.Lib.Cmis {
                 this.ignoredFileNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames;
                 this.ignoredFolderNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames;
                 this.authProvider.DeleteAllCookies();
+                this.Queue.EventManager.RemoveEventHandler(this.rootFolderMonitor);
+                this.rootFolderMonitor.RepoRootDeleted -= this.RootFolderAvailablilityChanged;
+                this.rootFolderMonitor = new RepositoryRootDeletedDetection(this.fileSystemFactory.CreateDirectoryInfo(this.RepoInfo.LocalPath));
+                this.rootFolderMonitor.RepoRootDeleted += this.RootFolderAvailablilityChanged;
                 return true;
             }
 
             return false;
+        }
+
+        private void RootFolderAvailablilityChanged(object sender, RepositoryRootDeletedDetection.RootExistsEventArgs e) {
+            this.repoStatus.Deactivated = !e.RootExists;
+            this.Status = this.repoStatus.Status;
         }
 
         /// <summary>

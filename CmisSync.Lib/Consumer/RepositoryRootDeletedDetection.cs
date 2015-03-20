@@ -6,15 +6,20 @@ namespace CmisSync.Lib.Consumer {
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.FileSystem;
 
+    using log4net;
+
     public class RepositoryRootDeletedDetection : SyncEventHandler {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(RepositoryRootDeletedDetection));
+
         private readonly IDirectoryInfo path;
         private readonly string absolutePath;
-        private readonly Action callback;
         private bool isRootFolderAvailable = true;
-        public RepositoryRootDeletedDetection(IDirectoryInfo localRootPath, Action callback) {
+
+        public event EventHandler<RootExistsEventArgs> RepoRootDeleted;
+
+        public RepositoryRootDeletedDetection(IDirectoryInfo localRootPath) {
             this.path = localRootPath;
             this.absolutePath = this.path.FullName;
-            this.callback = callback;
             this.isRootFolderAvailable = this.IsRootFolderAvailable();
         }
 
@@ -31,18 +36,44 @@ namespace CmisSync.Lib.Consumer {
         }
 
         public override bool Handle(ISyncEvent e) {
+            if (e is ConfigChangedEvent) {
+                return false;
+            }
+
             if (!this.isRootFolderAvailable || e is FSEvent || e is AbstractFolderEvent) {
-                return !this.IsRootFolderAvailable();
+                var rootFolderWasAvailable = this.isRootFolderAvailable;
+                var rootFolderExists = this.IsRootFolderAvailable();
+                if (!rootFolderExists) {
+                    Logger.Fatal(string.Format("Local root folder \"{0}\" is missing: All events will be ignored until the root folder is back again.", this.absolutePath));
+                } else if (!rootFolderWasAvailable) {
+                    Logger.Info(string.Format("Local root folder \"{0}\" is available again", this.absolutePath));
+                }
+
+                if (rootFolderExists != rootFolderWasAvailable) {
+                    var handler = this.RepoRootDeleted;
+                    if (handler != null) {
+                        handler(this, new RootExistsEventArgs(rootFolderExists));
+                    }
+                }
+
+                return !rootFolderExists;
             } else {
                 return false;
             }
+        }
+
+        public class RootExistsEventArgs : EventArgs {
+            public RootExistsEventArgs(bool exits) {
+                this.RootExists = exits;
+            }
+
+            public bool RootExists { get; private set; }
         }
 
         private bool IsRootFolderAvailable() {
             this.path.Refresh();
             if (!this.path.Exists || this.path.FullName != this.absolutePath) {
                 this.isRootFolderAvailable = false;
-                this.callback();
             } else {
                 this.isRootFolderAvailable = true;
             }
