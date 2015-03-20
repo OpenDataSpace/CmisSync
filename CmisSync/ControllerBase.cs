@@ -365,7 +365,7 @@ namespace CmisSync {
                     if (repo.Name == repoName) {
                         if (repo.Status != SyncStatus.Suspend) {
                             repo.Suspend();
-                            Logger.Debug("Requested to syspend sync of repo " + repo.Name);
+                            Logger.Debug("Requested to suspend sync of repo " + repo.Name);
                         } else {
                             repo.Resume();
                             Logger.Debug("Requested to resume sync of repo " + repo.Name);
@@ -651,22 +651,22 @@ namespace CmisSync {
                     string msg = string.Empty;
                     switch (e.Type) {
                     case ExceptionType.LocalSyncTargetDeleted:
-                        msg = string.Format("Local target folder \"{0}\" unavailable", repositoryInfo.LocalPath);
+                        msg = string.Format(Properties_Resources.LocalRootFolderUnavailable, repositoryInfo.LocalPath);
                         break;
                     default:
-                        msg = e.Exception != null ? e.Exception.Message : "Unknown Exception occured";
+                        msg = e.Exception != null ? e.Exception.Message : Properties_Resources.UnknownExceptionOccured;
                         break;
                     }
 
                     switch (e.Level) {
                     case ExceptionLevel.Fatal:
-                        this.AlertNotificationRaised(string.Format("{0}: Fatal error occured", repositoryInfo.DisplayName), msg);
+                        this.AlertNotificationRaised(string.Format(Properties_Resources.FatalExceptionTitle, repositoryInfo.DisplayName), msg);
                         break;
                     case ExceptionLevel.Warning:
-                        this.ShowException(string.Format("{0}: Error occured", repositoryInfo.DisplayName), msg);
+                        this.ShowException(string.Format(Properties_Resources.WarningExceptionTitle, repositoryInfo.DisplayName), msg);
                         break;
                     default:
-                        this.ShowException(string.Format("{0}: Error occured", repositoryInfo.DisplayName), msg);
+                        this.ShowException(string.Format(Properties_Resources.WarningExceptionTitle, repositoryInfo.DisplayName), msg);
                         break;
                     }
                 };
