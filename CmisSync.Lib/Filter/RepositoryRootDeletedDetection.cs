@@ -1,5 +1,5 @@
 
-namespace CmisSync.Lib.Consumer {
+namespace CmisSync.Lib.Filter {
     using System;
 
     using CmisSync.Lib.Events;

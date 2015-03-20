@@ -52,7 +52,6 @@ SOURCES =  \
 	Consumer/ISituationDetection.cs \
 	Consumer/LocalSituationDetection.cs \
 	Consumer/RemoteSituationDetection.cs \
-	Consumer/RepositoryRootDeletedDetection.cs \
 	Consumer/RetryException.cs \
 	Consumer/SituationSolver/AbstractEnhancedSolver.cs \
 	Consumer/SituationSolver/ISolver.cs \
@@ -144,6 +143,7 @@ SOURCES =  \
 	Filter/IgnoredFoldersFilter.cs \
 	Filter/InvalidFolderNameFilter.cs \
 	Filter/ReportingFilter.cs \
+	Filter/RepositoryRootDeletedDetection.cs \
 	HttpProxyUtils.cs \
 	IActivityListener.cs \
 	PathMatcher/IPathMatcher.cs \

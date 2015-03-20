@@ -252,6 +252,7 @@
     <Compile Include="IntegrationTests\AllowableActionsTests\ReadingActionsTests.cs" />
     <Compile Include="TestUtils\MockOfIRepositoryInfo.cs" />
     <Compile Include="IntegrationTests\UploadSlowWrittenFile.cs" />
+    <Compile Include="FilterTests\RepositoryRootDeletedDetectionTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
