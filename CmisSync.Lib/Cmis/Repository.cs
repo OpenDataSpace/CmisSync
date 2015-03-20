@@ -620,6 +620,8 @@ namespace CmisSync.Lib.Cmis {
                 if (handler != null) {
                     handler(this, new RepositoryExceptionEventArgs(ExceptionLevel.Fatal, ExceptionType.LocalSyncTargetDeleted));
                 }
+            } else {
+                this.Queue.AddEvent(new StartNextSyncEvent(fullSyncRequested: true));
             }
         }
 
