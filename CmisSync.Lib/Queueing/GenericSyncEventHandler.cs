@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Queueing
-{
+namespace CmisSync.Lib.Queueing {
     using System;
     using System.Collections.Generic;
     using System.Text;
@@ -40,8 +39,7 @@ namespace CmisSync.Lib.Queueing
     /// <summary>
     /// Generic sync event handler. Takes a delegate as handler which is called, if the event is a type of the generic event.
     /// </summary>
-    public class GenericSyncEventHandler<TSyncEventType> : SyncEventHandler
-    {
+    public class GenericSyncEventHandler<TSyncEventType> : SyncEventHandler {
         private GenericSyncEventDelegate<TSyncEventType> handler;
         private int priority;
         private string name;
@@ -58,8 +56,7 @@ namespace CmisSync.Lib.Queueing
         public GenericSyncEventHandler(
             GenericSyncEventDelegate<TSyncEventType> handler,
             string name = null)
-            : this(EventHandlerPriorities.GetPriority(typeof(GenericSyncEventHandler<>)), handler, name)
-        {
+            : this(EventHandlerPriorities.GetPriority(typeof(GenericSyncEventHandler<>)), handler, name) {
         }
 
         /// <summary>
@@ -90,10 +87,8 @@ namespace CmisSync.Lib.Queueing
         /// <value>
         /// The priority.
         /// </value>
-        public override int Priority
-        {
-            get
-            {
+        public override int Priority {
+            get {
                 return this.priority;
             }
         }
@@ -107,8 +102,7 @@ namespace CmisSync.Lib.Queueing
         /// <returns>
         /// <c>false</c> if the event is not the same type like the given generic class, otherwise the result of the callback handler.
         /// </returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             return (e is TSyncEventType) ? this.handler(e) : false;
         }
 
@@ -116,8 +110,7 @@ namespace CmisSync.Lib.Queueing
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Queueing.GenericSyncEventHandler"/>.
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Queueing.GenericSyncEventHandler"/>.</returns>
-        public override string ToString()
-        {
+        public override string ToString() {
             return string.Format("[GenericSyncEventHandler {0}: Priority={1} AcceptedType={2}]", this.name != null ? this.name : string.Empty, this.Priority, typeof(TSyncEventType).ToString());
         }
     }
