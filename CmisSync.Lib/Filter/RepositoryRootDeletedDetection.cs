@@ -36,6 +36,10 @@ namespace CmisSync.Lib.Filter {
         public event EventHandler<RootExistsEventArgs> RepoRootDeleted;
 
         public RepositoryRootDeletedDetection(IDirectoryInfo localRootPath) {
+            if (localRootPath == null) {
+                throw new ArgumentNullException();
+            }
+
             this.path = localRootPath;
             this.absolutePath = this.path.FullName;
             this.isRootFolderAvailable = this.IsRootFolderAvailable();

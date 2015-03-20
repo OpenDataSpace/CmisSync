@@ -19,13 +19,29 @@
 
 namespace TestLibrary.FilterTests {
     using System;
+    using System.IO;
 
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Storage.FileSystem;
+
+    using Moq;
 
     using NUnit.Framework;
 
     [TestFixture]
     public class RepositoryRootDeletedDetectionTest {
+        [Test, Category("Fast")]
+        public void ConstructorFailsIfGivenPathIsNull() {
+            Assert.Throws<ArgumentNullException>(() => new RepositoryRootDeletedDetection(null));
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorTakesPath() {
+            var path = Mock.Of<IDirectoryInfo>(p => p.FullName == Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()) && p.Exists == true);
+            var underTest = new RepositoryRootDeletedDetection(path);
+
+            Assert.That(underTest.Priority, Is.EqualTo(EventHandlerPriorities.CRITICAL));
+        }
     }
 }
