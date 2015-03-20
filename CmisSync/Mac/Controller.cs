@@ -48,7 +48,6 @@ using CmisSync.Lib.Config;
 namespace CmisSync {
 
     public class Controller : ControllerBase {
-
         private NSUserNotificationCenter notificationCenter;
         private Dictionary<string,DateTime> transmissionFiles = new Dictionary<string, DateTime> ();
         private HashSet<string> startedTransmissions = new HashSet<string> ();
@@ -58,22 +57,21 @@ namespace CmisSync {
         private readonly string notificationType = "Type";
         private readonly string notificationTypeCredentials = "Credentials";
         private readonly string notificationTypeTransmission = "Transmission";
+        private readonly string notificationTypeAlert = "Alert";
 
-        private class ComparerNSUserNotification : IComparer<NSUserNotification>
-        {
-            public int Compare (NSUserNotification x, NSUserNotification y)
-            {
+        private class ComparerNSUserNotification : IComparer<NSUserNotification> {
+            public int Compare(NSUserNotification x, NSUserNotification y) {
                 DateTime xDate = x.DeliveryDate;
                 DateTime yDate = y.DeliveryDate;
                 return xDate.CompareTo (yDate);
             }
         }
 
-        public bool IsNotificationTransmission(NSUserNotification notification)
-        {
-            if (null != notification.UserInfo && notification.UserInfo.ContainsKey ((NSString)notificationType)) {
-                return notificationTypeTransmission == (string)(notification.UserInfo [notificationType] as NSString);
+        public bool IsNotificationTransmission(NSUserNotification notification) {
+            if (null != notification.UserInfo && notification.UserInfo.ContainsKey((NSString)notificationType)) {
+                return notificationTypeTransmission == (string)(notification.UserInfo[notificationType] as NSString);
             }
+
             return false;
         }
 
@@ -82,6 +80,14 @@ namespace CmisSync {
             if (null != notification.UserInfo && notification.UserInfo.ContainsKey ((NSString)notificationType)) {
                 return notificationTypeCredentials == (string)(notification.UserInfo [notificationType] as NSString);
             }
+            return false;
+        }
+
+        private bool IsNotificationAWarning(NSUserNotification notification) {
+            if (null != notification.UserInfo && notification.UserInfo.ContainsKey((NSString)notificationType)) {
+                return notificationTypeAlert == (string)(notification.UserInfo[notificationType] as NSString);
+            }
+
             return false;
         }
 
@@ -116,6 +122,21 @@ namespace CmisSync {
                     notification.UserInfo = userInfo;
                     notification.DeliveryDate = NSDate.Now;
                     notificationCenter.DeliverNotification (notification);
+                });
+            }
+        }
+
+        private void InsertAlertNotification(string title, string msg) {
+            using (var a = new NSAutoreleasePool()) {
+                notificationCenter.BeginInvokeOnMainThread(delegate {
+                    NSUserNotification notification = new NSUserNotification();
+                    notification.Title = title;
+                    notification.InformativeText = msg;
+                    NSMutableDictionary userInfo = new NSMutableDictionary();
+                    userInfo.Add((NSString)notificationType, (NSString)notificationTypeAlert);
+                    notification.UserInfo = userInfo;
+                    notification.DeliveryDate = NSDate.Now;
+                    notificationCenter.DeliverNotification(notification);
                 });
             }
         }
@@ -163,10 +184,16 @@ namespace CmisSync {
                     //RemoveNotificationCredentials(e.Notification.Title);
                     EditRepositoryCredentials(e.Notification.Title);
                 }
+
+                if (IsNotificationAWarning(e.Notification)) {
+                    OpenCmisSyncFolder(Program.Controller.FoldersPath);
+                }
             };
 
             // If we return true here, Notification will show up even if your app is TopMost.
-            notificationCenter.ShouldPresentNotification = (c, n) => { return false; };
+            notificationCenter.ShouldPresentNotification = (c, n) => {
+                return IsNotificationAWarning(n);
+            };
 
             ShowChangePassword += delegate(string reponame) {
                 InsertNotificationCredentials(reponame);
@@ -175,6 +202,10 @@ namespace CmisSync {
             SuccessfulLogin += delegate(string reponame)
             {
                 RemoveNotificationCredentials(reponame);
+            };
+
+            AlertNotificationRaised += (title, message) => {
+                InsertAlertNotification(title, message);
             };
 
             OnTransmissionListChanged += delegate {
