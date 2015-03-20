@@ -96,8 +96,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 return this.CreateRemotePWCDocument(remoteDocument);
             }
 
-            this.TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
-
             checksum = obj.LastChecksumPWC;
             return remotePWCDocument;
         }
@@ -114,7 +112,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             FileTransmissionObject obj = new FileTransmissionObject(transmissionEvent.Type, localFile, remoteDocument);
             obj.ChecksumAlgorithmName = "SHA-1";
             obj.RemoteObjectPWCId = remotePWCDocument.Id;
-            remotePWCDocument.Refresh();
             obj.LastChangeTokenPWC = remotePWCDocument.ChangeToken;
             obj.LastChecksumPWC = checksum;
 
@@ -188,15 +185,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                         IDocument document = doc;
                         uploader.UploadFile(docPWC, file, transmissionEvent, hashAlg, false, (byte[] checksumUpdate) => this.SaveRemotePWCDocument(localFile, document, docPWC, checksumUpdate, transmissionEvent));
                         hash = hashAlg.Hash;
-                    } catch (FileTransmission.AbortException ex) {
-                        hashAlg.TransformFinalBlock(new byte[0], 0, 0);
-                        this.SaveRemotePWCDocument(localFile, doc, docPWC, hashAlg.Hash, transmissionEvent);
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                        throw;
                     } catch (Exception ex) {
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
                         throw;
                     }
+                }
+
+                if (this.TransmissionStorage != null) {
+                    this.TransmissionStorage.RemoveObjectByRemoteObjectId(doc.Id);
                 }
 
                 Dictionary<string, object> properties = new Dictionary<string, object>();
