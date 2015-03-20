@@ -140,6 +140,12 @@ namespace TestLibrary.ProducerTests.WatcherTests {
             this.ReportFSFolderRemovedEvent();
         }
 
+        [Test, Category("Medium")]
+        public void FSWatcherRootFolderRemotedTest() {
+            this.storage.Setup(s => s.GetObjectByLocalPath(It.IsAny<IFileSystemInfo>())).Returns(Mock.Of<IMappedObject>(o => o.Type == MappedObjectType.Folder));
+            this.ReportFSWatcherRootFolderRemoted();
+        }
+
         // This test fails on current build slave, retest when these are FC20 or higher
         [Test, Category("Medium"), Category("BrokenOnFC18"), Category("Erratic")]
         public void ReportFSFolderRenamedEventTest() {

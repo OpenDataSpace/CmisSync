@@ -282,6 +282,31 @@ namespace TestLibrary.ProducerTests.WatcherTests {
             }
         }
 
+        public void ReportFSWatcherRootFolderRemoted() {
+            this.queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.LocalPath == this.localFolder.FullName)))
+                .Callback((ISyncEvent file) => this.returnedFSEvent = file as FSEvent);
+            var watcherData = this.GetWatcherData(this.localFolder.FullName, this.queue.Object);
+            this.localSubFolder.Delete();
+            this.localFile.Delete();
+            watcherData.Watcher.EnableEvents = true;
+            var t = Task.Factory.StartNew(() => {
+                int count = 0;
+                while (this.returnedFSEvent == null && count < RETRIES) {
+                    WaitWatcherData(watcherData, this.localFolder.FullName, WatcherChangeTypes.Deleted, MILISECONDSWAIT);
+                    count++;
+                }
+            });
+            this.localFolder.Delete();
+            t.Wait();
+            if (this.returnedFSEvent != null) {
+                Assert.AreEqual(this.localFolder.FullName, this.returnedFSEvent.LocalPath);
+                Assert.AreEqual(WatcherChangeTypes.Deleted, this.returnedFSEvent.Type);
+                Assert.That(this.returnedFSEvent.IsDirectory, Is.True);
+            } else {
+                Assert.Inconclusive("Missed folder removed event");
+            }
+        }
+
         public void ReportFSFolderRenamedEvent() {
             string oldpath = this.localSubFolder.FullName;
             string newpath = Path.Combine(this.localFolder.FullName, Path.GetRandomFileName());
