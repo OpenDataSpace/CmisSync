@@ -18,9 +18,7 @@
 //-----------------------------------------------------------------------
 
 #if __COCOA__
-
-namespace TestLibrary.ProducerTests.WatcherTests
-{
+namespace TestLibrary.ProducerTests.WatcherTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -38,11 +36,9 @@ namespace TestLibrary.ProducerTests.WatcherTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class MacWatcherTest : BaseWatcherTest
-    {
+    public class MacWatcherTest : BaseWatcherTest {
         [TestFixtureSetUp]
-        public void ClassSetUp()
-        {
+        public void ClassSetUp() {
             try {
                 NSApplication.Init();
             } catch (InvalidOperationException) {
@@ -70,15 +66,13 @@ namespace TestLibrary.ProducerTests.WatcherTests
 
         [Test, Category("Fast")]
         public void ConstructorSuccessTest() {
-            using (var watcher = new MacWatcher(localFolder.FullName, queue.Object))
-            {
+            using (var watcher = new MacWatcher(localFolder.FullName, queue.Object)) {
                 Assert.False(watcher.EnableEvents);
             }
         }
 
         [Test, Category("Fast")]
-        public void ConstructorWithCustomLatency()
-        {
+        public void ConstructorWithCustomLatency() {
             using (new MacWatcher(localFolder.FullName, queue.Object, TimeSpan.FromMilliseconds(100)));
         }
 
@@ -94,19 +88,16 @@ namespace TestLibrary.ProducerTests.WatcherTests
             using(new MacWatcher(localFolder.FullName, null));
         }
 
-        public class EventQueue : ISyncEventQueue
-        {
+        public class EventQueue : ISyncEventQueue {
             private ISyncEventQueue Queue;
             public List<FSEvent> Events = new List<FSEvent>();
             public ISyncEventManager EventManager { get; private set; }
 
-            public EventQueue(ISyncEventQueue queue)
-            {
+            public EventQueue(ISyncEventQueue queue) {
                 Queue = queue;
             }
 
-            public void AddEvent(ISyncEvent newEvent)
-            {
+            public void AddEvent(ISyncEvent newEvent) {
                 lock (Events) {
                     FSEvent fsEvent = newEvent as FSEvent;
                     if (fsEvent != null) {
@@ -194,6 +185,11 @@ namespace TestLibrary.ProducerTests.WatcherTests
         [Test, Category("Medium")]
         public void ReportFSFolderRemovedEventTest() {
             ReportFSFolderRemovedEvent();
+        }
+
+        [Test, Category("Medium")]
+        public void ReportFSWatcherRootFolderRemotedTest() {
+            ReportFSWatcherRootFolderRemoted();
         }
 
         [Test, Category("Medium")]

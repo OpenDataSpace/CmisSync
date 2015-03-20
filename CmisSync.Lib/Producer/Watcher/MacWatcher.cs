@@ -57,6 +57,7 @@ namespace CmisSync.Lib.Producer.Watcher {
                 if (value == isStarted) {
                     return;
                 }
+
                 if (value) {
                     isStarted = FsStream.Start();
                     if (isStarted) {
@@ -66,7 +67,7 @@ namespace CmisSync.Lib.Producer.Watcher {
                 } else {
                     FsStream.Events -= OnFSEventStreamEvents;
                     FsStream.FlushSync();
-                    FsStream.Stop ();
+                    FsStream.Stop();
                     isStarted = false;
                 }
             }
@@ -147,7 +148,7 @@ namespace CmisSync.Lib.Producer.Watcher {
             GC.SuppressFinalize(this);
         }
 
-        private void OnFSEventStreamEvents (object sender, FSEventStreamEventsArgs e) {
+        private void OnFSEventStreamEvents(object sender, FSEventStreamEventsArgs e) {
             foreach (MonoMac.CoreServices.FSEvent fsEvent in e.Events) {
                 bool isFile = (fsEvent.Flags & FSEventStreamEventFlags.ItemIsFile) != 0;
                 if ((fsEvent.Flags & FSEventStreamEventFlags.ItemRemoved) != 0 && !FileOrDirectoryExists(fsEvent.Path, isFile)) {
