@@ -41,32 +41,26 @@
 //   OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 //   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.IO;
-using System.Threading;
-using System.Timers;
-
-using MonoMac.AppKit;
-using MonoMac.Foundation;
-
 namespace CmisSync {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Runtime.InteropServices;
+    using System.IO;
+    using System.Threading;
+    using System.Timers;
 
+    using MonoMac.AppKit;
+    using MonoMac.Foundation;
     public sealed class MacWatcher : IDisposable {
-        
-        public delegate void ChangedEventHandler (string path);
+        public delegate void ChangedEventHandler(string path);
         public event ChangedEventHandler Changed;
 
         public string Path { get; private set; }
 
-
         [Flags]
         [Serializable]
-        private enum FSEventStreamCreateFlags : uint
-        {
+        private enum FSEventStreamCreateFlags : uint {
             kFSEventStreamCreateFlagNone       = 0x00000000,
             kFSEventStreamCreateFlagUseCFTypes = 0x00000001,
             kFSEventStreamCreateFlagNoDefer    = 0x00000002,
@@ -76,10 +70,10 @@ namespace CmisSync {
         private DateTime last_found_timestamp;
         private IntPtr m_stream;
         private FSEventStreamCallback m_callback; // need to keep a reference around so that it isn't GC'ed
-        private static readonly IntPtr kCFRunLoopDefaultMode = (new NSString ("kCFRunLoopDefaultMode")).Handle;
+        private static readonly IntPtr kCFRunLoopDefaultMode = (new NSString("kCFRunLoopDefaultMode")).Handle;
         private ulong kFSEventStreamEventIdSinceNow          = 0xFFFFFFFFFFFFFFFFUL;
 
-        private delegate void FSEventStreamCallback (
+        private delegate void FSEventStreamCallback(
             IntPtr streamRef,
             IntPtr clientCallBackInfo,
             int numEvents,
@@ -88,22 +82,20 @@ namespace CmisSync {
             IntPtr eventIds);
 
 
-        ~MacWatcher ()
-        {
+        ~MacWatcher() {
             Dispose (false);
         }
 
 
-        public MacWatcher (string path)
-        {
+        public MacWatcher(string path) {
             Path       = path;
             m_callback = DoCallback;
 
-            NSString [] s  = new NSString [1];
-            s [0]          = new NSString (path);
-            NSArray path_p = NSArray.FromNSObjects (s);
+            NSString[] s  = new NSString[1];
+            s[0]          = new NSString(path);
+            NSArray path_p = NSArray.FromNSObjects(s);
 
-            m_stream = FSEventStreamCreate ( // note that the stream will always be valid
+            m_stream = FSEventStreamCreate( // note that the stream will always be valid
                 IntPtr.Zero, // allocator
                 m_callback, // callback
                 IntPtr.Zero, // context
@@ -112,48 +104,46 @@ namespace CmisSync {
                 2, // latency (in seconds)
                 FSEventStreamCreateFlags.kFSEventStreamCreateFlagNone); // flags
 
-            FSEventStreamScheduleWithRunLoop (
+            FSEventStreamScheduleWithRunLoop(
                 m_stream, // streamRef
                 CFRunLoopGetMain(), // runLoop
                 kCFRunLoopDefaultMode); // runLoopMode
 
-            bool started = FSEventStreamStart (m_stream);
+            bool started = FSEventStreamStart(m_stream);
             if (!started) {
-                GC.SuppressFinalize (this);
+                GC.SuppressFinalize(this);
                 throw new InvalidOperationException ("Failed to start FSEvent stream for " + path);
             }
         }
 
 
-        public void Dispose ()
-        {
+        public void Dispose() {
             Dispose (true);
-            GC.SuppressFinalize (this);
+            GC.SuppressFinalize(this);
         }
 
 
-        private void Dispose (bool disposing)
-        {
+        private void Dispose(bool disposing) {
             if (m_stream != IntPtr.Zero) {
-                FSEventStreamStop (m_stream);
-                FSEventStreamInvalidate (m_stream);
-                FSEventStreamRelease (m_stream);
+                FSEventStreamStop(m_stream);
+                FSEventStreamInvalidate(m_stream);
+                FSEventStreamRelease(m_stream);
 
                 m_stream = IntPtr.Zero;
             }
         }
 
 
-        private void checkDirectory (string dir)
-        {
-            if (dir == null)
+        private void checkDirectory(string dir) {
+            if (dir == null) {
                 return;
+            }
 
             DirectoryInfo parent = new DirectoryInfo (dir);
 
             if (!parent.FullName.Contains ("/.") &&
-                DateTime.Compare (parent.LastWriteTime, this.last_found_timestamp) > 0) {
-
+                DateTime.Compare (parent.LastWriteTime, this.last_found_timestamp) > 0)
+            {
                 last_found_timestamp = parent.LastWriteTime;
             }
         }
@@ -162,48 +152,48 @@ namespace CmisSync {
         private void DoCallback (IntPtr streamRef, IntPtr clientCallBackInfo,
             int numEvents, IntPtr eventPaths, IntPtr eventFlags, IntPtr eventIds)
         {
-            int bytes = Marshal.SizeOf (typeof (IntPtr));
-            string [] paths = new string [numEvents];
+            int bytes = Marshal.SizeOf(typeof(IntPtr));
+            string[] paths = new string[numEvents];
 
             for (int i = 0; i < numEvents; ++i) {
-                IntPtr p = Marshal.ReadIntPtr (eventPaths, i * bytes);
-                paths [i] = Marshal.PtrToStringAnsi (p);
-                checkDirectory (paths [i]);
+                IntPtr p = Marshal.ReadIntPtr(eventPaths, i * bytes);
+                paths[i] = Marshal.PtrToStringAnsi(p);
+                checkDirectory(paths[i]);
             }
 
             var handler = Changed;
             if (handler != null) {
-                string path = paths [0];
-                path = path.Substring (Path.Length);
-                path = path.Trim ("/".ToCharArray ());
-                handler (path);
+                string path = paths[0];
+                path = path.Substring(Path.Length);
+                path = path.Trim("/".ToCharArray());
+                handler(path);
             }
 
-            GC.KeepAlive (this);
+            GC.KeepAlive(this);
         }
 
 
         [DllImport("/System/Library/Frameworks/CoreServices.framework/CoreServices")]
-        private extern static IntPtr CFRunLoopGetMain ();
-      
+        private extern static IntPtr CFRunLoopGetMain();
+
         [DllImport("/System/Library/Frameworks/CoreServices.framework/CoreServices")]
-        private extern static IntPtr FSEventStreamCreate (IntPtr allocator, FSEventStreamCallback callback,
+        private extern static IntPtr FSEventStreamCreate(IntPtr allocator, FSEventStreamCallback callback,
             IntPtr context, IntPtr pathsToWatch, ulong sinceWhen, double latency, FSEventStreamCreateFlags flags);
 
         [DllImport("/System/Library/Frameworks/CoreServices.framework/CoreServices")]
-        private extern static void FSEventStreamScheduleWithRunLoop (IntPtr streamRef, IntPtr runLoop, IntPtr runLoopMode);
+        private extern static void FSEventStreamScheduleWithRunLoop(IntPtr streamRef, IntPtr runLoop, IntPtr runLoopMode);
 
         [return: MarshalAs (UnmanagedType.U1)]
         [DllImport("/System/Library/Frameworks/CoreServices.framework/CoreServices")]
-        private extern static bool FSEventStreamStart (IntPtr streamRef);
+        private extern static bool FSEventStreamStart(IntPtr streamRef);
 
         [DllImport("/System/Library/Frameworks/CoreServices.framework/CoreServices")]
-        private extern static void FSEventStreamStop (IntPtr streamRef);
+        private extern static void FSEventStreamStop(IntPtr streamRef);
 
         [DllImport("/System/Library/Frameworks/CoreServices.framework/CoreServices")]
-        private extern static void FSEventStreamInvalidate (IntPtr streamRef);
+        private extern static void FSEventStreamInvalidate(IntPtr streamRef);
 
         [DllImport("/System/Library/Frameworks/CoreServices.framework/CoreServices")]
-        private extern static void FSEventStreamRelease (IntPtr streamRef);
+        private extern static void FSEventStreamRelease(IntPtr streamRef);
     }
 }
