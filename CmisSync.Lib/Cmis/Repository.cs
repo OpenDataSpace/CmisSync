@@ -31,6 +31,7 @@ namespace CmisSync.Lib.Cmis {
     using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.PathMatcher;
@@ -79,7 +80,12 @@ namespace CmisSync.Lib.Cmis {
         /// <summary>
         /// Any sync conflict or warning happend
         /// </summary>
-        Warning
+        Warning,
+
+        /// <summary>
+        /// The complete connection is deactivated.
+        /// </summary>
+        Deactivated
     }
 
     /// <summary>
@@ -102,6 +108,11 @@ namespace CmisSync.Lib.Cmis {
         public readonly string LocalPath;
 
         /// <summary>
+        /// Occurs when an exception should be shown to the user.
+        /// </summary>
+        public event EventHandler<RepositoryExceptionEventArgs> ShowException;
+
+        /// <summary>
         /// The storage.
         /// </summary>
         protected MetaDataStorage storage;
@@ -117,6 +128,8 @@ namespace CmisSync.Lib.Cmis {
         protected ConnectionScheduler connectionScheduler;
 
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Repository));
+
+        private RepositoryRootDeletedDetection rootFolderMonitor;
 
         /// <summary>
         /// The ignored folders filter.
@@ -229,11 +242,15 @@ namespace CmisSync.Lib.Cmis {
             this.Name = repoInfo.DisplayName;
             this.RemoteUrl = repoInfo.Address;
 
+            this.rootFolderMonitor = new RepositoryRootDeletedDetection(this.fileSystemFactory.CreateDirectoryInfo(this.LocalPath));
+            this.rootFolderMonitor.RepoRootDeleted += this.RootFolderAvailablilityChanged;
+
             if (!this.fileSystemFactory.CreateDirectoryInfo(this.LocalPath).IsExtendedAttributeAvailable()) {
                 throw new ExtendedAttributeException("Extended Attributes are not available on the local path: " + this.LocalPath);
             }
 
             this.Queue = queue;
+            this.Queue.EventManager.AddEventHandler(rootFolderMonitor);
             this.Queue.EventManager.AddEventHandler(new DebugLoggingHandler());
 
             // Create Database connection
@@ -591,10 +608,27 @@ namespace CmisSync.Lib.Cmis {
                 this.ignoredFileNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames;
                 this.ignoredFolderNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames;
                 this.authProvider.DeleteAllCookies();
+                this.Queue.EventManager.RemoveEventHandler(this.rootFolderMonitor);
+                this.rootFolderMonitor.RepoRootDeleted -= this.RootFolderAvailablilityChanged;
+                this.rootFolderMonitor = new RepositoryRootDeletedDetection(this.fileSystemFactory.CreateDirectoryInfo(this.RepoInfo.LocalPath));
+                this.rootFolderMonitor.RepoRootDeleted += this.RootFolderAvailablilityChanged;
                 return true;
             }
 
             return false;
+        }
+
+        private void RootFolderAvailablilityChanged(object sender, RepositoryRootDeletedDetection.RootExistsEventArgs e) {
+            this.repoStatus.Deactivated = !e.RootExists;
+            this.Status = this.repoStatus.Status;
+            if (!e.RootExists) {
+                var handler = this.ShowException;
+                if (handler != null) {
+                    handler(this, new RepositoryExceptionEventArgs(ExceptionLevel.Fatal, ExceptionType.LocalSyncTargetDeleted));
+                }
+            } else {
+                this.Queue.AddEvent(new StartNextSyncEvent(fullSyncRequested: true));
+            }
         }
 
         /// <summary>

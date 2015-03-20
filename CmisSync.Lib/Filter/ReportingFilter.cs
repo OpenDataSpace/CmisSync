@@ -122,7 +122,7 @@ namespace CmisSync.Lib.Filter {
                     }
 
                     string[] folderNames = pathEvent.RemotePath.Split('/');
-                    foreach(var name in folderNames) {
+                    foreach (var name in folderNames) {
                         if (this.invalidFolderNameFilter.CheckFolderName(name, out reason)) {
                             this.Queue.AddEvent(new RequestIgnoredEvent(e, reason, this));
                             Logger.Info(reason);

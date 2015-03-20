@@ -295,6 +295,8 @@
     <Compile Include="Storage\FileSystem\ReadOnlyIgnoringFileInfoDecorator.cs" />
     <Compile Include="Storage\FileSystem\ReadOnlyIgnoringFileSystemInfoDecorator.cs" />
     <Compile Include="Storage\FileSystem\ReadOnlyIgnoringDirectoryInfoDecorator.cs" />
+    <Compile Include="Filter\RepositoryRootDeletedDetection.cs" />
+    <Compile Include="Cmis\RepositoryExceptionEventArgs.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

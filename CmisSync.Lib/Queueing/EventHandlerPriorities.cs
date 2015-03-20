@@ -40,6 +40,8 @@ namespace CmisSync.Lib.Queueing {
         /// </summary>
         public static readonly int DEBUG = 100000;
 
+        public static readonly int CRITICAL = 99999;
+
         /// <summary>
         /// The FILTER handler priority.
         /// </summary>

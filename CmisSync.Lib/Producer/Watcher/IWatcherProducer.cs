@@ -17,15 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Producer.Watcher
-{
+namespace CmisSync.Lib.Producer.Watcher {
     using System;
 
     /// <summary>
     /// Interface for Mac and DotNet Watcher Producers
     /// </summary>
-    public interface IWatcherProducer : IDisposable
-    {
+    public interface IWatcherProducer : IDisposable {
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> enables the FSEvent report
         /// </summary>

@@ -353,6 +353,15 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0}: Fatal error occured.
+        /// </summary>
+        internal static string FatalExceptionTitle {
+            get {
+                return ResourceManager.GetString("FatalExceptionTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Features.
         /// </summary>
         internal static string Features {
@@ -484,6 +493,15 @@ namespace CmisSync {
         internal static string LocalDirectoryExist {
             get {
                 return ResourceManager.GetString("LocalDirectoryExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Local sync folder &quot;{0}&quot; is unavailable. Synchronization aborted!.
+        /// </summary>
+        internal static string LocalRootFolderUnavailable {
+            get {
+                return ResourceManager.GetString("LocalRootFolderUnavailable", resourceCulture);
             }
         }
         
@@ -1060,6 +1078,15 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unknown Exception occured.
+        /// </summary>
+        internal static string UnknownExceptionOccured {
+            get {
+                return ResourceManager.GetString("UnknownExceptionOccured", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Untrusted Certificate.
         /// </summary>
         internal static string UntrustedCertificate {
@@ -1092,6 +1119,15 @@ namespace CmisSync {
         internal static string ViewLog {
             get {
                 return ResourceManager.GetString("ViewLog", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}: Error occured.
+        /// </summary>
+        internal static string WarningExceptionTitle {
+            get {
+                return ResourceManager.GetString("WarningExceptionTitle", resourceCulture);
             }
         }
         
