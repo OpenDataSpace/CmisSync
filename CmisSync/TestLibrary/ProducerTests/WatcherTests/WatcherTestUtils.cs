@@ -282,7 +282,7 @@ namespace TestLibrary.ProducerTests.WatcherTests {
             }
         }
 
-        public void ReportFSWatcherRootFolderRemoted() {
+        public void ReportFSWatcherRootFolderRemoved() {
             this.queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.LocalPath == this.localFolder.FullName)))
                 .Callback((ISyncEvent file) => this.returnedFSEvent = file as FSEvent);
             var watcherData = this.GetWatcherData(this.localFolder.FullName, this.queue.Object);
@@ -292,8 +292,12 @@ namespace TestLibrary.ProducerTests.WatcherTests {
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
                 while (this.returnedFSEvent == null && count < RETRIES) {
-                    WaitWatcherData(watcherData, this.localFolder.FullName, WatcherChangeTypes.Deleted, MILISECONDSWAIT);
-                    count++;
+                    try {
+                        WaitWatcherData(watcherData, this.localFolder.FullName, WatcherChangeTypes.Deleted, MILISECONDSWAIT);
+                        count++;
+                    } catch (FileNotFoundException) {
+                        break;
+                    }
                 }
             });
             this.localFolder.Delete();

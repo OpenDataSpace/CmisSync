@@ -141,9 +141,9 @@ namespace TestLibrary.ProducerTests.WatcherTests {
         }
 
         [Test, Category("Medium")]
-        public void FSWatcherRootFolderRemotedTest() {
+        public void FSWatcherRootFolderRemovedTest() {
             this.storage.Setup(s => s.GetObjectByLocalPath(It.IsAny<IFileSystemInfo>())).Returns(Mock.Of<IMappedObject>(o => o.Type == MappedObjectType.Folder));
-            this.ReportFSWatcherRootFolderRemoted();
+            this.ReportFSWatcherRootFolderRemoved();
         }
 
         // This test fails on current build slave, retest when these are FC20 or higher
