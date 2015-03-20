@@ -78,7 +78,12 @@ namespace CmisSync.Lib.Cmis {
         /// <summary>
         /// Any sync conflict or warning happend
         /// </summary>
-        Warning
+        Warning,
+
+        /// <summary>
+        /// The complete connection is deactivated.
+        /// </summary>
+        Deactivated
     }
 
     /// <summary>
