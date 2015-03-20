@@ -52,6 +52,7 @@ SOURCES =  \
 	Consumer/ISituationDetection.cs \
 	Consumer/LocalSituationDetection.cs \
 	Consumer/RemoteSituationDetection.cs \
+	Consumer/RepositoryRootDeletedDetection.cs \
 	Consumer/RetryException.cs \
 	Consumer/SituationSolver/AbstractEnhancedSolver.cs \
 	Consumer/SituationSolver/ISolver.cs \

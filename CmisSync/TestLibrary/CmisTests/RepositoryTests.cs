@@ -60,6 +60,15 @@ namespace TestLibrary.CmisTests {
         }
 
         [Test, Category("Fast")]
+        public void SyncStatusIsDeactivatedIfRootFolderDoesNotExists() {
+            this.SetupMocks();
+            this.localPath.Delete();
+            var underTest = new TestRepository(this.repoInfo, this.listener, this.queue);
+
+            Assert.That(underTest.Status, Is.EqualTo(SyncStatus.Deactivated));
+        }
+
+        [Test, Category("Fast")]
         public void SyncStatusSwitchesFromOfflineToIdleIfLoginWasSuccessful() {
             this.SetupMocks();
             bool notified = false;

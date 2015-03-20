@@ -30,6 +30,7 @@ namespace CmisSync.Lib.Cmis {
     using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.PathMatcher;
@@ -233,11 +234,17 @@ namespace CmisSync.Lib.Cmis {
             this.Name = repoInfo.DisplayName;
             this.RemoteUrl = repoInfo.Address;
 
+            var rootFolderMonitor = new RepositoryRootDeletedDetection(this.fileSystemFactory.CreateDirectoryInfo(this.LocalPath), () => {
+                /*this.repoStatus.Deactivated = true;
+                this.Status = this.repoStatus.Status;*/
+            });
+
             if (!this.fileSystemFactory.CreateDirectoryInfo(this.LocalPath).IsExtendedAttributeAvailable()) {
                 throw new ExtendedAttributeException("Extended Attributes are not available on the local path: " + this.LocalPath);
             }
 
             this.Queue = queue;
+            this.Queue.EventManager.AddEventHandler(rootFolderMonitor);
             this.Queue.EventManager.AddEventHandler(new DebugLoggingHandler());
 
             // Create Database connection
