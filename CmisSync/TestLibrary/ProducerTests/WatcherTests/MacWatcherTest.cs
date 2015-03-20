@@ -189,7 +189,7 @@ namespace TestLibrary.ProducerTests.WatcherTests {
 
         [Test, Category("Medium")]
         public void ReportFSWatcherRootFolderRemotedTest() {
-            ReportFSWatcherRootFolderRemoted();
+            ReportFSWatcherRootFolderRemoved();
         }
 
         [Test, Category("Medium")]
