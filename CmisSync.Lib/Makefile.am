@@ -27,6 +27,7 @@ SOURCES =  \
 	Cmis/MimeType.cs \
 	Cmis/OperationContextFactory.cs \
 	Cmis/Repository.cs \
+	Cmis/RepositoryExceptionEventArgs.cs \
 	Cmis/RepositoryStatus.cs \
 	Cmis/RepositoryStatusAggregator.cs \
 	Cmis/UiUtils/CmisPermissionDeniedException.cs \

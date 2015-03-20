@@ -107,6 +107,11 @@ namespace CmisSync.Lib.Cmis {
         public readonly string LocalPath;
 
         /// <summary>
+        /// Occurs when an exception should be shown to the user.
+        /// </summary>
+        public event EventHandler<RepositoryExceptionEventArgs> ShowException;
+
+        /// <summary>
         /// The storage.
         /// </summary>
         protected MetaDataStorage storage;
@@ -610,6 +615,12 @@ namespace CmisSync.Lib.Cmis {
         private void RootFolderAvailablilityChanged(object sender, RepositoryRootDeletedDetection.RootExistsEventArgs e) {
             this.repoStatus.Deactivated = !e.RootExists;
             this.Status = this.repoStatus.Status;
+            if (!e.RootExists) {
+                var handler = this.ShowException;
+                if (handler != null) {
+                    handler(this, new RepositoryExceptionEventArgs(ExceptionLevel.Fatal, ExceptionType.LocalSyncTargetDeleted));
+                }
+            }
         }
 
         /// <summary>

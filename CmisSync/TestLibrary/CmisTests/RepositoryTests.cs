@@ -48,6 +48,12 @@ namespace TestLibrary.CmisTests {
         [TestFixtureSetUp]
         public void ClassInit() {
             config = ITUtils.GetConfig();
+#if __COCOA__
+            try {
+                NSApplication.Init();
+            } catch (InvalidOperationException) {
+            }
+#endif
         }
 
         [Test, Category("Fast")]
@@ -62,8 +68,15 @@ namespace TestLibrary.CmisTests {
         [Test, Category("Fast")]
         public void SyncStatusIsDeactivatedIfRootFolderDoesNotExists() {
             this.SetupMocks();
-
+            bool notified = false;
             var underTest = new TestRepository(this.repoInfo, this.listener, this.queue);
+
+            underTest.ShowException += (object sender, RepositoryExceptionEventArgs e) => {
+                Assert.That(sender, Is.EqualTo(underTest));
+                Assert.That(e.Level, Is.EqualTo(ExceptionLevel.Fatal));
+                Assert.That(e.Type, Is.EqualTo(ExceptionType.LocalSyncTargetDeleted));
+                notified = true;
+            };
 
             this.localPath.Delete();
             this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, this.localPath.FullName, true));
@@ -73,6 +86,7 @@ namespace TestLibrary.CmisTests {
             this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, this.localPath.FullName, true));
             this.queue.Run();
             Assert.That(underTest.Status, Is.EqualTo(SyncStatus.Disconnected));
+            Assert.That(notified, Is.True);
         }
 
         [Test, Category("Fast")]

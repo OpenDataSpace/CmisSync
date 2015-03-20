@@ -647,6 +647,29 @@ namespace CmisSync {
         private void AddRepository(RepoInfo repositoryInfo) {
             try {
                 Repository repo = new Repository(repositoryInfo, this.activityListenerAggregator);
+                repo.ShowException += (object sender, RepositoryExceptionEventArgs e) => {
+                    string msg = string.Empty;
+                    switch (e.Type) {
+                    case ExceptionType.LocalSyncTargetDeleted:
+                        msg = string.Format("Local target folder \"{0}\" unavailable", repositoryInfo.LocalPath);
+                        break;
+                    default:
+                        msg = e.Exception != null ? e.Exception.Message : "Unknown Exception occured";
+                        break;
+                    }
+
+                    switch (e.Level) {
+                    case ExceptionLevel.Fatal:
+                        this.AlertNotificationRaised(string.Format("{0}: Fatal error occured", repositoryInfo.DisplayName), msg);
+                        break;
+                    case ExceptionLevel.Warning:
+                        this.ShowException(string.Format("{0}: Error occured", repositoryInfo.DisplayName), msg);
+                        break;
+                    default:
+                        this.ShowException(string.Format("{0}: Error occured", repositoryInfo.DisplayName), msg);
+                        break;
+                    }
+                };
                 repo.Queue.EventManager.AddEventHandler(
                     new GenericSyncEventHandler<FileTransmissionEvent>(
                     50,
