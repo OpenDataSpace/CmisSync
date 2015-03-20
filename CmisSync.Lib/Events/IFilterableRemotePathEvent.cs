@@ -17,15 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
 
     /// <summary>
     /// This events are filterable by path. A path must be a remote path.
     /// </summary>
-    public interface IFilterableRemotePathEvent : IFilterableEvent
-    {
+    public interface IFilterableRemotePathEvent : IFilterableEvent {
         /// <summary>
         /// Gets the remote path.
         /// </summary>
