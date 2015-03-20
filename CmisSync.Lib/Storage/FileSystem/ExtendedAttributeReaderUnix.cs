@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.FileSystem
-{
+namespace CmisSync.Lib.Storage.FileSystem {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -31,15 +30,13 @@ namespace CmisSync.Lib.Storage.FileSystem
     /// <summary>
     /// Extended attribute reader for unix.
     /// </summary>
-    public class ExtendedAttributeReaderUnix : IExtendedAttributeReader
-    {
+    public class ExtendedAttributeReaderUnix : IExtendedAttributeReader {
         private readonly string prefix = "user.";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.ExtendedAttributeReaderUnix"/> class.
         /// </summary>
-        public ExtendedAttributeReaderUnix()
-        {
+        public ExtendedAttributeReaderUnix() {
 #if (__MonoCS__ != true)
             throw new WrongPlatformException();
 #endif
@@ -51,8 +48,7 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// <returns>The extended attribute.</returns>
         /// <param name="path">Path to the file or folder.</param>
         /// <param name="key">Key of the extended attribute.</param>
-        public string GetExtendedAttribute(string path, string key)
-        {
+        public string GetExtendedAttribute(string path, string key) {
             path = Path.GetFullPath(path);
             if (!File.Exists(path) && !Directory.Exists(path)) {
                 throw new FileNotFoundException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path), path);
@@ -79,12 +75,9 @@ namespace CmisSync.Lib.Storage.FileSystem
                 }
             }
 #endif
-            if(value == null)
-            {
+            if (value == null) {
                 return null;
-            }
-            else
-            {
+            } else {
                 return Encoding.UTF8.GetString(value);
             }
 #else
@@ -99,8 +92,7 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// <param name="key">Key of the extended attribute.</param>
         /// <param name="value">Value of the extended attribute.</param>
         /// <param name="restoreLastModificationDate">If set to <c>true</c> restore last modification date.</param>
-        public void SetExtendedAttribute(string path, string key, string value, bool restoreLastModificationDate = false)
-        {
+        public void SetExtendedAttribute(string path, string key, string value, bool restoreLastModificationDate = false) {
 #if __MonoCS__
             path = Path.GetFullPath(path);
             if (!File.Exists(path) && !Directory.Exists(path)) {
@@ -108,17 +100,14 @@ namespace CmisSync.Lib.Storage.FileSystem
             }
 
             long ret;
-            if(value == null)
-            {
+            if (value == null) {
                 RemoveExtendedAttribute(path, key);
                 return;
-            }
-            else
-            {
+            } else {
                 ret = Syscall.setxattr(path, prefix + key, Encoding.UTF8.GetBytes(value));
             }
-            if(ret != 0)
-            {
+
+            if (ret != 0) {
                 throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", Syscall.GetLastError().ToString(), path));
             }
 #else
@@ -131,8 +120,7 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// </summary>
         /// <param name="path">Removes attribute from this path.</param>
         /// <param name="key">Key of the attribute, which should be removed.</param>
-        public void RemoveExtendedAttribute(string path, string key)
-        {
+        public void RemoveExtendedAttribute(string path, string key) {
             path = Path.GetFullPath(path);
             if (!File.Exists(path) && !Directory.Exists(path)) {
                 throw new FileNotFoundException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path), path);
@@ -140,8 +128,7 @@ namespace CmisSync.Lib.Storage.FileSystem
 
 #if __MonoCS__
             long ret = Syscall.removexattr (path, prefix + key);
-            if(ret != 0)
-            {
+            if (ret != 0) {
 #if! __COCOA__
                 Errno errno = Syscall.GetLastError();
                 if (errno != Errno.ENODATA) {
@@ -159,19 +146,17 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// </summary>
         /// <returns>The attribute keys.</returns>
         /// <param name="path">Path which should be read.</param>
-        public List<string> ListAttributeKeys(string path)
-        {
+        public List<string> ListAttributeKeys(string path) {
 #if __MonoCS__
             string[] list;
             Syscall.listxattr(path, out list);
             List<string> result = new List<string>();
-            foreach(string key in list)
-            {
-                if(key.StartsWith(prefix))
-                {
+            foreach (string key in list) {
+                if (key.StartsWith(prefix)) {
                     result.Add(key.Substring(prefix.Length));
                 }
             }
+
             return result;
 #else
             throw new WrongPlatformException();
@@ -183,8 +168,7 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// </summary>
         /// <param name="path">Path to be checked</param>
         /// <returns><c>true</c> if this instance is feature available the specified path; otherwise, <c>false</c>.</returns>
-        public bool IsFeatureAvailable(string path)
-        {
+        public bool IsFeatureAvailable(string path) {
 #if __MonoCS__
             if (!File.Exists(path) && !Directory.Exists(path)) {
                 throw new ArgumentException(
@@ -197,8 +181,7 @@ namespace CmisSync.Lib.Storage.FileSystem
             string key = "test";
             long ret = Syscall.getxattr(path, prefix + key, out value);
             bool retValue = true;
-            if(ret != 0)
-            {
+            if (ret != 0) {
 #if __COCOA__
                 // Feature not supported is errno 102
                 if (ret == 102) {
@@ -211,6 +194,7 @@ namespace CmisSync.Lib.Storage.FileSystem
                 }
 #endif
             }
+
             return retValue;
 #else
             throw new WrongPlatformException();

@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ProducerTests.WatcherTests
-{
+namespace TestLibrary.ProducerTests.WatcherTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -36,15 +35,13 @@ namespace TestLibrary.ProducerTests.WatcherTests
 
     using TestLibrary.IntegrationTests;
 
-    public class WatcherData
-    {
+    public class WatcherData {
         public IWatcherProducer Watcher { get; set; }
 
         public object Data { get; set; }
     }
 
-    public class BaseWatcherTest
-    {
+    public class BaseWatcherTest {
         protected DirectoryInfo localFolder;
         protected FileInfo localFile;
         protected DirectoryInfo localSubFolder;
@@ -83,19 +80,15 @@ namespace TestLibrary.ProducerTests.WatcherTests
                     count++;
                 }
             });
-            using (this.localFile.Create())
-            {
+            using (this.localFile.Create()) {
             }
 
             t.Wait();
-            if (this.returnedFSEvent != null)
-            {
+            if (this.returnedFSEvent != null) {
                 Assert.IsFalse(this.returnedFSEvent.IsDirectory);
                 Assert.AreEqual(this.localFile.FullName, this.returnedFSEvent.LocalPath);
                 Assert.AreEqual(WatcherChangeTypes.Created, this.returnedFSEvent.Type);
-            }
-            else
-            {
+            } else {
                 Assert.Inconclusive("Missed file added event");
             }
         }
@@ -112,8 +105,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
                     count++;
                 }
             });
-            using (FileStream stream = File.OpenWrite(this.localFile.FullName))
-            {
+            using (FileStream stream = File.OpenWrite(this.localFile.FullName)) {
                 byte[] data = new byte[1024];
 
                 // Write data
@@ -121,19 +113,14 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
 
             t.Wait();
-            if (this.returnedFSEvent != null)
-            {
+            if (this.returnedFSEvent != null) {
                 if (this.returnedFSEvent.Type == WatcherChangeTypes.Changed) {
                     Assert.IsFalse(this.returnedFSEvent.IsDirectory);
                     Assert.AreEqual(this.localFile.FullName, this.returnedFSEvent.LocalPath);
-                }
-                else
-                {
+                } else {
                     Assert.Inconclusive(string.Format("File System Event: \"{0}\"", this.returnedFSEvent.ToString()));
                 }
-            }
-            else
-            {
+            } else {
                 Assert.Inconclusive("Missed file changed event");
             }
         }
@@ -155,20 +142,15 @@ namespace TestLibrary.ProducerTests.WatcherTests
             this.localFile.MoveTo(newpath);
             t.Wait();
             if (this.returnedFSEvent != null) {
-                if (this.returnedFSEvent.Type == WatcherChangeTypes.Renamed)
-                {
+                if (this.returnedFSEvent.Type == WatcherChangeTypes.Renamed) {
                     Assert.IsFalse(this.returnedFSEvent.IsDirectory);
                     Assert.AreEqual(newpath, (this.returnedFSEvent as FSMovedEvent).LocalPath);
                     Assert.AreEqual(oldpath, (this.returnedFSEvent as FSMovedEvent).OldPath);
                     Assert.AreEqual(WatcherChangeTypes.Renamed, (this.returnedFSEvent as FSMovedEvent).Type);
-                }
-                else
-                {
+                } else {
                     Assert.Inconclusive(string.Format("File System Event: \"{0}\"", this.returnedFSEvent.ToString()));
                 }
-            }
-            else
-            {
+            } else {
                 Assert.Inconclusive("Missed file rename event");
             }
 
@@ -194,19 +176,14 @@ namespace TestLibrary.ProducerTests.WatcherTests
             new FileInfoWrapper(this.localFile).MoveTo(newpath);
             t.Wait();
             if (this.returnedFSEvent != null) {
-                if (this.returnedFSEvent.Type == WatcherChangeTypes.Renamed)
-                {
+                if (this.returnedFSEvent.Type == WatcherChangeTypes.Renamed) {
                     Assert.That(this.returnedFSEvent.IsDirectory, Is.False);
                     Assert.That((this.returnedFSEvent as FSMovedEvent).LocalPath, Is.EqualTo(newpath));
                     Assert.That((this.returnedFSEvent as FSMovedEvent).OldPath, Is.EqualTo(oldpath));
-                }
-                else
-                {
+                } else {
                     Assert.Inconclusive(string.Format("File System Event: \"{0}\"", this.returnedFSEvent.ToString()));
                 }
-            }
-            else
-            {
+            } else {
                 Assert.Inconclusive("Missed file rename event");
             }
 
@@ -230,9 +207,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             if (this.returnedFSEvent != null) {
                 Assert.AreEqual(WatcherChangeTypes.Deleted, this.returnedFSEvent.Type, this.localFile.FullName + " " + this.returnedFSEvent.LocalPath);
                 Assert.AreEqual(this.localFile.FullName, this.returnedFSEvent.LocalPath);
-            }
-            else
-            {
+            } else {
                 Assert.Inconclusive("Missed file removed event");
             }
         }
@@ -252,14 +227,11 @@ namespace TestLibrary.ProducerTests.WatcherTests
             });
             this.localSubFolder.Create();
             t.Wait();
-            if (this.returnedFSEvent != null)
-            {
+            if (this.returnedFSEvent != null) {
                 Assert.IsTrue(this.returnedFSEvent.IsDirectory);
                 Assert.AreEqual(this.localSubFolder.FullName, this.returnedFSEvent.LocalPath);
                 Assert.AreEqual(WatcherChangeTypes.Created, this.returnedFSEvent.Type);
-            }
-            else
-            {
+            } else {
                 Assert.Inconclusive("Missed folder added event");
             }
         }
@@ -278,14 +250,11 @@ namespace TestLibrary.ProducerTests.WatcherTests
             });
             this.localSubFolder.CreationTime = this.localSubFolder.CreationTime.AddDays(1);
             t.Wait();
-            if (this.returnedFSEvent != null)
-            {
+            if (this.returnedFSEvent != null) {
                 Assert.IsTrue(this.returnedFSEvent.IsDirectory);
                 Assert.AreEqual(this.localSubFolder.FullName, this.returnedFSEvent.LocalPath);
                 Assert.AreEqual(WatcherChangeTypes.Changed, this.returnedFSEvent.Type);
-            }
-            else
-            {
+            } else {
                 Assert.Inconclusive("Missed folder changed event");
             }
         }
@@ -304,14 +273,40 @@ namespace TestLibrary.ProducerTests.WatcherTests
             });
             this.localSubFolder.Delete();
             t.Wait();
-            if (this.returnedFSEvent != null)
-            {
+            if (this.returnedFSEvent != null) {
                 Assert.AreEqual(this.localSubFolder.FullName, this.returnedFSEvent.LocalPath);
                 Assert.AreEqual(WatcherChangeTypes.Deleted, this.returnedFSEvent.Type);
                 Assert.That(this.returnedFSEvent.IsDirectory, Is.True);
+            } else {
+                Assert.Inconclusive("Missed folder removed event");
             }
-            else
-            {
+        }
+
+        public void ReportFSWatcherRootFolderRemoved() {
+            this.queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.LocalPath == this.localFolder.FullName)))
+                .Callback((ISyncEvent file) => this.returnedFSEvent = file as FSEvent);
+            var watcherData = this.GetWatcherData(this.localFolder.FullName, this.queue.Object);
+            this.localSubFolder.Delete();
+            this.localFile.Delete();
+            watcherData.Watcher.EnableEvents = true;
+            var t = Task.Factory.StartNew(() => {
+                int count = 0;
+                while (this.returnedFSEvent == null && count < RETRIES) {
+                    try {
+                        WaitWatcherData(watcherData, this.localFolder.FullName, WatcherChangeTypes.Deleted, MILISECONDSWAIT);
+                        count++;
+                    } catch (FileNotFoundException) {
+                        break;
+                    }
+                }
+            });
+            this.localFolder.Delete();
+            t.Wait();
+            if (this.returnedFSEvent != null) {
+                Assert.AreEqual(this.localFolder.FullName, this.returnedFSEvent.LocalPath);
+                Assert.AreEqual(WatcherChangeTypes.Deleted, this.returnedFSEvent.Type);
+                Assert.That(this.returnedFSEvent.IsDirectory, Is.True);
+            } else {
                 Assert.Inconclusive("Missed folder removed event");
             }
         }
@@ -332,20 +327,15 @@ namespace TestLibrary.ProducerTests.WatcherTests
             });
             this.localSubFolder.MoveTo(newpath);
             t.Wait();
-            if (this.returnedFSEvent != null)
-            {
+            if (this.returnedFSEvent != null) {
                 Assert.IsTrue(this.returnedFSEvent.IsDirectory);
                 if (this.returnedFSEvent.Type == WatcherChangeTypes.Renamed) {
                     Assert.AreEqual(oldpath, (this.returnedFSEvent as FSMovedEvent).OldPath);
                     Assert.AreEqual(newpath, (this.returnedFSEvent as FSMovedEvent).LocalPath);
-                }
-                else
-                {
+                } else {
                     Assert.Inconclusive(string.Format("File System Event: \"{0}\"", this.returnedFSEvent.ToString()));
                 }
-            }
-            else
-            {
+            } else {
                 Assert.Inconclusive("Missed folder renamed event");
             }
 
@@ -370,17 +360,14 @@ namespace TestLibrary.ProducerTests.WatcherTests
             });
             new DirectoryInfoWrapper(this.localSubFolder).MoveTo(newpath);
             t.Wait();
-            if (this.returnedFSEvent != null)
-            {
+            if (this.returnedFSEvent != null) {
                 FSMovedEvent movedEvent = this.returnedFSEvent as FSMovedEvent;
 
                 Assert.That(movedEvent.OldPath, Is.EqualTo(oldpath));
                 Assert.That(movedEvent.LocalPath, Is.EqualTo(newpath));
                 Assert.That(movedEvent.Type, Is.EqualTo(WatcherChangeTypes.Renamed));
                 Assert.That(movedEvent.IsDirectory, Is.True);
-            }
-            else
-            {
+            } else {
                 Assert.Inconclusive("Missed folder moved event(s)");
             }
 
@@ -396,8 +383,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             this.localSubFolder = new DirectoryInfo(Path.Combine(this.localFolder.FullName, Path.GetRandomFileName()));
             this.localSubFolder.Create();
             this.localFile = new FileInfo(Path.Combine(this.localFolder.FullName, Path.GetRandomFileName()));
-            using (this.localFile.Create())
-            {
+            using (this.localFile.Create()) {
             }
 
             if (AreExtendedAttributesAvailable(this.localFile.FullName)) {

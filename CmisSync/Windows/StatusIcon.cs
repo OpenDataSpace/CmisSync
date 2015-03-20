@@ -98,6 +98,15 @@ namespace CmisSync {
                     ToolTipIcon.Warning);
             };
 
+            Program.Controller.AlertNotificationRaised += delegate(string title, string message) {
+                this.trayicon.ShowBalloonTip(
+                    60000,
+                    title,
+                    message,
+                    ToolTipIcon.Error);
+                Controller.Warning = true;
+            };
+
             this.trayicon.BalloonTipClicked += trayicon_BalloonTipClicked;
         }
 

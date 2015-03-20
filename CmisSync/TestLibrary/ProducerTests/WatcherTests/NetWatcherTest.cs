@@ -18,8 +18,7 @@
 //-----------------------------------------------------------------------
 
 #if ! __COCOA__
-namespace TestLibrary.ProducerTests.WatcherTests
-{
+namespace TestLibrary.ProducerTests.WatcherTests {
     using System;
     using System.IO;
 
@@ -37,8 +36,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class NetWatcherTest : BaseWatcherTest
-    {
+    public class NetWatcherTest : BaseWatcherTest {
         private Mock<IMetaDataStorage> storage;
 
         [SetUp]
@@ -140,6 +138,12 @@ namespace TestLibrary.ProducerTests.WatcherTests
         public void ReportFSFolderRemovedEventTest() {
             this.storage.Setup(s => s.GetObjectByLocalPath(It.IsAny<IFileSystemInfo>())).Returns(Mock.Of<IMappedObject>(o => o.Type == MappedObjectType.Folder));
             this.ReportFSFolderRemovedEvent();
+        }
+
+        [Test, Category("Medium")]
+        public void FSWatcherRootFolderRemovedTest() {
+            this.storage.Setup(s => s.GetObjectByLocalPath(It.IsAny<IFileSystemInfo>())).Returns(Mock.Of<IMappedObject>(o => o.Type == MappedObjectType.Folder));
+            this.ReportFSWatcherRootFolderRemoved();
         }
 
         // This test fails on current build slave, retest when these are FC20 or higher

@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.Database
-{
+namespace CmisSync.Lib.Storage.Database {
     using System;
 
     using Newtonsoft.Json;
@@ -26,13 +25,11 @@ namespace CmisSync.Lib.Storage.Database
     /// <summary>
     /// DBreeze initializer should be called by every class before using DBreeze
     /// </summary>
-    public sealed class DBreezeInitializerSingleton
-    {
+    public sealed class DBreezeInitializerSingleton {
         private static volatile DBreezeInitializerSingleton instance;
         private static object syncRoot = new object();
 
-        private DBreezeInitializerSingleton()
-        {
+        private DBreezeInitializerSingleton() {
             // Use Newtonsoft.Json as Serializator
             DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject; 
             DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
@@ -41,16 +38,12 @@ namespace CmisSync.Lib.Storage.Database
         /// <summary>
         /// Initializes DBreeze static classes
         /// </summary>
-        public static void Init()
-        {
-            if (instance == null) 
-            {
-                lock (syncRoot) 
-                {
-                    if (instance == null) 
-                    {
+        public static void Init() {
+            if (instance == null) {
+                lock (syncRoot) {
+                    if (instance == null) {
                         instance = new DBreezeInitializerSingleton();
-                    }                        
+                    }
                 }
             }
         }

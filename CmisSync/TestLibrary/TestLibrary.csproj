@@ -263,6 +263,7 @@
     <Compile Include="FileTransmissionTests\TransmissionTest.cs" />
     <Compile Include="FileTransmissionTests\TransmissionManagerTest.cs" />
     <Compile Include="TestUtils\MockOfITransmissionManagerUtil.cs" />
+    <Compile Include="FilterTests\RepositoryRootDeletedDetectionTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

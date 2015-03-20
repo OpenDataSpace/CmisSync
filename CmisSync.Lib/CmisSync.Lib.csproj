@@ -305,6 +305,8 @@
     <Compile Include="Streams\AbortableStream.cs" />
     <Compile Include="Streams\PausableStream.cs" />
     <Compile Include="Streams\BandwidthNotifyingStream.cs" />
+    <Compile Include="Filter\RepositoryRootDeletedDetection.cs" />
+    <Compile Include="Cmis\RepositoryExceptionEventArgs.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

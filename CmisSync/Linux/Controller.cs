@@ -63,6 +63,10 @@ namespace CmisSync {
                 NotificationUtils.NotifyAsync(title, msg);
             };
 
+            this.AlertNotificationRaised += (string title, string message) => {
+                NotificationUtils.NotifyAsync(title, message);
+            };
+
             base.Initialize(firstRun);
         }
 

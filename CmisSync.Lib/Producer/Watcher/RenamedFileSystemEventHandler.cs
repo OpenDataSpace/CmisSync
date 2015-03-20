@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Producer.Watcher
-{
+namespace CmisSync.Lib.Producer.Watcher {
     using System;
     using System.IO;
 
@@ -31,8 +30,7 @@ namespace CmisSync.Lib.Producer.Watcher
     /// <summary>
     /// Renamed file system event handler.
     /// </summary>
-    public class RenamedFileSystemEventHandler
-    {
+    public class RenamedFileSystemEventHandler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RenamedFileSystemEventHandler));
 
         private ISyncEventQueue queue;
@@ -43,8 +41,7 @@ namespace CmisSync.Lib.Producer.Watcher
         /// </summary>
         /// <param name="queue">Sync event queue to report the events to.</param>
         /// <param name="fsFactory">File system factory.</param>
-        public RenamedFileSystemEventHandler(ISyncEventQueue queue, IFileSystemInfoFactory fsFactory = null)
-        {
+        public RenamedFileSystemEventHandler(ISyncEventQueue queue, IFileSystemInfoFactory fsFactory = null) {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }

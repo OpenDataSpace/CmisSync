@@ -366,7 +366,7 @@ namespace CmisSync {
                     if (repo.Name == repoName) {
                         if (repo.Status != SyncStatus.Suspend) {
                             repo.Suspend();
-                            Logger.Debug("Requested to syspend sync of repo " + repo.Name);
+                            Logger.Debug("Requested to suspend sync of repo " + repo.Name);
                         } else {
                             repo.Resume();
                             Logger.Debug("Requested to resume sync of repo " + repo.Name);
@@ -642,6 +642,29 @@ namespace CmisSync {
         private void AddRepository(RepoInfo repositoryInfo) {
             try {
                 Repository repo = new Repository(repositoryInfo, this.activityListenerAggregator);
+                repo.ShowException += (object sender, RepositoryExceptionEventArgs e) => {
+                    string msg = string.Empty;
+                    switch (e.Type) {
+                    case ExceptionType.LocalSyncTargetDeleted:
+                        msg = string.Format(Properties_Resources.LocalRootFolderUnavailable, repositoryInfo.LocalPath);
+                        break;
+                    default:
+                        msg = e.Exception != null ? e.Exception.Message : Properties_Resources.UnknownExceptionOccured;
+                        break;
+                    }
+
+                    switch (e.Level) {
+                    case ExceptionLevel.Fatal:
+                        this.AlertNotificationRaised(string.Format(Properties_Resources.FatalExceptionTitle, repositoryInfo.DisplayName), msg);
+                        break;
+                    case ExceptionLevel.Warning:
+                        this.ShowException(string.Format(Properties_Resources.WarningExceptionTitle, repositoryInfo.DisplayName), msg);
+                        break;
+                    default:
+                        this.ShowException(string.Format(Properties_Resources.WarningExceptionTitle, repositoryInfo.DisplayName), msg);
+                        break;
+                    }
+                };
                 repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>());
                 repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<ProxyAuthRequiredEvent, SuccessfulLoginEvent>());
                 repo.Queue.EventManager.AddEventHandler(
