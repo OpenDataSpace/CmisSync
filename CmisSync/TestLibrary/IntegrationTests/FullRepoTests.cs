@@ -204,6 +204,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(child, Is.InstanceOf(typeof(IDocument)));
             var doc = child as IDocument;
             Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
+            doc.AssertThatIfContentHashExistsItIsEqualTo(content);
             Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
@@ -609,6 +610,7 @@ namespace TestLibrary.IntegrationTests {
             var remoteDoc = this.remoteRootDir.GetChildren().First() as IDocument;
             var localDoc = this.localRootDir.GetFiles().First();
             Assert.That(remoteDoc.ContentStreamLength, Is.EqualTo(newContent.Length));
+            remoteDoc.AssertThatIfContentHashExistsItIsEqualTo(newContent);
             Assert.That(localDoc.Length, Is.EqualTo(newContent.Length));
             Assert.That(localDoc.LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
