@@ -125,7 +125,8 @@ namespace TestLibrary.IntegrationTests {
                 RemotePath = config[2].ToString() + "/" + this.subfolder,
                 Address = new XmlUri(new Uri(config[3].ToString())),
                 User = config[4].ToString(),
-                RepositoryId = config[6].ToString()
+                RepositoryId = config[6].ToString(),
+                Binding = config[7] != null ? config[7].ToString() : BindingType.AtomPub
             };
             this.repoInfo.RemotePath = this.repoInfo.RemotePath.Replace("//", "/");
             this.repoInfo.SetPassword(config[5].ToString());
@@ -147,8 +148,19 @@ namespace TestLibrary.IntegrationTests {
 
             // Session
             var cmisParameters = new Dictionary<string, string>();
-            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-            cmisParameters[SessionParameter.AtomPubUrl] = this.repoInfo.Address.ToString();
+            cmisParameters[SessionParameter.BindingType] = repoInfo.Binding;
+            switch (repoInfo.Binding) {
+            case BindingType.AtomPub:
+                cmisParameters[SessionParameter.AtomPubUrl] = this.repoInfo.Address.ToString();
+                break;
+            case BindingType.Browser:
+                cmisParameters[SessionParameter.BrowserUrl] = this.repoInfo.Address.ToString();
+                break;
+            default:
+                Assert.Fail(string.Format("Unknown binding type {0}", repoInfo.Binding));
+                break;
+            }
+
             cmisParameters[SessionParameter.User] = this.repoInfo.User;
             cmisParameters[SessionParameter.Password] = this.repoInfo.GetPassword().ToString();
             cmisParameters[SessionParameter.RepositoryId] = this.repoInfo.RepositoryId;
