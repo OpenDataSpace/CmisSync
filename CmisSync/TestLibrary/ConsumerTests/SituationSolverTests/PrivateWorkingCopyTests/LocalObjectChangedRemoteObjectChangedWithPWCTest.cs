@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectChangedRemoteObjectChangedWithPWCTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -90,14 +90,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.fallbackSolver.Verify(s => s.Solve(dir, remoteDir, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
-        public void FallbackIsNotUsedIfOnlyLocalContentHasBeenChanged() {
+        [Test, Category("Fast"), Category("Solver")]
+        public void FallbackIsNotUsedIfOnlyLocalContentHasBeenChanged(
+            [Values(ContentChangeType.APPENDED, ContentChangeType.CHANGED)]ContentChangeType localChange,
+            [Values(ContentChangeType.NONE)]ContentChangeType remoteChange) {
             this.SetUpMocks();
             var underTest = this.CreateSolver();
             var file = new Mock<IFileInfo>(MockBehavior.Strict).Object;
             var remoteDoc = new Mock<IDocument>(MockBehavior.Strict).Object;
+            this.fallbackSolver.Setup(s => s.Solve(file, remoteDoc, localChange, remoteChange));
 
-            underTest.Solve(file, remoteDoc, ContentChangeType.CHANGED, ContentChangeType.NONE);
+            underTest.Solve(file, remoteDoc, localChange, remoteChange);
+
+            this.fallbackSolver.Verify(s => s.Solve(file, remoteDoc, localChange, remoteChange), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -113,6 +118,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             underTest.Solve(file, remoteDoc, localChange, remoteChange);
 
             this.fallbackSolver.Verify(s => s.Solve(file, remoteDoc, localChange, remoteChange), Times.Once());
+        }
+
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
+        public void OnlyLocalContentHashBeenChanged() {
+            this.SetUpMocks();
+            var underTest = this.CreateSolver();
+            var file = new Mock<IFileInfo>(MockBehavior.Strict).Object;
+            var remoteDoc = new Mock<IDocument>(MockBehavior.Strict).Object;
+            this.fallbackSolver.Setup(s => s.Solve(file, remoteDoc, ContentChangeType.CHANGED, ContentChangeType.NONE));
+
+            underTest.Solve(file, remoteDoc, ContentChangeType.CHANGED, ContentChangeType.NONE);
+
+            this.fallbackSolver.Verify(s => s.Solve(file, remoteDoc, ContentChangeType.CHANGED, ContentChangeType.NONE), Times.Never());
         }
 
         private LocalObjectChangedRemoteObjectChangedWithPWC CreateSolver() {
