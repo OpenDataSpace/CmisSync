@@ -58,6 +58,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(this.fileName));
             Assert.That(newDocument.Name, Is.EqualTo(this.fileName));
             Assert.That(newDocument.ContentStreamLength, Is.EqualTo(this.content.Length));
+            newDocument.AssertThatIfContentHashExistsItIsEqualTo(this.content);
         }
 
         [Test, Category("Slow"), MaxTime(180000)]

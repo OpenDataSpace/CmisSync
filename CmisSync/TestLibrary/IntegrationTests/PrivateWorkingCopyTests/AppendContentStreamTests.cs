@@ -70,8 +70,10 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
         [Test, Category("Slow"), MaxTime(180000)]
         public void CheckOutDocumentWithContentAndAppendContentAndCheckIn() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
+            var emptyDocHash = IDocumentAssertUtils.ComputeSha1Hash(new byte[0]);
+            var initialDocHash = IDocumentAssertUtils.ComputeSha1Hash(this.content);
             var doc = this.remoteRootDir.CreateDocument(this.fileName, this.content);
-            doc.AssertThatIfContentHashExistsItIsEqualTo(this.content);
+            doc.AssertThatIfContentHashExistsItIsEqualToHash(initialDocHash);
 
             var newId = doc.CheckOut();
             doc = newId == null ? doc : this.session.GetObject(newId) as IDocument;
@@ -80,6 +82,9 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             var newObjectId = doc.CheckIn(true, null, null, string.Empty);
             doc = this.session.GetObject(newObjectId) as IDocument;
             doc.Refresh();
+
+            Assert.That(doc.ContentStreamHash(), Is.Not.EqualTo(emptyDocHash), "Hash is equal to empty document hash, but shouldn't");
+            Assert.That(doc.ContentStreamHash(), Is.Not.EqualTo(initialDocHash), "Hash is equal to initial document hash, but shouldn't");
 
             doc.AssertThatIfContentHashExistsItIsEqualTo(this.content + this.content);
         }

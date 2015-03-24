@@ -50,7 +50,7 @@ namespace TestLibrary.CmisTests {
             config = ITUtils.GetConfig();
 #if __COCOA__
             try {
-                NSApplication.Init();
+                MonoMac.AppKit.NSApplication.Init();
             } catch (InvalidOperationException) {
             }
 #endif

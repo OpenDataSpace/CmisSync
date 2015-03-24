@@ -57,6 +57,7 @@ namespace CmisSync {
         private readonly string notificationType = "Type";
         private readonly string notificationTypeCredentials = "Credentials";
         private readonly string notificationTypeTransmission = "Transmission";
+        private readonly string notificationTypeAlert = "Alert";
 
         private class ComparerNSUserNotification : IComparer<NSUserNotification> {
             public int Compare(NSUserNotification x, NSUserNotification y) {
@@ -77,6 +78,14 @@ namespace CmisSync {
         private bool IsNotificationCredentials(NSUserNotification notification) {
             if (null != notification.UserInfo && notification.UserInfo.ContainsKey((NSString)notificationType)) {
                 return notificationTypeCredentials == (string)(notification.UserInfo[notificationType] as NSString);
+            }
+
+            return false;
+        }
+
+        private bool IsNotificationAWarning(NSUserNotification notification) {
+            if (null != notification.UserInfo && notification.UserInfo.ContainsKey((NSString)notificationType)) {
+                return notificationTypeAlert == (string)(notification.UserInfo[notificationType] as NSString);
             }
 
             return false;
@@ -109,6 +118,21 @@ namespace CmisSync {
                     notification.InformativeText = Properties_Resources.NotificationChangeCredentials;
                     NSMutableDictionary userInfo = new NSMutableDictionary();
                     userInfo.Add((NSString)notificationType, (NSString)notificationTypeCredentials);
+                    notification.UserInfo = userInfo;
+                    notification.DeliveryDate = NSDate.Now;
+                    notificationCenter.DeliverNotification(notification);
+                });
+            }
+        }
+
+        private void InsertAlertNotification(string title, string msg) {
+            using (var a = new NSAutoreleasePool()) {
+                notificationCenter.BeginInvokeOnMainThread(delegate {
+                    NSUserNotification notification = new NSUserNotification();
+                    notification.Title = title;
+                    notification.InformativeText = msg;
+                    NSMutableDictionary userInfo = new NSMutableDictionary();
+                    userInfo.Add((NSString)notificationType, (NSString)notificationTypeAlert);
                     notification.UserInfo = userInfo;
                     notification.DeliveryDate = NSDate.Now;
                     notificationCenter.DeliverNotification(notification);
@@ -153,10 +177,16 @@ namespace CmisSync {
                     //RemoveNotificationCredentials(e.Notification.Title);
                     EditRepositoryCredentials(e.Notification.Title);
                 }
+
+                if (IsNotificationAWarning(e.Notification)) {
+                    OpenCmisSyncFolder(Program.Controller.FoldersPath);
+                }
             };
 
             // If we return true here, Notification will show up even if your app is TopMost.
-            notificationCenter.ShouldPresentNotification = (c, n) => { return false; };
+            notificationCenter.ShouldPresentNotification = (c, n) => {
+                return IsNotificationAWarning(n);
+            };
 
             ShowChangePassword += delegate(string reponame) {
                 InsertNotificationCredentials(reponame);
@@ -165,6 +195,10 @@ namespace CmisSync {
             SuccessfulLogin += delegate(string reponame)
             {
                 RemoveNotificationCredentials(reponame);
+            };
+
+            AlertNotificationRaised += (title, message) => {
+                InsertAlertNotification(title, message);
             };
 
             OnTransmissionListChanged += delegate {

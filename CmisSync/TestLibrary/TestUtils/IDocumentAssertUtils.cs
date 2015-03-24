@@ -30,15 +30,25 @@ namespace TestLibrary.TestUtils {
 
     public static class IDocumentAssertUtils {
         public static void AssertThatIfContentHashExistsItIsEqualTo(this IDocument doc, string content) {
-            doc.AssertThatIfContentHashExistsItIsEqualTo(Encoding.UTF8.GetBytes(content));
+            doc.AssertThatIfContentHashExistsItIsEqualToHash(ComputeSha1Hash(content));
         }
 
         public static void AssertThatIfContentHashExistsItIsEqualTo(this IDocument doc, byte[] content) {
-            doc.AssertThatIfContentHashExistsItIsEqualToHash(SHA1.Create().ComputeHash(content));
+            doc.AssertThatIfContentHashExistsItIsEqualToHash(ComputeSha1Hash(content));
         }
 
         public static void AssertThatIfContentHashExistsItIsEqualToHash(this IDocument doc, byte[] expectedHash, string type = "SHA-1") {
             Assert.That(doc.ContentStreamHash(type), Is.Null.Or.EqualTo(expectedHash));
+        }
+
+        public static byte[] ComputeSha1Hash(string content) {
+            return ComputeSha1Hash(Encoding.UTF8.GetBytes(content));
+        }
+
+        public static byte[] ComputeSha1Hash(byte[] content) {
+            using (var sha1 = SHA1.Create()) {
+                return sha1.ComputeHash(content);
+            }
         }
     }
 }
