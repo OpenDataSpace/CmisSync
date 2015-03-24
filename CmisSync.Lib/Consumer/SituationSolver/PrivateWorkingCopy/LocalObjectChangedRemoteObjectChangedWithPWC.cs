@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectChangedRemoteObjectChangedWithPWC.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -76,10 +76,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
-            if (localFileSystemInfo is IFileInfo && remoteContent == ContentChangeType.NONE) {
+            if (!(localFileSystemInfo is IFileInfo)) {
                 this.fallbackSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
-            } else {
-                this.fallbackSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
+                return;
+            }
+
+            IFileInfo localFile = localFileSystemInfo as IFileInfo;
+
+            if (remoteContent != ContentChangeType.NONE) {
+                this.fallbackSolver.Solve(localFile, remoteId, localContent, remoteContent);
+                return;
             }
         }
     }
