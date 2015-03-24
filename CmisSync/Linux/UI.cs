@@ -49,6 +49,7 @@ namespace CmisSync {
         public Setup Setup;
         public About About;
         public Setting Setting;
+        public TransmissionWindow Transmissions;
 
         public static string AssetsPath =
             (null != Environment.GetEnvironmentVariable("CMISSYNC_ASSETS_DIR"))
@@ -61,6 +62,7 @@ namespace CmisSync {
             this.About      = new About();
             this.StatusIcon = new StatusIcon();
             this.Setting    = new Setting();
+            this.Transmissions = new TransmissionWindow();
             Program.Controller.UIHasLoaded();
         }
 

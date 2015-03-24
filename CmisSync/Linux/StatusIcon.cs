@@ -185,7 +185,12 @@ namespace CmisSync {
                 this.Controller.SettingClicked();
             };
             this.menu.Add(settingsItem);
-            this.menu.Add(new SeparatorMenuItem());
+            MenuItem transmissionsItem = new MenuItem(
+                Properties_Resources.Transmission);
+            transmissionsItem.Activated += delegate {
+                this.Controller.TransmissionClicked();
+            };
+            this.menu.Add(transmissionsItem);
 
             // Log Menu
             MenuItem log_item = new MenuItem(
@@ -201,7 +206,7 @@ namespace CmisSync {
                 this.Controller.AboutClicked();
             };
             this.menu.Add(about_item);
-
+            this.menu.Add(new SeparatorMenuItem());
             this.quitItem = new MenuItem(
                     CmisSync.Properties_Resources.Exit) {
                 Sensitive = true

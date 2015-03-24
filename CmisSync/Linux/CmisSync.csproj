@@ -126,6 +126,10 @@
     <Compile Include="..\TransmissionController.cs">
       <Link>TransmissionController.cs</Link>
     </Compile>
+    <Compile Include="TransmissionWidget.cs" />
+    <Compile Include="TransmissionWindow.cs" />
+    <Compile Include="gtk-gui\CmisSync.TransmissionWindow.cs" />
+    <Compile Include="gtk-gui\CmisSync.Widgets.TransmissionWidget.cs" />
     <Compile Include="Defines.cs" />
   </ItemGroup>
   <ItemGroup>

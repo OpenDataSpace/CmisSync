@@ -19,14 +19,11 @@
 
 namespace CmisSync {
     using System;
-
     using CmisSync.Lib.Config;
 
     public partial class Setting : Gtk.Window {
         private SettingController Controller = new SettingController();
-        public Setting() : 
-                base(Gtk.WindowType.Toplevel)
-        {
+        public Setting() : base(Gtk.WindowType.Toplevel) {
             this.Build();
             this.HideOnDelete();
             this.Title = Properties_Resources.EditTitle;
