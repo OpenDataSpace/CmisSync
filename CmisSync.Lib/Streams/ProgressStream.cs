@@ -58,18 +58,18 @@ namespace CmisSync.Lib.Streams {
         /// <param name='e'>
         /// Transmission event where the progress should be reported to.
         /// </param>
-        public ProgressStream(Stream stream, Transmission e) : base(stream) {
-            if (e == null) {
+        public ProgressStream(Stream stream, Transmission transmission) : base(stream) {
+            if (transmission == null) {
                 throw new ArgumentNullException("The event, where to publish the prgress cannot be null");
             }
 
             try {
-                e.Length = stream.Length;
+                transmission.Length = stream.Length;
             } catch (NotSupportedException) {
-                e.Length = null;
+                transmission.Length = null;
             }
 
-            this.transmission = e;
+            this.transmission = transmission;
             this.blockingDetectionTimer = new Timer(2000);
             this.blockingDetectionTimer.Elapsed += delegate(object sender, ElapsedEventArgs args) {
                 this.transmission.BitsPerSecond = (long)((this.bytesTransmittedSinceLastSecond * 8) / this.blockingDetectionTimer.Interval);
