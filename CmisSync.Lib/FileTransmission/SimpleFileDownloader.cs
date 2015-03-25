@@ -46,7 +46,7 @@ namespace CmisSync.Lib.FileTransmission {
         /// <exception cref="DisposeException">If the remote object has been disposed before the dowload is finished</exception>
         /// <exception cref="AbortException">If download is aborted</exception>
         /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
-        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, Transmission status, HashAlgorithm hashAlg) {
+        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg) {
             byte[] buffer = new byte[8 * 1024];
             int len;
 
@@ -67,23 +67,23 @@ namespace CmisSync.Lib.FileTransmission {
             DotCMIS.Data.IContentStream contentStream = null;
             if (offset > 0) {
                 long remainingBytes = (long)fileLength - offset;
-                status.Length = remoteDocument.ContentStreamLength;
-                status.Position = offset;
+                transmission.Length = remoteDocument.ContentStreamLength;
+                transmission.Position = offset;
                 contentStream = remoteDocument.GetContentStream(remoteDocument.ContentStreamId, offset, remainingBytes);
             } else {
                 contentStream = remoteDocument.GetContentStream();
             }
 
-            using (ProgressStream progressStream = new ProgressStream(localFileStream, status))
+            using (ProgressStream progressStream = new ProgressStream(localFileStream, transmission))
             using (CryptoStream hashstream = new CryptoStream(progressStream, hashAlg, CryptoStreamMode.Write))
             using (Stream remoteStream = contentStream != null ? contentStream.Stream : new MemoryStream(0)) {
-                status.Length = remoteDocument.ContentStreamLength;
-                status.Position = offset;
+                transmission.Length = remoteDocument.ContentStreamLength;
+                transmission.Position = offset;
                 while ((len = remoteStream.Read(buffer, 0, buffer.Length)) > 0) {
                     lock (this.disposeLock) {
                         if (this.disposed) {
-                            status.Status = TransmissionStatus.ABORTED;
-                            throw new ObjectDisposedException(status.Path);
+                            transmission.Status = TransmissionStatus.ABORTED;
+                            throw new ObjectDisposedException(transmission.Path);
                         }
 
                         hashstream.Write(buffer, 0, len);
