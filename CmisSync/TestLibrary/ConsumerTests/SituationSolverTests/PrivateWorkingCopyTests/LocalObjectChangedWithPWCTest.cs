@@ -64,6 +64,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         private Mock<IFileInfo> localFile;
         private Mock<IDocument> remoteDocument;
         private Mock<IDocument> remoteDocumentPWC;
+        private Mock<IMappedObject> mappedObject;
 
         [Test, Category("Fast"), Category("Solver")]
         public void Constructor() {
@@ -118,7 +119,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.SetUpMocks();
 
             this.SetupFile();
-            Mock.Get(this.storage.Object.GetObjectByLocalPath(this.localFile.Object)).Setup(o => o.LastChangeToken).Returns(this.changeTokenOld + ".change");
+            this.mappedObject.Object.LastChangeToken = this.changeTokenOld + ".change";
 
             var underTest = this.CreateSolver();
             Assert.Throws<ArgumentException>(() => underTest.Solve(this.localFile.Object, this.remoteDocument.Object, ContentChangeType.CHANGED));
@@ -249,12 +250,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 return doc;
             });
 
-            Mock<IMappedObject> mapped = this.storage.AddLocalFile(this.localFile.Object, this.objectIdOld);
-            mapped.SetupAllProperties();
-            mapped.Object.Name = this.fileName;
-            mapped.Object.LastChangeToken = this.changeTokenOld;
-            mapped.Object.ParentId = this.parentId;
-            mapped.Object.Guid = Guid.NewGuid();
+            this.mappedObject = this.storage.AddLocalFile(this.localFile.Object, this.objectIdOld);
+            this.mappedObject.Object.LastChangeToken = this.changeTokenOld;
+            this.mappedObject.Object.ParentId = this.parentId;
+            this.mappedObject.Object.Guid = Guid.NewGuid();
         }
 
 

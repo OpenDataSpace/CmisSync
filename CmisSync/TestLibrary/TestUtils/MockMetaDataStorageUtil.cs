@@ -64,13 +64,13 @@ namespace TestLibrary.TestUtils {
         }
 
         public static Mock<IMappedObject> AddLocalFile(this Mock<IMetaDataStorage> db, IFileInfo path, string id) {
-            var file = Mock.Of<IMappedObject>(
-                f =>
-                f.RemoteObjectId == id &&
-                f.Name == path.Name &&
-                f.Type == MappedObjectType.File);
-            db.AddMappedFile(file, path.FullName);
-            return Mock.Get(file);
+            Mock<IMappedObject> mapped = new Mock<IMappedObject>();
+            mapped.SetupAllProperties();
+            mapped.Setup(o => o.Type).Returns(MappedObjectType.File);
+            mapped.Object.RemoteObjectId = id;
+            mapped.Object.Name = path.Name;
+            db.AddMappedFile(mapped.Object, path.FullName);
+            return mapped;
         }
 
         public static Mock<IMappedObject> AddLocalFolder(this Mock<IMetaDataStorage> db, string path, string id) {

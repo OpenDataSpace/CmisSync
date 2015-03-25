@@ -207,15 +207,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 return doc;
             });
 
-            this.mappedObject = new Mock<IMappedObject>();
-            this.storage.Setup(s => s.GetObjectByRemoteId(It.Is<string>(id => id == this.objectIdOld))).Returns(this.mappedObject.Object);
-            this.mappedObject.SetupAllProperties();
-            this.mappedObject.Setup(o => o.Type).Returns(MappedObjectType.File);
-            this.mappedObject.Object.RemoteObjectId = this.objectIdOld;
-            this.mappedObject.Object.Name = this.fileName;
+            this.mappedObject = this.storage.AddLocalFile(this.localFile.Object, this.objectIdOld);
             this.mappedObject.Object.LastChangeToken = this.changeTokenOld;
-            this.mappedObject.Object.Guid = Guid.NewGuid();
             this.mappedObject.Object.ParentId = this.parentId;
+            this.mappedObject.Object.Guid = Guid.NewGuid();
         }
 
         private void SetUpMocks(bool isPwcUpdateable = true, bool serverCanModifyLastModificationDate = true) {
