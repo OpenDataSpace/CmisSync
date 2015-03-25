@@ -56,10 +56,10 @@ namespace CmisSync.Lib.Streams {
         }
 
         /// <summary>
-        /// Gets or sets the bits per second. Can be null if it is unknown.
+        /// Gets or sets the bits per second.
         /// </summary>
         /// <value>
-        /// The bits per second or null.
+        /// The bits per second.
         /// </value>
         public long BitsPerSecond {
             get {
