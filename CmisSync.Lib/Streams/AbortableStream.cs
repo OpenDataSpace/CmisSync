@@ -5,6 +5,7 @@ namespace CmisSync.Lib.Streams {
 
     public class AbortableStream : StreamWrapper {
         private bool aborted = false;
+        private object l = new object();
         public AbortableStream(Stream s) : base(s) {
         }
 
@@ -21,8 +22,10 @@ namespace CmisSync.Lib.Streams {
         /// Count.
         /// </param>
         public override int Read(byte[] buffer, int offset, int count) {
-            if (this.aborted) {
-                throw new FileTransmission.AbortException();
+            lock(this.l) {
+                if (this.aborted) {
+                    throw new FileTransmission.AbortException();
+                }
             }
 
             return this.Stream.Read(buffer, offset, count);
@@ -44,8 +47,10 @@ namespace CmisSync.Lib.Streams {
             // for it may be chained before CryptoStream, we should write the content for CryptoStream has calculated the hash of the content
             this.Stream.Write(buffer, offset, count);
 
-            if (this.aborted) {
-                throw new FileTransmission.AbortException();
+            lock(this.l) {
+                if (this.aborted) {
+                    throw new FileTransmission.AbortException();
+                }
             }
         }
 
@@ -53,7 +58,9 @@ namespace CmisSync.Lib.Streams {
         /// Abort this instance.
         /// </summary>
         public void Abort() {
-            this.aborted = true;
+            lock(this.l) {
+                this.aborted = true;
+            }
         }
     }
 }
