@@ -4,11 +4,8 @@ namespace CmisSync
 {
 	public partial class TransmissionWindow
 	{
-		private global::Gtk.ScrolledWindow scrolledwindow2;
-		private global::Gtk.VBox vbox5;
-		private global::CmisSync.Widgets.TransmissionWidget transmissionwidget1;
-		private global::CmisSync.Widgets.TransmissionWidget transmissionwidget2;
-		private global::CmisSync.Widgets.TransmissionWidget transmissionwidget3;
+		private global::Gtk.ScrolledWindow GtkScrolledWindow;
+		private global::Gtk.VBox transmissionList;
 
 		protected virtual void Build ()
 		{
@@ -18,47 +15,19 @@ namespace CmisSync
 			this.Title = global::Mono.Unix.Catalog.GetString ("TransmissionWindow");
 			this.WindowPosition = ((global::Gtk.WindowPosition)(4));
 			// Container child CmisSync.TransmissionWindow.Gtk.Container+ContainerChild
-			this.scrolledwindow2 = new global::Gtk.ScrolledWindow ();
-			this.scrolledwindow2.CanFocus = true;
-			this.scrolledwindow2.Name = "scrolledwindow2";
-			this.scrolledwindow2.ShadowType = ((global::Gtk.ShadowType)(1));
-			// Container child scrolledwindow2.Gtk.Container+ContainerChild
+			this.GtkScrolledWindow = new global::Gtk.ScrolledWindow ();
+			this.GtkScrolledWindow.Name = "GtkScrolledWindow";
+			this.GtkScrolledWindow.ShadowType = ((global::Gtk.ShadowType)(1));
+			// Container child GtkScrolledWindow.Gtk.Container+ContainerChild
 			global::Gtk.Viewport w1 = new global::Gtk.Viewport ();
 			w1.ShadowType = ((global::Gtk.ShadowType)(0));
 			// Container child GtkViewport.Gtk.Container+ContainerChild
-			this.vbox5 = new global::Gtk.VBox ();
-			this.vbox5.Name = "vbox5";
-			this.vbox5.Spacing = 6;
-			// Container child vbox5.Gtk.Box+BoxChild
-			this.transmissionwidget1 = new global::CmisSync.Widgets.TransmissionWidget ();
-			this.transmissionwidget1.Events = ((global::Gdk.EventMask)(256));
-			this.transmissionwidget1.Name = "transmissionwidget1";
-			this.vbox5.Add (this.transmissionwidget1);
-			global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox5 [this.transmissionwidget1]));
-			w2.Position = 0;
-			w2.Expand = false;
-			w2.Fill = false;
-			// Container child vbox5.Gtk.Box+BoxChild
-			this.transmissionwidget2 = new global::CmisSync.Widgets.TransmissionWidget ();
-			this.transmissionwidget2.Events = ((global::Gdk.EventMask)(256));
-			this.transmissionwidget2.Name = "transmissionwidget2";
-			this.vbox5.Add (this.transmissionwidget2);
-			global::Gtk.Box.BoxChild w3 = ((global::Gtk.Box.BoxChild)(this.vbox5 [this.transmissionwidget2]));
-			w3.Position = 1;
-			w3.Expand = false;
-			w3.Fill = false;
-			// Container child vbox5.Gtk.Box+BoxChild
-			this.transmissionwidget3 = new global::CmisSync.Widgets.TransmissionWidget ();
-			this.transmissionwidget3.Events = ((global::Gdk.EventMask)(256));
-			this.transmissionwidget3.Name = "transmissionwidget3";
-			this.vbox5.Add (this.transmissionwidget3);
-			global::Gtk.Box.BoxChild w4 = ((global::Gtk.Box.BoxChild)(this.vbox5 [this.transmissionwidget3]));
-			w4.Position = 2;
-			w4.Expand = false;
-			w4.Fill = false;
-			w1.Add (this.vbox5);
-			this.scrolledwindow2.Add (w1);
-			this.Add (this.scrolledwindow2);
+			this.transmissionList = new global::Gtk.VBox ();
+			this.transmissionList.Name = "transmissionList";
+			this.transmissionList.Spacing = 6;
+			w1.Add (this.transmissionList);
+			this.GtkScrolledWindow.Add (w1);
+			this.Add (this.GtkScrolledWindow);
 			if ((this.Child != null)) {
 				this.Child.ShowAll ();
 			}

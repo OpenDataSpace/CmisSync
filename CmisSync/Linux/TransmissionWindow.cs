@@ -19,9 +19,15 @@
 
 namespace CmisSync {
     using System;
+    using System.Collections.Generic;
+
+    using CmisSync.Lib.FileTransmission;
+
+    using CmisSync.Widgets;
 
     public partial class TransmissionWindow : Gtk.Window {
         private TransmissionController controller = new TransmissionController();
+        private Dictionary<Transmission, TransmissionWidget> widgets = new Dictionary<Transmission, TransmissionWidget>();
         public TransmissionWindow() : base(Gtk.WindowType.Toplevel) {
             this.Build();
             this.HideOnDelete();
@@ -36,6 +42,24 @@ namespace CmisSync {
                 // Do not destroy the window, just hide it
                 args.RetVal = true;
                 this.Hide();
+            };
+            this.controller.InsertTransmissionEvent += (Transmission transmission) => {
+                Gtk.Application.Invoke(delegate {
+                    var widget = new TransmissionWidget() { Transmission = transmission };
+                    this.widgets.Add(transmission, widget);
+                    this.transmissionList.PackStart(widget, false, true, 2);
+                    this.transmissionList.Show();
+                    this.ShowAll();
+                });
+            };
+
+            this.controller.DeleteTransmissionEvent += (Transmission transmission) => {
+                Gtk.Application.Invoke(delegate {
+                    var widget = widgets[transmission];
+                    widgets.Remove(transmission);
+                    this.transmissionList.Remove(widget);
+                    this.transmissionList.Show();
+                });
             };
         }
     }
