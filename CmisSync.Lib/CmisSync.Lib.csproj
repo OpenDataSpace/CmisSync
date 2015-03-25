@@ -307,6 +307,7 @@
     <Compile Include="Streams\BandwidthNotifyingStream.cs" />
     <Compile Include="Filter\RepositoryRootDeletedDetection.cs" />
     <Compile Include="Cmis\RepositoryExceptionEventArgs.cs" />
+    <Compile Include="Streams\NotifyPropertyChangedStream.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

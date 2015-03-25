@@ -250,6 +250,7 @@ SOURCES =  \
 	Streams/ChunkedStream.cs \
 	Streams/ForwardReadingStream.cs \
 	Streams/NonClosingHashStream.cs \
+	Streams/NotifyPropertyChangedStream.cs \
 	Streams/OffsetStream.cs \
 	Streams/PausableStream.cs \
 	Streams/ProgressStream.cs \

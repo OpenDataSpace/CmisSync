@@ -23,7 +23,7 @@ namespace CmisSync.Lib.Streams {
     using System.IO;
     using System.Timers;
 
-    public class BandwidthNotifyingStream : StreamWrapper, INotifyPropertyChanged {
+    public class BandwidthNotifyingStream : NotifyPropertyChangedStream {
         /// <summary>
         /// The start time of the usage.
         /// </summary>
@@ -41,18 +41,12 @@ namespace CmisSync.Lib.Streams {
 
         private long bitsPerSecond = 0;
 
-        /// <summary>
-        /// Occurs when property changed.
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public BandwidthNotifyingStream(Stream s) : base(s) {
             this.blockingDetectionTimer = new Timer(2000);
             this.blockingDetectionTimer.Elapsed += delegate(object sender, ElapsedEventArgs args) {
                 this.BitsPerSecond = (long)((this.bytesTransmittedSinceLastSecond * 8) / this.blockingDetectionTimer.Interval);
                 this.bytesTransmittedSinceLastSecond = 0;
             };
-
         }
 
         /// <summary>
@@ -75,17 +69,91 @@ namespace CmisSync.Lib.Streams {
         }
 
         /// <summary>
-        /// This method is called by the Set accessor of each property.
+        /// Read the specified buffer, offset and count.
         /// </summary>
-        /// <param name="propertyName">Property name.</param>
-        private void NotifyPropertyChanged(string propertyName) {
-            if (string.IsNullOrEmpty(propertyName)) {
-                throw new ArgumentNullException("Given property name is null");
+        /// <param name='buffer'>
+        /// Buffer.
+        /// </param>
+        /// <param name='offset'>
+        /// Offset.
+        /// </param>
+        /// <param name='count'>
+        /// Count.
+        /// </param>
+        public override int Read(byte[] buffer, int offset, int count) {
+            int result = this.Stream.Read(buffer, offset, count);
+            this.CalculateBandwidth(result);
+            return result;
+        }
+
+        /// <summary>
+        /// Write the specified buffer, offset and count.
+        /// </summary>
+        /// <param name='buffer'>
+        /// Buffer.
+        /// </param>
+        /// <param name='offset'>
+        /// Offset.
+        /// </param>
+        /// <param name='count'>
+        /// Count.
+        /// </param>
+        public override void Write(byte[] buffer, int offset, int count) {
+            // for it may be chained before CryptoStream, we should write the content for CryptoStream has calculated the hash of the content
+            this.Stream.Write(buffer, offset, count);
+            this.CalculateBandwidth(count);
+        }
+
+        /// <summary>
+        /// Close this instance and calculates the bandwidth of the last second.
+        /// </summary>
+        public override void Close() {
+            this.BitsPerSecond = CalcBitsPerSecond(this.start, DateTime.Now.AddMilliseconds(1), this.bytesTransmittedSinceLastSecond);
+            this.blockingDetectionTimer.Stop();
+            base.Close();
+        }
+
+        /// <summary>
+        /// Calculates the bits per second.
+        /// </summary>
+        /// <returns>
+        /// The bits per second.
+        /// </returns>
+        /// <param name='start'>
+        /// Start time for calculation.
+        /// </param>
+        /// <param name='end'>
+        /// End time for calculation.
+        /// </param>
+        /// <param name='bytes'>
+        /// Bytes in period between start end end.
+        /// </param>
+        private static long CalcBitsPerSecond(DateTime start, DateTime end, long bytes) {
+            if (end < start) {
+                throw new ArgumentException("The end of a transmission must be higher than the start");
             }
 
-            var handler = this.PropertyChanged;
-            if (handler != null) {
-                handler(this, new PropertyChangedEventArgs(propertyName));
+            TimeSpan difference = end - start;
+            double seconds = difference.TotalMilliseconds / 1000d;
+            double dbytes = bytes;
+            return (long)((dbytes * 8) / seconds);
+        }
+
+        /// <summary>
+        /// Calculates the bandwidth.
+        /// </summary>
+        /// <param name='transmittedBytes'>
+        /// Transmitted bytes.
+        /// </param>
+        private void CalculateBandwidth(int transmittedBytes) {
+            this.bytesTransmittedSinceLastSecond += transmittedBytes;
+            var diff = DateTime.Now - this.start;
+            if (diff.Seconds >= 1) {
+                this.BitsPerSecond = CalcBitsPerSecond(this.start, DateTime.Now, this.bytesTransmittedSinceLastSecond);
+                this.bytesTransmittedSinceLastSecond = 0;
+                this.start += diff;
+                this.blockingDetectionTimer.Stop();
+                this.blockingDetectionTimer.Start();
             }
         }
     }

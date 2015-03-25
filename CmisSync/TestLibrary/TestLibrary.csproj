@@ -265,6 +265,8 @@
     <Compile Include="TestUtils\MockOfITransmissionManagerUtil.cs" />
     <Compile Include="FilterTests\RepositoryRootDeletedDetectionTest.cs" />
     <Compile Include="StreamsTests\AbortableStreamTest.cs" />
+    <Compile Include="StreamsTests\BandwidthNotifyingStreamTest.cs" />
+    <Compile Include="StreamsTests\PausableStreamTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

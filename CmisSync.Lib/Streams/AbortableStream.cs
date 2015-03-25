@@ -27,7 +27,7 @@ namespace CmisSync.Lib.Streams {
     /// <summary>
     /// Abortable stream wraps the given stream and add the possibility to abort the stream read and write by throwing an exception.
     /// </summary>
-    public class AbortableStream : StreamWrapper, INotifyPropertyChanged {
+    public class AbortableStream : NotifyPropertyChangedStream {
         private bool aborted = false;
         private AbortException exception;
         private object l = new object();
@@ -38,11 +38,6 @@ namespace CmisSync.Lib.Streams {
         /// <param name="s">Stream which should be abortable.</param>
         public AbortableStream(Stream s) : base(s) {
         }
-
-        /// <summary>
-        /// Occurs when property changed.
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
         /// Gets the exception if the stream communication is aborted. Otherwise null.
@@ -56,10 +51,7 @@ namespace CmisSync.Lib.Streams {
             private set {
                 if (this.exception != value) {
                     this.exception = value;
-                    var handler = this.PropertyChanged;
-                    if (handler != null) {
-                        handler(this, new PropertyChangedEventArgs(Utils.NameOf(() => this.Exception)));
-                    }
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.Exception));
                 }
             }
         }

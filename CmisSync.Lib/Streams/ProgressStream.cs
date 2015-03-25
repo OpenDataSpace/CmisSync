@@ -27,7 +27,7 @@ namespace CmisSync.Lib.Streams {
     /// <summary>
     /// Progress reporting stream.
     /// </summary>
-    public class ProgressStream : StreamWrapper {
+    public class ProgressStream : NotifyPropertyChangedStream {
         /// <summary>
         /// The transmission controller which is used to report the status.
         /// </summary>
@@ -47,6 +47,11 @@ namespace CmisSync.Lib.Streams {
         /// The blocking detection timer.
         /// </summary>
         private Timer blockingDetectionTimer;
+
+        /// <summary>
+        /// The length of the underlaying stream.
+        /// </summary>
+        private long length;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Streams.ProgressStream"/> class.
@@ -86,12 +91,12 @@ namespace CmisSync.Lib.Streams {
         /// </value>
         public override long Length {
             get {
-                long length = this.Stream.Length;
-                if (length > this.transmission.Length) {
-                    this.transmission.Length = length;
+                var newLength = this.Stream.Length;
+                if (this.length != newLength) {
+                    this.length = newLength;
                 }
 
-                return length;
+                return this.length;
             }
         }
 

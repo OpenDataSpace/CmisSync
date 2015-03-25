@@ -286,7 +286,7 @@ namespace TestLibrary.StreamsTests {
             }
         }
 
-        [Test, Category("Fast"), Category("Streams")]
+        [Test, Category("Fast"), Category("Streams"), Ignore("Will be done by BandwidthNotifyingStream")]
         public void EnsureBandwidthIsReportedIfProgressIsShorterThanOneSecond() {
             byte[] inputContent = new byte[1024];
             bool isMoreThanZeroReported = false;
@@ -307,7 +307,7 @@ namespace TestLibrary.StreamsTests {
             Assert.That(transmission.BitsPerSecond, Is.Null);
         }
 
-        [Test, Category("Fast"), Category("Streams")]
+        [Test, Category("Fast"), Category("Streams"), Ignore("Will be done by abortable stream")]
         public void AbortReadIfTransmissionEventIsAborting() {
             byte[] content = new byte[1024];
             var transmission = new Transmission(this.transmissionType, this.filename);
@@ -318,7 +318,7 @@ namespace TestLibrary.StreamsTests {
             }
         }
 
-        [Test, Category("Fast"), Category("Streams")]
+        [Test, Category("Fast"), Category("Streams"), Ignore("Will be done by abortable stream")]
         public void AbortWriteIfTransmissionEventIsAborting() {
             var transmission = new Transmission(this.transmissionType, this.filename);
             using (var stream = new MemoryStream())
@@ -357,7 +357,7 @@ namespace TestLibrary.StreamsTests {
             }
         }
 
-        [Test, Category("Medium"), Category("Streams")]
+        [Test, Category("Medium"), Category("Streams"), Ignore("Will be implemented by pausable stream")]
         public void PauseAndResumeStream([Values(1,2,5)]int seconds) {
             int length = 1024;
             var start = DateTime.Now;
