@@ -19,12 +19,49 @@
 
 namespace CmisSync.Lib.Streams {
     using System;
+    using System.ComponentModel;
     using System.IO;
 
-    public class AbortableStream : StreamWrapper {
+    using CmisSync.Lib.FileTransmission;
+
+    /// <summary>
+    /// Abortable stream wraps the given stream and add the possibility to abort the stream read and write by throwing an exception.
+    /// </summary>
+    public class AbortableStream : StreamWrapper, INotifyPropertyChanged {
         private bool aborted = false;
+        private AbortException exception;
         private object l = new object();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Streams.AbortableStream"/> class.
+        /// </summary>
+        /// <param name="s">Stream which should be abortable.</param>
         public AbortableStream(Stream s) : base(s) {
+        }
+
+        /// <summary>
+        /// Occurs when property changed.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Gets the exception if the stream communication is aborted. Otherwise null.
+        /// </summary>
+        /// <value>The exception.</value>
+        public AbortException Exception {
+            get {
+                return this.exception;
+            }
+
+            private set {
+                if (this.exception != value) {
+                    this.exception = value;
+                    var handler = this.PropertyChanged;
+                    if (handler != null) {
+                        handler(this, new PropertyChangedEventArgs(Utils.NameOf(() => this.Exception)));
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -42,7 +79,8 @@ namespace CmisSync.Lib.Streams {
         public override int Read(byte[] buffer, int offset, int count) {
             lock(this.l) {
                 if (this.aborted) {
-                    throw new FileTransmission.AbortException();
+                    this.Exception = new AbortException();
+                    throw this.exception;
                 }
             }
 
@@ -67,7 +105,8 @@ namespace CmisSync.Lib.Streams {
 
             lock(this.l) {
                 if (this.aborted) {
-                    throw new FileTransmission.AbortException();
+                    this.Exception = new AbortException();
+                    throw this.exception;
                 }
             }
         }

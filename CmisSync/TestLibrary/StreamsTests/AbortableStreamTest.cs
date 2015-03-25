@@ -21,6 +21,7 @@ namespace TestLibrary.StreamsTests {
     using System;
     using System.IO;
 
+    using CmisSync.Lib;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Streams;
 
@@ -57,7 +58,7 @@ namespace TestLibrary.StreamsTests {
         [Test, Category("Fast"), Category("Streams")]
         public void AbortReadIfTransmissionEventIsAborting() {
             byte[] content = new byte[1024];
-            using (var stream = new Mock<MemoryStream>(content) {CallBase = true }.Object)
+            using (var stream = new Mock<MemoryStream>(content) { CallBase = true }.Object)
             using (var underTest = new AbortableStream(stream)) {
                 underTest.Abort();
                 Assert.Throws<AbortException>(() => underTest.ReadByte());
@@ -69,13 +70,31 @@ namespace TestLibrary.StreamsTests {
         [Test, Category("Fast"), Category("Streams")]
         public void AbortWriteIfTransmissionEventIsAborting() {
             using (var inputStream = new MemoryStream(new byte[1024 * 1024 * 10]))
-            using (var stream = new Mock<MemoryStream>() {CallBase = true }.Object)
+            using (var stream = new Mock<MemoryStream>() { CallBase = true }.Object)
             using (var underTest = new AbortableStream(stream)) {
                 underTest.Abort();
                 Assert.Throws<AbortException>(() => inputStream.CopyTo(underTest));
                 Mock.Get(stream).Verify(s => s.WriteByte(It.IsAny<byte>()), Times.AtMostOnce());
                 Mock.Get(stream).Verify(s => s.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>()), Times.AtMostOnce());
             }
+        }
+
+        [Test, Category("Fast"), Category("Streams")]
+        public void NotificationSendOutOnAbortion() {
+            bool notified = false;
+            byte[] content = new byte[1024];
+            using (var stream = new Mock<MemoryStream>(content) { CallBase = true }.Object)
+            using (var underTest = new AbortableStream(stream)) {
+                underTest.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) => {
+                    Assert.That(e.PropertyName, Is.EqualTo(Utils.NameOf((AbortableStream s) => s.Exception)));
+                    Assert.That(underTest.Exception, Is.Not.Null);
+                    notified = true;
+                };
+                underTest.Abort();
+                Assert.Throws<AbortException>(() => underTest.ReadByte());
+            }
+
+            Assert.That(notified, Is.True);
         }
     }
 }
