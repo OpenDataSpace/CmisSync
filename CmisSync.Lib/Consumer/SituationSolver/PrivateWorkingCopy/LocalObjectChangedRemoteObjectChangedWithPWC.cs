@@ -24,9 +24,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     /// <summary>
     /// Local object changed remote object changed situations are decorated if only the local content has been changed. Otherwise the given fallback will solve the situation.
@@ -82,11 +84,63 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             }
 
             IFileInfo localFile = localFileSystemInfo as IFileInfo;
+            IDocument remoteDocument = remoteId as IDocument;
 
             if (remoteContent != ContentChangeType.NONE) {
                 this.fallbackSolver.Solve(localFile, remoteId, localContent, remoteContent);
                 return;
             }
+
+            bool updateLocalDate = false;
+            bool updateRemoteDate = false;
+            var obj = this.Storage.GetObjectByRemoteId(remoteDocument.Id);
+
+            if (localFile.IsContentChangedTo(obj, true)) {
+                updateRemoteDate = true;
+                try {
+                    FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                    this.transmissionManager.AddTransmission(transmissionEvent);
+                    obj.LastChecksum = UploadFileWithPWC(localFile, ref remoteDocument, transmissionEvent);
+                    obj.ChecksumAlgorithmName = "SHA-1";
+                    obj.LastContentSize = remoteDocument.ContentStreamLength ?? localFile.Length;
+                    if (remoteDocument.Id != obj.RemoteObjectId) {
+                        this.TransmissionStorage.RemoveObjectByRemoteObjectId(obj.RemoteObjectId);
+                        obj.RemoteObjectId = remoteDocument.Id;
+                    }
+                } catch (Exception ex) {
+                    if (ex.InnerException is CmisPermissionDeniedException) {
+                        OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", localFile.FullName));
+                        return;
+                    } else if (ex.InnerException is CmisStorageException) {
+                        OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: StorageException", localFile.FullName), ex);
+                        return;
+                    }
+
+                    throw;
+                }
+            } else {
+                //  just date sync
+                if (remoteDocument.LastModificationDate != null && localFile.LastWriteTimeUtc < remoteDocument.LastModificationDate) {
+                    updateLocalDate = true;
+                } else {
+                    updateRemoteDate = true;
+                }
+            }
+
+            if (this.ServerCanModifyDateTimes) {
+                if (updateLocalDate) {
+                    localFile.LastWriteTimeUtc = (DateTime)remoteDocument.LastModificationDate;
+                } else if (updateRemoteDate) {
+                    remoteDocument.UpdateLastWriteTimeUtc(localFile.LastWriteTimeUtc);
+                } else {
+                    throw new ArgumentException();
+                }
+            }
+
+            obj.LastChangeToken = remoteDocument.ChangeToken;
+            obj.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+            obj.LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate;
+            this.Storage.SaveMappedObject(obj);
         }
     }
 }

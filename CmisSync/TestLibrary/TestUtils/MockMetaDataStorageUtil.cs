@@ -54,23 +54,23 @@ namespace TestLibrary.TestUtils {
         }
 
         public static void AddLocalFile(this Mock<IMetaDataStorage> db, string path, string id, Guid uuid) {
-            var file = Mock.Of<IMappedObject>(
-                f =>
-                f.RemoteObjectId == id &&
-                f.Name == Path.GetFileName(path) &&
-                f.Guid == uuid &&
-                f.Type == MappedObjectType.File);
-            db.AddMappedFile(file, path);
+            var file = new Mock<IMappedObject>();
+            file.SetupAllProperties();
+            file.Setup(o => o.Type).Returns(MappedObjectType.File);
+            file.Object.RemoteObjectId = id;
+            file.Object.Name = Path.GetFileName(path);
+            file.Object.Guid = uuid;
+            db.AddMappedFile(file.Object, path);
         }
 
         public static Mock<IMappedObject> AddLocalFile(this Mock<IMetaDataStorage> db, IFileInfo path, string id) {
-            var file = Mock.Of<IMappedObject>(
-                f =>
-                f.RemoteObjectId == id &&
-                f.Name == path.Name &&
-                f.Type == MappedObjectType.File);
-            db.AddMappedFile(file, path.FullName);
-            return Mock.Get(file);
+            var file = new Mock<IMappedObject>();
+            file.SetupAllProperties();
+            file.Setup(o => o.Type).Returns(MappedObjectType.File);
+            file.Object.RemoteObjectId = id;
+            file.Object.Name = path.Name;
+            db.AddMappedFile(file.Object, path.FullName);
+            return file;
         }
 
         public static Mock<IMappedObject> AddLocalFolder(this Mock<IMetaDataStorage> db, string path, string id) {
@@ -83,18 +83,20 @@ namespace TestLibrary.TestUtils {
 
         public static void AddLocalFolder(this Mock<IMetaDataStorage> storage, string path, string id, Guid uuid) {
             var folder = new Mock<IMappedObject>();
-            folder.Setup(f => f.Name).Returns(Path.GetDirectoryName(path));
-            folder.Setup(f => f.RemoteObjectId).Returns(id);
-            folder.Setup(f => f.Type).Returns(MappedObjectType.Folder);
-            folder.Setup(f => f.Guid).Returns(uuid);
+            folder.SetupAllProperties();
+            folder.Setup(o => o.Type).Returns(MappedObjectType.Folder);
+            folder.Object.Name = Path.GetDirectoryName(path);
+            folder.Object.RemoteObjectId = id;
+            folder.Object.Guid = uuid;
             storage.AddMappedFolder(folder.Object, path);
         }
 
         public static Mock<IMappedObject> AddLocalFolder(this Mock<IMetaDataStorage> db, IDirectoryInfo path, string id) {
             var folder = new Mock<IMappedObject>();
-            folder.Setup(f => f.Name).Returns(path.Name);
-            folder.Setup(f => f.RemoteObjectId).Returns(id);
-            folder.Setup(f => f.Type).Returns(MappedObjectType.Folder);
+            folder.SetupAllProperties();
+            folder.Setup(o => o.Type).Returns(MappedObjectType.Folder);
+            folder.Object.Name = path.Name;
+            folder.Object.RemoteObjectId = id;
             db.AddMappedFolder(folder.Object, path.FullName);
             return folder;
         }

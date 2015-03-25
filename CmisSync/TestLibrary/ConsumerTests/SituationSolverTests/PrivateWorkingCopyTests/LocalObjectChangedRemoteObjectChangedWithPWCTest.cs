@@ -19,6 +19,8 @@
 
 namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests {
     using System;
+    using System.Security.Cryptography;
+    using System.IO;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Consumer.SituationSolver;
@@ -26,9 +28,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
+    using DotCMIS.Data;
 
     using Moq;
 
@@ -38,12 +42,29 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
     [TestFixture]
     public class LocalObjectChangedRemoteObjectChangedWithPWCTest {
-        private long chunkSize;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileTransmissionStorage> transmissionStorage;
         private Mock<TransmissionManager> manager;
         private Mock<ISolver> fallbackSolver;
+
+        private readonly string parentId = "parentId";
+        private readonly string fileName = "file.bin";
+        private readonly string objectIdOld = "objectIdOld";
+        private readonly string objectIdPWC = "objectIdPWC";
+        private readonly string objectIdNew = "objectIdNew";
+        private readonly string changeTokenOld = "changeTokenOld";
+        private readonly string changeTokenPWC = "changeTokenPWC";
+        private readonly string changeTokenNew = "changeTokenNew";
+
+        private Mock<IFileInfo> localFile;
+        private Mock<IDocument> remoteDocument;
+        private Mock<IDocument> remoteDocumentPWC;
+        private Mock<IMappedObject> mappedObject;
+
+        private string parentPath;
+        private string localPath;
+        private long chunkSize;
 
         [Test, Category("Fast"), Category("Solver")]
         public void Constructor() {
@@ -91,21 +112,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void FallbackIsNotUsedIfOnlyLocalContentHasBeenChanged(
-            [Values(ContentChangeType.APPENDED, ContentChangeType.CHANGED)]ContentChangeType localChange,
-            [Values(ContentChangeType.NONE)]ContentChangeType remoteChange) {
-            this.SetUpMocks();
-            var underTest = this.CreateSolver();
-            var file = new Mock<IFileInfo>(MockBehavior.Strict).Object;
-            var remoteDoc = new Mock<IDocument>(MockBehavior.Strict).Object;
-            this.fallbackSolver.Setup(s => s.Solve(file, remoteDoc, localChange, remoteChange));
-
-            underTest.Solve(file, remoteDoc, localChange, remoteChange);
-
-            this.fallbackSolver.Verify(s => s.Solve(file, remoteDoc, localChange, remoteChange), Times.Never());
-        }
-
-        [Test, Category("Fast"), Category("Solver")]
         public void FallbackIsCalledIfRemoteContentHasBeenChanged(
             [Values(ContentChangeType.NONE, ContentChangeType.APPENDED, ContentChangeType.CHANGED, ContentChangeType.CREATED, ContentChangeType.DELETED)]ContentChangeType localChange,
             [Values(ContentChangeType.APPENDED, ContentChangeType.CHANGED, ContentChangeType.CREATED, ContentChangeType.DELETED)]ContentChangeType remoteChange) {
@@ -120,17 +126,35 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.fallbackSolver.Verify(s => s.Solve(file, remoteDoc, localChange, remoteChange), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
-        public void OnlyLocalContentHashBeenChanged() {
+        [Test, Category("Fast"), Category("Solver")]
+        public void FallbackIsNotUsedIfOnlyLocalContentHasBeenChanged() {
             this.SetUpMocks();
-            var underTest = this.CreateSolver();
-            var file = new Mock<IFileInfo>(MockBehavior.Strict).Object;
-            var remoteDoc = new Mock<IDocument>(MockBehavior.Strict).Object;
-            this.fallbackSolver.Setup(s => s.Solve(file, remoteDoc, ContentChangeType.CHANGED, ContentChangeType.NONE));
 
-            underTest.Solve(file, remoteDoc, ContentChangeType.CHANGED, ContentChangeType.NONE);
+            this.SetupFile();
+            Mock<IMappedObject> obj = Mock.Get(this.storage.Object.GetObjectByRemoteId(this.objectIdOld));
+            this.mappedObject.Object.LastChecksum = SHA1.Create().ComputeHash(new byte[0]);
+            this.mappedObject.Object.ChecksumAlgorithmName = "SHA-1";
+            this.mappedObject.Object.LastContentSize = 0;
 
-            this.fallbackSolver.Verify(s => s.Solve(file, remoteDoc, ContentChangeType.CHANGED, ContentChangeType.NONE), Times.Never());
+            long fileSize = this.chunkSize * 4;
+            byte[] content = new byte[fileSize];
+            var hash = SHA1.Create().ComputeHash(content);
+            this.localFile.SetupStream(content);
+
+            DateTime now = DateTime.UtcNow;
+            obj.Object.LastRemoteWriteTimeUtc = now - TimeSpan.FromHours(2);
+            this.remoteDocument.Setup(d => d.LastModificationDate).Returns(now - TimeSpan.FromHours(1));
+            obj.Object.LastLocalWriteTimeUtc = now - TimeSpan.FromHours(2);
+            this.localFile.Setup(f => f.LastWriteTimeUtc).Returns(now);
+
+             var underTest = this.CreateSolver();
+            this.fallbackSolver.Setup(s => s.Solve(this.localFile.Object, this.remoteDocument.Object, ContentChangeType.CHANGED, ContentChangeType.NONE));
+
+            underTest.Solve(this.localFile.Object, this.remoteDocument.Object, ContentChangeType.CHANGED, ContentChangeType.NONE);
+
+            this.fallbackSolver.Verify(s => s.Solve(this.localFile.Object, this.remoteDocument.Object, ContentChangeType.CHANGED, ContentChangeType.NONE), Times.Never());
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectIdNew, this.fileName, this.parentId, this.changeTokenNew, contentSize: fileSize, checksum: hash, lastLocalModification: now);
+            this.remoteDocument.VerifyUpdateLastModificationDate(now, Times.Once(), true);
         }
 
         private LocalObjectChangedRemoteObjectChangedWithPWC CreateSolver() {
@@ -140,6 +164,53 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.transmissionStorage.Object,
                 this.manager.Object,
                 this.fallbackSolver.Object);
+        }
+
+        private void SetupFile() {
+            this.parentPath = Path.GetTempPath();
+            this.localPath = Path.Combine(this.parentPath, this.fileName);
+
+            var file = Mock.Of<IFileInfo>(
+                f =>
+                f.FullName == this.localPath &&
+                f.Name == this.fileName &&
+                f.Exists == true &&
+                f.IsExtendedAttributeAvailable() == true);
+            this.localFile = Mock.Get(file);
+
+            var doc = Mock.Of<IDocument>(
+                d =>
+                d.Name == this.fileName &&
+                d.Id == this.objectIdOld &&
+                d.ChangeToken == this.changeTokenOld);
+            this.remoteDocument = Mock.Get(doc);
+            this.session.AddRemoteObject(doc);
+
+            var docPWC = Mock.Of<IDocument>(
+                d =>
+                d.Name == this.fileName &&
+                d.Id == this.objectIdPWC &&
+                d.ChangeToken == this.changeTokenPWC);
+            this.remoteDocumentPWC = Mock.Get(docPWC);
+            this.session.AddRemoteObject(docPWC);
+
+            long length = 0;
+            this.remoteDocumentPWC.Setup(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>())).Callback<IContentStream, bool, bool>((stream, last, refresh) => {
+                byte[] buffer = new byte[stream.Length.GetValueOrDefault()];
+                length += stream.Stream.Read(buffer, 0, buffer.Length);
+            });
+            this.remoteDocumentPWC.Setup(d => d.ContentStreamLength).Returns(() => { return length; });
+
+            this.remoteDocument.SetupCheckout(this.remoteDocumentPWC, this.changeTokenNew, this.objectIdNew);
+            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == this.objectIdNew))).Returns<IObjectId>((id) => {
+                Assert.AreEqual(id.Id, doc.Id);
+                return doc;
+            });
+
+            this.mappedObject = this.storage.AddLocalFile(this.localFile.Object, this.objectIdOld);
+            this.mappedObject.Object.LastChangeToken = this.changeTokenOld;
+            this.mappedObject.Object.ParentId = this.parentId;
+            this.mappedObject.Object.Guid = Guid.NewGuid();
         }
 
         private void SetUpMocks(bool isPwcUpdateable = true, bool serverCanModifyLastModificationDate = true) {
