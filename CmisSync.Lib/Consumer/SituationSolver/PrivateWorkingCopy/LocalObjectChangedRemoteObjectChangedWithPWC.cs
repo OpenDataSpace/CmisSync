@@ -102,6 +102,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     this.transmissionManager.AddTransmission(transmissionEvent);
                     obj.LastChecksum = UploadFileWithPWC(localFile, ref remoteDocument, transmissionEvent);
                     obj.ChecksumAlgorithmName = "SHA-1";
+                    obj.LastContentSize = remoteDocument.ContentStreamLength ?? localFile.Length;
                     if (remoteDocument.Id != obj.RemoteObjectId) {
                         this.TransmissionStorage.RemoveObjectByRemoteObjectId(obj.RemoteObjectId);
                         obj.RemoteObjectId = remoteDocument.Id;

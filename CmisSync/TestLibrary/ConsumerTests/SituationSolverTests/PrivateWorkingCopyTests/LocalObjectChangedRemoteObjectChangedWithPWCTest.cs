@@ -142,10 +142,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.localFile.SetupStream(content);
 
             DateTime now = DateTime.UtcNow;
-            obj.Setup(o => o.LastRemoteWriteTimeUtc).Returns(now - TimeSpan.FromHours(1));
-            this.remoteDocument.Setup(d => d.LastModificationDate).Returns(now);
-            obj.Setup(o => o.LastLocalWriteTimeUtc).Returns(now - TimeSpan.FromHours(2));
-            this.localFile.Object.LastWriteTimeUtc = now;
+            obj.Object.LastRemoteWriteTimeUtc = now - TimeSpan.FromHours(2);
+            this.remoteDocument.Setup(d => d.LastModificationDate).Returns(now - TimeSpan.FromHours(1));
+            obj.Object.LastLocalWriteTimeUtc = now - TimeSpan.FromHours(2);
+            this.localFile.Setup(f => f.LastWriteTimeUtc).Returns(now);
 
              var underTest = this.CreateSolver();
             this.fallbackSolver.Setup(s => s.Solve(this.localFile.Object, this.remoteDocument.Object, ContentChangeType.CHANGED, ContentChangeType.NONE));
@@ -153,7 +153,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             underTest.Solve(this.localFile.Object, this.remoteDocument.Object, ContentChangeType.CHANGED, ContentChangeType.NONE);
 
             this.fallbackSolver.Verify(s => s.Solve(this.localFile.Object, this.remoteDocument.Object, ContentChangeType.CHANGED, ContentChangeType.NONE), Times.Never());
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectIdNew, this.fileName, this.parentId, this.changeTokenNew, contentSize: fileSize, checksum: hash, lastRemoteModification: now, lastLocalModification: now);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectIdNew, this.fileName, this.parentId, this.changeTokenNew, contentSize: fileSize, checksum: hash, lastLocalModification: now);
+            this.remoteDocument.VerifyUpdateLastModificationDate(now, Times.Once(), true);
         }
 
         private LocalObjectChangedRemoteObjectChangedWithPWC CreateSolver() {
@@ -207,6 +208,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             });
 
             this.mappedObject = new Mock<IMappedObject>();
+            this.storage.Setup(s => s.GetObjectByRemoteId(It.Is<string>(id => id == this.objectIdOld))).Returns(this.mappedObject.Object);
             this.mappedObject.SetupAllProperties();
             this.mappedObject.Setup(o => o.Type).Returns(MappedObjectType.File);
             this.mappedObject.Object.RemoteObjectId = this.objectIdOld;
@@ -214,7 +216,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.mappedObject.Object.LastChangeToken = this.changeTokenOld;
             this.mappedObject.Object.Guid = Guid.NewGuid();
             this.mappedObject.Object.ParentId = this.parentId;
-            this.storage.Setup(s => s.GetObjectByRemoteId(It.Is<string>(id => id == this.objectIdOld))).Returns(this.mappedObject.Object);
         }
 
         private void SetUpMocks(bool isPwcUpdateable = true, bool serverCanModifyLastModificationDate = true) {
