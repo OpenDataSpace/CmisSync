@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -98,9 +99,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             if (localFile.IsContentChangedTo(obj, true)) {
                 updateRemoteDate = true;
                 try {
-                    FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
-                    this.transmissionManager.AddTransmission(transmissionEvent);
-                    obj.LastChecksum = UploadFileWithPWC(localFile, ref remoteDocument, transmissionEvent);
+                    var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                    obj.LastChecksum = UploadFileWithPWC(localFile, ref remoteDocument, transmission);
                     obj.ChecksumAlgorithmName = "SHA-1";
                     obj.LastContentSize = remoteDocument.ContentStreamLength ?? localFile.Length;
                     if (remoteDocument.Id != obj.RemoteObjectId) {
