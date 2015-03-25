@@ -169,6 +169,7 @@ SOURCES =  \
 	StorageTests/FileSystemTests/FileSystemWrapperTests.cs \
 	StorageTests/FileSystemTests/LongFileAndPathNameSupportTest.cs \
 	StorageTests/FileSystemTests/Utf8FileNameNormalizationTest.cs \
+	StreamsTests/AbortableStreamTest.cs \
 	StreamsTests/BandwidthLimitedStreamTest.cs \
 	StreamsTests/ChunkedStreamTest.cs \
 	StreamsTests/NonClosingHashStreamTest.cs \
