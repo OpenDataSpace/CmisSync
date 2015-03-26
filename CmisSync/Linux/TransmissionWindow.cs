@@ -50,7 +50,6 @@ namespace CmisSync {
                     this.widgets.Add(transmission, widget);
                     this.transmissionList.PackStart(widget, false, true, 2);
                     this.transmissionList.Show();
-                    this.ShowAll();
                 });
             };
 
