@@ -56,7 +56,7 @@ namespace TestLibrary.StreamsTests {
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void AbortReadIfTransmissionEventIsAborting() {
+        public void AbortReadIfAbortIsCalled() {
             byte[] content = new byte[1024];
             using (var stream = new Mock<MemoryStream>(content) { CallBase = true }.Object)
             using (var underTest = new AbortableStream(stream)) {
@@ -68,7 +68,7 @@ namespace TestLibrary.StreamsTests {
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void AbortWriteIfTransmissionEventIsAborting() {
+        public void AbortWriteIfAbortIsCalled() {
             using (var inputStream = new MemoryStream(new byte[1024 * 1024 * 10]))
             using (var stream = new Mock<MemoryStream>() { CallBase = true }.Object)
             using (var underTest = new AbortableStream(stream)) {
