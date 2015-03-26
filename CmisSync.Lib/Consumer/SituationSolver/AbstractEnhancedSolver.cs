@@ -258,21 +258,21 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <param name="doc">Remote document.</param>
         /// <param name="transmissionManager">Transmission manager.</param>
         /// <param name="transmissionEvent">File Transmission event.</param>
-        protected byte[] UploadFile(IFileInfo localFile, IDocument doc, Transmission transmissionEvent) {
+        protected byte[] UploadFile(IFileInfo localFile, IDocument doc, Transmission transmission) {
             using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
                 byte[] hash = null;
                 IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
                 using (var hashAlg = new SHA1Managed()) {
                     try {
-                        uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
+                        uploader.UploadFile(doc, file, transmission, hashAlg);
                         hash = hashAlg.Hash;
                     } catch (Exception ex) {
-                        transmissionEvent.FailedException = ex;
+                        transmission.FailedException = ex;
                         throw;
                     }
                 }
 
-                transmissionEvent.Status = TransmissionStatus.FINISHED;
+                transmission.Status = TransmissionStatus.FINISHED;
                 return hash;
             }
         }
