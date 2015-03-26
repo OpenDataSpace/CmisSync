@@ -175,6 +175,7 @@ SOURCES =  \
 	StreamsTests/NonClosingHashStreamTest.cs \
 	StreamsTests/OffsetStreamTest.cs \
 	StreamsTests/ProgressStreamTest.cs \
+	StreamsTests/TransmissionStreamTest.cs \
 	TestUtils/FolderTree.cs \
 	TestUtils/FolderTreeTest.cs \
 	TestUtils/IDocumentAssertUtils.cs \

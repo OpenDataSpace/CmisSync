@@ -22,6 +22,10 @@ namespace CmisSync.Lib.Streams {
         /// <param name="wrappedStream">Wrapped stream.</param>
         /// <param name="transmission">Transmission object to be notified about changes and listened to events as well.</param>
         public TransmissionStream(Stream wrappedStream, Transmission transmission) {
+            if (transmission == null) {
+                throw new ArgumentNullException("Given transmission is null");
+            }
+
             this.abort = new AbortableStream(wrappedStream);
             this.pause = new PausableStream(this.abort);
             this.bandwidthNotify = new BandwidthNotifyingStream(this.pause);
