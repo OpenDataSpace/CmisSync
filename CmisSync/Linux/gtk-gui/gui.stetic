@@ -636,7 +636,7 @@
       </widget>
     </child>
   </widget>
-  <widget class="Gtk.Window" id="CmisSync.TransmissionWindow" design-size="400 300">
+  <widget class="Gtk.Window" id="CmisSync.TransmissionWindow" design-size="542 324">
     <property name="MemberName" />
     <property name="Title" translatable="yes">TransmissionWindow</property>
     <property name="WindowPosition">CenterOnParent</property>
