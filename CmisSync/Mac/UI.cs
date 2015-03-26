@@ -85,7 +85,6 @@ namespace CmisSync {
         }
 
         public void Run() {
-
             NSApplication.Main(new string[0]);
         }
 
