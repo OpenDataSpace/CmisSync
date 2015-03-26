@@ -57,7 +57,12 @@ namespace CmisSync {
             foreach (object item in ListView.SelectedItems) {
                 var transmission = item as Transmission;
                 if (transmission.Done()) {
-                    Process.Start(transmission.Path);
+                    try {
+                        if (System.IO.File.Exists(transmission.Path)) {
+                            Process.Start(transmission.Path);
+                        }
+                    } catch (Exception) {
+                    }
                 }
             }
         }
@@ -65,7 +70,12 @@ namespace CmisSync {
         private void ListViewItem_OpenFileLocation(object sender, RoutedEventArgs e) {
             foreach (object item in ListView.SelectedItems) {
                 var transmission = item as Transmission;
-                Process.Start("explorer.exe", "/select,\"" + transmission.Path + "\"");
+                try {
+                    if (System.IO.File.Exists(transmission.Path)) {
+                        Process.Start("explorer.exe", "/select,\"" + transmission.Path + "\"");
+                    }
+                } catch (Exception) {
+                }
             }
         }
     }

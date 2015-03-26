@@ -67,13 +67,11 @@ namespace CmisSync {
         }
 
         private void Controller_ShowWindowEvent() {
-            Dispatcher.BeginInvoke((Action)delegate
-            {
+            Dispatcher.BeginInvoke((Action)delegate {
                 Show();
                 Activate();
                 BringIntoView();
-                if (WindowState == System.Windows.WindowState.Minimized)
-                {
+                if (WindowState == System.Windows.WindowState.Minimized) {
                     WindowState = System.Windows.WindowState.Normal;
                 }
             });
