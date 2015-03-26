@@ -30,7 +30,7 @@ namespace TestLibrary.StreamsTests {
     public class PausableStreamTest {
         [Test, Category("Medium"), Category("Streams"), Timeout(6000)]
         public void PauseAndResumeStream([Values(1, 2, 5)]int seconds) {
-            int length = 1024;
+            int length = 1024 * 1024 * 10;
             var start = DateTime.Now;
             byte[] content = new byte[length];
             using (var inputStream = new MemoryStream(content))
@@ -45,6 +45,48 @@ namespace TestLibrary.StreamsTests {
                     }
                 });
                 System.Threading.Thread.Sleep(seconds * 1000);
+                underTest.Resume();
+                task.Wait();
+            }
+        }
+
+        [Test, Category("Fast"), Category("Streams"), Timeout(6000)]
+        public void PausableStreamDoesNotPauseWithoutCallingPause() {
+            int length = 1024 * 1024 * 10;
+            byte[] content = new byte[length];
+            using (var inputStream = new MemoryStream(content))
+                using (var underTest = new PausableStream(inputStream)) {
+                var task = Task.Factory.StartNew(() => {
+                    using (var outputStream = new MemoryStream()) {
+                        underTest.CopyTo(outputStream);
+                        Assert.That(outputStream.Length, Is.EqualTo(length));
+                    }
+                });
+                task.Wait();
+            }
+        }
+
+        [Test, Category("Fast"), Category("Streams"), Timeout(2000)]
+        public void PausableStreamDoesPauseAndResumeOnMultiplePauseCalls([Values(1)]int seconds) {
+            int length = 1024 * 1024 * 10;
+            var start = DateTime.Now;
+            byte[] content = new byte[length];
+            using (var inputStream = new MemoryStream(content))
+                using (var underTest = new PausableStream(inputStream)) {
+                underTest.Pause();
+                underTest.Pause();
+                underTest.Pause();
+                underTest.Pause();
+                var task = Task.Factory.StartNew(() => {
+                    using (var outputStream = new MemoryStream()) {
+                        underTest.CopyTo(outputStream);
+                        Assert.That(outputStream.Length, Is.EqualTo(length));
+                        var duration = DateTime.Now - start;
+                        Assert.That(Math.Round(duration.TotalSeconds), Is.InRange(seconds, seconds + 1));
+                    }
+                });
+                System.Threading.Thread.Sleep(seconds * 1000);
+                underTest.Resume();
                 underTest.Resume();
                 task.Wait();
             }

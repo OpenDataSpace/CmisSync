@@ -26,13 +26,16 @@ namespace CmisSync.Lib.Streams {
     /// Pausable stream takes the given stream and causes the reading or writing thread to pause if pause is called until resume is called.
     /// </summary>
     public class PausableStream : StreamWrapper {
-        private ManualResetEvent waitHandle = new ManualResetEvent(false);
-
+        private ManualResetEventSlim waitHandle = new ManualResetEventSlim(true);
+        private CancellationTokenSource cancelTaskSource;
+        private CancellationToken cancelToken;
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Streams.PausableStream"/> class.
         /// </summary>
         /// <param name="s">Stream which should be wrapped and extended by the possibility to be paused on read or write by another thread.</param>
         public PausableStream(Stream s) : base(s) {
+            this.cancelTaskSource = new CancellationTokenSource();
+            this.cancelToken = this.cancelTaskSource.Token;
         }
 
         /// <summary>
@@ -52,7 +55,7 @@ namespace CmisSync.Lib.Streams {
             this.Stream.Write(buffer, offset, count);
 
             // Pause here
-            this.waitHandle.WaitOne();
+            this.waitHandle.Wait(this.cancelToken);
         }
 
         /// <summary>
@@ -69,8 +72,13 @@ namespace CmisSync.Lib.Streams {
         /// </param>
         public override int Read(byte[] buffer, int offset, int count) {
             // Pause here
-            this.waitHandle.WaitOne();
+            this.waitHandle.Wait(this.cancelToken);
+
             return this.Stream.Read(buffer, offset, count);
+        }
+
+        public override void Close() {
+            base.Close();
         }
 
         /// <summary>
