@@ -30,6 +30,13 @@ namespace CmisSync.Lib.Streams {
             this.pause = new PausableStream(this.abort);
             this.bandwidthNotify = new BandwidthNotifyingStream(this.pause);
             this.progress = new ProgressStream(this.bandwidthNotify);
+            this.abort.PropertyChanged += (object sender, PropertyChangedEventArgs e) => {
+                var a = sender as AbortableStream;
+                if (e.PropertyName == Utils.NameOf(() => a.Exception)) {
+                    transmission.Status = TransmissionStatus.ABORTED;
+                    transmission.FailedException = a.Exception;
+                }
+            };
             this.bandwidthNotify.PropertyChanged += (object sender, PropertyChangedEventArgs e) => {
                 var s = sender as BandwidthNotifyingStream;
                 if (e.PropertyName == Utils.NameOf(() => s.BitsPerSecond)) {
