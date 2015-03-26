@@ -31,10 +31,10 @@
 //
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
-using System.ComponentModel;
 
 namespace CmisSync {
     using System;
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.IO;
     using System.Collections.Generic;
@@ -192,8 +192,7 @@ namespace CmisSync {
                 InsertNotificationCredentials(reponame);
             };
 
-            SuccessfulLogin += delegate(string reponame)
-            {
+            SuccessfulLogin += delegate(string reponame) {
                 RemoveNotificationCredentials(reponame);
             };
 
@@ -202,6 +201,14 @@ namespace CmisSync {
             };
 
             OnTransmissionListChanged += delegate {
+                var count = this.ActiveTransmissions().Count;
+                using (var a = new NSAutoreleasePool()) {
+                    notificationCenter.BeginInvokeOnMainThread(delegate {
+                    NSApplication.SharedApplication.DockTile.ShowsApplicationBadge = count > 0;
+                    NSApplication.SharedApplication.DockTile.BadgeLabel = count > 0 ? count.ToString() : null;
+                    });
+                }
+
                 if (!ConfigManager.CurrentConfig.Notifications) {
                     return;
                 }
