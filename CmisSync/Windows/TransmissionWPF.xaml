@@ -16,11 +16,18 @@
             </ListView.Resources>
             <ListView.View>
                 <GridView>
-                    <GridViewColumn x:Name="ColumnRepo" Header="Repo" DisplayMemberBinding="{Binding Repository}" Width="150"/>
-                    <GridViewColumn x:Name="ColumnPath" Header="Path" DisplayMemberBinding="{Binding RelativePath}" Width="200"/>
-                    <GridViewColumn x:Name="ColumnStatus" Header="Status" DisplayMemberBinding="{Binding Status}" Width="150"/>
-                    <GridViewColumn x:Name="ColumnProgress" Header="Progress" DisplayMemberBinding="{Binding Percent}" Width="100"/>
-                    <GridViewColumn x:Name="ColumnDate" Header="UpdateTime" DisplayMemberBinding="{Binding LastModification}" Width="100"/>
+                    <GridViewColumn x:Name="ColumnRepo" Header="Repo" DisplayMemberBinding="{Binding Repository}" Width="Auto"/>
+                    <GridViewColumn x:Name="ColumnPath" Header="Path" DisplayMemberBinding="{Binding RelativePath}" Width="Auto"/>
+                    <GridViewColumn x:Name="ColumnStatus" Header="Status" DisplayMemberBinding="{Binding Status}" Width="Auto"/>
+                    <GridViewColumn x:Name="ColumnProgress" Header="Progress" Width="100">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ProgressBar Minimum="0" Maximum="100" Value="{Binding Path=Percent, Mode=OneWay}" MinWidth="80" Height="Auto" Width="Auto">
+                                </ProgressBar>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn x:Name="ColumnDate" Header="UpdateTime" DisplayMemberBinding="{Binding LastModification}" Width="Auto"/>
                 </GridView>
             </ListView.View>
             <ListView.ItemContainerStyle>
