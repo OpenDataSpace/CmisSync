@@ -46,7 +46,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     /// </summary>
     public class LocalObjectAddedWithPWC : AbstractEnhancedSolverWithPWC {
         private readonly ISolver folderOrEmptyFileAddedSolver;
-        private readonly TransmissionManager transmissionManager;
+        private readonly ITransmissionManager transmissionManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.PWC.LocalObjectAddedWithPWC"/> class.
@@ -60,7 +60,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            TransmissionManager manager,
+            ITransmissionManager manager,
             ISolver localFolderOrEmptyFileAddedSolver) : base(session, storage, transmissionStorage)
         {
             if (localFolderOrEmptyFileAddedSolver == null) {
