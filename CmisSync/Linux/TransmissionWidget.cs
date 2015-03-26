@@ -32,6 +32,9 @@ namespace CmisSync.Widgets {
 
         private Timer animation;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Widgets.TransmissionWidget"/> class.
+        /// </summary>
         public TransmissionWidget() {
             this.Build();
             this.animation = new Timer() {
@@ -45,7 +48,15 @@ namespace CmisSync.Widgets {
             };
         }
 
+        /// <summary>
+        /// Gets or sets the monitored transmission.
+        /// </summary>
+        /// <value>The transmission.</value>
         public Transmission Transmission {
+            get {
+                return this.transmission;
+            }
+
             set {
                 if (this.transmission != value) {
                     if (this.transmission != null) {
@@ -67,9 +78,16 @@ namespace CmisSync.Widgets {
                     this.UpdateSizeAndPositionStatus(this.transmission);
                 }
             }
+        }
 
+        private double Progress {
             get {
-                return this.transmission;
+                return this.transmissionProgressBar.Fraction;
+            }
+
+            set {
+                this.transmissionProgressBar.Fraction = value;
+                this.transmissionProgressBar.Text = CmisSync.Lib.Utils.FormatPercent(value * 100);
             }
         }
 
@@ -99,17 +117,6 @@ namespace CmisSync.Widgets {
                 Gtk.Application.Invoke(delegate {
                     this.UpdateStatus(t.Status);
                 });
-            }
-        }
-
-        public double Progress {
-            get {
-                return this.transmissionProgressBar.Fraction;
-            }
-
-            set {
-                this.transmissionProgressBar.Fraction = value;
-                this.transmissionProgressBar.Text = CmisSync.Lib.Utils.FormatPercent(value * 100);
             }
         }
 
