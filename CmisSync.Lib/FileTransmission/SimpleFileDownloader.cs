@@ -74,8 +74,8 @@ namespace CmisSync.Lib.FileTransmission {
                 contentStream = remoteDocument.GetContentStream();
             }
 
-            using (ProgressStream progressStream = new ProgressStream(localFileStream, transmission))
-            using (CryptoStream hashstream = new CryptoStream(progressStream, hashAlg, CryptoStreamMode.Write))
+            using (var transmissionStream = transmission.CreateStream(localFileStream))
+            using (CryptoStream hashstream = new CryptoStream(transmissionStream, hashAlg, CryptoStreamMode.Write))
             using (Stream remoteStream = contentStream != null ? contentStream.Stream : new MemoryStream(0)) {
                 transmission.Length = remoteDocument.ContentStreamLength;
                 transmission.Position = offset;

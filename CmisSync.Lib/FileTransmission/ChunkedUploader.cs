@@ -84,10 +84,10 @@ namespace CmisSync.Lib.FileTransmission {
             for (long offset = localFileStream.Position; offset < localFileStream.Length; offset += this.ChunkSize) {
                 bool isFirstChunk = offset == 0;
                 bool isLastChunk = (offset + this.ChunkSize) >= localFileStream.Length;
-                using (NonClosingHashStream hashstream = new NonClosingHashStream(localFileStream, hashAlg, CryptoStreamMode.Read))
-                using (ChunkedStream chunkstream = new ChunkedStream(hashstream, this.ChunkSize))
-                using (OffsetStream offsetstream = new OffsetStream(chunkstream, offset))
-                using (ProgressStream progressstream = new ProgressStream(offsetstream, transmission)) {
+                using (var hashstream = new NonClosingHashStream(localFileStream, hashAlg, CryptoStreamMode.Read))
+                using (var chunkstream = new ChunkedStream(hashstream, this.ChunkSize))
+                using (var offsetstream = new OffsetStream(chunkstream, offset))
+                using (var transmissionStream = transmission.CreateStream(offsetstream)) {
                     transmission.Length = localFileStream.Length;
                     transmission.Position = offset;
                     chunkstream.ChunkPosition = offset;
@@ -101,7 +101,7 @@ namespace CmisSync.Lib.FileTransmission {
                         contentStream.Length = this.ChunkSize;
                     }
 
-                    contentStream.Stream = progressstream;
+                    contentStream.Stream = transmissionStream;
                     try {
                         if (isFirstChunk && result.ContentStreamId != null && overwrite) {
                             result.DeleteContentStream(true);

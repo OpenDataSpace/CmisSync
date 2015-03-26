@@ -140,8 +140,7 @@ namespace CmisSync.Lib.FileTransmission
         }
 
         private int DownloadNextChunk(IDocument remoteDocument, long offset, long remainingBytes, Transmission transmission, Stream outputstream, HashAlgorithm hashAlg) {
-            lock(this.disposeLock)
-            {
+            lock(this.disposeLock) {
                 if (this.disposed) {
                     transmission.Status = TransmissionStatus.ABORTED;
                     throw new ObjectDisposedException(transmission.Path);
@@ -151,11 +150,10 @@ namespace CmisSync.Lib.FileTransmission
                 transmission.Length = remoteDocument.ContentStreamLength;
                 transmission.Position = offset;
 
-                using (Stream remoteStream = contentStream.Stream)
-                using (ForwardReadingStream forwardstream = new ForwardReadingStream(remoteStream))
-                using (OffsetStream offsetstream = new OffsetStream(forwardstream, offset))
-                using (ProgressStream progress = new ProgressStream(offsetstream, transmission))
-                {
+                using (var remoteStream = contentStream.Stream)
+                using (var forwardstream = new ForwardReadingStream(remoteStream))
+                using (var offsetstream = new OffsetStream(forwardstream, offset))
+                using (var progress = transmission.CreateStream(offsetstream)) {
                     byte[] buffer = new byte[8 * 1024];
                     int result = 0;
                     int len;
