@@ -76,6 +76,17 @@ namespace CmisSync.Widgets {
                     };
                     this.UpdateStatus(this.transmission.Status);
                     this.UpdateSizeAndPositionStatus(this.transmission);
+                    switch (this.transmission.Type) {
+                    case TransmissionType.DOWNLOAD_NEW_FILE:
+                        this.fileTypeImage.Pixbuf = UIHelpers.GetIcon("dataspacesync-downloading", 16);
+                        break;
+                    case TransmissionType.UPLOAD_NEW_FILE:
+                        this.fileTypeImage.Pixbuf = UIHelpers.GetIcon("dataspacesync-uploading", 16);
+                        break;
+                    default:
+                        this.fileTypeImage.Pixbuf = UIHelpers.GetIcon("dataspacesync-updating", 16);
+                        break;
+                    }
                 }
             }
         }
