@@ -255,6 +255,7 @@ SOURCES =  \
 	Streams/PausableStream.cs \
 	Streams/ProgressStream.cs \
 	Streams/StreamWrapper.cs \
+	Streams/TransmissionStream.cs \
 	Utils.cs
 
 EXTRA_DIST = CmisSync.Lib.csproj StaticDefines.cs

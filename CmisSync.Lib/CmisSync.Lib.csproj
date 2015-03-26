@@ -308,6 +308,7 @@
     <Compile Include="Filter\RepositoryRootDeletedDetection.cs" />
     <Compile Include="Cmis\RepositoryExceptionEventArgs.cs" />
     <Compile Include="Streams\NotifyPropertyChangedStream.cs" />
+    <Compile Include="Streams\TransmissionStream.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
