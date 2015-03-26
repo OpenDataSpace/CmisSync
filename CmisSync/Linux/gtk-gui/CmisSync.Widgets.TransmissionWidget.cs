@@ -43,7 +43,8 @@ namespace CmisSync.Widgets
 			this.fileNameLabel = new global::Gtk.Label ();
 			this.fileNameLabel.Name = "fileNameLabel";
 			this.fileNameLabel.Xalign = 0F;
-			this.fileNameLabel.LabelProp = global::Mono.Unix.Catalog.GetString ("label1");
+			this.fileNameLabel.UseMarkup = true;
+			this.fileNameLabel.Selectable = true;
 			this.vbox1.Add (this.fileNameLabel);
 			global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.fileNameLabel]));
 			w2.Position = 0;
@@ -62,9 +63,9 @@ namespace CmisSync.Widgets
 			this.hbox3.Spacing = 6;
 			// Container child hbox3.Gtk.Box+BoxChild
 			this.statusDetailsLabel = new global::Gtk.Label ();
+			this.statusDetailsLabel.Sensitive = false;
 			this.statusDetailsLabel.Name = "statusDetailsLabel";
 			this.statusDetailsLabel.Xalign = 0F;
-			this.statusDetailsLabel.LabelProp = global::Mono.Unix.Catalog.GetString ("label2");
 			this.statusDetailsLabel.UseMarkup = true;
 			this.statusDetailsLabel.Selectable = true;
 			this.statusDetailsLabel.SingleLineMode = true;
@@ -75,8 +76,8 @@ namespace CmisSync.Widgets
 			w4.Fill = false;
 			// Container child hbox3.Gtk.Box+BoxChild
 			this.bandwidthLabel = new global::Gtk.Label ();
+			this.bandwidthLabel.Sensitive = false;
 			this.bandwidthLabel.Name = "bandwidthLabel";
-			this.bandwidthLabel.LabelProp = global::Mono.Unix.Catalog.GetString ("label3");
 			this.hbox3.Add (this.bandwidthLabel);
 			global::Gtk.Box.BoxChild w5 = ((global::Gtk.Box.BoxChild)(this.hbox3 [this.bandwidthLabel]));
 			w5.Position = 2;
@@ -84,9 +85,9 @@ namespace CmisSync.Widgets
 			w5.Fill = false;
 			// Container child hbox3.Gtk.Box+BoxChild
 			this.repoLabel = new global::Gtk.Label ();
+			this.repoLabel.Sensitive = false;
 			this.repoLabel.Name = "repoLabel";
 			this.repoLabel.Xalign = 0F;
-			this.repoLabel.LabelProp = global::Mono.Unix.Catalog.GetString ("label2");
 			this.hbox3.Add (this.repoLabel);
 			global::Gtk.Box.BoxChild w6 = ((global::Gtk.Box.BoxChild)(this.hbox3 [this.repoLabel]));
 			w6.Position = 3;
@@ -94,9 +95,9 @@ namespace CmisSync.Widgets
 			w6.Fill = false;
 			// Container child hbox3.Gtk.Box+BoxChild
 			this.lastModificationLabel = new global::Gtk.Label ();
+			this.lastModificationLabel.Sensitive = false;
 			this.lastModificationLabel.Name = "lastModificationLabel";
 			this.lastModificationLabel.Xalign = 0F;
-			this.lastModificationLabel.LabelProp = global::Mono.Unix.Catalog.GetString ("label1");
 			this.hbox3.Add (this.lastModificationLabel);
 			global::Gtk.Box.BoxChild w7 = ((global::Gtk.Box.BoxChild)(this.hbox3 [this.lastModificationLabel]));
 			w7.PackType = ((global::Gtk.PackType)(1));

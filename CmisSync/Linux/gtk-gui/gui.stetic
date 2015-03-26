@@ -515,7 +515,8 @@
               <widget class="Gtk.Label" id="fileNameLabel">
                 <property name="MemberName" />
                 <property name="Xalign">0</property>
-                <property name="LabelProp" translatable="yes">label1</property>
+                <property name="UseMarkup">True</property>
+                <property name="Selectable">True</property>
               </widget>
               <packing>
                 <property name="Position">0</property>
@@ -541,8 +542,8 @@
                 <child>
                   <widget class="Gtk.Label" id="statusDetailsLabel">
                     <property name="MemberName" />
+                    <property name="Sensitive">False</property>
                     <property name="Xalign">0</property>
-                    <property name="LabelProp" translatable="yes">label2</property>
                     <property name="UseMarkup">True</property>
                     <property name="Selectable">True</property>
                     <property name="SingleLineMode">True</property>
@@ -560,7 +561,7 @@
                 <child>
                   <widget class="Gtk.Label" id="bandwidthLabel">
                     <property name="MemberName" />
-                    <property name="LabelProp" translatable="yes">label3</property>
+                    <property name="Sensitive">False</property>
                   </widget>
                   <packing>
                     <property name="Position">2</property>
@@ -572,8 +573,8 @@
                 <child>
                   <widget class="Gtk.Label" id="repoLabel">
                     <property name="MemberName" />
+                    <property name="Sensitive">False</property>
                     <property name="Xalign">0</property>
-                    <property name="LabelProp" translatable="yes">label2</property>
                   </widget>
                   <packing>
                     <property name="Position">3</property>
@@ -588,8 +589,8 @@
                 <child>
                   <widget class="Gtk.Label" id="lastModificationLabel">
                     <property name="MemberName" />
+                    <property name="Sensitive">False</property>
                     <property name="Xalign">0</property>
-                    <property name="LabelProp" translatable="yes">label1</property>
                   </widget>
                   <packing>
                     <property name="PackType">End</property>
