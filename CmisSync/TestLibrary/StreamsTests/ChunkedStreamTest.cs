@@ -24,6 +24,7 @@ namespace TestLibrary.StreamsTests {
     using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
+    using CmisSync.Lib.Streams;
 
     using NUnit.Framework;
 
