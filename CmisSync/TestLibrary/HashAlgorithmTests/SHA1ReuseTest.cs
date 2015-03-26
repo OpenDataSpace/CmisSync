@@ -45,8 +45,8 @@ namespace TestLibrary.HashAlgorithmTests {
         }
 
         [Test, Category("Fast"), Category("Hash")]
-        public void Compute1Byte() {
-            byte[] data = new byte[1];
+        public void ComputeArray([Values(0, 1, 2, 10, 1024, 325245)]long length) {
+            byte[] data = new byte[length];
 
             using (SHA1Managed sha1 = new SHA1Managed())
             using (SHA1Reuse reuse = new SHA1Reuse()) {
@@ -93,26 +93,7 @@ namespace TestLibrary.HashAlgorithmTests {
         }
 
         [Test, Category("Fast"), Category("Hash")]
-        public void ComputeBlocksBy1ByteAsBlockSize() {
-            int dataLength = 1;
-            byte[] data = new byte[dataLength];
-
-            using (SHA1Managed sha1 = new SHA1Managed())
-            using (SHA1Reuse reuse = new SHA1Reuse()) {
-                for (int i = 0; i < 10; ++i) {
-                    sha1.TransformBlock(data, 0, dataLength, data, 0);
-                    reuse.TransformBlock(data, 0, dataLength, data, 0);
-                }
-
-                sha1.TransformFinalBlock(data, dataLength, 0);
-                reuse.TransformFinalBlock(data, dataLength, 0);
-                Assert.IsTrue(sha1.Hash.SequenceEqual(reuse.Hash));
-            }
-        }
-
-        [Test, Category("Fast"), Category("Hash")]
-        public void ComputeBlocksBy1024BytesAsBlockSize() {
-            int dataLength = 1024;
+        public void ComputeBlocksWithBlockSize([Values(1, 1024, 324734)]int dataLength) {
             byte[] data = new byte[dataLength];
 
             using (SHA1Managed sha1 = new SHA1Managed())
