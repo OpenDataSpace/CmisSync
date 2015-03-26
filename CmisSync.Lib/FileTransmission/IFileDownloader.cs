@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.FileTransmission
-{
+namespace CmisSync.Lib.FileTransmission {
     using System;
     using System.IO;
     using System.Security.Cryptography;
@@ -30,8 +29,7 @@ namespace CmisSync.Lib.FileTransmission
     /// <summary>
     /// File downloader interface.
     /// </summary>
-    public interface IFileDownloader : IDisposable
-    {
+    public interface IFileDownloader : IDisposable {
         /// <summary>
         /// Downloads the file and returns the SHA-1 hash of the content of the saved file
         /// </summary>
