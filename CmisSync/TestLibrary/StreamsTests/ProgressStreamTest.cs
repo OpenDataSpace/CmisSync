@@ -35,9 +35,6 @@ namespace TestLibrary.StreamsTests {
 
     [TestFixture]
     public class ProgressStreamTest {
-        private readonly string filename = "filename";
-        private readonly TransmissionType transmissionType = TransmissionType.DOWNLOAD_NEW_FILE;
-
         private int lengthCalls;
         private int positionCalls;
         private long position;
@@ -51,8 +48,8 @@ namespace TestLibrary.StreamsTests {
             this.percent = 0;
         }
 
-        [Test, Category("Fast"), Category("Streams"), TestCaseSource("GetAllTypes")]
-        public void ConstructorExtractsLengthOfGivenStream(TransmissionType type) {
+        [Test, Category("Fast"), Category("Streams")]
+        public void ConstructorExtractsLengthOfGivenStream() {
             long length = 10;
             using (var underTest = new ProgressStream(Mock.Of<Stream>(s => s.Length == length))) {
                 Assert.That(underTest.Length, Is.EqualTo(length));
