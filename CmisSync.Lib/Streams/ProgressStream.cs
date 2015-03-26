@@ -22,36 +22,19 @@ namespace CmisSync.Lib.Streams {
     using System.IO;
     using System.Timers;
 
-    using CmisSync.Lib.FileTransmission;
-
     /// <summary>
     /// Progress reporting stream.
     /// </summary>
     public class ProgressStream : NotifyPropertyChangedStream {
         /// <summary>
-        /// The transmission controller which is used to report the status.
-        /// </summary>
-        private Transmission transmission;
-
-        /// <summary>
-        /// The start time of the usage.
-        /// </summary>
-        private DateTime start = DateTime.Now;
-
-        /// <summary>
-        /// The bytes transmitted since last second.
-        /// </summary>
-        private long bytesTransmittedSinceLastSecond = 0;
-
-        /// <summary>
-        /// The blocking detection timer.
-        /// </summary>
-        private Timer blockingDetectionTimer;
-
-        /// <summary>
         /// The length of the underlaying stream.
         /// </summary>
-        private long length;
+        private long length = -1;
+
+        /// <summary>
+        /// The position of the underlaying stream.
+        /// </summary>
+        private long position = -1;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Streams.ProgressStream"/> class.
@@ -63,23 +46,11 @@ namespace CmisSync.Lib.Streams {
         /// <param name='e'>
         /// Transmission event where the progress should be reported to.
         /// </param>
-        public ProgressStream(Stream stream, Transmission transmission) : base(stream) {
-            if (transmission == null) {
-                throw new ArgumentNullException("The event, where to publish the prgress cannot be null");
-            }
-
+        public ProgressStream(Stream stream) : base(stream) {
             try {
-                transmission.Length = stream.Length;
+                this.length = stream.Length;
             } catch (NotSupportedException) {
-                transmission.Length = null;
             }
-
-            this.transmission = transmission;
-            this.blockingDetectionTimer = new Timer(2000);
-            this.blockingDetectionTimer.Elapsed += delegate(object sender, ElapsedEventArgs args) {
-                this.transmission.BitsPerSecond = (long)((this.bytesTransmittedSinceLastSecond * 8) / this.blockingDetectionTimer.Interval);
-                this.bytesTransmittedSinceLastSecond = 0;
-            };
         }
 
         #region overrideCode
@@ -94,6 +65,7 @@ namespace CmisSync.Lib.Streams {
                 var newLength = this.Stream.Length;
                 if (this.length != newLength) {
                     this.length = newLength;
+                    this.NotifyPropertyChanged((Utils.NameOf(() => this.Length)));
                 }
 
                 return this.length;
@@ -109,8 +81,9 @@ namespace CmisSync.Lib.Streams {
         public override long Position {
             get {
                 long pos = this.Stream.Position;
-                if (pos != this.transmission.Position) {
-                    this.transmission.Position = pos;
+                if (pos != this.position) {
+                    this.position = pos;
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.Position));
                 }
 
                 return pos;
@@ -118,9 +91,30 @@ namespace CmisSync.Lib.Streams {
 
             set {
                 this.Stream.Position = value;
-                if (value != this.transmission.Position) {
-                    this.transmission.Position = value;
+                if (this.position != value) {
+                    this.position = value;
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.Position));
                 }
+            }
+        }
+
+        /// <summary>
+        /// Gets the percentage of the transmission progress if known. Otherwise null.
+        /// </summary>
+        /// <value>
+        /// The percentage of the transmission progress.
+        /// </value>
+        public double? Percent {
+            get {
+                if (this.length < 0 || this.position < 0) {
+                    return null;
+                }
+
+                if (this.Length == 0) {
+                    return 100d;
+                }
+
+                return Math.Round(((double)this.Position * 100d) / (double)this.Length, 1);
             }
         }
 
@@ -135,7 +129,12 @@ namespace CmisSync.Lib.Streams {
         /// </param>
         public override long Seek(long offset, SeekOrigin origin) {
             long result = this.Stream.Seek(offset, origin);
-            this.transmission.Position = this.Stream.Position;
+            long pos = this.Stream.Position;
+            if (pos != this.position) {
+                this.position = pos;
+                this.NotifyPropertyChanged(Utils.NameOf(() => this.Position));
+            }
+
             return result;
         }
 
@@ -152,16 +151,9 @@ namespace CmisSync.Lib.Streams {
         /// Count.
         /// </param>
         public override int Read(byte[] buffer, int offset, int count) {
-            if (this.transmission.Status == TransmissionStatus.ABORTING) {
-                this.transmission.Status = TransmissionStatus.ABORTED;
-                throw new FileTransmission.AbortException(this.transmission.Path);
-            }
-
-            this.PauseIfRequested();
-
             int result = this.Stream.Read(buffer, offset, count);
-
-            this.CalculateBandwidth(result);
+            this.position += result;
+            this.NotifyPropertyChanged(Utils.NameOf(() => this.Position));
             return result;
         }
 
@@ -173,8 +165,9 @@ namespace CmisSync.Lib.Streams {
         /// </param>
         public override void SetLength(long value) {
             this.Stream.SetLength(value);
-            if (this.transmission.Length == null || value > (long)this.transmission.Length) {
-                this.transmission.Length = value;
+            if (this.length != value) {
+                this.length = value;
+                this.NotifyPropertyChanged(Utils.NameOf(() => this.Length));
             }
         }
 
@@ -193,64 +186,9 @@ namespace CmisSync.Lib.Streams {
         public override void Write(byte[] buffer, int offset, int count) {
             // for it may be chained before CryptoStream, we should write the content for CryptoStream has calculated the hash of the content
             this.Stream.Write(buffer, offset, count);
-            this.CalculateBandwidth(count);
-
-            if (this.transmission.Status == TransmissionStatus.ABORTING) {
-                this.transmission.Status = TransmissionStatus.ABORTED;
-                throw new FileTransmission.AbortException(this.transmission.Path);
-            }
-
-            this.PauseIfRequested();
+            this.position += count;
+            this.NotifyPropertyChanged(Utils.NameOf(() => this.Position));
         }
 #endregion
-
-        /// <summary>
-        /// Close this instance and calculates the bandwidth of the last second.
-        /// </summary>
-        public override void Close() {
-            long? result = Transmission.CalcBitsPerSecond(this.start, DateTime.Now.AddMilliseconds(1), this.bytesTransmittedSinceLastSecond);
-            this.transmission.BitsPerSecond = result;
-            this.blockingDetectionTimer.Stop();
-            this.transmission.BitsPerSecond = null;
-            base.Close();
-        }
-
-        /// <summary>
-        /// Calculates the bandwidth.
-        /// </summary>
-        /// <param name='transmittedBytes'>
-        /// Transmitted bytes.
-        /// </param>
-        private void CalculateBandwidth(int transmittedBytes) {
-            this.bytesTransmittedSinceLastSecond += transmittedBytes;
-            TimeSpan diff = DateTime.Now - this.start;
-            long? pos;
-            long? length = null;
-            try {
-                pos = Stream.Position;
-                if (pos > this.transmission.Length) {
-                    length = this.Stream.Length;
-                }
-            } catch (NotSupportedException) {
-                pos = null;
-            }
-
-            this.transmission.Position = pos;
-            this.transmission.Length = length;
-            if (diff.Seconds >= 1) {
-                long? result = Transmission.CalcBitsPerSecond(this.start, DateTime.Now, this.bytesTransmittedSinceLastSecond);
-                this.transmission.BitsPerSecond = result;
-                this.bytesTransmittedSinceLastSecond = 0;
-                this.start = this.start + diff;
-                this.blockingDetectionTimer.Stop();
-                this.blockingDetectionTimer.Start();
-            }
-        }
-
-        private void PauseIfRequested() {
-            while (this.transmission.Status == TransmissionStatus.PAUSED) {
-                System.Threading.Thread.Sleep(250);
-            }
-        }
     }
 }
