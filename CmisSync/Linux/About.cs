@@ -32,145 +32,142 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see (http://www.gnu.org/licenses/).
 
-namespace CmisSync
-{
+namespace CmisSync {
     using System;
     using System.Globalization;
     using Gtk;
     using Mono.Unix;
 
     [CLSCompliant(false)]
-    public class About : Window
-    {
-        public AboutController Controller = new AboutController ();
+    public class About : Window {
+        public AboutController Controller = new AboutController();
 
         private Label updates;
 
-
-        public About () : base ("")
-        {
-            DeleteEvent += delegate (object o, DeleteEventArgs args) {
-                Controller.WindowClosed ();
+        public About() : base(string.Empty) {
+            this.DeleteEvent += delegate(object o, DeleteEventArgs args) {
+                this.Controller.WindowClosed();
                 args.RetVal = true;
             };
 
-            DefaultSize    = new Gdk.Size (600, 260);
-            Resizable      = false;
-            BorderWidth    = 0;
-            IconName       = "dataspacesyc-folder";
-            WindowPosition = WindowPosition.Center;
-            Title          = String.Format(Properties_Resources.About, Properties_Resources.ApplicationName);
-            AppPaintable   = true;
+            this.DefaultSize    = new Gdk.Size(600, 260);
+            this.Resizable      = false;
+            this.BorderWidth    = 0;
+            this.IconName       = "dataspacesyc-folder";
+            this.WindowPosition = WindowPosition.Center;
+            this.Title          = string.Format(Properties_Resources.About, Properties_Resources.ApplicationName);
+            this.AppPaintable   = true;
 
-            string image_path = UIHelpers.GetImagePath ("about.png");
+            string image_path = UIHelpers.GetImagePath("about.png");
 
-            Realize ();
-            Gdk.Pixbuf buf = new Gdk.Pixbuf (image_path);
+            this.Realize();
+            Gdk.Pixbuf buf = new Gdk.Pixbuf(image_path);
             Gdk.Pixmap map, map2;
-            buf.RenderPixmapAndMask (out map, out map2, 255);
-            GdkWindow.SetBackPixmap (map, false);
+            buf.RenderPixmapAndMask(out map, out map2, 255);
+            GdkWindow.SetBackPixmap(map, false);
 
-            CreateAbout ();
+            this.CreateAbout();
 
-            Controller.HideWindowEvent += delegate {
-                Application.Invoke (delegate {
-                        HideAll ();
-                        });
+            this.Controller.HideWindowEvent += delegate {
+                Application.Invoke(delegate {
+                    this.HideAll();
+                });
             };
 
-            Controller.ShowWindowEvent += delegate {
-                Application.Invoke (delegate {
-                        ShowAll ();
-                        Present ();
-                        });
+            this.Controller.ShowWindowEvent += delegate {
+                Application.Invoke(delegate {
+                    this.ShowAll();
+                    this.Present();
+                });
             };
 
-            Controller.NewVersionEvent += delegate (string new_version) {
-                Application.Invoke (delegate {
-                        this.updates.Markup = String.Format ("<span font_size='small' fgcolor='#729fcf'>{0}</span>",
-                            string.Format (Properties_Resources.NewVersionAvailable, new_version));
-
-                        this.updates.ShowAll ();
-                        });
+            this.Controller.NewVersionEvent += delegate(string new_version) {
+                Application.Invoke(delegate {
+                    this.updates.Markup = string.Format(
+                        "<span font_size='small' fgcolor='#729fcf'>{0}</span>",
+                        string.Format(Properties_Resources.NewVersionAvailable, new_version));
+                    this.updates.ShowAll();
+                });
             };
 
-            Controller.VersionUpToDateEvent += delegate {
-                Application.Invoke (delegate {
-                        this.updates.Markup = String.Format ("<span font_size='small' fgcolor='#729fcf'>{0}</span>",
-                            Properties_Resources.RunningLatestVersion);
-
-                        this.updates.ShowAll ();
-                        });
+            this.Controller.VersionUpToDateEvent += delegate {
+                Application.Invoke(delegate {
+                    this.updates.Markup = string.Format(
+                        "<span font_size='small' fgcolor='#729fcf'>{0}</span>",
+                        Properties_Resources.RunningLatestVersion);
+                    this.updates.ShowAll();
+                });
             };
 
-            Controller.CheckingForNewVersionEvent += delegate {
-                Application.Invoke (delegate {
-                        // this.updates.Markup = String.Format ("<span font_size='small' fgcolor='#729fcf'>{0}</span>",
+            this.Controller.CheckingForNewVersionEvent += delegate {
+                Application.Invoke(delegate {
+                    // this.updates.Markup = String.Format ("<span font_size='small' fgcolor='#729fcf'>{0}</span>",
                         //    "Checking for updates...");
-
-                        this.updates.ShowAll();
-                        });
+                    this.updates.ShowAll();
+                });
             };
         }
 
-
-        private void CreateAbout ()
-        {
+        private void CreateAbout() {
             Gdk.Color fgcolor = new Gdk.Color();
             Gdk.Color.Parse("red", ref fgcolor);
-            Label version = new Label () {
-                Markup = string.Format (
+            Label version = new Label() {
+                Markup = string.Format(
                     "<span font_size='small' fgcolor='#729fcf'>{0}</span>",
-                    String.Format(Properties_Resources.Version, Controller.RunningVersion, Controller.CreateTime.GetValueOrDefault().ToString("d"))),
+                    string.Format(
+                    Properties_Resources.Version,
+                    this.Controller.RunningVersion,
+                    this.Controller.CreateTime.GetValueOrDefault().ToString("d"))),
                 Xalign = 0
             };
 
-            this.updates = new Label () {
+            this.updates = new Label() {
                 Markup = "<span font_size='small' fgcolor='#729fcf'><b>Please check for updates at CmisSync.com</b></span>",
                        Xalign = 0
             };
 
-            Label credits = new Label () {
-                LineWrap     = true,
-                             LineWrapMode = Pango.WrapMode.Word,
-                             Markup = "<span font_size='small' fgcolor='#729fcf'>" +
-                                 "Copyright © 2013–" + DateTime.Now.Year.ToString() + " GRAU DATA AG, Aegif and others.\n" +
-                                 "\n" + Properties_Resources.ApplicationName +
-                                 " is Open Source software. You are free to use, modify, " +
-                                 "and redistribute it under the GNU General Public License version 3 or later." +
-                                 "</span>",
-                             WidthRequest = 330,
-                             Wrap         = true,
-                             Xalign = 0
+            Label credits = new Label() {
+                LineWrap = true,
+                LineWrapMode = Pango.WrapMode.Word,
+                Markup = "<span font_size='small' fgcolor='#729fcf'>" +
+                "Copyright © 2013–" + DateTime.Now.Year.ToString() + " GRAU DATA AG, Aegif and others.\n" +
+                "\n" + Properties_Resources.ApplicationName +
+                " is Open Source software. You are free to use, modify, " +
+                "and redistribute it under the GNU General Public License version 3 or later." +
+                "</span>",
+                WidthRequest = 330,
+                Wrap = true,
+                Xalign = 0
             };
 
-            LinkButton website_link = new LinkButton (Controller.WebsiteLinkAddress, Properties_Resources.Website);
+            LinkButton website_link = new LinkButton(this.Controller.WebsiteLinkAddress, Properties_Resources.Website);
             website_link.ModifyFg(StateType.Active, fgcolor);
-            LinkButton credits_link = new LinkButton (Controller.CreditsLinkAddress, Properties_Resources.Credits);
-            LinkButton report_problem_link = new LinkButton (Controller.ReportProblemLinkAddress, Properties_Resources.ReportProblem);
+            LinkButton credits_link = new LinkButton(this.Controller.CreditsLinkAddress, Properties_Resources.Credits);
+            LinkButton report_problem_link = new LinkButton(this.Controller.ReportProblemLinkAddress, Properties_Resources.ReportProblem);
 
-            HBox layout_links = new HBox (false, 0);
-            layout_links.PackStart (website_link, false, false, 0);
-            layout_links.PackStart (credits_link, false, false, 0);
-            layout_links.PackStart (report_problem_link, false, false, 0);
+            HBox layout_links = new HBox(false, 0);
+            layout_links.PackStart(website_link, false, false, 0);
+            layout_links.PackStart(credits_link, false, false, 0);
+            layout_links.PackStart(report_problem_link, false, false, 0);
 
-            VBox layout_vertical = new VBox (false, 0);
-            layout_vertical.PackStart (new Label (""), false, false, 42);
-            layout_vertical.PackStart (version, false, false, 0);
-            //layout_vertical.PackStart (this.updates, false, false, 0);
-            layout_vertical.PackStart (credits, false, false, 9);
-            layout_vertical.PackStart (new Label (""), false, false, 0);
-            layout_vertical.PackStart (layout_links, false, false, 0);
+            VBox layout_vertical = new VBox(false, 0);
+            layout_vertical.PackStart(new Label(string.Empty), false, false, 42);
+            layout_vertical.PackStart(version, false, false, 0);
 
-            HBox layout_horizontal = new HBox (false, 0) {
+            // layout_vertical.PackStart(this.updates, false, false, 0);
+            layout_vertical.PackStart(credits, false, false, 9);
+            layout_vertical.PackStart(new Label(string.Empty), false, false, 0);
+            layout_vertical.PackStart(layout_links, false, false, 0);
+
+            HBox layout_horizontal = new HBox(false, 0) {
                 BorderWidth   = 0,
-                              HeightRequest = 260,
-                              WidthRequest  = 640
+                HeightRequest = 260,
+                WidthRequest  = 640
             };
-            layout_horizontal.PackStart (new Label (""), false, false, 150);
-            layout_horizontal.PackStart (layout_vertical, false, false, 0);
+            layout_horizontal.PackStart(new Label(string.Empty), false, false, 150);
+            layout_horizontal.PackStart(layout_vertical, false, false, 0);
 
-            Add (layout_horizontal);
+            this.Add(layout_horizontal);
         }
     }
 }

@@ -40,7 +40,6 @@ namespace CmisSync.Widgets {
             this.animation = new Timer() {
                 Interval = 100
             };
-
             this.animation.Elapsed += delegate {
                 Gtk.Application.Invoke(delegate {
                     this.transmissionProgressBar.Pulse();

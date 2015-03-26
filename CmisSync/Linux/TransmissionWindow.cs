@@ -26,9 +26,9 @@ namespace CmisSync {
     using CmisSync.Widgets;
 
     public partial class TransmissionWindow : Gtk.Window {
-        private static Gdk.Color bg_color = Gdk.Color.Parse("#000", ref bg_color);
         private TransmissionController controller = new TransmissionController();
         private Dictionary<Transmission, TransmissionWidget> widgets = new Dictionary<Transmission, TransmissionWidget>();
+
         public TransmissionWindow() : base(Gtk.WindowType.Toplevel) {
             this.Build();
             this.HideOnDelete();
@@ -48,7 +48,6 @@ namespace CmisSync {
                 Gtk.Application.Invoke(delegate {
                     var widget = new TransmissionWidget() { Transmission = transmission };
                     this.widgets.Add(transmission, widget);
-                    widget.ModifyBg(Gtk.StateType.Normal, bg_color);
                     this.transmissionList.PackStart(widget, false, true, 2);
                     this.transmissionList.Show();
                     this.ShowAll();
