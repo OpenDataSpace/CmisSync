@@ -27,6 +27,7 @@ namespace TestLibrary.FileTransmissionTests {
     using CmisSync.Lib;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.FileTransmission;
+    using CmisSync.Lib.Streams;
 
     using NUnit.Framework;
 
@@ -168,6 +169,20 @@ namespace TestLibrary.FileTransmissionTests {
             underTest.FailedException = new Exception("generic test exception");
 
             Assert.That(changed, Is.True, "The status must be changed if an exception is added");
+        }
+
+        [Test, Category("Fast")]
+        public void CreateStreamReturnsNewTransmissionStreamInstance() {
+            var underTest = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, this.path);
+            using (var stream = new MemoryStream())
+            using (var newStream = underTest.CreateStream(stream))
+            using (var secondNewStream = underTest.CreateStream(stream)) {
+                Assert.That(newStream, Is.Not.Null);
+                Assert.That(newStream, Is.InstanceOf<TransmissionStream>());
+                Assert.That(secondNewStream, Is.Not.Null);
+                Assert.That(secondNewStream, Is.InstanceOf<TransmissionStream>());
+                Assert.That(newStream != secondNewStream, Is.True);
+            }
         }
 
         public Array GetAllTypes(){
