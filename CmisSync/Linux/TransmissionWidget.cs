@@ -69,7 +69,7 @@ namespace CmisSync.Widgets {
                         this.Progress = this.transmission.Percent.GetValueOrDefault() / 100;
                     }
 
-                    this.repoLabel.Text = this.transmission.Repository;
+                    this.repoLabel.Markup = string.Format("<small>{0}</small>", this.transmission.Repository);
                     this.fileNameLabel.Text = System.IO.Path.GetFileName(this.transmission.Path);
                     this.fileNameLabel.TooltipText = this.transmission.Path;
                     this.openFileInFolderButton.Clicked += (object s, EventArgs e) => {
@@ -107,12 +107,12 @@ namespace CmisSync.Widgets {
             var t = sender as Transmission;
             if (args.PropertyName == CmisSync.Lib.Utils.NameOf(() => t.BitsPerSecond)) {
                 Gtk.Application.Invoke(delegate {
-                    this.bandwidthLabel.Text = CmisSync.Lib.Utils.FormatBandwidth(t.BitsPerSecond.GetValueOrDefault());
+                    this.bandwidthLabel.Markup = string.Format("<small>{0}</small>", CmisSync.Lib.Utils.FormatBandwidth(t.BitsPerSecond.GetValueOrDefault()));
                     this.UpdateSizeAndPositionStatus(t);
                 });
             } else if (args.PropertyName == CmisSync.Lib.Utils.NameOf(() => t.LastModification)) {
                 Gtk.Application.Invoke(delegate {
-                    this.lastModificationLabel.Text = t.LastModification.ToString();
+                    this.lastModificationLabel.Markup = string.Format("<small>{0}</small>", t.LastModification.ToString());
                 });
             } else if (args.PropertyName == CmisSync.Lib.Utils.NameOf(() => t.Length)) {
                 Gtk.Application.Invoke(delegate {
@@ -135,7 +135,7 @@ namespace CmisSync.Widgets {
         private void UpdateSizeAndPositionStatus(Transmission t) {
             string pos = t.Position != null && t.Position != t.Length ? CmisSync.Lib.Utils.FormatSize(t.Position.GetValueOrDefault()) + "/" : string.Empty;
             string size = t.Length != null ? CmisSync.Lib.Utils.FormatSize(t.Length.GetValueOrDefault()) : string.Empty;
-            this.statusDetailsLabel.Text = string.Format("{0}{1}", pos, size);
+            this.statusDetailsLabel.Markup = string.Format("<small>{0}{1}</small>", pos, size);
         }
 
         private void UpdateStatus(TransmissionStatus status) {
@@ -144,6 +144,7 @@ namespace CmisSync.Widgets {
             case TransmissionStatus.FINISHED:
                 this.openFileInFolderButton.Sensitive = true;
                 this.Progress = 1.0;
+                this.bandwidthLabel.Markup = string.Empty;
                 break;
             case TransmissionStatus.ABORTING:
                 this.animation.Start();

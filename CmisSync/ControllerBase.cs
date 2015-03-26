@@ -642,6 +642,7 @@ namespace CmisSync {
         private void AddRepository(RepoInfo repositoryInfo) {
             try {
                 Repository repo = new Repository(repositoryInfo, this.activityListenerAggregator);
+                this.transmissionManager.AddPathRepoMapping(repositoryInfo.LocalPath, repositoryInfo.DisplayName);
                 repo.ShowException += (object sender, RepositoryExceptionEventArgs e) => {
                     string msg = string.Empty;
                     switch (e.Type) {

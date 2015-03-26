@@ -9,7 +9,7 @@ namespace CmisSync.Widgets
 		private global::Gtk.VBox vbox1;
 		private global::Gtk.Label fileNameLabel;
 		private global::Gtk.ProgressBar transmissionProgressBar;
-		private global::Gtk.HBox hbox3;
+		private global::Gtk.HBox statusBox;
 		private global::Gtk.Label statusDetailsLabel;
 		private global::Gtk.Label bandwidthLabel;
 		private global::Gtk.Label repoLabel;
@@ -25,6 +25,7 @@ namespace CmisSync.Widgets
 			this.Name = "CmisSync.Widgets.TransmissionWidget";
 			// Container child CmisSync.Widgets.TransmissionWidget.Gtk.Container+ContainerChild
 			this.hbox1 = new global::Gtk.HBox ();
+			this.hbox1.Name = "hbox1";
 			this.hbox1.Spacing = 6;
 			// Container child hbox1.Gtk.Box+BoxChild
 			this.fileTypeImage = new global::Gtk.Image ();
@@ -42,7 +43,6 @@ namespace CmisSync.Widgets
 			this.fileNameLabel = new global::Gtk.Label ();
 			this.fileNameLabel.Name = "fileNameLabel";
 			this.fileNameLabel.Xalign = 0F;
-			this.fileNameLabel.UseMarkup = true;
 			this.fileNameLabel.Selectable = true;
 			this.vbox1.Add (this.fileNameLabel);
 			global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.fileNameLabel]));
@@ -57,10 +57,10 @@ namespace CmisSync.Widgets
 			w3.Position = 1;
 			w3.Fill = false;
 			// Container child vbox1.Gtk.Box+BoxChild
-			this.hbox3 = new global::Gtk.HBox ();
-			this.hbox3.Name = "hbox3";
-			this.hbox3.Spacing = 6;
-			// Container child hbox3.Gtk.Box+BoxChild
+			this.statusBox = new global::Gtk.HBox ();
+			this.statusBox.Name = "statusBox";
+			this.statusBox.Spacing = 10;
+			// Container child statusBox.Gtk.Box+BoxChild
 			this.statusDetailsLabel = new global::Gtk.Label ();
 			this.statusDetailsLabel.Sensitive = false;
 			this.statusDetailsLabel.Name = "statusDetailsLabel";
@@ -68,43 +68,46 @@ namespace CmisSync.Widgets
 			this.statusDetailsLabel.UseMarkup = true;
 			this.statusDetailsLabel.Selectable = true;
 			this.statusDetailsLabel.SingleLineMode = true;
-			this.hbox3.Add (this.statusDetailsLabel);
-			global::Gtk.Box.BoxChild w4 = ((global::Gtk.Box.BoxChild)(this.hbox3 [this.statusDetailsLabel]));
+			this.statusBox.Add (this.statusDetailsLabel);
+			global::Gtk.Box.BoxChild w4 = ((global::Gtk.Box.BoxChild)(this.statusBox [this.statusDetailsLabel]));
 			w4.Position = 0;
 			w4.Expand = false;
 			w4.Fill = false;
-			// Container child hbox3.Gtk.Box+BoxChild
+			// Container child statusBox.Gtk.Box+BoxChild
 			this.bandwidthLabel = new global::Gtk.Label ();
 			this.bandwidthLabel.Sensitive = false;
 			this.bandwidthLabel.Name = "bandwidthLabel";
-			this.hbox3.Add (this.bandwidthLabel);
-			global::Gtk.Box.BoxChild w5 = ((global::Gtk.Box.BoxChild)(this.hbox3 [this.bandwidthLabel]));
+			this.bandwidthLabel.UseMarkup = true;
+			this.statusBox.Add (this.bandwidthLabel);
+			global::Gtk.Box.BoxChild w5 = ((global::Gtk.Box.BoxChild)(this.statusBox [this.bandwidthLabel]));
 			w5.Position = 2;
 			w5.Expand = false;
 			w5.Fill = false;
-			// Container child hbox3.Gtk.Box+BoxChild
+			// Container child statusBox.Gtk.Box+BoxChild
 			this.repoLabel = new global::Gtk.Label ();
 			this.repoLabel.Sensitive = false;
 			this.repoLabel.Name = "repoLabel";
 			this.repoLabel.Xalign = 0F;
-			this.hbox3.Add (this.repoLabel);
-			global::Gtk.Box.BoxChild w6 = ((global::Gtk.Box.BoxChild)(this.hbox3 [this.repoLabel]));
+			this.repoLabel.UseMarkup = true;
+			this.statusBox.Add (this.repoLabel);
+			global::Gtk.Box.BoxChild w6 = ((global::Gtk.Box.BoxChild)(this.statusBox [this.repoLabel]));
 			w6.Position = 3;
 			w6.Expand = false;
 			w6.Fill = false;
-			// Container child hbox3.Gtk.Box+BoxChild
+			// Container child statusBox.Gtk.Box+BoxChild
 			this.lastModificationLabel = new global::Gtk.Label ();
 			this.lastModificationLabel.Sensitive = false;
 			this.lastModificationLabel.Name = "lastModificationLabel";
 			this.lastModificationLabel.Xalign = 0F;
-			this.hbox3.Add (this.lastModificationLabel);
-			global::Gtk.Box.BoxChild w7 = ((global::Gtk.Box.BoxChild)(this.hbox3 [this.lastModificationLabel]));
+			this.lastModificationLabel.UseMarkup = true;
+			this.statusBox.Add (this.lastModificationLabel);
+			global::Gtk.Box.BoxChild w7 = ((global::Gtk.Box.BoxChild)(this.statusBox [this.lastModificationLabel]));
 			w7.PackType = ((global::Gtk.PackType)(1));
 			w7.Position = 5;
 			w7.Expand = false;
 			w7.Fill = false;
-			this.vbox1.Add (this.hbox3);
-			global::Gtk.Box.BoxChild w8 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.hbox3]));
+			this.vbox1.Add (this.statusBox);
+			global::Gtk.Box.BoxChild w8 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.statusBox]));
 			w8.Position = 2;
 			w8.Expand = false;
 			w8.Fill = false;

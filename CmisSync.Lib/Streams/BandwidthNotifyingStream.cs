@@ -47,6 +47,7 @@ namespace CmisSync.Lib.Streams {
                 this.BitsPerSecond = (long)((this.bytesTransmittedSinceLastSecond * 8) / this.blockingDetectionTimer.Interval);
                 this.bytesTransmittedSinceLastSecond = 0;
             };
+            this.blockingDetectionTimer.Start();
         }
 
         /// <summary>

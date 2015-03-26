@@ -39,6 +39,7 @@ namespace CmisSync.Lib.Queueing {
 
         private object collectionLock = new object();
         private ObservableCollection<Transmission> activeTransmissions = new ObservableCollection<Transmission>();
+        private Dictionary<string, string> pathToRepoNameMapping = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets the active transmissions. This Collection can be obsered for changes.
@@ -74,11 +75,29 @@ namespace CmisSync.Lib.Queueing {
         /// <param name="cachePath">Cache path.</param>
         public Transmission CreateTransmission(TransmissionType type, string path, string cachePath = null) {
             var transmission = new Transmission(type, path, cachePath);
+            lock (this.collectionLock) {
+                var entry = this.pathToRepoNameMapping.FirstOrDefault(t => path.StartsWith(t.Key));
+                transmission.Repository = entry.Value ?? string.Empty;
+                if (entry.Key != null) {
+                    transmission.RelativePath = path.Substring(entry.Key.Length).TrimStart(System.IO.Path.DirectorySeparatorChar);
+                }
+            }
+
             transmission.PropertyChanged += this.TransmissionFinished;
             this.activeTransmissions.Add(transmission);
             return transmission;
         }
 
+        /// <summary>
+        /// Adds the path repo mapping entry to internal storage.
+        /// </summary>
+        /// <param name="path">Path.</param>
+        /// <param name="repoName">Repo name.</param>
+        public void AddPathRepoMapping(string path, string repoName) {
+            lock (this.collectionLock) {
+                this.pathToRepoNameMapping[path] = repoName;
+            }
+        }
 
         /// <summary>
         /// Aborts all open HTTP requests.
