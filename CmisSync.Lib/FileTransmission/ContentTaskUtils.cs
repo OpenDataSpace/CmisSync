@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.FileTransmission
-{
+namespace CmisSync.Lib.FileTransmission {
     using System;
     using System.IO;
     using System.Security.Cryptography;
@@ -28,8 +27,7 @@ namespace CmisSync.Lib.FileTransmission
     /// <summary>
     /// Content task utils.
     /// </summary>
-    public static class ContentTaskUtils
-    {
+    public static class ContentTaskUtils {
         /// <summary>
         /// Creates the matching uploader.
         /// </summary>
@@ -39,6 +37,7 @@ namespace CmisSync.Lib.FileTransmission
             if (chunkSize > 0) {
                 return new ChunkedUploader(chunkSize);
             }
+
             return new SimpleFileUploader();
         }
 

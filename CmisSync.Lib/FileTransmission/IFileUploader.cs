@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.FileTransmission
-{
+namespace CmisSync.Lib.FileTransmission {
     using System;
     using System.IO;
     using System.Security.Cryptography;
@@ -32,8 +31,7 @@ namespace CmisSync.Lib.FileTransmission
     /// <summary>
     /// I file Upload Module must implement this interface.
     /// </summary>
-    public interface IFileUploader : IDisposable
-    {
+    public interface IFileUploader : IDisposable {
         /// <summary>
         /// Uploads the localFileStream to remoteDocument.
         /// </summary>
