@@ -247,7 +247,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             long readLength = 0;
             stream.Setup(s => s.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Returns((byte[] buffer, int offset, int count) => {
                 if (readLength > 0) {
-                    foreach (Transmission transmission in this.transmissionManager.ActiveTransmissions) {
+                    foreach (var transmission in this.transmissionManager.ActiveTransmissions) {
                         transmission.Abort();
                     }
                 }
