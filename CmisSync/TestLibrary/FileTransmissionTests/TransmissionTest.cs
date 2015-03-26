@@ -74,43 +74,6 @@ namespace TestLibrary.FileTransmissionTests {
             Assert.That(lengthChanged, Is.EqualTo(2));
         }
 
-        [Test, Category("Fast")]
-        public void CalculateBitsPerSecondWithOneMinuteDifference() {
-            DateTime start = DateTime.Now;
-            DateTime end = start.AddMinutes(1);
-            long? bitsPerSecond = Transmission.CalcBitsPerSecond(start, end, 1);
-            Assert.AreEqual(0, bitsPerSecond);
-            bitsPerSecond = Transmission.CalcBitsPerSecond(start, end, 60);
-            Assert.AreEqual(8, bitsPerSecond);
-        }
-
-        [Test, Category("Fast")]
-        public void CalcBitsPerSecondWithOneSecondDifference() {
-            DateTime start = DateTime.Now;
-            DateTime end = start.AddSeconds(1);
-            long? bitsPerSecond = Transmission.CalcBitsPerSecond(start, end, 1);
-            Assert.AreEqual(8, bitsPerSecond);
-            bitsPerSecond = Transmission.CalcBitsPerSecond(start, start, 100);
-            Assert.Null(bitsPerSecond);
-            bitsPerSecond = Transmission.CalcBitsPerSecond(start, end, 100);
-            Assert.AreEqual(8 * 100, bitsPerSecond);
-        }
-
-        [Test, Category("Fast")]
-        public void CalculateBitsPerSecondWithOneMilisecondDifference() {
-            DateTime start = DateTime.Now;
-            DateTime end = start.AddMilliseconds(1);
-            long? bitsPerSecond = Transmission.CalcBitsPerSecond(start, end, 1);
-            Assert.AreEqual(8000, bitsPerSecond);
-        }
-
-        [Test, Category("Fast")]
-        public void CalculationOfBitsPerSecondFailsOnIllegalDifference() {
-            DateTime start = DateTime.Now;
-            DateTime end = start.AddSeconds(1);
-            Assert.Throws<ArgumentException>(() => Transmission.CalcBitsPerSecond(end, start, 100));
-        }
-
         [Test, Category("Fast"), TestCaseSource("GetAllTypes")]
         public void Percent(TransmissionType type) {
             var underTest = new Transmission(type, this.path);
