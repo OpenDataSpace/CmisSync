@@ -27,6 +27,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Consumer.SituationSolver.PWC;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -300,7 +301,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();
             this.transmissionStorage.Setup(f => f.ChunkSize).Returns(this.chunkSize);
 
-            this.manager = new Mock<TransmissionManager>();
+            this.manager = new Mock<TransmissionManager>() { CallBase = true };
 
             this.folderOrEmptyFileAddedSolver = new Mock<ISolver>(MockBehavior.Strict);
         }
