@@ -71,6 +71,7 @@ namespace CmisSync.Widgets {
 
                     this.repoLabel.Text = this.transmission.Repository;
                     this.fileNameLabel.Text = System.IO.Path.GetFileName(this.transmission.Path);
+                    this.fileNameLabel.TooltipText = this.transmission.Path;
                     this.openFileInFolderButton.Clicked += (object s, EventArgs e) => {
                         Utils.OpenFolder(new FileInfo(this.transmission.Path).Directory.FullName);
                     };
@@ -132,7 +133,7 @@ namespace CmisSync.Widgets {
         }
 
         private void UpdateSizeAndPositionStatus(Transmission t) {
-            string pos = t.Position != null ? CmisSync.Lib.Utils.FormatSize(t.Position.GetValueOrDefault()) + "/" : string.Empty;
+            string pos = t.Position != null && t.Position != t.Length ? CmisSync.Lib.Utils.FormatSize(t.Position.GetValueOrDefault()) + "/" : string.Empty;
             string size = t.Length != null ? CmisSync.Lib.Utils.FormatSize(t.Length.GetValueOrDefault()) : string.Empty;
             this.statusDetailsLabel.Text = string.Format("{0}{1}", pos, size);
         }

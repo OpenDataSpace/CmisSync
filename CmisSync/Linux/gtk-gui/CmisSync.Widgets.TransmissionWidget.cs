@@ -25,7 +25,6 @@ namespace CmisSync.Widgets
 			this.Name = "CmisSync.Widgets.TransmissionWidget";
 			// Container child CmisSync.Widgets.TransmissionWidget.Gtk.Container+ContainerChild
 			this.hbox1 = new global::Gtk.HBox ();
-			this.hbox1.Name = "hbox1";
 			this.hbox1.Spacing = 6;
 			// Container child hbox1.Gtk.Box+BoxChild
 			this.fileTypeImage = new global::Gtk.Image ();
