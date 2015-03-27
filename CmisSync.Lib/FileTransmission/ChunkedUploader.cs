@@ -110,7 +110,7 @@ namespace CmisSync.Lib.FileTransmission {
                         result.AppendContentStream(contentStream, isLastChunk, true);
                         HashAlgorithmReuse reuse = hashAlg as HashAlgorithmReuse;
                         if (reuse != null && update != null) {
-                            using (HashAlgorithm hash = reuse.GetHashAlgorithm()) {
+                            using (HashAlgorithm hash = (HashAlgorithm)reuse.Clone()) {
                                 hash.TransformFinalBlock(new byte[0], 0, 0);
                                 update(hash.Hash);
                             }
