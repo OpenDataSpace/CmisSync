@@ -26,8 +26,6 @@ namespace CmisSync.Lib.FileTransmission {
 
     using DotCMIS.Client;
 
-    public delegate void UpdateChecksum(byte[] checksum);
-
     /// <summary>
     /// I file Upload Module must implement this interface.
     /// </summary>

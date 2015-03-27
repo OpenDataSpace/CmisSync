@@ -113,6 +113,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 return;
             }
 
+            target.Refresh();
             IFileTransmissionObject obj = new FileTransmissionObject(transmissionEvent.Type, target, remoteDocument);
             obj.ChecksumAlgorithmName = "SHA-1";
             obj.LastChecksum = hash;
@@ -172,28 +173,23 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             }
         }
 
-        protected byte[] DownloadCacheFile(IFileInfo target, IDocument remoteDocument, Transmission transmissionEvent, IFileSystemInfoFactory fsFactory) {
+        protected byte[] DownloadCacheFile(IFileInfo target, IDocument remoteDocument, Transmission transmission, IFileSystemInfoFactory fsFactory) {
             if (!this.LoadCacheFile(target, remoteDocument, fsFactory)) {
                 if (target.Exists) {
                     target.Delete();
                 }
             }
 
-            using (SHA1 hashAlg = new SHA1Managed()) {
+            using (var hashAlg = new SHA1Reuse()) {
                 using (var filestream = target.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
                 using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
                     try {
-                        download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
+                        download.DownloadFile(remoteDocument, filestream, transmission, hashAlg, (byte[] checksumUpdate) => this.SaveCacheFile(target, remoteDocument, checksumUpdate, transmission));
                         if (this.TransmissionStorage != null) {
                             this.TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
                         }
-                    } catch (FileTransmission.AbortException ex) {
-                        target.Refresh();
-                        this.SaveCacheFile(target, remoteDocument, hashAlg.Hash, transmissionEvent);
-                        transmissionEvent.FailedException = ex;
-                        throw;
                     } catch (Exception ex) {
-                        transmissionEvent.FailedException = ex;
+                        transmission.FailedException = ex;
                         throw;
                     }
                 }

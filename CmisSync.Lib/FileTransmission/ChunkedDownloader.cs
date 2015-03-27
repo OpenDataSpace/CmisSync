@@ -79,7 +79,7 @@ namespace CmisSync.Lib.FileTransmission
         /// <exception cref="DisposeException">If the remote object has been disposed before the dowload is finished</exception>
         /// <exception cref="AbortException">If download is aborted</exception>
         /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
-        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, Transmission status, HashAlgorithm hashAlg) {
+        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg, UpdateChecksum update = null) {
             {
                 byte[] buffer = new byte[8 * 1024];
                 int len;
@@ -96,7 +96,7 @@ namespace CmisSync.Lib.FileTransmission
                 long remainingBytes = (fileLength != null) ? (long)fileLength - offset : this.ChunkSize;
                 try {
                     do {
-                        offset += this.DownloadNextChunk(remoteDocument, offset, remainingBytes, status, localFileStream, hashAlg);
+                        offset += this.DownloadNextChunk(remoteDocument, offset, remainingBytes, transmission, localFileStream, hashAlg);
                     } while(fileLength == null);
                 } catch (DotCMIS.Exceptions.CmisConstraintException) {
                 }
