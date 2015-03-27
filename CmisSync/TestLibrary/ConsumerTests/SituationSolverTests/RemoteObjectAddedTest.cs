@@ -216,7 +216,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                     cacheFileInfo.Setup(f => f.Exists).Returns(true);
                     return stream;
                 });
-                cacheFileInfo.Setup(f => f.MoveTo(this.path)).Throws(new IOException());
+                cacheFileInfo.Setup(f => f.MoveTo(this.path)).Callback(() => fileInfo.Setup(file => file.Refresh()).Callback(() => fileInfo.Setup(newFile => newFile.Exists).Returns(true))).Throws(new IOException());
                 fileInfo.SetupStream(Encoding.UTF8.GetBytes("other content"));
                 this.fsFactory.AddIFileInfo(cacheFileInfo.Object);
                 this.fsFactory.Setup(f => f.CreateConflictFileInfo(fileInfo.Object)).Returns(conflictFileInfo);
