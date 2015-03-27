@@ -221,10 +221,13 @@ namespace CmisSync.Lib.FileTransmission {
 
             set {
                 if (this.position != value) {
+                    var percent = this.Percent;
                     this.position = value;
                     this.LastModification = DateTime.Now;
                     this.NotifyPropertyChanged(Utils.NameOf(() => this.Position));
-                    this.NotifyPropertyChanged(Utils.NameOf(() => this.Percent));
+                    if (percent != this.Percent) {
+                        this.NotifyPropertyChanged(Utils.NameOf(() => this.Percent));
+                    }
                 }
             }
         }
@@ -285,7 +288,6 @@ namespace CmisSync.Lib.FileTransmission {
                 if (this.bitsPerSecond != value && !this.Done) {
                     this.bitsPerSecond = value;
                     this.NotifyPropertyChanged(Utils.NameOf(() => this.BitsPerSecond));
-                    this.NotifyPropertyChanged(Utils.NameOf(() => this.Percent));
                 }
             }
         }
@@ -320,7 +322,7 @@ namespace CmisSync.Lib.FileTransmission {
             }
 
             set {
-                if ((value - this.lastModification).TotalSeconds > 1 ) {
+                if (Math.Abs((value - this.lastModification).TotalSeconds) > 1 ) {
                     this.lastModification = value;
                     this.NotifyPropertyChanged(Utils.NameOf(() => this.LastModification));
                 }
