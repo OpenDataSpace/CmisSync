@@ -20,6 +20,7 @@
 namespace TestLibrary.StreamsTests {
     using System;
     using System.IO;
+    using System.Threading.Tasks;
 
     using CmisSync.Lib.Streams;
 
@@ -45,5 +46,35 @@ namespace TestLibrary.StreamsTests {
 
             Assert.That(isMoreThanZeroReported, Is.True);
         }
+
+        [Test, Category("Medium"), Category("Streams")]
+        public void EnsureThatPausingStreamUpdatesBitsPerSecondToZero() {
+            byte[] inputContent = new byte[1024];
+            bool isMoreThanZeroReported = false;
+            bool isNotifiedZero = false;
+            using (var inputStream = new MemoryStream(inputContent))
+            using (var outputStream = new MemoryStream())
+            using (var underTest = new BandwidthNotifyingStream(inputStream)) {
+                underTest.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs args) {
+                    if ((sender as BandwidthNotifyingStream).BitsPerSecond > 0) {
+                        isMoreThanZeroReported = true;
+                    }
+                };
+                underTest.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs args) {
+                    if ((sender as BandwidthNotifyingStream).BitsPerSecond == 0) {
+                        isNotifiedZero = true;
+                    }
+                };
+                var task = Task.Factory.StartNew(() => {
+                    underTest.CopyTo(outputStream);
+                    System.Threading.Thread.Sleep(4200);
+                });
+                task.Wait(2200);
+                Assert.That(isMoreThanZeroReported, Is.True);
+                task.Wait();
+                Assert.That(underTest.BitsPerSecond, Is.EqualTo(0));
+                Assert.That(isNotifiedZero, Is.True);
+            }
+       }
     }
 }
