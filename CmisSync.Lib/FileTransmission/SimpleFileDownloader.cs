@@ -25,6 +25,7 @@ namespace CmisSync.Lib.FileTransmission
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Streams;
+    using CmisSync.Lib.HashAlgorithm;
 
     using DotCMIS.Client;
 
@@ -48,7 +49,7 @@ namespace CmisSync.Lib.FileTransmission
         /// <exception cref="DisposeException">If the remote object has been disposed before the dowload is finished</exception>
         /// <exception cref="AbortException">If download is aborted</exception>
         /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
-        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg)
+        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg, UpdateChecksum update = null)
         {
             byte[] buffer = new byte[8 * 1024];
             int len;
@@ -97,6 +98,14 @@ namespace CmisSync.Lib.FileTransmission
 
                         hashstream.Write(buffer, 0, len);
                         hashstream.Flush();
+
+                        HashAlgorithmReuse reuse = hashAlg as HashAlgorithmReuse;
+                        if (reuse != null && update != null) {
+                            using (HashAlgorithm hash = reuse.GetHashAlgorithm()) {
+                                hash.TransformFinalBlock(new byte[0], 0, 0);
+                                update(hash.Hash);
+                            }
+                        }
                     }
                 }
             }

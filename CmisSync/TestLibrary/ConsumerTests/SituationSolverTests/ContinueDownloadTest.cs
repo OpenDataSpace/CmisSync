@@ -313,7 +313,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.localFile.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, this.changeToken, true, this.creationDate, this.creationDate, this.fileHash, this.fileContent.Length);
             this.transmissionStorage.Verify(f => f.GetObjectByRemoteObjectId(this.objectId), Times.Exactly(2));
-            this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.Once());
+            this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.AtLeastOnce());
             this.transmissionStorage.Verify(f => f.RemoveObjectByRemoteObjectId(this.objectId), Times.Once());
         }
 
@@ -334,7 +334,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.localFile.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, this.changeToken, true, this.creationDate, this.creationDate, this.fileHash, this.fileContent.Length);
             this.transmissionStorage.Verify(f => f.GetObjectByRemoteObjectId(this.objectId), Times.Exactly(2));
-            this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.Once());
+            this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.AtLeastOnce());
             this.transmissionStorage.Verify(f => f.RemoveObjectByRemoteObjectId(this.objectId), Times.Once());
         }
 
@@ -353,7 +353,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 stream.Setup(f => f.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Returns(0);
                 this.cacheFile.Setup(f => f.Exists).Returns(false);
             });
-            this.cacheFile.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Returns(stream.Object);
+            this.cacheFile.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Returns(() => {
+                this.cacheFile.Setup(f => f.Exists).Returns(true);
+                return stream.Object;
+            });
 
             string newLastChangeToken = this.changeToken + ".change";
             Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.objectId, this.objectName, this.parentId, this.fileContent.Length, this.fileContent, newLastChangeToken);
@@ -367,7 +370,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.localFile.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, newLastChangeToken, true, this.creationDate, this.creationDate, this.fileHash, this.fileContent.Length);
             this.transmissionStorage.Verify(f => f.GetObjectByRemoteObjectId(this.objectId), Times.Exactly(2));
-            this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.Once());
+            this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.AtLeastOnce());
             this.transmissionStorage.Verify(f => f.RemoveObjectByRemoteObjectId(this.objectId), Times.Once());
         }
 
@@ -399,7 +402,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.localFile.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, this.changeToken, true, this.creationDate, this.creationDate, this.fileHash, this.fileContent.Length);
             this.transmissionStorage.Verify(f => f.GetObjectByRemoteObjectId(this.objectId), Times.Exactly(2));
-            this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.Once());
+            this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.AtLeastOnce());
             this.transmissionStorage.Verify(f => f.RemoveObjectByRemoteObjectId(this.objectId), Times.Once());
         }
 
@@ -443,7 +446,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 stream.Object.Position = 0;
                 this.cacheFile.Setup(f => f.Exists).Returns(false);
             });
-            this.cacheFile.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Returns(stream.Object);
+            this.cacheFile.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Returns(() => {
+                this.cacheFile.Setup(f => f.Exists).Returns(true);
+                return stream.Object;
+            });
         }
     }
 }

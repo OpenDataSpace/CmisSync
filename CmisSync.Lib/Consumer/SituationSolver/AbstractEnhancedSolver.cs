@@ -113,6 +113,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 return;
             }
 
+            target.Refresh();
             IFileTransmissionObject obj = new FileTransmissionObject(transmissionEvent.Type, target, remoteDocument);
             obj.ChecksumAlgorithmName = "SHA-1";
             obj.LastChecksum = hash;
@@ -179,19 +180,19 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 }
             }
 
-            using (SHA1 hashAlg = new SHA1Managed()) {
+            using (var hashAlg = new SHA1Reuse()) {
                 using (var filestream = target.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
                 using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
                     try {
-                        download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
+                        download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg, (byte[] checksumUpdate) => this.SaveCacheFile(target, remoteDocument, checksumUpdate, transmissionEvent));
                         if (this.TransmissionStorage != null) {
                             this.TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
                         }
-                    } catch (FileTransmission.AbortException ex) {
-                        target.Refresh();
-                        this.SaveCacheFile(target, remoteDocument, hashAlg.Hash, transmissionEvent);
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                        throw;
+                    //} catch (FileTransmission.AbortException ex) {
+                    //    target.Refresh();
+                    //    this.SaveCacheFile(target, remoteDocument, hashAlg.Hash, transmissionEvent);
+                    //    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                    //    throw;
                     } catch (Exception ex) {
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
                         throw;
