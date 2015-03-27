@@ -508,7 +508,7 @@
           </packing>
         </child>
         <child>
-          <widget class="Gtk.VBox" id="vbox1">
+          <widget class="Gtk.VBox" id="midbox">
             <property name="MemberName" />
             <property name="Spacing">6</property>
             <child>

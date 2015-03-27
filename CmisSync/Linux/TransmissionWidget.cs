@@ -145,6 +145,7 @@ namespace CmisSync.Widgets {
                 this.openFileInFolderButton.Sensitive = true;
                 this.Progress = 1.0;
                 this.bandwidthLabel.Markup = string.Empty;
+                this.midbox.Remove(this.transmissionProgressBar);
                 break;
             case TransmissionStatus.ABORTING:
                 this.animation.Start();
