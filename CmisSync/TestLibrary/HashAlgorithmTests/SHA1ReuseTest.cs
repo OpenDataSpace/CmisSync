@@ -35,7 +35,7 @@ namespace TestLibrary.HashAlgorithmTests {
 
             using (SHA1Managed sha1 = new SHA1Managed())
             using (SHA1Reuse reuse = new SHA1Reuse()) {
-                Assert.IsTrue(reuse.Compute(data).SequenceEqual(sha1.ComputeHash(data)));
+                Assert.IsTrue(reuse.ComputeHash(data).SequenceEqual(sha1.ComputeHash(data)));
             }
 
             using (SHA1Managed sha1 = new SHA1Managed())
@@ -50,7 +50,7 @@ namespace TestLibrary.HashAlgorithmTests {
 
             using (SHA1Managed sha1 = new SHA1Managed())
             using (SHA1Reuse reuse = new SHA1Reuse()) {
-                Assert.IsTrue(reuse.Compute(data).SequenceEqual(sha1.ComputeHash(data)));
+                Assert.IsTrue(reuse.ComputeHash(data).SequenceEqual(sha1.ComputeHash(data)));
             }
 
             using (SHA1Managed sha1 = new SHA1Managed())
@@ -65,7 +65,7 @@ namespace TestLibrary.HashAlgorithmTests {
 
             using (SHA1Managed sha1 = new SHA1Managed())
             using (SHA1Reuse reuse = new SHA1Reuse()) {
-                Assert.IsTrue(reuse.Compute(data).SequenceEqual(sha1.ComputeHash(data)));
+                Assert.IsTrue(reuse.ComputeHash(data).SequenceEqual(sha1.ComputeHash(data)));
             }
 
             using (SHA1Managed sha1 = new SHA1Managed())
@@ -116,25 +116,25 @@ namespace TestLibrary.HashAlgorithmTests {
 
             using (SHA1Managed sha1 = new SHA1Managed())
             using (SHA1Reuse reuse = new SHA1Reuse()) {
-                HashAlgorithm hash0 = reuse.GetHashAlgorithm();
+                SHA1Reuse hash0 = (SHA1Reuse)reuse.Clone();
                 sha1.TransformBlock(data, 0, dataLength, data, 0);
                 reuse.TransformBlock(data, 0, dataLength, data, 0);
                 hash0.TransformBlock(data, 0, dataLength, data, 0);
 
-                HashAlgorithm hash1 = reuse.GetHashAlgorithm();
+                SHA1Reuse hash1 = (SHA1Reuse)reuse.Clone();
                 sha1.TransformBlock(data, 0, dataLength, data, 0);
                 reuse.TransformBlock(data, 0, dataLength, data, 0);
                 hash0.TransformBlock(data, 0, dataLength, data, 0);
                 hash1.TransformBlock(data, 0, dataLength, data, 0);
 
-                HashAlgorithm hash2 = reuse.GetHashAlgorithm();
+                SHA1Reuse hash2 = (SHA1Reuse)reuse.Clone();
                 sha1.TransformBlock(data, 0, dataLength, data, 0);
                 reuse.TransformBlock(data, 0, dataLength, data, 0);
                 hash0.TransformBlock(data, 0, dataLength, data, 0);
                 hash1.TransformBlock(data, 0, dataLength, data, 0);
                 hash2.TransformBlock(data, 0, dataLength, data, 0);
 
-                HashAlgorithm hash3 = reuse.GetHashAlgorithm();
+                SHA1Reuse hash3 = (SHA1Reuse)reuse.Clone();
                 sha1.TransformFinalBlock(data, dataLength, 0);
                 reuse.TransformFinalBlock(data, dataLength, 0);
                 hash0.TransformFinalBlock(data, dataLength, 0);
@@ -148,6 +148,49 @@ namespace TestLibrary.HashAlgorithmTests {
                 Assert.IsTrue(sha1.Hash.SequenceEqual(hash2.Hash));
                 Assert.IsTrue(sha1.Hash.SequenceEqual(hash3.Hash));
             }
+        }
+
+        [Test, Category("Fast"), Category("Hash")]
+        public void ComputeBlocksViaClone() {
+            int dataLength = 23;
+            byte[] data = new byte[dataLength];
+
+            using (SHA1Managed sha1 = new SHA1Managed())
+            using (SHA1Managed sha1_1 = new SHA1Managed())
+            using (SHA1Reuse reuse = new SHA1Reuse())
+            using (SHA1Reuse hash0 = (SHA1Reuse)reuse.Clone()) {
+                for (int i = 0; i < 100; i++) {
+                    sha1.TransformBlock(data, 0, dataLength, data, 0);
+                    sha1_1.TransformBlock(data, 0, dataLength, data, 0);
+                    reuse.TransformBlock(data, 0, dataLength, data, 0);
+                    hash0.TransformBlock(data, 0, dataLength, data, 0);
+                }
+
+                using(var hash1 = hash0.Clone() as HashAlgorithm)
+                using(var hash2 = hash0.Clone() as HashAlgorithm)
+                using(var hash3 = hash0.Clone() as HashAlgorithm) {
+                    sha1.TransformFinalBlock(data, dataLength, 0);
+                    reuse.TransformFinalBlock(data, dataLength, 0);
+                    hash0.TransformFinalBlock(data, dataLength, 0);
+                    Assert.That(sha1.Hash, Is.EqualTo(reuse.Hash));
+                    Assert.That(sha1.Hash, Is.EqualTo(hash0.Hash));
+
+                    for (int i = 0; i < 100; i++) {
+                        sha1_1.TransformBlock(data, 0, dataLength, data, 0);
+                        hash1.TransformBlock(data, 0, dataLength, data, 0);
+                        hash2.TransformBlock(data, 0, dataLength, data, 0);
+                        hash3.TransformBlock(data, 0, dataLength, data, 0);
+                    }
+
+                    hash1.TransformFinalBlock(data, dataLength, 0);
+                    hash2.TransformFinalBlock(data, dataLength, 0);
+                    hash3.TransformFinalBlock(data, dataLength, 0);
+                    sha1_1.TransformFinalBlock(data, dataLength, 0);
+                    Assert.That(sha1_1.Hash, Is.EqualTo(hash1.Hash));
+                    Assert.That(sha1_1.Hash, Is.EqualTo(hash2.Hash));
+                    Assert.That(sha1_1.Hash, Is.EqualTo(hash3.Hash));
+                }
+           }
         }
     }
 }
