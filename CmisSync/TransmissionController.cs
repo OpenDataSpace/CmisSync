@@ -40,11 +40,6 @@ namespace CmisSync {
                 }
             }
         }
-
-        public static bool Done(this Transmission transmission) {
-            var status = transmission.Status;
-            return status == TransmissionStatus.ABORTED || status == TransmissionStatus.FINISHED;
-        }
     }
 
     public class TransmissionController {
@@ -90,8 +85,8 @@ namespace CmisSync {
 
         public class TransmissionCompare : IComparer<Transmission> {
             public int Compare(Transmission x, Transmission y) {
-                if (x.Done() != y.Done()) {
-                    return x.Done() ? 1 : -1;
+                if (x.Done != y.Done) {
+                    return x.Done ? 1 : -1;
                 }
 
                 if (x.LastModification == y.LastModification) {
@@ -117,7 +112,7 @@ namespace CmisSync {
                 string fullPath = transmission.Path;
                 if (FullPathList.Contains(fullPath)) {
                     var oldTransmission = TransmissionList.Find(t => t.Path == fullPath);
-                    if (!oldTransmission.Done()) {
+                    if (!oldTransmission.Done) {
                         continue;
                     }
                     DeleteTransmissionEvent(oldTransmission);
@@ -134,7 +129,7 @@ namespace CmisSync {
                 TransmissionList.Sort(new TransmissionCompare());
                 for (int i = FullPathList.Count - 1; i >= 0 && TransmissionList.Count > transmissionLimit; --i) {
                     var transmission = TransmissionList[i];
-                    if (!transmission.Done()) {
+                    if (!transmission.Done) {
                         break;
                     }
 

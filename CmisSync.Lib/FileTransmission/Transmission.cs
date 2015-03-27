@@ -243,6 +243,9 @@ namespace CmisSync.Lib.FileTransmission {
                     this.status = value;
                     this.LastModification = DateTime.Now;
                     this.NotifyPropertyChanged(Utils.NameOf(() => this.Status));
+                    if (this.Done) {
+                        this.BitsPerSecond = null;
+                    }
                 }
             }
         }
@@ -306,6 +309,10 @@ namespace CmisSync.Lib.FileTransmission {
             }
         }
 
+        /// <summary>
+        /// Gets or sets the last modification of this transmission.
+        /// </summary>
+        /// <value>The last modification.</value>
         public DateTime LastModification {
             get {
                 return this.lastModification;
@@ -316,6 +323,17 @@ namespace CmisSync.Lib.FileTransmission {
                     this.lastModification = value;
                     this.NotifyPropertyChanged(Utils.NameOf(() => this.LastModification));
                 }
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="CmisSync.Lib.FileTransmission.Transmission"/> is done.
+        /// It is true if the transmission is aborted or finished, otherwise false.
+        /// </summary>
+        /// <value><c>true</c> if done; otherwise, <c>false</c>.</value>
+        public bool Done {
+            get {
+                return this.Status == TransmissionStatus.ABORTED || this.Status == TransmissionStatus.FINISHED;
             }
         }
 
