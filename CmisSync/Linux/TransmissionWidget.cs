@@ -71,6 +71,7 @@ namespace CmisSync.Widgets {
                     this.repoLabel.Markup = string.Format("<small>{0}</small>", this.transmission.Repository);
                     this.fileNameLabel.Text = System.IO.Path.GetFileName(this.transmission.Path);
                     this.fileNameLabel.TooltipText = this.transmission.Path;
+                    this.lastModificationLabel.Markup = string.Format("<small>{0}</small>", transmission.LastModification.ToString());
                     this.openFileInFolderButton.Clicked += (object s, EventArgs e) => {
                         Utils.OpenFolder(new FileInfo(this.transmission.Path).Directory.FullName);
                     };

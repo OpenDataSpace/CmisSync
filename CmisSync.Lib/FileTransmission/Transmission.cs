@@ -282,9 +282,10 @@ namespace CmisSync.Lib.FileTransmission {
             }
 
             set {
-                if (this.bitsPerSecond != value) {
+                if (this.bitsPerSecond != value && !this.Done) {
                     this.bitsPerSecond = value;
                     this.NotifyPropertyChanged(Utils.NameOf(() => this.BitsPerSecond));
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.Percent));
                 }
             }
         }
@@ -319,7 +320,7 @@ namespace CmisSync.Lib.FileTransmission {
             }
 
             set {
-                if (this.lastModification != value) {
+                if ((value - this.lastModification).TotalSeconds > 1 ) {
                     this.lastModification = value;
                     this.NotifyPropertyChanged(Utils.NameOf(() => this.LastModification));
                 }
