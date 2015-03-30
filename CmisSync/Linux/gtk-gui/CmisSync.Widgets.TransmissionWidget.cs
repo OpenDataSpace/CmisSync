@@ -4,6 +4,7 @@ namespace CmisSync.Widgets
 {
 	public partial class TransmissionWidget
 	{
+		private global::Gtk.EventBox eventBox;
 		private global::Gtk.HBox mainBox;
 		private global::Gtk.Image fileTypeImage;
 		private global::Gtk.VBox midbox;
@@ -24,6 +25,10 @@ namespace CmisSync.Widgets
 			this.CanFocus = true;
 			this.Name = "CmisSync.Widgets.TransmissionWidget";
 			// Container child CmisSync.Widgets.TransmissionWidget.Gtk.Container+ContainerChild
+			this.eventBox = new global::Gtk.EventBox ();
+			this.eventBox.CanFocus = true;
+			this.eventBox.Name = "eventBox";
+			// Container child eventBox.Gtk.Container+ContainerChild
 			this.mainBox = new global::Gtk.HBox ();
 			this.mainBox.CanFocus = true;
 			this.mainBox.Name = "mainBox";
@@ -128,7 +133,8 @@ namespace CmisSync.Widgets
 			w10.Position = 2;
 			w10.Expand = false;
 			w10.Fill = false;
-			this.Add (this.mainBox);
+			this.eventBox.Add (this.mainBox);
+			this.Add (this.eventBox);
 			if ((this.Child != null)) {
 				this.Child.ShowAll ();
 			}

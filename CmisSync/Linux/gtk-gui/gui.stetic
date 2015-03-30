@@ -489,80 +489,124 @@
       </widget>
     </child>
   </widget>
-  <widget class="Gtk.Bin" id="CmisSync.Widgets.TransmissionWidget" design-size="328 72">
+  <widget class="Gtk.Bin" id="CmisSync.Widgets.TransmissionWidget" design-size="328 56">
     <property name="MemberName" />
     <property name="CanFocus">True</property>
     <child>
-      <widget class="Gtk.HBox" id="mainBox">
+      <widget class="Gtk.EventBox" id="eventBox">
         <property name="MemberName" />
         <property name="CanFocus">True</property>
-        <property name="Spacing">6</property>
         <child>
-          <widget class="Gtk.Image" id="fileTypeImage">
+          <widget class="Gtk.HBox" id="mainBox">
             <property name="MemberName" />
-            <property name="Xalign">0</property>
-          </widget>
-          <packing>
-            <property name="Position">0</property>
-            <property name="AutoSize">False</property>
-            <property name="Expand">False</property>
-          </packing>
-        </child>
-        <child>
-          <widget class="Gtk.VBox" id="midbox">
-            <property name="MemberName" />
+            <property name="CanFocus">True</property>
             <property name="Spacing">6</property>
             <child>
-              <widget class="Gtk.Label" id="fileNameLabel">
+              <widget class="Gtk.Image" id="fileTypeImage">
                 <property name="MemberName" />
                 <property name="Xalign">0</property>
-                <property name="Selectable">True</property>
               </widget>
               <packing>
                 <property name="Position">0</property>
                 <property name="AutoSize">False</property>
                 <property name="Expand">False</property>
-                <property name="Fill">False</property>
               </packing>
             </child>
             <child>
-              <widget class="Gtk.ProgressBar" id="transmissionProgressBar">
+              <widget class="Gtk.VBox" id="midbox">
                 <property name="MemberName" />
-              </widget>
-              <packing>
-                <property name="Position">1</property>
-                <property name="AutoSize">False</property>
-                <property name="Fill">False</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="Gtk.HBox" id="statusBox">
-                <property name="MemberName" />
-                <property name="Spacing">10</property>
+                <property name="Spacing">6</property>
                 <child>
-                  <widget class="Gtk.Label" id="statusDetailsLabel">
+                  <widget class="Gtk.Label" id="fileNameLabel">
                     <property name="MemberName" />
-                    <property name="Sensitive">False</property>
                     <property name="Xalign">0</property>
-                    <property name="UseMarkup">True</property>
                     <property name="Selectable">True</property>
-                    <property name="SingleLineMode">True</property>
                   </widget>
                   <packing>
                     <property name="Position">0</property>
-                    <property name="AutoSize">True</property>
+                    <property name="AutoSize">False</property>
                     <property name="Expand">False</property>
                     <property name="Fill">False</property>
                   </packing>
                 </child>
                 <child>
-                  <placeholder />
+                  <widget class="Gtk.ProgressBar" id="transmissionProgressBar">
+                    <property name="MemberName" />
+                  </widget>
+                  <packing>
+                    <property name="Position">1</property>
+                    <property name="AutoSize">False</property>
+                    <property name="Fill">False</property>
+                  </packing>
                 </child>
                 <child>
-                  <widget class="Gtk.Label" id="bandwidthLabel">
+                  <widget class="Gtk.HBox" id="statusBox">
                     <property name="MemberName" />
-                    <property name="Sensitive">False</property>
-                    <property name="UseMarkup">True</property>
+                    <property name="Spacing">10</property>
+                    <child>
+                      <widget class="Gtk.Label" id="statusDetailsLabel">
+                        <property name="MemberName" />
+                        <property name="Sensitive">False</property>
+                        <property name="Xalign">0</property>
+                        <property name="UseMarkup">True</property>
+                        <property name="Selectable">True</property>
+                        <property name="SingleLineMode">True</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">0</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder />
+                    </child>
+                    <child>
+                      <widget class="Gtk.Label" id="bandwidthLabel">
+                        <property name="MemberName" />
+                        <property name="Sensitive">False</property>
+                        <property name="UseMarkup">True</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">2</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Label" id="repoLabel">
+                        <property name="MemberName" />
+                        <property name="Sensitive">False</property>
+                        <property name="Xalign">0</property>
+                        <property name="UseMarkup">True</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">3</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder />
+                    </child>
+                    <child>
+                      <widget class="Gtk.Label" id="lastModificationLabel">
+                        <property name="MemberName" />
+                        <property name="Sensitive">False</property>
+                        <property name="Xalign">0</property>
+                        <property name="UseMarkup">True</property>
+                      </widget>
+                      <packing>
+                        <property name="PackType">End</property>
+                        <property name="Position">5</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
                   </widget>
                   <packing>
                     <property name="Position">2</property>
@@ -571,38 +615,21 @@
                     <property name="Fill">False</property>
                   </packing>
                 </child>
-                <child>
-                  <widget class="Gtk.Label" id="repoLabel">
-                    <property name="MemberName" />
-                    <property name="Sensitive">False</property>
-                    <property name="Xalign">0</property>
-                    <property name="UseMarkup">True</property>
-                  </widget>
-                  <packing>
-                    <property name="Position">3</property>
-                    <property name="AutoSize">True</property>
-                    <property name="Expand">False</property>
-                    <property name="Fill">False</property>
-                  </packing>
-                </child>
-                <child>
-                  <placeholder />
-                </child>
-                <child>
-                  <widget class="Gtk.Label" id="lastModificationLabel">
-                    <property name="MemberName" />
-                    <property name="Sensitive">False</property>
-                    <property name="Xalign">0</property>
-                    <property name="UseMarkup">True</property>
-                  </widget>
-                  <packing>
-                    <property name="PackType">End</property>
-                    <property name="Position">5</property>
-                    <property name="AutoSize">True</property>
-                    <property name="Expand">False</property>
-                    <property name="Fill">False</property>
-                  </packing>
-                </child>
+              </widget>
+              <packing>
+                <property name="Position">1</property>
+                <property name="AutoSize">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.Button" id="openFileInFolderButton">
+                <property name="MemberName" />
+                <property name="UseStock">True</property>
+                <property name="Type">StockItem</property>
+                <property name="StockId">gtk-open</property>
+                <property name="FocusOnClick">False</property>
+                <property name="Relief">None</property>
+                <property name="label">gtk-open</property>
               </widget>
               <packing>
                 <property name="Position">2</property>
@@ -612,27 +639,6 @@
               </packing>
             </child>
           </widget>
-          <packing>
-            <property name="Position">1</property>
-            <property name="AutoSize">False</property>
-          </packing>
-        </child>
-        <child>
-          <widget class="Gtk.Button" id="openFileInFolderButton">
-            <property name="MemberName" />
-            <property name="UseStock">True</property>
-            <property name="Type">StockItem</property>
-            <property name="StockId">gtk-open</property>
-            <property name="FocusOnClick">False</property>
-            <property name="Relief">None</property>
-            <property name="label">gtk-open</property>
-          </widget>
-          <packing>
-            <property name="Position">2</property>
-            <property name="AutoSize">True</property>
-            <property name="Expand">False</property>
-            <property name="Fill">False</property>
-          </packing>
         </child>
       </widget>
     </child>
@@ -654,7 +660,6 @@
               <widget class="Gtk.VBox" id="transmissionList">
                 <property name="MemberName" />
                 <property name="ShowScrollbars">True</property>
-                <property name="Spacing">6</property>
                 <child>
                   <placeholder />
                 </child>

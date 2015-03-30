@@ -25,7 +25,6 @@ namespace CmisSync
 			// Container child GtkViewport.Gtk.Container+ContainerChild
 			this.transmissionList = new global::Gtk.VBox ();
 			this.transmissionList.Name = "transmissionList";
-			this.transmissionList.Spacing = 6;
 			w1.Add (this.transmissionList);
 			this.GtkScrolledWindow.Add (w1);
 			this.Add (this.GtkScrolledWindow);

@@ -45,6 +45,13 @@ namespace CmisSync.Widgets {
                     this.transmissionProgressBar.Pulse();
                 });
             };
+
+            this.eventBox.EnterNotifyEvent += (object o, Gtk.EnterNotifyEventArgs args) => {
+                this.eventBox.State = Gtk.StateType.Prelight;
+            };
+            this.eventBox.LeaveNotifyEvent += (object o, Gtk.LeaveNotifyEventArgs args) => {
+                this.eventBox.State = Gtk.StateType.Normal;
+            };
         }
 
         /// <summary>
