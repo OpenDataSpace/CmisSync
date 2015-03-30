@@ -32,25 +32,20 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+namespace CmisSync {
+    using System;
+    using System.Drawing;
 
-using System;
-using System.Drawing;
+    using MonoMac.Foundation;
+    using MonoMac.AppKit;
+    using MonoMac.ObjCRuntime;
 
-using MonoMac.Foundation;
-using MonoMac.AppKit;
-using MonoMac.ObjCRuntime;
+    [MonoMac.Foundation.Register("AppDelegate")]
+    public partial class AppDelegate : NSApplicationDelegate {
+        public AppDelegate() {
+        }
 
-namespace CmisSync
-{
-	public partial class AppDelegate : NSApplicationDelegate
-	{
-		public AppDelegate ()
-		{
-		}
-
-		public override void FinishedLaunching 
-		(NSObject notification)
-		{
-		}
-	}
+        public override void FinishedLaunching(NSObject notification) {
+        }
+    }
 }

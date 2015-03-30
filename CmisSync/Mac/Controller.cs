@@ -202,12 +202,12 @@ namespace CmisSync {
 
             OnTransmissionListChanged += delegate {
                 var count = this.ActiveTransmissions().Count;
-                using (var a = new NSAutoreleasePool()) {
+                /*using (var a = new NSAutoreleasePool()) {
                     notificationCenter.BeginInvokeOnMainThread(delegate {
                     NSApplication.SharedApplication.DockTile.ShowsApplicationBadge = count > 0;
                     NSApplication.SharedApplication.DockTile.BadgeLabel = count > 0 ? count.ToString() : null;
                     });
-                }
+                }*/
 
                 if (!ConfigManager.CurrentConfig.Notifications) {
                     return;
@@ -310,7 +310,7 @@ namespace CmisSync {
                 }
 
                 lock (transmissionLock) {
-                    if (transmission.Done()) {
+                    if (transmission.Done) {
                         transmission.PropertyChanged -= TransmissionReport;
                         transmissionFiles.Remove(transmission.Path);
                     } else {

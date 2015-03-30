@@ -46,9 +46,9 @@ namespace CmisSync {
                 for (int i = 0; i < TransmissionItems.Count; ++i) {
                     if (TransmissionItems[i].Path == item.Path) {
                         TransmissionItems[i] = item;
-                        if (item.Done()) {
+                        if (item.Done) {
                             // finished TransmissionItem should put to the tail
-                            if (i < TransmissionItems.Count - 1 && !TransmissionItems[i + 1].Done()) {
+                            if (i < TransmissionItems.Count - 1 && !TransmissionItems[i + 1].Done) {
                                 TransmissionItems[i] = TransmissionItems[i + 1];
                                 TransmissionItems[i + 1] = item;
                                 changeAll = true;
@@ -229,7 +229,7 @@ namespace CmisSync {
                         TableRowMenuOpen.Enabled = false;
                         foreach (int row in TableView.SelectedRows) {
                             var item = DataSource.GetTransmissionItem(row);
-                            if (item != null && item.Done()) {
+                            if (item != null && item.Done) {
                                 TableRowMenuOpen.Enabled = true;
                                 break;
                             }
@@ -255,7 +255,7 @@ namespace CmisSync {
             NSWorkspace.SharedWorkspace.BeginInvokeOnMainThread(delegate {
                 foreach (int row in TableView.SelectedRows) {
                     var item = DataSource.GetTransmissionItem(row);
-                    if (item!=null && item.Done()) {
+                    if (item!=null && item.Done) {
                         NSWorkspace.SharedWorkspace.OpenFile(item.Path);
                     }
                 }
