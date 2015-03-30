@@ -127,7 +127,7 @@ namespace CmisSync {
             bool open = false;
             foreach (object item in ListView.SelectedItems) {
                 Transmission data = item as Transmission;
-                if (data.Done()) {
+                if (data.Done) {
                     open = true;
                     break;
                 }

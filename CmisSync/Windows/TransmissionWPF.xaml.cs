@@ -56,7 +56,7 @@ namespace CmisSync {
         private void ListViewItem_Open(object sender, RoutedEventArgs e) {
             foreach (object item in ListView.SelectedItems) {
                 var transmission = item as Transmission;
-                if (transmission.Done()) {
+                if (transmission.Done) {
                     try {
                         if (System.IO.File.Exists(transmission.Path)) {
                             Process.Start(transmission.Path);
