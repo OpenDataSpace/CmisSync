@@ -611,18 +611,6 @@
                 <property name="Fill">False</property>
               </packing>
             </child>
-            <child>
-              <widget class="Gtk.HSeparator" id="bottomSeparator">
-                <property name="MemberName" />
-              </widget>
-              <packing>
-                <property name="PackType">End</property>
-                <property name="Position">3</property>
-                <property name="AutoSize">True</property>
-                <property name="Expand">False</property>
-                <property name="Fill">False</property>
-              </packing>
-            </child>
           </widget>
           <packing>
             <property name="Position">1</property>
@@ -656,6 +644,7 @@
     <child>
       <widget class="Gtk.ScrolledWindow" id="GtkScrolledWindow">
         <property name="MemberName" />
+        <property name="VscrollbarPolicy">Always</property>
         <property name="ShadowType">In</property>
         <child>
           <widget class="Gtk.Viewport" id="GtkViewport">

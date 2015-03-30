@@ -49,6 +49,7 @@ namespace CmisSync {
                     var widget = new TransmissionWidget() { Transmission = transmission };
                     this.widgets.Add(transmission, widget);
                     this.transmissionList.PackStart(widget, false, true, 2);
+                    this.transmissionList.ReorderChild(widget, 0);
                     this.transmissionList.Show();
                 });
             };

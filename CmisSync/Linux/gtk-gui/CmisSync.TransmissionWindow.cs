@@ -17,6 +17,7 @@ namespace CmisSync
 			// Container child CmisSync.TransmissionWindow.Gtk.Container+ContainerChild
 			this.GtkScrolledWindow = new global::Gtk.ScrolledWindow ();
 			this.GtkScrolledWindow.Name = "GtkScrolledWindow";
+			this.GtkScrolledWindow.VscrollbarPolicy = ((global::Gtk.PolicyType)(0));
 			this.GtkScrolledWindow.ShadowType = ((global::Gtk.ShadowType)(1));
 			// Container child GtkScrolledWindow.Gtk.Container+ContainerChild
 			global::Gtk.Viewport w1 = new global::Gtk.Viewport ();
