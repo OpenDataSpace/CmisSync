@@ -4,9 +4,10 @@ namespace CmisSync.Widgets
 {
 	public partial class TransmissionWidget
 	{
-		private global::Gtk.HBox hbox1;
+		private global::Gtk.EventBox eventBox;
+		private global::Gtk.HBox mainBox;
 		private global::Gtk.Image fileTypeImage;
-		private global::Gtk.VBox vbox1;
+		private global::Gtk.VBox midbox;
 		private global::Gtk.Label fileNameLabel;
 		private global::Gtk.ProgressBar transmissionProgressBar;
 		private global::Gtk.HBox statusBox;
@@ -24,39 +25,44 @@ namespace CmisSync.Widgets
 			this.CanFocus = true;
 			this.Name = "CmisSync.Widgets.TransmissionWidget";
 			// Container child CmisSync.Widgets.TransmissionWidget.Gtk.Container+ContainerChild
-			this.hbox1 = new global::Gtk.HBox ();
-			this.hbox1.Name = "hbox1";
-			this.hbox1.Spacing = 6;
-			// Container child hbox1.Gtk.Box+BoxChild
+			this.eventBox = new global::Gtk.EventBox ();
+			this.eventBox.CanFocus = true;
+			this.eventBox.Name = "eventBox";
+			// Container child eventBox.Gtk.Container+ContainerChild
+			this.mainBox = new global::Gtk.HBox ();
+			this.mainBox.CanFocus = true;
+			this.mainBox.Name = "mainBox";
+			this.mainBox.Spacing = 6;
+			// Container child mainBox.Gtk.Box+BoxChild
 			this.fileTypeImage = new global::Gtk.Image ();
 			this.fileTypeImage.Name = "fileTypeImage";
 			this.fileTypeImage.Xalign = 0F;
-			this.hbox1.Add (this.fileTypeImage);
-			global::Gtk.Box.BoxChild w1 = ((global::Gtk.Box.BoxChild)(this.hbox1 [this.fileTypeImage]));
+			this.mainBox.Add (this.fileTypeImage);
+			global::Gtk.Box.BoxChild w1 = ((global::Gtk.Box.BoxChild)(this.mainBox [this.fileTypeImage]));
 			w1.Position = 0;
 			w1.Expand = false;
-			// Container child hbox1.Gtk.Box+BoxChild
-			this.vbox1 = new global::Gtk.VBox ();
-			this.vbox1.Name = "vbox1";
-			this.vbox1.Spacing = 6;
-			// Container child vbox1.Gtk.Box+BoxChild
+			// Container child mainBox.Gtk.Box+BoxChild
+			this.midbox = new global::Gtk.VBox ();
+			this.midbox.Name = "midbox";
+			this.midbox.Spacing = 6;
+			// Container child midbox.Gtk.Box+BoxChild
 			this.fileNameLabel = new global::Gtk.Label ();
 			this.fileNameLabel.Name = "fileNameLabel";
 			this.fileNameLabel.Xalign = 0F;
 			this.fileNameLabel.Selectable = true;
-			this.vbox1.Add (this.fileNameLabel);
-			global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.fileNameLabel]));
+			this.midbox.Add (this.fileNameLabel);
+			global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.midbox [this.fileNameLabel]));
 			w2.Position = 0;
 			w2.Expand = false;
 			w2.Fill = false;
-			// Container child vbox1.Gtk.Box+BoxChild
+			// Container child midbox.Gtk.Box+BoxChild
 			this.transmissionProgressBar = new global::Gtk.ProgressBar ();
 			this.transmissionProgressBar.Name = "transmissionProgressBar";
-			this.vbox1.Add (this.transmissionProgressBar);
-			global::Gtk.Box.BoxChild w3 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.transmissionProgressBar]));
+			this.midbox.Add (this.transmissionProgressBar);
+			global::Gtk.Box.BoxChild w3 = ((global::Gtk.Box.BoxChild)(this.midbox [this.transmissionProgressBar]));
 			w3.Position = 1;
 			w3.Fill = false;
-			// Container child vbox1.Gtk.Box+BoxChild
+			// Container child midbox.Gtk.Box+BoxChild
 			this.statusBox = new global::Gtk.HBox ();
 			this.statusBox.Name = "statusBox";
 			this.statusBox.Spacing = 10;
@@ -106,15 +112,15 @@ namespace CmisSync.Widgets
 			w7.Position = 5;
 			w7.Expand = false;
 			w7.Fill = false;
-			this.vbox1.Add (this.statusBox);
-			global::Gtk.Box.BoxChild w8 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.statusBox]));
+			this.midbox.Add (this.statusBox);
+			global::Gtk.Box.BoxChild w8 = ((global::Gtk.Box.BoxChild)(this.midbox [this.statusBox]));
 			w8.Position = 2;
 			w8.Expand = false;
 			w8.Fill = false;
-			this.hbox1.Add (this.vbox1);
-			global::Gtk.Box.BoxChild w9 = ((global::Gtk.Box.BoxChild)(this.hbox1 [this.vbox1]));
+			this.mainBox.Add (this.midbox);
+			global::Gtk.Box.BoxChild w9 = ((global::Gtk.Box.BoxChild)(this.mainBox [this.midbox]));
 			w9.Position = 1;
-			// Container child hbox1.Gtk.Box+BoxChild
+			// Container child mainBox.Gtk.Box+BoxChild
 			this.openFileInFolderButton = new global::Gtk.Button ();
 			this.openFileInFolderButton.Name = "openFileInFolderButton";
 			this.openFileInFolderButton.UseStock = true;
@@ -122,12 +128,13 @@ namespace CmisSync.Widgets
 			this.openFileInFolderButton.FocusOnClick = false;
 			this.openFileInFolderButton.Relief = ((global::Gtk.ReliefStyle)(2));
 			this.openFileInFolderButton.Label = "gtk-open";
-			this.hbox1.Add (this.openFileInFolderButton);
-			global::Gtk.Box.BoxChild w10 = ((global::Gtk.Box.BoxChild)(this.hbox1 [this.openFileInFolderButton]));
+			this.mainBox.Add (this.openFileInFolderButton);
+			global::Gtk.Box.BoxChild w10 = ((global::Gtk.Box.BoxChild)(this.mainBox [this.openFileInFolderButton]));
 			w10.Position = 2;
 			w10.Expand = false;
 			w10.Fill = false;
-			this.Add (this.hbox1);
+			this.eventBox.Add (this.mainBox);
+			this.Add (this.eventBox);
 			if ((this.Child != null)) {
 				this.Child.ShowAll ();
 			}

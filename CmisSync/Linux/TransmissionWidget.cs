@@ -45,6 +45,13 @@ namespace CmisSync.Widgets {
                     this.transmissionProgressBar.Pulse();
                 });
             };
+
+            this.eventBox.EnterNotifyEvent += (object o, Gtk.EnterNotifyEventArgs args) => {
+                this.eventBox.State = Gtk.StateType.Prelight;
+            };
+            this.eventBox.LeaveNotifyEvent += (object o, Gtk.LeaveNotifyEventArgs args) => {
+                this.eventBox.State = Gtk.StateType.Normal;
+            };
         }
 
         /// <summary>
@@ -145,6 +152,7 @@ namespace CmisSync.Widgets {
                 this.openFileInFolderButton.Sensitive = true;
                 this.Progress = 1.0;
                 this.bandwidthLabel.Markup = string.Empty;
+                this.midbox.Remove(this.transmissionProgressBar);
                 break;
             case TransmissionStatus.ABORTING:
                 this.animation.Start();
