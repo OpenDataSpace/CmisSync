@@ -65,5 +65,30 @@ namespace CmisSync.Lib.Config {
         public override string ToString() {
             return this.password == null ? null : Crypto.Deobfuscate(this.password);
         }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object"/> is equal to the current <see cref="CmisSync.Lib.Config.Password"/>.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object"/> to compare with the current <see cref="CmisSync.Lib.Config.Password"/>.</param>
+        /// <returns><c>true</c> if the specified <see cref="System.Object"/> is equal to the current
+        /// <see cref="CmisSync.Lib.Config.Password"/>; otherwise, <c>false</c>.</returns>
+        public override bool Equals(object obj) {
+            if (obj == null) {
+                return false;
+            } else if (obj is Password) {
+                return this.password.Equals((obj as Password).password);
+            } else {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Serves as a hash function for a <see cref="CmisSync.Lib.Config.Password"/> object.
+        /// </summary>
+        /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
+        /// hash table.</returns>
+        public override int GetHashCode() {
+            return this.password.GetHashCode();
+        }
     }
 }

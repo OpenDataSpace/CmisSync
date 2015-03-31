@@ -73,5 +73,22 @@ namespace TestLibrary.ConfigTests {
             Assert.IsTrue(textWriter.ToString().Contains(pw.ObfuscatedPassword));
             Assert.IsFalse(textWriter.ToString().Contains(plaintext));
         }
+
+        [Test, Category("Fast")]
+        public void OnePasswordEqualsAnotherInstanceWithTheSameStoredPassword() {
+            var underTest = new Password("secret");
+            Assert.That(underTest, Is.EqualTo(new Password("secret")));
+        }
+
+        [Test, Category("Fast")]
+        public void HashCodeIsEqualIfBothContentsAreEqual() {
+            var underTest = new Password("secret");
+            Assert.That(underTest.GetHashCode(), Is.EqualTo(new Password("secret").GetHashCode()));
+        }
+
+        [Test, Category("Fast")]
+        public void EqualsOnNullReturnsFalse() {
+            Assert.That(new Password("secret").Equals(null), Is.False);
+        }
     }
 }
