@@ -103,7 +103,7 @@ namespace CmisSync.Lib.FileTransmission
                         if (reuse != null && update != null) {
                             using (HashAlgorithm hash = (HashAlgorithm)reuse.Clone()) {
                                 hash.TransformFinalBlock(new byte[0], 0, 0);
-                                update(hash.Hash);
+                                update(hash.Hash, localFileStream.Length);
                             }
                         }
                     }
