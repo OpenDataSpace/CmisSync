@@ -59,5 +59,9 @@ namespace CmisSync.Lib.Config {
                 this.binding = value;
             }
         }
+
+        public override string ToString() {
+            return string.Format("[ServerCredentials: Address={0}, Binding={1}, UserName={2}]", Address, Binding, UserName);
+        }
     }
 }
