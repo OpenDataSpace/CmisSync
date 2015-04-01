@@ -17,7 +17,7 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         /// Gets or sets the failed exception.
         /// </summary>
         /// <value>The failed exception.</value>
-        public Exception FailedException { get; set; }
+        public LoginException FailedException { get; set; }
 
         /// <summary>
         /// Gets or sets the credentials.
@@ -55,7 +55,7 @@ namespace CmisSync.Lib.Cmis.UiUtils {
                 this.Repositories = this.Credentials.GetRepositories(factory);
                 return true;
             } catch (Exception e) {
-                this.FailedException = e;
+                this.FailedException = new LoginException(e);
                 return false;
             }
         }
@@ -64,19 +64,11 @@ namespace CmisSync.Lib.Cmis.UiUtils {
             return string.Format("[LoginCredentials: Credentials={1}, FailedException={0}]", FailedException, Credentials);
         }
 
-        private int GetPriority(Exception ex) {
+        private int GetPriority(LoginException ex) {
             if (ex == null) {
                 return 10;
-            } else if (ex is CmisPermissionDeniedException) {
-                return 9;
-            } else if (ex is CmisObjectNotFoundException) {
-                return 8;
-            } else if (ex is CmisRuntimeException) {
-                return 7;
-            } else if (ex is CmisConnectionException) {
-                return 6;
             } else {
-                return 0;
+                return (int)ex.Type;
             }
         }
     }

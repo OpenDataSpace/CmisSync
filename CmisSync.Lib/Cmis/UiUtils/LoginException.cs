@@ -5,23 +5,35 @@ namespace CmisSync.Lib.Cmis.UiUtils {
 
     using DotCMIS.Exceptions;
 
+    using Newtonsoft.Json;
+
     public enum LoginExceptionType {
-        Unkown,
-        PermissionDenied,
-        NameResolutionFailure,
-        ServerNotFound,
-        ConnectionBroken,
-        TargetIsNotACmisServer,
-        ServerCouldNotLocateRepository,
-        HttpsSendFailure,
-        HttpsTrustFailure
+        Unkown = int.MaxValue,
+        ConnectionBroken = 9,
+        NameResolutionFailure = 8,
+        ServerNotFound = 7,
+        HttpsSendFailure = 6,
+        HttpsTrustFailure = 5,
+        TargetIsNotACmisServer = 4,
+        PermissionDenied = 3,
+        Unauthorized = 2,
+        ServerCouldNotLocateRepository = 1
     }
 
     [Serializable]
     public class LoginException : Exception{
-        public LoginException() : base(typeof(LoginException).Name) {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.UiUtils.LoginException"/> class.
+        /// </summary>
+        public LoginException() : base() {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.UiUtils.LoginException"/> class.
+        /// </summary>
+        /// <param name="inner">Inner Exception.</param>
+        public LoginException(Exception inner) : base(inner.Message, inner) {
+        }
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisPermissionDeniedException"/> class.
         /// </summary>
@@ -59,7 +71,11 @@ namespace CmisSync.Lib.Cmis.UiUtils {
                 } else if (ex is CmisObjectNotFoundException) {
                     return LoginExceptionType.ServerCouldNotLocateRepository;
                 } else if (ex is CmisRuntimeException) {
-                    return LoginExceptionType.TargetIsNotACmisServer;
+                    if (ex.Message == "Unauthorized") {
+                        return LoginExceptionType.Unauthorized;
+                    } else {
+                        return LoginExceptionType.TargetIsNotACmisServer;
+                    }
                 } else if (ex is CmisConnectionException) {
                     return LoginExceptionType.ConnectionBroken;
                 } else if (ex.Message == "SendFailure") {
@@ -68,6 +84,8 @@ namespace CmisSync.Lib.Cmis.UiUtils {
                     return LoginExceptionType.HttpsTrustFailure;
                 } else if (ex.Message == "NameResolutionFailure") {
                     return LoginExceptionType.NameResolutionFailure;
+                } else if (ex is JsonReaderException) {
+                    return LoginExceptionType.TargetIsNotACmisServer;
                 } else {
                     return LoginExceptionType.Unkown;
                 }
