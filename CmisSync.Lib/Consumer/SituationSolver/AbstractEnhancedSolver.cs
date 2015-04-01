@@ -185,7 +185,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 using (var filestream = target.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
                 using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
                     try {
-                        download.DownloadFile(remoteDocument, filestream, transmission, hashAlg, (byte[] checksumUpdate, long length) => this.SaveCacheFile(target, remoteDocument, checksumUpdate, transmission));
+                        download.DownloadFile(remoteDocument, filestream, transmission, hashAlg, (byte[] checksumUpdate, long length) => this.SaveCacheFile(target, remoteDocument, checksumUpdate, length, transmission));
                         if (this.TransmissionStorage != null) {
                             this.TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
                         }
