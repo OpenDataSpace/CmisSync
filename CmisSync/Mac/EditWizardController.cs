@@ -279,7 +279,7 @@ namespace CmisSync
             PasswordText.Enabled = false;
             new TaskFactory().StartNew(() => {
                 try{
-                    CmisUtils.GetRepositories(cred);
+                    cred.GetRepositories();
                     InvokeOnMainThread(()=> {
                         lock(loginLock)
                         {
