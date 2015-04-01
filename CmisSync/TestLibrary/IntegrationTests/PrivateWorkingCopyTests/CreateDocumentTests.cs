@@ -91,5 +91,18 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             this.remoteRootDir.CreateDocument(fileName, "content");
             Assert.Throws<CmisNameConstraintViolationException>(() => this.remoteRootDir.CreateDocument(fileName, "other content", true));
         }
+
+        [Test, Category("Slow"), MaxTime(180000)]
+        public void CreateDocumentViaPwcCheckInWithLastModificationDate() {
+            this.EnsureThatPrivateWorkingCopySupportIsAvailable();
+            string fileName = "file.bin";
+            DateTime past = DateTime.UtcNow - TimeSpan.FromDays(1);
+            var doc = this.remoteRootDir.CreateDocument(fileName, "content", checkedOut: true);
+            var properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.LastModificationDate, past);
+            doc = this.session.GetObject(doc.CheckIn(true, properties, null, string.Empty)) as IDocument;
+
+            Assert.That(doc.LastModificationDate, Is.EqualTo(past).Within(1).Seconds);
+        }
     }
 }
