@@ -107,6 +107,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.cacheFile.Setup(f => f.Directory).Returns(parentDir);
             this.cacheFile.Setup(f => f.IsExtendedAttributeAvailable()).Returns(true);
             this.fsFactory.AddIFileInfo(this.cacheFile.Object);
+            this.cacheFile.Setup(f => f.Length).Returns(() => { return this.localFileLength; });
 
             this.backupFile = new Mock<IFileInfo>();
         }
@@ -267,7 +268,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Never());
             this.localFile.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Never());
             this.transmissionStorage.Verify(f => f.GetObjectByRemoteObjectId(It.IsAny<string>()), Times.Once());
-            this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.Once());
+            this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.Exactly(2));
             this.transmissionStorage.Verify(f => f.RemoveObjectByRemoteObjectId(It.IsAny<string>()), Times.Never());
             this.storage.Verify(f => f.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
         }
@@ -301,6 +302,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             });
 
             this.cacheFile.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Returns(stream.Object);
+            this.cacheFile.Setup(f => f.Length).Returns(() => { return this.localFileLength; });
 
             var remoteDocument = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.objectId, this.objectName, this.parentId, this.fileContent.Length, this.fileContent, this.changeToken);
             remoteDocument.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
@@ -437,14 +439,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 return countRead;
             });
 
-            this.localFileLength = 0;
             stream.Setup(f => f.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback((byte[] buffer, int offset, int count) => this.localFileLength += count);
             stream.Setup(f => f.Length).Returns(() => { return this.localFileLength; });
 
             this.cacheFile.Setup(f => f.Delete()).Callback(() => {
-                stream.Setup(f => f.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Returns(0);
-                stream.Object.Position = 0;
                 this.cacheFile.Setup(f => f.Exists).Returns(false);
+                this.localFileLength = 0;
+                lengthRead = 0;
+                stream.Object.Position = 0;
             });
             this.cacheFile.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Returns(() => {
                 this.cacheFile.Setup(f => f.Exists).Returns(true);

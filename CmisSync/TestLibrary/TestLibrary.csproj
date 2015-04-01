@@ -268,6 +268,7 @@
     <Compile Include="StreamsTests\BandwidthNotifyingStreamTest.cs" />
     <Compile Include="StreamsTests\PausableStreamTest.cs" />
     <Compile Include="StreamsTests\TransmissionStreamTest.cs" />
+    <Compile Include="CmisTests\UiUtilsTests\UiConvenienceExtendersTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

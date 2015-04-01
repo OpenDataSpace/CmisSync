@@ -108,7 +108,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent,
             ContentChangeType remoteContent);
 
-        private void SaveCacheFile(IFileInfo target, IDocument remoteDocument, byte[] hash, Transmission transmissionEvent) {
+        private void SaveCacheFile(IFileInfo target, IDocument remoteDocument, byte[] hash, long length, Transmission transmissionEvent) {
             if (this.TransmissionStorage == null) {
                 return;
             }
@@ -117,6 +117,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             IFileTransmissionObject obj = new FileTransmissionObject(transmissionEvent.Type, target, remoteDocument);
             obj.ChecksumAlgorithmName = "SHA-1";
             obj.LastChecksum = hash;
+            obj.LastContentSize = length;
 
             this.TransmissionStorage.SaveObject(obj);
         }
@@ -184,7 +185,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 using (var filestream = target.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
                 using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
                     try {
-                        download.DownloadFile(remoteDocument, filestream, transmission, hashAlg, (byte[] checksumUpdate) => this.SaveCacheFile(target, remoteDocument, checksumUpdate, transmission));
+                        download.DownloadFile(remoteDocument, filestream, transmission, hashAlg, (byte[] checksumUpdate, long length) => this.SaveCacheFile(target, remoteDocument, checksumUpdate, transmission));
                         if (this.TransmissionStorage != null) {
                             this.TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
                         }

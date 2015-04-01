@@ -74,7 +74,7 @@ namespace CmisSync {
         /// </summary>
         public SetupController Controller = new SetupController();
 
-        delegate Tuple<CmisServer, Exception> GetRepositoriesFuzzyDelegate(ServerCredentials credentials);
+        private delegate LoginCredentials GetRepositoriesDelegate(ServerCredentials credentials);
 
         // Public Buttons
         private Button back_button;
@@ -443,8 +443,8 @@ namespace CmisSync {
                 System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
 
                 // Try to find the CMIS server (asynchronously)
-                GetRepositoriesFuzzyDelegate dlgt =
-                    new GetRepositoriesFuzzyDelegate(CmisUtils.GetRepositoriesFuzzy);
+                GetRepositoriesDelegate dlgt =
+                    new GetRepositoriesDelegate(SetupController.GetRepositories);
                 ServerCredentials credentials = new ServerCredentials() {
                     UserName = user_box.Text,
                     Password = password_box.Password,
@@ -456,13 +456,11 @@ namespace CmisSync {
                     System.Windows.Forms.Application.DoEvents();
                 }
 
-                Tuple<CmisServer, Exception> result = dlgt.EndInvoke(ar);
-                CmisServer cmisServer = result.Item1;
+                var result = dlgt.EndInvoke(ar);
+                Controller.repositories = result.Repositories;
 
-                Controller.repositories = cmisServer != null ? cmisServer.Repositories : null;
-
-                address_box.Text = cmisServer.Url.ToString();
-                binding = cmisServer.Binding;
+                address_box.Text = result.Credentials.Address.ToString();
+                binding = result.Credentials.Binding;
 
                 // Hide wait cursor
                 System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
@@ -470,7 +468,7 @@ namespace CmisSync {
 
                 if (Controller.repositories == null) {
                     // Could not retrieve repositories list from server, show warning.
-                    string warning = Controller.GetConnectionsProblemWarning(cmisServer, result.Item2);
+                    string warning = Controller.GetConnectionsProblemWarning(result.FailedException);
                     address_error_label.Text = warning;
                     address_error_label.Visibility = Visibility.Visible;
                 } else {
@@ -505,10 +503,10 @@ namespace CmisSync {
             loader = new Dictionary<string, AsyncNodeLoader>();
             // Some CMIS servers hold several repositories (ex:Nuxeo). Show one root per repository.
             bool firstRepo = true;
-            foreach (KeyValuePair<String, String> repository in Controller.repositories) {
+            foreach (var repository in Controller.repositories) {
                 RootFolder repo = new RootFolder() {
-                    Name = repository.Value,
-                    Id = repository.Key,
+                    Name = repository.Name,
+                    Id = repository.Id,
                     Address = Controller.saved_address.ToString()
                 };
                 repos.Add(repo);
@@ -524,7 +522,7 @@ namespace CmisSync {
                     Password = Controller.saved_password,
                     Address = Controller.saved_address,
                     Binding = Controller.saved_binding,
-                    RepoId = repository.Key
+                    RepoId = repository.Id
                 };
                 AsyncNodeLoader asyncLoader = new AsyncNodeLoader(repo, cred, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
                 //  GUI workaround to remove ignore folder {{
@@ -661,9 +659,9 @@ namespace CmisSync {
 
             // init UI elements.
             string localfoldername = Controller.saved_address.Host.ToString();
-            foreach (KeyValuePair<string, string> repository in Controller.repositories) {
-                if (repository.Key == Controller.saved_repository) {
-                    localfoldername += "\\" + repository.Value;
+            foreach (var repository in Controller.repositories) {
+                if (repository.Id == Controller.saved_repository) {
+                    localfoldername += "\\" + repository.Name;
                     break;
                 }
             }

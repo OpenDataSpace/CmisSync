@@ -73,8 +73,7 @@ namespace TestLibrary.IntegrationTests {
                 Assert.Ignore();
             }
 
-            ServerCredentials credentials = new ServerCredentials
-            {
+            ServerCredentials credentials = new ServerCredentials {
                 Address = new Uri(cmisServerUrl),
                 UserName = cmisUser,
                 Password = cmisPassword
@@ -84,15 +83,14 @@ namespace TestLibrary.IntegrationTests {
             proxySettings.Selection = string.IsNullOrEmpty(cmisServerUrl) ? ProxySelection.NOPROXY : ProxySelection.CUSTOM;
             proxySettings.Server = new Uri(proxyUrl);
             proxySettings.LoginRequired = !string.IsNullOrEmpty(proxyUser);
-            if (proxySettings.LoginRequired)
-            {
+            if (proxySettings.LoginRequired) {
                 proxySettings.Username = proxyUser;
                 proxySettings.ObfuscatedPassword = Crypto.Obfuscate(proxyPassword);
             }
 
             HttpProxyUtils.SetDefaultProxy(proxySettings, true);
 
-            Assert.That(CmisUtils.GetRepositories(credentials), Is.Not.Empty);
+            Assert.That(credentials.GetRepositories(), Is.Not.Empty);
         }
     }
 }

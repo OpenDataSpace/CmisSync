@@ -24,7 +24,7 @@ namespace CmisSync.Lib.FileTransmission {
 
     using CmisSync.Lib.Storage.Database;
 
-    public delegate void UpdateChecksum(byte[] checksum);
+    public delegate void UpdateChecksum(byte[] checksum, long length = -1);
 
     /// <summary>
     /// Content task utils.
