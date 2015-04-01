@@ -249,6 +249,7 @@ namespace CmisSync.Lib.Queueing {
                     Logger.Error("Failed to find cmis object: ", e);
                 } catch (CmisConnectionException e) {
                     Logger.Info(string.Format("Failed to create connection to \"{0}\". Will try again in {1} ms", this.RepoInfo.Address.ToString(), this.Interval));
+                    Logger.Debug(string.Empty, e);
                 } catch (CmisBaseException e) {
                     Logger.Error("Failed to create session to remote " + this.RepoInfo.Address.ToString() + ": ", e);
                 }
