@@ -151,30 +151,25 @@ namespace CmisSync
             //  monomac bug: animation GUI effect will cause GUI to hang, when backend thread is busy
 //            LoginProgress.StartAnimation(this);
             Thread check = new Thread(() => {
-                Tuple<CmisServer, Exception> fuzzyResult = CmisUtils.GetRepositoriesFuzzy(credentials);
-                CmisServer cmisServer = fuzzyResult.Item1;
-                if (cmisServer != null)
-                {
-                    Controller.repositories = cmisServer.Repositories;
-                }
-                else
-                {
+                var result = SetupController.GetRepositories(credentials);
+                if (result.Repositories != null) {
+                    Controller.repositories = result.Repositories.WithoutHiddenOnce();
+                } else {
                     Controller.repositories = null;
                 }
+
                 InvokeOnMainThread(delegate {
-                    if (Controller.repositories == null)
-                    {
-                        WarnText.StringValue = Controller.GetConnectionsProblemWarning(fuzzyResult.Item1, fuzzyResult.Item2);
+                    if (Controller.repositories == null) {
+                        AddressText.StringValue = result.Credentials.Address.ToString();
+                        WarnText.StringValue = this.Controller.GetConnectionsProblemWarning(result.FailedException);
                         AddressText.Enabled = true;
                         UserText.Enabled = true;
                         PasswordText.Enabled = true;
                         ContinueButton.Enabled = true;
                         CancelButton.Enabled = true;
-                    }
-                    else
-                    {
+                    } else {
                         RemoveEvent();
-                        Controller.Add1PageCompleted(cmisServer.Url, cmisServer.Binding, credentials.UserName, credentials.Password.ToString());
+                        Controller.Add1PageCompleted(result.Credentials.Address, result.Credentials.Binding, credentials.UserName, credentials.Password.ToString());
                     }
                     LoginProgress.StopAnimation(this);
                 });
