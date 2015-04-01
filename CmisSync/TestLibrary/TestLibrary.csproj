@@ -263,6 +263,7 @@
     <Compile Include="ConsumerTests\SituationSolverTests\PrivateWorkingCopyTests\LocalObjectChangedRemoteObjectChangedWithPWCTest.cs" />
     <Compile Include="TestUtils\MockOfIFileTransmissionStorageUtil.cs" />
     <Compile Include="FilterTests\RepositoryRootDeletedDetectionTest.cs" />
+    <Compile Include="CmisTests\UiUtilsTests\UiConvenienceExtendersTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

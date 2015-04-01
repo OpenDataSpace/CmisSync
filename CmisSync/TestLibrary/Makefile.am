@@ -28,6 +28,7 @@ SOURCES =  \
 	CmisTests/OperationContextFactoryTest.cs \
 	CmisTests/RepositoryTests.cs \
 	CmisTests/UiUtilsTests/CmisUtilsTest.cs \
+	CmisTests/UiUtilsTests/UiConvenienceExtendersTest.cs \
 	ConfigTests/CmisRepoCredentialsTest.cs \
 	ConfigTests/ConfigurationTest.cs \
 	ConfigTests/CryptoTest.cs \

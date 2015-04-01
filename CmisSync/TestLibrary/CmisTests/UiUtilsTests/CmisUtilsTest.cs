@@ -22,30 +22,20 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
+    using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
 
     using CmisSync.Lib;
+    using CmisSync.Lib.Cmis.UiUtils;
+    using CmisSync.Lib.Config;
+
+    using DotCMIS;
 
     using NUnit.Framework;
 
     [TestFixture]
     public class CmisUtilsTest {
-        private static readonly string TestFolderParent = Directory.GetCurrentDirectory();
-        private static readonly string TestFolder = Path.Combine(TestFolderParent, "conflicttest");
-
-        [SetUp]
-        public void TestInit() {
-            Directory.CreateDirectory(TestFolder);
-        }
-
-        [TearDown]
-        public void TestCleanup() {
-            if (Directory.Exists(TestFolder)) {
-                Directory.Delete(TestFolder, true);
-            }
-        }
-
         [Test, Category("Fast")]
         public void BandwidthTest() {
             long bitPerSecond = 1;
@@ -99,9 +89,9 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
         [Test, Category("Fast")]
         public void CreateUserAgent() {
             var useragent = Utils.CreateUserAgent();
-            Assert.IsTrue(useragent.Contains(Backend.Version));
-            Assert.IsTrue(useragent.Contains("hostname="));
-            Assert.IsTrue(useragent.Contains(CultureInfo.CurrentCulture.Name));
+            Assert.That(useragent.Contains(Backend.Version));
+            Assert.That(useragent.Contains("hostname="));
+            Assert.That(useragent.Contains(CultureInfo.CurrentCulture.Name));
         }
 
         [Test, Category("Fast")]
@@ -145,8 +135,34 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
         public void IgnoreFolderByWildard() {
             var wildcards = new List<string>();
             wildcards.Add(".*");
-            Assert.IsFalse(Utils.IsInvalidFolderName("test", wildcards), "test is a valid folder name");
-            Assert.IsTrue(Utils.IsInvalidFolderName(".test", wildcards), ".test is not a valid folder name");
+            Assert.That(Utils.IsInvalidFolderName("test", wildcards), Is.False, "test is a valid folder name");
+            Assert.That(Utils.IsInvalidFolderName(".test", wildcards), Is.True, ".test is not a valid folder name");
+        }
+
+        [Test, Category("Fast")]
+        public void CreateMultipleServerCredentialsBasedOnTheGivenOne() {
+            var userName = "User";
+            var originalUrl = "https://demo.deutsche-wolke.de/wrongStuff";
+            var password = new Password(Guid.NewGuid().ToString());
+            var originalCredentials = new ServerCredentials {
+                Address = new Uri(originalUrl),
+                Password = password,
+                Binding = BindingType.Browser,
+                UserName = userName
+            };
+
+            var list = originalCredentials.CreateFuzzyCredentials();
+
+            Assert.That(list, Is.Not.Null);
+            Assert.That(list, Is.Not.Empty);
+            Assert.That(list.First().Credentials, Is.EqualTo(originalCredentials));
+            Assert.That(list[1].Credentials.Address.ToString(), Is.EqualTo(originalCredentials.Address.ToString()));
+            Assert.That(list[1].Credentials.Binding, Is.Not.EqualTo(originalCredentials.Binding));
+            foreach (var entry in list) {
+                Assert.That(entry.Credentials.Password.ToString(), Is.EqualTo(password.ToString()));
+                Assert.That(entry.Credentials.UserName, Is.EqualTo(userName));
+                Console.WriteLine(entry);
+            }
         }
     }
 }
