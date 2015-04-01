@@ -24,6 +24,10 @@ namespace CmisSync.Lib.Config {
     using System.Text;
 
     using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Cmis.UiUtils;
+    using DotCMIS.Client;
+    using DotCMIS.Client.Impl;
+    using DotCMIS;
 
     /// <summary>
     /// Server Login for a specific Uri
@@ -60,8 +64,56 @@ namespace CmisSync.Lib.Config {
             }
         }
 
+        public IList<CmisSync.Lib.Cmis.UiUtils.LogonRepositoryInfo> GetRepositories() {
+            return this.GetRepositories(null);
+        }
+
+        /// <summary>
+        /// Get the list of repositories of a CMIS server
+        /// </summary>
+        /// <returns>The list of repositories. Each item contains the identifier and the human-readable name of the repository.</returns>
+        public IList<CmisSync.Lib.Cmis.UiUtils.LogonRepositoryInfo> GetRepositories(ISessionFactory sessionFactory) {
+            var result = new List<CmisSync.Lib.Cmis.UiUtils.LogonRepositoryInfo>();
+            // If no URL was provided, return empty result.
+            if (this.Address == null) {
+                return result;
+            }
+
+            // Create session factory.
+            var factory = sessionFactory ?? SessionFactory.NewInstance();
+            var cmisParameters = this.GetRepositoriesCmisSessionParameter();
+            IList<IRepository> repositories = factory.GetRepositories(cmisParameters);
+
+            // Populate the result list with identifier and name of each repository.
+            foreach (var repo in repositories) {
+                result.Add(new CmisSync.Lib.Cmis.UiUtils.LogonRepositoryInfo(repo.Id, repo.Name));
+            }
+
+            return result;
+        }
+
         public override string ToString() {
             return string.Format("[ServerCredentials: Address={0}, Binding={1}, UserName={2}]", Address, Binding, UserName);
+        }
+
+        private Dictionary<string, string> GetRepositoriesCmisSessionParameter(int timeout = 5000) {
+            Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
+            if (this.Binding == DotCMIS.BindingType.AtomPub) {
+                cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
+                cmisParameters[SessionParameter.AtomPubUrl] = this.Address.ToString();
+            } else if (this.Binding == DotCMIS.BindingType.Browser) {
+                cmisParameters[SessionParameter.BindingType] = BindingType.Browser;
+                cmisParameters[SessionParameter.BrowserUrl] = this.Address.ToString();
+            }
+
+            cmisParameters[SessionParameter.User] = this.UserName;
+            cmisParameters[SessionParameter.Password] = this.Password.ToString();
+            cmisParameters[SessionParameter.DeviceIdentifier] = ConfigManager.CurrentConfig.DeviceId.ToString();
+            cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
+            cmisParameters[SessionParameter.Compression] = bool.TrueString;
+            cmisParameters[SessionParameter.ConnectTimeout] = timeout.ToString();
+            cmisParameters[SessionParameter.ReadTimeout] = timeout.ToString();
+            return cmisParameters;
         }
     }
 }

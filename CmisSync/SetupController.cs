@@ -35,6 +35,7 @@
 namespace CmisSync
 {
     using System;
+    using System.Linq;
     using System.Collections.Generic;
     using System.IO;
     using System.Text.RegularExpressions;
@@ -156,8 +157,7 @@ namespace CmisSync
                 }
             }
 
-            multipleCredentials.Sort();
-            return multipleCredentials[0];
+            return multipleCredentials.OrderBy(cred => cred.FailedException.Type).First();
         }
 
         /// <summary>
