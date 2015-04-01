@@ -30,9 +30,11 @@ SOURCES =  \
 	Cmis/RepositoryExceptionEventArgs.cs \
 	Cmis/RepositoryStatus.cs \
 	Cmis/RepositoryStatusAggregator.cs \
-	Cmis/UiUtils/CmisPermissionDeniedException.cs \
-	Cmis/UiUtils/CmisServerNotFoundException.cs \
 	Cmis/UiUtils/CmisUtils.cs \
+	Cmis/UiUtils/LoginCredentials.cs \
+	Cmis/UiUtils/LoginException.cs \
+	Cmis/UiUtils/LogonRepositoryInfo.cs \
+	Cmis/UiUtils/UiConvenienceExtenders.cs \
 	Config/AuthenticationType.cs \
 	Config/Brand.cs \
 	Config/CmisRepoCredentials.cs \

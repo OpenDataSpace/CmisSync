@@ -60,8 +60,7 @@ namespace CmisSync {
         private string continueText = Properties_Resources.Continue;
         private string backText = Properties_Resources.Back;
 
-        private delegate Tuple<CmisServer, Exception> GetRepositoriesFuzzyDelegate(ServerCredentials credentials);
-
+        private delegate LoginCredentials GetRepositoriesDelegate(ServerCredentials credentials);
         private delegate string[] GetSubfoldersDelegate(
             string repositoryId,
             string path,
@@ -257,8 +256,8 @@ namespace CmisSync {
                 this.GdkWindow.Cursor = waitCursor;
 
                 // Try to find the CMIS server (asynchronous using a delegate)
-                GetRepositoriesFuzzyDelegate dlgt =
-                    new GetRepositoriesFuzzyDelegate(CmisUtils.GetRepositoriesFuzzy);
+                GetRepositoriesDelegate dlgt =
+                    new GetRepositoriesDelegate(SetupController.GetRepositories);
                 ServerCredentials credentials = new ServerCredentials() {
                     UserName = user_entry.Text,
                     Password = password_entry.Text,
@@ -272,27 +271,29 @@ namespace CmisSync {
                     }
                 }
 
-                Tuple<CmisServer, Exception> result = dlgt.EndInvoke(ar);
-                CmisServer cmisServer = result.Item1;
-                if (cmisServer != null) {
-                    this.controller.repositories = cmisServer.Repositories;
-                    address_entry.Text = cmisServer.Url.ToString();
+                var result = dlgt.EndInvoke(ar);
+                if (result.Repositories != null) {
+                    this.controller.repositories = result.Repositories.WithoutHiddenOnce();
+                    address_entry.Text = result.Credentials.Address.ToString();
                 } else {
                     this.controller.repositories = null;
+
+                    // Show best found Url
+                    address_entry.Text = result.Credentials.Address.ToString();
+
+                    // Show warning
+                    string warning = this.controller.GetConnectionsProblemWarning(result.FailedException);
+                    address_error_label.Markup = "<span foreground=\"red\">" + warning + "</span>";
+                    address_error_label.Show();
                 }
 
                 // Hide wait cursor
                 this.GdkWindow.Cursor = defaultCursor;
 
-                if (this.controller.repositories == null) {
-                    // Show warning
-                    string warning = this.controller.GetConnectionsProblemWarning(cmisServer, result.Item2);
-                    address_error_label.Markup = "<span foreground=\"red\">" + warning + "</span>";
-                    address_error_label.Show();
-                } else {
+                if (this.controller.repositories != null) {
                     // Continue to folder selection
                     this.controller.Add1PageCompleted(
-                        new Uri(address_entry.Text), cmisServer.Binding, user_entry.Text, password_entry.Text);
+                        new Uri(address_entry.Text), result.Credentials.Binding, user_entry.Text, password_entry.Text);
                 }
             };
 
@@ -321,10 +322,10 @@ namespace CmisSync {
             bool firstRepo = true;
             List<RootFolder> repositories = new List<RootFolder>();
             Dictionary<string, AsyncNodeLoader> loader = new Dictionary<string, AsyncNodeLoader>();
-            foreach (KeyValuePair<string, string> repository in this.controller.repositories) {
+            foreach (var repository in this.controller.repositories) {
                 RootFolder root = new RootFolder() {
-                    Name = repository.Value,
-                    Id = repository.Key,
+                    Name = repository.Name,
+                    Id = repository.Id,
                     Address = this.controller.saved_address.ToString()
                 };
                 if (firstRepo) {
@@ -339,7 +340,7 @@ namespace CmisSync {
                     UserName = this.controller.saved_user,
                     Password = this.controller.saved_password,
                     Address = this.controller.saved_address,
-                    RepoId = repository.Key
+                    RepoId = repository.Id
                 };
                 AsyncNodeLoader asyncLoader = new AsyncNodeLoader(root, cred, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
                 asyncLoader.UpdateNodeEvent += delegate {
@@ -476,9 +477,9 @@ namespace CmisSync {
         private void ShowCustomizePage() {
             this.Header = Properties_Resources.Customize;
             string localfoldername = this.controller.saved_address.Host.ToString();
-            foreach (KeyValuePair<string, string> repository in this.controller.repositories) {
-                if (repository.Key == this.controller.saved_repository) {
-                    localfoldername += "/" + repository.Value;
+            foreach (var repository in this.controller.repositories) {
+                if (repository.Id == this.controller.saved_repository) {
+                    localfoldername += "/" + repository.Name;
                     break;
                 }
             }
