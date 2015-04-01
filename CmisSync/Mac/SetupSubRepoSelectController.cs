@@ -75,29 +75,25 @@ namespace CmisSync
             bool firstRepo = true;
             Repositories = new List<RootFolder>();
             Loader = new Dictionary<string,AsyncNodeLoader> ();
-            foreach (KeyValuePair<String, String> repository in Controller.repositories)
-            {
+            foreach (var repository in Controller.repositories) {
                 RootFolder repo = new RootFolder() {
-                    Name = repository.Value,
-                    Id = repository.Key,
+                    Name = repository.Name,
+                    Id = repository.Id,
                     Address = Controller.saved_address.ToString()
                 };
                 Repositories.Add(repo);
-                if (firstRepo)
-                {
+                if (firstRepo) {
                     repo.Selected = true;
                     firstRepo = false;
-                }
-                else
-                {
+                } else {
                     repo.Selected = false;
                 }
-                CmisRepoCredentials cred = new CmisRepoCredentials()
-                {
+
+                CmisRepoCredentials cred = new CmisRepoCredentials() {
                     UserName = Controller.saved_user,
                     Password = Controller.saved_password,
                     Address = Controller.saved_address,
-                    RepoId = repository.Key
+                    RepoId = repository.Id
                 };
                 //  GUI workaround to remove ignore folder {{
                 //AsyncNodeLoader asyncLoader = new AsyncNodeLoader(repo, cred, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
