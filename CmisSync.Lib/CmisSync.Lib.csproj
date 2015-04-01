@@ -124,8 +124,6 @@
     <Compile Include="Cmis\Authentication\PersistentNtlmAuthenticationProvider.cs" />
     <Compile Include="Cmis\Authentication\PersistentStandardAuthenticationProvider.cs" />
     <Compile Include="Cmis\Authentication\StandardAuthenticationProviderWrapper.cs" />
-    <Compile Include="Cmis\UiUtils\CmisPermissionDeniedException.cs" />
-    <Compile Include="Cmis\UiUtils\CmisServerNotFoundException.cs" />
     <Compile Include="Cmis\UiUtils\CmisUtils.cs" />
     <Compile Include="Cmis\Repository.cs" />
     <Compile Include="Queueing\ActiveActivitiesManager.cs" />
@@ -297,6 +295,10 @@
     <Compile Include="Storage\FileSystem\ReadOnlyIgnoringDirectoryInfoDecorator.cs" />
     <Compile Include="Filter\RepositoryRootDeletedDetection.cs" />
     <Compile Include="Cmis\RepositoryExceptionEventArgs.cs" />
+    <Compile Include="Cmis\UiUtils\LoginCredentials.cs" />
+    <Compile Include="Cmis\UiUtils\LogonRepositoryInfo.cs" />
+    <Compile Include="Cmis\UiUtils\LoginException.cs" />
+    <Compile Include="Cmis\UiUtils\UiConvenienceExtenders.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
