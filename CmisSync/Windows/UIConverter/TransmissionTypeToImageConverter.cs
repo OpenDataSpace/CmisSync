@@ -8,12 +8,14 @@ namespace CmisSync.UIConverter {
     using System.Windows.Data;
 
     using CmisSync.Lib.FileTransmission;
-    
+    using System.Windows.Media.Imaging;
+
+    [ValueConversion(typeof(TransmissionType), typeof(BitmapFrame))]
     public class TypeToImageConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
             switch ((TransmissionType)value) {
                 case TransmissionType.UPLOAD_NEW_FILE:
-                    return UIHelpers.GetBitmap("Uploading");
+                    return UIHelpers.GetImageSource("Uploading");
                 case TransmissionType.UPLOAD_MODIFIED_FILE:
                     return UIHelpers.GetImageSource("Downloading");
                 default:

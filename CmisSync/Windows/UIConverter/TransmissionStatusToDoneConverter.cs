@@ -9,6 +9,7 @@ namespace CmisSync.UIConverter {
 
     using CmisSync.Lib.FileTransmission;
 
+    [ValueConversion(typeof(TransmissionStatus), typeof(bool))]
     class TransmissionStatusToDoneConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
             return ((TransmissionStatus)value == TransmissionStatus.ABORTED || (TransmissionStatus)value == TransmissionStatus.FINISHED);

@@ -8,12 +8,16 @@ namespace CmisSync.UIConverter {
     using System.Windows.Data;
 
     [ValueConversion(typeof(long?), typeof(string))]
-    class BitsPerSecondToStringConverter : IValueConverter {
+    class TranmissionPositionToStringConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
-            if (value == null) {
-                return string.Empty;
+            if (value != null) {
+                if ((long)value == 0) {
+                    return string.Empty;
+                } else {
+                    return string.Format("{0}/", CmisSync.Lib.Utils.FormatSize((long)value));
+                }
             } else {
-                return CmisSync.Lib.Utils.FormatBandwidth((double)((long)value));
+                return string.Empty;
             }
         }
 

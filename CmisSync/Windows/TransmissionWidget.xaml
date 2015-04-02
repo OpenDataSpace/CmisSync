@@ -10,6 +10,8 @@
         <l:TypeToImageConverter x:Key="typeToImageConverter" />
         <l:BitsPerSecondToStringConverter x:Key="bandwidthConverter" />
         <l:TransmissionStatusToDoneConverter x:Key="statusToDoneConverter" />
+        <l:TransmissionLengthToStringConverter x:Key="lengthToStringConverter" />
+        <l:TranmissionPositionToStringConverter x:Key="posToStringConverter" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -27,7 +29,7 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <Image Width="16" Height="16" Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" VerticalAlignment="Center" Source="{Binding Path=Type, Converter={StaticResource typeToImageConverter}, Mode=OneWay}"/>
-        <Label x:Name="fileNameLabel" Content="{Binding FileName}" ToolTip="{Binding Path}" Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="4"/>
+        <TextBlock x:Name="fileNameLabel" Text="{Binding FileName}" ToolTip="{Binding Path}" Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="5"/>
         <ProgressBar x:Name="progress" Minimum="0" Maximum="100" Height="14" Value="{Binding Percent, Mode=OneWay}" Grid.Column="1" Grid.ColumnSpan="5" Grid.Row="1">
             <ProgressBar.Style>
                 <Style TargetType="{x:Type ProgressBar}">
@@ -39,20 +41,27 @@
                 </Style>
             </ProgressBar.Style>
         </ProgressBar>
-        <Label x:Name="bandwidthLabel" Content="{Binding Path=BitsPerSecond, Converter={StaticResource bandwidthConverter}, Mode=OneWay}" IsEnabled="False" FontSize="10" Grid.Column="1" Grid.Row="2">
-            <Label.Style>
-                <Style TargetType="{x:Type Label}">
+        <TextBlock x:Name="bandwidthLabel" Text="{Binding Path=BitsPerSecond, Converter={StaticResource bandwidthConverter}, Mode=OneWay}" IsEnabled="False" FontSize="10" Grid.Column="1" Grid.Row="2" Margin="0,0,10,0">
+            <TextBlock.Style>
+                <Style TargetType="{x:Type TextBlock}">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding Path=Status, Converter={StaticResource statusToDoneConverter}, Mode=OneWay}" Value="True">
                             <Setter Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
-            </Label.Style>
-        </Label>
-        <Label x:Name="statusLabel" Content="{Binding Position}" IsEnabled="False" FontSize="10" Grid.Column="2" Grid.Row="2"/>
-        <Label x:Name="repositoryLabel" Content="{Binding Repository}" IsEnabled="False" FontSize="10" Grid.Column="3" Grid.Row="2"/>
-        <Label x:Name="lastModificationLabel" Content="{Binding LastModification}" IsEnabled="False" FontSize="10" Grid.Column="5" Grid.Row="2"/>
+            </TextBlock.Style>
+        </TextBlock>
+        <TextBlock x:Name="statusLabel" IsEnabled="False" FontSize="10" Grid.Column="2" Grid.Row="2" Margin="0,0,10,0">
+            <TextBlock.Text>
+                <MultiBinding StringFormat="{}{0}{1}">
+                    <Binding Path="Position" Mode="OneWay" Converter="{StaticResource posToStringConverter}"/>
+                    <Binding Path="Length" Mode="OneWay" Converter="{StaticResource lengthToStringConverter}"/>
+                </MultiBinding>
+            </TextBlock.Text>
+        </TextBlock>
+        <TextBlock x:Name="repositoryLabel" Text="{Binding Repository}" IsEnabled="False" FontSize="10" Grid.Column="3" Grid.Row="2" Margin="0,0,10,0"/>
+        <TextBlock x:Name="lastModificationLabel" Text="{Binding LastModification}" IsEnabled="False" FontSize="10" Grid.Column="5" Grid.Row="2" Margin="10,0,0,0"/>
         <Button x:Name="openButton" Content="Open" IsEnabled="False" Grid.Column="6" Grid.RowSpan="3" VerticalAlignment="Center" Click="openButton_Click" Visibility="Hidden">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
