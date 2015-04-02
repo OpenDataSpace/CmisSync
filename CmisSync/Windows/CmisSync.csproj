@@ -152,7 +152,9 @@
     <Compile Include="StatusIcon.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="TransmissionTypeToImageConverter.cs" />
+    <Compile Include="UIConverter\BitsPerSecondToStringConverter.cs" />
+    <Compile Include="UIConverter\TransmissionStatusToDoneConverter.cs" />
+    <Compile Include="UIConverter\TransmissionTypeToImageConverter.cs" />
     <Compile Include="TransmissionWidget.xaml.cs">
       <DependentUpon>TransmissionWidget.xaml</DependentUpon>
     </Compile>

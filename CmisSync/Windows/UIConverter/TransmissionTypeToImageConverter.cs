@@ -1,5 +1,5 @@
 ﻿
-namespace CmisSync {
+namespace CmisSync.UIConverter {
     using System;
     using System.Collections.Generic;
     using System.Globalization;

@@ -3,11 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:l="clr-namespace:CmisSync"
+             xmlns:l="clr-namespace:CmisSync.UIConverter"
              mc:Ignorable="d" 
              d:DesignHeight="71" d:DesignWidth="297">
     <UserControl.Resources>
         <l:TypeToImageConverter x:Key="typeToImageConverter" />
+        <l:BitsPerSecondToStringConverter x:Key="bandwidthConverter" />
+        <l:TransmissionStatusToDoneConverter x:Key="statusToDoneConverter" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -19,13 +21,14 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <Image Width="16" Height="16" Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" VerticalAlignment="Center" Source="{Binding Path=Type, Converter={StaticResource typeToImageConverter}, Mode=OneWay}"/>
         <Label x:Name="fileNameLabel" Content="{Binding FileName}" ToolTip="{Binding Path}" Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="4"/>
-        <ProgressBar x:Name="progress" Minimum="0" Maximum="100" Height="14" Value="{Binding Percent, Mode=OneWay}" Grid.Column="1" Grid.ColumnSpan="4" Grid.Row="1">
+        <ProgressBar x:Name="progress" Minimum="0" Maximum="100" Height="14" Value="{Binding Percent, Mode=OneWay}" Grid.Column="1" Grid.ColumnSpan="5" Grid.Row="1">
             <ProgressBar.Style>
                 <Style TargetType="{x:Type ProgressBar}">
                     <Style.Triggers>
@@ -36,10 +39,21 @@
                 </Style>
             </ProgressBar.Style>
         </ProgressBar>
-        <Label x:Name="bandwidthLabel" Content="{Binding BitsPerSecond}" IsEnabled="False" FontSize="10" Grid.Column="1" Grid.Row="2"/>
-        <Label x:Name="repositoryLabel" Content="{Binding Repository}" IsEnabled="False" FontSize="10" Grid.Column="2" Grid.Row="2"/>
-        <Label x:Name="lastModificationLabel" Content="{Binding LastModification}" IsEnabled="False" FontSize="10" Grid.Column="4" Grid.Row="2"/>
-        <Button x:Name="openButton" Content="Open" IsEnabled="False" Grid.Column="5" Grid.RowSpan="3" VerticalAlignment="Center" Click="openButton_Click" Visibility="Hidden">
+        <Label x:Name="bandwidthLabel" Content="{Binding Path=BitsPerSecond, Converter={StaticResource bandwidthConverter}, Mode=OneWay}" IsEnabled="False" FontSize="10" Grid.Column="1" Grid.Row="2">
+            <Label.Style>
+                <Style TargetType="{x:Type Label}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=Status, Converter={StaticResource statusToDoneConverter}, Mode=OneWay}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
+        <Label x:Name="statusLabel" Content="{Binding Position}" IsEnabled="False" FontSize="10" Grid.Column="2" Grid.Row="2"/>
+        <Label x:Name="repositoryLabel" Content="{Binding Repository}" IsEnabled="False" FontSize="10" Grid.Column="3" Grid.Row="2"/>
+        <Label x:Name="lastModificationLabel" Content="{Binding LastModification}" IsEnabled="False" FontSize="10" Grid.Column="5" Grid.Row="2"/>
+        <Button x:Name="openButton" Content="Open" IsEnabled="False" Grid.Column="6" Grid.RowSpan="3" VerticalAlignment="Center" Click="openButton_Click" Visibility="Hidden">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Setter Property="Control.Background" Value="{x:Null}" />
