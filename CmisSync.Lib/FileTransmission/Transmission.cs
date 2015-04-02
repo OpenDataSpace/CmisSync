@@ -120,6 +120,13 @@ namespace CmisSync.Lib.FileTransmission {
             this.CachePath = cachePath;
         }
 
+        [Obsolete("Should only be used by UI templates", true)]
+        public Transmission() {
+            this.type = TransmissionType.UPLOAD_NEW_FILE;
+            this.Path = "Not Set";
+            this.CachePath = null;
+        }
+
         /// <summary>
         /// Occurs when property changed.
         /// </summary>
@@ -178,6 +185,15 @@ namespace CmisSync.Lib.FileTransmission {
         /// The path.
         /// </value>
         public string Path { get; private set; }
+
+        /// <summary>
+        /// Gets the file name of the target file
+        /// </summary>
+        public string FileName {
+            get {
+                return new System.IO.FileInfo(this.Path).Name;
+            }
+        }
 
         /// <summary>
         /// Gets download cache file. If a download happens, a cache file could be used. If the cache is used, this should be the path.
