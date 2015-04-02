@@ -45,11 +45,6 @@ namespace CmisSync {
         }
 
         private void ApplyTransmission() {
-            ColumnRepo.Header = Properties_Resources.TransmissionTitleRepo;
-            ColumnPath.Header = Properties_Resources.TransmissionTitlePath;
-            ColumnStatus.Header = Properties_Resources.TransmissionTitleStatus;
-            ColumnProgress.Header = Properties_Resources.TransmissionTitleProgress;
-            ColumnDate.Header = Properties_Resources.TransmissionTitleLastChange;
             OkButton.Content = Properties_Resources.Close;
         }
 

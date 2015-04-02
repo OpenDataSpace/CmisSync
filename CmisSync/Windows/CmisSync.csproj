@@ -152,6 +152,10 @@
     <Compile Include="StatusIcon.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="TransmissionTypeToImageConverter.cs" />
+    <Compile Include="TransmissionWidget.xaml.cs">
+      <DependentUpon>TransmissionWidget.xaml</DependentUpon>
+    </Compile>
     <Compile Include="TransmissionWindow.cs" />
     <Compile Include="TransmissionWPF.xaml.cs">
       <DependentUpon>TransmissionWPF.xaml</DependentUpon>
@@ -396,6 +400,10 @@
     <Page Include="SetupAddCustomizeWPF.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TransmissionWidget.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="TransmissionWPF.xaml">
       <SubType>Designer</SubType>

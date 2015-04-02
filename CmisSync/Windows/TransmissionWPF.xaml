@@ -1,12 +1,16 @@
-﻿<UserControl x:Class="CmisSync.TransmissionWPF"
+﻿<UserControl xmlns:CmisSync="clr-namespace:CmisSync"  x:Class="CmisSync.TransmissionWPF"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:lib="clr-namespace:CmisSync.Lib.FileTransmission;assembly=CmisSync.Lib" 
              mc:Ignorable="d" 
-             d:DesignHeight="440" d:DesignWidth="620">
+             d:DesignHeight="325" d:DesignWidth="517">
     <Grid>
-        <ListView Name ="ListView" Margin="0,0,0,50">
+        <ListView Name ="ListView" Margin="0,0,0,50" HorizontalContentAlignment="Stretch"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                  ScrollViewer.CanContentScroll="True" SelectionMode="Single">
             <ListView.Resources>
                 <MenuItem x:Key="ListViewItemContextMenuOpen" Header="_Open" Click="ListViewItem_Open"/>
                 <ContextMenu x:Key="ListViewItemContextMenu">
@@ -14,26 +18,21 @@
                     <MenuItem Header="Open _file location" Click="ListViewItem_OpenFileLocation"/>
                 </ContextMenu>
             </ListView.Resources>
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn x:Name="ColumnRepo" Header="Repo" DisplayMemberBinding="{Binding Repository}" Width="Auto"/>
-                    <GridViewColumn x:Name="ColumnPath" Header="Path" DisplayMemberBinding="{Binding RelativePath}" Width="Auto"/>
-                    <GridViewColumn x:Name="ColumnStatus" Header="Status" DisplayMemberBinding="{Binding Status}" Width="Auto"/>
-                    <GridViewColumn x:Name="ColumnProgress" Header="Progress" Width="100">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <ProgressBar Minimum="0" Maximum="100" Value="{Binding Path=Percent, Mode=OneWay}" MinWidth="80" Height="Auto" Width="Auto">
-                                </ProgressBar>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn x:Name="ColumnDate" Header="UpdateTime" DisplayMemberBinding="{Binding LastModification}" Width="Auto"/>
-                </GridView>
-            </ListView.View>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <CmisSync:TransmissionWidget/>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+            <!--<ListView.Items>
+                <lib:Transmission BitsPerSecond="5" Repository="my"></lib:Transmission>
+                <lib:Transmission BitsPerSecond="5" Repository="my"></lib:Transmission>
+                <lib:Transmission BitsPerSecond="5" Repository="my"></lib:Transmission>
+                <lib:Transmission BitsPerSecond="5" Repository="my"></lib:Transmission>
+            </ListView.Items>-->
             <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="ContextMenu" Value="{StaticResource ListViewItemContextMenu}"/>
-                    <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_Open"/>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Setter Property="HorizontalAlignment" Value="Stretch" />
+                    <Setter Property="ContextMenu" Value="{StaticResource ListViewItemContextMenu}" />
                 </Style>
             </ListView.ItemContainerStyle>
         </ListView>
