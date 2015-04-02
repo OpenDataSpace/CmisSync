@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="AbortableStream.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -92,15 +92,14 @@ namespace CmisSync.Lib.Streams {
         /// Count.
         /// </param>
         public override void Write(byte[] buffer, int offset, int count) {
-            // for it may be chained before CryptoStream, we should write the content for CryptoStream has calculated the hash of the content
-            this.Stream.Write(buffer, offset, count);
-
             lock(this.l) {
                 if (this.aborted) {
                     this.Exception = new AbortException();
                     throw this.exception;
                 }
             }
+
+            this.Stream.Write(buffer, offset, count);
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="AbortableStreamTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -74,8 +74,8 @@ namespace TestLibrary.StreamsTests {
             using (var underTest = new AbortableStream(stream)) {
                 underTest.Abort();
                 Assert.Throws<AbortException>(() => inputStream.CopyTo(underTest));
-                Mock.Get(stream).Verify(s => s.WriteByte(It.IsAny<byte>()), Times.AtMostOnce());
-                Mock.Get(stream).Verify(s => s.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>()), Times.AtMostOnce());
+                Mock.Get(stream).Verify(s => s.WriteByte(It.IsAny<byte>()), Times.Never());
+                Mock.Get(stream).Verify(s => s.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never());
             }
         }
 
