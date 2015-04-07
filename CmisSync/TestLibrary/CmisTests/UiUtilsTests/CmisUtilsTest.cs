@@ -37,7 +37,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
     [TestFixture]
     public class CmisUtilsTest {
         [Test, Category("Fast")]
-        public void BandwidthTest() {
+        public void BandwidthFormatTest() {
             long bitPerSecond = 1;
             double bitPerSecondDouble = 1d;
             Assert.AreEqual(Utils.FormatBandwidth(bitPerSecond), Utils.FormatBandwidth(bitPerSecondDouble));
