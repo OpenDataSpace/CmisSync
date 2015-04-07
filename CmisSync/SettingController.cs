@@ -47,91 +47,71 @@ namespace CmisSync {
         /// <summary>
         /// Constructor.
         /// </summary>
-        public SettingController()
-        {
-            Program.Controller.ShowSettingWindowEvent += delegate
-            {
+        public SettingController() {
+            Program.Controller.ShowSettingWindowEvent += delegate {
                 ShowWindowEvent();
             };
         }
 
-        public void ShowWindow()
-        {
+        public void ShowWindow() {
             ShowWindowEvent();
         }
 
-        public void HideWindow()
-        {
+        public void HideWindow() {
             HideWindowEvent();
         }
 
-        public void CheckProxyNone()
-        {
+        public void CheckProxyNone() {
             CheckProxyNoneEvent(true);
             CheckProxySystemEvent(false);
             CheckProxyCutomEvent(false);
             EnableLoginEvent(false);
         }
 
-        public void CheckProxySystem()
-        {
+        public void CheckProxySystem() {
             CheckProxyNoneEvent(false);
             CheckProxySystemEvent(true);
             CheckProxyCutomEvent(false);
             EnableLoginEvent(true);
         }
 
-        public void CheckProxyCustom()
-        {
+        public void CheckProxyCustom() {
             CheckProxyNoneEvent(false);
             CheckProxySystemEvent(false);
             CheckProxyCutomEvent(true);
             EnableLoginEvent(true);
         }
 
-        public void CheckLogin(bool check)
-        {
+        public void CheckLogin(bool check) {
             CheckLoginEvent(check);
         }
 
-        public string GetServer(string server)
-        {
-            try
-            {
+        public string GetServer(string server) {
+            try {
                 Uri uri = new Uri(server);
                 return server;
-            }
-            catch (Exception)
-            {
-                if (!server.StartsWith("http://"))
-                {
+            } catch (Exception) {
+                if (!server.StartsWith("http://")) {
                     server = "http://" + server;
-                    try
-                    {
+                    try {
                         Uri uri = new Uri(server);
                         return server;
-                    }
-                    catch(Exception)
-                    {
+                    } catch(Exception) {
                     }
                 }
             }
+
             return null;
         }
 
-        public void ValidateServer(string server)
-        {
-            if (GetServer(server) == null)
-            {
+        public void ValidateServer(string server) {
+            if (GetServer(server) == null) {
                 UpdateServerHelpEvent(Properties_Resources.InvalidURL);
                 UpdateSaveEvent(false);
-            }
-            else
-            {
+            } else {
                 UpdateServerHelpEvent(string.Empty);
                 UpdateSaveEvent(true);
             }
         }
     }
-
 }
