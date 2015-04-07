@@ -84,15 +84,12 @@ namespace CmisSync {
         /// <summary>
         /// Constructor.
         /// </summary>
-        public Setup()
-        {
+        public Setup() {
             Logger.Info("Entering constructor.");
 
             // Defines how to show the setup window.
-            Controller.ShowWindowEvent += delegate
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
+            Controller.ShowWindowEvent += delegate {
+                Dispatcher.BeginInvoke((Action)delegate {
                     Logger.Info("Entering ShowWindowEvent.");
                     Show();
                     Activate();
@@ -102,26 +99,21 @@ namespace CmisSync {
             };
 
             // Defines how to hide the setup windows.
-            Controller.HideWindowEvent += delegate
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
+            Controller.HideWindowEvent += delegate {
+                Dispatcher.BeginInvoke((Action)delegate {
                     Hide();
                 });
             };
 
             // Defines what to do when changing page.
             // The remote folder addition wizard has several steps.
-            Controller.ChangePageEvent += delegate(PageType type)
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
+            Controller.ChangePageEvent += delegate(PageType type) {
+                Dispatcher.BeginInvoke((Action)delegate {
                     Logger.Info("Entering ChangePageEvent.");
                     Reset();
 
                     // Show appropriate setup page.
-                    switch (type)
-                    {
+                    switch (type) {
                         // Welcome page that shows up at first run.
                         case PageType.Setup:
                             LoadWelcomeWPF();
@@ -156,8 +148,7 @@ namespace CmisSync {
                     Logger.Info("Exiting ChangePageEvent.");
                 });
             };
-            this.Closing += delegate
-            {
+            this.Closing += delegate {
                 Controller.PageCancelled();
             };
 
@@ -165,8 +156,7 @@ namespace CmisSync {
             Logger.Info("Exiting constructor.");
         }
 
-        private void LoadWelcomeWPF()
-        {
+        private void LoadWelcomeWPF() {
             // UI elements.
             Header = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
             Description = String.Format(Properties_Resources.Intro, Properties_Resources.ApplicationName);
@@ -457,7 +447,7 @@ namespace CmisSync {
                 }
 
                 var result = dlgt.EndInvoke(ar);
-                Controller.repositories = result.Repositories;
+                Controller.repositories = result.Repositories.WithoutHiddenOnce();
 
                 address_box.Text = result.Credentials.Address.ToString();
                 binding = result.Credentials.Binding;

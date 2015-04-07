@@ -32,8 +32,7 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-namespace CmisSync
-{
+namespace CmisSync {
     using System;
     using System.Linq;
     using System.Collections.Generic;
@@ -51,8 +50,7 @@ namespace CmisSync
     /// <summary>
     /// Kind of pages that are used in the folder addition wizards.
     /// </summary>
-    public enum PageType
-    {
+    public enum PageType {
         None,
         Setup,
         Add1,
@@ -67,8 +65,7 @@ namespace CmisSync
     /// - CmisSync tutorial that appears at firt run,
     /// - wizard to add a new remote folder.
     /// </summary>
-    public class SetupController
-    {
+    public class SetupController {
         protected static readonly ILog Logger = LogManager.GetLogger(typeof(SetupController));
 
         // Delegates.
