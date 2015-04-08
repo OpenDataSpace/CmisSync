@@ -32,21 +32,19 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-
-using System;
-using System.Drawing;
-using System.IO;
-
-using MonoMac.AppKit;
-using MonoMac.Foundation;
-using MonoMac.ObjCRuntime;
-using MonoMac.WebKit;
-
 namespace CmisSync {
+    using System;
+    using System.Drawing;
+    using System.IO;
 
+    using MonoMac.AppKit;
+    using MonoMac.Foundation;
+    using MonoMac.ObjCRuntime;
+    using MonoMac.WebKit;
+
+    [CLSCompliant(false)]
     public class About : NSWindow {
-
-        public AboutController Controller = new AboutController ();
+        public AboutController Controller = new AboutController();
 
         private NSImage about_image;
         private NSImageView about_image_view;
@@ -59,191 +57,173 @@ namespace CmisSync {
         private CmisSyncLink report_problem_link;
 
 
-        public About (IntPtr handle) : base (handle) { }
+        public About(IntPtr handle) : base(handle) { }
 
-        public About () : base ()
-        {
-            using (var a = new NSAutoreleasePool ())
-            {
-                SetFrame (new RectangleF (0, 0, 640, 281), true);
-                Center ();
+        public About() : base() {
+            using (var a = new NSAutoreleasePool()) {
+                SetFrame(new RectangleF(0, 0, 640, 281), true);
+                Center();
 
-                Delegate    = new AboutDelegate ();
+                Delegate    = new AboutDelegate();
                 StyleMask   = (NSWindowStyle.Closable | NSWindowStyle.Titled);
-                Title       = String.Format(Properties_Resources.About, Properties_Resources.ApplicationName);
-                MaxSize     = new SizeF (640, 281);
-                MinSize     = new SizeF (640, 281);
+                Title       = string.Format(Properties_Resources.About, Properties_Resources.ApplicationName);
+                MaxSize     = new SizeF(640, 281);
+                MinSize     = new SizeF(640, 281);
                 HasShadow   = true;
                 BackingType = NSBackingStore.Buffered;
 
-				this.website_link       = new CmisSyncLink (Properties_Resources.Website, Controller.WebsiteLinkAddress);
-                this.website_link.Frame = new RectangleF (new PointF (295, 25), this.website_link.Frame.Size);
+                this.website_link       = new CmisSyncLink(Properties_Resources.Website, Controller.WebsiteLinkAddress);
+                this.website_link.Frame = new RectangleF(new PointF(295, 25), this.website_link.Frame.Size);
 
-				this.credits_link = new CmisSyncLink (Properties_Resources.Credits, Controller.CreditsLinkAddress);
-                this.credits_link.Frame = new RectangleF (
-                    new PointF (this.website_link.Frame.X + this.website_link.Frame.Width + 10, 25),
+                this.credits_link = new CmisSyncLink(Properties_Resources.Credits, Controller.CreditsLinkAddress);
+                this.credits_link.Frame = new RectangleF(
+                    new PointF(this.website_link.Frame.X + this.website_link.Frame.Width + 10, 25),
                     this.credits_link.Frame.Size);
 
-				this.report_problem_link = new CmisSyncLink (Properties_Resources.ReportProblem, Controller.ReportProblemLinkAddress);
-                this.report_problem_link.Frame = new RectangleF (
-                    new PointF (this.credits_link.Frame.X + this.credits_link.Frame.Width + 10, 25),
+                this.report_problem_link = new CmisSyncLink(Properties_Resources.ReportProblem, Controller.ReportProblemLinkAddress);
+                this.report_problem_link.Frame = new RectangleF(
+                    new PointF(this.credits_link.Frame.X + this.credits_link.Frame.Width + 10, 25),
                     this.report_problem_link.Frame.Size);
 
-                this.hidden_close_button = new NSButton () {
-                    Frame                     = new RectangleF (0, 0, 0, 0),
+                this.hidden_close_button = new NSButton() {
+                    Frame                     = new RectangleF(0, 0, 0, 0),
                     KeyEquivalentModifierMask = NSEventModifierMask.CommandKeyMask,
                     KeyEquivalent             = "w"
                 };
 
                 this.hidden_close_button.Activated += delegate {
-                    Controller.WindowClosed ();
+                    Controller.WindowClosed();
                 };
 
+                ContentView.AddSubview(this.hidden_close_button);
 
-                ContentView.AddSubview (this.hidden_close_button);
+                CreateAbout();
 
-                CreateAbout ();
-
-                ContentView.AddSubview (this.website_link);
-                ContentView.AddSubview (this.credits_link);
-                ContentView.AddSubview (this.report_problem_link);
+                ContentView.AddSubview(this.website_link);
+                ContentView.AddSubview(this.credits_link);
+                ContentView.AddSubview(this.report_problem_link);
             }
 
             Controller.HideWindowEvent += delegate {
-                using (var a = new NSAutoreleasePool ())
-                {
-                    InvokeOnMainThread (delegate {
-                        PerformClose (this);
+                using (var a = new NSAutoreleasePool()) {
+                    InvokeOnMainThread(delegate {
+                        PerformClose(this);
                     });
                 }
             };
 
             Controller.ShowWindowEvent += delegate {
-                using (var a = new NSAutoreleasePool ())
-                {
-                    InvokeOnMainThread (delegate {
-                        OrderFrontRegardless ();
+                using (var a = new NSAutoreleasePool()) {
+                    InvokeOnMainThread(delegate {
+                        OrderFrontRegardless();
                     });
                 }
             };
 
-            Controller.NewVersionEvent += delegate (string new_version) {
-                using (var a = new NSAutoreleasePool ())
-                {
-                    InvokeOnMainThread (delegate {
+            Controller.NewVersionEvent += delegate(string new_version) {
+                using (var a = new NSAutoreleasePool ()) {
+                    InvokeOnMainThread(delegate {
                         this.updates_text_field.StringValue = "A newer version (" + new_version + ") is available!";
-                        this.updates_text_field.TextColor   = NSColor.FromCalibratedRgba (0.45f, 0.62f, 0.81f, 1.0f);
+                        this.updates_text_field.TextColor   = NSColor.FromCalibratedRgba(0.45f, 0.62f, 0.81f, 1.0f);
                     });
                 }
             };
 
             Controller.VersionUpToDateEvent += delegate {
-                using (var a = new NSAutoreleasePool ())
-                {
-                    InvokeOnMainThread (delegate {
+                using (var a = new NSAutoreleasePool()) {
+                    InvokeOnMainThread(delegate {
                         this.updates_text_field.StringValue = "You are running the latest version.";
-                        this.updates_text_field.TextColor   = NSColor.FromCalibratedRgba (0.45f, 0.62f, 0.81f, 1.0f);
+                        this.updates_text_field.TextColor   = NSColor.FromCalibratedRgba(0.45f, 0.62f, 0.81f, 1.0f);
                     });
                 }
             };
 
             Controller.CheckingForNewVersionEvent += delegate {
-                using (var a = new NSAutoreleasePool ())
-                {
-                    InvokeOnMainThread (delegate {
+                using (var a = new NSAutoreleasePool()) {
+                    InvokeOnMainThread(delegate {
                         this.updates_text_field.StringValue = "Checking for updates...";
-                        this.updates_text_field.TextColor   = NSColor.FromCalibratedRgba (0.45f, 0.62f, 0.81f, 1.0f);
+                        this.updates_text_field.TextColor   = NSColor.FromCalibratedRgba(0.45f, 0.62f, 0.81f, 1.0f);
                     });
                 }
             };
         }
 
+        private void CreateAbout() {
+            using (var a = new NSAutoreleasePool()) {
+                string about_image_path = UIHelpers.GetImagePathname("about");
 
-        private void CreateAbout ()
-        {
-            using (var a = new NSAutoreleasePool ())
-            {
-                string about_image_path = UIHelpers.GetImagePathname ("about");
-
-                this.about_image = new NSImage (about_image_path) {
-                    Size = new SizeF (640, 260)
+                this.about_image = new NSImage(about_image_path) {
+                    Size = new SizeF(640, 260)
                 };
 
-                this.about_image_view = new NSImageView () {
+                this.about_image_view = new NSImageView() {
                     Image = this.about_image,
-                    Frame = new RectangleF (0, 0, 640, 260)
+                    Frame = new RectangleF(0, 0, 640, 260)
                 };
 
-
-                this.version_text_field = new NSTextField () {
+                this.version_text_field = new NSTextField() {
                     StringValue     = string.Format(Properties_Resources.Version, Controller.RunningVersion, Controller.CreateTime.GetValueOrDefault().ToString("d")),
-                    Frame           = new RectangleF (295, 140, 318, 22),
+                    Frame           = new RectangleF(295, 140, 318, 22),
                     BackgroundColor = NSColor.White,
                     Bordered        = false,
                     Editable        = false,
                     DrawsBackground = false,
-					TextColor       = NSColor.FromCalibratedRgba (0.45f, 0.62f, 0.81f, 1.0f),
-                    Font            = NSFontManager.SharedFontManager.FontWithFamily
-                        ("Lucida Grande", NSFontTraitMask.Unbold, 0, 11)
+                    TextColor       = NSColor.FromCalibratedRgba(0.45f, 0.62f, 0.81f, 1.0f),
+                    Font            = NSFontManager.SharedFontManager.FontWithFamily("Lucida Grande", NSFontTraitMask.Unbold, 0, 11)
                 };
 
-                this.updates_text_field = new NSTextField () {
+                this.updates_text_field = new NSTextField() {
                     StringValue     = "Checking for updates...",
-                    Frame           = new RectangleF (295, Frame.Height - 232, 318, 98),
+                    Frame           = new RectangleF(295, Frame.Height - 232, 318, 98),
                     Bordered        = false,
                     Editable        = false,
                     DrawsBackground = false,
-                    Font            = NSFontManager.SharedFontManager.FontWithFamily
-                        ("Lucida Grande", NSFontTraitMask.Unbold, 0, 11),
-                    TextColor       = NSColor.FromCalibratedRgba (0.45f, 0.62f, 0.81f, 1.0f) // Tango Sky Blue #1
+                    Font            = NSFontManager.SharedFontManager.FontWithFamily("Lucida Grande", NSFontTraitMask.Unbold, 0, 11),
+                    TextColor       = NSColor.FromCalibratedRgba(0.45f, 0.62f, 0.81f, 1.0f) // Tango Sky Blue #1
                 };
 
-                this.credits_text_field = new NSTextField () {
-					StringValue     = @"Copyright © 2013-" + DateTime.Now.Year + " GRAU DATA AG, Hylke Bons and others." +
+                this.credits_text_field = new NSTextField() {
+                    StringValue     = @"Copyright © 2013-" + DateTime.Now.Year + " GRAU DATA AG, Hylke Bons and others." +
                                        "\n" +
                                        "\n" +
-					                  "DataSpace Sync is Open Source software. You are free to use, modify, and redistribute it " +
+                                       "DataSpace Sync is Open Source software. You are free to use, modify, and redistribute it " +
                                        "under the GNU General Public License version 3 or later.",
-                    Frame           = new RectangleF (295, Frame.Height - 260, 318, 98),
-					TextColor       = NSColor.FromCalibratedRgba (0.45f, 0.62f, 0.81f, 1.0f),
+                    Frame           = new RectangleF(295, Frame.Height - 260, 318, 98),
+                    TextColor       = NSColor.FromCalibratedRgba(0.45f, 0.62f, 0.81f, 1.0f),
                     DrawsBackground = false,
                     Bordered        = false,
                     Editable        = false,
-                    Font            = NSFontManager.SharedFontManager.FontWithFamily (
-                        "Lucida Grande", NSFontTraitMask.Unbold, 0, 11),
+                    Font            = NSFontManager.SharedFontManager.FontWithFamily("Lucida Grande", NSFontTraitMask.Unbold, 0, 11),
                 };
 
-                ContentView.AddSubview (this.about_image_view);
-                ContentView.AddSubview (this.version_text_field);
-				//ContentView.AddSubview (this.updates_text_field);
-                ContentView.AddSubview (this.credits_text_field);
+                ContentView.AddSubview(this.about_image_view);
+                ContentView.AddSubview(this.version_text_field);
+                ContentView.AddSubview(this.credits_text_field);
             }
         }
 
 
-        public override void OrderFrontRegardless ()
-        {
-            NSApplication.SharedApplication.ActivateIgnoringOtherApps (true);
-            MakeKeyAndOrderFront (this);
+        public override void OrderFrontRegardless() {
+            NSApplication.SharedApplication.ActivateIgnoringOtherApps(true);
+            MakeKeyAndOrderFront(this);
 
-            if (Program.UI != null)
-                Program.UI.UpdateDockIconVisibility ();
+            if (Program.UI != null) {
+                Program.UI.UpdateDockIconVisibility();
+            }
 
-            base.OrderFrontRegardless ();
+            base.OrderFrontRegardless();
         }
 
+        public override void PerformClose(NSObject sender) {
+            base.OrderOut(this);
 
-        public override void PerformClose (NSObject sender)
-        {
-            base.OrderOut (this);
-
-            if (Program.UI != null)
-                Program.UI.UpdateDockIconVisibility ();
+            if (Program.UI != null) {
+                Program.UI.UpdateDockIconVisibility();
+            }
 
             return;
         }
     }
-
 
     public class AboutDelegate : NSWindowDelegate {
         
