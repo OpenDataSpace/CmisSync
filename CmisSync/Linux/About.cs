@@ -42,8 +42,6 @@ namespace CmisSync {
     public class About : Window {
         public AboutController Controller = new AboutController();
 
-        private Label updates;
-
         public About() : base(string.Empty) {
             this.DeleteEvent += delegate(object o, DeleteEventArgs args) {
                 this.Controller.WindowClosed();
@@ -80,32 +78,6 @@ namespace CmisSync {
                     this.Present();
                 });
             };
-
-            this.Controller.NewVersionEvent += delegate(string new_version) {
-                Application.Invoke(delegate {
-                    this.updates.Markup = string.Format(
-                        "<span font_size='small' fgcolor='#729fcf'>{0}</span>",
-                        string.Format(Properties_Resources.NewVersionAvailable, new_version));
-                    this.updates.ShowAll();
-                });
-            };
-
-            this.Controller.VersionUpToDateEvent += delegate {
-                Application.Invoke(delegate {
-                    this.updates.Markup = string.Format(
-                        "<span font_size='small' fgcolor='#729fcf'>{0}</span>",
-                        Properties_Resources.RunningLatestVersion);
-                    this.updates.ShowAll();
-                });
-            };
-
-            this.Controller.CheckingForNewVersionEvent += delegate {
-                Application.Invoke(delegate {
-                    // this.updates.Markup = String.Format ("<span font_size='small' fgcolor='#729fcf'>{0}</span>",
-                        //    "Checking for updates...");
-                    this.updates.ShowAll();
-                });
-            };
         }
 
         private void CreateAbout() {
@@ -119,11 +91,6 @@ namespace CmisSync {
                     this.Controller.RunningVersion,
                     this.Controller.CreateTime.GetValueOrDefault().ToString("d"))),
                 Xalign = 0
-            };
-
-            this.updates = new Label() {
-                Markup = "<span font_size='small' fgcolor='#729fcf'><b>Please check for updates at CmisSync.com</b></span>",
-                       Xalign = 0
             };
 
             Label credits = new Label() {
@@ -153,8 +120,6 @@ namespace CmisSync {
             VBox layout_vertical = new VBox(false, 0);
             layout_vertical.PackStart(new Label(string.Empty), false, false, 42);
             layout_vertical.PackStart(version, false, false, 0);
-
-            // layout_vertical.PackStart(this.updates, false, false, 0);
             layout_vertical.PackStart(credits, false, false, 9);
             layout_vertical.PackStart(new Label(string.Empty), false, false, 0);
             layout_vertical.PackStart(layout_links, false, false, 0);
