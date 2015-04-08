@@ -49,7 +49,6 @@ namespace CmisSync {
         private NSImage about_image;
         private NSImageView about_image_view;
         private NSTextField version_text_field;
-        private NSTextField updates_text_field;
         private NSTextField credits_text_field;
         private NSButton hidden_close_button;
         private CmisSyncLink website_link;
@@ -119,33 +118,6 @@ namespace CmisSync {
                     });
                 }
             };
-
-            Controller.NewVersionEvent += delegate(string new_version) {
-                using (var a = new NSAutoreleasePool ()) {
-                    InvokeOnMainThread(delegate {
-                        this.updates_text_field.StringValue = "A newer version (" + new_version + ") is available!";
-                        this.updates_text_field.TextColor   = NSColor.FromCalibratedRgba(0.45f, 0.62f, 0.81f, 1.0f);
-                    });
-                }
-            };
-
-            Controller.VersionUpToDateEvent += delegate {
-                using (var a = new NSAutoreleasePool()) {
-                    InvokeOnMainThread(delegate {
-                        this.updates_text_field.StringValue = "You are running the latest version.";
-                        this.updates_text_field.TextColor   = NSColor.FromCalibratedRgba(0.45f, 0.62f, 0.81f, 1.0f);
-                    });
-                }
-            };
-
-            Controller.CheckingForNewVersionEvent += delegate {
-                using (var a = new NSAutoreleasePool()) {
-                    InvokeOnMainThread(delegate {
-                        this.updates_text_field.StringValue = "Checking for updates...";
-                        this.updates_text_field.TextColor   = NSColor.FromCalibratedRgba(0.45f, 0.62f, 0.81f, 1.0f);
-                    });
-                }
-            };
         }
 
         private void CreateAbout() {
@@ -170,16 +142,6 @@ namespace CmisSync {
                     DrawsBackground = false,
                     TextColor       = NSColor.FromCalibratedRgba(0.45f, 0.62f, 0.81f, 1.0f),
                     Font            = NSFontManager.SharedFontManager.FontWithFamily("Lucida Grande", NSFontTraitMask.Unbold, 0, 11)
-                };
-
-                this.updates_text_field = new NSTextField() {
-                    StringValue     = "Checking for updates...",
-                    Frame           = new RectangleF(295, Frame.Height - 232, 318, 98),
-                    Bordered        = false,
-                    Editable        = false,
-                    DrawsBackground = false,
-                    Font            = NSFontManager.SharedFontManager.FontWithFamily("Lucida Grande", NSFontTraitMask.Unbold, 0, 11),
-                    TextColor       = NSColor.FromCalibratedRgba(0.45f, 0.62f, 0.81f, 1.0f) // Tango Sky Blue #1
                 };
 
                 this.credits_text_field = new NSTextField() {
@@ -225,24 +187,20 @@ namespace CmisSync {
         }
     }
 
+    [CLSCompliant(false)]
     public class AboutDelegate : NSWindowDelegate {
-        
-        public override bool WindowShouldClose (NSObject sender)
-        {
-            (sender as About).Controller.WindowClosed ();
+        public override bool WindowShouldClose(NSObject sender) {
+            (sender as About).Controller.WindowClosed();
             return false;
         }
     }
 
-
+    [CLSCompliant(false)]
     public class CmisSyncLink : NSTextField {
-
         private NSUrl url;
 
-
-        public CmisSyncLink (string text, string address) : base ()
-        {
-            this.url = new NSUrl (address);
+        public CmisSyncLink(string text, string address) : base() {
+            this.url = new NSUrl(address);
 
             AllowsEditingTextAttributes = true;
             BackgroundColor = NSColor.White;
@@ -251,30 +209,27 @@ namespace CmisSync {
             Editable        = false;
             Selectable      = false;
 
-            NSData name_data = NSData.FromString ("<a href='" + url +
+            NSData name_data = NSData.FromString(
+                "<a href='" + url +
                 "' style='font-size: 8pt; font-family: \"Lucida Grande\"; color: #739ECF'>" + text + "</a></font>");
 
             NSDictionary name_dictionary       = new NSDictionary();
-            NSAttributedString name_attributes = new NSAttributedString (name_data, new NSUrl ("file://"), out name_dictionary);
+            NSAttributedString name_attributes = new NSAttributedString(name_data, new NSUrl("file://"), out name_dictionary);
 
-            NSMutableAttributedString s = new NSMutableAttributedString ();
-            s.Append (name_attributes);
+            NSMutableAttributedString s = new NSMutableAttributedString();
+            s.Append(name_attributes);
 
             Cell.AttributedStringValue = s;
 
-            SizeToFit ();
+            SizeToFit();
         }
 
-
-        public override void MouseUp (NSEvent e)
-        {
-            NSWorkspace.SharedWorkspace.OpenUrl (url);
+        public override void MouseUp(NSEvent e) {
+            NSWorkspace.SharedWorkspace.OpenUrl(url);
         }
 
-
-        public override void ResetCursorRects ()
-        {
-            AddCursorRect (Bounds, NSCursor.PointingHandCursor);
+        public override void ResetCursorRects() {
+            AddCursorRect(Bounds, NSCursor.PointingHandCursor);
         }
     }
 }
