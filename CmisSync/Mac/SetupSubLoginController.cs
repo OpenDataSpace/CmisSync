@@ -20,38 +20,39 @@
 namespace CmisSync {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Globalization;
+    using System.Linq;
     using System.Threading;
-    using MonoMac.Foundation;
-    using MonoMac.AppKit;
 
-    using CmisSync.Lib.Config;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Cmis.UiUtils;
+    using CmisSync.Lib.Config;
+
+    using MonoMac.AppKit;
+    using MonoMac.Foundation;
 
     public partial class SetupSubLoginController : MonoMac.AppKit.NSViewController {
         #region Constructors
 
         // Called when created from unmanaged code
         public SetupSubLoginController(IntPtr handle) : base(handle) {
-            Initialize();
+            this.Initialize();
         }
 
         // Called when created directly from a XIB file
         [Export("initWithCoder:")]
         public SetupSubLoginController(NSCoder coder) : base(coder) {
-            Initialize();
+            this.Initialize();
         }
 
         // Call to load from the XIB/NIB file
         public SetupSubLoginController(SetupController controller) : base("SetupSubLogin", NSBundle.MainBundle) {
             this.Controller = controller;
-            Initialize();
+            this.Initialize();
         }
 
         // Shared initialization code
-        void Initialize() {
+        private void Initialize() {
         }
 
         #endregion
@@ -74,27 +75,27 @@ namespace CmisSync {
             this.ContinueButton.Title = Properties_Resources.Continue;
             this.CancelButton.Title = Properties_Resources.Cancel;
 
-            this.AddressText.StringValue = (Controller.PreviousAddress == null || string.IsNullOrEmpty(Controller.PreviousAddress.ToString())) ? "https://" : Controller.PreviousAddress.ToString();
+            this.AddressText.StringValue = (Controller.PreviousAddress == null || string.IsNullOrEmpty(this.Controller.PreviousAddress.ToString())) ? "https://" : this.Controller.PreviousAddress.ToString();
             this.UserText.StringValue = string.IsNullOrEmpty(Controller.saved_user) ? Environment.UserName : Controller.saved_user;
 //            this.PasswordText.StringValue = String.IsNullOrEmpty (Controller.saved_password) ? "" : Controller.saved_password;
             this.PasswordText.StringValue = string.Empty;
 
-            InsertEvent();
+            this.InsertEvent();
 
-            //  Must be called after InsertEvent()
-            CheckAddressTextField();
+            // Must be called after InsertEvent()
+            this.CheckAddressTextField();
         }
 
         void InsertEvent() {
-            this.AddressDelegate.StringValueChanged += CheckAddressTextField;
-            Controller.UpdateSetupContinueButtonEvent += SetContinueButton;
-            Controller.UpdateAddProjectButtonEvent += SetContinueButton;
+            this.AddressDelegate.StringValueChanged += this.CheckAddressTextField;
+            this.Controller.UpdateSetupContinueButtonEvent += this.SetContinueButton;
+            this.Controller.UpdateAddProjectButtonEvent += this.SetContinueButton;
         }
 
         void RemoveEvent() {
-            this.AddressDelegate.StringValueChanged -= CheckAddressTextField;
-            Controller.UpdateSetupContinueButtonEvent -= SetContinueButton;
-            Controller.UpdateAddProjectButtonEvent -= SetContinueButton;
+            this.AddressDelegate.StringValueChanged -= this.CheckAddressTextField;
+            this.Controller.UpdateSetupContinueButtonEvent -= this.SetContinueButton;
+            this.Controller.UpdateAddProjectButtonEvent -= this.SetContinueButton;
         }
 
         void SetContinueButton(bool enabled) {
@@ -106,7 +107,7 @@ namespace CmisSync {
 
         void CheckAddressTextField() {
             InvokeOnMainThread(delegate {
-                string error = Controller.CheckAddPage(AddressText.StringValue);
+                string error = this.Controller.CheckAddPage(AddressText.StringValue);
                 if (string.IsNullOrEmpty(error)) {
                     AddressHelp.StringValue = string.Empty;
                 } else {
@@ -119,8 +120,8 @@ namespace CmisSync {
         TextFieldDelegate AddressDelegate;
 
         partial void OnCancel(MonoMac.Foundation.NSObject sender) {
-            RemoveEvent();
-            Controller.PageCancelled();
+            this.RemoveEvent();
+            this.Controller.PageCancelled();
         }
 
         partial void OnContinue(MonoMac.Foundation.NSObject sender) {
@@ -128,7 +129,7 @@ namespace CmisSync {
                 UserName = UserText.StringValue,
                 Password = PasswordText.StringValue,
                 Address = new Uri(AddressText.StringValue),
-                Binding = (Controller.saved_binding == null) ? ServerCredentials.BindingBrowser : Controller.saved_binding
+                Binding = (this.Controller.saved_binding == null) ? ServerCredentials.BindingBrowser : this.Controller.saved_binding
             };
             WarnText.StringValue = string.Empty;
             AddressText.Enabled = false;
@@ -141,13 +142,13 @@ namespace CmisSync {
             Thread check = new Thread(() => {
                 var result = SetupController.GetRepositories(credentials);
                 if (result.Repositories != null) {
-                    Controller.repositories = result.Repositories.WithoutHiddenOnce();
+                    this.Controller.repositories = result.Repositories.WithoutHiddenOnce();
                 } else {
-                    Controller.repositories = null;
+                    this.Controller.repositories = null;
                 }
 
                 InvokeOnMainThread(delegate {
-                    if (Controller.repositories == null) {
+                    if (this.Controller.repositories == null) {
                         AddressText.StringValue = result.Credentials.Address.ToString();
                         WarnText.StringValue = this.Controller.GetConnectionsProblemWarning(result.FailedException);
                         AddressText.Enabled = true;
@@ -166,7 +167,7 @@ namespace CmisSync {
             check.Start();
         }
 
-        //strongly typed view accessor
+        // strongly typed view accessor
         public new SetupSubLogin View {
             get {
                 return (SetupSubLogin)base.View;
