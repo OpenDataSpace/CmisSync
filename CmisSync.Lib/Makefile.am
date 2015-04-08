@@ -31,6 +31,7 @@ SOURCES =  \
 	Cmis/RepositoryStatus.cs \
 	Cmis/RepositoryStatusAggregator.cs \
 	Cmis/UiUtils/CmisUtils.cs \
+	Cmis/UiUtils/Icons.cs \
 	Cmis/UiUtils/LoginCredentials.cs \
 	Cmis/UiUtils/LoginException.cs \
 	Cmis/UiUtils/LogonRepositoryInfo.cs \
