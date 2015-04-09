@@ -74,7 +74,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 string oldName = (remoteId as ICmisObject).Name;
                 try {
                     (remoteId as ICmisObject).Rename(localFile.Name, true);
-                } catch (CmisConstraintException e) {
+                } catch (CmisNameConstraintViolationException e) {
                     if (!Utils.IsValidISO885915(localFile.Name)) {
                         OperationsLogger.Warn(string.Format("The server denies the renaming of {2} from {0} to {1}, perhaps because the new name contains UTF-8 characters", oldName, localFile.Name, localFile.FullName));
                         throw new InteractionNeededException(string.Format("Server denied renaming of {0}", oldName), e) {
