@@ -10,11 +10,13 @@ namespace CmisSync.Lib.Cmis.UiUtils {
     }
 
     public class LinuxIcon: IconAttribute {
-        public LinuxIcon(string name, int size = 16, string type = "png") : base(name, type) {
-            this.Size = size;
+        public LinuxIcon(string name, int x = 16, int y = -1, string type = "png") : base(name, type) {
+            this.X = x;
+            this.Y = y < 0 ? x : y;
         }
 
-        public int Size { get; private set; }
+        public int X { get; private set; }
+        public int Y { get; private set; }
     }
 
     public class WindowsIcon : IconAttribute {
