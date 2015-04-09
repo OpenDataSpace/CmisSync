@@ -253,7 +253,9 @@ namespace TestLibrary.IntegrationTests {
             }
 
             if (disposing) {
-                this.repo.Dispose();
+                if (this.repo != null) {
+                    this.repo.Dispose();
+                }
             }
 
             this.disposed = true;
