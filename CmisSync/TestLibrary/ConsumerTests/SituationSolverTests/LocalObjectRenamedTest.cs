@@ -242,7 +242,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             var remoteFolder = new Mock<IFolder>();
             remoteFolder.Setup(f => f.Name).Returns(this.oldName);
             remoteFolder.Setup(f => f.Id).Returns(this.id);
-            remoteFolder.Setup(f => f.Rename(@"ä".Normalize(NormalizationForm.FormD), true)).Throws<CmisConstraintException>();
+            remoteFolder.Setup(f => f.Rename(@"ä".Normalize(NormalizationForm.FormD), true)).Throws<CmisNameConstraintViolationException>();
             var localFolder = new Mock<IDirectoryInfo>();
             localFolder.SetupProperty(f => f.LastWriteTimeUtc, this.modificationDate);
             localFolder.Setup(f => f.Name).Returns(@"ä".Normalize(NormalizationForm.FormD));
