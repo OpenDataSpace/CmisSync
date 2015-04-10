@@ -1,6 +1,7 @@
 
 namespace CmisSync.Lib.UiUtils {
     using System;
+    using System.Reflection;
 
     public enum Icons {
         [LinuxIcon("dataspacesync-app")]
@@ -154,6 +155,46 @@ namespace CmisSync.Lib.UiUtils {
         [WindowsIcon("Updating")]
         [MacOSIcon("Updating")]
         DownloadAndUpdateExistingObjectIcon,
+    }
+
+    public static class IconExtenders {
+        public static string GetName(this Icons icon) {
+            var attr = icon.GetAttribute();
+            if (attr != null) {
+                return attr.Name;
+            } else {
+                return null;
+            }
+        }
+
+        public static string GetNameWithTypeExtension(this Icons icon) {
+            var attr = icon.GetAttribute();
+            if (attr != null) {
+                return string.Format("{0}.{1}", attr.Name, attr.FileType);
+            } else {
+                return null;
+            }
+        }
+
+        internal static IconAttribute GetAttribute(this Icons icon) {
+            Type type = icon.GetType();
+            string name = Enum.GetName(type, icon);
+            if (name != null) {
+                FieldInfo field = type.GetField(name);
+                if (field != null) {
+                    switch (Environment.OSVersion.Platform) {
+                    case PlatformID.MacOSX:
+                        return Attribute.GetCustomAttribute(field, typeof(MacOSIcon)) as MacOSIcon;
+                    case PlatformID.Unix:
+                        return Attribute.GetCustomAttribute(field, typeof(LinuxIcon)) as LinuxIcon;
+                    default:
+                        return Attribute.GetCustomAttribute(field, typeof(WindowsIcon)) as WindowsIcon;
+                    }
+                }
+            }
+
+            return null;
+        }
     }
 
     internal class LinuxIcon: IconAttribute {

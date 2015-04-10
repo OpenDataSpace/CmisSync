@@ -199,6 +199,7 @@ SOURCES =  \
 	UtilsTests/BackendTest.cs \
 	UtilsTests/EncodingTest.cs \
 	UtilsTests/HttpProxyUtilsTest.cs \
+	UtilsTests/IconsTest.cs \
 	UtilsTests/NameOfPropertyTest.cs \
 	UtilsTests/ProcessDiagnosticsTest.cs \
 	UtilsTests/X509StoreTest.cs
