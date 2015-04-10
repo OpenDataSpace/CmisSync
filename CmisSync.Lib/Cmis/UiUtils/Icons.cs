@@ -4,7 +4,7 @@ namespace CmisSync.Lib.Cmis.UiUtils {
 
     public enum Icons {
         [LinuxIcon("dataspacesync-app")]
-        [WindowsIcon("dataspacesync", "ico")]
+        [WindowsIcon("app", "ico")]
         [MacOSIcon("cmissync-app", "icns")]
         ApplicationIcon,
 
@@ -14,37 +14,37 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         DefaultTargetFolderIcon,
 
         [LinuxIcon("dataspacesync-folder")]
-        [WindowsIcon("")]
+        [WindowsIcon("folder")]
         [MacOSIcon("cmissync-folder", "icns")]
         FolderIcon,
 
         [LinuxIcon("dataspacesync-process-syncing-i")]
-        [WindowsIcon("")]
+        [WindowsIcon("process-syncing-i")]
         [MacOSIcon("process-syncing-i")]
         SyncInProgressIcon1,
 
         [LinuxIcon("dataspacesync-process-syncing-ii")]
-        [WindowsIcon("")]
+        [WindowsIcon("process-syncing-ii")]
         [MacOSIcon("process-syncing-ii")]
         SyncInProgressIcon2,
 
         [LinuxIcon("dataspacesync-process-syncing-iii")]
-        [WindowsIcon("")]
+        [WindowsIcon("process-syncing-iii")]
         [MacOSIcon("process-syncing-iii")]
         SyncInProgressIcon3,
 
         [LinuxIcon("dataspacesync-process-syncing-iiii")]
-        [WindowsIcon("")]
+        [WindowsIcon("process-syncing-iiii")]
         [MacOSIcon("process-syncing-iiii")]
         SyncInProgressIcon4,
 
         [LinuxIcon("dataspacesync-process-syncing-iiiii")]
-        [WindowsIcon("")]
+        [WindowsIcon("process-syncing-iiiii")]
         [MacOSIcon("process-syncing-iiiii")]
         SyncInProgressIcon5,
 
         [LinuxIcon("dataspacesync-process-syncing-i")]
-        [WindowsIcon("")]
+        [WindowsIcon("process-syncing-i")]
         [MacOSIcon("process-syncing-i")]
         SyncPausedIcon,
 
@@ -52,7 +52,7 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         SyncPausedHighlightedIcon,
 
         [LinuxIcon("dataspacesync-process-syncing-i")]
-        [WindowsIcon("")]
+        [WindowsIcon("process-syncing-i")]
         [MacOSIcon("process-syncing-i")]
         SyncDisconnectedIcon,
 
@@ -60,7 +60,7 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         SyncDisconnectedHighlightedIcon,
 
         [LinuxIcon("dataspacesync-process-syncing-i")]
-        [WindowsIcon("")]
+        [WindowsIcon("process-syncing-i")]
         [MacOSIcon("process-syncing-i")]
         SyncDisabledIcon,
 
@@ -91,12 +91,12 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         ErrorOnSyncHighlightedIcon,
 
         [LinuxIcon("about")]
-        [WindowsIcon("")]
+        [WindowsIcon("about")]
         [MacOSIcon("about")]
         AboutImage,
 
         [LinuxIcon("side-splash")]
-        [WindowsIcon("")]
+        [WindowsIcon("side-splash")]
         [MacOSIcon("side-splash")]
         SideImage,
 
@@ -106,22 +106,22 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         ErrorIcon,
 
         [LinuxIcon("tutorial-slide-1")]
-        [WindowsIcon("")]
+        [WindowsIcon("tutorial-slide-1")]
         [MacOSIcon("tutorial-slide-1")]
         TutorialSlide1,
 
         [LinuxIcon("tutorial-slide-2")]
-        [WindowsIcon("")]
+        [WindowsIcon("tutorial-slide-2")]
         [MacOSIcon("tutorial-slide-2")]
         TutorialSlide2,
 
         [LinuxIcon("tutorial-slide-3")]
-        [WindowsIcon("")]
+        [WindowsIcon("tutorial-slide-3")]
         [MacOSIcon("tutorial-slide-3")]
         TutorialSlide3,
 
         [LinuxIcon("tutorial-slide-4")]
-        [WindowsIcon("")]
+        [WindowsIcon("tutorial-slide-4")]
         [MacOSIcon("tutorial-slide-4")]
         TutorialSlide4,
 
