@@ -8,53 +8,50 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         [MacOSIcon("cmissync-app", "icns")]
         ApplicationIcon,
 
-        [LinuxIcon("")]
+        [LinuxIcon("dataspacesync-folder")]
         [WindowsIcon("")]
         [MacOSIcon("cmissync-folder", "icns")]
         DefaultTargetFolderIcon,
 
-        [LinuxIcon("")]
+        [LinuxIcon("dataspacesync-folder")]
         [WindowsIcon("")]
         [MacOSIcon("cmissync-folder", "icns")]
         FolderIcon,
 
-        [LinuxIcon("")]
-        [WindowsIcon("")]
-        [MacOSIcon("process-syncing-i")]
-        RemoteFolderIcon,
-
-        [LinuxIcon("")]
+        [LinuxIcon("dataspacesync-process-syncing-i")]
         [WindowsIcon("")]
         [MacOSIcon("process-syncing-i")]
         SyncInProgressIcon1,
 
-        [LinuxIcon("")]
+        [LinuxIcon("dataspacesync-process-syncing-ii")]
         [WindowsIcon("")]
         [MacOSIcon("process-syncing-ii")]
         SyncInProgressIcon2,
 
-        [LinuxIcon("")]
+        [LinuxIcon("dataspacesync-process-syncing-iii")]
         [WindowsIcon("")]
         [MacOSIcon("process-syncing-iii")]
         SyncInProgressIcon3,
 
-        [LinuxIcon("")]
+        [LinuxIcon("dataspacesync-process-syncing-iiii")]
         [WindowsIcon("")]
         [MacOSIcon("process-syncing-iiii")]
         SyncInProgressIcon4,
 
-        [LinuxIcon("")]
+        [LinuxIcon("dataspacesync-process-syncing-iiiii")]
         [WindowsIcon("")]
         [MacOSIcon("process-syncing-iiiii")]
         SyncInProgressIcon5,
 
+        [LinuxIcon("dataspacesync-process-syncing-i")]
+        [WindowsIcon("")]
         [MacOSIcon("process-syncing-i")]
         SyncPausedIcon,
 
         [MacOSIcon("process-syncing-i-active")]
         SyncPausedHighlightedIcon,
 
-        [LinuxIcon("")]
+        [LinuxIcon("dataspacesync-process-syncing-i")]
         [WindowsIcon("")]
         [MacOSIcon("process-syncing-i")]
         SyncDisconnectedIcon,
@@ -62,7 +59,7 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         [MacOSIcon("process-syncing-i-active")]
         SyncDisconnectedHighlightedIcon,
 
-        [LinuxIcon("")]
+        [LinuxIcon("dataspacesync-process-syncing-i")]
         [WindowsIcon("")]
         [MacOSIcon("process-syncing-i")]
         SyncDisabledIcon,
@@ -70,8 +67,6 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         [MacOSIcon("process-syncing-i-active")]
         SyncDisabledHighlightedIcon,
 
-        [LinuxIcon("")]
-        [WindowsIcon("")]
         [MacOSIcon("process-syncing-i-active")]
         SyncInProgressHighlightedIcon1,
 
@@ -84,12 +79,10 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         [MacOSIcon("process-syncing-iiii-active")]
         SyncInProgressHighlightedIcon4,
 
-        [LinuxIcon("")]
-        [WindowsIcon("")]
         [MacOSIcon("process-syncing-iiiii-active")]
         SyncInProgressHighlightedIcon5,
 
-        [LinuxIcon("")]
+        [LinuxIcon("dataspacesync-process-syncing-error", 24)]
         [WindowsIcon("")]
         [MacOSIcon("process-syncing-error")]
         ErrorOnSyncIcon,
@@ -97,67 +90,67 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         [MacOSIcon("process-syncing-error-active")]
         ErrorOnSyncHighlightedIcon,
 
-        [LinuxIcon("")]
+        [LinuxIcon("about")]
         [WindowsIcon("")]
         [MacOSIcon("about")]
         AboutImage,
 
-        [LinuxIcon("")]
+        [LinuxIcon("side-splash")]
         [WindowsIcon("")]
         [MacOSIcon("side-splash")]
         SideImage,
 
-        [LinuxIcon("")]
+        [LinuxIcon("dataspacesync-process-syncing-error", 24)]
         [WindowsIcon("")]
         [MacOSIcon("error", "icns")]
         ErrorIcon,
 
-        [LinuxIcon("")]
+        [LinuxIcon("tutorial-slide-1")]
         [WindowsIcon("")]
         [MacOSIcon("tutorial-slide-1")]
         TutorialSlide1,
 
-        [LinuxIcon("")]
+        [LinuxIcon("tutorial-slide-2")]
         [WindowsIcon("")]
         [MacOSIcon("tutorial-slide-2")]
         TutorialSlide2,
 
-        [LinuxIcon("")]
+        [LinuxIcon("tutorial-slide-3")]
         [WindowsIcon("")]
         [MacOSIcon("tutorial-slide-3")]
         TutorialSlide3,
 
-        [LinuxIcon("")]
+        [LinuxIcon("tutorial-slide-4")]
         [WindowsIcon("")]
         [MacOSIcon("tutorial-slide-4")]
         TutorialSlide4,
 
-        [LinuxIcon("")]
+        [LinuxIcon("dataspacesync-start", 12)]
         [WindowsIcon("")]
         [MacOSIcon("media_playback_start")]
         ResumeIcon,
 
-        [LinuxIcon("")]
+        [LinuxIcon("dataspacesync-pause", 12)]
         [WindowsIcon("")]
         [MacOSIcon("media_playback_pause")]
         PauseIcon,
 
-        [LinuxIcon("")]
+        [LinuxIcon("dataspacesync-uploading")]
         [WindowsIcon("")]
         [MacOSIcon("Uploading")]
         UploadNewObjectIcon,
 
-        [LinuxIcon("")]
+        [LinuxIcon("dataspacesync-updating")]
         [WindowsIcon("")]
         [MacOSIcon("Updating")]
         UploadAndUpdateExistingObjectIcon,
 
-        [LinuxIcon("")]
+        [LinuxIcon("dataspacesync-downloading")]
         [WindowsIcon("")]
         [MacOSIcon("Downloading")]
         DownloadNewObjectIcon,
 
-        [LinuxIcon("")]
+        [LinuxIcon("dataspacesync-updating")]
         [WindowsIcon("")]
         [MacOSIcon("Updating")]
         DownloadAndUpdateExistingObjectIcon,
@@ -183,6 +176,7 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         }
     }
 
+    [System.AttributeUsage(System.AttributeTargets.Field)]
     public class IconAttribute : System.Attribute {
         public IconAttribute(string name, string type) {
             this.Name = name;
