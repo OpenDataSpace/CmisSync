@@ -99,7 +99,7 @@ namespace CmisSync {
         /// <summary>
         /// Get the image associated with given identifier.
         /// </summary>
-        public static Drawing.Bitmap GetBitmap (string name) {
+        public static Drawing.Bitmap GetBitmap(string name) {
             string filename = name + ".png";
 
             string brandFolder = Path.Combine(ConfigManager.CurrentConfig.GetConfigPath(), Program.Controller.BrandConfigFolder);

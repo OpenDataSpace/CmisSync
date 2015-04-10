@@ -32,18 +32,16 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see (http://www.gnu.org/licenses/).
 
-
-using System;
-using System.ComponentModel; 
-using System.Diagnostics;
-using System.Windows;
-using System.Windows.Input;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Xaml;
-
 namespace CmisSync {
+    using System;
+    using System.ComponentModel;
+    using System.Diagnostics;
+    using System.Windows;
+    using System.Windows.Input;
+    using System.Windows.Controls;
+    using System.Windows.Media;
+    using System.Windows.Media.Imaging;
+    using System.Xaml;
 
     /// <summary>
     /// About dialog.
@@ -59,9 +57,8 @@ namespace CmisSync {
         /// <summary>
         /// Constructor.
         /// </summary>
-        public About ()
-        {
-            Title      = String.Format(Properties_Resources.About, Properties_Resources.ApplicationName);
+        public About() {
+            Title      = string.Format(Properties_Resources.About, Properties_Resources.ApplicationName);
             ResizeMode = ResizeMode.NoResize;
             Height     = 288;
             Width      = 640;
@@ -70,7 +67,6 @@ namespace CmisSync {
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
             Closing += Close;
 
-            //CreateAbout ();
             LoadAbout();
 
             CreateLink();
@@ -88,50 +84,25 @@ namespace CmisSync {
                     Hide ();
                 });
             };
-
-            Controller.NewVersionEvent += delegate (string new_version) {
-                Dispatcher.BeginInvoke((Action)delegate {
-                    this.updates.Content = String.Format(Properties_Resources.NewVersionAvailable, new_version);
-                    this.updates.UpdateLayout ();
-                });
-            };
-
-            Controller.VersionUpToDateEvent += delegate {
-                Dispatcher.BeginInvoke ((Action) delegate {
-                    this.updates.Content = Properties_Resources.RunningLatestVersion;
-                    this.updates.UpdateLayout ();
-                });
-            };
-
-            Controller.CheckingForNewVersionEvent += delegate {
-                Dispatcher.BeginInvoke ((Action) delegate {
-                    //this.updates.Content = "Checking for updates...";
-                    this.updates.UpdateLayout ();
-                });
-            };
         }
 
         private Canvas canvas;
         private Image image;
         private Label version;
-        private Label updates;
         private TextBlock credits;
 
-        private void LoadAbout()
-        {
+        private void LoadAbout() {
             System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/AboutWPF.xaml", System.UriKind.Relative);
             UserControl aboutWPF = Application.LoadComponent(resourceLocater) as UserControl;
 
             canvas = aboutWPF.FindName("canvas") as Canvas;
             image = aboutWPF.FindName("image") as Image;
             version = aboutWPF.FindName("version") as Label;
-            updates = aboutWPF.FindName("updates") as Label;
             credits = aboutWPF.FindName("credits") as TextBlock;
 
             image.Source = UIHelpers.GetImageSource("about");
-            version.Content = String.Format(Properties_Resources.Version, Controller.RunningVersion, Controller.CreateTime.GetValueOrDefault().ToString("d"));
-            updates.Content = "";
-            credits.Text = String.Format("Copyright © {0}–{1} {2}\n\n{3} {4}",
+            version.Content = string.Format(Properties_Resources.Version, Controller.RunningVersion, Controller.CreateTime.GetValueOrDefault().ToString("d"));
+            credits.Text = string.Format("Copyright © {0}–{1} {2}\n\n{3} {4}",
                     "2013",
                     DateTime.Now.Year.ToString(),
                     " GRAU DATA AG, Aegif and others.",
@@ -141,8 +112,7 @@ namespace CmisSync {
             Content = aboutWPF;
         }
 
-        private void CreateLink()
-        {
+        private void CreateLink() {
             Link website_link = new Link(Properties_Resources.Website, Controller.WebsiteLinkAddress);
             Link credits_link = new Link(Properties_Resources.Credits, Controller.CreditsLinkAddress);
             Link report_problem_link = new Link(Properties_Resources.ReportProblem, Controller.ReportProblemLinkAddress);
@@ -163,34 +133,30 @@ namespace CmisSync {
         /// <summary>
         /// Close the dialog.
         /// </summary>
-        private void Close (object sender, CancelEventArgs args)
-        {
-            Controller.WindowClosed ();
+        private void Close(object sender, CancelEventArgs args) {
+            Controller.WindowClosed();
             args.Cancel = true;
         }
     }
-
 
     /// <summary>
     /// Hyperlink label that opens an URL in the default browser.
     /// </summary>
     public class Link : Label {
-
-        public Link (string title, string address)
-        {
+        public Link(string title, string address) {
             FontSize   = 11;
             Cursor     = Cursors.Hand;
-            Foreground = new SolidColorBrush (Color.FromRgb (135, 178, 227));
+            Foreground = new SolidColorBrush(Color.FromRgb (135, 178, 227));
 
-            TextDecoration underline = new TextDecoration () {
+            TextDecoration underline = new TextDecoration() {
                 Pen              = new Pen (new SolidColorBrush (Color.FromRgb (135, 178, 227)), 1),
                 PenThicknessUnit = TextDecorationUnit.FontRecommended
             };
 
             TextDecorationCollection collection = new TextDecorationCollection ();
-            collection.Add (underline);
+            collection.Add(underline);
 
-            TextBlock text_block = new TextBlock () {
+            TextBlock text_block = new TextBlock() {
                 Text            = title,
                 TextDecorations = collection
             };
