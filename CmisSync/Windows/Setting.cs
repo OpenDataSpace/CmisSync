@@ -16,34 +16,30 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-using System.ComponentModel;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Controls;
-using System.Windows.Forms.Integration;
+namespace CmisSync {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Linq;
+    using System.Text;
+    using System.Windows;
+    using System.Windows.Controls;
+    using System.Windows.Forms.Integration;
+    using System.Windows.Media;
 
-using CmisSync.Lib.Config;
+    using CmisSync.Lib.Config;
 
-
-namespace CmisSync
-{
     /// <summary>
     /// Setting widget
     /// </summary>
-    public class Setting : Window
-    {
+    public class Setting : Window {
         private SettingController Controller = new SettingController();
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public Setting()
-        {
+        public Setting() {
             Title = Properties_Resources.EditTitle;
             ResizeMode = ResizeMode.NoResize;
             Height = 370;
@@ -53,18 +49,15 @@ namespace CmisSync
 
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
 
-            Closing += delegate (object sender, CancelEventArgs args)
-            {
+            Closing += delegate (object sender, CancelEventArgs args) {
                 Controller.HideWindow();
                 args.Cancel = true;
             };
 
             LoadSetting();
 
-            Controller.ShowWindowEvent += delegate
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
+            Controller.ShowWindowEvent += delegate {
+                Dispatcher.BeginInvoke((Action)delegate {
                     RefreshSetting();
                     Show();
                     Activate();
@@ -72,53 +65,39 @@ namespace CmisSync
                 });
             };
 
-            Controller.HideWindowEvent += delegate
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
+            Controller.HideWindowEvent += delegate {
+                Dispatcher.BeginInvoke((Action)delegate {
                     Hide();
                 });
             };
 
-            FinishButton.Click += delegate
-            {
+            FinishButton.Click += delegate {
                 ProxySettings proxy = new ProxySettings();
-                if (ProxyNone.IsChecked.GetValueOrDefault())
-                {
+                if (ProxyNone.IsChecked.GetValueOrDefault()) {
                     proxy.Selection = ProxySelection.NOPROXY;
-                }
-                else if (ProxySystem.IsChecked.GetValueOrDefault())
-                {
+                } else if (ProxySystem.IsChecked.GetValueOrDefault()) {
                     proxy.Selection = ProxySelection.SYSTEM;
-                }
-                else
-                {
+                } else {
                     proxy.Selection = ProxySelection.CUSTOM;
                 }
+
                 proxy.LoginRequired = LoginCheck.IsChecked.GetValueOrDefault();
                 string server = Controller.GetServer(AddressText.Text);
-                if (server != null)
-                {
+                if (server != null) {
                     proxy.Server = new Uri(server);
-                }
-                else
-                {
+                } else {
                     proxy.Server = ConfigManager.CurrentConfig.Proxy.Server;
                 }
+
                 proxy.Username = UserText.Text;
                 proxy.ObfuscatedPassword = Crypto.Obfuscate(PasswordText.Password);
-
                 ConfigManager.CurrentConfig.Proxy = proxy;
-
                 ConfigManager.CurrentConfig.Notifications = NotificationsCheck.IsChecked.GetValueOrDefault();
-
                 ConfigManager.CurrentConfig.Save();
-
                 Controller.HideWindow();
             };
 
-            CancelButton.Click += delegate
-            {
+            CancelButton.Click += delegate {
                 Controller.HideWindow();
             };
         }
@@ -139,16 +118,14 @@ namespace CmisSync
         private Button FinishButton;
         private Button CancelButton;
 
-        private void RefreshSetting()
-        {
-            AddressText.Text = ConfigManager.CurrentConfig.Proxy.Server == null ? "" : ((Uri)ConfigManager.CurrentConfig.Proxy.Server).ToString();
-            UserText.Text = ConfigManager.CurrentConfig.Proxy.Username == null ? "" : ConfigManager.CurrentConfig.Proxy.Username;
-            PasswordText.Password = ConfigManager.CurrentConfig.Proxy.ObfuscatedPassword == null ? "" : Crypto.Deobfuscate(ConfigManager.CurrentConfig.Proxy.ObfuscatedPassword);
+        private void RefreshSetting() {
+            AddressText.Text = ConfigManager.CurrentConfig.Proxy.Server == null ? string.Empty : ((Uri)ConfigManager.CurrentConfig.Proxy.Server).ToString();
+            UserText.Text = ConfigManager.CurrentConfig.Proxy.Username == null ? string.Empty : ConfigManager.CurrentConfig.Proxy.Username;
+            PasswordText.Password = ConfigManager.CurrentConfig.Proxy.ObfuscatedPassword == null ? string.Empty : Crypto.Deobfuscate(ConfigManager.CurrentConfig.Proxy.ObfuscatedPassword);
 
             Controller.CheckLogin(ConfigManager.CurrentConfig.Proxy.LoginRequired);
 
-            switch (ConfigManager.CurrentConfig.Proxy.Selection)
-            {
+            switch (ConfigManager.CurrentConfig.Proxy.Selection) {
                 case ProxySelection.NOPROXY:
                     Controller.CheckProxyNone();
                     break;
@@ -167,8 +144,7 @@ namespace CmisSync
             FinishButton.Focus();
         }
 
-        private void LoadSetting()
-        {
+        private void LoadSetting() {
             System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/SettingWPF.xaml", System.UriKind.Relative);
             SettingWPF wpf = Application.LoadComponent(resourceLocater) as SettingWPF;
 
@@ -192,6 +168,5 @@ namespace CmisSync
 
             Content = wpf;
         }
-
     }
 }
