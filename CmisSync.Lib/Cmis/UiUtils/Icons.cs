@@ -9,7 +9,7 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         ApplicationIcon,
 
         [LinuxIcon("dataspacesync-folder")]
-        [WindowsIcon("")]
+        [WindowsIcon("cmissync-folder", "ico")]
         [MacOSIcon("cmissync-folder", "icns")]
         DefaultTargetFolderIcon,
 
@@ -83,7 +83,7 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         SyncInProgressHighlightedIcon5,
 
         [LinuxIcon("dataspacesync-process-syncing-error", 24)]
-        [WindowsIcon("")]
+        [WindowsIcon("process-syncing-error")]
         [MacOSIcon("process-syncing-error")]
         ErrorOnSyncIcon,
 
@@ -101,7 +101,7 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         SideImage,
 
         [LinuxIcon("dataspacesync-process-syncing-error", 24)]
-        [WindowsIcon("")]
+        [WindowsIcon("process-syncing-error")]
         [MacOSIcon("error", "icns")]
         ErrorIcon,
 
@@ -126,32 +126,32 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         TutorialSlide4,
 
         [LinuxIcon("dataspacesync-start", 12)]
-        [WindowsIcon("")]
+        [WindowsIcon("media_playback_start")]
         [MacOSIcon("media_playback_start")]
         ResumeIcon,
 
         [LinuxIcon("dataspacesync-pause", 12)]
-        [WindowsIcon("")]
+        [WindowsIcon("media_playback_pause")]
         [MacOSIcon("media_playback_pause")]
         PauseIcon,
 
         [LinuxIcon("dataspacesync-uploading")]
-        [WindowsIcon("")]
+        [WindowsIcon("Uploading")]
         [MacOSIcon("Uploading")]
         UploadNewObjectIcon,
 
         [LinuxIcon("dataspacesync-updating")]
-        [WindowsIcon("")]
+        [WindowsIcon("Updating")]
         [MacOSIcon("Updating")]
         UploadAndUpdateExistingObjectIcon,
 
         [LinuxIcon("dataspacesync-downloading")]
-        [WindowsIcon("")]
+        [WindowsIcon("Downloading")]
         [MacOSIcon("Downloading")]
         DownloadNewObjectIcon,
 
         [LinuxIcon("dataspacesync-updating")]
-        [WindowsIcon("")]
+        [WindowsIcon("Updating")]
         [MacOSIcon("Updating")]
         DownloadAndUpdateExistingObjectIcon,
     }
