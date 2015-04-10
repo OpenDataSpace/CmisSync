@@ -31,7 +31,6 @@ SOURCES =  \
 	Cmis/RepositoryStatus.cs \
 	Cmis/RepositoryStatusAggregator.cs \
 	Cmis/UiUtils/CmisUtils.cs \
-	Cmis/UiUtils/Icons.cs \
 	Cmis/UiUtils/LoginCredentials.cs \
 	Cmis/UiUtils/LoginException.cs \
 	Cmis/UiUtils/LogonRepositoryInfo.cs \
@@ -259,6 +258,7 @@ SOURCES =  \
 	Streams/ProgressStream.cs \
 	Streams/StreamWrapper.cs \
 	Streams/TransmissionStream.cs \
+	UiUtils/Icons.cs \
 	Utils.cs
 
 EXTRA_DIST = CmisSync.Lib.csproj StaticDefines.cs

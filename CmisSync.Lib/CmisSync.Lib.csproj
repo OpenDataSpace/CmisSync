@@ -56,7 +56,6 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="nunit.framework" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms\Tarjan\AbstractTarjanNode.cs" />
@@ -312,7 +311,7 @@
     <Compile Include="Cmis\UiUtils\LogonRepositoryInfo.cs" />
     <Compile Include="Cmis\UiUtils\LoginException.cs" />
     <Compile Include="Cmis\UiUtils\UiConvenienceExtenders.cs" />
-    <Compile Include="Cmis\UiUtils\Icons.cs" />
+    <Compile Include="UiUtils\Icons.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -367,4 +366,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <Folder Include="UiUtils\" />
+  </ItemGroup>
 </Project>

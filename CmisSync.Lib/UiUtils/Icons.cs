@@ -1,5 +1,5 @@
 
-namespace CmisSync.Lib.Cmis.UiUtils {
+namespace CmisSync.Lib.UiUtils {
     using System;
 
     public enum Icons {
@@ -156,7 +156,7 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         DownloadAndUpdateExistingObjectIcon,
     }
 
-    public class LinuxIcon: IconAttribute {
+    internal class LinuxIcon: IconAttribute {
         public LinuxIcon(string name, int x = 16, int y = -1, string type = "png") : base(name, type) {
             this.X = x;
             this.Y = y < 0 ? x : y;
@@ -166,18 +166,18 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         public int Y { get; private set; }
     }
 
-    public class WindowsIcon : IconAttribute {
+    internal class WindowsIcon : IconAttribute {
         public WindowsIcon(string name, string type = "png") : base(name, type) {
         }
     }
 
-    public class MacOSIcon : IconAttribute {
+    internal class MacOSIcon : IconAttribute {
         public MacOSIcon(string name, string type = "png") : base(name, type) {
         }
     }
 
     [System.AttributeUsage(System.AttributeTargets.Field)]
-    public class IconAttribute : System.Attribute {
+    internal class IconAttribute : System.Attribute {
         public IconAttribute(string name, string type) {
             this.Name = name;
             this.FileType = type;
