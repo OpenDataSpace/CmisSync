@@ -48,23 +48,39 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         [MacOSIcon("process-syncing-iiiii")]
         SyncInProgressIcon5,
 
+        [MacOSIcon("process-syncing-i")]
+        SyncPausedIcon,
+
+        [MacOSIcon("process-syncing-i-active")]
+        SyncPausedHighlightedIcon,
+
+        [LinuxIcon("")]
+        [WindowsIcon("")]
+        [MacOSIcon("process-syncing-i")]
+        SyncDisconnectedIcon,
+
+        [MacOSIcon("process-syncing-i-active")]
+        SyncDisconnectedHighlightedIcon,
+
+        [LinuxIcon("")]
+        [WindowsIcon("")]
+        [MacOSIcon("process-syncing-i")]
+        SyncDisabledIcon,
+
+        [MacOSIcon("process-syncing-i-active")]
+        SyncDisabledHighlightedIcon,
+
         [LinuxIcon("")]
         [WindowsIcon("")]
         [MacOSIcon("process-syncing-i-active")]
         SyncInProgressHighlightedIcon1,
 
-        [LinuxIcon("")]
-        [WindowsIcon("")]
         [MacOSIcon("process-syncing-ii-active")]
         SyncInProgressHighlightedIcon2,
 
-        [LinuxIcon("")]
-        [WindowsIcon("")]
         [MacOSIcon("process-syncing-iii-active")]
         SyncInProgressHighlightedIcon3,
 
-        [LinuxIcon("")]
-        [WindowsIcon("")]
         [MacOSIcon("process-syncing-iiii-active")]
         SyncInProgressHighlightedIcon4,
 
@@ -78,8 +94,6 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         [MacOSIcon("process-syncing-error")]
         ErrorOnSyncIcon,
 
-        [LinuxIcon("")]
-        [WindowsIcon("")]
         [MacOSIcon("process-syncing-error-active")]
         ErrorOnSyncHighlightedIcon,
 
