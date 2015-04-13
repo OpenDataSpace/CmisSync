@@ -215,13 +215,22 @@ namespace CmisSync.Lib.UiUtils {
         }
     }
 
-    internal class LinuxIcon: IconAttribute {
+    internal class LinuxIcon : IconAttribute {
         public LinuxIcon(string name, int x = 16, int y = -1, string type = "png") : base(name, type) {
             this.X = x;
             this.Y = y < 0 ? x : y;
         }
 
+        /// <summary>
+        /// Gets the icon width.
+        /// </summary>
+        /// <value>The width</value>
         public int X { get; private set; }
+
+        /// <summary>
+        /// Gets the icon height.
+        /// </summary>
+        /// <value>The height</value>
         public int Y { get; private set; }
     }
 
@@ -237,12 +246,26 @@ namespace CmisSync.Lib.UiUtils {
 
     [System.AttributeUsage(System.AttributeTargets.Field)]
     internal class IconAttribute : System.Attribute {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.UiUtils.IconAttribute"/> class.
+        /// </summary>
+        /// <param name="name">Name of the icon.</param>
+        /// <param name="type">Type of the icon.</param>
         public IconAttribute(string name, string type) {
             this.Name = name;
             this.FileType = type;
         }
 
+        /// <summary>
+        /// Gets the name.
+        /// </summary>
+        /// <value>The name.</value>
         public string Name { get; private set; }
-        public string FileType {get; private set; }
+
+        /// <summary>
+        /// Gets the type of the file.
+        /// </summary>
+        /// <value>The type of the file.</value>
+        public string FileType { get; private set; }
     }
 }
