@@ -194,6 +194,15 @@ namespace CmisSync.Lib.UiUtils {
             }
         }
 
+        public static string GetNameWithSizeAndTypeExtension(this Icons icon) {
+            var attr = icon.GetAttribute() as LinuxIcon;
+            if (attr != null) {
+                return string.Format("{0}-{1}.{2}", attr.Name, attr.X.ToString(), attr.FileType);
+            } else {
+                return icon.GetNameWithTypeExtension();
+            }
+        }
+
         internal static IconAttribute GetAttribute(this Icons icon) {
             Type type = icon.GetType();
             string name = Enum.GetName(type, icon);

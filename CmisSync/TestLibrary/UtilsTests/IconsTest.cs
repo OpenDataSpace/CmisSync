@@ -49,7 +49,22 @@ namespace TestLibrary.UtilsTests {
             Assert.That(Environment.OSVersion.Platform, Is.EqualTo(expectedPlatform));
         }
 
-        public Array GetAllIcons(){
+        [Test, Category("Fast"), TestCaseSource("GetAllIcons")]
+        public void GetIconWithSizeAndExtensionOnLinux(Icons icon) {
+            PlatformID expectedPlatform = Environment.OSVersion.Platform;
+#if !__COCOA__ && __MonoCS__
+            if (icon.GetName() != null) {
+                Assert.That(icon.GetNameWithSizeAndTypeExtension(), Is.StringContaining(icon.GetName()));
+                Assert.That(icon.GetNameWithSizeAndTypeExtension(), Is.Not.EqualTo(icon.GetNameWithTypeExtension()));
+            } else {
+                Assert.That(icon.GetNameWithSizeAndTypeExtension(), Is.Null);
+            }
+#else
+            Assert.That(icon.GetNameWithSizeAndTypeExtension(), Is.EqualTo(icon.GetNameWithTypeExtension()));
+#endif
+        }
+
+        public Array GetAllIcons() {
             return Enum.GetValues(typeof(Icons));
         }
     }
