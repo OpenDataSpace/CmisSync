@@ -259,6 +259,7 @@ SOURCES =  \
 	Streams/StreamWrapper.cs \
 	Streams/TransmissionStream.cs \
 	UiUtils/Icons.cs \
+	UiUtils/IIconLoader.cs \
 	Utils.cs
 
 EXTRA_DIST = CmisSync.Lib.csproj StaticDefines.cs
