@@ -19,9 +19,20 @@
 
 namespace CmisSync.Lib.UiUtils {
     using System;
+
+    /// <summary>
+    /// Icon loader which takes two or more IIconLoader which will be called from first one until a non null result is returned.
+    /// </summary>
     public class AggregatingIconLoader : IIconLoader {
         private IIconLoader primaryLoader;
         private IIconLoader fallbackLoader;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.UiUtils.AggregatingIconLoader"/> class.
+        /// </summary>
+        /// <param name="primaryLoader">Primary loader.</param>
+        /// <param name="fallbackLoader">Fallback loader.</param>
+        /// <param name="moreFallBackLoader">More fall back loader.</param>
         public AggregatingIconLoader(IIconLoader primaryLoader, IIconLoader fallbackLoader, params IIconLoader[] moreFallBackLoader) {
             if (primaryLoader == null) {
                 throw new ArgumentNullException("Given primary loader is null");
@@ -42,6 +53,12 @@ namespace CmisSync.Lib.UiUtils {
             }
         }
 
+        /// <summary>
+        /// Gets the path of the given icon, or null if this loader is not able to provide a path to the requested icon.
+        /// It will call the first loader and if null is returned, the next are called.
+        /// </summary>
+        /// <returns>The path to this given icon or null if no path can be returned.</returns>
+        /// <param name="icon">Requested Icon.</param>
         public string GetPathOf(Icons icon) {
             return this.primaryLoader.GetPathOf(icon) ?? this.fallbackLoader.GetPathOf(icon);
         }
