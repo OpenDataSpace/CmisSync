@@ -21,6 +21,9 @@ namespace CmisSync.Lib.UiUtils {
     using System;
     using System.Reflection;
 
+    /// <summary>
+    /// Icons available for UI.
+    /// </summary>
     public enum Icons {
         [LinuxIcon("dataspacesync-app")]
         [WindowsIcon("app", "ico")]
@@ -175,6 +178,9 @@ namespace CmisSync.Lib.UiUtils {
         DownloadAndUpdateExistingObjectIcon,
     }
 
+    /// <summary>
+    /// Icon convenience extenders.
+    /// </summary>
     public static class IconExtenders {
         public static string GetName(this Icons icon) {
             var attr = icon.GetAttribute();
@@ -203,6 +209,11 @@ namespace CmisSync.Lib.UiUtils {
             }
         }
 
+        /// <summary>
+        /// Gets the icon attribute of the given icon based on the actual OS.
+        /// </summary>
+        /// <returns>The icon attribute.</returns>
+        /// <param name="icon">Given Icon.</param>
         internal static IconAttribute GetAttribute(this Icons icon) {
             Type type = icon.GetType();
             string name = Enum.GetName(type, icon);
@@ -224,6 +235,9 @@ namespace CmisSync.Lib.UiUtils {
         }
     }
 
+    /// <summary>
+    /// Linux icon.
+    /// </summary>
     internal class LinuxIcon : IconAttribute {
         public LinuxIcon(string name, int x = 16, int y = -1, string type = "png") : base(name, type) {
             this.X = x;
@@ -243,16 +257,25 @@ namespace CmisSync.Lib.UiUtils {
         public int Y { get; private set; }
     }
 
+    /// <summary>
+    /// Windows icon.
+    /// </summary>
     internal class WindowsIcon : IconAttribute {
         public WindowsIcon(string name, string type = "png") : base(name, type) {
         }
     }
 
+    /// <summary>
+    /// Mac OS icon.
+    /// </summary>
     internal class MacOSIcon : IconAttribute {
         public MacOSIcon(string name, string type = "png") : base(name, type) {
         }
     }
 
+    /// <summary>
+    /// Icon attribute.
+    /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Field)]
     internal class IconAttribute : System.Attribute {
         /// <summary>
