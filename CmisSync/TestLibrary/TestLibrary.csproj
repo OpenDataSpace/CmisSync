@@ -270,6 +270,7 @@
     <Compile Include="StreamsTests\TransmissionStreamTest.cs" />
     <Compile Include="CmisTests\UiUtilsTests\UiConvenienceExtendersTest.cs" />
     <Compile Include="UtilsTests\IconsTest.cs" />
+    <Compile Include="UtilsTests\IconLoaderAggregationTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

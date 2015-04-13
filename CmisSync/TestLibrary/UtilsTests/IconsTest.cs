@@ -64,7 +64,7 @@ namespace TestLibrary.UtilsTests {
 #endif
         }
 
-        public Array GetAllIcons() {
+        private Array GetAllIcons() {
             return Enum.GetValues(typeof(Icons));
         }
     }

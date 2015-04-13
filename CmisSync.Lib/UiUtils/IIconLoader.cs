@@ -19,6 +19,7 @@
 
 namespace CmisSync.Lib.UiUtils {
     using System;
+
     /// <summary>
     /// Every icon loading class should implement this interface to generalize the way a path to a loaded icon can be returned.
     /// </summary>

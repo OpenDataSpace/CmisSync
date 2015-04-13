@@ -258,6 +258,7 @@ SOURCES =  \
 	Streams/ProgressStream.cs \
 	Streams/StreamWrapper.cs \
 	Streams/TransmissionStream.cs \
+	UiUtils/AggregatingIconLoader.cs \
 	UiUtils/Icons.cs \
 	UiUtils/IIconLoader.cs \
 	Utils.cs
