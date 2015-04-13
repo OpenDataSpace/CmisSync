@@ -147,6 +147,19 @@ namespace CmisSync {
         }
     }
 
+    public class TransmissionViewDelegate : NSTableViewDelegate {
+        private TransmissionDataSource DataSource;
+
+        public TransmissionViewDelegate(TransmissionDataSource dataSource) {
+            DataSource = dataSource;
+        }
+
+        public override NSView GetViewForItem(NSTableView tableView, NSTableColumn tableColumn, int row) {
+            NSView view = new TransmissionWidgetItem();
+            return view;
+        }
+    }
+
     public partial class TransmissionWidgetController : MonoMac.AppKit.NSWindowController {
         #region Constructors
 
@@ -188,19 +201,23 @@ namespace CmisSync {
 
         private TransmissionController Controller = new TransmissionController();
         TransmissionDataSource DataSource;
+        TransmissionViewDelegate ViewDelegate;
 
         public override void AwakeFromNib() {
             base.AwakeFromNib();
 
-            TableColumnRepo.HeaderCell.Title = Properties_Resources.TransmissionTitleRepo;
-            TableColumnPath.HeaderCell.Title = Properties_Resources.TransmissionTitlePath;
-            TableColumnStatus.HeaderCell.Title = Properties_Resources.TransmissionTitleStatus;
+//            TableColumnRepo.HeaderCell.Title = Properties_Resources.TransmissionTitleRepo;
+//            TableColumnPath.HeaderCell.Title = Properties_Resources.TransmissionTitlePath;
+//            TableColumnStatus.HeaderCell.Title = Properties_Resources.TransmissionTitleStatus;
             TableColumnProgress.HeaderCell.Title = Properties_Resources.TransmissionTitleProgress;
-            TableColumnUpdateTime.HeaderCell.Title = Properties_Resources.TransmissionTitleLastChange;
+//            TableColumnUpdateTime.HeaderCell.Title = Properties_Resources.TransmissionTitleLastChange;
             FinishButton.Title = Properties_Resources.Close;
 
             DataSource = new TransmissionDataSource(Controller);
             TableView.DataSource = DataSource;
+
+            ViewDelegate = new TransmissionViewDelegate(DataSource);
+            TableView.Delegate = ViewDelegate;
 
             TableView.ShouldSelectRow += delegate(NSTableView tableView, int row) {
                 return true;

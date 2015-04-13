@@ -198,6 +198,10 @@
     <Compile Include="ClientBrand.cs" />
     <Compile Include="UIHelpers.cs" />
     <Compile Include="RepositoryMenuItem.cs" />
+    <Compile Include="TransmissionWidgetItem.cs" />
+    <Compile Include="TransmissionWidgetItem.designer.cs">
+      <DependentUpon>TransmissionWidgetItem.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -305,6 +309,7 @@
     <InterfaceDefinition Include="GeneralSettings.xib" />
     <InterfaceDefinition Include="ProxySettings.xib" />
     <InterfaceDefinition Include="TransmissionWidget.xib" />
+    <InterfaceDefinition Include="TransmissionWidgetItem.xib" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Properties\Properties.Resources.cs.resx" />
