@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.TestUtils
-{
+namespace TestLibrary.TestUtils {
     using System;
 
     using CmisSync.Lib.Storage.FileSystem;
@@ -30,8 +29,7 @@ namespace TestLibrary.TestUtils
     using NUnit.Framework;
 
     [TestFixture]
-    public class FolderTreeTest
-    {
+    public class FolderTreeTest {
         private readonly string tree = @".
 ├── A
 │   └── E
@@ -99,13 +97,15 @@ namespace TestLibrary.TestUtils
         [Test, Category("Fast")]
         public void ConstructFolderTreeByRemoteFolder() {
             var root = new Mock<IFolder>();
-            var a = Mock.Of<IFolder>(dir => dir.Name == "A");
-            var b = Mock.Of<IFolder>(dir => dir.Name == "B");
-            var c = Mock.Of<IFolder>(dir => dir.Name == "C");
-            var d = Mock.Of<IFolder>(dir => dir.Name == "D");
-            var e = Mock.Of<IFolder>(dir => dir.Name == "E");
-            var f = Mock.Of<IFolder>(dir => dir.Name == "F");
-            var g = Mock.Of<IFolder>(dir => dir.Name == "G");
+            var remoteRootId = Guid.NewGuid().ToString();
+            root.Setup(r => r.Id).Returns(remoteRootId);
+            var a = Mock.Of<IFolder>(dir => dir.Name == "A" && dir.Id == "1");
+            var b = Mock.Of<IFolder>(dir => dir.Name == "B" && dir.Id == "2");
+            var c = Mock.Of<IFolder>(dir => dir.Name == "C" && dir.Id == "3");
+            var d = Mock.Of<IFolder>(dir => dir.Name == "D" && dir.Id == "4");
+            var e = Mock.Of<IFolder>(dir => dir.Name == "E" && dir.Id == "5");
+            var f = Mock.Of<IFolder>(dir => dir.Name == "F" && dir.Id == "6");
+            var g = Mock.Of<IFolder>(dir => dir.Name == "G" && dir.Id == "7");
             Mock.Get(a).SetupChildren(e);
             Mock.Get(b).SetupChildren();
             Mock.Get(c).SetupChildren(d);
@@ -214,6 +214,36 @@ namespace TestLibrary.TestUtils
             var underTest = new FolderTree(this.tree);
 
             Assert.That(underTest, Is.Not.EqualTo(new FolderTree(differentTree)));
+        }
+
+        [Test, Category("Fast")]
+        public void 
+
+        [Test, Category("Fast")]
+        public void AddLocalAndRemoteIdToFileName() {
+            string localId = Guid.NewGuid().ToString();
+            string remoteId = Guid.NewGuid().ToString();
+            string name = "A";
+            string nameWithIds = name + " {\"lid\": \"" + localId + "\", \"rid\": \"" + remoteId + "\"}";
+            var underTest = new FolderTree(nameWithIds);
+
+            Assert.That(underTest.Name, Is.EqualTo(name));
+            Assert.That(underTest.LocalId, Is.EqualTo(localId));
+            Assert.That(underTest.RemoteId, Is.EqualTo(remoteId));
+            Assert.That(underTest, Is.EqualTo(new FolderTree(underTest.ToString())));
+            Assert.That(underTest.ToString(), Is.StringContaining(localId).And.StringContaining(remoteId));
+        }
+
+        [Test, Category("Fast")]
+        public void ConvertStringToTree() {
+            FolderTree underTest = this.tree;
+            Assert.That(underTest, Is.EqualTo(new FolderTree(this.tree)));
+        }
+
+        [Test, Category("Fast")]
+        public void ConvertTreeToString() {
+            string newTree = new FolderTree(this.tree);
+            Assert.That(newTree, Is.EqualTo(this.tree));
         }
 
         [Test, Category("Fast")]
