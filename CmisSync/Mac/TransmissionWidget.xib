@@ -25,14 +25,25 @@
                 <rect key="frame" x="0.0" y="0.0" width="640" height="400"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="h1n-Y6-8bj">
+                    <button verticalHuggingPriority="750" id="hdT-2e-MQs">
+                        <rect key="frame" x="506" y="13" width="120" height="32"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
+                        <buttonCell key="cell" type="push" title="Button" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="F4L-iO-6Zo">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="OnFinish:" target="-2" id="w1I-qg-j4B"/>
+                        </connections>
+                    </button>
+                    <scrollView autohidesScrollers="YES" horizontalLineScroll="60" horizontalPageScroll="10" verticalLineScroll="60" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="h1n-Y6-8bj">
                         <rect key="frame" x="-1" y="60" width="642" height="341"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <clipView key="contentView" id="CdM-7V-2aT">
                             <rect key="frame" x="1" y="1" width="640" height="339"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
-                                <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="c88-RI-CR0">
+                                <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" autosaveColumns="NO" rowHeight="58" rowSizeStyle="automatic" viewBased="YES" id="c88-RI-CR0">
                                     <rect key="frame" x="0.0" y="0.0" width="640" height="0.0"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <size key="intercellSpacing" width="3" height="2"/>
@@ -52,21 +63,37 @@
                                             </textFieldCell>
                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                             <prototypeCellViews>
-                                                <tableCellView id="9e2-2b-J21">
-                                                    <rect key="frame" x="1" y="1" width="637" height="17"/>
+                                                <tableCellView id="jvS-7y-Dmf" customClass="TransmissionWidgetItem">
+                                                    <rect key="frame" x="1" y="1" width="637" height="58"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <subviews>
-                                                        <customView id="8h3-h3-tFr" customClass="TransmissionWidgetItem">
-                                                            <rect key="frame" x="-18" y="-40" width="163" height="96"/>
+                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="xim-h7-0ut">
+                                                            <rect key="frame" x="0.0" y="38" width="637" height="17"/>
+                                                            <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
+                                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="LabelHead" id="WPL-hd-5qC">
+                                                                <font key="font" metaFont="system"/>
+                                                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                            </textFieldCell>
+                                                        </textField>
+                                                        <progressIndicator maxValue="100" indeterminate="YES" style="bar" id="Tzz-yz-a1K">
+                                                            <rect key="frame" x="0.0" y="20" width="637" height="20"/>
+                                                        </progressIndicator>
+                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="KMl-tE-jCc">
+                                                            <rect key="frame" x="0.0" y="3" width="637" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                            <subviews>
-                                                                <progressIndicator maxValue="100" indeterminate="YES" style="bar" id="pRh-2l-03n">
-                                                                    <rect key="frame" x="33" y="38" width="96" height="20"/>
-                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                </progressIndicator>
-                                                            </subviews>
-                                                        </customView>
+                                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="LabelFoot" id="QPR-Ez-mcK">
+                                                                <font key="font" metaFont="system"/>
+                                                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                            </textFieldCell>
+                                                        </textField>
                                                     </subviews>
+                                                    <connections>
+                                                        <outlet property="labelFoot" destination="KMl-tE-jCc" id="gVj-8G-PhG"/>
+                                                        <outlet property="labelHead" destination="xim-h7-0ut" id="5LA-Ov-Ezs"/>
+                                                        <outlet property="progress" destination="Tzz-yz-a1K" id="n8L-kD-m0Q"/>
+                                                    </connections>
                                                 </tableCellView>
                                             </prototypeCellViews>
                                         </tableColumn>
@@ -84,17 +111,6 @@
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                     </scrollView>
-                    <button verticalHuggingPriority="750" id="hdT-2e-MQs">
-                        <rect key="frame" x="506" y="13" width="120" height="32"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
-                        <buttonCell key="cell" type="push" title="Button" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="F4L-iO-6Zo">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                        <connections>
-                            <action selector="OnFinish:" target="-2" id="w1I-qg-j4B"/>
-                        </connections>
-                    </button>
                 </subviews>
             </view>
         </window>

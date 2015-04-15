@@ -91,28 +91,34 @@ namespace CmisSync {
         }
 
         public override NSObject GetObjectValue(NSTableView tableView, NSTableColumn tableColumn, int row) {
+            double percent = 0;
+            string repo = string.Empty;
+            string file = string.Empty;
+            long speed = 0;
+            long length = 0;
             lock (lockTransmissionItems) {
                 if (row >= TransmissionItems.Count) {
                     return new NSNull();
                 }
-
-                switch (tableColumn.Identifier) {
-                case "Repo":
-                    return new NSString(TransmissionItems[row].Repository);
-                case "Path":
-                    return new NSString(TransmissionItems[row].Path);
-                case "Status":
-                    return new NSString(TransmissionItems[row].Status.ToString());
-                case "Progress":
-                    return new NSString(TransmissionItems[row].Percent.ToString());
-                case "UpdateTime":
-                    return new NSString(TransmissionItems[row].LastModification.ToString());
-                default:
-                    return new NSNull();
-                }
+                percent = TransmissionItems[row].Percent.GetValueOrDefault();
+                repo = TransmissionItems[row].Repository;
+                file = TransmissionItems[row].FileName;
+                speed = TransmissionItems[row].BitsPerSecond.GetValueOrDefault();
+                length = TransmissionItems[row].Length.GetValueOrDefault();
             }
-
-            throw new You_Should_Not_Call_base_In_This_Method ();
+            BeginInvokeOnMainThread(delegate {
+                TransmissionWidgetItem view = tableView.GetView(0,row,true) as TransmissionWidgetItem;
+                if (view != null) {
+                    view.labelHead.StringValue = "repo:" + repo;
+                    view.labelHead.StringValue += " name:" + file;
+                    view.labelFoot.StringValue = " length:" + length;
+                    view.labelFoot.StringValue += " speed:" + speed;
+                    view.progress.DoubleValue = percent;
+                } else {
+                    Console.WriteLine("Emtpy view at transmission window row: " + row.ToString());
+                }
+            });
+            return new NSNull();
         }
 
         public override int GetRowCount(NSTableView tableView) {
@@ -138,25 +144,12 @@ namespace CmisSync {
                 for (int i = 0; i < TransmissionItems.Count; ++i) {
                     if (TransmissionItems[i].Path == item.Path) {
                         BeginInvokeOnMainThread(delegate {
-                            tableView.ReloadData(new NSIndexSet(i), NSIndexSet.FromArray(new int[]{ 0, 1, 2, 3, 4}));
+                            tableView.ReloadData(new NSIndexSet(i), new NSIndexSet(0));
                         });
                         return;
                     }
                 }
             }
-        }
-    }
-
-    public class TransmissionViewDelegate : NSTableViewDelegate {
-        private TransmissionDataSource DataSource;
-
-        public TransmissionViewDelegate(TransmissionDataSource dataSource) {
-            DataSource = dataSource;
-        }
-
-        public override NSView GetViewForItem(NSTableView tableView, NSTableColumn tableColumn, int row) {
-            NSView view = new TransmissionWidgetItem();
-            return view;
         }
     }
 
@@ -201,23 +194,15 @@ namespace CmisSync {
 
         private TransmissionController Controller = new TransmissionController();
         TransmissionDataSource DataSource;
-        TransmissionViewDelegate ViewDelegate;
 
         public override void AwakeFromNib() {
             base.AwakeFromNib();
 
-//            TableColumnRepo.HeaderCell.Title = Properties_Resources.TransmissionTitleRepo;
-//            TableColumnPath.HeaderCell.Title = Properties_Resources.TransmissionTitlePath;
-//            TableColumnStatus.HeaderCell.Title = Properties_Resources.TransmissionTitleStatus;
             TableColumnProgress.HeaderCell.Title = Properties_Resources.TransmissionTitleProgress;
-//            TableColumnUpdateTime.HeaderCell.Title = Properties_Resources.TransmissionTitleLastChange;
             FinishButton.Title = Properties_Resources.Close;
 
             DataSource = new TransmissionDataSource(Controller);
             TableView.DataSource = DataSource;
-
-            ViewDelegate = new TransmissionViewDelegate(DataSource);
-            TableView.Delegate = ViewDelegate;
 
             TableView.ShouldSelectRow += delegate(NSTableView tableView, int row) {
                 return true;

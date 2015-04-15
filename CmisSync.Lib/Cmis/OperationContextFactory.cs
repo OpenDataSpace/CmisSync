@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Cmis
-{
+namespace CmisSync.Lib.Cmis {
     using System;
     using System.Collections.Generic;
 
@@ -29,8 +28,7 @@ namespace CmisSync.Lib.Cmis
     /// <summary>
     /// Operation context factory.
     /// </summary>
-    public static class OperationContextFactory
-    {
+    public static class OperationContextFactory {
         private static readonly int MaximumItemsPerPage = 1000;
 
         /// <summary>

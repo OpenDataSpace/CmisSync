@@ -20,9 +20,6 @@ namespace CmisSync {
             Initialize();
         }
 
-        public TransmissionWidgetItem() {
-        }
-
         // Shared initialization code
         void Initialize() {
         }
