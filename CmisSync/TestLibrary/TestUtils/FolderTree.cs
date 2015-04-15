@@ -21,11 +21,14 @@ namespace TestLibrary.TestUtils {
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Text;
 
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
+
+    using Newtonsoft.Json.Linq;
 
     public class FolderTree {
         private List<FolderTree> children = new List<FolderTree>();
@@ -45,7 +48,14 @@ namespace TestLibrary.TestUtils {
                 } else if (line.StartsWith("│   ") || line.StartsWith("    ")) {
                     childTree.Append(System.Environment.NewLine).Append(line.Substring(4));
                 } else {
-                    this.Name = line;
+                    if (line.Contains(" {")) {
+                        this.Name = line.Substring(0, line.IndexOf(" {"));
+                        JObject jobject = JObject.Parse(line.Substring(line.IndexOf(" {")));
+                        this.LocalId = jobject.GetValue("lid").ToString();
+                        this.RemoteId = jobject.GetValue("rid").ToString();
+                    } else {
+                        this.Name = line;
+                    }
                 }
             }
 
@@ -59,6 +69,7 @@ namespace TestLibrary.TestUtils {
 
         public FolderTree(IFolder folder, string name = null) {
             this.Name = name ?? folder.Name;
+            this.RemoteId = folder.Id;
             foreach (var child in folder.GetChildren()) {
                 if (child is IFolder) {
                     this.children.Add(new FolderTree(child as IFolder));
@@ -72,6 +83,7 @@ namespace TestLibrary.TestUtils {
 
         public FolderTree(IDirectoryInfo dir, string name = null) {
             this.Name = name ?? dir.Name;
+            this.LocalId = dir.Uuid == null ? null : dir.Uuid.GetValueOrDefault().ToString();
             foreach (var child in dir.GetDirectories()) {
                 this.children.Add(new FolderTree(child));
             }
@@ -94,10 +106,12 @@ namespace TestLibrary.TestUtils {
 
         private FolderTree(IDocument doc) {
             this.Name = doc.Name;
+            this.RemoteId = doc.Id;
         }
 
         private FolderTree(IFileInfo file) {
             this.Name = file.Name;
+            this.LocalId = file.Uuid == null ? null : file.Uuid.GetValueOrDefault().ToString();
         }
 
         private FolderTree(FileInfo file) {
@@ -106,9 +120,15 @@ namespace TestLibrary.TestUtils {
 
         public string Name { get; private set; }
 
+        public string LocalId { get; set; }
+
+        public string RemoteId { get; set; }
+
         public override string ToString() {
             var tree = new StringBuilder();
-            tree.AppendLine(this.Name);
+
+            var ids = string.Format(" {{\"lid\":\"{0}\", \"rid\":\"{1}\"}}", this.LocalId, this.RemoteId);
+            tree.AppendLine(string.Format("{0}{1}", this.Name, (string.IsNullOrEmpty(this.LocalId) && string.IsNullOrEmpty(this.RemoteId)) ? string.Empty : ids));
             int count = this.children.Count;
             foreach (var child in this.children) {
                 string prefix = "│   ";
@@ -144,7 +164,40 @@ namespace TestLibrary.TestUtils {
         }
 
         public override bool Equals(object obj) {
-            return this.ToString().Equals(obj.ToString());
+            if (obj != null && (obj is FolderTree || obj is string)) {
+                var otherTree = obj is string ? new FolderTree((string)obj) : obj as FolderTree;
+                if (!string.IsNullOrEmpty(this.LocalId) && !string.IsNullOrEmpty(otherTree.LocalId)) {
+                    if (!this.LocalId.Equals(otherTree.LocalId)) {
+                        return false;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(this.RemoteId) && !string.IsNullOrEmpty(otherTree.RemoteId)) {
+                    if (!this.RemoteId.Equals(otherTree.RemoteId)) {
+                        return false;
+                    }
+                }
+
+                if (!this.Name.Equals(otherTree.Name)) {
+                    return false;
+                }
+
+                if (this.children.Count != otherTree.children.Count) {
+                    return false;
+                }
+
+                return this.children.SequenceEqual(otherTree.children);
+            } else {
+                return false;
+            }
+        }
+
+        public static implicit operator string(FolderTree tree) {
+            return tree == null ? null : tree.ToString();
+        }
+
+        public static implicit operator FolderTree(string tree) {
+            return tree == null ? null : new FolderTree(tree);
         }
 
         public override int GetHashCode() {
