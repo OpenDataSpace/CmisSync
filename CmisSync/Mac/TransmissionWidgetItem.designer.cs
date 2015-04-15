@@ -16,7 +16,10 @@ namespace CmisSync
 		public MonoMac.AppKit.NSProgressIndicator progress { get; private set; }
 		
         [Outlet]
-        public MonoMac.AppKit.NSTextField label { get; private set; }
+        public MonoMac.AppKit.NSTextField labelHead { get; private set; }
+
+        [Outlet]
+        public MonoMac.AppKit.NSTextField labelFoot { get; private set; }
 
 		void ReleaseDesignerOutlets ()
 		{
@@ -24,9 +27,13 @@ namespace CmisSync
 				progress.Dispose ();
 				progress = null;
 			}
-            if (label != null) {
-                label.Dispose ();
-                label = null;
+            if (labelHead != null) {
+                labelHead.Dispose ();
+                labelHead = null;
+            }
+            if (labelFoot != null) {
+                labelFoot.Dispose ();
+                labelFoot = null;
             }
 		}
 	}

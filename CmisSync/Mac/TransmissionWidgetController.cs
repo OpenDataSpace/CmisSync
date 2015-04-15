@@ -109,11 +109,11 @@ namespace CmisSync {
             BeginInvokeOnMainThread(delegate {
                 TransmissionWidgetItem view = tableView.GetView(0,row,true) as TransmissionWidgetItem;
                 if (view != null) {
+                    view.labelHead.StringValue = "repo:" + repo;
+                    view.labelHead.StringValue += " name:" + file;
+                    view.labelFoot.StringValue = " length:" + length;
+                    view.labelFoot.StringValue += " speed:" + speed;
                     view.progress.DoubleValue = percent;
-                    view.label.StringValue = "repo:" + repo;
-                    view.label.StringValue += " name:" + file;
-                    view.label.StringValue += " length:" + length;
-                    view.label.StringValue += " speed:" + speed;
                 } else {
                     Console.WriteLine("Emtpy view at transmission window row: " + row.ToString());
                 }
