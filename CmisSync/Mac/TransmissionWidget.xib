@@ -70,19 +70,28 @@
                                                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="xim-h7-0ut">
                                                             <rect key="frame" x="0.0" y="38" width="637" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
-                                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="LabelHead" id="WPL-hd-5qC">
+                                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Label Name" id="WPL-hd-5qC">
                                                                 <font key="font" metaFont="system"/>
                                                                 <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                             </textFieldCell>
                                                         </textField>
-                                                        <progressIndicator maxValue="100" indeterminate="YES" style="bar" id="Tzz-yz-a1K">
+                                                        <progressIndicator maxValue="100" style="bar" id="Tzz-yz-a1K">
                                                             <rect key="frame" x="0.0" y="20" width="637" height="20"/>
                                                         </progressIndicator>
-                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="KMl-tE-jCc">
-                                                            <rect key="frame" x="0.0" y="3" width="637" height="17"/>
-                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="LabelFoot" id="QPR-Ez-mcK">
+                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="KMl-tE-jCc" userLabel="Label Status">
+                                                            <rect key="frame" x="0.0" y="3" width="437" height="17"/>
+                                                            <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
+                                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Label Status" id="QPR-Ez-mcK">
+                                                                <font key="font" metaFont="system"/>
+                                                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                            </textFieldCell>
+                                                        </textField>
+                                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="4ed-0x-UIk">
+                                                            <rect key="frame" x="454" y="3" width="182" height="17"/>
+                                                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" baseWritingDirection="rightToLeft" title="Label Date" id="ttn-ta-Cxf">
                                                                 <font key="font" metaFont="system"/>
                                                                 <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -90,8 +99,9 @@
                                                         </textField>
                                                     </subviews>
                                                     <connections>
-                                                        <outlet property="labelFoot" destination="KMl-tE-jCc" id="gVj-8G-PhG"/>
-                                                        <outlet property="labelHead" destination="xim-h7-0ut" id="5LA-Ov-Ezs"/>
+                                                        <outlet property="labelDate" destination="4ed-0x-UIk" id="3Vv-Ur-2JD"/>
+                                                        <outlet property="labelName" destination="xim-h7-0ut" id="Wod-c9-wJC"/>
+                                                        <outlet property="labelStatus" destination="KMl-tE-jCc" id="6TJ-5Z-ZuG"/>
                                                         <outlet property="progress" destination="Tzz-yz-a1K" id="n8L-kD-m0Q"/>
                                                     </connections>
                                                 </tableCellView>
