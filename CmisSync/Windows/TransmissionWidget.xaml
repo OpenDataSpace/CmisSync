@@ -12,6 +12,7 @@
         <l:TransmissionStatusToDoneConverter x:Key="statusToDoneConverter" />
         <l:TransmissionLengthToStringConverter x:Key="lengthToStringConverter" />
         <l:TranmissionPositionToStringConverter x:Key="posToStringConverter" />
+        <l:TransmissionStatusToVisibilityConverter x:Key="statusToVisibilityConverter" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -30,7 +31,7 @@
         </Grid.ColumnDefinitions>
         <Image Width="16" Height="16" Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" VerticalAlignment="Center" Source="{Binding Path=Type, Converter={StaticResource typeToImageConverter}, Mode=OneWay}"/>
         <TextBlock x:Name="fileNameLabel" Text="{Binding FileName}" ToolTip="{Binding Path}" Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="5"/>
-        <ProgressBar x:Name="progress" Minimum="0" Maximum="100" Height="14" Value="{Binding Percent, Mode=OneWay}" Grid.Column="1" Grid.ColumnSpan="5" Grid.Row="1">
+        <ProgressBar x:Name="progress" Minimum="0" Maximum="100" Height="14" Value="{Binding Percent, Mode=OneWay}" Grid.Column="1" Grid.ColumnSpan="5" Grid.Row="1" Visibility="{Binding Path=Status, Converter={StaticResource statusToVisibilityConverter}, Mode=OneWay}">
             <ProgressBar.Style>
                 <Style TargetType="{x:Type ProgressBar}">
                     <Style.Triggers>
@@ -41,7 +42,7 @@
                 </Style>
             </ProgressBar.Style>
         </ProgressBar>
-        <TextBlock x:Name="bandwidthLabel" Text="{Binding Path=BitsPerSecond, Converter={StaticResource bandwidthConverter}, Mode=OneWay}" IsEnabled="False" FontSize="10" Grid.Column="1" Grid.Row="2" Margin="0,0,10,0">
+        <TextBlock x:Name="bandwidthLabel" Text="{Binding Path=BitsPerSecond, Converter={StaticResource bandwidthConverter}, Mode=OneWay}" IsEnabled="False" FontSize="10" Grid.Column="1" Grid.Row="2" Margin="0,0,10,0" Visibility="{Binding Path=Status, Converter={StaticResource statusToVisibilityConverter}, Mode=OneWay}">
             <TextBlock.Style>
                 <Style TargetType="{x:Type TextBlock}">
                     <Style.Triggers>

@@ -183,9 +183,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
             using (var hashAlg = new SHA1Reuse()) {
                 using (var filestream = target.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
-                using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
+                using (var downloader = ContentTaskUtils.CreateDownloader()) {
                     try {
-                        download.DownloadFile(remoteDocument, filestream, transmission, hashAlg, (byte[] checksumUpdate, long length) => this.SaveCacheFile(target, remoteDocument, checksumUpdate, length, transmission));
+                        downloader.DownloadFile(remoteDocument, filestream, transmission, hashAlg, (byte[] checksumUpdate, long length) => this.SaveCacheFile(target, remoteDocument, checksumUpdate, length, transmission));
                         if (this.TransmissionStorage != null) {
                             this.TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
                         }

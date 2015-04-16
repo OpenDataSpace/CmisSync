@@ -156,6 +156,7 @@
     <Compile Include="UIConverter\TransmissionLengthToStringConverter.cs" />
     <Compile Include="UIConverter\TransmissionPositionToStringConverter.cs" />
     <Compile Include="UIConverter\TransmissionStatusToDoneConverter.cs" />
+    <Compile Include="UIConverter\TransmissionStatusToVisibilityConverter.cs" />
     <Compile Include="UIConverter\TransmissionTypeToImageConverter.cs" />
     <Compile Include="TransmissionWidget.xaml.cs">
       <DependentUpon>TransmissionWidget.xaml</DependentUpon>
