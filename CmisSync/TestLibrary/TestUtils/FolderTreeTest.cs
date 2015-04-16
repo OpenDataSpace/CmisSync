@@ -136,10 +136,18 @@ namespace TestLibrary.TestUtils {
             Mock.Get(e).SetupChildren(f, g);
             Mock.Get(g).SetupChildren();
             root.SetupChildren(a, c, b);
-
+            string tree = @".
+├── A
+│   └── E
+│       ├── F {""file"":true}
+│       └── G
+├── B
+└── C
+    └── D {""file"":true}
+";
             var underTest = new FolderTree(root.Object, ".");
 
-            Assert.That(underTest, Is.EqualTo(new FolderTree(this.tree)));
+            Assert.That(underTest, Is.EqualTo(new FolderTree(tree)));
         }
 
         [Test, Category("Fast")]
@@ -215,9 +223,6 @@ namespace TestLibrary.TestUtils {
 
             Assert.That(underTest, Is.Not.EqualTo(new FolderTree(differentTree)));
         }
-
-        [Test, Category("Fast")]
-        public void 
 
         [Test, Category("Fast")]
         public void AddLocalAndRemoteIdToFileName() {

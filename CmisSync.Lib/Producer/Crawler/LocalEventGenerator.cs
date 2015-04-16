@@ -72,7 +72,8 @@ namespace CmisSync.Lib.Producer.Crawler {
         public List<AbstractFolderEvent> CreateEvents(
             List<IMappedObject> storedObjects,
             IObjectTree<IFileSystemInfo> localTree,
-            Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap)
+            Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap,
+            ISet<IMappedObject> handledStoredObjects)
         {
             List<AbstractFolderEvent> creationEvents = new List<AbstractFolderEvent>();
             var parent = localTree.Item;
@@ -84,8 +85,6 @@ namespace CmisSync.Lib.Producer.Crawler {
             }
 
             foreach (var child in localTree.Children) {
-                bool removeStoredMappedChild = false;
-
                 IMappedObject storedMappedChild = this.FindStoredObjectByFileSystemInfo(storedObjects, child.Item);
                 if (storedMappedChild != null) {
                     var localPath = this.storage.GetLocalPath(storedMappedChild);
@@ -106,18 +105,14 @@ namespace CmisSync.Lib.Producer.Crawler {
                         AbstractFolderEvent createdEvent = this.CreateLocalEventBasedOnStorage(child.Item, storedParent, storedMappedChild);
 
                         eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(createdEvent, correspondingRemoteEvent);
-                        removeStoredMappedChild = true;
+                        handledStoredObjects.Add(storedMappedChild);
                     }
                 } else {
                     // Added
                     creationEvents.Add(this.GenerateCreatedEvent(child.Item));
                 }
 
-                creationEvents.AddRange(this.CreateEvents(storedObjects, child, eventMap));
-
-                if (removeStoredMappedChild) {
-                    storedObjects.Remove(storedMappedChild);
-                }
+                creationEvents.AddRange(this.CreateEvents(storedObjects, child, eventMap, handledStoredObjects));
             }
 
             return creationEvents;
