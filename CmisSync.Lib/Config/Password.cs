@@ -76,7 +76,7 @@ namespace CmisSync.Lib.Config {
             if (obj == null) {
                 return false;
             } else if (obj is Password) {
-                return this.password.Equals((obj as Password).password);
+                return this.ToString().Equals((obj as Password).ToString());
             } else {
                 return false;
             }
@@ -88,7 +88,7 @@ namespace CmisSync.Lib.Config {
         /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
         /// hash table.</returns>
         public override int GetHashCode() {
-            return this.password.GetHashCode();
+            return this.password.ToString().GetHashCode();
         }
     }
 }
