@@ -61,6 +61,8 @@ namespace CmisSync.Lib.FileTransmission {
             long offset = localFileStream.Position;
             long? fileLength = remoteDocument.ContentStreamLength;
             if (fileLength <= offset) {
+                transmission.Length = fileLength.GetValueOrDefault();
+                transmission.Position = offset;
                 hashAlg.TransformFinalBlock(new byte[0], 0, 0);
                 return;
             }
