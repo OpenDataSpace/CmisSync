@@ -56,7 +56,11 @@ namespace CmisSync.Lib
         /// <param name='eventMap'>
         /// Event map.
         /// </param>
-        public List<AbstractFolderEvent> CreateEvents(List<IMappedObject> storedObjects, IObjectTree<IFileableCmisObject> remoteTree, Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap)
+        public List<AbstractFolderEvent> CreateEvents(
+            List<IMappedObject> storedObjects,
+            IObjectTree<IFileableCmisObject> remoteTree,
+            Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap,
+            ISet<IMappedObject> handledStoredObjects)
         {
             List<AbstractFolderEvent> createdEvents = new List<AbstractFolderEvent>();
             var storedParent = storedObjects.Find(o => o.RemoteObjectId == remoteTree.Item.Id);
@@ -72,9 +76,9 @@ namespace CmisSync.Lib
                     createdEvents.Add(addEvent);
                 }
 
-                createdEvents.AddRange(this.CreateEvents(storedObjects, child, eventMap));
+                createdEvents.AddRange(this.CreateEvents(storedObjects, child, eventMap, handledStoredObjects));
                 if (storedMappedChild != null) {
-                    storedObjects.Remove(storedMappedChild);
+                    handledStoredObjects.Add(storedMappedChild);
                 }
             }
 
