@@ -58,16 +58,24 @@ namespace CmisSync.Lib.Producer.Crawler {
             CrawlEventCollection createdEvents = new CrawlEventCollection();
             List<IMappedObject> storedObjectsForRemote = storedTree.ToList();
             List<IMappedObject> storedObjectsForLocal = new List<IMappedObject>(storedObjectsForRemote);
-
+            ISet<IMappedObject> handledLocalStoredObjects = new HashSet<IMappedObject>();
+            ISet<IMappedObject> handledRemoteStoredObjects = new HashSet<IMappedObject>();
             Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap = new Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>>();
-            createdEvents.creationEvents = this.remoteEventGenerator.CreateEvents(storedObjectsForRemote, remoteTree, eventMap);
-            createdEvents.creationEvents.AddRange(this.localEventGenerator.CreateEvents(storedObjectsForLocal, localTree, eventMap));
+            createdEvents.creationEvents = this.remoteEventGenerator.CreateEvents(storedObjectsForRemote, remoteTree, eventMap, handledRemoteStoredObjects);
+            createdEvents.creationEvents.AddRange(this.localEventGenerator.CreateEvents(storedObjectsForLocal, localTree, eventMap, handledLocalStoredObjects));
 
             createdEvents.mergableEvents = eventMap;
 
-            IMappedObject rootNode = storedTree.Item;
-            storedObjectsForLocal.Remove(rootNode);
-            storedObjectsForRemote.Remove(rootNode);
+            handledLocalStoredObjects.Add(storedTree.Item);
+            handledRemoteStoredObjects.Add(storedTree.Item);
+
+            foreach (var handledObject in handledLocalStoredObjects) {
+                storedObjectsForLocal.Remove(handledObject);
+            }
+
+            foreach (var handledObject in handledRemoteStoredObjects) {
+                storedObjectsForRemote.Remove(handledObject);
+            }
 
             this.AddDeletedObjectsToMergableEvents(storedObjectsForLocal, eventMap, true);
             this.AddDeletedObjectsToMergableEvents(storedObjectsForRemote, eventMap, false);
