@@ -34,7 +34,7 @@ namespace CmisSync.UIConverter {
             switch ((TransmissionType)value) {
                 case TransmissionType.UPLOAD_NEW_FILE:
                     return UIHelpers.GetImageSource("Uploading");
-                case TransmissionType.UPLOAD_MODIFIED_FILE:
+                case TransmissionType.DOWNLOAD_NEW_FILE:
                     return UIHelpers.GetImageSource("Downloading");
                 default:
                     return UIHelpers.GetImageSource("Updating");

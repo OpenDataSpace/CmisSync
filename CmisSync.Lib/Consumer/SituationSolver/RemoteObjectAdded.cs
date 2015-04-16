@@ -24,8 +24,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
-    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -49,20 +49,21 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="transmissonManager">Transmisson manager.</param>
+        /// <param name="transmissionStorage">Transmission progress storage.</param>
+        /// <param name="transmissionManager">Transmission manager.</param>
         /// <param name="fsFactory">File system factory.</param>
         public RemoteObjectAdded(
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            TransmissionManager transmissonManager,
+            TransmissionManager transmissionManager,
             IFileSystemInfoFactory fsFactory = null) : base(session, storage, transmissionStorage) {
-            if (transmissonManager == null) {
+            if (transmissionManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
             }
 
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
-            this.manager = transmissonManager;
+            this.manager = transmissionManager;
         }
 
         /// <summary>

@@ -168,6 +168,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     this.Storage.SaveMappedObject(mapped);
                     OperationsLogger.Info(string.Format("Uploaded file content of {0} in [{1} msec]", localFile.FullName, watch.ElapsedMilliseconds));
                 } else {
+                    transmission.Length = 0;
+                    transmission.Position = 0;
                     transmission.Status = TransmissionStatus.FINISHED;
                 }
             }

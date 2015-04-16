@@ -96,6 +96,7 @@ namespace CmisSync {
             string file = string.Empty;
             long speed = 0;
             long length = 0;
+            DateTime date;
             lock (lockTransmissionItems) {
                 if (row >= TransmissionItems.Count) {
                     return new NSNull();
@@ -105,15 +106,18 @@ namespace CmisSync {
                 file = TransmissionItems[row].FileName;
                 speed = TransmissionItems[row].BitsPerSecond.GetValueOrDefault();
                 length = TransmissionItems[row].Length.GetValueOrDefault();
+                date = TransmissionItems[row].LastModification;
             }
             BeginInvokeOnMainThread(delegate {
                 TransmissionWidgetItem view = tableView.GetView(0,row,true) as TransmissionWidgetItem;
                 if (view != null) {
-                    view.labelHead.StringValue = "repo:" + repo;
-                    view.labelHead.StringValue += " name:" + file;
-                    view.labelFoot.StringValue = " length:" + length;
-                    view.labelFoot.StringValue += " speed:" + speed;
+                    view.labelName.StringValue = file;
+                    view.labelDate.StringValue = date.ToShortDateString() + " " + date.ToShortTimeString();
+                    view.labelStatus.StringValue = "length:" + length.ToString() + " speed:" + speed.ToString();
                     view.progress.DoubleValue = percent;
+                    if(percent == 100){
+                        view.progress.RemoveFromSuperview();
+                    }
                 } else {
                     Console.WriteLine("Emtpy view at transmission window row: " + row.ToString());
                 }

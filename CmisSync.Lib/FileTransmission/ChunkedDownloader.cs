@@ -100,6 +100,9 @@ namespace CmisSync.Lib.FileTransmission
                     } while(fileLength == null);
                 } catch (DotCMIS.Exceptions.CmisConstraintException) {
                 }
+            } else {
+                transmission.Position = 0;
+                transmission.Length = 0;
             }
 
             hashAlg.TransformFinalBlock(new byte[0], 0, 0);
