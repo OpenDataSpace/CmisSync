@@ -197,6 +197,7 @@ namespace TestLibrary.IntegrationTests {
             DateTime modificationDate = fileInfo.LastWriteTimeUtc;
 
             this.InitializeAndRunRepo();
+            Thread.Sleep(5000);
             this.remoteRootDir.Refresh();
             var children = this.remoteRootDir.GetChildren();
             Assert.That(children.TotalNumItems, Is.EqualTo(1));
