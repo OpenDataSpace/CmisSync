@@ -92,5 +92,21 @@ namespace TestLibrary.QueueingTests
             queue.SwallowExceptions = true;
             queue.RunStartSyncEvent();
         }
+
+        [Test, Category("Fast")]
+        public void DropAllFSEventsIfConfigured([Values(true, false)]bool dropAll) {
+            var manager = new SyncEventManager();
+            var handler = Mock.Of<SyncEventHandler>(h => h.Priority == EventHandlerPriorities.CRITICAL);
+            var underTest = new SingleStepEventQueue(manager);
+            manager.AddEventHandler(handler);
+
+            underTest.DropAllLocalFileSystemEvents = dropAll;
+            underTest.AddEvent(Mock.Of<IFSEvent>());
+            underTest.AddEvent(Mock.Of<ISyncEvent>());
+            underTest.Run();
+
+            Mock.Get(handler).Verify(h => h.Handle(It.IsAny<IFSEvent>()), dropAll ? Times.Never() : Times.Once());
+            Mock.Get(handler).Verify(h => h.Handle(It.IsAny<ISyncEvent>()), dropAll ? Times.Once() : Times.Exactly(2));
+        }
     }
 }

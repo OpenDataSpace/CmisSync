@@ -66,7 +66,7 @@ namespace CmisSync.Lib.Queueing {
         // CompareTo is implemented for Sorting EventHandlers
         // Equals is not implemented because EventHandler removal shall work by Object.Equals
         int IComparable.CompareTo(object obj) {
-            if(!(obj is SyncEventHandler)) {
+            if (!(obj is SyncEventHandler)) {
                 throw new ArgumentException("Argument is not a SyncEventHandler", "obj");
             }
 
