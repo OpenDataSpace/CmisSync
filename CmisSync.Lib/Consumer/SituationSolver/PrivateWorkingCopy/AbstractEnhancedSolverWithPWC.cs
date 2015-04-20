@@ -129,7 +129,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
         /// <param name="mappedObject">Mapped object saved in <c>Storage</c></param>
         protected byte[] UploadFileWithPWC(IFileInfo localFile, ref IDocument doc, Transmission transmission, IMappedObject mappedObject = null) {
             byte[] checksum = null;
-            IDocument docPWC = this.LoadRemotePWCDocument(doc, ref checksum);
+            var docPWC = this.LoadRemotePWCDocument(doc, ref checksum);
 
             using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
                 if (checksum != null) {
