@@ -83,7 +83,8 @@ namespace TestLibrary.ConfigTests {
         [Test, Category("Fast")]
         public void HashCodeIsEqualIfBothContentsAreEqual() {
             var underTest = new Password("secret");
-            Assert.That(underTest.GetHashCode(), Is.EqualTo(new Password("secret").GetHashCode()));
+            var otherPassword = new Password("secret");
+            Assert.That(underTest.GetHashCode(), Is.EqualTo(otherPassword.GetHashCode()), string.Format("HashCode of \"{0}\" is not equal to HashCode of \"{1}\"", underTest.ToString(), otherPassword.ToString()));
         }
 
         [Test, Category("Fast")]
