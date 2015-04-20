@@ -51,41 +51,31 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage) : base(session, storage, transmissionStorage) {
-            if (this.TransmissionStorage == null) {
+            if (transmissionStorage == null) {
                 throw new ArgumentNullException("Given transmission storage is null");
             }
 
-            if (!this.Session.ArePrivateWorkingCopySupported()) {
+            if (!session.ArePrivateWorkingCopySupported()) {
                 throw new ArgumentException("Given session does not support private working copies");
             }
         }
 
         private IDocument CreateRemotePWCDocument(IDocument remoteDocument) {
-            try {
-                if (this.TransmissionStorage != null) {
-                    if (this.TransmissionStorage.GetObjectByRemoteObjectId(remoteDocument.Id) != null) {
-                        this.TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
-                    }
-                }
-
-                if (string.IsNullOrEmpty(remoteDocument.VersionSeriesCheckedOutId)) {
-                    remoteDocument.CheckOut();
-                    remoteDocument.Refresh();
-                }
-
-                IDocument remotePWCDocument = this.Session.GetObject(remoteDocument.VersionSeriesCheckedOutId) as IDocument;
-                remotePWCDocument.DeleteContentStream();
-                return remotePWCDocument;
-            } catch (Exception ex) {
-                return null;
+            if (this.TransmissionStorage.GetObjectByRemoteObjectId(remoteDocument.Id) != null) {
+                this.TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
             }
+
+            if (string.IsNullOrEmpty(remoteDocument.VersionSeriesCheckedOutId)) {
+                remoteDocument.CheckOut();
+                remoteDocument.Refresh();
+            }
+
+            IDocument remotePWCDocument = this.Session.GetObject(remoteDocument.VersionSeriesCheckedOutId) as IDocument;
+            remotePWCDocument.DeleteContentStream();
+            return remotePWCDocument;
         }
 
         private IDocument LoadRemotePWCDocument(IDocument remoteDocument, ref byte[] checksum) {
-            if (this.TransmissionStorage == null) {
-                return this.CreateRemotePWCDocument(remoteDocument);
-            }
-
             IFileTransmissionObject obj = this.TransmissionStorage.GetObjectByRemoteObjectId(remoteDocument.Id);
             if (obj == null) {
                 return this.CreateRemotePWCDocument(remoteDocument);
@@ -109,10 +99,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
         }
 
         private void SaveRemotePWCDocument(IFileInfo localFile, IDocument remoteDocument, IDocument remotePWCDocument, byte[] checksum, Transmission transmissionEvent) {
-            if (this.TransmissionStorage == null) {
-                return;
-            }
-
             if (remotePWCDocument == null) {
                 return;
             }
@@ -198,9 +184,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     }
                 }
 
-                if (this.TransmissionStorage != null) {
-                    this.TransmissionStorage.RemoveObjectByRemoteObjectId(doc.Id);
-                }
+                this.TransmissionStorage.RemoveObjectByRemoteObjectId(doc.Id);
 
                 Dictionary<string, object> properties = new Dictionary<string, object>();
                 properties.Add(PropertyIds.LastModificationDate, localFile.LastWriteTimeUtc);
