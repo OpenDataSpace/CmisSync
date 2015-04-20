@@ -872,8 +872,8 @@ namespace TestLibrary.IntegrationTests {
             var sourceFolderB = this.remoteRootDir.CreateFolder("C").CreateFolder("Folder").CreateFolder("D");
             sourceFolderB.CreateDocument(fileNameB, contentB);
 
-            this.InitializeAndRunRepo(swallowExceptions: true);
-
+            this.InitializeAndRunRepo(swallowExceptions: false);
+            this.repo.SingleStepQueue.DropAllLocalFileSystemEvents = true;
             var rootDirs = this.localRootDir.GetDirectories();
             var folderA = rootDirs.First().Name == folderName ? rootDirs.First() : rootDirs.Last();
             var folderC = rootDirs.First().Name == "C" ? rootDirs.First() : rootDirs.Last();
