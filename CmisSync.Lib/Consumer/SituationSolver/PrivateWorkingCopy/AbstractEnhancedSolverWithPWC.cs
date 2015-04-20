@@ -24,6 +24,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     using System.Linq;
     using System.Security.Cryptography;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.HashAlgorithm;
@@ -49,7 +50,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
         public AbstractEnhancedSolverWithPWC(
             ISession session,
             IMetaDataStorage storage,
-            IFileTransmissionStorage transmissionStorage = null) : base(session, storage, transmissionStorage) {
+            IFileTransmissionStorage transmissionStorage) : base(session, storage, transmissionStorage) {
+            if (this.TransmissionStorage == null) {
+                throw new ArgumentNullException("Given transmission storage is null");
+            }
+
+            if (!this.Session.ArePrivateWorkingCopySupported()) {
+                throw new ArgumentException("Given session does not support private working copies");
+            }
         }
 
         private IDocument CreateRemotePWCDocument(IDocument remoteDocument) {

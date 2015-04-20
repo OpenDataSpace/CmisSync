@@ -269,6 +269,7 @@
     <Compile Include="StreamsTests\PausableStreamTest.cs" />
     <Compile Include="StreamsTests\TransmissionStreamTest.cs" />
     <Compile Include="CmisTests\UiUtilsTests\UiConvenienceExtendersTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\PrivateWorkingCopyTests\AbstractEnhancedSolverWithPWCTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
