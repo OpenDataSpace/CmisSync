@@ -395,11 +395,13 @@ namespace TestLibrary.IntegrationTests {
             this.InitializeAndRunRepo();
 
             doc.Refresh();
+            doc.AssertThatIfContentHashExistsItIsEqualTo(content);
             string oldChangeToken = doc.ChangeToken;
             doc.DeleteContentStream(true);
             string newChangeToken = doc.ChangeToken;
             Assert.That(oldChangeToken, Is.Not.EqualTo(newChangeToken));
             Assert.That(doc.ContentStreamLength, Is.Not.EqualTo(content.Length));
+            doc.AssertThatIfContentHashExistsItIsEqualTo(string.Empty);
             this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
