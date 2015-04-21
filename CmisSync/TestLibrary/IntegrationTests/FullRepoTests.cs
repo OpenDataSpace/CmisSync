@@ -336,7 +336,7 @@ namespace TestLibrary.IntegrationTests {
             this.ContentChangesActive = contentChanges;
             string fileName = "file";
             string content = "content";
-            this.remoteRootDir.CreateDocument(fileName, content);
+            var doc = this.remoteRootDir.CreateDocument(fileName, content);
 
             this.InitializeAndRunRepo();
 
@@ -345,6 +345,8 @@ namespace TestLibrary.IntegrationTests {
             var child = children.First();
             Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
             Assert.That(child.Length, Is.EqualTo(content.Length));
+            doc.Refresh();
+            doc.AssertThatIfContentHashExistsItIsEqualTo(content);
         }
 
         [Test, Category("Slow"), MaxTime(180000)]
@@ -352,7 +354,7 @@ namespace TestLibrary.IntegrationTests {
             this.ContentChangesActive = contentChanges;
             this.InitializeAndRunRepo();
             string fileName = "file";
-            this.remoteRootDir.CreateDocument(fileName, null);
+            var doc = this.remoteRootDir.CreateDocument(fileName, null);
 
             this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
@@ -364,11 +366,13 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
             Assert.That(child.Length, Is.EqualTo(0));
             Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
+            doc.Refresh();
+            doc.AssertThatIfContentHashExistsItIsEqualTo(new byte[0]);
         }
 
-        // Timeout is set to 10 minutes for 100 x 1 MB file
+        // Timeout is set to 10 minutes for 10 x 1 MB file
         [Test, Category("Slow"), Timeout(600000)]
-        public void ManyRemoteFilesCreated([Values(100)]int fileNumber) {
+        public void ManyRemoteFilesCreated([Values(10)]int fileNumber) {
             string content = new string('A', 1024 * 1024);
             for (int i = 0; i < fileNumber; ++i) {
                 string fileName = "file" + i.ToString();
@@ -377,11 +381,19 @@ namespace TestLibrary.IntegrationTests {
 
             this.InitializeAndRunRepo();
 
-            var children = this.localRootDir.GetFiles();
-            Assert.That(children.Length, Is.EqualTo(fileNumber));
-            var child = children.First();
-            Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
-            Assert.That(child.Length, Is.EqualTo(content.Length));
+            var localFiles = this.localRootDir.GetFiles();
+            Assert.That(localFiles.Length, Is.EqualTo(fileNumber));
+            foreach (var localFile in localFiles) {
+                Assert.That(localFile, Is.InstanceOf(typeof(FileInfo)));
+                Assert.That(localFile.Length, Is.EqualTo(content.Length));
+            }
+
+            var remoteFiles = this.remoteRootDir.GetChildren();
+            Assert.That(remoteFiles.TotalNumItems, Is.EqualTo(fileNumber));
+            foreach (IDocument remoteFile in remoteFiles.OfType<IDocument>()) {
+                Assert.That(remoteFile.ContentStreamLength, Is.EqualTo(content.Length));
+                remoteFile.AssertThatIfContentHashExistsItIsEqualTo(content);
+            }
         }
 
         [Test, Category("Slow"), MaxTime(180000)]
