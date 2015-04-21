@@ -103,12 +103,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 return;
             }
 
-            FileTransmissionObject obj = new FileTransmissionObject(transmissionEvent.Type, localFile, remoteDocument);
-            obj.ChecksumAlgorithmName = "SHA-1";
-            obj.RemoteObjectPWCId = remotePWCDocument.Id;
-            obj.LastChangeTokenPWC = remotePWCDocument.ChangeToken;
-            obj.LastChecksumPWC = checksum;
-
+            FileTransmissionObject obj = new FileTransmissionObject(transmissionEvent.Type, localFile, remoteDocument) {
+                ChecksumAlgorithmName = "SHA-1",
+                RemoteObjectPWCId = remotePWCDocument.Id,
+                LastChangeTokenPWC = remotePWCDocument.ChangeToken,
+                LastChecksumPWC = checksum
+            };
             this.TransmissionStorage.SaveObject(obj);
         }
 
