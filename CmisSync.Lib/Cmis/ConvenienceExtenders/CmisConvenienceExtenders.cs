@@ -138,7 +138,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="type">Type of the requested hash.</param>
         public static bool IsContentStreamHashSupported(this ISession session) {
             try {
-                var type = session.GetTypeDefinition("cmis:document");
+                var type = session.GetTypeDefinition(BaseTypeId.CmisDocument.GetCmisValue());
                 if (type == null) {
                     return false;
                 }

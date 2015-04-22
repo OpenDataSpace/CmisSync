@@ -5,6 +5,8 @@ namespace TestLibrary.IntegrationTests.ContentHashTests {
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
+    using DotCMIS.Client;
+
     using NUnit.Framework;
 
     using TestUtils;
@@ -25,7 +27,20 @@ namespace TestLibrary.IntegrationTests.ContentHashTests {
 
         [Test, Category("Slow")]
         public void CreateDocViaPwcAndDeleteContent() {
+            this.EnsureThatContentHashesAreSupportedByServerTypeSystem();
+            this.EnsureThatPrivateWorkingCopySupportIsAvailable();
+            string content = "content";
 
+            var doc = this.remoteRootDir.CreateDocument("file.txt", content, checkedOut: true);
+            var newId = doc.CheckIn(true, null, null, null);
+            if (newId != null) {
+                doc = this.session.GetObject(newId) as IDocument;
+                doc.Refresh();
+            }
+
+            doc.DeleteContentStream(true);
+
+            Assert.That(doc.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(string.Empty), Is.True);
         }
     }
 }

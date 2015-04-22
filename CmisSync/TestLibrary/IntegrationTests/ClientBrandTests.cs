@@ -33,6 +33,7 @@ namespace TestLibrary.IntegrationTests {
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
     using DotCMIS.Data.Impl;
+    using DotCMIS.Enums;
 
     using NUnit.Framework;
 
@@ -193,7 +194,7 @@ namespace TestLibrary.IntegrationTests {
                         string filename = Path.GetFileName(path);
                         Dictionary<string, object> properties = new Dictionary<string, object>();
                         properties.Add(PropertyIds.Name, filename);
-                        properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+                        properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
                         ContentStream contentStream = new ContentStream();
                         contentStream.FileName = filename;
                         contentStream.MimeType = "application/octet-stream";

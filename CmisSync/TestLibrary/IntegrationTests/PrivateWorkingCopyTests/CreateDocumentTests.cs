@@ -27,6 +27,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
 
     using DotCMIS;
     using DotCMIS.Client;
+    using DotCMIS.Enums;
     using DotCMIS.Exceptions;
 
     using NUnit.Framework;
@@ -53,7 +54,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             if (withPropertiesOnCheckIn) {
                 properties = new Dictionary<string, object>();
                 properties.Add(PropertyIds.Name, this.fileName);
-                properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+                properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             }
 
             var newObjectId = doc.CheckIn(true, properties, null, string.Empty);
