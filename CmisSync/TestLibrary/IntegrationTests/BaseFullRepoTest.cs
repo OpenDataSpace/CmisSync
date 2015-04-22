@@ -254,6 +254,12 @@ namespace TestLibrary.IntegrationTests {
             this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(forceCrawl));
         }
 
+        protected void AssertThatContentHashIsEqualToExceptedIfSupported(IDocument doc, string content) {
+            if (this.session.IsContentStreamHashSupported()) {
+                Assert.That(doc.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(content), Is.True);
+            }
+        }
+
         protected virtual void Dispose(bool disposing) {
             if (this.disposed) {
                 return;
