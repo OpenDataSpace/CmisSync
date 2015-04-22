@@ -210,7 +210,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test, Category("Slow"), MaxTime(180000), Ignore("https://mantis.dataspace.cc/view.php?id=4533")]
         public void OneLocalFileCreatedAndModificationDateIsSynced() {
             if (!this.session.IsServerAbleToUpdateModificationDate()) {
                 Assert.Ignore("Server does not support the synchronization of modification dates");

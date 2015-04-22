@@ -99,7 +99,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.Throws<CmisNameConstraintViolationException>(() => this.remoteRootDir.CreateDocument(fileName, "other content", true));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test, Category("Slow"), MaxTime(180000), Ignore("https://mantis.dataspace.cc/view.php?id=4533")]
         public void CreateDocumentViaPwcCheckInWithLastModificationDate() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             string fileName = "file.bin";
