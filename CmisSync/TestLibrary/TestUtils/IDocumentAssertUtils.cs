@@ -43,6 +43,7 @@ namespace TestLibrary.TestUtils {
         }
 
         public static bool VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(this IDocument doc, string content, int timeoutInSeconds = 30) {
+            doc.AssertThatIfContentHashExistsItIsEqualTo(content);
             int loops = 0;
             while (doc.ContentStreamHash() == null && loops < timeoutInSeconds) {
                 loops++;

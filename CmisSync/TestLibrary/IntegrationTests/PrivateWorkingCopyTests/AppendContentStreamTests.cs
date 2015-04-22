@@ -52,7 +52,9 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(this.fileName));
             Assert.That(newDocument.Name, Is.EqualTo(this.fileName));
             Assert.That(newDocument.ContentStreamLength, Is.EqualTo(this.content.Length));
-            newDocument.AssertThatIfContentHashExistsItIsEqualTo(content);
+            if (this.session.IsContentStreamHashSupported()) {
+                Assert.That(newDocument.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(this.content), Is.True);
+            }
         }
 
         [Test, Category("Slow"), MaxTime(180000)]
@@ -64,7 +66,9 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             var newId = doc.CheckOut();
             doc = newId == null ? doc : this.session.GetObject(newId) as IDocument;
             doc = doc.AppendContent(content) ?? doc;
-            doc.AssertThatIfContentHashExistsItIsEqualTo(this.content + this.content);
+            if (this.session.IsContentStreamHashSupported()) {
+                Assert.That(doc.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(this.content + this.content), Is.True);
+            }
         }
 
         [Test, Category("Slow"), MaxTime(180000)]
@@ -86,7 +90,9 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(doc.ContentStreamHash(), Is.Not.EqualTo(emptyDocHash), "Hash is equal to empty document hash, but shouldn't");
             Assert.That(doc.ContentStreamHash(), Is.Not.EqualTo(initialDocHash), "Hash is equal to initial document hash, but shouldn't");
 
-            doc.AssertThatIfContentHashExistsItIsEqualTo(this.content + this.content);
+            if (this.session.IsContentStreamHashSupported()) {
+                Assert.That(doc.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(this.content + this.content), Is.True);
+            }
         }
 
         [Test, Category("Slow"), MaxTime(180000)]
