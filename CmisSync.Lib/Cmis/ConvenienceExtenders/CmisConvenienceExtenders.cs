@@ -131,6 +131,30 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         }
 
         /// <summary>
+        /// Returns the hash of the content stream on the server.
+        /// </summary>
+        /// <returns>The hash.</returns>
+        /// <param name="doc">Document with the content stream.</param>
+        /// <param name="type">Type of the requested hash.</param>
+        public static bool IsContentStreamHashSupported(this ISession session) {
+            try {
+                var type = session.GetTypeDefinition("cmis:document");
+                if (type == null) {
+                    return false;
+                }
+
+                foreach (var prop in type.PropertyDefinitions) {
+                    if (prop.Id.Equals("cmis:contentStreamHash")) {
+                        return true;
+                    }
+                }
+            } catch (CmisObjectNotFoundException) {
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Sets the content stream of the document.
         /// </summary>
         /// <returns>The content.</returns>

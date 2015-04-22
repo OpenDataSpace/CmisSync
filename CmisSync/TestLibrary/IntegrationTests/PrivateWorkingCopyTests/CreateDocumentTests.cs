@@ -21,6 +21,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
@@ -58,7 +59,9 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(this.fileName));
             Assert.That(newDocument.Name, Is.EqualTo(this.fileName));
             Assert.That(newDocument.ContentStreamLength, Is.EqualTo(this.content.Length));
-            newDocument.AssertThatIfContentHashExistsItIsEqualTo(this.content);
+            if (this.session.IsContentStreamHashSupported()) {
+                Assert.That(newDocument.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(content), Is.True);
+            }
         }
 
         [Test, Category("Slow"), MaxTime(180000)]

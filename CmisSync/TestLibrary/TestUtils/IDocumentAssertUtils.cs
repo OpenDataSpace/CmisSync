@@ -21,6 +21,7 @@ namespace TestLibrary.TestUtils {
     using System;
     using System.Security.Cryptography;
     using System.Text;
+    using System.Threading;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
@@ -39,6 +40,21 @@ namespace TestLibrary.TestUtils {
 
         public static void AssertThatIfContentHashExistsItIsEqualToHash(this IDocument doc, byte[] expectedHash, string type = "SHA-1") {
             Assert.That(doc.ContentStreamHash(type), Is.Null.Or.EqualTo(expectedHash));
+        }
+
+        public static bool VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(this IDocument doc, string content, int timeoutInSeconds = 30) {
+            int loops = 0;
+            while (doc.ContentStreamHash() == null && loops < timeoutInSeconds) {
+                loops++;
+                Thread.Sleep(1000);
+                doc.Refresh();
+                doc.AssertThatIfContentHashExistsItIsEqualTo(content);
+                if (doc.ContentStreamHash() != null) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public static byte[] ComputeSha1Hash(string content) {
