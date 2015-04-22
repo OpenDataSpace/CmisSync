@@ -39,11 +39,15 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
         private readonly string content = "content";
 
         [Test, Category("Slow"), MaxTime(180000)]
-        public void CreateCheckedOutDocument([Values(true, false)]bool withPropertiesOnCheckIn) {
+        public void CreateCheckedOutDocument([Values(true, false)]bool withPropertiesOnCheckIn, [Values(true, false)]bool deleteExistingContentStream) {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
 
             var doc = this.remoteRootDir.CreateDocument(this.fileName, (string)null, checkedOut: true);
             this.remoteRootDir.Refresh();
+            if (deleteExistingContentStream) {
+                doc.DeleteContentStream();
+            }
+
             doc.SetContent(this.content);
             Dictionary<string, object> properties = null;
             if (withPropertiesOnCheckIn) {

@@ -30,16 +30,20 @@ namespace TestLibrary.TestUtils {
     using NUnit.Framework;
 
     public static class IDocumentAssertUtils {
-        public static void AssertThatIfContentHashExistsItIsEqualTo(this IDocument doc, string content) {
-            doc.AssertThatIfContentHashExistsItIsEqualToHash(ComputeSha1Hash(content));
+        public static void AssertThatIfContentHashExistsItIsEqualTo(this IDocument doc, string content, string msg = null) {
+            doc.AssertThatIfContentHashExistsItIsEqualToHash(ComputeSha1Hash(content), msg: msg);
         }
 
-        public static void AssertThatIfContentHashExistsItIsEqualTo(this IDocument doc, byte[] content) {
-            doc.AssertThatIfContentHashExistsItIsEqualToHash(ComputeSha1Hash(content));
+        public static void AssertThatIfContentHashExistsItIsEqualTo(this IDocument doc, byte[] content, string msg = null) {
+            doc.AssertThatIfContentHashExistsItIsEqualToHash(ComputeSha1Hash(content), msg: msg);
         }
 
-        public static void AssertThatIfContentHashExistsItIsEqualToHash(this IDocument doc, byte[] expectedHash, string type = "SHA-1") {
-            Assert.That(doc.ContentStreamHash(type), Is.Null.Or.EqualTo(expectedHash));
+        public static void AssertThatIfContentHashExistsItIsEqualToHash(this IDocument doc, byte[] expectedHash, string type = "SHA-1", string msg = null) {
+            if (msg == null) {
+                Assert.That(doc.ContentStreamHash(type), Is.Null.Or.EqualTo(expectedHash));
+            } else {
+                Assert.That(doc.ContentStreamHash(type), Is.Null.Or.EqualTo(expectedHash), msg);
+            }
         }
 
         public static bool VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(this IDocument doc, string content, int timeoutInSeconds = 30) {

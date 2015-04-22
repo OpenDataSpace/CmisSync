@@ -104,6 +104,7 @@ SOURCES =  \
 	IntegrationTests/BaseFullRepoTest.cs \
 	IntegrationTests/ClientBrandTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
+	IntegrationTests/ContentHashTests/CRUDTests.cs \
 	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/DownloadLinkTests.cs \
 	IntegrationTests/FileSystemEventOrderTest.cs \

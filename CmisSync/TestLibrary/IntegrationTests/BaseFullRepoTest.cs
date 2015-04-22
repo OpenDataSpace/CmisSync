@@ -232,6 +232,12 @@ namespace TestLibrary.IntegrationTests {
             }
         }
 
+        protected void EnsureThatContentHashesAreSupportedByServerTypeSystem() {
+            if (!this.session.IsContentStreamHashSupported()) {
+                Assert.Ignore("Server type system does not support content hashes");
+            }
+        }
+
         protected void AssertThatDatesAreEqual(DateTime? expected, DateTime? actual, string msg = null) {
             if (msg != null) {
                 Assert.That((DateTime)actual, Is.EqualTo((DateTime)expected).Within(1).Seconds, msg);

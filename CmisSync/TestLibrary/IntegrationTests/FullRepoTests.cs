@@ -191,21 +191,22 @@ namespace TestLibrary.IntegrationTests {
             var filePath = Path.Combine(this.localRootDir.FullName, fileName);
             var fileInfo = new FileInfo(filePath);
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.WriteLine(content);
+                sw.Write(content);
             }
 
+            fileInfo.Refresh();
+            Assert.That(fileInfo.Length, Is.EqualTo(content.Length));
             DateTime modificationDate = fileInfo.LastWriteTimeUtc;
 
             this.InitializeAndRunRepo();
-            Thread.Sleep(5000);
             this.remoteRootDir.Refresh();
             var children = this.remoteRootDir.GetChildren();
             Assert.That(children.TotalNumItems, Is.EqualTo(1));
             var child = children.First();
             Assert.That(child, Is.InstanceOf(typeof(IDocument)));
             var doc = child as IDocument;
-            Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
-            doc.AssertThatIfContentHashExistsItIsEqualTo(content);
+            Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length), "Remote content stream has wrong length");
+            this.AssertThatContentHashIsEqualToExceptedIfSupported(doc, content);
             Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
@@ -220,7 +221,7 @@ namespace TestLibrary.IntegrationTests {
             var filePath = Path.Combine(this.localRootDir.FullName, fileName);
             var fileInfo = new FileInfo(filePath);
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.WriteLine(content);
+                sw.Write(content);
             }
 
             DateTime modificationDate = DateTime.UtcNow - TimeSpan.FromHours(1);
@@ -251,7 +252,7 @@ namespace TestLibrary.IntegrationTests {
             var filePath = Path.Combine(this.localRootDir.FullName, fileName);
             var fileInfo = new FileInfo(filePath);
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.WriteLine(content);
+                sw.Write(content);
             }
 
             this.InitializeAndRunRepo();
@@ -282,7 +283,7 @@ namespace TestLibrary.IntegrationTests {
             var filePath = Path.Combine(this.localRootDir.FullName, fileName);
             var fileInfo = new FileInfo(filePath);
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.WriteLine(content);
+                sw.Write(content);
             }
 
             this.repo.SingleStepQueue.SwallowExceptions = true;
@@ -408,12 +409,13 @@ namespace TestLibrary.IntegrationTests {
 
             doc.Refresh();
             doc.AssertThatIfContentHashExistsItIsEqualTo(content);
+            byte[] hash = doc.ContentStreamHash();
             string oldChangeToken = doc.ChangeToken;
             doc.DeleteContentStream(true);
             string newChangeToken = doc.ChangeToken;
             Assert.That(oldChangeToken, Is.Not.EqualTo(newChangeToken));
-            Assert.That(doc.ContentStreamLength, Is.Not.EqualTo(content.Length));
-            doc.AssertThatIfContentHashExistsItIsEqualTo(string.Empty);
+            Assert.That(doc.ContentStreamLength, Is.Null.Or.EqualTo(0));
+            doc.AssertThatIfContentHashExistsItIsEqualTo(string.Empty, string.Format("old hash was {0}", hash != null ? Utils.ToHexString(hash) : "null"));
             this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
@@ -480,7 +482,7 @@ namespace TestLibrary.IntegrationTests {
             var localDoc = Path.Combine(this.localRootDir.FullName, fileName);
             var fileInfo = new FileInfo(localDoc);
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.WriteLine(localContent);
+                sw.Write(localContent);
             }
 
             Thread.Sleep(200);
@@ -502,7 +504,7 @@ namespace TestLibrary.IntegrationTests {
             var fileInfo = new FileInfo(localPath);
 
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.WriteLine(localContent);
+                sw.Write(localContent);
             }
 
             this.InitializeAndRunRepo(swallowExceptions: true);
@@ -510,7 +512,7 @@ namespace TestLibrary.IntegrationTests {
             this.remoteRootDir.GetChildren().First().Delete(true);
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.WriteLine(changedLocalContent);
+                sw.Write(changedLocalContent);
             }
 
             fileInfo.Refresh();
@@ -646,7 +648,7 @@ namespace TestLibrary.IntegrationTests {
                 var filePath = Path.Combine(this.localRootDir.FullName, string.Format("file_{0}.bin", i.ToString()));
                 var fileInfo = new FileInfo(filePath);
                 using (StreamWriter sw = fileInfo.CreateText()) {
-                    sw.WriteLine(string.Format("content of file \"{0}\"", filePath));
+                    sw.Write(string.Format("content of file \"{0}\"", filePath));
                 }
 
                 fileInfo.Refresh();
