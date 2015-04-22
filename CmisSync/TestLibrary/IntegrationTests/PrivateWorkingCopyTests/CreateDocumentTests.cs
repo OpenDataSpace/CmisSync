@@ -100,7 +100,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.Throws<CmisNameConstraintViolationException>(() => this.remoteRootDir.CreateDocument(fileName, "other content", true));
         }
 
-        [Test, Category("Slow"), MaxTime(180000), Ignore("https://mantis.dataspace.cc/view.php?id=4533")]
+        [Test, Category("Slow"), MaxTime(180000)]
         public void CreateDocumentViaPwcCheckInWithLastModificationDate() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             string fileName = "file.bin";
@@ -109,7 +109,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             var properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.LastModificationDate, past);
             doc = this.session.GetObject(doc.CheckIn(true, properties, null, string.Empty)) as IDocument;
-
+            doc.Refresh();
             Assert.That(doc.LastModificationDate, Is.EqualTo(past).Within(1).Seconds);
         }
     }
