@@ -130,7 +130,10 @@ SOURCES =  \
 	MockedServer/MockOfISessionFactory.cs \
 	MockedServer/MockedCmisServer.cs \
 	MockedServer/MockedCmisUserAccount.cs \
+	MockedServer/MockedDocument.cs \
+	MockedServer/MockedDocumentType.cs \
 	MockedServer/MockedFolder.cs \
+	MockedServer/MockedItemList.cs \
 	MoqExtensions/MoqExtensions.cs \
 	PathMatcherTests/PathMatcherTest.cs \
 	ProducerTests/ContentChangeTests/ContentChangeEventAccumulatorTest.cs \

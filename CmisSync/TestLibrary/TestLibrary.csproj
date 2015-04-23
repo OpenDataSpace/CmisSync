@@ -271,6 +271,9 @@
     <Compile Include="CmisTests\UiUtilsTests\UiConvenienceExtendersTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\PrivateWorkingCopyTests\AbstractEnhancedSolverWithPWCTest.cs" />
     <Compile Include="IntegrationTests\ContentHashTests\CRUDTests.cs" />
+    <Compile Include="MockedServer\MockedDocument.cs" />
+    <Compile Include="MockedServer\MockedDocumentType.cs" />
+    <Compile Include="MockedServer\MockedItemList.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

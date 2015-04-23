@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.MockedServer
-{
+namespace TestLibrary.MockedServer {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -28,8 +27,7 @@ namespace TestLibrary.MockedServer
     using Moq;
     using TestLibrary.TestUtils;
 
-    public class MockedFolder : Mock<IFolder>
-    {
+    public class MockedFolder : Mock<IFolder> {
         public MockedFolder(string name, IFolder parent = null) : base(MockBehavior.Strict) {
 
         }
