@@ -70,13 +70,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 remoteDocument.Refresh();
             }
 
-            IDocument remotePWCDocument = this.Session.GetObject(remoteDocument.VersionSeriesCheckedOutId) as IDocument;
+            var remotePWCDocument = this.Session.GetObject(remoteDocument.VersionSeriesCheckedOutId) as IDocument;
             remotePWCDocument.DeleteContentStream();
             return remotePWCDocument;
         }
 
         private IDocument LoadRemotePWCDocument(IDocument remoteDocument, ref byte[] checksum) {
-            IFileTransmissionObject obj = this.TransmissionStorage.GetObjectByRemoteObjectId(remoteDocument.Id);
+            var obj = this.TransmissionStorage.GetObjectByRemoteObjectId(remoteDocument.Id);
             if (obj == null) {
                 return this.CreateRemotePWCDocument(remoteDocument);
             }
@@ -85,7 +85,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 return this.CreateRemotePWCDocument(remoteDocument);
             }
 
-            IDocument remotePWCDocument = this.Session.GetObject(remoteDocument.VersionSeriesCheckedOutId) as IDocument;
+            var remotePWCDocument = this.Session.GetObject(remoteDocument.VersionSeriesCheckedOutId) as IDocument;
             if (remotePWCDocument == null) {
                 return this.CreateRemotePWCDocument(remoteDocument);
             }
@@ -103,7 +103,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 return;
             }
 
-            FileTransmissionObject obj = new FileTransmissionObject(transmissionEvent.Type, localFile, remoteDocument) {
+            var obj = new FileTransmissionObject(transmissionEvent.Type, localFile, remoteDocument) {
                 ChecksumAlgorithmName = "SHA-1",
                 RemoteObjectPWCId = remotePWCDocument.Id,
                 LastChangeTokenPWC = remotePWCDocument.ChangeToken,
@@ -155,10 +155,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 }
 
                 byte[] hash = null;
-                IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader(this.TransmissionStorage.ChunkSize);
+                var uploader = FileTransmission.ContentTaskUtils.CreateUploader(this.TransmissionStorage.ChunkSize);
                 using (var hashAlg = new SHA1Reuse()) {
                     try {
-                        using (NonClosingHashStream hashstream = new NonClosingHashStream(file, hashAlg, CryptoStreamMode.Read)) {
+                        using (var hashstream = new NonClosingHashStream(file, hashAlg, CryptoStreamMode.Read)) {
                             int bufsize = 8 * 1024;
                             byte[] buffer = new byte[bufsize];
                             for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault();) {
@@ -186,10 +186,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
                 this.TransmissionStorage.RemoveObjectByRemoteObjectId(doc.Id);
 
-                Dictionary<string, object> properties = new Dictionary<string, object>();
+                var properties = new Dictionary<string, object>();
                 properties.Add(PropertyIds.LastModificationDate, localFile.LastWriteTimeUtc);
                 doc = this.Session.GetObject(docPWC.CheckIn(true, properties, null, string.Empty)) as IDocument;
-                doc.Refresh();   // Refresh is required, or DotCMIS will use cached one only
+
+                // Refresh is required, or DotCMIS will use cached one only
+                doc.Refresh();
 
                 transmission.Status = TransmissionStatus.FINISHED;
                 return hash;
