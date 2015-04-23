@@ -30,7 +30,7 @@ namespace TestLibrary.TestUtils {
     using Moq;
 
     public static class MockOfICmisObject {
-        public static void SetupReadOnly(this Mock<ICmisObject> mock, bool readOnly = true) {
+        public static Mock<ICmisObject> SetupReadOnly(this Mock<ICmisObject> mock, bool readOnly = true) {
             var actions = new List<string>();
             actions.Add(Actions.CanGetAcl);
             actions.Add(Actions.CanGetAppliedPolicies);
@@ -61,9 +61,10 @@ namespace TestLibrary.TestUtils {
             }
 
             mock.SetupAllowableActions(actions.ToArray());
+            return mock;
         }
 
-        public static void SetupReadOnly(this Mock<IDocument> doc, bool readOnly = true) {
+        public static Mock<IDocument> SetupReadOnly(this Mock<IDocument> doc, bool readOnly = true) {
             var actions = new List<string>();
             actions.Add(Actions.CanGetAcl);
             actions.Add(Actions.CanGetAppliedPolicies);
@@ -91,9 +92,10 @@ namespace TestLibrary.TestUtils {
             }
 
             doc.SetupAllowableActions(actions.ToArray());
+            return doc;
         }
 
-        public static void SetupReadOnly(this Mock<IFolder> folder, bool readOnly = true, bool supportsDescendants = true) {
+        public static Mock<IFolder> SetupReadOnly(this Mock<IFolder> folder, bool readOnly = true, bool supportsDescendants = true) {
             var actions = new List<string>();
             actions.Add(Actions.CanGetAcl);
             actions.Add(Actions.CanGetAppliedPolicies);
@@ -137,24 +139,28 @@ namespace TestLibrary.TestUtils {
             }
 
             folder.SetupAllowableActions(actions.ToArray());
+            return folder;
         }
 
-        public static void SetupAllowableActions(this Mock<ICmisObject> mock, params string[] actions) {
+        public static Mock<ICmisObject> SetupAllowableActions(this Mock<ICmisObject> mock, params string[] actions) {
             var allowableActions = new HashSet<string>(actions);
             var allowableMock = Mock.Of<IAllowableActions>(o => o.Actions == allowableActions);
             mock.Setup(m => m.AllowableActions).Returns(allowableMock);
+            return mock;
         }
 
-        public static void SetupAllowableActions(this Mock<IDocument> doc, params string[] actions) {
+        public static Mock<IDocument> SetupAllowableActions(this Mock<IDocument> doc, params string[] actions) {
             var allowableActions = new HashSet<string>(actions);
             var allowableMock = Mock.Of<IAllowableActions>(o => o.Actions == allowableActions);
             doc.Setup(m => m.AllowableActions).Returns(allowableMock);
+            return doc;
         }
 
-        public static void SetupAllowableActions(this Mock<IFolder> folder, params string[] actions) {
+        public static Mock<IFolder> SetupAllowableActions(this Mock<IFolder> folder, params string[] actions) {
             var allowableActions = new HashSet<string>(actions);
             var allowableMock = Mock.Of<IAllowableActions>(o => o.Actions == allowableActions);
             folder.Setup(m => m.AllowableActions).Returns(allowableMock);
+            return folder;
         }
     }
 }
