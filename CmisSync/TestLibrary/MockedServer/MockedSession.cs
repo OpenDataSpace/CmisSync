@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="MockOfISession.cs" company="GRAU DATA AG">
+// <copyright file="MockedSession.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -33,10 +33,11 @@ namespace TestLibrary.MockedServer {
 
     using TestLibrary.TestUtils;
 
-    public class MockOfISession : Mock<ISession> {
+    public class MockedSession : Mock<ISession> {
         private Mock<ICmisBinding> binding = new Mock<ICmisBinding>(MockBehavior.Strict);
         private Mock<IRepositoryService> repoService = new Mock<IRepositoryService>(MockBehavior.Strict);
-        public MockOfISession(MockOfIRepository repo) : base(MockBehavior.Strict) {
+
+        public MockedSession(MockedRepository repo) : base(MockBehavior.Strict) {
             // TypeSystem
             IList<IPropertyDefinition> props = new List<IPropertyDefinition>();
             props.Add(Mock.Of<IPropertyDefinition>(p => p.Id == PropertyIds.LastModificationDate && p.Updatability == DotCMIS.Enums.Updatability.ReadWrite));

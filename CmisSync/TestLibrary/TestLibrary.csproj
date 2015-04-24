@@ -166,8 +166,6 @@
     <Compile Include="IntegrationTests\TestNameAttribute.cs" />
     <Compile Include="IntegrationTests\UploadFileIT.cs" />
     <Compile Include="MockedServer\MockOfIAclCapabilities.cs" />
-    <Compile Include="MockedServer\MockOfIRepository.cs" />
-    <Compile Include="MockedServer\MockOfISession.cs" />
     <Compile Include="MockedServer\MockOfISessionFactory.cs" />
     <Compile Include="MockedServer\MockedCmisServer.cs" />
     <Compile Include="MockedServer\MockedCmisUserAccount.cs" />
@@ -274,6 +272,8 @@
     <Compile Include="MockedServer\MockedDocument.cs" />
     <Compile Include="MockedServer\MockedDocumentType.cs" />
     <Compile Include="MockedServer\MockedItemList.cs" />
+    <Compile Include="MockedServer\MockedSession.cs" />
+    <Compile Include="MockedServer\MockedRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

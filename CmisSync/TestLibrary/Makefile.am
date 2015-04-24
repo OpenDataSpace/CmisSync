@@ -125,8 +125,6 @@ SOURCES =  \
 	IntegrationTests/UploadFileIT.cs \
 	IntegrationTests/UploadSlowWrittenFile.cs \
 	MockedServer/MockOfIAclCapabilities.cs \
-	MockedServer/MockOfIRepository.cs \
-	MockedServer/MockOfISession.cs \
 	MockedServer/MockOfISessionFactory.cs \
 	MockedServer/MockedCmisServer.cs \
 	MockedServer/MockedCmisUserAccount.cs \
@@ -134,6 +132,8 @@ SOURCES =  \
 	MockedServer/MockedDocumentType.cs \
 	MockedServer/MockedFolder.cs \
 	MockedServer/MockedItemList.cs \
+	MockedServer/MockedRepository.cs \
+	MockedServer/MockedSession.cs \
 	MoqExtensions/MoqExtensions.cs \
 	PathMatcherTests/PathMatcherTest.cs \
 	ProducerTests/ContentChangeTests/ContentChangeEventAccumulatorTest.cs \
