@@ -124,8 +124,10 @@ SOURCES =  \
 	IntegrationTests/TestNameAttribute.cs \
 	IntegrationTests/UploadFileIT.cs \
 	IntegrationTests/UploadSlowWrittenFile.cs \
+	MockedServer/IContentChangeEventNotifier.cs \
 	MockedServer/MockOfIAclCapabilities.cs \
 	MockedServer/MockOfISessionFactory.cs \
+	MockedServer/MockedCmisObject.cs \
 	MockedServer/MockedCmisServer.cs \
 	MockedServer/MockedCmisUserAccount.cs \
 	MockedServer/MockedDocument.cs \

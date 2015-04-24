@@ -33,7 +33,7 @@ namespace TestLibrary.MockedServer {
             this.ItemsPerPage = this.ItemsPerPage == 0 ? 100 : this.ItemsPerPage;
             this.Setup(l => l.TotalNumItems).Returns(this.internalList.Count);
             this.Setup(l => l.GetEnumerator()).Returns(this.internalList.GetEnumerator());
-            this.Setup(l => l.GetPage()).Returns(new MockedItemList<T>(this.internalList.GetRange(0, this.ItemsPerPage).ToArray()) { ItemsPerPage = this.ItemsPerPage }.Object);
+            this.Setup(l => l.GetPage()).Returns(() => new MockedItemList<T>(this.internalList.GetRange(0, Math.Min(this.ItemsPerPage, this.internalList.Count)).ToArray()) { ItemsPerPage = this.ItemsPerPage }.Object);
             this.Setup(l => l.GetPage(It.IsAny<int>())).Returns<int>((max) => new MockedItemList<T>(this.internalList.GetRange(0, max).ToArray()) { ItemsPerPage = max }.Object);
             this.Setup(l => l.PageNumItems).Returns(this.internalList.Count % this.ItemsPerPage);
             this.Setup(l => l.HasMoreItems).Returns(this.internalList.Count > this.ItemsPerPage);
@@ -41,5 +41,12 @@ namespace TestLibrary.MockedServer {
         }
 
         public int ItemsPerPage { get; set; }
+
+        public IList<T> Items {
+            get {
+                return new List<T>(this.internalList);
+            }
+        }
+
     }
 }

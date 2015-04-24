@@ -21,15 +21,38 @@ namespace TestLibrary.MockedServer {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+
     using DotCMIS.Client;
     using DotCMIS.Data;
     using DotCMIS.Enums;
+
     using Moq;
+
     using TestLibrary.TestUtils;
 
     public class MockedFolder : Mock<IFolder> {
-        public MockedFolder(string name, IFolder parent = null) : base(MockBehavior.Strict) {
+        private IFolder parent;
+        private string name;
+        private string id;
+        private MockedItemList<ICmisObject> children = new MockedItemList<ICmisObject>();
+        private DateTime lastModification = DateTime.UtcNow;
+        private DateTime creationDate = DateTime.UtcNow;
 
+        public MockedFolder(string name, string id = null, IFolder parent = null) : base(MockBehavior.Strict) {
+            this.name = name;
+            this.id = id;
+            this.parent = parent;
+            this.Setup(m => m.ParentId).Returns(this.parent != null ? this.parent.Id : (string)null);
+            this.Setup(m => m.Name).Returns(this.name);
+            this.Setup(m => m.GetChildren()).Returns(this.children.Object);
+            this.Setup(m => m.GetChildren(It.IsAny<IOperationContext>())).Returns(this.children.Object);
+            this.Setup(m => m.IsRootFolder).Returns(this.parent == null);
+            this.Setup(m => m.Id).Returns(this.id);
+            this.Setup(m => m.FolderParent).Returns(this.parent);
+            this.Setup(m => m.Path).Returns(this.parent.Path + "/" + this.name);
+            this.Setup(m => m.LastModificationDate).Returns(this.lastModification);
+            this.Setup(m => m.CreationDate).Returns(this.creationDate);
+//            this.Setup(m => m.Move(It.Is<IObjectId>(obj => obj.Id == this.Object.ParentId), It.IsAny<IObjectId>())).Returns(this.Object);
         }
     }
 }
