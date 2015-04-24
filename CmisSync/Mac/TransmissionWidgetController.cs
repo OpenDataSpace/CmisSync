@@ -103,6 +103,7 @@ namespace CmisSync {
                 if (row >= TransmissionItems.Count) {
                     return new NSNull();
                 }
+
                 Transmission transmission = TransmissionItems[row];
                 percent = transmission.Percent.GetValueOrDefault();
                 repo = transmission.Repository;
@@ -114,7 +115,7 @@ namespace CmisSync {
                     var t = sender as Transmission;
                     if (e.PropertyName == Utils.NameOf(() => t.Percent) || e.PropertyName == Utils.NameOf(()=>t.BitsPerSecond)) {
                         BeginInvokeOnMainThread(delegate {
-                            TransmissionWidgetItem view = tableView.GetView(0,row,true) as TransmissionWidgetItem;
+                            TransmissionWidgetItem view = tableView.GetView(0, row, true) as TransmissionWidgetItem;
                             if (view != null) {
                                 view.labelName.StringValue = t.FileName;
                                 view.labelDate.StringValue = t.LastModification.ToShortDateString() + " " + t.LastModification.ToShortTimeString();
@@ -128,7 +129,7 @@ namespace CmisSync {
                 };
             }
             BeginInvokeOnMainThread(delegate {
-                TransmissionWidgetItem view = tableView.GetView(0,row,false) as TransmissionWidgetItem;
+                TransmissionWidgetItem view = tableView.GetView(0, row, false) as TransmissionWidgetItem;
                 if (view != null) {
                     view.labelName.StringValue = file;
                     view.labelDate.StringValue = date.ToShortDateString() + " " + date.ToShortTimeString();
