@@ -148,7 +148,7 @@ namespace CmisSync {
             NSWorkspace.SharedWorkspace.NotificationCenter.AddObserver(
                 NSWorkspace.WillSleepNotification,
                 delegate {
-                    Logger.Info(String.Format("Machine sleep event detected, stop all repositories"));
+                    Logger.Info(string.Format("Machine sleep event detected, stop all repositories"));
                     StopAll();
                 }
             );
@@ -156,7 +156,7 @@ namespace CmisSync {
             NSWorkspace.SharedWorkspace.NotificationCenter.AddObserver(
                 NSWorkspace.DidWakeNotification,
                 delegate {
-                    Logger.Info (String.Format ("Machine sleep event detected, start all repositories"));
+                    Logger.Info(string.Format("Machine sleep event detected, start all repositories"));
                     StartAll();
                 }
             );
@@ -350,7 +350,7 @@ namespace CmisSync {
         public override void CreateStartupItem() {
             // There aren't any bindings in MonoMac to support this yet, so
             // we call out to an applescript to do the job
-            Process process = new Process ();
+            Process process = new Process();
             process.StartInfo.FileName               = "osascript";
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.UseShellExecute        = false;
@@ -358,8 +358,8 @@ namespace CmisSync {
             process.StartInfo.Arguments = "-e 'tell application \"System Events\" to " +
                 "make login item at end with properties {path:\"" + NSBundle.MainBundle.BundlePath + "\", hidden:false}'";
 
-            process.Start ();
-            process.WaitForExit ();
+            process.Start();
+            process.WaitForExit();
         }
 
         // Adds the DataSpace folder to the user's
