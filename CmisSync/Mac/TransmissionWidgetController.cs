@@ -93,50 +93,35 @@ namespace CmisSync {
         }
 
         public override NSObject GetObjectValue(NSTableView tableView, NSTableColumn tableColumn, int row) {
-            double percent = 0;
-            string repo = string.Empty;
-            string file = string.Empty;
-            long speed = 0;
-            long length = 0;
-            DateTime date;
+            Transmission transmission = null;
             lock (lockTransmissionItems) {
                 if (row >= TransmissionItems.Count) {
                     return new NSNull();
                 }
 
-                Transmission transmission = TransmissionItems[row];
-                percent = transmission.Percent.GetValueOrDefault();
-                repo = transmission.Repository;
-                file = transmission.FileName;
-                speed = transmission.BitsPerSecond.GetValueOrDefault();
-                length = transmission.Length.GetValueOrDefault();
-                date = transmission.LastModification;
+                transmission = TransmissionItems[row];
                 transmission.PropertyChanged += (object sender, PropertyChangedEventArgs e) => {
                     var t = sender as Transmission;
-                    if (e.PropertyName == Utils.NameOf(() => t.Percent) || e.PropertyName == Utils.NameOf(()=>t.BitsPerSecond)) {
+                    if (e.PropertyName == Utils.NameOf(() => t.Percent)) {
                         BeginInvokeOnMainThread(delegate {
-                            TransmissionWidgetItem view = tableView.GetView(0, row, true) as TransmissionWidgetItem;
-                            if (view != null) {
-                                view.labelName.StringValue = t.FileName;
-                                view.labelDate.StringValue = t.LastModification.ToShortDateString() + " " + t.LastModification.ToShortTimeString();
-                                view.labelStatus.StringValue = "length:" + t.Length.ToString() + " speed:" + t.BitsPerSecond.ToString();
-                                view.progress.DoubleValue = t.Percent.GetValueOrDefault();
-                            } else {
-                                Console.WriteLine("Emtpy view at transmission window row: " + row.ToString());
-                            }
+                            var widget = tableView.GetView(0, row, true) as TransmissionWidgetItem;
+                            this.UpdateViewProgress(widget, t);
+                            this.UpdateViewLastModificationDate(widget, t.LastModification);
+                        });
+                    } else if (e.PropertyName == Utils.NameOf(() => t.BitsPerSecond)) {
+                        BeginInvokeOnMainThread(delegate {
+                            this.UpdateWidgetStatus(tableView.GetView(0, row, true) as TransmissionWidgetItem, t);
                         });
                     }
                 };
             }
             BeginInvokeOnMainThread(delegate {
-                TransmissionWidgetItem view = tableView.GetView(0, row, false) as TransmissionWidgetItem;
-                if (view != null) {
-                    view.labelName.StringValue = file;
-                    view.labelDate.StringValue = date.ToShortDateString() + " " + date.ToShortTimeString();
-                    view.labelStatus.StringValue = "length:" + length.ToString() + " speed:" + speed.ToString();
-                    view.progress.DoubleValue = percent;
-                } else {
-                    Console.WriteLine("Emtpy view at transmission window row: " + row.ToString());
+                var widget = tableView.GetView(0, row, false) as TransmissionWidgetItem;
+                if (widget != null) {
+                    widget.labelName.StringValue = transmission.FileName;
+                    this.UpdateViewLastModificationDate(widget, transmission.LastModification);
+                    this.UpdateWidgetStatus(widget, transmission);
+                    this.UpdateViewProgress(widget, transmission);
                 }
             });
             return new NSNull();
@@ -147,6 +132,28 @@ namespace CmisSync {
                 return TransmissionItems.Count;
             }
         }
+
+        private void UpdateViewLastModificationDate(TransmissionWidgetItem widget, DateTime date) {
+            if (widget != null) {
+                widget.labelDate.StringValue = string.Format("{0} {1}", date.ToShortDateString(), date.ToShortTimeString());
+            }
+        }
+
+        private void UpdateViewProgress(TransmissionWidgetItem widget, Transmission t) {
+            if (widget != null) {
+                widget.progress.DoubleValue = t.Percent.GetValueOrDefault();
+            }
+        }
+
+        private void UpdateWidgetStatus(TransmissionWidgetItem widget, Transmission t) {
+            if (widget != null) {
+                string pos = t.Position != null && t.Position != t.Length ? string.Format("{0}/", CmisSync.Lib.Utils.FormatSize(t.Position.GetValueOrDefault())) : string.Empty;
+                string size = t.Length != null ? CmisSync.Lib.Utils.FormatSize(t.Length.GetValueOrDefault()) : string.Empty;
+                string speed = CmisSync.Lib.Utils.FormatBandwidth(t.BitsPerSecond.GetValueOrDefault());
+                widget.labelStatus.StringValue = string.Format("{0}{1}\t{2}", pos, size, speed);
+            }
+        }
+
 
         public void UpdateTableView(NSTableView tableView, Transmission item) {
             if (changeAll) {
