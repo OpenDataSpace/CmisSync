@@ -119,6 +119,7 @@ namespace CmisSync {
                 var widget = tableView.GetView(0, row, false) as TransmissionWidgetItem;
                 if (widget != null) {
                     widget.labelName.StringValue = transmission.FileName;
+                    widget.labelName.ToolTip = transmission.Path;
                     this.UpdateViewLastModificationDate(widget, transmission.LastModification);
                     this.UpdateWidgetStatus(widget, transmission);
                     this.UpdateViewProgress(widget, transmission);
@@ -141,6 +142,7 @@ namespace CmisSync {
 
         private void UpdateViewProgress(TransmissionWidgetItem widget, Transmission t) {
             if (widget != null) {
+                widget.progress.Hidden = t.Percent.GetValueOrDefault() == 100;
                 widget.progress.DoubleValue = t.Percent.GetValueOrDefault();
             }
         }
@@ -149,7 +151,7 @@ namespace CmisSync {
             if (widget != null) {
                 string pos = t.Position != null && t.Position != t.Length ? string.Format("{0}/", CmisSync.Lib.Utils.FormatSize(t.Position.GetValueOrDefault())) : string.Empty;
                 string size = t.Length != null ? CmisSync.Lib.Utils.FormatSize(t.Length.GetValueOrDefault()) : string.Empty;
-                string speed = CmisSync.Lib.Utils.FormatBandwidth(t.BitsPerSecond.GetValueOrDefault());
+                string speed = !t.Done ? CmisSync.Lib.Utils.FormatBandwidth(t.BitsPerSecond.GetValueOrDefault()): string.Empty;
                 widget.labelStatus.StringValue = string.Format("{0}{1}\t{2}", pos, size, speed);
             }
         }

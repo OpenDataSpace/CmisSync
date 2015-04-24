@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="7531" systemVersion="14C1514" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6751" systemVersion="13F1077" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="7531"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6751"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="TransmissionWidgetController">
@@ -44,7 +44,6 @@
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" autosaveColumns="NO" rowHeight="58" rowSizeStyle="automatic" viewBased="YES" id="c88-RI-CR0">
-                                    <rect key="frame" x="0.0" y="0.0" width="640" height="0.0"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <size key="intercellSpacing" width="3" height="2"/>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -69,7 +68,7 @@
                                                     <subviews>
                                                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="xim-h7-0ut">
                                                             <rect key="frame" x="0.0" y="38" width="637" height="17"/>
-                                                            <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
+                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Label Name" id="WPL-hd-5qC">
                                                                 <font key="font" metaFont="system"/>
                                                                 <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -78,23 +77,24 @@
                                                         </textField>
                                                         <progressIndicator maxValue="100" style="bar" id="Tzz-yz-a1K">
                                                             <rect key="frame" x="0.0" y="20" width="637" height="20"/>
+                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                                         </progressIndicator>
                                                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="KMl-tE-jCc" userLabel="Label Status">
-                                                            <rect key="frame" x="0.0" y="3" width="437" height="17"/>
-                                                            <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
-                                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Label Status" id="QPR-Ez-mcK">
-                                                                <font key="font" metaFont="system"/>
-                                                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                            <rect key="frame" x="0.0" y="6" width="437" height="14"/>
+                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" sendsActionOnEndEditing="YES" title="Label Status" id="QPR-Ez-mcK">
+                                                                <font key="font" metaFont="smallSystem"/>
+                                                                <color key="textColor" name="controlShadowColor" catalog="System" colorSpace="catalog"/>
+                                                                <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                             </textFieldCell>
                                                         </textField>
                                                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="4ed-0x-UIk">
-                                                            <rect key="frame" x="454" y="3" width="182" height="17"/>
-                                                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" baseWritingDirection="rightToLeft" title="Label Date" id="ttn-ta-Cxf">
-                                                                <font key="font" metaFont="system"/>
-                                                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                            <rect key="frame" x="454" y="6" width="182" height="14"/>
+                                                            <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMinY="YES"/>
+                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" enabled="NO" allowsUndo="NO" sendsActionOnEndEditing="YES" baseWritingDirection="rightToLeft" title="Label Date" id="ttn-ta-Cxf">
+                                                                <font key="font" metaFont="smallSystem"/>
+                                                                <color key="textColor" name="controlShadowColor" catalog="System" colorSpace="catalog"/>
+                                                                <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                             </textFieldCell>
                                                         </textField>
                                                     </subviews>
