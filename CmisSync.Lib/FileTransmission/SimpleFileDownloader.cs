@@ -48,7 +48,7 @@ namespace CmisSync.Lib.FileTransmission {
         /// <exception cref="AbortException">If download is aborted</exception>
         /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
         public void DownloadFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg, UpdateChecksum update = null) {
-            byte[] buffer = new byte[8 * 1024];
+            byte[] buffer = new byte[1024 * 1024];
             int len;
 
             if (localFileStream.Length > 0) {
@@ -82,21 +82,27 @@ namespace CmisSync.Lib.FileTransmission {
             using (Stream remoteStream = contentStream != null ? contentStream.Stream : new MemoryStream(0)) {
                 transmission.Length = remoteDocument.ContentStreamLength;
                 transmission.Position = offset;
-                while ((len = remoteStream.Read(buffer, 0, buffer.Length)) > 0) {
+                int toWrite = 0;
+                while ((len = remoteStream.Read(buffer, 0, buffer.Length - toWrite)) > 0) {
                     lock (this.disposeLock) {
                         if (this.disposed) {
                             transmission.Status = TransmissionStatus.ABORTED;
                             throw new ObjectDisposedException(transmission.Path);
                         }
 
-                        hashstream.Write(buffer, 0, len);
-                        hashstream.Flush();
+                        toWrite += len;
+                        if (toWrite >= buffer.Length) {
+                            //  we need to update the checksum in batch, for better performance
+                            hashstream.Write(buffer, 0, toWrite);
+                            hashstream.Flush();
+                            toWrite = 0;
 
-                        HashAlgorithmReuse reuse = hashAlg as HashAlgorithmReuse;
-                        if (reuse != null && update != null) {
-                            using (HashAlgorithm hash = (HashAlgorithm)reuse.Clone()) {
-                                hash.TransformFinalBlock(new byte[0], 0, 0);
-                                update(hash.Hash, localFileStream.Length);
+                            HashAlgorithmReuse reuse = hashAlg as HashAlgorithmReuse;
+                            if (reuse != null && update != null) {
+                                using (HashAlgorithm hash = (HashAlgorithm)reuse.Clone()) {
+                                    hash.TransformFinalBlock(new byte[0], 0, 0);
+                                    update(hash.Hash, localFileStream.Length);
+                                }
                             }
                         }
                     }
