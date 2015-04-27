@@ -144,6 +144,15 @@ namespace CmisSync {
             if (widget != null) {
                 widget.progress.Hidden = t.Percent.GetValueOrDefault() == 100;
                 widget.progress.DoubleValue = t.Percent.GetValueOrDefault();
+                if (widget.progress.Hidden) {
+                    System.Drawing.SizeF size = widget.Frame.Size;
+                    size.Height = widget.labelName.Frame.Height + widget.labelStatus.Frame.Height;
+                    widget.SetFrameSize(size);
+                } else {
+                    System.Drawing.SizeF size = widget.Frame.Size;
+                    size.Height = widget.labelName.Frame.Height + widget.progress.Frame.Height + widget.labelStatus.Frame.Height;
+                    widget.SetFrameSize(size);
+                }
             }
         }
 
