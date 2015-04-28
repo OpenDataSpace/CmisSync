@@ -20,6 +20,7 @@
 namespace TestLibrary.MockedServer {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     using DotCMIS;
     using DotCMIS.Binding;
@@ -37,7 +38,7 @@ namespace TestLibrary.MockedServer {
         private Mock<ICmisBinding> binding = new Mock<ICmisBinding>(MockBehavior.Strict);
         private Mock<IRepositoryService> repoService = new Mock<IRepositoryService>(MockBehavior.Strict);
 
-        public MockedSession(MockedRepository repo) : base(MockBehavior.Strict) {
+        public MockedSession(MockedRepository repo, MockBehavior behavior = MockBehavior.Strict) : base(behavior) {
             // TypeSystem
             IList<IPropertyDefinition> props = new List<IPropertyDefinition>();
             props.Add(Mock.Of<IPropertyDefinition>(p => p.Id == PropertyIds.LastModificationDate && p.Updatability == DotCMIS.Enums.Updatability.ReadWrite));
@@ -50,6 +51,24 @@ namespace TestLibrary.MockedServer {
             this.binding.Setup(b => b.GetRepositoryService()).Returns(this.repoService.Object);
             this.Setup(s => s.Binding).Returns(this.binding.Object);
             this.Setup(s => s.RepositoryInfo.Id).Returns(repo.Object.Id);
+
+            this.Setup(s => s.Delete(It.Is<IObjectId>(o => this.Objects.ContainsKey(o.Id)))).Callback<IObjectId>((o) => this.Objects.Remove(o.Id));
+            this.Setup(s => s.Delete(It.Is<IObjectId>(o => this.Objects.ContainsKey(o.Id)), It.IsAny<bool>())).Callback<IObjectId, bool>((o, a) => this.Objects.Remove(o.Id));
+
+            this.Setup(s => s.GetContentStream(It.Is<IObjectId>(o => (this.Objects[o.Id] as IDocument) != null))).Returns<IObjectId>((o) => (this.Objects[o.Id] as IDocument).GetContentStream());
+
+            this.Setup(s => s.GetRootFolder()).Returns(() => this.RootFolder);
+            this.Setup(s => s.GetRootFolder(It.IsAny<IOperationContext>())).Returns(() => this.RootFolder);
+
+            this.Setup(s => s.GetObjectByPath(It.Is<string>(p => !string.IsNullOrEmpty(p)))).Returns<string>((p) => this.GetObjectByPath(p));
+        }
+
+        public Dictionary<string, ICmisObject> Objects { get; set; }
+
+        public IFolder RootFolder { get; set; }
+
+        private ICmisObject GetObjectByPath(string path) {
+            return this.Objects.First((o) => (o.Value is IFileableCmisObject && (o.Value as IFileableCmisObject).Paths.Contains(path))).Value;
         }
     }
 }

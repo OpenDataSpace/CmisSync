@@ -277,6 +277,16 @@
     <Compile Include="MockedServer\MockedCmisObject.cs" />
     <Compile Include="IntegrationTests\MockedServerTests\SetupDocumentTest.cs" />
     <Compile Include="MockedServer\IContentChangeEventNotifier.cs" />
+    <Compile Include="MockedServer\MockedAcl.cs" />
+    <Compile Include="MockedServer\MockedAce.cs" />
+    <Compile Include="MockedServer\MockedPrincipal.cs" />
+    <Compile Include="MockedServer\MockedExtensionsData.cs" />
+    <Compile Include="MockedServer\MockedCmisExtensionElement.cs" />
+    <Compile Include="IntegrationTests\MockedServerTests\SetupFolderTest.cs" />
+    <Compile Include="MockedServer\MockedObjectType.cs" />
+    <Compile Include="MockedServer\MockedTypeDefinition.cs" />
+    <Compile Include="MockedServer\MockedFolderType.cs" />
+    <Compile Include="MockedServer\MockedFileableCmisObject.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

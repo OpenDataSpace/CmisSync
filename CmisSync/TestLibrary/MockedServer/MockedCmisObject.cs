@@ -14,6 +14,7 @@ namespace TestLibrary.MockedServer {
         private DateTime? creationDate = DateTime.UtcNow;
         private DateTime? lastModificationDate = DateTime.UtcNow;
         private string name;
+        private MockedAcl Acl;
 
         public event ContentChangeEventHandler ContentChanged;
 
@@ -26,11 +27,15 @@ namespace TestLibrary.MockedServer {
             this.Setup(m => m.Id).Returns(() => this.Id);
             this.Setup(m => m.Name).Returns(() => this.name);
             this.Setup(m => m.ObjectType).Returns(() => this.ObjectType);
-            this.Setup(m => m.BaseType).Returns(() => this.BaseType);
-            this.Setup(m => m.BaseTypeId).Returns(() => this.BaseType.BaseTypeId);
+            this.Setup(m => m.BaseType).Returns(() => this.ObjectType.GetBaseType());
+            this.Setup(m => m.BaseTypeId).Returns(() => this.ObjectType.BaseTypeId);
             this.Setup(m => m.ChangeToken).Returns(() => this.ChangeToken);
             this.Setup(m => m.UpdateProperties(It.IsAny<IDictionary<string, object>>())).Callback<IDictionary<string, object>>((dict) => this.UpdateProperties(dict)).Returns(this.Object);
             this.Setup(m => m.UpdateProperties(It.IsAny<IDictionary<string, object>>(), It.IsAny<bool>())).Callback<IDictionary<string, object>, bool>((dict, refresh) => this.UpdateProperties(dict)).Returns(() => Mock.Of<IObjectId>(o => o.Id == this.Id));
+            this.SetupRename();
+            this.Setup(m => m.SecondaryTypes).Returns(() => new List<ISecondaryType>(this.SecondaryTypes));
+            this.Acl = new MockedAcl(behavior);
+            this.Setup(m => m.Acl).Returns(() => this.Acl.Object);
         }
 
         public DateTime? CreationDate {
@@ -107,10 +112,16 @@ namespace TestLibrary.MockedServer {
             }
         }
 
+        protected virtual void SetupRename() {
+            this.Setup(m => m.Rename(It.IsAny<string>())).Callback<string>(s => { this.Name = s; this.UpdateChangeToken(); this.NotifyChanges(); }).Returns(() => this.Object);
+            this.Setup(m => m.Rename(It.IsAny<string>(), It.IsAny<bool>())).Callback<string, bool>((s, b) => { this.Name = s; this.UpdateChangeToken(); this.NotifyChanges(); }).Returns(() => Mock.Of<IObjectId>((o) => o.Id == this.Id));
+        }
+
+        protected List<ISecondaryType> SecondaryTypes { get; set; }
+
         public string CreatedBy { get; set; }
 
         public IObjectType ObjectType { get; protected set; }
-        public IObjectType BaseType { get; protected set; }
         public string Id { get; protected set; }
         public string ChangeToken { get; set; }
     }

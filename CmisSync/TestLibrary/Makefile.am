@@ -112,6 +112,8 @@ SOURCES =  \
 	IntegrationTests/FullRepoTests.cs \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
+	IntegrationTests/MockedServerTests/SetupDocumentTest.cs \
+	IntegrationTests/MockedServerTests/SetupFolderTest.cs \
 	IntegrationTests/NeedsLocalFileSystemFolder.cs \
 	IntegrationTests/PrivateWorkingCopyTests/AppendContentStreamTests.cs \
 	IntegrationTests/PrivateWorkingCopyTests/CreateDocumentTests.cs \
@@ -127,15 +129,24 @@ SOURCES =  \
 	MockedServer/IContentChangeEventNotifier.cs \
 	MockedServer/MockOfIAclCapabilities.cs \
 	MockedServer/MockOfISessionFactory.cs \
+	MockedServer/MockedAce.cs \
+	MockedServer/MockedAcl.cs \
+	MockedServer/MockedCmisExtensionElement.cs \
 	MockedServer/MockedCmisObject.cs \
 	MockedServer/MockedCmisServer.cs \
 	MockedServer/MockedCmisUserAccount.cs \
 	MockedServer/MockedDocument.cs \
 	MockedServer/MockedDocumentType.cs \
+	MockedServer/MockedExtensionsData.cs \
+	MockedServer/MockedFileableCmisObject.cs \
 	MockedServer/MockedFolder.cs \
+	MockedServer/MockedFolderType.cs \
 	MockedServer/MockedItemList.cs \
+	MockedServer/MockedObjectType.cs \
+	MockedServer/MockedPrincipal.cs \
 	MockedServer/MockedRepository.cs \
 	MockedServer/MockedSession.cs \
+	MockedServer/MockedTypeDefinition.cs \
 	MoqExtensions/MoqExtensions.cs \
 	PathMatcherTests/PathMatcherTest.cs \
 	ProducerTests/ContentChangeTests/ContentChangeEventAccumulatorTest.cs \
