@@ -110,6 +110,10 @@ namespace TestLibrary.FileTransmissionTests {
             }
         }
 
+        /// <summary>
+        /// downloader will save the checksum to database for every 1M byte download
+        /// 1 byte will save the database one time
+        /// </summary>
         [Test, Category("Fast")]
         public void DownloadWithOneUpdate() {
             SetUp(1);
@@ -124,6 +128,10 @@ namespace TestLibrary.FileTransmissionTests {
             }
         }
 
+        /// <summary>
+        /// downloader will save the checksum to database for every 1M byte download
+        /// 2M bytes will save the database two times
+        /// </summary>
         [Test, Category("Fast")]
         public void DownloadWithTwoUpdate() {
             SetUp(2 * 1024 * 1024);
@@ -138,6 +146,10 @@ namespace TestLibrary.FileTransmissionTests {
             }
         }
 
+        /// <summary>
+        /// downloader will save the checksum to database for every 1M byte download
+        /// 2M + 1 bytes will save the database three times
+        /// </summary>
         [Test, Category("Fast")]
         public void DownloadWithThreeUpdate() {
             SetUp(2 * 1024 * 1024 + 1);
