@@ -135,6 +135,7 @@ SOURCES =  \
 	MockedServer/MockedCmisObject.cs \
 	MockedServer/MockedCmisServer.cs \
 	MockedServer/MockedCmisUserAccount.cs \
+	MockedServer/MockedContentStream.cs \
 	MockedServer/MockedDocument.cs \
 	MockedServer/MockedDocumentType.cs \
 	MockedServer/MockedExtensionsData.cs \

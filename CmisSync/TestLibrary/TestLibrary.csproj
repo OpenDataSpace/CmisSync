@@ -287,6 +287,7 @@
     <Compile Include="MockedServer\MockedTypeDefinition.cs" />
     <Compile Include="MockedServer\MockedFolderType.cs" />
     <Compile Include="MockedServer\MockedFileableCmisObject.cs" />
+    <Compile Include="MockedServer\MockedContentStream.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

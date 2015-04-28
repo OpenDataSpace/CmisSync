@@ -20,11 +20,13 @@
 namespace TestLibrary.MockedServer {
     using System;
     using System.Collections.Generic;
+    using System.IO;
 
     using DotCMIS;
     using DotCMIS.Client;
     using DotCMIS.Data;
     using DotCMIS.Enums;
+    using DotCMIS.Exceptions;
 
     using Moq;
 
@@ -33,6 +35,7 @@ namespace TestLibrary.MockedServer {
     public class MockedDocument : MockedCmisObject<IDocument> {
         private IDocumentType docType = new MockedDocumentType().Object;
         private IFolder parent;
+        private string defaultStreamId = null;
 
         public MockedDocument(
             string name,
@@ -41,14 +44,44 @@ namespace TestLibrary.MockedServer {
             IFolder parent = null,
             MockBehavior behavior = MockBehavior.Strict) : base(name, id, behavior) {
             this.ObjectType = this.docType;
+            this.Renditions = new List<IRendition>();
             this.parent = parent ?? Mock.Of<IFolder>();
             this.Setup(m => m.BaseType).Returns(this.docType);
             this.Setup(m => m.BaseTypeId).Returns(BaseTypeId.CmisDocument);
             this.SetupParent(this.parent);
-            this.Setup(m => m.ContentStreamId).Returns((string)null);
-            this.Setup(m => m.ContentStreamLength).Returns(content == null ? (long?)null : content.Length);
-            this.Setup(m => m.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>())).Callback<IContentStream, bool>((stream, lastChunk) => Console.WriteLine("vla")).Returns(this.Object);
-            this.Setup(m => m.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>())).Callback<IContentStream, bool>((stream, overwrite) => Console.Write("override")).Returns(this.Object);
+            this.Setup(m => m.ContentStreamId).Returns(defaultStreamId);
+            this.Setup(m => m.ContentStreamLength).Returns(() => this.Stream == null ? (long?)null : this.Stream.Length);
+            this.Setup(m => m.ContentStreamFileName).Returns(() => this.Stream != null ? this.Stream.FileName : name);
+            this.Setup(m => m.SetContentStream(It.Is<IContentStream>(s => s != null), It.IsAny<bool>())).Callback<IContentStream, bool>((stream, overwrite) => this.SetContent(stream, overwrite)).Returns(() => this.Object);
+            this.Setup(m => m.SetContentStream(It.Is<IContentStream>(s => s != null), It.IsAny<bool>(), It.IsAny<bool>())).Callback<IContentStream, bool, bool>((stream, o, r) => this.SetContent(stream, o)).Returns(() => Mock.Of<IObjectId>(oid => oid.Id == this.Object.Id));
+            // this.Setup(m => m.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>())).Callback<IContentStream, bool>((stream, lastChunk) => Console.WriteLine("vla")).Returns(this.Object);
+            this.Setup(m => m.GetContentStream()).Returns(() => this.Stream);
+            if (content != null) {
+                this.Stream = new MockedContentStream(name, content, behavior: behavior).Object;
+            }
+
+            this.Setup(m => m.Renditions).Returns(() => new List<IRendition>(this.Renditions));
+        }
+
+        public IContentStream Stream { get; set; }
+
+        public IList<IRendition> Renditions { get; set; }
+
+        private void SetContent(IContentStream inputstream, bool overwrite) {
+            if (this.Stream != null && this.Stream.Length != null && this.Stream.Length > 0 && !overwrite) {
+                throw new CmisContentAlreadyExistsException();
+            }
+
+            var newContent = new MockedContentStream(inputstream.FileName, null, inputstream.MimeType);
+            using (var memStream = new MemoryStream())
+            using (var input = inputstream.Stream){
+                input.CopyTo(memStream);
+                newContent.Content = memStream.ToArray();
+            }
+
+            this.Stream = newContent.Object;
+            this.UpdateChangeToken();
+            this.NotifyChanges();
         }
     }
 }
