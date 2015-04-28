@@ -105,7 +105,9 @@ namespace CmisSync.Lib.FileTransmission {
                         }
                     }
                 }
-                UpdateHash(hashAlg, localFileStream.Length, update);
+                if (written > 0) {
+                    UpdateHash(hashAlg, localFileStream.Length, update);
+                }
             }
         }
 
