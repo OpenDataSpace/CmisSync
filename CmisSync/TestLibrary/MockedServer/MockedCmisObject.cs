@@ -21,6 +21,7 @@ namespace TestLibrary.MockedServer {
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Linq;
 
     using DotCMIS;
     using DotCMIS.Client;
@@ -54,6 +55,13 @@ namespace TestLibrary.MockedServer {
             this.Setup(m => m.SecondaryTypes).Returns(() => new List<ISecondaryType>(this.SecondaryTypes));
             this.Acl = new MockedAcl(behavior);
             this.Setup(m => m.Acl).Returns(() => this.Acl.Object);
+            this.Setup(m => m.GetPropertyValue(It.IsAny<string>())).Returns<string>((propId) => {
+                return this.Properties.First(p => p.Id == propId).Value;
+            });
+            this.Setup(m => m.Properties).Returns(() => new List<IProperty>(this.Properties));
+            this.Setup(m => m[It.IsAny<string>()]).Returns<string>((propId) => {
+                return this.Properties.First(p => p.Id == propId);
+            });
         }
 
         public DateTime? CreationDate {
@@ -142,5 +150,6 @@ namespace TestLibrary.MockedServer {
         public IObjectType ObjectType { get; protected set; }
         public string Id { get; protected set; }
         public string ChangeToken { get; set; }
+        public IList<IProperty> Properties { get; set; }
     }
 }
