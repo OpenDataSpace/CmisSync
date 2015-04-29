@@ -22,6 +22,8 @@ namespace TestLibrary.MockedServer {
     using System.Collections.Generic;
     using System.IO;
 
+    using CmisSync.Lib.Streams;
+
     using DotCMIS;
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -42,6 +44,7 @@ namespace TestLibrary.MockedServer {
             string content = null,
             string id = null,
             IFolder parent = null,
+            MockedDocument privateWorkingCopyOf = null,
             MockBehavior behavior = MockBehavior.Strict) : base(name, id, behavior) {
             this.ObjectType = this.docType;
             this.Renditions = new List<IRendition>();
@@ -54,13 +57,24 @@ namespace TestLibrary.MockedServer {
             this.Setup(m => m.ContentStreamFileName).Returns(() => this.Stream != null ? this.Stream.FileName : name);
             this.Setup(m => m.SetContentStream(It.Is<IContentStream>(s => s != null), It.IsAny<bool>())).Callback<IContentStream, bool>((stream, overwrite) => this.SetContent(stream, overwrite)).Returns(() => this.Object);
             this.Setup(m => m.SetContentStream(It.Is<IContentStream>(s => s != null), It.IsAny<bool>(), It.IsAny<bool>())).Callback<IContentStream, bool, bool>((stream, o, r) => this.SetContent(stream, o)).Returns(() => Mock.Of<IObjectId>(oid => oid.Id == this.Object.Id));
-            // this.Setup(m => m.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>())).Callback<IContentStream, bool>((stream, lastChunk) => Console.WriteLine("vla")).Returns(this.Object);
             this.Setup(m => m.GetContentStream()).Returns(() => this.Stream);
+            this.Setup(m => m.GetContentStream(It.Is<string>(sid => sid == null || sid.Equals(this.defaultStreamId)), It.IsAny<long>(), It.IsAny<long>())).Returns<string, long?, long?>((sid, offset, length) => {
+                var subStream = new MockedContentStream(this.Stream.FileName, behavior: behavior);
+                using (var orig = this.Stream.Stream)
+                using (var part = new MemoryStream()) {
+                    orig.Seek(offset.GetValueOrDefault(), SeekOrigin.Begin);
+                    orig.CopyTo(part, 1024, (int)length.GetValueOrDefault());
+                    subStream.Content = part.ToArray();
+                }
+
+                return subStream.Object;
+            });
             if (content != null) {
                 this.Stream = new MockedContentStream(name, content, behavior: behavior).Object;
             }
 
             this.Setup(m => m.Renditions).Returns(() => new List<IRendition>(this.Renditions));
+            this.Setup(m => m.IsPrivateWorkingCopy).Returns(privateWorkingCopyOf == null);
         }
 
         public IContentStream Stream { get; set; }

@@ -19,6 +19,8 @@
 
 namespace TestLibrary.IntegrationTests.MockedServerTests {
     using System;
+    using System.IO;
+    using System.Text;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
@@ -49,10 +51,40 @@ namespace TestLibrary.IntegrationTests.MockedServerTests {
             Assert.That(underTest.CreatedBy, Is.Null.Or.Not.Null);
             Assert.That(underTest.LastModificationDate, Is.Null.Or.Not.Null);
             Assert.That(underTest.ContentStreamId, Is.Null);
+            var contentStream = underTest.GetContentStream();
             if (content == null) {
                 Assert.That(underTest.ContentStreamLength, Is.Null.Or.EqualTo(0));
+                Assert.That(contentStream, Is.Null);
             } else {
                 Assert.That(underTest.ContentStreamLength, Is.EqualTo(content.Length));
+                Assert.That(contentStream, Is.Not.Null);
+                Assert.That(contentStream.FileName, Is.EqualTo(name));
+                Assert.That(contentStream.MimeType, Is.Not.Null);
+                Assert.That(contentStream.Length, Is.EqualTo(underTest.ContentStreamLength));
+                using (var stream = contentStream.Stream) {
+                    Assert.That(stream.Length, Is.EqualTo(underTest.ContentStreamLength));
+                }
+            }
+        }
+
+        [Test, Category("Fast")]
+        public void ContentStreamRegion() {
+            var content = "AB";
+            var underTest = new MockedDocument("name", content, "id").Object;
+            var firstPart = underTest.GetContentStream(null, 0, 1);
+            var secondPart = underTest.GetContentStream(null, 1, 1);
+            var fullContent = underTest.GetContentStream();
+            Assert.That(firstPart.Length, Is.EqualTo(1));
+            Assert.That(firstPart.FileName, Is.EqualTo(underTest.Name));
+            Assert.That(secondPart.Length, Is.EqualTo(1));
+            Assert.That(secondPart.FileName, Is.EqualTo(underTest.Name));
+            Assert.That(fullContent.Length, Is.EqualTo(content.Length));
+            using (var concatStream = new MemoryStream())
+            using (var firstStream = firstPart.Stream)
+            using (var secondStream = secondPart.Stream) {
+                firstStream.CopyTo(concatStream);
+                secondStream.CopyTo(concatStream);
+                Assert.That(concatStream.ToArray(), Is.EqualTo(Encoding.UTF8.GetBytes(content)));
             }
         }
 
