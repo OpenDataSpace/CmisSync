@@ -146,7 +146,15 @@ SOURCES =  \
 	MockedServer/MockedObjectType.cs \
 	MockedServer/MockedPrincipal.cs \
 	MockedServer/MockedProperty.cs \
+	MockedServer/MockedPropertyBooleanDefinition.cs \
+	MockedServer/MockedPropertyDateTimeDefinition.cs \
+	MockedServer/MockedPropertyDecimalDefinition.cs \
 	MockedServer/MockedPropertyDefinition.cs \
+	MockedServer/MockedPropertyHtmlDefinition.cs \
+	MockedServer/MockedPropertyIdDefinition.cs \
+	MockedServer/MockedPropertyIntegerDefinition.cs \
+	MockedServer/MockedPropertyStringDefinition.cs \
+	MockedServer/MockedPropertyUriDefinition.cs \
 	MockedServer/MockedRepository.cs \
 	MockedServer/MockedSession.cs \
 	MockedServer/MockedTypeDefinition.cs \

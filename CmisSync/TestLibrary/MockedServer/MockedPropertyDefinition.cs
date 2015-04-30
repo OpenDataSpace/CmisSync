@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary {
+namespace TestLibrary.MockedServer {
     using System;
 
     using DotCMIS.Data;
