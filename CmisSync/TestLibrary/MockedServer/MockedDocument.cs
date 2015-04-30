@@ -74,6 +74,8 @@ namespace TestLibrary.MockedServer {
 
             this.Setup(m => m.Renditions).Returns(() => new List<IRendition>(this.Renditions));
             this.Setup(m => m.IsPrivateWorkingCopy).Returns(() => this.IsPrivateWorkingCopy);
+            this.Setup(m => m.DeleteContentStream()).Callback(() => { if (this.Stream != null) {this.Stream = null; this.UpdateChangeToken(); this.NotifyChanges(); }}).Returns(() => this.Object);
+            this.Setup(m => m.DeleteContentStream(It.IsAny<bool>())).Callback(() => { if (this.Stream != null) {this.Stream = null; this.UpdateChangeToken(); this.NotifyChanges(); }}).Returns(() => Mock.Of<IObjectId>(oid => oid.Id == this.Object.Id));
         }
 
         public IContentStream Stream { get; set; }

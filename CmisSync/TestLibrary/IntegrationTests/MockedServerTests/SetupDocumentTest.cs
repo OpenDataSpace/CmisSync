@@ -121,5 +121,24 @@ namespace TestLibrary.IntegrationTests.MockedServerTests {
             Assert.That(underTest.Object.ChangeToken, Is.Not.EqualTo(oldChangeToken));
             contentChangeHandler.Verify(h => h(underTest, It.Is<IChangeEvent>(e => e.ChangeType == ChangeType.Updated && e.ObjectId == underTest.Object.Id)), Times.Once());
         }
+
+        [Test, Category("Fast")]
+        public void DeleteExistingContentStream([Values(true, false, null)]bool? refresh) {
+            var contentChangeHandler = new Mock<ContentChangeEventHandler>();
+            var underTest = new MockedDocument("name", "content");
+            var oldChangeToken = underTest.Object.ChangeToken;
+            underTest.ContentChanged += contentChangeHandler.Object;
+
+            if (refresh == null) {
+                Assert.That(underTest.Object.DeleteContentStream().Id, Is.EqualTo(underTest.Id));
+            } else {
+                Assert.That(underTest.Object.DeleteContentStream((bool)refresh).Id, Is.EqualTo(underTest.Id));
+            }
+
+            Assert.That(underTest.Object.ContentStreamLength, Is.Null.Or.EqualTo(0));
+            Assert.That(underTest.Object.GetContentStream(), Is.Null);
+            Assert.That(underTest.Object.ChangeToken, Is.Not.EqualTo(oldChangeToken));
+            contentChangeHandler.Verify(h => h(underTest, It.Is<IChangeEvent>(e => e.ChangeType == ChangeType.Updated && e.ObjectId == underTest.Object.Id)), Times.Once());
+        }
     }
 }
