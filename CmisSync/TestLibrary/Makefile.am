@@ -145,6 +145,8 @@ SOURCES =  \
 	MockedServer/MockedItemList.cs \
 	MockedServer/MockedObjectType.cs \
 	MockedServer/MockedPrincipal.cs \
+	MockedServer/MockedProperty.cs \
+	MockedServer/MockedPropertyDefinition.cs \
 	MockedServer/MockedRepository.cs \
 	MockedServer/MockedSession.cs \
 	MockedServer/MockedTypeDefinition.cs \

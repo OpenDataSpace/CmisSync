@@ -44,7 +44,6 @@ namespace TestLibrary.MockedServer {
             string content = null,
             string id = null,
             IFolder parent = null,
-            MockedDocument privateWorkingCopyOf = null,
             MockBehavior behavior = MockBehavior.Strict) : base(name, id, behavior) {
             this.ObjectType = this.docType;
             this.Renditions = new List<IRendition>();
@@ -63,7 +62,7 @@ namespace TestLibrary.MockedServer {
                 using (var orig = this.Stream.Stream)
                 using (var part = new MemoryStream()) {
                     orig.Seek(offset.GetValueOrDefault(), SeekOrigin.Begin);
-                    orig.CopyTo(part, 1024, (int)length.GetValueOrDefault());
+                    orig.CopyTo(part, 8096, (int)length.GetValueOrDefault());
                     subStream.Content = part.ToArray();
                 }
 
@@ -74,12 +73,14 @@ namespace TestLibrary.MockedServer {
             }
 
             this.Setup(m => m.Renditions).Returns(() => new List<IRendition>(this.Renditions));
-            this.Setup(m => m.IsPrivateWorkingCopy).Returns(privateWorkingCopyOf == null);
+            this.Setup(m => m.IsPrivateWorkingCopy).Returns(() => this.IsPrivateWorkingCopy);
         }
 
         public IContentStream Stream { get; set; }
 
         public IList<IRendition> Renditions { get; set; }
+
+        public bool IsPrivateWorkingCopy { get; set; }
 
         private void SetContent(IContentStream inputstream, bool overwrite) {
             if (this.Stream != null && this.Stream.Length != null && this.Stream.Length > 0 && !overwrite) {
