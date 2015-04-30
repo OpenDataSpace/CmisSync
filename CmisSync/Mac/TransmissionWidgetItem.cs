@@ -1,11 +1,12 @@
 ﻿
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using MonoMac.Foundation;
-using MonoMac.AppKit;
-
 namespace CmisSync {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using MonoMac.Foundation;
+    using MonoMac.AppKit;
+
     public partial class TransmissionWidgetItem : MonoMac.AppKit.NSTableCellView {
         #region Constructors
 
@@ -27,4 +28,3 @@ namespace CmisSync {
         #endregion
     }
 }
-
