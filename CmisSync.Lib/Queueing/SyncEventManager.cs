@@ -59,9 +59,9 @@ namespace CmisSync.Lib.Queueing {
         public void Handle(ISyncEvent e) {
             for (int i = this.handler.Count - 1; i >= 0; i--) {
                 var h = this.handler[i];
-                if (this.handler[i].Handle(e)) {
+                if (h.Handle(e)) {
                     if (!(e is IRemoveFromLoggingEvent)) {
-                        Logger.Debug(string.Format("Event {0} was handled by {1}", e.ToString(), this.handler[i].GetType()));
+                        Logger.Debug(string.Format("Event {0} was handled by {1}", e.ToString(), h.GetType()));
                     }
 
                     return;

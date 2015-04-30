@@ -423,7 +423,6 @@ namespace TestLibrary.IntegrationTests {
             var children = this.localRootDir.GetFiles();
             Assert.That(children.Length, Is.EqualTo(1));
             var child = children.First();
-            Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
             Assert.That(child.Length, Is.EqualTo(0), child.ToString());
         }
 
@@ -876,6 +875,54 @@ namespace TestLibrary.IntegrationTests {
                 }
             }
 
+            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
+        }
+
+        [Test, Category("Slow"), MaxTime(180000)]
+        public void LocalFilesMovedToEachOthersLocationInLocalFolderTree([Values(false)]bool contentChanges, [Values("a", "Z")]string folderName) {
+            this.ContentChangesActive = contentChanges;
+            string fileNameA = "testfile.bin";
+            string fileNameB = "anotherFile.bin";
+            string contentA = "text";
+            string contentB = "another text";
+            var sourceFolderA = this.remoteRootDir.CreateFolder(folderName).CreateFolder("folder").CreateFolder("B");
+            sourceFolderA.CreateDocument(fileNameA, contentA);
+
+            var sourceFolderB = this.remoteRootDir.CreateFolder("C").CreateFolder("Folder").CreateFolder("D");
+            sourceFolderB.CreateDocument(fileNameB, contentB);
+
+            this.InitializeAndRunRepo(swallowExceptions: false);
+            this.repo.SingleStepQueue.DropAllLocalFileSystemEvents = true;
+            var rootDirs = this.localRootDir.GetDirectories();
+            var folderA = rootDirs.First().Name == folderName ? rootDirs.First() : rootDirs.Last();
+            var folderC = rootDirs.First().Name == "C" ? rootDirs.First() : rootDirs.Last();
+            var folderB = folderA.GetDirectories().First().GetDirectories().First();
+            var folderD = folderC.GetDirectories().First().GetDirectories().First();
+            var fileToBeMovedA = folderB.GetFiles().First();
+            var fileToBeMovedB = folderD.GetFiles().First();
+            fileToBeMovedA.MoveTo(Path.Combine(folderD.FullName, fileNameA));
+            fileToBeMovedB.MoveTo(Path.Combine(folderB.FullName, fileNameB));
+            this.AddStartNextSyncEvent();
+            this.repo.Run();
+
+            this.remoteRootDir.Refresh();
+            var remoteRootDirs = this.remoteRootDir.GetChildren();
+            var first = remoteRootDirs.First();
+            var last = remoteRootDirs.Last();
+            var remoteFolderC = first.Name == "C" ? first as IFolder : last as IFolder;
+            Assert.That(remoteFolderC.Name, Is.EqualTo("C"));
+            var remoteFolderFolder = remoteFolderC.GetChildren().First() as IFolder;
+            var remoteFolderD = remoteFolderFolder.GetChildren().First() as IFolder;
+            remoteFolderD.Refresh();
+            var remoteFile = remoteFolderD.GetChildren().First() as IDocument;
+
+            Assert.That(remoteFile.Name, Is.EqualTo(fileNameA));
+            Assert.That(remoteFile.ContentStreamLength, Is.EqualTo(contentA.Length));
+            folderB.Refresh();
+            Assert.That(folderB.GetFiles().First().Name, Is.Not.EqualTo(fileNameA));
+            folderD.Refresh();
+            Assert.That(folderD.GetFileSystemInfos().Count(), Is.EqualTo(folderD.GetFiles().Count()));
+            Assert.That(folderD.GetFiles().First().Name, Is.EqualTo(fileNameA));
             Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 
