@@ -131,6 +131,7 @@ SOURCES =  \
 	MockedServer/MockOfISessionFactory.cs \
 	MockedServer/MockedAce.cs \
 	MockedServer/MockedAcl.cs \
+	MockedServer/MockedChoice.cs \
 	MockedServer/MockedCmisExtensionElement.cs \
 	MockedServer/MockedCmisObject.cs \
 	MockedServer/MockedCmisServer.cs \
@@ -144,6 +145,7 @@ SOURCES =  \
 	MockedServer/MockedFolderType.cs \
 	MockedServer/MockedItemList.cs \
 	MockedServer/MockedObjectType.cs \
+	MockedServer/MockedPolicyIdList.cs \
 	MockedServer/MockedPrincipal.cs \
 	MockedServer/MockedProperty.cs \
 	MockedServer/MockedPropertyBooleanDefinition.cs \

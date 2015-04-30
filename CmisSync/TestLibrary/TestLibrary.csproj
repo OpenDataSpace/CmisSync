@@ -298,6 +298,8 @@
     <Compile Include="MockedServer\MockedPropertyIntegerDefinition.cs" />
     <Compile Include="MockedServer\MockedPropertyStringDefinition.cs" />
     <Compile Include="MockedServer\MockedPropertyUriDefinition.cs" />
+    <Compile Include="MockedServer\MockedChoice.cs" />
+    <Compile Include="MockedServer\MockedPolicyIdList.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
