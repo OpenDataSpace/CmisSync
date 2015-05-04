@@ -178,7 +178,7 @@ namespace TestLibrary.IntegrationTests {
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             IFolder subFolder = folder.CreateFolder(subFolderName);
 
-            IDocument doc = subFolder.CreateVersionedDocument(fileName, "testContent");
+            IDocument doc = subFolder.CreateDocument(fileName, "testContent", checkedOut: true);
             IObjectId checkoutId = doc.CheckOut();
             IDocument docCheckout = (IDocument)session.GetObject(checkoutId);
             Assert.AreEqual(doc.ContentStreamLength, docCheckout.ContentStreamLength);
@@ -226,7 +226,7 @@ namespace TestLibrary.IntegrationTests {
 
             string content = "testContent";
 
-            IDocument doc = subFolder.CreateVersionedDocument(fileName, "testContent");
+            IDocument doc = subFolder.CreateDocument(fileName, "testContent", checkedOut: true);
             IObjectId checkoutId = doc.CheckOut();
             IDocument docCheckout = session.GetObject(checkoutId) as IDocument;
             Assert.AreEqual(doc.ContentStreamLength, docCheckout.ContentStreamLength);

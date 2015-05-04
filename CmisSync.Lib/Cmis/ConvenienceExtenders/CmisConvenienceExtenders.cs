@@ -56,6 +56,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="folder">Parent folder.</param>
         /// <param name="name">Name of the document.</param>
         /// <param name="content">If content is not null, a content stream containing the given content will be added.</param>
+        /// <param name="checkedOut">If true, the new document will be created in checked out state.</param>
         public static IDocument CreateDocument(this IFolder folder, string name, string content, bool checkedOut = false) {
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);
@@ -69,38 +70,13 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             contentStream.FileName = name;
             contentStream.MimeType = MimeType.GetMIMEType(name);
             contentStream.Length = content.Length;
+            IDocument doc = null;
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
                 contentStream.Stream = stream;
-                return folder.CreateDocument(properties, contentStream, checkedOut ? (VersioningState?)VersioningState.CheckedOut : (VersioningState?)null);
-            }
-        }
-
-        /// <summary>
-        /// Creates the versioned document.
-        /// </summary>
-        /// <returns>The versioned document.</returns>
-        /// <param name="folder">Parent Folder.</param>
-        /// <param name="name">Name of the document.</param>
-        /// <param name="content">Content of the document.</param>
-        public static IDocument CreateVersionedDocument(this IFolder folder, string name, string content) {
-            Dictionary<string, object> properties = new Dictionary<string, object>();
-            properties.Add(PropertyIds.Name, name);
-            //  for opencmis cmis server, "VersionableType" should be used to support checkout
-            //properties.Add(PropertyIds.ObjectTypeId, "VersionableType");
-            //  for OpenDataSpace cmis gateway, "cmis:document" is ok to support checkout
-            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
-            if (string.IsNullOrEmpty(content)) {
-                return folder.CreateDocument(properties, null, VersioningState.CheckedOut);
+                doc = folder.CreateDocument(properties, contentStream, checkedOut ? (VersioningState?)VersioningState.CheckedOut : (VersioningState?)null);
             }
 
-            ContentStream contentStream = new ContentStream();
-            contentStream.FileName = name;
-            contentStream.MimeType = MimeType.GetMIMEType(name);
-            contentStream.Length = content.Length;
-            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
-                contentStream.Stream = stream;
-                return folder.CreateDocument(properties, contentStream, VersioningState.CheckedOut);
-            }
+            return doc;
         }
 
         /// <summary>
