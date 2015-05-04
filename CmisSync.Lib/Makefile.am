@@ -256,6 +256,7 @@ SOURCES =  \
 	Streams/OffsetStream.cs \
 	Streams/PausableStream.cs \
 	Streams/ProgressStream.cs \
+	Streams/StreamConvenienceExtensions.cs \
 	Streams/StreamWrapper.cs \
 	Streams/TransmissionStream.cs \
 	UiUtils/AggregatingIconLoader.cs \

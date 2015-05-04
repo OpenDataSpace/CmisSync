@@ -32,6 +32,8 @@ namespace TestLibrary {
     public class SingleStepEventQueue : ICountingQueue {
         private IEventCounter fullCounter;
         private IEventCounter categoryCounter;
+        private SyncEventHandler dropAllFsEventsHandler;
+        private bool isDroppingAllFsEvents = false;
         public ISyncEventManager Manager;
         public ConcurrentQueue<ISyncEvent> Queue = new ConcurrentQueue<ISyncEvent>();
 
@@ -43,6 +45,11 @@ namespace TestLibrary {
             this.Manager = manager;
             this.fullCounter = fullCounter ?? new QueuedEventsCounter();
             this.categoryCounter = categoryCounter ?? new QueuedCategorizedEventsCounter();
+            this.dropAllFsEventsHandler = new GenericSyncEventHandler<IFSEvent>(
+                int.MaxValue,
+                delegate(ISyncEvent e) {
+                return true;
+            });
         }
 
         public ISyncEventManager EventManager {
@@ -62,6 +69,23 @@ namespace TestLibrary {
         }
 
         public bool SwallowExceptions { get; set; }
+
+        public bool DropAllLocalFileSystemEvents {
+            get {
+                return this.isDroppingAllFsEvents;
+            }
+
+            set {
+                if (value != this.isDroppingAllFsEvents) {
+                    this.isDroppingAllFsEvents = value;
+                    if (this.isDroppingAllFsEvents) {
+                        this.Manager.AddEventHandler(this.dropAllFsEventsHandler);
+                    } else {
+                        this.Manager.RemoveEventHandler(this.dropAllFsEventsHandler);
+                    }
+                }
+            }
+        }
 
         public void AddEvent(ISyncEvent e) {
             if (e is ICountableEvent && (e as ICountableEvent).Category != EventCategory.NoCategory) {

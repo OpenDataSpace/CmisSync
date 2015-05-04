@@ -191,9 +191,11 @@ namespace TestLibrary.IntegrationTests {
             var filePath = Path.Combine(this.localRootDir.FullName, fileName);
             var fileInfo = new FileInfo(filePath);
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.WriteLine(content);
+                sw.Write(content);
             }
 
+            fileInfo.Refresh();
+            Assert.That(fileInfo.Length, Is.EqualTo(content.Length));
             DateTime modificationDate = fileInfo.LastWriteTimeUtc;
 
             this.InitializeAndRunRepo();
@@ -203,8 +205,8 @@ namespace TestLibrary.IntegrationTests {
             var child = children.First();
             Assert.That(child, Is.InstanceOf(typeof(IDocument)));
             var doc = child as IDocument;
-            Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
-            doc.AssertThatIfContentHashExistsItIsEqualTo(content);
+            Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length), "Remote content stream has wrong length");
+            this.AssertThatContentHashIsEqualToExceptedIfSupported(doc, content);
             Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
@@ -219,7 +221,7 @@ namespace TestLibrary.IntegrationTests {
             var filePath = Path.Combine(this.localRootDir.FullName, fileName);
             var fileInfo = new FileInfo(filePath);
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.WriteLine(content);
+                sw.Write(content);
             }
 
             DateTime modificationDate = DateTime.UtcNow - TimeSpan.FromHours(1);
@@ -250,7 +252,7 @@ namespace TestLibrary.IntegrationTests {
             var filePath = Path.Combine(this.localRootDir.FullName, fileName);
             var fileInfo = new FileInfo(filePath);
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.WriteLine(content);
+                sw.Write(content);
             }
 
             this.InitializeAndRunRepo();
@@ -281,7 +283,7 @@ namespace TestLibrary.IntegrationTests {
             var filePath = Path.Combine(this.localRootDir.FullName, fileName);
             var fileInfo = new FileInfo(filePath);
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.WriteLine(content);
+                sw.Write(content);
             }
 
             this.repo.SingleStepQueue.SwallowExceptions = true;
@@ -335,7 +337,7 @@ namespace TestLibrary.IntegrationTests {
             this.ContentChangesActive = contentChanges;
             string fileName = "file";
             string content = "content";
-            this.remoteRootDir.CreateDocument(fileName, content);
+            var doc = this.remoteRootDir.CreateDocument(fileName, content);
 
             this.InitializeAndRunRepo();
 
@@ -344,6 +346,8 @@ namespace TestLibrary.IntegrationTests {
             var child = children.First();
             Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
             Assert.That(child.Length, Is.EqualTo(content.Length));
+            doc.Refresh();
+            doc.AssertThatIfContentHashExistsItIsEqualTo(content);
         }
 
         [Test, Category("Slow"), MaxTime(180000)]
@@ -351,7 +355,7 @@ namespace TestLibrary.IntegrationTests {
             this.ContentChangesActive = contentChanges;
             this.InitializeAndRunRepo();
             string fileName = "file";
-            this.remoteRootDir.CreateDocument(fileName, null);
+            var doc = this.remoteRootDir.CreateDocument(fileName, null);
 
             this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
@@ -363,11 +367,13 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
             Assert.That(child.Length, Is.EqualTo(0));
             Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
+            doc.Refresh();
+            doc.AssertThatIfContentHashExistsItIsEqualTo(new byte[0]);
         }
 
-        // Timeout is set to 10 minutes for 100 x 1 MB file
+        // Timeout is set to 10 minutes for 10 x 1 MB file
         [Test, Category("Slow"), Timeout(600000)]
-        public void ManyRemoteFilesCreated([Values(100)]int fileNumber) {
+        public void ManyRemoteFilesCreated([Values(10)]int fileNumber) {
             string content = new string('A', 1024 * 1024);
             for (int i = 0; i < fileNumber; ++i) {
                 string fileName = "file" + i.ToString();
@@ -376,11 +382,19 @@ namespace TestLibrary.IntegrationTests {
 
             this.InitializeAndRunRepo();
 
-            var children = this.localRootDir.GetFiles();
-            Assert.That(children.Length, Is.EqualTo(fileNumber));
-            var child = children.First();
-            Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
-            Assert.That(child.Length, Is.EqualTo(content.Length));
+            var localFiles = this.localRootDir.GetFiles();
+            Assert.That(localFiles.Length, Is.EqualTo(fileNumber));
+            foreach (var localFile in localFiles) {
+                Assert.That(localFile, Is.InstanceOf(typeof(FileInfo)));
+                Assert.That(localFile.Length, Is.EqualTo(content.Length));
+            }
+
+            var remoteFiles = this.remoteRootDir.GetChildren();
+            Assert.That(remoteFiles.TotalNumItems, Is.EqualTo(fileNumber));
+            foreach (IDocument remoteFile in remoteFiles.OfType<IDocument>()) {
+                Assert.That(remoteFile.ContentStreamLength, Is.EqualTo(content.Length));
+                remoteFile.AssertThatIfContentHashExistsItIsEqualTo(content);
+            }
         }
 
         [Test, Category("Slow"), MaxTime(180000)]
@@ -394,11 +408,14 @@ namespace TestLibrary.IntegrationTests {
             this.InitializeAndRunRepo();
 
             doc.Refresh();
+            doc.AssertThatIfContentHashExistsItIsEqualTo(content);
+            byte[] hash = doc.ContentStreamHash();
             string oldChangeToken = doc.ChangeToken;
             doc.DeleteContentStream(true);
             string newChangeToken = doc.ChangeToken;
             Assert.That(oldChangeToken, Is.Not.EqualTo(newChangeToken));
-            Assert.That(doc.ContentStreamLength, Is.Not.EqualTo(content.Length));
+            Assert.That(doc.ContentStreamLength, Is.Null.Or.EqualTo(0));
+            doc.AssertThatIfContentHashExistsItIsEqualTo(string.Empty, string.Format("old hash was {0}", hash != null ? Utils.ToHexString(hash) : "null"));
             this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
@@ -406,7 +423,6 @@ namespace TestLibrary.IntegrationTests {
             var children = this.localRootDir.GetFiles();
             Assert.That(children.Length, Is.EqualTo(1));
             var child = children.First();
-            Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
             Assert.That(child.Length, Is.EqualTo(0), child.ToString());
         }
 
@@ -465,7 +481,7 @@ namespace TestLibrary.IntegrationTests {
             var localDoc = Path.Combine(this.localRootDir.FullName, fileName);
             var fileInfo = new FileInfo(localDoc);
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.WriteLine(localContent);
+                sw.Write(localContent);
             }
 
             Thread.Sleep(200);
@@ -487,7 +503,7 @@ namespace TestLibrary.IntegrationTests {
             var fileInfo = new FileInfo(localPath);
 
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.WriteLine(localContent);
+                sw.Write(localContent);
             }
 
             this.InitializeAndRunRepo(swallowExceptions: true);
@@ -495,7 +511,7 @@ namespace TestLibrary.IntegrationTests {
             this.remoteRootDir.GetChildren().First().Delete(true);
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.WriteLine(changedLocalContent);
+                sw.Write(changedLocalContent);
             }
 
             fileInfo.Refresh();
@@ -631,7 +647,7 @@ namespace TestLibrary.IntegrationTests {
                 var filePath = Path.Combine(this.localRootDir.FullName, string.Format("file_{0}.bin", i.ToString()));
                 var fileInfo = new FileInfo(filePath);
                 using (StreamWriter sw = fileInfo.CreateText()) {
-                    sw.WriteLine(string.Format("content of file \"{0}\"", filePath));
+                    sw.Write(string.Format("content of file \"{0}\"", filePath));
                 }
 
                 fileInfo.Refresh();
@@ -859,6 +875,54 @@ namespace TestLibrary.IntegrationTests {
                 }
             }
 
+            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
+        }
+
+        [Test, Category("Slow"), MaxTime(180000)]
+        public void LocalFilesMovedToEachOthersLocationInLocalFolderTree([Values(false)]bool contentChanges, [Values("a", "Z")]string folderName) {
+            this.ContentChangesActive = contentChanges;
+            string fileNameA = "testfile.bin";
+            string fileNameB = "anotherFile.bin";
+            string contentA = "text";
+            string contentB = "another text";
+            var sourceFolderA = this.remoteRootDir.CreateFolder(folderName).CreateFolder("folder").CreateFolder("B");
+            sourceFolderA.CreateDocument(fileNameA, contentA);
+
+            var sourceFolderB = this.remoteRootDir.CreateFolder("C").CreateFolder("Folder").CreateFolder("D");
+            sourceFolderB.CreateDocument(fileNameB, contentB);
+
+            this.InitializeAndRunRepo(swallowExceptions: false);
+            this.repo.SingleStepQueue.DropAllLocalFileSystemEvents = true;
+            var rootDirs = this.localRootDir.GetDirectories();
+            var folderA = rootDirs.First().Name == folderName ? rootDirs.First() : rootDirs.Last();
+            var folderC = rootDirs.First().Name == "C" ? rootDirs.First() : rootDirs.Last();
+            var folderB = folderA.GetDirectories().First().GetDirectories().First();
+            var folderD = folderC.GetDirectories().First().GetDirectories().First();
+            var fileToBeMovedA = folderB.GetFiles().First();
+            var fileToBeMovedB = folderD.GetFiles().First();
+            fileToBeMovedA.MoveTo(Path.Combine(folderD.FullName, fileNameA));
+            fileToBeMovedB.MoveTo(Path.Combine(folderB.FullName, fileNameB));
+            this.AddStartNextSyncEvent();
+            this.repo.Run();
+
+            this.remoteRootDir.Refresh();
+            var remoteRootDirs = this.remoteRootDir.GetChildren();
+            var first = remoteRootDirs.First();
+            var last = remoteRootDirs.Last();
+            var remoteFolderC = first.Name == "C" ? first as IFolder : last as IFolder;
+            Assert.That(remoteFolderC.Name, Is.EqualTo("C"));
+            var remoteFolderFolder = remoteFolderC.GetChildren().First() as IFolder;
+            var remoteFolderD = remoteFolderFolder.GetChildren().First() as IFolder;
+            remoteFolderD.Refresh();
+            var remoteFile = remoteFolderD.GetChildren().First() as IDocument;
+
+            Assert.That(remoteFile.Name, Is.EqualTo(fileNameA));
+            Assert.That(remoteFile.ContentStreamLength, Is.EqualTo(contentA.Length));
+            folderB.Refresh();
+            Assert.That(folderB.GetFiles().First().Name, Is.Not.EqualTo(fileNameA));
+            folderD.Refresh();
+            Assert.That(folderD.GetFileSystemInfos().Count(), Is.EqualTo(folderD.GetFiles().Count()));
+            Assert.That(folderD.GetFiles().First().Name, Is.EqualTo(fileNameA));
             Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 

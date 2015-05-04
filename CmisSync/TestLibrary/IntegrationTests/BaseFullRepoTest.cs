@@ -232,6 +232,12 @@ namespace TestLibrary.IntegrationTests {
             }
         }
 
+        protected void EnsureThatContentHashesAreSupportedByServerTypeSystem() {
+            if (!this.session.IsContentStreamHashSupported()) {
+                Assert.Ignore("Server type system does not support content hashes");
+            }
+        }
+
         protected void AssertThatDatesAreEqual(DateTime? expected, DateTime? actual, string msg = null) {
             if (msg != null) {
                 Assert.That((DateTime)actual, Is.EqualTo((DateTime)expected).Within(1).Seconds, msg);
@@ -252,6 +258,12 @@ namespace TestLibrary.IntegrationTests {
             }
 
             this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(forceCrawl));
+        }
+
+        protected void AssertThatContentHashIsEqualToExceptedIfSupported(IDocument doc, string content) {
+            if (this.session.IsContentStreamHashSupported()) {
+                Assert.That(doc.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(content), Is.True);
+            }
         }
 
         protected virtual void Dispose(bool disposing) {

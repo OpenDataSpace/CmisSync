@@ -113,7 +113,7 @@ namespace TestLibrary.IntegrationTests {
             string filename = "testfile.txt";
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             IDocument doc = null;
             try {
                 doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
@@ -178,7 +178,7 @@ namespace TestLibrary.IntegrationTests {
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             IFolder subFolder = folder.CreateFolder(subFolderName);
 
-            IDocument doc = subFolder.CreateVersionedDocument(fileName, "testContent");
+            IDocument doc = subFolder.CreateDocument(fileName, "testContent", checkedOut: true);
             IObjectId checkoutId = doc.CheckOut();
             IDocument docCheckout = (IDocument)session.GetObject(checkoutId);
             Assert.AreEqual(doc.ContentStreamLength, docCheckout.ContentStreamLength);
@@ -226,7 +226,7 @@ namespace TestLibrary.IntegrationTests {
 
             string content = "testContent";
 
-            IDocument doc = subFolder.CreateVersionedDocument(fileName, "testContent");
+            IDocument doc = subFolder.CreateDocument(fileName, "testContent", checkedOut: true);
             IObjectId checkoutId = doc.CheckOut();
             IDocument docCheckout = session.GetObject(checkoutId) as IDocument;
             Assert.AreEqual(doc.ContentStreamLength, docCheckout.ContentStreamLength);
@@ -408,7 +408,7 @@ namespace TestLibrary.IntegrationTests {
 
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             IList<string> devices = new List<string>();
             devices.Add("*");
             properties.Add("gds:ignoreDeviceIds", devices);
@@ -456,7 +456,7 @@ namespace TestLibrary.IntegrationTests {
 
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             using (var oneByteStream = new MemoryStream(new byte[1])) {
                 ContentStream contentStream = new ContentStream();
                 contentStream.MimeType = MimeType.GetMIMEType(filename);
@@ -528,7 +528,7 @@ namespace TestLibrary.IntegrationTests {
             string filename = "testfile.txt";
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             try {
                 IDocument doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
                 if (doc != null) {
@@ -629,7 +629,7 @@ namespace TestLibrary.IntegrationTests {
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
             Dictionary<string, object> properties = new Dictionary<string, object>();
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             properties.Add(PropertyIds.Name, filename);
             properties.Add(PropertyIds.CreationDate, creationDate);
             properties.Add(PropertyIds.LastModificationDate, modificationDate);
@@ -658,7 +658,7 @@ namespace TestLibrary.IntegrationTests {
             string filename = "testfile.txt";
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             try {
                 IDocument doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
                 if (doc != null) {
@@ -700,7 +700,7 @@ namespace TestLibrary.IntegrationTests {
             string filename = "testfile.jpg";
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             try {
                 IDocument doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
                 if (doc != null) {

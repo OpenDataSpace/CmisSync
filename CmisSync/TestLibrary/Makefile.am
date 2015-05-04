@@ -56,6 +56,7 @@ SOURCES =  \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedRemoteObjectMovedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedRemoteObjectRenamedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedTest.cs \
+	ConsumerTests/SituationSolverTests/PrivateWorkingCopyTests/AbstractEnhancedSolverWithPWCTest.cs \
 	ConsumerTests/SituationSolverTests/PrivateWorkingCopyTests/LocalObjectAddedWithPWCTest.cs \
 	ConsumerTests/SituationSolverTests/PrivateWorkingCopyTests/LocalObjectChangedRemoteObjectChangedWithPWCTest.cs \
 	ConsumerTests/SituationSolverTests/PrivateWorkingCopyTests/LocalObjectChangedWithPWCTest.cs \
@@ -103,6 +104,7 @@ SOURCES =  \
 	IntegrationTests/BaseFullRepoTest.cs \
 	IntegrationTests/ClientBrandTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
+	IntegrationTests/ContentHashTests/CRUDTests.cs \
 	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/DownloadLinkTests.cs \
 	IntegrationTests/FileSystemEventOrderTest.cs \
@@ -110,6 +112,8 @@ SOURCES =  \
 	IntegrationTests/FullRepoTests.cs \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
+	IntegrationTests/MockedServerTests/SetupDocumentTest.cs \
+	IntegrationTests/MockedServerTests/SetupFolderTest.cs \
 	IntegrationTests/NeedsLocalFileSystemFolder.cs \
 	IntegrationTests/PrivateWorkingCopyTests/AppendContentStreamTests.cs \
 	IntegrationTests/PrivateWorkingCopyTests/CreateDocumentTests.cs \
@@ -122,13 +126,40 @@ SOURCES =  \
 	IntegrationTests/TestNameAttribute.cs \
 	IntegrationTests/UploadFileIT.cs \
 	IntegrationTests/UploadSlowWrittenFile.cs \
+	MockedServer/IContentChangeEventNotifier.cs \
 	MockedServer/MockOfIAclCapabilities.cs \
-	MockedServer/MockOfIRepository.cs \
-	MockedServer/MockOfISession.cs \
 	MockedServer/MockOfISessionFactory.cs \
+	MockedServer/MockedAce.cs \
+	MockedServer/MockedAcl.cs \
+	MockedServer/MockedChoice.cs \
+	MockedServer/MockedCmisExtensionElement.cs \
+	MockedServer/MockedCmisObject.cs \
 	MockedServer/MockedCmisServer.cs \
 	MockedServer/MockedCmisUserAccount.cs \
+	MockedServer/MockedContentStream.cs \
+	MockedServer/MockedDocument.cs \
+	MockedServer/MockedDocumentType.cs \
+	MockedServer/MockedExtensionsData.cs \
+	MockedServer/MockedFileableCmisObject.cs \
 	MockedServer/MockedFolder.cs \
+	MockedServer/MockedFolderType.cs \
+	MockedServer/MockedItemList.cs \
+	MockedServer/MockedObjectType.cs \
+	MockedServer/MockedPolicyIdList.cs \
+	MockedServer/MockedPrincipal.cs \
+	MockedServer/MockedProperty.cs \
+	MockedServer/MockedPropertyBooleanDefinition.cs \
+	MockedServer/MockedPropertyDateTimeDefinition.cs \
+	MockedServer/MockedPropertyDecimalDefinition.cs \
+	MockedServer/MockedPropertyDefinition.cs \
+	MockedServer/MockedPropertyHtmlDefinition.cs \
+	MockedServer/MockedPropertyIdDefinition.cs \
+	MockedServer/MockedPropertyIntegerDefinition.cs \
+	MockedServer/MockedPropertyStringDefinition.cs \
+	MockedServer/MockedPropertyUriDefinition.cs \
+	MockedServer/MockedRepository.cs \
+	MockedServer/MockedSession.cs \
+	MockedServer/MockedTypeDefinition.cs \
 	MoqExtensions/MoqExtensions.cs \
 	PathMatcherTests/PathMatcherTest.cs \
 	ProducerTests/ContentChangeTests/ContentChangeEventAccumulatorTest.cs \

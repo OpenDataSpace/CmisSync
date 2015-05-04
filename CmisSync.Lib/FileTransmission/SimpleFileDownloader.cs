@@ -82,6 +82,7 @@ namespace CmisSync.Lib.FileTransmission {
             using (Stream remoteStream = contentStream != null ? contentStream.Stream : new MemoryStream(0)) {
                 transmission.Length = remoteDocument.ContentStreamLength;
                 transmission.Position = offset;
+                int written = 0;
                 while ((len = remoteStream.Read(buffer, 0, buffer.Length)) > 0) {
                     lock (this.disposeLock) {
                         if (this.disposed) {
@@ -89,17 +90,33 @@ namespace CmisSync.Lib.FileTransmission {
                             throw new ObjectDisposedException(transmission.Path);
                         }
 
-                        hashstream.Write(buffer, 0, len);
-                        hashstream.Flush();
+                        try {
+                            hashstream.Write(buffer, 0, len);
+                            hashstream.Flush();
+                            written += len;
+                        } catch (Exception ex) {
+                            UpdateHash(hashAlg, localFileStream.Length, update);
+                            throw;
+                        }
 
-                        HashAlgorithmReuse reuse = hashAlg as HashAlgorithmReuse;
-                        if (reuse != null && update != null) {
-                            using (HashAlgorithm hash = (HashAlgorithm)reuse.Clone()) {
-                                hash.TransformFinalBlock(new byte[0], 0, 0);
-                                update(hash.Hash, localFileStream.Length);
-                            }
+                        if (written >= 1024 * 1024) {
+                            UpdateHash(hashAlg, localFileStream.Length, update);
+                            written = 0;
                         }
                     }
+                }
+                if (written > 0) {
+                    UpdateHash(hashAlg, localFileStream.Length, update);
+                }
+            }
+        }
+
+        private void UpdateHash(HashAlgorithm hash, long length, UpdateChecksum update) {
+            HashAlgorithmReuse reuse = hash as HashAlgorithmReuse;
+            if (reuse != null && update != null) {
+                using (HashAlgorithm hashReuse = (HashAlgorithm)reuse.Clone()) {
+                    hashReuse.TransformFinalBlock(new byte[0], 0, 0);
+                    update(hashReuse.Hash, length);
                 }
             }
         }

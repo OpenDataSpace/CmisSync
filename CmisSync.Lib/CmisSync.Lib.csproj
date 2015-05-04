@@ -314,6 +314,7 @@
     <Compile Include="UiUtils\Icons.cs" />
     <Compile Include="UiUtils\IIconLoader.cs" />
     <Compile Include="UiUtils\AggregatingIconLoader.cs" />
+    <Compile Include="Streams\StreamConvenienceExtensions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

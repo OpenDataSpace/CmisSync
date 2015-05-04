@@ -166,8 +166,6 @@
     <Compile Include="IntegrationTests\TestNameAttribute.cs" />
     <Compile Include="IntegrationTests\UploadFileIT.cs" />
     <Compile Include="MockedServer\MockOfIAclCapabilities.cs" />
-    <Compile Include="MockedServer\MockOfIRepository.cs" />
-    <Compile Include="MockedServer\MockOfISession.cs" />
     <Compile Include="MockedServer\MockOfISessionFactory.cs" />
     <Compile Include="MockedServer\MockedCmisServer.cs" />
     <Compile Include="MockedServer\MockedCmisUserAccount.cs" />
@@ -271,6 +269,39 @@
     <Compile Include="CmisTests\UiUtilsTests\UiConvenienceExtendersTest.cs" />
     <Compile Include="UtilsTests\IconsTest.cs" />
     <Compile Include="UtilsTests\IconLoaderAggregationTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\PrivateWorkingCopyTests\AbstractEnhancedSolverWithPWCTest.cs" />
+    <Compile Include="IntegrationTests\ContentHashTests\CRUDTests.cs" />
+    <Compile Include="MockedServer\MockedDocument.cs" />
+    <Compile Include="MockedServer\MockedDocumentType.cs" />
+    <Compile Include="MockedServer\MockedItemList.cs" />
+    <Compile Include="MockedServer\MockedSession.cs" />
+    <Compile Include="MockedServer\MockedRepository.cs" />
+    <Compile Include="MockedServer\MockedCmisObject.cs" />
+    <Compile Include="IntegrationTests\MockedServerTests\SetupDocumentTest.cs" />
+    <Compile Include="MockedServer\IContentChangeEventNotifier.cs" />
+    <Compile Include="MockedServer\MockedAcl.cs" />
+    <Compile Include="MockedServer\MockedAce.cs" />
+    <Compile Include="MockedServer\MockedPrincipal.cs" />
+    <Compile Include="MockedServer\MockedExtensionsData.cs" />
+    <Compile Include="MockedServer\MockedCmisExtensionElement.cs" />
+    <Compile Include="IntegrationTests\MockedServerTests\SetupFolderTest.cs" />
+    <Compile Include="MockedServer\MockedObjectType.cs" />
+    <Compile Include="MockedServer\MockedTypeDefinition.cs" />
+    <Compile Include="MockedServer\MockedFolderType.cs" />
+    <Compile Include="MockedServer\MockedFileableCmisObject.cs" />
+    <Compile Include="MockedServer\MockedContentStream.cs" />
+    <Compile Include="MockedServer\MockedProperty.cs" />
+    <Compile Include="MockedServer\MockedPropertyDefinition.cs" />
+    <Compile Include="MockedServer\MockedPropertyBooleanDefinition.cs" />
+    <Compile Include="MockedServer\MockedPropertyDateTimeDefinition.cs" />
+    <Compile Include="MockedServer\MockedPropertyDecimalDefinition.cs" />
+    <Compile Include="MockedServer\MockedPropertyHtmlDefinition.cs" />
+    <Compile Include="MockedServer\MockedPropertyIdDefinition.cs" />
+    <Compile Include="MockedServer\MockedPropertyIntegerDefinition.cs" />
+    <Compile Include="MockedServer\MockedPropertyStringDefinition.cs" />
+    <Compile Include="MockedServer\MockedPropertyUriDefinition.cs" />
+    <Compile Include="MockedServer\MockedChoice.cs" />
+    <Compile Include="MockedServer\MockedPolicyIdList.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -304,5 +335,7 @@
   <ItemGroup />
   <ItemGroup>
     <Folder Include="IntegrationTests\PrivateWorkingCopyTests\" />
+    <Folder Include="IntegrationTests\ContentHashTests\" />
+    <Folder Include="IntegrationTests\MockedServerTests\" />
   </ItemGroup>
 </Project>

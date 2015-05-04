@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="MockOfIRepository.cs" company="GRAU DATA AG">
+// <copyright file="MockedRepository.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.MockedServer
-{
+namespace TestLibrary.MockedServer {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -31,9 +30,8 @@ namespace TestLibrary.MockedServer
 
     using TestLibrary.TestUtils;
 
-    public class MockOfIRepository : Mock<IRepository>
-    {
-        private static Dictionary<string, MockOfIRepository> repositories = new Dictionary<string, MockOfIRepository>();
+    public class MockedRepository : Mock<IRepository> {
+        private static Dictionary<string, MockedRepository> repositories = new Dictionary<string, MockedRepository>();
 
         private MockedFolder rootFolder = new MockedFolder("/");
 
@@ -43,11 +41,11 @@ namespace TestLibrary.MockedServer
             }
         }
 
-        public static MockOfIRepository GetRepository(string id) {
+        public static MockedRepository GetRepository(string id) {
             lock (repositories) {
-                MockOfIRepository repo;
+                MockedRepository repo;
                 if (!repositories.TryGetValue(id, out repo)) {
-                    repo = new MockOfIRepository(id);
+                    repo = new MockedRepository(id);
                     repositories[id] = repo;
                 }
 
@@ -63,7 +61,7 @@ namespace TestLibrary.MockedServer
             repositories.Remove(this.Object.Id);
         }
 
-        private MockOfIRepository(string id) : base(MockBehavior.Strict) {
+        private MockedRepository(string id) : base(MockBehavior.Strict) {
             this.Setup(r => r.Name).Returns("name");
             this.Setup(r => r.Id).Returns(id);
             this.Setup(r => r.Description).Returns("desc");
@@ -74,7 +72,7 @@ namespace TestLibrary.MockedServer
                 c.SupportedPermissions == SupportedPermissions.Basic &&
                 c.PermissionMapping == new Dictionary<string, IPermissionMapping>());
             this.Setup(r => r.AclCapabilities).Returns(acls);
-            this.Setup(r => r.CreateSession()).Returns(new MockOfISession(this).Object);
+            this.Setup(r => r.CreateSession()).Returns(new MockedSession(this).Object);
         }
     }
 }

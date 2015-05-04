@@ -30,7 +30,7 @@ namespace CmisSync.Lib.Cmis.UiUtils {
     /// <summary>
     /// Login credentials helper class for creating new connections and handle result if it fails.
     /// </summary>
-    public class LoginCredentials : IComparable {
+    public class LoginCredentials {
         /// <summary>
         /// Gets or sets the failed exception.
         /// </summary>
@@ -50,22 +50,32 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         public IList<LogonRepositoryInfo> Repositories { get; private set; }
 
         /// <summary>
-        /// Compares to.
+        /// Gets the priority based on the LoginException.
         /// </summary>
-        /// <returns>The to.</returns>
-        /// <param name="obj">Object.</param>
-        public int CompareTo(object obj) {
-            if (obj is LoginCredentials) {
-                return this.GetPriority(this.FailedException).CompareTo(this.GetPriority((obj as LoginCredentials).FailedException));
-            } else {
-                throw new ArgumentException("Given credentials are invalid");
+        /// <value>The priority.</value>
+        public int Priority {
+            get {
+                if (this.FailedException == null) {
+                    return 10;
+                } else {
+                    return (int)this.FailedException.Type;
+                }
             }
         }
 
+        /// <summary>
+        /// Tries to log in on with the given credentials
+        /// </summary>
+        /// <returns><c>true</c>, if login was successful, <c>false</c> otherwise.</returns>
         public bool LogIn() {
             return this.LogIn(null);
         }
 
+        /// <summary>
+        /// Tries to log in on with the given credentials
+        /// </summary>
+        /// <returns><c>true</c>, if login was successful, <c>false</c> otherwise.</returns>
+        /// <param name="sessionFactory">Use the given session factory for login. If null is passed, the default DotCMIS SessionFactory is used.</param>
         public bool LogIn(ISessionFactory sessionFactory) {
             // Create session factory if non is given
             var factory = sessionFactory ?? SessionFactory.NewInstance();
@@ -78,16 +88,12 @@ namespace CmisSync.Lib.Cmis.UiUtils {
             }
         }
 
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Cmis.UiUtils.LoginCredentials"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Cmis.UiUtils.LoginCredentials"/>.</returns>
         public override string ToString() {
-            return string.Format("[LoginCredentials: Credentials={1}, FailedException={0}]", FailedException, Credentials);
-        }
-
-        private int GetPriority(LoginException ex) {
-            if (ex == null) {
-                return 10;
-            } else {
-                return (int)ex.Type;
-            }
+            return string.Format("[LoginCredentials: Credentials={1}, FailedException={0}]", this.FailedException, this.Credentials);
         }
     }
 }

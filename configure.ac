@@ -34,6 +34,12 @@ SHAMROCK_CHECK_MONO_4_0_GAC_ASSEMBLIES([
     System.Configuration
     System.Security
     System.Windows.Forms
+    System.Xml
+    System.Xml.Linq
+    System.Net
+    System.Web
+    System.Core
+    System.Runtime.Serialization
     Mono.Posix
 ])]
 )

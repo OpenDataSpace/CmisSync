@@ -21,11 +21,13 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
     using DotCMIS;
     using DotCMIS.Client;
+    using DotCMIS.Enums;
     using DotCMIS.Exceptions;
 
     using NUnit.Framework;
@@ -38,17 +40,21 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
         private readonly string content = "content";
 
         [Test, Category("Slow"), MaxTime(180000)]
-        public void CreateCheckedOutDocument([Values(true, false)]bool withPropertiesOnCheckIn) {
+        public void CreateCheckedOutDocument([Values(true, false)]bool withPropertiesOnCheckIn, [Values(true, false)]bool deleteExistingContentStream) {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
 
             var doc = this.remoteRootDir.CreateDocument(this.fileName, (string)null, checkedOut: true);
             this.remoteRootDir.Refresh();
+            if (deleteExistingContentStream) {
+                doc.DeleteContentStream();
+            }
+
             doc.SetContent(this.content);
             Dictionary<string, object> properties = null;
             if (withPropertiesOnCheckIn) {
                 properties = new Dictionary<string, object>();
                 properties.Add(PropertyIds.Name, this.fileName);
-                properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+                properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             }
 
             var newObjectId = doc.CheckIn(true, properties, null, string.Empty);
@@ -58,7 +64,9 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(this.fileName));
             Assert.That(newDocument.Name, Is.EqualTo(this.fileName));
             Assert.That(newDocument.ContentStreamLength, Is.EqualTo(this.content.Length));
-            newDocument.AssertThatIfContentHashExistsItIsEqualTo(this.content);
+            if (this.session.IsContentStreamHashSupported()) {
+                Assert.That(newDocument.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(content), Is.True);
+            }
         }
 
         [Test, Category("Slow"), MaxTime(180000)]
@@ -101,7 +109,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             var properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.LastModificationDate, past);
             doc = this.session.GetObject(doc.CheckIn(true, properties, null, string.Empty)) as IDocument;
-
+            doc.Refresh();
             Assert.That(doc.LastModificationDate, Is.EqualTo(past).Within(1).Seconds);
         }
     }

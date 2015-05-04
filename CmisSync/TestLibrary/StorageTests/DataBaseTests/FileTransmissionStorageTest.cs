@@ -71,13 +71,25 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast"), Category("FileTransmissionStorage")]
-        public void ConstructorThrowsExceptionIfEngineIsNull() {
+        public void ConstructorThrowsExceptionIfDbEngineIsNull() {
             Assert.Throws<ArgumentNullException>(() => new FileTransmissionStorage(null));
         }
 
         [Test, Category("Fast"), Category("FileTransmissionStorage")]
-        public void ConstructorTakesData() {
-            new FileTransmissionStorage(this.engine);
+        public void ConstructorTakesDbEngine() {
+            var underTest = new FileTransmissionStorage(this.engine);
+            Assert.That(underTest.ChunkSize, Is.GreaterThan(0));
+        }
+
+        [Test, Category("Fast"), Category("FileTransmissionStorage")]
+        public void ConstructorTakesDbEngineAndChunkSize([Values(1, 1024, 12345)]long chunkSize) {
+            var underTest = new FileTransmissionStorage(this.engine, chunkSize);
+            Assert.That(underTest.ChunkSize, Is.EqualTo(chunkSize));
+        }
+
+        [Test, Category("Fast"), Category("FileTransmissionStorage")]
+        public void ConstructurThrowsExceptionIfChunkSizeIsZeroOrNegative([Values(0, -1, -1024)]long chunkSize) {
+            Assert.Throws<ArgumentException>(() => new FileTransmissionStorage(this.engine, chunkSize));
         }
 
         [Test, Category("Fast"), Category("FileTransmissionStorage")]

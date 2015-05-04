@@ -78,6 +78,8 @@ SOURCES =  \
 	TransmissionWidget.cs \
 	TransmissionWidget.designer.cs \
 	TransmissionWidgetController.cs \
+	TransmissionWidgetItem.cs \
+	TransmissionWidgetItem.designer.cs \
 	TextFieldDelegate.cs \
 	UI.cs \
 	UIHelpers.cs

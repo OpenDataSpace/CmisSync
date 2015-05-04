@@ -47,7 +47,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private readonly string parentId = "parentId";
         private readonly string changeToken = "changeToken";
         private readonly long chunkSize = 8 * 1024;
-        private readonly int chunkCount = 4;
+        private int chunkCount = 4;
         private readonly byte[] emptyHash = SHA1.Create().ComputeHash(new byte[0]);
 
         private Mock<ISession> session;
@@ -69,6 +69,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
         [SetUp]
         public void SetUp() {
+            Setup(4);
+        }
+
+        private void Setup(int chunk) {
+            this.chunkCount = chunk;
+
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.fsFactory = new Mock<IFileSystemInfoFactory>(MockBehavior.Strict);
@@ -119,6 +125,40 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.RunSolverToAbortDownload(solver);
 
             this.RunSolverToContinueDownload(solver);
+            this.cacheFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
+            this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
+        }
+
+        /// <summary>
+        /// Abort will occur after two chunk download, and abort will trigger one save
+        /// Downloader will save database after 1M bytes download
+        /// </summary>
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFileAddedWithTwoSave() {
+            Setup((int)((1024 * 1024 + this.chunkSize - 1 + 2 * this.chunkSize) / this.chunkSize));
+            var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+
+            this.RunSolverToAbortDownload(solver);
+
+            this.RunSolverToContinueDownload(solver);
+            this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.Exactly(2));
+            this.cacheFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
+            this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
+        }
+
+        /// <summary>
+        /// Abort will occur after two chunk download, and abort will trigger one save
+        /// Downloader will save database after 1M bytes download
+        /// </summary>
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFileAddedWithThreeSave() {
+            Setup((int)((1024 * 1024 + 2 * this.chunkSize - 1 + 2 * this.chunkSize) / this.chunkSize));
+            var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+
+            this.RunSolverToAbortDownload(solver);
+
+            this.RunSolverToContinueDownload(solver);
+            this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.Exactly(3));
             this.cacheFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
             this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
         }
@@ -268,7 +308,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Never());
             this.localFile.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Never());
             this.transmissionStorage.Verify(f => f.GetObjectByRemoteObjectId(It.IsAny<string>()), Times.Once());
-            this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.Exactly(2));
+            this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.AtLeastOnce());
             this.transmissionStorage.Verify(f => f.RemoveObjectByRemoteObjectId(It.IsAny<string>()), Times.Never());
             this.storage.Verify(f => f.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
         }

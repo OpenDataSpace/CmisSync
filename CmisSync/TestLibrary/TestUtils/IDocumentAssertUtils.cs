@@ -21,6 +21,7 @@ namespace TestLibrary.TestUtils {
     using System;
     using System.Security.Cryptography;
     using System.Text;
+    using System.Threading;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
@@ -29,16 +30,36 @@ namespace TestLibrary.TestUtils {
     using NUnit.Framework;
 
     public static class IDocumentAssertUtils {
-        public static void AssertThatIfContentHashExistsItIsEqualTo(this IDocument doc, string content) {
-            doc.AssertThatIfContentHashExistsItIsEqualToHash(ComputeSha1Hash(content));
+        public static void AssertThatIfContentHashExistsItIsEqualTo(this IDocument doc, string content, string msg = null) {
+            doc.AssertThatIfContentHashExistsItIsEqualToHash(ComputeSha1Hash(content), msg: msg);
         }
 
-        public static void AssertThatIfContentHashExistsItIsEqualTo(this IDocument doc, byte[] content) {
-            doc.AssertThatIfContentHashExistsItIsEqualToHash(ComputeSha1Hash(content));
+        public static void AssertThatIfContentHashExistsItIsEqualTo(this IDocument doc, byte[] content, string msg = null) {
+            doc.AssertThatIfContentHashExistsItIsEqualToHash(ComputeSha1Hash(content), msg: msg);
         }
 
-        public static void AssertThatIfContentHashExistsItIsEqualToHash(this IDocument doc, byte[] expectedHash, string type = "SHA-1") {
-            Assert.That(doc.ContentStreamHash(type), Is.Null.Or.EqualTo(expectedHash));
+        public static void AssertThatIfContentHashExistsItIsEqualToHash(this IDocument doc, byte[] expectedHash, string type = "SHA-1", string msg = null) {
+            if (msg == null) {
+                Assert.That(doc.ContentStreamHash(type), Is.Null.Or.EqualTo(expectedHash));
+            } else {
+                Assert.That(doc.ContentStreamHash(type), Is.Null.Or.EqualTo(expectedHash), msg);
+            }
+        }
+
+        public static bool VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(this IDocument doc, string content, int timeoutInSeconds = 30) {
+            doc.AssertThatIfContentHashExistsItIsEqualTo(content);
+            int loops = 0;
+            while (doc.ContentStreamHash() == null && loops < timeoutInSeconds) {
+                loops++;
+                Thread.Sleep(1000);
+                doc.Refresh();
+                doc.AssertThatIfContentHashExistsItIsEqualTo(content);
+                if (doc.ContentStreamHash() != null) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public static byte[] ComputeSha1Hash(string content) {

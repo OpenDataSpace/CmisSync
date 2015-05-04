@@ -154,7 +154,7 @@ namespace CmisSync {
                 }
             }
 
-            return multipleCredentials.OrderBy(cred => cred.FailedException.Type).First();
+            return multipleCredentials.OrderBy(cred => cred.Priority).First();
         }
 
         /// <summary>

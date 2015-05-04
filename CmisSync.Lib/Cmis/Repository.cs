@@ -266,8 +266,7 @@ namespace CmisSync.Lib.Cmis {
 
             // Initialize storage
             this.storage = new MetaDataStorage(this.db, new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath));
-            this.fileTransmissionStorage = new FileTransmissionStorage(this.db);
-            this.fileTransmissionStorage.ChunkSize = RepoInfo.ChunkSize;
+            this.fileTransmissionStorage = new FileTransmissionStorage(this.db, RepoInfo.ChunkSize);
 
             // Add ignore file/folder filter
             this.ignoredFoldersFilter = new IgnoredFoldersFilter { IgnoredPaths = new List<string>(repoInfo.GetIgnoredPaths()) };

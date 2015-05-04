@@ -93,7 +93,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <value><c>true</c> if server can modify date times; otherwise, <c>false</c>.</value>
         protected bool ServerCanModifyDateTimes { get; private set; }
 
-        protected IFileTransmissionStorage TransmissionStorage { get; set; }
+        protected IFileTransmissionStorage TransmissionStorage { get; private set; }
 
         /// <summary>
         /// Solve the specified situation by using localFile and remote object.

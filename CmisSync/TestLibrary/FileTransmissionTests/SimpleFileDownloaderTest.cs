@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="SimpleFileDownloaderTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -28,6 +28,7 @@ namespace TestLibrary.FileTransmissionTests {
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.HashAlgorithm;
 
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -54,6 +55,10 @@ namespace TestLibrary.FileTransmissionTests {
 
         [SetUp]
         public void SetUp() {
+            SetUp(1024 * 1024);
+        }
+
+        private void SetUp(long length) {
             this.transmission = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "testfile");
             this.transmission.AddDefaultConstraints();
             if (this.localFileStream != null) {
@@ -66,7 +71,7 @@ namespace TestLibrary.FileTransmissionTests {
             }
 
             this.hashAlg = new SHA1Managed();
-            this.remoteLength = 1024 * 1024;
+            this.remoteLength = length;
             this.remoteContent = new byte[this.remoteLength];
             if (this.random != null) {
                 this.random.Dispose();
@@ -99,6 +104,60 @@ namespace TestLibrary.FileTransmissionTests {
 
             using (IFileDownloader downloader = new SimpleFileDownloader()) {
                 downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg);
+                Assert.AreEqual(this.remoteContent.Length, this.localFileStream.Length);
+                Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.remoteContent), this.hashAlg.Hash);
+                Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.localFileStream.ToArray()), this.hashAlg.Hash);
+            }
+        }
+
+        /// <summary>
+        /// downloader will save the checksum to database for every 1M byte download
+        /// 1 byte will save the database one time
+        /// </summary>
+        [Test, Category("Fast")]
+        public void DownloadWithOneUpdate() {
+            SetUp(1);
+            this.hashAlg = new SHA1Reuse();
+            using (IFileDownloader downloader = new SimpleFileDownloader()) {
+                int count = 0;
+                downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg, (byte[] checksum, long length) => { ++count; });
+                Assert.AreEqual(1, count);
+                Assert.AreEqual(this.remoteContent.Length, this.localFileStream.Length);
+                Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.remoteContent), this.hashAlg.Hash);
+                Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.localFileStream.ToArray()), this.hashAlg.Hash);
+            }
+        }
+
+        /// <summary>
+        /// downloader will save the checksum to database for every 1M byte download
+        /// 2M bytes will save the database two times
+        /// </summary>
+        [Test, Category("Fast")]
+        public void DownloadWithTwoUpdate() {
+            SetUp(2 * 1024 * 1024);
+            this.hashAlg = new SHA1Reuse();
+            using (IFileDownloader downloader = new SimpleFileDownloader()) {
+                int count = 0;
+                downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg, (byte[] checksum, long length) => { ++count; });
+                Assert.AreEqual(2, count);
+                Assert.AreEqual(this.remoteContent.Length, this.localFileStream.Length);
+                Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.remoteContent), this.hashAlg.Hash);
+                Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.localFileStream.ToArray()), this.hashAlg.Hash);
+            }
+        }
+
+        /// <summary>
+        /// downloader will save the checksum to database for every 1M byte download
+        /// 2M + 1 bytes will save the database three times
+        /// </summary>
+        [Test, Category("Fast")]
+        public void DownloadWithThreeUpdate() {
+            SetUp(2 * 1024 * 1024 + 1);
+            this.hashAlg = new SHA1Reuse();
+            using (IFileDownloader downloader = new SimpleFileDownloader()) {
+                int count = 0;
+                downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg, (byte[] checksum, long length) => { ++count; });
+                Assert.AreEqual(3, count);
                 Assert.AreEqual(this.remoteContent.Length, this.localFileStream.Length);
                 Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.remoteContent), this.hashAlg.Hash);
                 Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.localFileStream.ToArray()), this.hashAlg.Hash);
