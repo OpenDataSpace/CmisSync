@@ -305,6 +305,9 @@
     <Compile Include="MockedServer\MockedAclCapabilities.cs" />
     <Compile Include="MockedServer\MockedPermissionDefinition.cs" />
     <Compile Include="MockedServer\MockedPermissionMapping.cs" />
+    <Compile Include="MockedServer\MockedCmisBinding.cs" />
+    <Compile Include="MockedServer\MockedRepositoryService.cs" />
+    <Compile Include="MockedServer\MockedSessionFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

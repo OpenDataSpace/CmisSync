@@ -163,7 +163,10 @@ SOURCES =  \
 	MockedServer/MockedPropertyUriDefinition.cs \
 	MockedServer/MockedRepository.cs \
 	MockedServer/MockedRepositoryInfo.cs \
+	MockedServer/MockedRepositoryService.cs \
 	MockedServer/MockedSession.cs \
+	MockedServer/MockedSessionFactory.cs \
+	MockedServer/MockedSessionFactory.cs \
 	MockedServer/MockedTypeDefinition.cs \
 	MoqExtensions/MoqExtensions.cs \
 	PathMatcherTests/PathMatcherTest.cs \
