@@ -38,19 +38,19 @@ namespace TestLibrary.MockedServer {
         private Mock<ICmisBinding> binding = new Mock<ICmisBinding>(MockBehavior.Strict);
         private Mock<IRepositoryService> repoService = new Mock<IRepositoryService>(MockBehavior.Strict);
 
-        public MockedSession(MockedRepository repo, MockBehavior behavior = MockBehavior.Strict) : base(behavior) {
+        public MockedSession(IRepositoryInfo repo, MockBehavior behavior = MockBehavior.Strict) : base(behavior) {
             // TypeSystem
             IList<IPropertyDefinition> props = new List<IPropertyDefinition>();
             props.Add(Mock.Of<IPropertyDefinition>(p => p.Id == PropertyIds.LastModificationDate && p.Updatability == DotCMIS.Enums.Updatability.ReadWrite));
             var docType = Mock.Of<IObjectType>(d => d.PropertyDefinitions == props);
             var folderType = Mock.Of<IObjectType>(d => d.PropertyDefinitions == props);
-            this.repoService.Setup(s => s.GetTypeDefinition(repo.Object.Id, BaseTypeId.CmisDocument.GetCmisValue(), null)).Returns(docType);
-            this.repoService.Setup(s => s.GetTypeDefinition(repo.Object.Id, BaseTypeId.CmisFolder.GetCmisValue(), null)).Returns(folderType);
+            this.repoService.Setup(s => s.GetTypeDefinition(repo.Id, BaseTypeId.CmisDocument.GetCmisValue(), null)).Returns(docType);
+            this.repoService.Setup(s => s.GetTypeDefinition(repo.Id, BaseTypeId.CmisFolder.GetCmisValue(), null)).Returns(folderType);
 
             this.repoService.Setup(s => s.GetRepositoryInfos(It.IsAny<IExtensionsData>())).Returns((IList<IRepositoryInfo>)null);
             this.binding.Setup(b => b.GetRepositoryService()).Returns(this.repoService.Object);
             this.Setup(s => s.Binding).Returns(this.binding.Object);
-            this.Setup(s => s.RepositoryInfo.Id).Returns(repo.Object.Id);
+            this.Setup(s => s.RepositoryInfo.Id).Returns(repo.Id);
 
             this.Setup(s => s.Delete(It.Is<IObjectId>(o => this.Objects.ContainsKey(o.Id)))).Callback<IObjectId>((o) => this.Objects.Remove(o.Id));
             this.Setup(s => s.Delete(It.Is<IObjectId>(o => this.Objects.ContainsKey(o.Id)), It.IsAny<bool>())).Callback<IObjectId, bool>((o, a) => this.Objects.Remove(o.Id));
@@ -70,6 +70,12 @@ namespace TestLibrary.MockedServer {
 
         private ICmisObject GetObjectByPath(string path) {
             return this.Objects.First((o) => (o.Value is IFileableCmisObject && (o.Value as IFileableCmisObject).Paths.Contains(path))).Value;
+        }
+
+        public void AddObjects(params ICmisObject[] objects) {
+            foreach (var obj in objects) {
+                this.Objects[obj.Id] = obj;
+            }
         }
     }
 }

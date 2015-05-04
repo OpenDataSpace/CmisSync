@@ -301,6 +301,10 @@
     <Compile Include="MockedServer\MockedChoice.cs" />
     <Compile Include="MockedServer\MockedPolicyIdList.cs" />
     <Compile Include="IntegrationTests\MockedServerTests\SetupRepositoryTest.cs" />
+    <Compile Include="MockedServer\MockedRepositoryInfo.cs" />
+    <Compile Include="MockedServer\MockedAclCapabilities.cs" />
+    <Compile Include="MockedServer\MockedPermissionDefinition.cs" />
+    <Compile Include="MockedServer\MockedPermissionMapping.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

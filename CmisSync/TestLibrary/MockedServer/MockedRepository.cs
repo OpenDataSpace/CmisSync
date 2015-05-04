@@ -30,38 +30,18 @@ namespace TestLibrary.MockedServer {
 
     using TestLibrary.TestUtils;
 
-    public class MockedRepository : Mock<IRepository> {
+    public class MockedRepository : MockedRepositoryInfo<IRepository> {
 
         public MockedFolder MockedRootFolder { get; set; }
 
-        public string RepoName { get; set; }
-
-        public string Id { get; set; }
-
-        public string Description { get; set; }
-
-        public string ProductName { get; set; }
-
-        public string VendorName { get; set; }
-
-        public MockedRepository(string id, string name = "name", MockedFolder rootFolder = null, MockBehavior behavior = MockBehavior.Strict) : base(behavior) {
-            this.Id = id;
-            this.RepoName = name;
+        public MockedRepository(string id = null, string name = "name", MockedFolder rootFolder = null, MockBehavior behavior = MockBehavior.Strict) : base(id, name, behavior) {
             this.MockedRootFolder = rootFolder ?? new MockedFolder("/");
-            this.Description = "desc";
-            this.ProductName = "GRAU DATA AG in memory cmis repo";
-            this.VendorName = "GRAU DATA AG";
-            this.Setup(r => r.Name).Returns(() => this.RepoName);
-            this.Setup(r => r.Id).Returns(() => this.Id);
-            this.Setup(r => r.Description).Returns(() => this.Description);
-            this.Setup(r => r.ProductName).Returns(() => this.ProductName);
-            this.Setup(r => r.VendorName).Returns(() => this.VendorName);
-            var acls = Mock.Of<IAclCapabilities>(
-                c =>
-                c.SupportedPermissions == SupportedPermissions.Basic &&
-                c.PermissionMapping == new Dictionary<string, IPermissionMapping>());
-            this.Setup(r => r.AclCapabilities).Returns(acls);
-            this.Setup(r => r.CreateSession()).Returns(() => new MockedSession(this) { RootFolder = this.MockedRootFolder.Object }.Object);
+            this.RootFolderId = this.MockedRootFolder.Object.Id;
+            this.Setup(r => r.CreateSession()).Returns(() => {
+                var session = new MockedSession(this.Object) { RootFolder = this.MockedRootFolder.Object };
+                session.AddObjects(this.MockedRootFolder.Object);
+                return session.Object;
+            });
         }
     }
 }

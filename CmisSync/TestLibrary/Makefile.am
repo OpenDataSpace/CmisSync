@@ -132,6 +132,7 @@ SOURCES =  \
 	MockedServer/MockOfISessionFactory.cs \
 	MockedServer/MockedAce.cs \
 	MockedServer/MockedAcl.cs \
+	MockedServer/MockedAclCapabilities.cs \
 	MockedServer/MockedChoice.cs \
 	MockedServer/MockedCmisExtensionElement.cs \
 	MockedServer/MockedCmisObject.cs \
@@ -146,6 +147,8 @@ SOURCES =  \
 	MockedServer/MockedFolderType.cs \
 	MockedServer/MockedItemList.cs \
 	MockedServer/MockedObjectType.cs \
+	MockedServer/MockedPermissionDefinition.cs \
+	MockedServer/MockedPermissionMapping.cs \
 	MockedServer/MockedPolicyIdList.cs \
 	MockedServer/MockedPrincipal.cs \
 	MockedServer/MockedProperty.cs \
@@ -159,6 +162,7 @@ SOURCES =  \
 	MockedServer/MockedPropertyStringDefinition.cs \
 	MockedServer/MockedPropertyUriDefinition.cs \
 	MockedServer/MockedRepository.cs \
+	MockedServer/MockedRepositoryInfo.cs \
 	MockedServer/MockedSession.cs \
 	MockedServer/MockedTypeDefinition.cs \
 	MoqExtensions/MoqExtensions.cs \

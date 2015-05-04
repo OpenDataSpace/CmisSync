@@ -9,19 +9,23 @@ namespace TestLibrary.IntegrationTests.MockedServerTests {
     [TestFixture]
     public class SetupRepositoryTest {
         [Test, Category("Fast")]
-        public void CreateRepository() {
-            var repoId = Guid.NewGuid().ToString();
+        public void CreateRepository([Values(true, false)]bool withGivenId) {
+            string repoId = withGivenId ? Guid.NewGuid().ToString() : null;
             var name = "my";
 
             var underTest = new MockedRepository(repoId, name).Object;
 
             Assert.That(underTest.Name, Is.EqualTo(name));
-            Assert.That(underTest.Id, Is.EqualTo(repoId));
+            if (withGivenId) {
+                Assert.That(underTest.Id, Is.EqualTo(repoId));
+            } else {
+                Assert.That(underTest.Id, Is.Not.Null);
+            }
         }
 
         [Test, Category("Fast")]
         public void CreateSession() {
-            var repo = new MockedRepository(Guid.NewGuid().ToString());
+            var repo = new MockedRepository();
 
             var session = repo.Object.CreateSession();
 
