@@ -61,6 +61,7 @@ namespace TestLibrary.MockedServer {
             this.Setup(s => s.GetRootFolder(It.IsAny<IOperationContext>())).Returns(() => this.RootFolder);
 
             this.Setup(s => s.GetObjectByPath(It.Is<string>(p => !string.IsNullOrEmpty(p)))).Returns<string>((p) => this.GetObjectByPath(p));
+            this.Objects = new Dictionary<string, ICmisObject>();
         }
 
         public Dictionary<string, ICmisObject> Objects { get; set; }

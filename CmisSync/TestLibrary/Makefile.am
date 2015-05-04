@@ -114,6 +114,7 @@ SOURCES =  \
 	IntegrationTests/IntegrationTestUtils.cs \
 	IntegrationTests/MockedServerTests/SetupDocumentTest.cs \
 	IntegrationTests/MockedServerTests/SetupFolderTest.cs \
+	IntegrationTests/MockedServerTests/SetupRepositoryTest.cs \
 	IntegrationTests/NeedsLocalFileSystemFolder.cs \
 	IntegrationTests/PrivateWorkingCopyTests/AppendContentStreamTests.cs \
 	IntegrationTests/PrivateWorkingCopyTests/CreateDocumentTests.cs \

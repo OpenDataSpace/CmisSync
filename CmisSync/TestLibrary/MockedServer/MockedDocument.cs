@@ -76,6 +76,10 @@ namespace TestLibrary.MockedServer {
             this.Setup(m => m.IsPrivateWorkingCopy).Returns(() => this.IsPrivateWorkingCopy);
             this.Setup(m => m.DeleteContentStream()).Callback(() => { if (this.Stream != null) {this.Stream = null; this.UpdateChangeToken(); this.NotifyChanges(); }}).Returns(() => this.Object);
             this.Setup(m => m.DeleteContentStream(It.IsAny<bool>())).Callback(() => { if (this.Stream != null) {this.Stream = null; this.UpdateChangeToken(); this.NotifyChanges(); }}).Returns(() => Mock.Of<IObjectId>(oid => oid.Id == this.Object.Id));
+            this.Setup(m => m.Delete(It.IsAny<bool>())).Callback<bool>((allVersions) => this.Delete(allVersions));
+            this.Setup(m => m.DeleteAllVersions()).Callback(() => this.Delete(true));
+            this.Setup(m => m.GetAllVersions()).Returns(() => new List<IDocument>(this.AllVersions));
+            this.AllVersions = new List<IDocument>(new IDocument[]{ this.Object });
         }
 
         public IContentStream Stream { get; set; }
@@ -83,6 +87,25 @@ namespace TestLibrary.MockedServer {
         public IList<IRendition> Renditions { get; set; }
 
         public bool IsPrivateWorkingCopy { get; set; }
+
+        public MockedSession MockedSession { get; set; }
+
+        public List<IDocument> AllVersions { get; set; }
+
+        private void Delete(bool allVersions) {
+            if (allVersions) {
+                foreach (var doc in this.Object.GetAllVersions()) {
+                    doc.Delete(false);
+                }
+            } else {
+                if (this.MockedSession != null) {
+                    this.MockedSession.Objects.Remove(this.Object.Id);
+                    this.AllVersions.Remove(this.Object);
+                }
+
+                this.NotifyChanges(ChangeType.Deleted);
+            }
+        }
 
         private void SetContent(IContentStream inputstream, bool overwrite) {
             if (this.Stream != null && this.Stream.Length != null && this.Stream.Length > 0 && !overwrite) {

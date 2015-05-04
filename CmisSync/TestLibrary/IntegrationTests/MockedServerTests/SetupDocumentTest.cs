@@ -145,5 +145,19 @@ namespace TestLibrary.IntegrationTests.MockedServerTests {
 
             contentChangeHandler.Verify(h => h(underTest, It.Is<IChangeEvent>(e => e.ChangeType == ChangeType.Updated && e.ObjectId == underTest.Object.Id)), content == null ? Times.Never() : Times.Once());
         }
+
+        [Test, Category("Fast")]
+        public void DeleteObject([Values(true, false)]bool allVersions, [Values(true, false)]bool withSession) {
+            var session = new MockedSession(new MockedRepository(Guid.NewGuid().ToString()));
+            var contentChangeHandler = new Mock<ContentChangeEventHandler>();
+            var underTest = new MockedDocument("name", "content") { MockedSession = withSession ? session : null };
+            session.Objects.Add(underTest.Object.Id, underTest.Object);
+            underTest.ContentChanged += contentChangeHandler.Object;
+
+            underTest.Object.Delete(allVersions);
+
+            Assert.That(session.Objects, withSession ? Is.Empty : Is.Not.Empty);
+            contentChangeHandler.Verify(h => h(underTest, It.Is<IChangeEvent>(e => e.ChangeType == ChangeType.Deleted && e.ObjectId == underTest.Object.Id)), Times.Once());
+        }
     }
 }

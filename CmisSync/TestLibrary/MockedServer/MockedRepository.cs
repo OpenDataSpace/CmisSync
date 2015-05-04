@@ -31,48 +31,37 @@ namespace TestLibrary.MockedServer {
     using TestLibrary.TestUtils;
 
     public class MockedRepository : Mock<IRepository> {
-        private static Dictionary<string, MockedRepository> repositories = new Dictionary<string, MockedRepository>();
 
-        private MockedFolder rootFolder = new MockedFolder("/");
+        public MockedFolder MockedRootFolder { get; set; }
 
-        public IFolder RootFolder {
-            get {
-                return this.rootFolder.Object;
-            }
-        }
+        public string RepoName { get; set; }
 
-        public static MockedRepository GetRepository(string id) {
-            lock (repositories) {
-                MockedRepository repo;
-                if (!repositories.TryGetValue(id, out repo)) {
-                    repo = new MockedRepository(id);
-                    repositories[id] = repo;
-                }
+        public string Id { get; set; }
 
-                return repo;
-            }
-        }
+        public string Description { get; set; }
 
-        public void SetupName(string name) {
-            this.Setup(r => r.Name).Returns(name);
-        }
+        public string ProductName { get; set; }
 
-        public void Destroy() {
-            repositories.Remove(this.Object.Id);
-        }
+        public string VendorName { get; set; }
 
-        private MockedRepository(string id) : base(MockBehavior.Strict) {
-            this.Setup(r => r.Name).Returns("name");
-            this.Setup(r => r.Id).Returns(id);
-            this.Setup(r => r.Description).Returns("desc");
-            this.Setup(r => r.ProductName).Returns("GRAU DATA AG in memory cmis repo");
-            this.Setup(r => r.VendorName).Returns("GRAU DATA AG");
+        public MockedRepository(string id, string name = "name", MockedFolder rootFolder = null, MockBehavior behavior = MockBehavior.Strict) : base(behavior) {
+            this.Id = id;
+            this.RepoName = name;
+            this.MockedRootFolder = rootFolder ?? new MockedFolder("/");
+            this.Description = "desc";
+            this.ProductName = "GRAU DATA AG in memory cmis repo";
+            this.VendorName = "GRAU DATA AG";
+            this.Setup(r => r.Name).Returns(() => this.RepoName);
+            this.Setup(r => r.Id).Returns(() => this.Id);
+            this.Setup(r => r.Description).Returns(() => this.Description);
+            this.Setup(r => r.ProductName).Returns(() => this.ProductName);
+            this.Setup(r => r.VendorName).Returns(() => this.VendorName);
             var acls = Mock.Of<IAclCapabilities>(
                 c =>
                 c.SupportedPermissions == SupportedPermissions.Basic &&
                 c.PermissionMapping == new Dictionary<string, IPermissionMapping>());
             this.Setup(r => r.AclCapabilities).Returns(acls);
-            this.Setup(r => r.CreateSession()).Returns(new MockedSession(this).Object);
+            this.Setup(r => r.CreateSession()).Returns(() => new MockedSession(this) { RootFolder = this.MockedRootFolder.Object }.Object);
         }
     }
 }
