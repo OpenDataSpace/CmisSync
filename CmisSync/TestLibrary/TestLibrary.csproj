@@ -308,6 +308,7 @@
     <Compile Include="MockedServer\MockedCmisBinding.cs" />
     <Compile Include="MockedServer\MockedRepositoryService.cs" />
     <Compile Include="MockedServer\MockedSessionFactory.cs" />
+    <Compile Include="IntegrationTests\MockedServerTests\SetupSessionFactoryTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
