@@ -119,6 +119,7 @@ SOURCES =  \
 	IntegrationTests/NeedsLocalFileSystemFolder.cs \
 	IntegrationTests/PrivateWorkingCopyTests/AppendContentStreamTests.cs \
 	IntegrationTests/PrivateWorkingCopyTests/CreateDocumentTests.cs \
+	IntegrationTests/PrivateWorkingCopyTests/UploadChangedContent.cs \
 	IntegrationTests/RepositoryStatusIT.cs \
 	IntegrationTests/RepositoryUtilsTests.cs \
 	IntegrationTests/SelectiveIgnoreTests/CrudIT.cs \
