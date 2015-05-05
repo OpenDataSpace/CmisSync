@@ -40,10 +40,14 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
         public void CheckOutDocumentAppendContentAndCheckIn() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             var doc = this.remoteRootDir.CreateDocument(this.fileName, (string)null);
-
+            var oldId = doc.Id;
             var newId = doc.CheckOut();
+            var oldDoc = this.session.GetObject(oldId) as IDocument;
+            oldDoc.Refresh();
+            Assert.That(oldDoc.VersionSeriesCheckedOutId, Is.Not.Null);
             doc = newId == null ? doc : this.session.GetObject(newId) as IDocument;
             doc = doc.AppendContent(content) ?? doc;
+            Assert.That(doc.Id, Is.EqualTo(oldDoc.VersionSeriesCheckedOutId));
             var newObjectId = doc.CheckIn(true, null, null, string.Empty);
             var newDocument = this.session.GetObject(newObjectId) as IDocument;
             newDocument.Refresh();
@@ -52,6 +56,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(this.fileName));
             Assert.That(newDocument.Name, Is.EqualTo(this.fileName));
             Assert.That(newDocument.ContentStreamLength, Is.EqualTo(this.content.Length));
+            Assert.That(newDocument.VersionSeriesCheckedOutId, Is.Null);
             this.AssertThatContentHashIsEqualToExceptedIfSupported(newDocument, this.content);
         }
 
