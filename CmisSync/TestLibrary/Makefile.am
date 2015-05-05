@@ -165,7 +165,13 @@ SOURCES =  \
 	MockedServer/MockedPropertyUriDefinition.cs \
 	MockedServer/MockedRepository.cs \
 	MockedServer/MockedRepositoryInfo.cs \
-	MockedServer/MockedRepositoryService.cs \
+	MockedServer/MockedServices/MockedAclService.cs \
+	MockedServer/MockedServices/MockedDiscoveryService.cs \
+	MockedServer/MockedServices/MockedMultiFilingService.cs \
+	MockedServer/MockedServices/MockedNavigationService.cs \
+	MockedServer/MockedServices/MockedObjectService.cs \
+	MockedServer/MockedServices/MockedPolicyService.cs \
+	MockedServer/MockedServices/MockedRepositoryService.cs \
 	MockedServer/MockedSession.cs \
 	MockedServer/MockedSessionFactory.cs \
 	MockedServer/MockedSessionFactory.cs \

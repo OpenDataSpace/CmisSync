@@ -306,10 +306,16 @@
     <Compile Include="MockedServer\MockedPermissionDefinition.cs" />
     <Compile Include="MockedServer\MockedPermissionMapping.cs" />
     <Compile Include="MockedServer\MockedCmisBinding.cs" />
-    <Compile Include="MockedServer\MockedRepositoryService.cs" />
     <Compile Include="MockedServer\MockedSessionFactory.cs" />
     <Compile Include="IntegrationTests\MockedServerTests\SetupSessionFactoryTest.cs" />
     <Compile Include="IntegrationTests\PrivateWorkingCopyTests\UploadChangedContent.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedAclService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedDiscoveryService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedMultiFilingService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedNavigationService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedObjectService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedPolicyService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedRepositoryService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -345,5 +351,6 @@
     <Folder Include="IntegrationTests\PrivateWorkingCopyTests\" />
     <Folder Include="IntegrationTests\ContentHashTests\" />
     <Folder Include="IntegrationTests\MockedServerTests\" />
+    <Folder Include="MockedServer\MockedServices\" />
   </ItemGroup>
 </Project>
