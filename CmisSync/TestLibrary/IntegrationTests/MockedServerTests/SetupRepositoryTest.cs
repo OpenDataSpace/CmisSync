@@ -20,6 +20,9 @@
 namespace TestLibrary.IntegrationTests.MockedServerTests {
     using System;
 
+    using DotCMIS.Client;
+    using DotCMIS.Exceptions;
+
     using MockedServer;
 
     using NUnit.Framework;
@@ -44,11 +47,17 @@ namespace TestLibrary.IntegrationTests.MockedServerTests {
         [Test, Category("Fast")]
         public void CreateSession() {
             var repo = new MockedRepository();
-
+            var repoService = new MockedServer.MockedServices.MockedRepositoryService();
+            repoService.RepositoryInfos.Add(repo.Object);
+            repo.RepositoryService = repoService.Object;
             var session = repo.Object.CreateSession();
 
             Assert.That(session, Is.Not.Null);
             Assert.That(session.GetRootFolder(), Is.EqualTo(repo.MockedRootFolder.Object));
+            var rootFolder = session.GetRootFolder() as IFolder;
+            rootFolder.DeleteTree(true, null, true);
+            Assert.Throws<CmisObjectNotFoundException>(() => session.GetRootFolder());
+            Assert.Throws<CmisObjectNotFoundException>(() => rootFolder.DeleteTree(true, null, true));
         }
     }
 }

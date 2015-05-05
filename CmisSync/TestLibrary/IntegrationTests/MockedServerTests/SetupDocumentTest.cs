@@ -148,7 +148,7 @@ namespace TestLibrary.IntegrationTests.MockedServerTests {
 
         [Test, Category("Fast")]
         public void DeleteObject([Values(true, false)]bool allVersions, [Values(true, false)]bool withSession) {
-            var session = new MockedSession(new MockedRepository().Object);
+            var session = new MockedSession(new MockedRepository().Object.Id);
             var contentChangeHandler = new Mock<ContentChangeEventHandler>();
             var underTest = new MockedDocument("name", "content") { MockedSession = withSession ? session : null };
             session.Objects.Add(underTest.Object.Id, underTest.Object);

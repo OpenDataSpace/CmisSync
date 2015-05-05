@@ -43,7 +43,7 @@ namespace TestLibrary.MockedServer {
             this.Setup(m => m.GetChildren(It.IsAny<IOperationContext>())).Returns(this.children.Object);
             this.Setup(m => m.IsRootFolder).Returns(this.parent == null);
             this.Setup(m => m.FolderParent).Returns(() => this.parent);
-            this.ObjectType = new MockedFolderType(behavior).Object;
+            this.ObjectType = new MockedFolderType(behavior: behavior).Object;
 //            this.Setup(m => m.Path).Returns(this.parent.Path + "/" + this.name);
             this.Setup(m => m.LastModificationDate).Returns(this.lastModification);
             this.Setup(m => m.CreationDate).Returns(this.creationDate);

@@ -22,6 +22,7 @@ namespace TestLibrary.MockedServer {
     using System.Collections.Generic;
     using System.Linq;
 
+    using DotCMIS.Binding.Services;
     using DotCMIS.Client;
     using DotCMIS.Data;
     using DotCMIS.Enums;
@@ -36,12 +37,24 @@ namespace TestLibrary.MockedServer {
 
         public MockedRepository(string id = null, string name = "name", MockedFolder rootFolder = null, MockBehavior behavior = MockBehavior.Strict) : base(id, name, behavior) {
             this.MockedRootFolder = rootFolder ?? new MockedFolder("/");
+            this.Objects = new Dictionary<string, ICmisObject>();
+            this.Objects.Add(this.MockedRootFolder.Object.Id, this.MockedRootFolder.Object);
             this.RootFolderId = this.MockedRootFolder.Object.Id;
             this.Setup(r => r.CreateSession()).Returns(() => {
-                var session = new MockedSession(this.Object) { RootFolder = this.MockedRootFolder.Object };
+                var session = new MockedSession(this.Object.Id) {
+                    Binding = new MockedCmisBinding(behavior) {
+                        RepositoryService = this.RepositoryService
+                    }.Object,
+                    Objects = this.Objects
+                };
+
                 session.AddObjects(this.MockedRootFolder.Object);
                 return session.Object;
             });
         }
+
+        public IRepositoryService RepositoryService { get; set; }
+
+        public Dictionary<string, ICmisObject> Objects { get; private set; }
     }
 }

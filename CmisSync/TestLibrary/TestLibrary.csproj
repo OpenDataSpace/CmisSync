@@ -316,6 +316,9 @@
     <Compile Include="MockedServer\MockedServices\MockedObjectService.cs" />
     <Compile Include="MockedServer\MockedServices\MockedPolicyService.cs" />
     <Compile Include="MockedServer\MockedServices\MockedRepositoryService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedRelationshipService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedVersioningService.cs" />
+    <Compile Include="MockedServer\MockedObjectData.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

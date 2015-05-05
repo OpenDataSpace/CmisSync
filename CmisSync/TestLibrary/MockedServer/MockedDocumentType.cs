@@ -19,19 +19,27 @@
 
 namespace TestLibrary.MockedServer {
     using System;
+    using System.Collections.Generic;
 
+    using DotCMIS;
     using DotCMIS.Client;
+    using DotCMIS.Data;
     using DotCMIS.Enums;
 
     using Moq;
 
     public class MockedDocumentType : MockedObjectType<IDocumentType> {
-        public MockedDocumentType(MockBehavior behavior = MockBehavior.Strict) : base(behavior) {
+        public MockedDocumentType(bool modificationDateUpdatable = true, MockBehavior behavior = MockBehavior.Strict) : base(behavior) {
             this.Id = BaseTypeId.CmisDocument.GetCmisValue();
             this.BaseType = this.Object;
             this.BaseTypeId = BaseTypeId.CmisDocument;
             this.Description = "mocked C# document type";
             this.DisplayName = "mocked document type";
+            var modificationDateDefinition = new MockedPropertyDateTimeDefinition() {
+                Id = PropertyIds.LastModificationDate,
+                Updatability = modificationDateUpdatable ? Updatability.ReadWrite : Updatability.ReadOnly
+            }.Object;
+            this.PropertyDefinitions.Add(modificationDateDefinition);
             this.Setup(m => m.ContentStreamAllowed).Returns(ContentStreamAllowed.Allowed);
             this.Setup(m => m.GetChildren()).Returns(new MockedItemList<IObjectType>().Object);
         }

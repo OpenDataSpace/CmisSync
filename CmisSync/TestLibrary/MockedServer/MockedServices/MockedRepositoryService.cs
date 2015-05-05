@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.MockedServer {
+namespace TestLibrary.MockedServer.MockedServices {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -25,16 +25,25 @@ namespace TestLibrary.MockedServer {
     using DotCMIS.Binding.Services;
     using DotCMIS.Data;
     using DotCMIS.Data.Extensions;
+    using DotCMIS.Enums;
 
     using Moq;
 
     public class MockedRepositoryService : Mock<IRepositoryService> {
         public MockedRepositoryService(MockBehavior behavior = MockBehavior.Strict) : base(behavior) {
+            this.RepositoryInfos = new List<IRepositoryInfo>();
+            this.TypeDefinitions = new Dictionary<string, ITypeDefinition>();
+            var docType = new MockedDocumentType().Object;
+            var folderType = new MockedFolderType().Object;
+            this.TypeDefinitions.Add(docType.Id, docType);
+            this.TypeDefinitions.Add(folderType.Id, folderType);
             this.Setup(m => m.GetRepositoryInfos(It.IsAny<IExtensionsData>())).Returns(() => new List<IRepositoryInfo>(this.RepositoryInfos));
             this.Setup(m => m.GetRepositoryInfo(It.IsAny<string>(), It.IsAny<IExtensionsData>())).Returns<string, IExtensionsData>((repoId, extension) => this.RepositoryInfos.First(repo => repo.Id == repoId));
-            this.RepositoryInfos = new List<IRepositoryInfo>();
+            this.Setup(s => s.GetTypeDefinition(It.Is<string>(repoId => this.RepositoryInfos.First(repo => repo.Id == repoId) != null), It.IsAny<string>(), null)).Returns<string, string, ExtensionsData>((r, typeId, extension) => this.TypeDefinitions[typeId]);
         }
 
         public IList<IRepositoryInfo> RepositoryInfos { get; set; }
+
+        public Dictionary<string, ITypeDefinition> TypeDefinitions { get; private set; }
     }
 }
