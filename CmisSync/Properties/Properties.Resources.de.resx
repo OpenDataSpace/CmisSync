@@ -223,7 +223,7 @@
     <value>Synchronisation</value>
   </data>
   <data name="SyncingChanges" xml:space="preserve">
-    <value>Synchronisieren die Änderungen...</value>
+    <value>Synchronisation läuft...</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Benutzer</value>
