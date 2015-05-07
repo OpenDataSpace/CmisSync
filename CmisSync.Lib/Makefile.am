@@ -16,6 +16,7 @@ SOURCES =  \
 	Algorithms/Tarjan/Tarjan.cs \
 	Backend.cs \
 	ClientBrandBase.cs \
+	Cmis/AbstractNotifyingRepository.cs \
 	Cmis/Authentication/AuthProviderFactory.cs \
 	Cmis/Authentication/IDisposableAuthProvider.cs \
 	Cmis/Authentication/PersistentNtlmAuthenticationProvider.cs \
@@ -24,12 +25,14 @@ SOURCES =  \
 	Cmis/ConvenienceExtenders/AllowableActionConvenienceExtenders.cs \
 	Cmis/ConvenienceExtenders/CmisConvenienceExtenders.cs \
 	Cmis/DotCMISLogListener.cs \
+	Cmis/INotifyRepositoryPropertyChanged.cs \
 	Cmis/MimeType.cs \
 	Cmis/OperationContextFactory.cs \
 	Cmis/Repository.cs \
 	Cmis/RepositoryExceptionEventArgs.cs \
 	Cmis/RepositoryStatus.cs \
 	Cmis/RepositoryStatusAggregator.cs \
+	Cmis/SyncStatus.cs \
 	Cmis/UiUtils/CmisUtils.cs \
 	Cmis/UiUtils/LoginCredentials.cs \
 	Cmis/UiUtils/LoginException.cs \

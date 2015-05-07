@@ -55,63 +55,9 @@ namespace CmisSync.Lib.Cmis {
     using log4net;
 
     /// <summary>
-    /// Current status of the synchronization.
-    /// </summary>
-    public enum SyncStatus {
-        /// <summary>
-        /// Normal operation.
-        /// </summary>
-        Idle,
-
-        /// <summary>
-        /// Synchronization is suspended.
-        /// </summary>
-        Suspend,
-
-        /// <summary>
-        /// Connection is not established.
-        /// </summary>
-        Disconnected,
-
-        /// <summary>
-        /// Actually changes are synchronized.
-        /// </summary>
-        Synchronizing,
-
-        /// <summary>
-        /// Any sync conflict or warning happend
-        /// </summary>
-        Warning,
-
-        /// <summary>
-        /// The complete connection is deactivated.
-        /// </summary>
-        Deactivated
-    }
-
-    /// <summary>
     /// Synchronized CMIS repository.
     /// </summary>
-    public class Repository : IDisposable, INotifyPropertyChanged, IObserver<Tuple<EventCategory, int>> {
-        /// <summary>
-        /// Name of the synchronized folder, as found in the CmisSync XML configuration file.
-        /// </summary>
-        public readonly string Name;
-
-        /// <summary>
-        /// URL of the remote CMIS endpoint.
-        /// </summary>
-        public readonly Uri RemoteUrl;
-
-        /// <summary>
-        /// Path of the local synchronized folder.
-        /// </summary>
-        public readonly string LocalPath;
-
-        /// <summary>
-        /// Occurs when an exception should be shown to the user.
-        /// </summary>
-        public event EventHandler<RepositoryExceptionEventArgs> ShowException;
+    public class Repository : AbstractNotifyingRepository, IDisposable, IObserver<Tuple<EventCategory, int>> {
 
         /// <summary>
         /// The storage.
@@ -189,21 +135,13 @@ namespace CmisSync.Lib.Cmis {
 
         private ActivityListenerAggregator activityListener;
 
-        private SyncStatus status = SyncStatus.Disconnected;
-
-        private int changesFound = 0;
-
         private int connectionExceptionsFound = 0;
-
-        private DateTime? lastFinishedSync;
 
         private IDisposable unsubscriber;
 
         private object counterLock = new object();
 
         private object connectionExceptionCounterLock = new object();
-
-        private RepositoryStatus repoStatus = new RepositoryStatus();
 
         static Repository() {
             DBreezeInitializerSingleton.Init();
@@ -224,24 +162,13 @@ namespace CmisSync.Lib.Cmis {
         /// <param name="activityListener">Activity listener.</param>
         /// <param name="inMemory">If set to <c>true</c> in memory.</param>
         /// <param name="queue">Event Queue.</param>
-        protected Repository(RepoInfo repoInfo, ActivityListenerAggregator activityListener, bool inMemory, ICountingQueue queue) {
-            this.Status = this.repoStatus.Status;
-            if (repoInfo == null) {
-                throw new ArgumentNullException("Given repoInfo is null");
-            }
-
+        protected Repository(RepoInfo repoInfo, ActivityListenerAggregator activityListener, bool inMemory, ICountingQueue queue) : base(repoInfo) {
             if (activityListener == null) {
                 throw new ArgumentNullException("Given activityListener is null");
             }
 
             this.fileSystemFactory = new FileSystemInfoFactory();
             this.activityListener = activityListener;
-
-            // Initialize local variables
-            this.RepoInfo = repoInfo;
-            this.LocalPath = repoInfo.LocalPath;
-            this.Name = repoInfo.DisplayName;
-            this.RemoteUrl = repoInfo.Address;
 
             this.rootFolderMonitor = new RepositoryRootDeletedDetection(this.fileSystemFactory.CreateDirectoryInfo(this.LocalPath));
             this.rootFolderMonitor.RepoRootDeleted += this.RootFolderAvailablilityChanged;
@@ -321,8 +248,8 @@ namespace CmisSync.Lib.Cmis {
                 new GenericSyncEventHandler<SuccessfulLoginEvent>(
                 10000,
                 delegate(ISyncEvent e) {
-                this.repoStatus.Connected = true;
-                this.Status = this.repoStatus.Status;
+                this.RepoStatusFlags.Connected = true;
+                this.Status = this.RepoStatusFlags.Status;
 
                 return false;
             }));
@@ -330,8 +257,8 @@ namespace CmisSync.Lib.Cmis {
                 new GenericSyncEventHandler<ConfigurationNeededEvent>(
                 10000,
                 delegate(ISyncEvent e) {
-                this.repoStatus.Warning = true;
-                this.Status = this.repoStatus.Status;
+                this.RepoStatusFlags.Warning = true;
+                this.Status = this.RepoStatusFlags.Status;
 
                 return false;
             }));
@@ -344,64 +271,6 @@ namespace CmisSync.Lib.Cmis {
         /// </summary>
         ~Repository() {
             this.Dispose(false);
-        }
-
-        /// <summary>
-        /// Occurs when property changed.
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        /// <summary>
-        /// Gets the current status of the synchronization (paused or not).
-        /// </summary>
-        /// <value>The status.</value>
-        public SyncStatus Status {
-            get {
-                return this.status;
-            }
-
-            private set {
-                if (value != this.status) {
-                    this.status = value;
-                    this.NotifyPropertyChanged(Utils.NameOf(() => this.Status));
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the last time when a sync was finished without detected changes.
-        /// </summary>
-        /// <value>The last finished sync.</value>
-        public DateTime? LastFinishedSync {
-            get {
-                return this.lastFinishedSync;
-            }
-
-            private set {
-                if (value != this.lastFinishedSync) {
-                    this.lastFinishedSync = value;
-                    this.NotifyPropertyChanged(Utils.NameOf(() => this.LastFinishedSync));
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the number of changes which are actually found on queue.
-        /// </summary>
-        /// <value>The number of changes.</value>
-        public int NumberOfChanges {
-            get {
-                return this.changesFound;
-            }
-
-            private set {
-                if (value != this.changesFound) {
-                    this.repoStatus.KnownChanges = value;
-                    this.changesFound = value;
-                    this.NotifyPropertyChanged(Utils.NameOf(() => this.NumberOfChanges));
-                    this.Status = this.repoStatus.Status;
-                }
-            }
         }
 
         /// <summary>
@@ -430,17 +299,12 @@ namespace CmisSync.Lib.Cmis {
         public WatcherConsumer WatcherConsumer { get; private set; }
 
         /// <summary>
-        /// Gets or sets the synchronized folder's information.
-        /// </summary>
-        protected RepoInfo RepoInfo { get; set; }
-
-        /// <summary>
         /// Stop syncing momentarily.
         /// </summary>
         public void Suspend() {
-            if (!this.repoStatus.Paused) {
-                this.repoStatus.Paused = true;
-                this.Status = this.repoStatus.Status;
+            if (!this.RepoStatusFlags.Paused) {
+                this.RepoStatusFlags.Paused = true;
+                this.Status = this.RepoStatusFlags.Status;
 
                 this.Scheduler.Stop();
                 this.Queue.Suspend();
@@ -461,9 +325,9 @@ namespace CmisSync.Lib.Cmis {
         /// Restart syncing.
         /// </summary>
         public void Resume() {
-            if (this.repoStatus.Paused) {
-                this.repoStatus.Paused = false;
-                this.Status = this.repoStatus.Status;
+            if (this.RepoStatusFlags.Paused) {
+                this.RepoStatusFlags.Paused = false;
+                this.Status = this.RepoStatusFlags.Status;
 
                 this.Queue.Continue();
                 this.Scheduler.Start();
@@ -516,25 +380,25 @@ namespace CmisSync.Lib.Cmis {
                 } else {
                     lock(this.counterLock) {
                         this.NumberOfChanges = 0;
-                        this.LastFinishedSync = this.status == SyncStatus.Idle ? DateTime.Now : this.LastFinishedSync;
+                        this.LastFinishedSync = this.Status == SyncStatus.Idle ? DateTime.Now : this.LastFinishedSync;
                     }
                 }
             } else if (changeCounter.Item1 == EventCategory.SyncRequested || changeCounter.Item1 == EventCategory.PeriodicSync) {
                 lock(this.counterLock) {
                     if (changeCounter.Item1 == EventCategory.SyncRequested) {
-                        this.repoStatus.SyncRequested = changeCounter.Item2 > 0;
-                        this.Status = this.repoStatus.Status;
+                        this.RepoStatusFlags.SyncRequested = changeCounter.Item2 > 0;
+                        this.Status = this.RepoStatusFlags.Status;
                     }
 
-                    if (changeCounter.Item2 <= 0 && this.status == SyncStatus.Idle) {
+                    if (changeCounter.Item2 <= 0 && this.Status == SyncStatus.Idle) {
                         this.LastFinishedSync = DateTime.Now;
                     }
                 }
             } else if (changeCounter.Item1 == EventCategory.ConnectionException) {
                 lock(this.connectionExceptionCounterLock) {
                     if (changeCounter.Item2 > this.connectionExceptionsFound) {
-                        this.repoStatus.Connected = false;
-                        this.Status = this.repoStatus.Status;
+                        this.RepoStatusFlags.Connected = false;
+                        this.Status = this.RepoStatusFlags.Status;
                     }
 
                     this.connectionExceptionsFound = changeCounter.Item2;
@@ -619,30 +483,12 @@ namespace CmisSync.Lib.Cmis {
         }
 
         private void RootFolderAvailablilityChanged(object sender, RepositoryRootDeletedDetection.RootExistsEventArgs e) {
-            this.repoStatus.Deactivated = !e.RootExists;
-            this.Status = this.repoStatus.Status;
+            this.RepoStatusFlags.Deactivated = !e.RootExists;
+            this.Status = this.RepoStatusFlags.Status;
             if (!e.RootExists) {
-                var handler = this.ShowException;
-                if (handler != null) {
-                    handler(this, new RepositoryExceptionEventArgs(ExceptionLevel.Fatal, ExceptionType.LocalSyncTargetDeleted));
-                }
+                this.PassExceptionToListener(ExceptionLevel.Fatal, ExceptionType.LocalSyncTargetDeleted);
             } else {
                 this.Queue.AddEvent(new StartNextSyncEvent(fullSyncRequested: true));
-            }
-        }
-
-        /// <summary>
-        /// This method is called by the Set accessor of each property.
-        /// </summary>
-        /// <param name="propertyName">Property name.</param>
-        private void NotifyPropertyChanged(string propertyName) {
-            if (string.IsNullOrEmpty(propertyName)) {
-                throw new ArgumentNullException("Given property name is null");
-            }
-
-            var handler = this.PropertyChanged;
-            if (handler != null) {
-                handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }

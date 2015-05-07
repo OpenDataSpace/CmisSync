@@ -300,6 +300,8 @@
     <Compile Include="MockedServer\MockedPropertyUriDefinition.cs" />
     <Compile Include="MockedServer\MockedChoice.cs" />
     <Compile Include="MockedServer\MockedPolicyIdList.cs" />
+    <Compile Include="CmisTests\RepositoryStatusAggregatorTest.cs" />
+    <Compile Include="CmisTests\AbstractRepositoryTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

@@ -312,6 +312,9 @@
     <Compile Include="Cmis\UiUtils\LoginException.cs" />
     <Compile Include="Cmis\UiUtils\UiConvenienceExtenders.cs" />
     <Compile Include="Streams\StreamConvenienceExtensions.cs" />
+    <Compile Include="Cmis\INotifyRepositoryPropertyChanged.cs" />
+    <Compile Include="Cmis\AbstractNotifyingRepository.cs" />
+    <Compile Include="Cmis\SyncStatus.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

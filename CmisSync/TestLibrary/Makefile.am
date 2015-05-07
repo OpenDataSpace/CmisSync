@@ -19,12 +19,14 @@ SOURCES =  \
 	AlgorithmsTests/StringTarjanNode.cs \
 	AlgorithmsTests/TarjanSimpleLinearTests.cs \
 	AlgorithmsTests/TrajanSimpleCircleTests.cs \
+	CmisTests/AbstractRepositoryTest.cs \
 	CmisTests/AuthenticationTests/AuthProviderFactoryTest.cs \
 	CmisTests/AuthenticationTests/KerberosAuthenticationProviderTest.cs \
 	CmisTests/AuthenticationTests/PersistentStandardAuthenticationProviderTest.cs \
 	CmisTests/ConvenienceExtendersTests/AllowableActionExtendersTest.cs \
 	CmisTests/ConvenienceExtendersTests/CmisConvenienceExtendersTest.cs \
 	CmisTests/OperationContextFactoryTest.cs \
+	CmisTests/RepositoryStatusAggregatorTest.cs \
 	CmisTests/RepositoryTests.cs \
 	CmisTests/UiUtilsTests/CmisUtilsTest.cs \
 	CmisTests/UiUtilsTests/UiConvenienceExtendersTest.cs \
