@@ -194,7 +194,7 @@ namespace CmisSync {
             };
 
             this.statusAggregator.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) => {
-                switch(this.statusAggregator.Status) {
+                switch (this.statusAggregator.Status) {
                 case SyncStatus.Idle:
                     this.OnIdle();
                     break;

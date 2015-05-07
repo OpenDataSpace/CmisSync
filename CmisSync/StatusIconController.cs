@@ -140,7 +140,7 @@ namespace CmisSync {
         /// Current frame of the animation being shown.
         /// First frame is the still icon.
         /// </summary>
-        private int animation_frame_number;
+        private int animationFrameNumber;
         
         /// <summary>
         /// Constructor.
@@ -156,7 +156,7 @@ namespace CmisSync {
                     if (Program.Controller.Folders.Count == 0) {
                         this.StateText = string.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
                     } else {
-                        this.StateText = Properties_Resources.FilesUpToDate;
+                        this.StateText = Properties_Resources.StatusNoChangeDetected;
                     }
                 }
 
@@ -172,14 +172,12 @@ namespace CmisSync {
                     if (Program.Controller.Folders.Count == 0) {
                         this.StateText = string.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
                     } else {
-                        this.StateText = Properties_Resources.FilesUpToDate;
+                        this.StateText = Properties_Resources.StatusNoChangeDetected;
                     }
                 }
 
                 this.UpdateStatusItemEvent(this.StateText);
-
                 this.animation.Stop();
-
                 this.UpdateIconEvent(0);
             };
 
@@ -274,20 +272,20 @@ namespace CmisSync {
         /// Start the tray icon animation.
         /// </summary>
         private void InitAnimation() {
-            this.animation_frame_number = 0;
+            this.animationFrameNumber = 0;
 
             this.animation = new Timer() {
                 Interval = 100
             };
 
             this.animation.Elapsed += delegate {
-                if (this.animation_frame_number < 4) {
-                    this.animation_frame_number++;
+                if (this.animationFrameNumber < 4) {
+                    this.animationFrameNumber++;
                 } else {
-                    this.animation_frame_number = 0;
+                    this.animationFrameNumber = 0;
                 }
 
-                this.UpdateIconEvent(this.animation_frame_number);
+                this.UpdateIconEvent(this.animationFrameNumber);
             };
         }
     }

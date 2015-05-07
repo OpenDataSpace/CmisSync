@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="ICountingQueue.cs" company="GRAU DATA AG">
+// <copyright file="SyncStatus.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -17,17 +17,41 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Queueing {
+namespace CmisSync.Lib.Cmis {
     using System;
 
-    using CmisSync.Lib.Events;
-
     /// <summary>
-    /// I counting queue counts every countable event by its category if its added and substracts it if the event is handled and removed from queue.
-    /// This queue also notifies listener about changes on categories or all countable events.
+    /// Current status of the synchronization.
     /// </summary>
-    public interface ICountingQueue : IDisposableSyncEventQueue {
-        IObservable<int> FullCounter { get; }
-        IObservable<Tuple<EventCategory, int>> CategoryCounter { get; }
+    public enum SyncStatus {
+        /// <summary>
+        /// Normal operation.
+        /// </summary>
+        Idle,
+
+        /// <summary>
+        /// Synchronization is suspended.
+        /// </summary>
+        Suspend,
+
+        /// <summary>
+        /// Connection is not established.
+        /// </summary>
+        Disconnected,
+
+        /// <summary>
+        /// Actually changes are synchronized.
+        /// </summary>
+        Synchronizing,
+
+        /// <summary>
+        /// Any sync conflict or warning happend
+        /// </summary>
+        Warning,
+
+        /// <summary>
+        /// The complete connection is deactivated.
+        /// </summary>
+        Deactivated
     }
 }

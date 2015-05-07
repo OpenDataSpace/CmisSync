@@ -184,6 +184,14 @@ namespace CmisSync {
                 }
             };
 
+            Controller.UpdateStatusItemEvent += delegate(string statusText) {
+                if (IsHandleCreated) {
+                    BeginInvoke((Action)delegate {
+                        this.trayicon.Text = statusText;
+                    });
+                }
+            };
+
             // Repo Submenu.
             Controller.UpdateSuspendSyncFolderEvent += delegate(string reponame) {
                 if (IsHandleCreated) {
@@ -196,6 +204,7 @@ namespace CmisSync {
                                         break;
                                     }
                                 }
+
                                 break;
                             }
                         }
@@ -224,7 +233,7 @@ namespace CmisSync {
             this.traymenu.Items.Clear();
             this.repoItems = new List<RepositoryMenuItem>();
 
-            this.trayicon.Text = String.Format("{0}\n{1}", Properties_Resources.ApplicationName, Controller.StateText);
+            this.trayicon.Text = string.Format("{0}\n{1}", Properties_Resources.ApplicationName, Controller.StateText);
 
             // Create a menu item per synchronized folder.
             if (Controller.Folders.Length > 0) {
