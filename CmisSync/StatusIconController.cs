@@ -156,7 +156,7 @@ namespace CmisSync {
                     if (Program.Controller.Folders.Count == 0) {
                         this.StateText = string.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
                     } else {
-                        this.StateText = Properties_Resources.FilesUpToDate;
+                        this.StateText = Properties_Resources.StatusNoChangeDetected;
                     }
                 }
 
@@ -172,14 +172,12 @@ namespace CmisSync {
                     if (Program.Controller.Folders.Count == 0) {
                         this.StateText = string.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
                     } else {
-                        this.StateText = Properties_Resources.FilesUpToDate;
+                        this.StateText = Properties_Resources.StatusNoChangeDetected;
                     }
                 }
 
                 this.UpdateStatusItemEvent(this.StateText);
-
                 this.animation.Stop();
-
                 this.UpdateIconEvent(0);
             };
 
