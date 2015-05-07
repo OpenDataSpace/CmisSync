@@ -177,8 +177,6 @@ namespace CmisSync {
                 }
 
                 this.UpdateStatusItemEvent(this.StateText);
-                this.animation.Stop();
-                this.UpdateIconEvent(0);
             };
 
             Program.Controller.OnTransmissionListChanged += delegate {
@@ -283,6 +281,9 @@ namespace CmisSync {
                     this.animationFrameNumber++;
                 } else {
                     this.animationFrameNumber = 0;
+                    if (this.CurrentState != IconState.Syncing) {
+                        this.animation.Stop();
+                    }
                 }
 
                 this.UpdateIconEvent(this.animationFrameNumber);
