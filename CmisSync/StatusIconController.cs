@@ -189,7 +189,9 @@ namespace CmisSync {
                     this.CurrentState = IconState.Syncing;
                     this.StateText = Properties_Resources.SyncingChanges;
                     this.UpdateStatusItemEvent(this.StateText);
-                    this.animation.Start();
+                    if (!this.animation.Enabled) {
+                        this.animation.Start();
+                    }
                 }
             };
         }
