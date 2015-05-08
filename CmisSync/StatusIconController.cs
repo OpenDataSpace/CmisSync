@@ -35,10 +35,11 @@ namespace CmisSync {
     /// </summary>
     public enum IconState {
         Idle,
-        SyncingUp,
-        SyncingDown,
         Syncing,
-        Error
+        Error,
+        Paused,
+        Deactivated,
+        Disconnected
     }
 
     /// <summary>
@@ -193,6 +194,36 @@ namespace CmisSync {
                         this.animation.Start();
                     }
                 }
+            };
+
+            // Paused.
+            Program.Controller.OnPaused += delegate {
+                if (this.CurrentState != IconState.Error) {
+                    this.CurrentState = IconState.Paused;
+                    this.StateText = Properties_Resources.StatusNoChangeDetected;
+                }
+
+                this.UpdateStatusItemEvent(this.StateText);
+            };
+
+            // Deactivated.
+            Program.Controller.OnDeactivated += delegate {
+                if (this.CurrentState != IconState.Error) {
+                    this.CurrentState = IconState.Deactivated;
+                    this.StateText = Properties_Resources.StatusNoChangeDetected;
+                }
+
+                this.UpdateStatusItemEvent(this.StateText);
+            };
+
+            // Disconnected.
+            Program.Controller.OnDisconnected += delegate {
+                if (this.CurrentState != IconState.Error) {
+                    this.CurrentState = IconState.Disconnected;
+                    this.StateText = Properties_Resources.StatusNoChangeDetected;
+                }
+
+                this.UpdateStatusItemEvent(this.StateText);
             };
         }
 

@@ -150,6 +150,12 @@ namespace CmisSync {
 
         public event Action OnError = delegate { };
 
+        public event Action OnDisconnected = delegate { };
+
+        public event Action OnPaused = delegate { };
+
+        public event Action OnDeactivated = delegate { };
+
         public event AlertNotificationRaisedEventHandler AlertNotificationRaised = delegate { };
 
         public delegate void AlertNotificationRaisedEventHandler(string title, string message);
@@ -203,6 +209,15 @@ namespace CmisSync {
                     break;
                 case SyncStatus.Warning:
                     this.OnError();
+                    break;
+                case SyncStatus.Disconnected:
+                    this.OnDisconnected();
+                    break;
+                case SyncStatus.Suspend:
+                    this.OnPaused();
+                    break;
+                case SyncStatus.Deactivated:
+                    this.OnDeactivated();
                     break;
                 default:
                     this.OnIdle();

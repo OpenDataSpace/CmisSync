@@ -60,17 +60,27 @@ namespace TestLibrary.CmisTests {
         [Test, Category("Fast")]
         public void RemoveRepository() {
             var underTest = new RepositoryStatusAggregator();
-            var numberOfChanges = 2;
-            var status = SyncStatus.Idle;
-            var lastSync = DateTime.Now;
 
-            var repo = Mock.Of<INotifyRepositoryPropertyChanged>(r => r.NumberOfChanges == numberOfChanges && r.Status == status && r.LastFinishedSync == lastSync);
+            var repo = Mock.Of<INotifyRepositoryPropertyChanged>(r => r.NumberOfChanges == 2 && r.Status == SyncStatus.Idle && r.LastFinishedSync == DateTime.Now);
             underTest.Add(repo);
             underTest.Remove(repo);
 
             Assert.That(underTest.NumberOfChanges, Is.EqualTo(0));
-            Assert.That(underTest.LastFinishedSync, Is.EqualTo(lastSync));
+            Assert.That(underTest.LastFinishedSync, Is.EqualTo(null));
             Assert.That(underTest.Status, Is.EqualTo(SyncStatus.Disconnected));
+        }
+
+        [Test, Category("Fast")]
+        public void ThreeRepositoriesAddedAndAggregated() {
+            var underTest = new RepositoryStatusAggregator();
+
+            underTest.Add(Mock.Of<INotifyRepositoryPropertyChanged>(r => r.NumberOfChanges == 1 && r.Status == SyncStatus.Idle && r.LastFinishedSync == (DateTime?)null));
+            underTest.Add(Mock.Of<INotifyRepositoryPropertyChanged>(r => r.NumberOfChanges == 2 && r.Status == SyncStatus.Disconnected && r.LastFinishedSync == DateTime.Now));
+            underTest.Add(Mock.Of<INotifyRepositoryPropertyChanged>(r => r.NumberOfChanges == 0 && r.Status == SyncStatus.Warning && r.LastFinishedSync == DateTime.Now));
+
+            Assert.That(underTest.NumberOfChanges, Is.EqualTo(3));
+            Assert.That(underTest.LastFinishedSync, Is.Null);
+            Assert.That(underTest.Status, Is.EqualTo(SyncStatus.Warning));
         }
     }
 }
