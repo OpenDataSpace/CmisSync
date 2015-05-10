@@ -200,7 +200,7 @@ namespace CmisSync {
             Program.Controller.OnPaused += delegate {
                 if (this.CurrentState != IconState.Error) {
                     this.CurrentState = IconState.Paused;
-                    this.StateText = Properties_Resources.StatusNoChangeDetected;
+                    this.StateText = Properties_Resources.SyncStatusPaused;
                 }
 
                 this.UpdateStatusItemEvent(this.StateText);
@@ -210,7 +210,7 @@ namespace CmisSync {
             Program.Controller.OnDeactivated += delegate {
                 if (this.CurrentState != IconState.Error) {
                     this.CurrentState = IconState.Deactivated;
-                    this.StateText = Properties_Resources.StatusNoChangeDetected;
+                    this.StateText = Properties_Resources.SyncStatusDeactivated;
                 }
 
                 this.UpdateStatusItemEvent(this.StateText);
@@ -220,7 +220,7 @@ namespace CmisSync {
             Program.Controller.OnDisconnected += delegate {
                 if (this.CurrentState != IconState.Error) {
                     this.CurrentState = IconState.Disconnected;
-                    this.StateText = Properties_Resources.StatusNoChangeDetected;
+                    this.StateText = Properties_Resources.SyncStatusDisconnected;
                 }
 
                 this.UpdateStatusItemEvent(this.StateText);
