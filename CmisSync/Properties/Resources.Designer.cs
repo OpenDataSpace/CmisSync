@@ -1006,6 +1006,33 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to All configured connections are deactivated.
+        /// </summary>
+        internal static string SyncStatusDeactivated {
+            get {
+                return ResourceManager.GetString("SyncStatusDeactivated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnected from server.
+        /// </summary>
+        internal static string SyncStatusDisconnected {
+            get {
+                return ResourceManager.GetString("SyncStatusDisconnected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Synchronization is paused.
+        /// </summary>
+        internal static string SyncStatusPaused {
+            get {
+                return ResourceManager.GetString("SyncStatusPaused", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Transmissions.
         /// </summary>
         internal static string Transmission {

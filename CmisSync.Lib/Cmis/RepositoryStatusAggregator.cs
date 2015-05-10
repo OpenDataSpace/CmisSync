@@ -65,7 +65,7 @@ namespace CmisSync.Lib.Cmis {
             }
 
             private set {
-                if (value != this.lastFinishedSync && value != null && value.GetValueOrDefault() > this.lastFinishedSync.GetValueOrDefault()) {
+                if (value != this.lastFinishedSync) {
                     this.lastFinishedSync = value;
                     this.NotifyPropertyChanged(Utils.NameOf(() => this.LastFinishedSync));
                 }
@@ -193,9 +193,14 @@ namespace CmisSync.Lib.Cmis {
         }
 
         private void AnyDateChanged() {
+            DateTime? smallestDate = DateTime.MaxValue;
             foreach (var repo in repos.Keys) {
-                this.LastFinishedSync = repo.LastFinishedSync;
+                if (repo.LastFinishedSync.GetValueOrDefault() < smallestDate) {
+                    smallestDate = repo.LastFinishedSync;
+                }
             }
+
+            this.LastFinishedSync = smallestDate == DateTime.MaxValue ? null : smallestDate;
         }
     }
 }

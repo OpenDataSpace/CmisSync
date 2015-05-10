@@ -389,8 +389,8 @@ namespace CmisSync.Lib {
         /// <returns><c>true</c> if is repo name hidden the specified name hiddenRepos; otherwise, <c>false</c>.</returns>
         /// <param name="name">repo name.</param>
         /// <param name="hiddenRepos">Hidden repos.</param>
-        public static bool IsRepoNameHidden(string name, IList<string> hiddenRepos) {
-            foreach (string wildcard in hiddenRepos) {
+        public static bool IsRepoNameHidden(string name, params string[] hiddenRepos) {
+            foreach (var wildcard in hiddenRepos) {
                 if (Utils.IgnoreLineToRegex(wildcard).IsMatch(name)) {
                     return true;
                 }

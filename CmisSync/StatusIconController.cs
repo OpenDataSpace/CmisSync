@@ -35,10 +35,11 @@ namespace CmisSync {
     /// </summary>
     public enum IconState {
         Idle,
-        SyncingUp,
-        SyncingDown,
         Syncing,
-        Error
+        Error,
+        Paused,
+        Deactivated,
+        Disconnected
     }
 
     /// <summary>
@@ -177,8 +178,6 @@ namespace CmisSync {
                 }
 
                 this.UpdateStatusItemEvent(this.StateText);
-                this.animation.Stop();
-                this.UpdateIconEvent(0);
             };
 
             Program.Controller.OnTransmissionListChanged += delegate {
@@ -191,8 +190,40 @@ namespace CmisSync {
                     this.CurrentState = IconState.Syncing;
                     this.StateText = Properties_Resources.SyncingChanges;
                     this.UpdateStatusItemEvent(this.StateText);
-                    this.animation.Start();
+                    if (!this.animation.Enabled) {
+                        this.animation.Start();
+                    }
                 }
+            };
+
+            // Paused.
+            Program.Controller.OnPaused += delegate {
+                if (this.CurrentState != IconState.Error) {
+                    this.CurrentState = IconState.Paused;
+                    this.StateText = Properties_Resources.SyncStatusPaused;
+                }
+
+                this.UpdateStatusItemEvent(this.StateText);
+            };
+
+            // Deactivated.
+            Program.Controller.OnDeactivated += delegate {
+                if (this.CurrentState != IconState.Error) {
+                    this.CurrentState = IconState.Deactivated;
+                    this.StateText = Properties_Resources.SyncStatusDeactivated;
+                }
+
+                this.UpdateStatusItemEvent(this.StateText);
+            };
+
+            // Disconnected.
+            Program.Controller.OnDisconnected += delegate {
+                if (this.CurrentState != IconState.Error) {
+                    this.CurrentState = IconState.Disconnected;
+                    this.StateText = Properties_Resources.SyncStatusDisconnected;
+                }
+
+                this.UpdateStatusItemEvent(this.StateText);
             };
         }
 
@@ -283,6 +314,9 @@ namespace CmisSync {
                     this.animationFrameNumber++;
                 } else {
                     this.animationFrameNumber = 0;
+                    if (this.CurrentState != IconState.Syncing) {
+                        this.animation.Stop();
+                    }
                 }
 
                 this.UpdateIconEvent(this.animationFrameNumber);
