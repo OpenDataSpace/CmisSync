@@ -9,11 +9,11 @@ namespace TestLibrary.StatusTests {
     using NUnit.Framework;
     [TestFixture]
     public class ServerTests {
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Timeout(2000)]
         public void RunServer() {
             Task.Factory.StartNew(() => {
                 var server = new Server();
-                Thread.Sleep(1000);
+                Console.WriteLine("Publishing");
                 server.Publish();
             });
             var sub = new Subscriber();
