@@ -59,8 +59,8 @@ AC_SUBST(DBREEZE_PATH,[\$\(top_srcdir\)/packages/DBreeze.1.71.0/lib/net40/DBreez
 AC_SUBST(MOQ_LIBS,[[-r:\$\(top_srcdir\)/packages/Moq.4.2.1409.1722/lib/net40/Moq.dll]])
 AC_SUBST(MOQ_PATH,[[\$\(top_srcdir\)/packages/Moq.4.2.1409.1722/lib/net40/Moq.dll]])
 
-AC_SUBST(NETMQ_LIBS,[[-r:\$\(top_srcdir\)/packages/NetMQ.3.3.0.11/lib/net40/NetMQ.dll]])
-AC_SUBST(NETMQ_PATH,[[\$\(top_srcdir\)/packages/NetMQ.3.3.0.11/lib/net40/NetMQ.dll]])
+AC_SUBST(ZEROMQ_LIBS,[[-r:\$\(top_srcdir\)/packages/ZeroMQ.4.1.0.15/lib/net40/ZeroMQ.dll]])
+AC_SUBST(ZEROMQ_PATH,[[\$\(top_srcdir\)/packages/ZeroMQ.4.1.0.15/lib/net40/ZeroMQ.dll]])
 
 AC_SUBST(DOTCMIS_LIBS,[[-r:\$\(top_srcdir\)/Extras/DotCMIS.dll]])
 AC_SUBST(DOTCMIS_PATH,[[\$\(top_srcdir\)/Extras/DotCMIS.dll]])

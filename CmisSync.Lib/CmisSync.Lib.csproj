@@ -53,11 +53,11 @@
     <Reference Include="System.Net" />
     <Reference Include="System.Core" />
     <Reference Include="System.Configuration" />
-    <Reference Include="NetMQ">
-      <HintPath>..\packages\NetMQ.3.3.0.11\lib\net40\NetMQ.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="ZeroMQ">
+      <HintPath>..\packages\ZeroMQ.4.1.0.15\lib\net40\ZeroMQ.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -371,6 +371,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="i386\libsodium.dll" />
+    <None Include="i386\libsodium.so" />
+    <None Include="i386\libzmq.dll" />
+    <None Include="i386\libzmq.so" />
+    <None Include="amd64\libsodium.dll" />
+    <None Include="amd64\libsodium.so" />
+    <None Include="amd64\libzmq.dll" />
+    <None Include="amd64\libzmq.so" />
   </ItemGroup>
   <ItemGroup />
 </Project>

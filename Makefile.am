@@ -32,6 +32,7 @@ bootstrap:
 	cp packages/log4net.2.0.3/lib/net40-client/log4net.dll bin/
 	cp packages/DBreeze.1.71.0/lib/net40/DBreeze.dll bin/
 	cp packages/Moq.4.2.1409.1722/lib/net40/Moq.dll bin/
+	cp packages/ZeroMQ.4.1.0.15/lib/net40/ZeroMQ.dll bin/
 
 install-exec-local:
 	$(INSTALL) -m 0755 $(JSON_PATH) $(DESTDIR)$(pkglibdir)
@@ -40,7 +41,7 @@ install-exec-local:
 	$(INSTALL) -m 0755 $(DBREEZE_PATH) $(DESTDIR)$(pkglibdir)
 	$(INSTALL) -m 0755 $(LOG4NET_PATH) $(DESTDIR)$(pkglibdir)
 	$(INSTALL) -m 0755 $(DOTCMIS_PATH) $(DESTDIR)$(pkglibdir)
-	$(INSTALL) -m 0755 $(NETMQ_PATH) $(DESTDIR)$(pkglibdir)
+	$(INSTALL) -m 0755 $(ZEROMQ_PATH) $(DESTDIR)$(pkglibdir)
 
 uninstall-local:
 	$(RM) \
@@ -50,7 +51,7 @@ uninstall-local:
 		$(DESTDIR)$(pkglibdir)/$(notdir $(DBREEZE_PATH)) \
 		$(DESTDIR)$(pkglibdir)/$(notdir $(LOG4NET_PATH)) \
 		$(DESTDIR)$(pkglibdir)/$(notdir $(DOTCMIS_PATH)) \
-		$(DESTDIR)$(pkglibdir)/$(notdir $(NETMQ_PATH))
+		$(DESTDIR)$(pkglibdir)/$(notdir $(ZEROMQ_PATH))
 
 # make it a .PHONY target, so it's always executed
 .PHONY: tmpinst

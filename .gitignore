@@ -53,3 +53,5 @@ StyleCop.Cache
 gendarme.html
 testdir
 SOURCES
+i386/
+amd64/
