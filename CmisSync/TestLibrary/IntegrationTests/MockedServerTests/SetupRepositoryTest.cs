@@ -54,7 +54,7 @@ namespace TestLibrary.IntegrationTests.MockedServerTests {
 
             Assert.That(session, Is.Not.Null);
             Assert.That(session.GetRootFolder(), Is.EqualTo(repo.MockedRootFolder.Object));
-            var rootFolder = session.GetRootFolder() as IFolder;
+            var rootFolder = session.GetRootFolder();
             rootFolder.DeleteTree(true, null, true);
             Assert.Throws<CmisObjectNotFoundException>(() => session.GetRootFolder());
             Assert.Throws<CmisObjectNotFoundException>(() => rootFolder.DeleteTree(true, null, true));

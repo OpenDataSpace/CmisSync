@@ -32,10 +32,11 @@ namespace TestLibrary.MockedServer {
     using TestLibrary.TestUtils;
 
     public class MockedRepository : MockedRepositoryInfo<IRepository> {
-
-        public MockedFolder MockedRootFolder { get; set; }
-
-        public MockedRepository(string id = null, string name = "name", MockedFolder rootFolder = null, MockBehavior behavior = MockBehavior.Strict) : base(id, name, behavior) {
+        public MockedRepository(
+            string id = null,
+            string name = "name",
+            MockedFolder rootFolder = null,
+            MockBehavior behavior = MockBehavior.Strict) : base(id, name, behavior) {
             this.MockedRootFolder = rootFolder ?? new MockedFolder("/");
             this.Objects = new Dictionary<string, ICmisObject>();
             this.Objects.Add(this.MockedRootFolder.Object.Id, this.MockedRootFolder.Object);
@@ -49,9 +50,12 @@ namespace TestLibrary.MockedServer {
                 };
 
                 session.AddObjects(this.MockedRootFolder.Object);
+                this.MockedRootFolder.Session = session;
                 return session.Object;
             });
         }
+
+        public MockedFolder MockedRootFolder { get; set; }
 
         public IRepositoryService RepositoryService { get; set; }
 

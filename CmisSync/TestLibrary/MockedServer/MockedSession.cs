@@ -47,8 +47,8 @@ namespace TestLibrary.MockedServer {
 
             this.Setup(s => s.GetContentStream(It.Is<IObjectId>(o => (this.Objects[o.Id] as IDocument) != null))).Returns<IObjectId>((o) => (this.Objects[o.Id] as IDocument).GetContentStream());
 
-            this.Setup(s => s.GetRootFolder()).Returns(() => this.Object.GetObject(this.Object.RepositoryInfo.RootFolderId) as IFolder);
-            this.Setup(s => s.GetRootFolder(It.IsAny<IOperationContext>())).Returns(() => this.Object.GetObject(this.Object.RepositoryInfo.RootFolderId) as IFolder);
+            this.Setup(s => s.GetRootFolder()).Returns(() => this.GetObject(this.Object.RepositoryInfo.RootFolderId) as IFolder);
+            this.Setup(s => s.GetRootFolder(It.IsAny<IOperationContext>())).Returns(() => this.GetObject(this.Object.RepositoryInfo.RootFolderId) as IFolder);
 
             this.Setup(s => s.GetObjectByPath(It.Is<string>(p => !string.IsNullOrEmpty(p)))).Returns<string>((p) => this.GetObjectByPath(p));
             this.Setup(s => s.GetObjectByPath(It.Is<string>(p => !string.IsNullOrEmpty(p)), It.IsAny<IOperationContext>())).Returns<string, IOperationContext>((p, c) => this.GetObjectByPath(p));
@@ -82,7 +82,7 @@ namespace TestLibrary.MockedServer {
             return this.Objects[objectId];
         }
 
-        private void Delete(string objectId) {
+        public void Delete(string objectId) {
             if (!this.Objects.Remove(objectId)) {
                 throw new CmisObjectNotFoundException();
             }
