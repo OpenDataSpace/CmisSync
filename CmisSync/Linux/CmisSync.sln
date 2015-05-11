@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotCMIS", "..\..\Extras\Ope
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLibrary", "..\TestLibrary\TestLibrary.csproj", "{295D2B18-B6EB-4EF4-9862-4E3C0C383888}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DancingQueen", "..\..\DancingQueen\DancingQueen.csproj", "{F0F479F3-8461-42B7-ABF1-19C4B41C6C1A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|Any CPU = Release|Any CPU
@@ -33,6 +35,14 @@ Global
 		{529EF90F-A34C-4426-A4F9-65113AC23841}.Release|Any CPU.Build.0 = Release|Any CPU
 		{728483AA-E34B-4441-BF2C-C8BC2901E4E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{728483AA-E34B-4441-BF2C-C8BC2901E4E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0F479F3-8461-42B7-ABF1-19C4B41C6C1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0F479F3-8461-42B7-ABF1-19C4B41C6C1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0F479F3-8461-42B7-ABF1-19C4B41C6C1A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F0F479F3-8461-42B7-ABF1-19C4B41C6C1A}.Debug|x86.Build.0 = Debug|Any CPU
+		{F0F479F3-8461-42B7-ABF1-19C4B41C6C1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0F479F3-8461-42B7-ABF1-19C4B41C6C1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0F479F3-8461-42B7-ABF1-19C4B41C6C1A}.Release|x86.ActiveCfg = Release|Any CPU
+		{F0F479F3-8461-42B7-ABF1-19C4B41C6C1A}.Release|x86.Build.0 = Release|Any CPU
 		{F62D4C7B-3A91-41A6-A758-8CEB95DEB629}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F62D4C7B-3A91-41A6-A758-8CEB95DEB629}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F62D4C7B-3A91-41A6-A758-8CEB95DEB629}.Release|Any CPU.ActiveCfg = Release|Any CPU
