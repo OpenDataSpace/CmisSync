@@ -69,6 +69,12 @@ namespace CmisSync.Lib.Cmis {
         public bool SyncRequested { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Cmis.RepositoryStatus"/> is deactivated.
+        /// </summary>
+        /// <value><c>true</c> if deactivated; otherwise, <c>false</c>.</value>
+        public bool Deactivated { get; set; }
+
+        /// <summary>
         /// Gets or sets the known changes.
         /// </summary>
         /// <value>The known changes.</value>
@@ -80,19 +86,15 @@ namespace CmisSync.Lib.Cmis {
         /// <value>The status.</value>
         public SyncStatus Status {
             get {
-                if (this.Paused) {
+                if (this.Deactivated) {
+                    return SyncStatus.Deactivated;
+                } else if (this.Paused) {
                     return SyncStatus.Suspend;
-                }
-
-                if (this.Warning) {
+                } else if (this.Warning) {
                     return SyncStatus.Warning;
-                }
-
-                if (!this.Connected) {
+                } else if (!this.Connected) {
                     return SyncStatus.Disconnected;
-                }
-
-                if (this.SyncRequested || this.KnownChanges > 0) {
+                } else if (this.SyncRequested || this.KnownChanges > 0) {
                     return SyncStatus.Synchronizing;
                 } else {
                     return SyncStatus.Idle;

@@ -16,8 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Producer.Crawler
-{
+namespace CmisSync.Lib.Producer.Crawler {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -38,13 +37,11 @@ namespace CmisSync.Lib.Producer.Crawler
     /// <attribution license="cc4" from="Microsoft" modified="false" /><para>The exception that is thrown when a null
     /// reference (Nothing in Visual Basic) is passed to a method that does not accept it as a valid argument. </para>
     /// </exception>
-    public class LocalEventGenerator
-    {
+    public class LocalEventGenerator {
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
 
-        public LocalEventGenerator(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null)
-        {
+        public LocalEventGenerator(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) {
             if (storage == null) {
                 throw new ArgumentNullException("Given storage is null");
             }
@@ -75,7 +72,8 @@ namespace CmisSync.Lib.Producer.Crawler
         public List<AbstractFolderEvent> CreateEvents(
             List<IMappedObject> storedObjects,
             IObjectTree<IFileSystemInfo> localTree,
-            Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap)
+            Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap,
+            ISet<IMappedObject> handledStoredObjects)
         {
             List<AbstractFolderEvent> creationEvents = new List<AbstractFolderEvent>();
             var parent = localTree.Item;
@@ -87,8 +85,6 @@ namespace CmisSync.Lib.Producer.Crawler
             }
 
             foreach (var child in localTree.Children) {
-                bool removeStoredMappedChild = false;
-
                 IMappedObject storedMappedChild = this.FindStoredObjectByFileSystemInfo(storedObjects, child.Item);
                 if (storedMappedChild != null) {
                     var localPath = this.storage.GetLocalPath(storedMappedChild);
@@ -109,24 +105,22 @@ namespace CmisSync.Lib.Producer.Crawler
                         AbstractFolderEvent createdEvent = this.CreateLocalEventBasedOnStorage(child.Item, storedParent, storedMappedChild);
 
                         eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(createdEvent, correspondingRemoteEvent);
-                        removeStoredMappedChild = true;
+                        handledStoredObjects.Add(storedMappedChild);
                     }
                 } else {
                     // Added
                     creationEvents.Add(this.GenerateCreatedEvent(child.Item));
                 }
 
-                creationEvents.AddRange(this.CreateEvents(storedObjects, child, eventMap));
-
-                if(removeStoredMappedChild) {
-                    storedObjects.Remove(storedMappedChild);
-                }
+                creationEvents.AddRange(this.CreateEvents(storedObjects, child, eventMap, handledStoredObjects));
             }
 
             return creationEvents;
         }
 
-        private static AbstractFolderEvent GetCorrespondingRemoteEvent(Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap, IMappedObject storedMappedChild)
+        private static AbstractFolderEvent GetCorrespondingRemoteEvent(
+                Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap,
+                IMappedObject storedMappedChild)
         {
             AbstractFolderEvent correspondingRemoteEvent = null;
             Tuple<AbstractFolderEvent, AbstractFolderEvent> tuple;
@@ -152,7 +146,9 @@ namespace CmisSync.Lib.Producer.Crawler
                 #if __COCOA__
                 if (fsObject.Name.Normalize(NormalizationForm.FormD) == storedMappedChild.Name.Normalize(NormalizationForm.FormD) && fsObject.LastWriteTimeUtc == storedMappedChild.LastLocalWriteTimeUtc) {
                 #else
-                if (fsObject.Name == storedMappedChild.Name && fsObject.LastWriteTimeUtc == storedMappedChild.LastLocalWriteTimeUtc) {
+                if (fsObject.Name == storedMappedChild.Name &&
+                    fsObject.LastWriteTimeUtc == storedMappedChild.LastLocalWriteTimeUtc &&
+                    fsObject.ReadOnly == storedMappedChild.IsReadOnly) {
                 #endif
                     // Equal
                     createdEvent = null;

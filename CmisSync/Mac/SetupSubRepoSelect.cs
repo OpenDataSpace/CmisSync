@@ -16,37 +16,32 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using MonoMac.Foundation;
-using MonoMac.AppKit;
 
-namespace CmisSync
-{
-    public partial class SetupSubRepoSelect : MonoMac.AppKit.NSView
-    {
+namespace CmisSync {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
+    using MonoMac.AppKit;
+    using MonoMac.Foundation;
+    public partial class SetupSubRepoSelect : MonoMac.AppKit.NSView {
         #region Constructors
 
         // Called when created from unmanaged code
-        public SetupSubRepoSelect (IntPtr handle) : base (handle)
-        {
-            Initialize ();
+        public SetupSubRepoSelect(IntPtr handle) : base(handle) {
+            this.Initialize();
         }
+
         // Called when created directly from a XIB file
         [Export ("initWithCoder:")]
-        public SetupSubRepoSelect (NSCoder coder) : base (coder)
-        {
-            Initialize ();
+        public SetupSubRepoSelect(NSCoder coder) : base(coder) {
+            this.Initialize();
         }
+
         // Shared initialization code
-        void Initialize ()
-        {
+        private void Initialize() {
         }
 
         #endregion
-
     }
 }
-

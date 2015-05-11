@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.IO;
 
@@ -40,8 +39,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class LocalObjectMovedTest
-    {
+    public class LocalObjectMovedTest {
         private readonly string rootId = "rootId";
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
@@ -64,14 +62,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void DefaultConstructorTest()
-        {
+        public void DefaultConstructorTest() {
             new LocalObjectMoved(this.session.Object, this.storage.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void MoveObjectToSubfolder()
-        {
+        public void MoveObjectToSubfolder() {
             var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("folderId", "folder", "/folder", this.rootId);
             var remoteTargetFolder = MockOfIFolderUtil.CreateRemoteFolderMock("targetId", "target", "/target", this.rootId);
             this.session.AddRemoteObjects(remoteFolder.Object, remoteTargetFolder.Object);
@@ -92,8 +88,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void MoveObjectFromSubFolder()
-        {
+        public void MoveObjectFromSubFolder() {
             var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("folderId", "folder", "/sub/folder", "subId");
             var subFolder = MockOfIFolderUtil.CreateRemoteFolderMock("subId", "sub", "/sub", this.rootId);
             this.session.AddRemoteObjects(remoteFolder.Object, subFolder.Object);
@@ -116,8 +111,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void MoveRenamedObject()
-        {
+        public void MoveRenamedObject() {
             string newFolderName = "newFolder";
             var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("folderId", "folder", "/folder", this.rootId);
             var targetFolder = MockOfIFolderUtil.CreateRemoteFolderMock("targetId", "target", "/target", this.rootId);
@@ -144,8 +138,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void PermissionDeniedLeadsToNoOperation()
-        {
+        public void PermissionDeniedLeadsToNoOperation() {
             var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("folderId", "folder", "/folder", this.rootId);
             var remoteTargetFolder = MockOfIFolderUtil.CreateRemoteFolderMock("targetId", "target", "/target", this.rootId);
             this.session.AddRemoteObjects(remoteFolder.Object, remoteTargetFolder.Object);
@@ -161,12 +154,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.underTest.Solve(localFolder.Object, remoteFolder.Object);
 
             remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, remoteTargetFolder.Object), Times.Once());
-            storage.VerifyThatNoObjectIsManipulated();
+            this.storage.VerifyThatNoObjectIsManipulated();
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void Utf8CharacterLeadsToNoSavings()
-        {
+        public void Utf8CharacterLeadsToNoSavings() {
             string newFolderName = @"ä".Normalize(System.Text.NormalizationForm.FormD);
             var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("folderId", "folder", "/folder", this.rootId);
             var targetFolder = MockOfIFolderUtil.CreateRemoteFolderMock("targetId", "target", "/target", this.rootId);
@@ -185,7 +177,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, targetFolder.Object), Times.Once());
             remoteFolder.Verify(f => f.Rename(newFolderName, true), Times.Once());
-            remoteFolder.Verify(f => f.UpdateProperties(It.IsAny<System.Collections.Generic.IDictionary<string,object>>()), Times.Never());
+            remoteFolder.Verify(f => f.UpdateProperties(It.IsAny<System.Collections.Generic.IDictionary<string, object>>()), Times.Never());
             this.storage.VerifyThatNoObjectIsManipulated();
         }
     }

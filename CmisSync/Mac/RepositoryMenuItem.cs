@@ -146,9 +146,8 @@ namespace CmisSync {
 
             set {
                 this.status = value;
-                InvokeOnMainThread(delegate {
-                    switch (this.status)
-                    {
+                BeginInvokeOnMainThread(delegate {
+                    switch (this.status) {
                         case SyncStatus.Idle:
                             this.suspendItem.Title = Properties_Resources.PauseSync;
                             this.suspendItem.Image = this.pauseImage;
@@ -190,7 +189,7 @@ namespace CmisSync {
                 }
             }
 
-            InvokeOnMainThread (delegate {
+            BeginInvokeOnMainThread(delegate {
                 this.statusItem.Title = message;
             });
         }

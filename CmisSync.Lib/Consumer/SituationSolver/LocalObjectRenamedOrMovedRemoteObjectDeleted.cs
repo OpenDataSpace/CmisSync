@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectRenamedOrMovedRemoteObjectDeleted.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -39,9 +39,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectRenamedOrMovedRemoteObjectDeleted(
             ISession session,
             IMetaDataStorage storage,
-            ActiveActivitiesManager manager,
+            IFileTransmissionStorage transmissionStorage,
+            TransmissionManager manager,
             ISolver secondSolver = null) : base(session, storage) {
-            this.secondSolver = secondSolver ?? new LocalObjectAdded(session, storage, manager);
+                this.secondSolver = secondSolver ?? new LocalObjectAdded(session, storage, transmissionStorage, manager);
         }
 
         public override void Solve(

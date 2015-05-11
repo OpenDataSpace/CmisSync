@@ -25,7 +25,7 @@ namespace CmisSync.Lib.Streams {
     /// <summary>
     /// Bandwidth limited stream.
     /// </summary>
-    public class BandwidthLimitedStream : StreamWrapper {
+    public class BandwidthLimitedStream : NotifyPropertyChangedStream {
         /// <summary>
         /// Locks the limit manipulation to prevent concurrent accesses
         /// </summary>
@@ -34,12 +34,12 @@ namespace CmisSync.Lib.Streams {
         /// <summary>
         /// The Limit of bytes which could be read per second. The limit is disabled if set to -1.
         /// </summary>
-        private long readLimit = -1;
+        private long? readLimit = null;
 
         /// <summary>
         /// The Limit of bytes which could be written per second. The limit is disabled if set to -1.
         /// </summary>
-        private long writeLimit = -1;
+        private long? writeLimit = null;
         private Stopwatch readWatch;
         private Stopwatch writeWatch;
 
@@ -74,18 +74,21 @@ namespace CmisSync.Lib.Streams {
         /// <value>
         /// The read limit.
         /// </value>
-        public long ReadLimit {
+        public long? ReadLimit {
             get {
-                return this.readLimit; 
+                return this.readLimit;
             }
 
             set {
-                if (value <= 0) {
+                if (value != null && value <= 0) {
                     throw new ArgumentException("Limit cannot be negative");
                 }
 
                 lock (this.limitLock) {
-                    this.readLimit = value;
+                    if (value != this.readLimit) {
+                        this.readLimit = value;
+                        this.NotifyPropertyChanged(Utils.NameOf(() => this.ReadLimit));
+                    }
                 }
             }
         }
@@ -96,18 +99,21 @@ namespace CmisSync.Lib.Streams {
         /// <value>
         /// The write limit.
         /// </value>
-        public long WriteLimit {
+        public long? WriteLimit {
             get {
                 return this.writeLimit;
             }
 
             set {
-                if (value <= 0) {
+                if (value != null && value <= 0) {
                     throw new ArgumentException("Limit cannot be negative");
                 }
 
                 lock (this.limitLock) {
-                    this.writeLimit = value;
+                    if (value != this.writeLimit) {
+                        this.writeLimit = value;
+                        this.NotifyPropertyChanged(Utils.NameOf(() => this.WriteLimit));
+                    }
                 }
             }
         }
@@ -116,28 +122,22 @@ namespace CmisSync.Lib.Streams {
         /// Disables the limits.
         /// </summary>
         public void DisableLimits() {
-            lock (this.limitLock) {
-                this.readLimit = -1;
-                this.writeLimit = -1;
-            }
+            this.DisableReadLimit();
+            this.DisableWriteLimit();
         }
 
         /// <summary>
         /// Disables the read limit.
         /// </summary>
         public void DisableReadLimit() {
-            lock (this.limitLock) {
-                this.readLimit = -1;
-            }
+            this.ReadLimit = null;
         }
 
         /// <summary>
         /// Disables the write limit.
         /// </summary>
         public void DisableWriteLimit() {
-            lock (this.limitLock) {
-                this.writeLimit = -1;
-            }
+            this.WriteLimit = null;
         }
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace CmisSync.Lib.Streams {
         /// Count of bytes.
         /// </param>
         public override int Read(byte[] buffer, int offset, int count) {
-            if (this.readLimit < 0) {
+            if (this.ReadLimit == null) {
                 return Stream.Read(buffer, offset, count);
             } else {
                 // TODO Sleep must be implemented
@@ -174,7 +174,7 @@ namespace CmisSync.Lib.Streams {
         /// Count.
         /// </param>
         public override void Write(byte[] buffer, int offset, int count) {
-            if (this.WriteLimit < 0) {
+            if (this.WriteLimit == null) {
                 this.Stream.Write(buffer, offset, count);
             } else {
                 // TODO Sleep must be implemented

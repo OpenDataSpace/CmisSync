@@ -21,13 +21,17 @@ namespace CmisSync {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.ComponentModel;
+
+    using CmisSync.Lib;
+    using CmisSync.Lib.FileTransmission;
 
     using MonoMac.Foundation;
     using MonoMac.AppKit;
 
     public class TransmissionDataSource : NSTableViewDataSource {
         object lockTransmissionItems = new object();
-        private List<TransmissionItem> TransmissionItems = new List<TransmissionItem>();
+        private List<Transmission> TransmissionItems = new List<Transmission>();
         private bool changeAll = false;
 
         TransmissionController Controller;
@@ -39,10 +43,10 @@ namespace CmisSync {
             Controller.UpdateTransmissionEvent += HandleUpdateTransmissionEvent;
         }
 
-        private void HandleUpdateTransmissionEvent(TransmissionItem item) {
+        private void HandleUpdateTransmissionEvent(Transmission item) {
             lock (lockTransmissionItems) {
                 for (int i = 0; i < TransmissionItems.Count; ++i) {
-                    if (TransmissionItems[i].FullPath == item.FullPath) {
+                    if (TransmissionItems[i].Path == item.Path) {
                         TransmissionItems[i] = item;
                         if (item.Done) {
                             // finished TransmissionItem should put to the tail
@@ -53,16 +57,17 @@ namespace CmisSync {
                                 continue;
                             }
                         }
+
                         return;
                     }
                 }
             }
         }
 
-        private void HandleDeleteTransmissionEvent(TransmissionItem item) {
+        private void HandleDeleteTransmissionEvent(Transmission item) {
             lock (lockTransmissionItems) {
                 for (int i = TransmissionItems.Count - 1; i >= 0; --i) {
-                    if (TransmissionItems[i].FullPath == item.FullPath) {
+                    if (TransmissionItems[i].Path == item.Path) {
                         TransmissionItems.RemoveAt(i);
                         changeAll = true;
                         return;
@@ -71,14 +76,14 @@ namespace CmisSync {
             }
         }
 
-        private void HandleInsertTransmissionEvent(TransmissionItem item) {
+        private void HandleInsertTransmissionEvent(Transmission item) {
             lock (lockTransmissionItems) {
                 TransmissionItems.Insert(0, item);
                 changeAll = true;
             }
         }
 
-        public TransmissionItem GetTransmissionItem(int row) {
+        public Transmission GetTransmissionItem(int row) {
             lock (lockTransmissionItems) {
                 if (row < TransmissionItems.Count) {
                     return TransmissionItems[row];
@@ -88,28 +93,39 @@ namespace CmisSync {
         }
 
         public override NSObject GetObjectValue(NSTableView tableView, NSTableColumn tableColumn, int row) {
+            Transmission transmission = null;
             lock (lockTransmissionItems) {
                 if (row >= TransmissionItems.Count) {
                     return new NSNull();
                 }
 
-                switch (tableColumn.Identifier) {
-                case "Repo":
-                    return new NSString(TransmissionItems[row].Repo);
-                case "Path":
-                    return new NSString(TransmissionItems[row].Path);
-                case "Status":
-                    return new NSString(TransmissionItems[row].Status);
-                case "Progress":
-                    return new NSString(TransmissionItems[row].Progress);
-                case "UpdateTime":
-                    return new NSString(TransmissionItems[row].UpdateTime.ToString());
-                default:
-                    return new NSNull();
-                }
+                transmission = TransmissionItems[row];
+                transmission.PropertyChanged += (object sender, PropertyChangedEventArgs e) => {
+                    var t = sender as Transmission;
+                    if (e.PropertyName == Utils.NameOf(() => t.Percent)) {
+                        BeginInvokeOnMainThread(delegate {
+                            var widget = tableView.GetView(0, row, true) as TransmissionWidgetItem;
+                            this.UpdateViewProgress(widget, t);
+                            this.UpdateViewLastModificationDate(widget, t.LastModification);
+                        });
+                    } else if (e.PropertyName == Utils.NameOf(() => t.BitsPerSecond)) {
+                        BeginInvokeOnMainThread(delegate {
+                            this.UpdateWidgetStatus(tableView.GetView(0, row, true) as TransmissionWidgetItem, t);
+                        });
+                    }
+                };
             }
-
-            throw new You_Should_Not_Call_base_In_This_Method ();
+            BeginInvokeOnMainThread(delegate {
+                var widget = tableView.GetView(0, row, false) as TransmissionWidgetItem;
+                if (widget != null) {
+                    widget.labelName.StringValue = transmission.FileName;
+                    widget.labelName.ToolTip = transmission.Path;
+                    this.UpdateViewLastModificationDate(widget, transmission.LastModification);
+                    this.UpdateWidgetStatus(widget, transmission);
+                    this.UpdateViewProgress(widget, transmission);
+                }
+            });
+            return new NSNull();
         }
 
         public override int GetRowCount(NSTableView tableView) {
@@ -118,7 +134,39 @@ namespace CmisSync {
             }
         }
 
-        public void UpdateTableView(NSTableView tableView, TransmissionItem item) {
+        private void UpdateViewLastModificationDate(TransmissionWidgetItem widget, DateTime date) {
+            if (widget != null) {
+                widget.labelDate.StringValue = string.Format("{0} {1}", date.ToShortDateString(), date.ToShortTimeString());
+            }
+        }
+
+        private void UpdateViewProgress(TransmissionWidgetItem widget, Transmission t) {
+            if (widget != null) {
+                widget.progress.Hidden = t.Percent.GetValueOrDefault() == 100;
+                widget.progress.DoubleValue = t.Percent.GetValueOrDefault();
+                if (widget.progress.Hidden) {
+                    System.Drawing.SizeF size = widget.Frame.Size;
+                    size.Height = widget.labelName.Frame.Height + widget.labelStatus.Frame.Height;
+                    widget.SetFrameSize(size);
+                } else {
+                    System.Drawing.SizeF size = widget.Frame.Size;
+                    size.Height = widget.labelName.Frame.Height + widget.progress.Frame.Height + widget.labelStatus.Frame.Height;
+                    widget.SetFrameSize(size);
+                }
+            }
+        }
+
+        private void UpdateWidgetStatus(TransmissionWidgetItem widget, Transmission t) {
+            if (widget != null) {
+                string pos = t.Position != null && t.Position != t.Length ? string.Format("{0}/", CmisSync.Lib.Utils.FormatSize(t.Position.GetValueOrDefault())) : string.Empty;
+                string size = t.Length != null ? CmisSync.Lib.Utils.FormatSize(t.Length.GetValueOrDefault()) : string.Empty;
+                string speed = !t.Done ? CmisSync.Lib.Utils.FormatBandwidth(t.BitsPerSecond.GetValueOrDefault()): string.Empty;
+                widget.labelStatus.StringValue = string.Format("{0}{1}\t{2}", pos, size, speed);
+            }
+        }
+
+
+        public void UpdateTableView(NSTableView tableView, Transmission item) {
             if (changeAll) {
                 changeAll = false;
                 BeginInvokeOnMainThread(delegate {
@@ -131,16 +179,16 @@ namespace CmisSync {
                 return;
             }
 
-            lock (lockTransmissionItems) {
-                for (int i = 0; i < TransmissionItems.Count; ++i) {
-                    if (TransmissionItems[i].FullPath == item.FullPath) {
-                        BeginInvokeOnMainThread(delegate {
-                            tableView.ReloadData(new NSIndexSet(i), NSIndexSet.FromArray(new int[]{ 0, 1, 2, 3, 4}));
-                        });
-                        return;
-                    }
-                }
-            }
+//            lock (lockTransmissionItems) {
+//                for (int i = 0; i < TransmissionItems.Count; ++i) {
+//                    if (TransmissionItems[i].Path == item.Path) {
+//                        BeginInvokeOnMainThread(delegate {
+//                            tableView.ReloadData(new NSIndexSet(i), new NSIndexSet(0));
+//                        });
+//                        return;
+//                    }
+//                }
+//            }
         }
     }
 
@@ -189,11 +237,7 @@ namespace CmisSync {
         public override void AwakeFromNib() {
             base.AwakeFromNib();
 
-            TableColumnRepo.HeaderCell.Title = Properties_Resources.TransmissionTitleRepo;
-            TableColumnPath.HeaderCell.Title = Properties_Resources.TransmissionTitlePath;
-            TableColumnStatus.HeaderCell.Title = Properties_Resources.TransmissionTitleStatus;
             TableColumnProgress.HeaderCell.Title = Properties_Resources.TransmissionTitleProgress;
-            TableColumnUpdateTime.HeaderCell.Title = Properties_Resources.TransmissionTitleLastChange;
             FinishButton.Title = Properties_Resources.Close;
 
             DataSource = new TransmissionDataSource(Controller);
@@ -213,7 +257,7 @@ namespace CmisSync {
                 DataSource.UpdateTableView(TableView, null);
                 HandleSelectionDidChange(this, new EventArgs());
             };
-            Controller.ShowTransmissionEvent += delegate (TransmissionItem item) {
+            Controller.ShowTransmissionEvent += delegate(Transmission item) {
                 DataSource.UpdateTableView(TableView, item);
                 HandleSelectionDidChange(this, new EventArgs());
             };
@@ -225,7 +269,7 @@ namespace CmisSync {
                     if (TableView.SelectedRowCount > 0) {
                         TableRowMenuOpen.Enabled = false;
                         foreach (int row in TableView.SelectedRows) {
-                            TransmissionItem item = DataSource.GetTransmissionItem(row);
+                            var item = DataSource.GetTransmissionItem(row);
                             if (item != null && item.Done) {
                                 TableRowMenuOpen.Enabled = true;
                                 break;
@@ -251,9 +295,9 @@ namespace CmisSync {
 
             NSWorkspace.SharedWorkspace.BeginInvokeOnMainThread(delegate {
                 foreach (int row in TableView.SelectedRows) {
-                    TransmissionItem item = DataSource.GetTransmissionItem(row);
+                    var item = DataSource.GetTransmissionItem(row);
                     if (item!=null && item.Done) {
-                        NSWorkspace.SharedWorkspace.OpenFile(item.FullPath);
+                        NSWorkspace.SharedWorkspace.OpenFile(item.Path);
                     }
                 }
             });
@@ -270,9 +314,9 @@ namespace CmisSync {
                 }
 
                 foreach (int row in TableView.SelectedRows) {
-                    TransmissionItem item = DataSource.GetTransmissionItem(row);
+                    var item = DataSource.GetTransmissionItem(row);
                     if (item!=null) { 
-                        NSWorkspace.SharedWorkspace.OpenFile(System.IO.Path.GetDirectoryName(item.FullPath));
+                        NSWorkspace.SharedWorkspace.OpenFile(System.IO.Path.GetDirectoryName(item.Path));
                     }
                 }
             });

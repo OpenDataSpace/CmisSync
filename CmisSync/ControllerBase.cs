@@ -46,6 +46,7 @@ namespace CmisSync {
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.FileSystem;
@@ -77,7 +78,7 @@ namespace CmisSync {
         /// </summary>
         private ActivityListenerAggregator activityListenerAggregator;
 
-        private ActiveActivitiesManager transmissionManager;
+        private TransmissionManager transmissionManager;
 
         /// <summary>
         /// Concurrency locks.
@@ -149,6 +150,12 @@ namespace CmisSync {
 
         public event Action OnError = delegate { };
 
+        public event Action OnDisconnected = delegate { };
+
+        public event Action OnPaused = delegate { };
+
+        public event Action OnDeactivated = delegate { };
+
         public event AlertNotificationRaisedEventHandler AlertNotificationRaised = delegate { };
 
         public delegate void AlertNotificationRaisedEventHandler(string title, string message);
@@ -174,7 +181,7 @@ namespace CmisSync {
         /// </summary>
         public ControllerBase() {
             this.FoldersPath = ConfigManager.CurrentConfig.GetFoldersPath();
-            this.transmissionManager = new ActiveActivitiesManager();
+            this.transmissionManager = new TransmissionManager();
             this.activityListenerAggregator = new ActivityListenerAggregator(this, this.transmissionManager);
             this.transmissionManager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
                 this.OnTransmissionListChanged();
@@ -193,7 +200,7 @@ namespace CmisSync {
             };
 
             this.statusAggregator.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) => {
-                switch(this.statusAggregator.Status) {
+                switch (this.statusAggregator.Status) {
                 case SyncStatus.Idle:
                     this.OnIdle();
                     break;
@@ -202,6 +209,15 @@ namespace CmisSync {
                     break;
                 case SyncStatus.Warning:
                     this.OnError();
+                    break;
+                case SyncStatus.Disconnected:
+                    this.OnDisconnected();
+                    break;
+                case SyncStatus.Suspend:
+                    this.OnPaused();
+                    break;
+                case SyncStatus.Deactivated:
+                    this.OnDeactivated();
                     break;
                 default:
                     this.OnIdle();
@@ -280,7 +296,7 @@ namespace CmisSync {
         /// List of actives transmissions.
         /// </summary>
         /// <returns>The transmissions.</returns>
-        public List<FileTransmissionEvent> ActiveTransmissions() {
+        public List<Transmission> ActiveTransmissions() {
             return this.transmissionManager.ActiveTransmissionsAsList();
         }
 
@@ -365,7 +381,7 @@ namespace CmisSync {
                     if (repo.Name == repoName) {
                         if (repo.Status != SyncStatus.Suspend) {
                             repo.Suspend();
-                            Logger.Debug("Requested to syspend sync of repo " + repo.Name);
+                            Logger.Debug("Requested to suspend sync of repo " + repo.Name);
                         } else {
                             repo.Resume();
                             Logger.Debug("Requested to resume sync of repo " + repo.Name);
@@ -389,15 +405,9 @@ namespace CmisSync {
                 Logger.Debug("Start to stop all active file transmissions");
                 int wait = 0;
                 do {
-                    List<FileTransmissionEvent> activeList = this.transmissionManager.ActiveTransmissionsAsList();
-                    foreach (FileTransmissionEvent transmissionEvent in activeList) {
-                        if (transmissionEvent.Status.Aborted.GetValueOrDefault()) {
-                            continue;
-                        }
-
-                        if (!transmissionEvent.Status.Aborting.GetValueOrDefault()) {
-                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = true });
-                        }
+                    List<Transmission> activeList = this.transmissionManager.ActiveTransmissionsAsList();
+                    foreach (var transmission in activeList) {
+                        transmission.Abort();
                     }
 
                     if (activeList.Count > 0) {
@@ -647,20 +657,30 @@ namespace CmisSync {
         private void AddRepository(RepoInfo repositoryInfo) {
             try {
                 Repository repo = new Repository(repositoryInfo, this.activityListenerAggregator);
-                repo.Queue.EventManager.AddEventHandler(
-                    new GenericSyncEventHandler<FileTransmissionEvent>(
-                    50,
-                    delegate(ISyncEvent e) {
-                    FileTransmissionEvent transEvent = e as FileTransmissionEvent;
-                    transEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
-                        if (args.Aborted == true && args.FailedException != null) {
-                            this.ShowException(
-                                string.Format(Properties_Resources.TransmissionFailedOnRepo, repo.Name),
-                                string.Format("{0}{1}{2}", transEvent.Path, Environment.NewLine, args.FailedException.Message));
-                        }
-                    };
-                    return false;
-                }));
+                this.transmissionManager.AddPathRepoMapping(repositoryInfo.LocalPath, repositoryInfo.DisplayName);
+                repo.ShowException += (object sender, RepositoryExceptionEventArgs e) => {
+                    string msg = string.Empty;
+                    switch (e.Type) {
+                    case ExceptionType.LocalSyncTargetDeleted:
+                        msg = string.Format(Properties_Resources.LocalRootFolderUnavailable, repositoryInfo.LocalPath);
+                        break;
+                    default:
+                        msg = e.Exception != null ? e.Exception.Message : Properties_Resources.UnknownExceptionOccured;
+                        break;
+                    }
+
+                    switch (e.Level) {
+                    case ExceptionLevel.Fatal:
+                        this.AlertNotificationRaised(string.Format(Properties_Resources.FatalExceptionTitle, repositoryInfo.DisplayName), msg);
+                        break;
+                    case ExceptionLevel.Warning:
+                        this.ShowException(string.Format(Properties_Resources.WarningExceptionTitle, repositoryInfo.DisplayName), msg);
+                        break;
+                    default:
+                        this.ShowException(string.Format(Properties_Resources.WarningExceptionTitle, repositoryInfo.DisplayName), msg);
+                        break;
+                    }
+                };
                 repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>());
                 repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<ProxyAuthRequiredEvent, SuccessfulLoginEvent>());
                 repo.Queue.EventManager.AddEventHandler(

@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Streams
-{
+namespace CmisSync.Lib.Streams {
     using System;
     using System.IO;
 
@@ -27,8 +26,7 @@ namespace CmisSync.Lib.Streams
     /// overridden by other stream extending classes without the need of the implementing class
     /// to implement each function of the Stream interface
     /// </summary>
-    public class StreamWrapper : Stream
-    {
+    public class StreamWrapper : Stream {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Streams.StreamWrapper"/> class.
         /// Takes a stream and wrapps all calls.
@@ -36,10 +34,8 @@ namespace CmisSync.Lib.Streams
         /// <param name='stream'>
         /// Stream to be wrapped.
         /// </param>
-        public StreamWrapper(Stream stream)
-        {
-            if (stream == null)
-            {
+        public StreamWrapper(Stream stream) {
+            if (stream == null) {
                 throw new ArgumentNullException("Given stream must not be null");
             }
 
@@ -53,10 +49,8 @@ namespace CmisSync.Lib.Streams
         /// <value>
         /// <c>true</c> if this instance can read; otherwise, <c>false</c>.
         /// </value>
-        public override bool CanRead
-        {
-            get
-            {
+        public override bool CanRead {
+            get {
                 return Stream.CanRead;
             }
         }
@@ -67,10 +61,8 @@ namespace CmisSync.Lib.Streams
         /// <value>
         /// <c>true</c> if this instance can seek; otherwise, <c>false</c>.
         /// </value>
-        public override bool CanSeek
-        {
-            get
-            {
+        public override bool CanSeek {
+            get {
                 return this.Stream.CanSeek;
             }
         }
@@ -81,10 +73,8 @@ namespace CmisSync.Lib.Streams
         /// <value>
         /// <c>true</c> if this instance can write; otherwise, <c>false</c>.
         /// </value>
-        public override bool CanWrite
-        {
-            get
-            {
+        public override bool CanWrite {
+            get {
                 return this.Stream.CanWrite;
             }
         }
@@ -95,10 +85,8 @@ namespace CmisSync.Lib.Streams
         /// <value>
         /// The length.
         /// </value>
-        public override long Length
-        {
-            get
-            {
+        public override long Length {
+            get {
                 return this.Stream.Length;
             }
         }
@@ -109,15 +97,12 @@ namespace CmisSync.Lib.Streams
         /// <value>
         /// The position.
         /// </value>
-        public override long Position
-        {
-            get
-            {
+        public override long Position {
+            get {
                 return this.Stream.Position;
             }
 
-            set
-            {
+            set {
                 this.Stream.Position = value;
             }
         }
@@ -133,8 +118,7 @@ namespace CmisSync.Lib.Streams
         /// <summary>
         /// Flush the wrapped instance.
         /// </summary>
-        public override void Flush()
-        {
+        public override void Flush() {
             this.Stream.Flush();
         }
 
@@ -159,8 +143,7 @@ namespace CmisSync.Lib.Streams
         /// <param name='state'>
         /// State passed to the wrapped instance.
         /// </param>
-        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
-        {
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state) {
             return this.Stream.BeginRead(buffer, offset, count, callback, state);
         }
 
@@ -176,8 +159,7 @@ namespace CmisSync.Lib.Streams
         /// <returns>
         /// The result of the call passed to the wrapped instance.
         /// </returns>
-        public override long Seek(long offset, SeekOrigin origin)
-        {
+        public override long Seek(long offset, SeekOrigin origin) {
             return this.Stream.Seek(offset, origin);
         }
 
@@ -196,8 +178,7 @@ namespace CmisSync.Lib.Streams
         /// <returns>
         /// The result of the call passed to the wrapped instance.
         /// </returns>
-        public override int Read(byte[] buffer, int offset, int count)
-        {
+        public override int Read(byte[] buffer, int offset, int count) {
             return this.Stream.Read(buffer, offset, count);
         }
 
@@ -207,8 +188,7 @@ namespace CmisSync.Lib.Streams
         /// <param name='value'>
         /// Value passed to the wrapped instance.
         /// </param>
-        public override void SetLength(long value)
-        {
+        public override void SetLength(long value) {
             this.Stream.SetLength(value);
         }
 
@@ -224,8 +204,7 @@ namespace CmisSync.Lib.Streams
         /// <param name='count'>
         /// Count passed to the wrapped instance.
         /// </param>
-        public override void Write(byte[] buffer, int offset, int count)
-        {
+        public override void Write(byte[] buffer, int offset, int count) {
             this.Stream.Write(buffer, offset, count);
         }
 
@@ -235,8 +214,7 @@ namespace CmisSync.Lib.Streams
         /// <param name='disposing'>
         /// Disposes the wrapper object.
         /// </param>
-        protected override void Dispose(bool disposing)
-        {
+        protected override void Dispose(bool disposing) {
             base.Dispose(disposing);
         }
         #endregion

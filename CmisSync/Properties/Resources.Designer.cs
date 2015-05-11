@@ -353,6 +353,15 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0}: Fatal error occured.
+        /// </summary>
+        internal static string FatalExceptionTitle {
+            get {
+                return ResourceManager.GetString("FatalExceptionTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Features.
         /// </summary>
         internal static string Features {
@@ -484,6 +493,15 @@ namespace CmisSync {
         internal static string LocalDirectoryExist {
             get {
                 return ResourceManager.GetString("LocalDirectoryExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Local sync folder &quot;{0}&quot; is unavailable. Synchronization aborted!.
+        /// </summary>
+        internal static string LocalRootFolderUnavailable {
+            get {
+                return ResourceManager.GetString("LocalRootFolderUnavailable", resourceCulture);
             }
         }
         
@@ -988,6 +1006,33 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to All configured connections are deactivated.
+        /// </summary>
+        internal static string SyncStatusDeactivated {
+            get {
+                return ResourceManager.GetString("SyncStatusDeactivated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnected from server.
+        /// </summary>
+        internal static string SyncStatusDisconnected {
+            get {
+                return ResourceManager.GetString("SyncStatusDisconnected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Synchronization is paused.
+        /// </summary>
+        internal static string SyncStatusPaused {
+            get {
+                return ResourceManager.GetString("SyncStatusPaused", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Transmissions.
         /// </summary>
         internal static string Transmission {
@@ -1060,6 +1105,15 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unknown Exception occured.
+        /// </summary>
+        internal static string UnknownExceptionOccured {
+            get {
+                return ResourceManager.GetString("UnknownExceptionOccured", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Untrusted Certificate.
         /// </summary>
         internal static string UntrustedCertificate {
@@ -1092,6 +1146,15 @@ namespace CmisSync {
         internal static string ViewLog {
             get {
                 return ResourceManager.GetString("ViewLog", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}: Error occured.
+        /// </summary>
+        internal static string WarningExceptionTitle {
+            get {
+                return ResourceManager.GetString("WarningExceptionTitle", resourceCulture);
             }
         }
         

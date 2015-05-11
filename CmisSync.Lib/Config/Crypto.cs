@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Config
-{
+namespace CmisSync.Lib.Config {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -31,21 +30,16 @@ namespace CmisSync.Lib.Config
     /// Obfuscation for sensitive data, making password harvesting a little less straightforward.
     /// Web browsers employ the same technique to store user passwords.
     /// </summary>
-    public static class Crypto
-    {
+    public static class Crypto {
         /// <summary>
         /// Obfuscate a string.
         /// </summary>
         /// <param name="value">The string to obfuscate</param>
         /// <returns>The obfuscated string</returns>
-        public static string Obfuscate(string value)
-        {
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
+        public static string Obfuscate(string value) {
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
                 return WindowsObfuscate(value);
-            }
-            else
-            {
+            } else {
                 return UnixObfuscate(value);
             }
         }
@@ -55,14 +49,10 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <param name="value">The string to deobfuscate</param>
         /// <returns>The clear string</returns>
-        public static string Deobfuscate(string value)
-        {
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
+        public static string Deobfuscate(string value) {
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT) {
                 return WindowsDeobfuscate(value);
-            }
-            else
-            {
+            } else {
                 return UnixDeobfuscate(value);
             }
         }
@@ -71,8 +61,7 @@ namespace CmisSync.Lib.Config
         /// Salt for the obfuscation.
         /// </summary>
         /// <returns>A byte array</returns>
-        public static byte[] GetCryptoKey()
-        {
+        public static byte[] GetCryptoKey() {
             return System.Text.Encoding.UTF8.GetBytes(
                 "Thou art so farth away, I miss you my dear files❥, with CmisSync be forever by my side!");
         }
@@ -82,36 +71,29 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <returns>The hash algorithm.</returns>
         /// <param name="name">Name of the has algorithm.</param>
-        public static HashAlgorithm CreateHashAlgorithm(string name)
-        {
+        public static HashAlgorithm CreateHashAlgorithm(string name) {
             name = name.ToLower();
-            if (name.Equals("sha1") || name.Equals("sha-1"))
-            {
+            if (name.Equals("sha1") || name.Equals("sha-1")) {
                 return SHA1.Create();
             }
 
-            if (name.Equals("sha256") || name.Equals("sha-256"))
-            {
+            if (name.Equals("sha256") || name.Equals("sha-256")) {
                 return SHA256.Create();
             }
 
-            if (name.Equals("sha384") || name.Equals("sha-384"))
-            {
+            if (name.Equals("sha384") || name.Equals("sha-384")) {
                 return SHA384.Create();
             }
 
-            if (name.Equals("sha512") || name.Equals("sha-512"))
-            {
+            if (name.Equals("sha512") || name.Equals("sha-512")) {
                 return SHA512.Create();
             }
 
-            if (name.Equals("md5"))
-            {
+            if (name.Equals("md5")) {
                 return MD5.Create();
             }
 
-            if (name.Equals("ripemd160") || name.Equals("ripemd"))
-            {
+            if (name.Equals("ripemd160") || name.Equals("ripemd")) {
                 return RIPEMD160.Create();
             }
 
@@ -124,11 +106,9 @@ namespace CmisSync.Lib.Config
         /// <returns>The checksum.</returns>
         /// <param name="hashAlgorithm">Hash algorithm.</param>
         /// <param name="inputStream">Input Stream.</param>
-        public static byte[] CalculateChecksum(string hashAlgorithm, Stream inputStream)
-        {
+        public static byte[] CalculateChecksum(string hashAlgorithm, Stream inputStream) {
             using (var bs = new BufferedStream(inputStream))
-            using (var hash = CreateHashAlgorithm(hashAlgorithm))
-            {
+            using (var hash = CreateHashAlgorithm(hashAlgorithm)) {
                 return hash.ComputeHash(bs);
             }
         }
@@ -139,10 +119,8 @@ namespace CmisSync.Lib.Config
         /// <returns>The checksum.</returns>
         /// <param name="hashAlgorithm">Hash algorithm.</param>
         /// <param name="file">File to be hashed.</param>
-        public static byte[] CalculateChecksum(string hashAlgorithm, IFileInfo file)
-        {
-            using (var stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
+        public static byte[] CalculateChecksum(string hashAlgorithm, IFileInfo file) {
+            using (var stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.Read)) {
                 return CalculateChecksum(hashAlgorithm, stream);
             }
         }
@@ -155,23 +133,19 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <param name="value">The string to obfuscate</param>
         /// <returns>The obfuscated string</returns>
-        private static string WindowsObfuscate(string value)
-        {
+        private static string WindowsObfuscate(string value) {
             #if __MonoCS__
             // This macro prevents compilation errors on Unix where ProtectedData does not exist.
             return "Should never be reached";
             #else
-            try
-            {
+            try {
                 byte[] data = System.Text.Encoding.UTF8.GetBytes(value);
 
                 // Encrypt the data using DataProtectionScope.CurrentUser. The result can be decrypted
                 //  only by the same current user.
                 byte[] crypt = ProtectedData.Protect(data, GetCryptoKey(), DataProtectionScope.CurrentUser);
                 return Convert.ToBase64String(crypt, Base64FormattingOptions.None);
-            }
-            catch (CryptographicException e)
-            {
+            } catch (CryptographicException e) {
                 Console.WriteLine("Data was not encrypted. An error occurred.");
                 Console.WriteLine(e.ToString());
                 return null;
@@ -184,30 +158,23 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <param name="value">The string to deobfuscate</param>
         /// <returns>The clear string</returns>
-        private static string WindowsDeobfuscate(string value)
-        {
+        private static string WindowsDeobfuscate(string value) {
             #if __MonoCS__
             // This macro prevents compilation errors on Unix where ProtectedData does not exist.
             throw new ApplicationException("Should never be reached");
             #else
-            try
-            {
+            try {
                 byte[] data = Convert.FromBase64String(value);
 
                 // Decrypt the data using DataProtectionScope.CurrentUser.
                 byte[] uncrypt = ProtectedData.Unprotect(data, GetCryptoKey(), DataProtectionScope.CurrentUser);
                 return System.Text.Encoding.UTF8.GetString(uncrypt);
-            }
-            catch (Exception e)
-            {
-                if (e is CryptographicException || e is FormatException)
-                {
+            } catch (Exception e) {
+                if (e is CryptographicException || e is FormatException) {
                     Console.WriteLine("Your password is not obfuscated yet.");
                     Console.WriteLine("Using unobfuscated value directly might be deprecated soon, so please delete your local directories and recreate them. Thank you for your understanding.");
                     return value;
-                }
-                else
-                {
+                } else {
                     throw;
                 }
             }
@@ -220,28 +187,22 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <param name="value">The string to obfuscate</param>
         /// <returns>The obfuscated string</returns>
-        private static string UnixObfuscate(string value)
-        {
+        private static string UnixObfuscate(string value) {
             #if __MonoCS__
-            try
-            {
+            try {
                 using (PasswordDeriveBytes pdb = new PasswordDeriveBytes(
                     GetCryptoKey(), new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }))
                     using (AesManaged myAes = new AesManaged())
                 {
                     myAes.Key = pdb.GetBytes(myAes.KeySize / 8);
                     myAes.IV = pdb.GetBytes(myAes.BlockSize / 8);
-                    using (ICryptoTransform encryptor = myAes.CreateEncryptor())
-                    {
+                    using (ICryptoTransform encryptor = myAes.CreateEncryptor()) {
                         byte[] data = System.Text.Encoding.UTF8.GetBytes(value);
                         byte[] crypt = encryptor.TransformFinalBlock(data, 0, data.Length);
                         return Convert.ToBase64String(crypt, Base64FormattingOptions.None);
                     }
                 }
-            }
-
-            catch (CryptographicException e)
-            {
+            } catch (CryptographicException e) {
                 Console.WriteLine("Data was not encrypted. An error occurred.");
                 Console.WriteLine(e.ToString());
                 return null;
@@ -256,35 +217,27 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <param name="value">The string to deobfuscate</param>
         /// <returns>The clear string</returns>
-        private static string UnixDeobfuscate(string value)
-        {
+        private static string UnixDeobfuscate(string value) {
             #if __MonoCS__
-            try
-            {
+            try {
                 using (PasswordDeriveBytes pdb = new PasswordDeriveBytes(
                     GetCryptoKey(), new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }))
                     using (AesManaged myAes = new AesManaged())
                 {
                     myAes.Key = pdb.GetBytes(myAes.KeySize / 8);
                     myAes.IV = pdb.GetBytes(myAes.BlockSize / 8);
-                    using (ICryptoTransform decryptor = myAes.CreateDecryptor())
-                    {
+                    using (ICryptoTransform decryptor = myAes.CreateDecryptor()) {
                         byte[] data = Convert.FromBase64String(value);
                         byte[] uncrypt = decryptor.TransformFinalBlock(data, 0, data.Length);
                         return System.Text.Encoding.UTF8.GetString(uncrypt);
                     }
                 }
-            }
-            catch (Exception e)
-            {
-                if (e is CryptographicException || e is FormatException || e is ArgumentException)
-                {
+            } catch (Exception e) {
+                if (e is CryptographicException || e is FormatException || e is ArgumentException) {
                     Console.WriteLine("Your password is not obfuscated yet.");
                     Console.WriteLine("Using unobfuscated value directly might be deprecated soon, so please delete your local directories and recreate them. Thank you for your understanding.");
                     return value;
-                }
-                else
-                {
+                } else {
                     throw;
                 }
             }

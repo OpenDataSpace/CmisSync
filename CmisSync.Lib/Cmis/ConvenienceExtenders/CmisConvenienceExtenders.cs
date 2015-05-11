@@ -44,7 +44,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         public static IFolder CreateFolder(this IFolder folder, string name) {
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisFolder.GetCmisValue());
 
             return folder.CreateFolder(properties);
         }
@@ -56,49 +56,27 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="folder">Parent folder.</param>
         /// <param name="name">Name of the document.</param>
         /// <param name="content">If content is not null, a content stream containing the given content will be added.</param>
-        public static IDocument CreateDocument(this IFolder folder, string name, string content) {
+        /// <param name="checkedOut">If true, the new document will be created in checked out state.</param>
+        public static IDocument CreateDocument(this IFolder folder, string name, string content, bool checkedOut = false) {
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
 
             if (string.IsNullOrEmpty(content)) {
-                return folder.CreateDocument(properties, null, null);
+                return folder.CreateDocument(properties, null, checkedOut ? (VersioningState?)VersioningState.CheckedOut : (VersioningState?)null);
             }
 
             ContentStream contentStream = new ContentStream();
             contentStream.FileName = name;
             contentStream.MimeType = MimeType.GetMIMEType(name);
             contentStream.Length = content.Length;
+            IDocument doc = null;
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
                 contentStream.Stream = stream;
-                return folder.CreateDocument(properties, contentStream, null);
-            }
-        }
-
-        /// <summary>
-        /// Creates the versioned document.
-        /// </summary>
-        /// <returns>The versioned document.</returns>
-        /// <param name="folder">Parent Folder.</param>
-        /// <param name="name">Name of the document.</param>
-        /// <param name="content">Content of the document.</param>
-        public static IDocument CreateVersionedDocument(this IFolder folder, string name, string content) {
-            Dictionary<string, object> properties = new Dictionary<string, object>();
-            properties.Add(PropertyIds.Name, name);
-            properties.Add(PropertyIds.ObjectTypeId, "VersionableType");
-
-            if (string.IsNullOrEmpty(content)) {
-                return folder.CreateDocument(properties, null, DotCMIS.Enums.VersioningState.Major);
+                doc = folder.CreateDocument(properties, contentStream, checkedOut ? (VersioningState?)VersioningState.CheckedOut : (VersioningState?)null);
             }
 
-            ContentStream contentStream = new ContentStream();
-            contentStream.FileName = name;
-            contentStream.MimeType = MimeType.GetMIMEType(name);
-            contentStream.Length = content.Length;
-            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
-                contentStream.Stream = stream;
-                return folder.CreateDocument(properties, contentStream, null);
-            }
+            return doc;
         }
 
         /// <summary>
@@ -129,6 +107,30 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         }
 
         /// <summary>
+        /// Returns the hash of the content stream on the server.
+        /// </summary>
+        /// <returns>The hash.</returns>
+        /// <param name="doc">Document with the content stream.</param>
+        /// <param name="type">Type of the requested hash.</param>
+        public static bool IsContentStreamHashSupported(this ISession session) {
+            try {
+                var type = session.GetTypeDefinition(BaseTypeId.CmisDocument.GetCmisValue());
+                if (type == null) {
+                    return false;
+                }
+
+                foreach (var prop in type.PropertyDefinitions) {
+                    if (prop.Id.Equals("cmis:contentStreamHash")) {
+                        return true;
+                    }
+                }
+            } catch (CmisObjectNotFoundException) {
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Sets the content stream of the document.
         /// </summary>
         /// <returns>The content.</returns>
@@ -148,6 +150,18 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             }
         }
 
+        public static IDocument AppendContent(this IDocument doc, string content, bool lastChunk = true) {
+            ContentStream contentStream = new ContentStream();
+            contentStream.FileName = doc.Name;
+            contentStream.MimeType = MimeType.GetMIMEType(doc.Name);
+            byte[] c = Encoding.UTF8.GetBytes(content);
+            contentStream.Length = c.LongLength;
+            using (var stream = new MemoryStream(c)) {
+                contentStream.Stream = stream;
+                return doc.AppendContentStream(contentStream, lastChunk);
+            }
+        }
+
         /// <summary>
         /// Updates the last write time in UTC via UpdateProperties
         /// </summary>
@@ -159,7 +173,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             properties.Add(PropertyIds.LastModificationDate, modificationDate);
             try {
                 return obj.UpdateProperties(properties, true);
-            } catch(CmisConstraintException e) {
+            } catch (CmisConstraintException e) {
                 var oldObject = obj.ToLogString();
                 obj.Refresh();
                 throw new CmisConstraintException(string.Format("Old object: {0}{1}New object: {2}", oldObject, Environment.NewLine, obj.ToLogString()), e);
@@ -352,18 +366,18 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="session">Cmis session.</param>
         public static bool IsServerAbleToUpdateModificationDate(this ISession session) {
             bool result = false;
-            var docType = session.Binding.GetRepositoryService().GetTypeDefinition(session.RepositoryInfo.Id, "cmis:document", null);
+            var docType = session.Binding.GetRepositoryService().GetTypeDefinition(session.RepositoryInfo.Id, BaseTypeId.CmisDocument.GetCmisValue(), null);
             foreach (var prop in docType.PropertyDefinitions) {
-                if (prop.Id == "cmis:lastModificationDate" && prop.Updatability == DotCMIS.Enums.Updatability.ReadWrite) {
+                if (prop.Id == PropertyIds.LastModificationDate && prop.Updatability == DotCMIS.Enums.Updatability.ReadWrite) {
                     result = true;
                     break;
                 }
             }
 
             if (result) {
-                var folderType = session.Binding.GetRepositoryService().GetTypeDefinition(session.RepositoryInfo.Id, "cmis:folder", null);
+                var folderType = session.Binding.GetRepositoryService().GetTypeDefinition(session.RepositoryInfo.Id, BaseTypeId.CmisFolder.GetCmisValue(), null);
                 foreach (var prop in folderType.PropertyDefinitions) {
-                    if (prop.Id == "cmis:lastModificationDate" && prop.Updatability != DotCMIS.Enums.Updatability.ReadWrite) {
+                    if (prop.Id == PropertyIds.LastModificationDate && prop.Updatability != DotCMIS.Enums.Updatability.ReadWrite) {
                         result = false;
                         break;
                     }
@@ -384,6 +398,60 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             try {
                 return session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.All ||
                     session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.ObjectIdsOnly;
+            } catch (NullReferenceException) {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Detect whether the repository supports checkout/cancelCheckout/checkin
+        /// </summary>
+        /// <param name="session">The Cmis Session</param>
+        /// <returns>
+        /// <c>true</c> if this feature is available, otherwise <c>false</c>
+        /// </returns>
+        public static bool ArePrivateWorkingCopySupported(this ISession session) {
+            try {
+                return session.RepositoryInfo.Capabilities.IsPwcUpdatableSupported.GetValueOrDefault();
+            } catch (NullReferenceException) {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Determines if multi filing is supported with the specified session.
+        /// </summary>
+        /// <returns><c>true</c> if multi filing supported with the specified session; otherwise, <c>false</c>.</returns>
+        /// <param name="session">Cmis session.</param>
+        public static bool IsMultiFilingSupported(this ISession session) {
+            try {
+                return session.RepositoryInfo.Capabilities.IsMultifilingSupported == true;
+            } catch (NullReferenceException) {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Determines if unfiling is supported with the specified session.
+        /// </summary>
+        /// <returns><c>true</c> if is unfiling is supported with the specified session; otherwise, <c>false</c>.</returns>
+        /// <param name="session">Cmis session.</param>
+        public static bool IsUnFilingSupported(this ISession session) {
+            try {
+                return session.RepositoryInfo.Capabilities.IsUnfilingSupported == true;
+            } catch (NullReferenceException) {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Determines if getDescendants calls are supported the specified session.
+        /// </summary>
+        /// <returns><c>true</c> if getDescendants calls supported the specified session; otherwise, <c>false</c>.</returns>
+        /// <param name="session">Cmis session.</param>
+        public static bool IsGetDescendantsSupported(this ISession session) {
+            try {
+                return session.RepositoryInfo.Capabilities.IsGetDescendantsSupported == true;
             } catch (NullReferenceException) {
                 return false;
             }

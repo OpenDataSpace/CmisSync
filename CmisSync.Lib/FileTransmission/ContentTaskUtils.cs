@@ -17,26 +17,30 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.FileTransmission
-{
+namespace CmisSync.Lib.FileTransmission {
     using System;
     using System.IO;
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Storage.Database;
 
+    public delegate void UpdateChecksum(byte[] checksum, long length = -1);
+
     /// <summary>
     /// Content task utils.
     /// </summary>
-    public static class ContentTaskUtils
-    {
+    public static class ContentTaskUtils {
         /// <summary>
         /// Creates the matching uploader.
         /// </summary>
         /// <returns>The uploader.</returns>
         /// <param name="chunkSize">Chunk size.</param>
         public static IFileUploader CreateUploader(long chunkSize = 0) {
-            return chunkSize > 0 ? new ChunkedUploader(chunkSize) : new SimpleFileUploader();
+            if (chunkSize > 0) {
+                return new ChunkedUploader(chunkSize);
+            }
+
+            return new SimpleFileUploader();
         }
 
         /// <summary>

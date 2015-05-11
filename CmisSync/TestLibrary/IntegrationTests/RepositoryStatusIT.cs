@@ -38,7 +38,7 @@ namespace TestLibrary.IntegrationTests {
         [Test, Category("Fast"), Ignore("TODO")]
         public void RepositoryDetectsDisconnectionAndReconnects() {
             var repoInfo = new RepoInfo();
-            var listener = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), new ActiveActivitiesManager());
+            var listener = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), new TransmissionManager());
             var underTest = new InMemoryRepo(repoInfo, listener);
         }
 

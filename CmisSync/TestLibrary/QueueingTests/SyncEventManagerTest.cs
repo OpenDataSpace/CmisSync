@@ -48,31 +48,37 @@ namespace TestLibrary.QueueingTests
         public void AddHandlerTest()
         {
             var handlerMock = new Mock<SyncEventHandler>();
-            var eventMock = new Mock<ISyncEvent>();
+            var mockedEvent = Mock.Of<ISyncEvent>();
 
-            SyncEventManager manager = new SyncEventManager();
-            manager.AddEventHandler(handlerMock.Object);
-            manager.Handle(eventMock.Object);
+            var underTest = new SyncEventManager();
+            underTest.AddEventHandler(handlerMock.Object);
+            underTest.Handle(mockedEvent);
 
-            handlerMock.Verify(foo => foo.Handle(eventMock.Object), Times.Once());
+            handlerMock.Verify(foo => foo.Handle(mockedEvent), Times.Once());
         }
 
         [Test, Category("Fast")]
-        public void BreaksIfHandlerSucceedsTest()
+        public void BreaksIfHandlerSucceedsTest([Values(true, false)]bool highestFirst)
         {
-            var handlerMock1 = new Mock<SyncEventHandler>();
+            var handlerMock1 = new Mock<SyncEventHandler>() { CallBase = true };
             handlerMock1.Setup(foo => foo.Handle(It.IsAny<ISyncEvent>())).Returns(true);
             handlerMock1.Setup(foo => foo.Priority).Returns(2);
 
-            var handlerMock2 = new Mock<SyncEventHandler>();
+            var handlerMock2 = new Mock<SyncEventHandler>() { CallBase = true };
             handlerMock2.Setup(foo => foo.Priority).Returns(1);
 
             var eventMock = new Mock<ISyncEvent>();
 
-            SyncEventManager manager = new SyncEventManager();
-            manager.AddEventHandler(handlerMock1.Object);
-            manager.AddEventHandler(handlerMock2.Object);
-            manager.Handle(eventMock.Object);
+            var underTest = new SyncEventManager();
+            if (highestFirst) {
+                underTest.AddEventHandler(handlerMock1.Object);
+                underTest.AddEventHandler(handlerMock2.Object);
+            } else {
+                underTest.AddEventHandler(handlerMock2.Object);
+                underTest.AddEventHandler(handlerMock1.Object);
+            }
+
+            underTest.Handle(eventMock.Object);
 
             handlerMock1.Verify(foo => foo.Handle(eventMock.Object), Times.Once());
             handlerMock2.Verify(foo => foo.Handle(eventMock.Object), Times.Never());
@@ -102,20 +108,20 @@ namespace TestLibrary.QueueingTests
         [Test, Category("Fast")]
         public void FirstInsertedHandlerWithSamePrioWinsTest()
         {
-            var handlerMock1 = new Mock<SyncEventHandler>();
+            var handlerMock1 = new Mock<SyncEventHandler>() { CallBase = true };
             handlerMock1.Setup(foo => foo.Handle(It.IsAny<ISyncEvent>())).Returns(true);
             handlerMock1.Setup(foo => foo.Priority).Returns(1);
 
-            var handlerMock2 = new Mock<SyncEventHandler>();
+            var handlerMock2 = new Mock<SyncEventHandler>() { CallBase = true };
             handlerMock2.Setup(foo => foo.Handle(It.IsAny<ISyncEvent>())).Returns(true);
             handlerMock2.Setup(foo => foo.Priority).Returns(1);
 
             var eventMock = new Mock<ISyncEvent>();
 
-            SyncEventManager manager = new SyncEventManager();
-            manager.AddEventHandler(handlerMock1.Object);
-            manager.AddEventHandler(handlerMock2.Object);
-            manager.Handle(eventMock.Object);
+            var underTest = new SyncEventManager();
+            underTest.AddEventHandler(handlerMock1.Object);
+            underTest.AddEventHandler(handlerMock2.Object);
+            underTest.Handle(eventMock.Object);
 
             handlerMock1.Verify(foo => foo.Handle(eventMock.Object), Times.Once());
             handlerMock2.Verify(foo => foo.Handle(eventMock.Object), Times.Never());
@@ -124,26 +130,26 @@ namespace TestLibrary.QueueingTests
         [Test, Category("Fast")]
         public void DeleteWorksCorrectlyTest()
         {
-            var handlerMock1 = new Mock<SyncEventHandler>();
+            var handlerMock1 = new Mock<SyncEventHandler>() { CallBase = true };
             handlerMock1.Setup(foo => foo.Handle(It.IsAny<ISyncEvent>())).Returns(false);
             handlerMock1.Setup(foo => foo.Priority).Returns(1);
 
-            var handlerMock2 = new Mock<SyncEventHandler>();
+            var handlerMock2 = new Mock<SyncEventHandler>() { CallBase = true };
             handlerMock2.Setup(foo => foo.Handle(It.IsAny<ISyncEvent>())).Returns(false);
             handlerMock2.Setup(foo => foo.Priority).Returns(1);
 
-            var handlerMock3 = new Mock<SyncEventHandler>();
+            var handlerMock3 = new Mock<SyncEventHandler>() { CallBase = true };
             handlerMock3.Setup(foo => foo.Handle(It.IsAny<ISyncEvent>())).Returns(false);
             handlerMock3.Setup(foo => foo.Priority).Returns(1);
 
             var eventMock = new Mock<ISyncEvent>();
 
-            SyncEventManager manager = new SyncEventManager();
-            manager.AddEventHandler(handlerMock1.Object);
-            manager.AddEventHandler(handlerMock2.Object);
-            manager.AddEventHandler(handlerMock3.Object);
-            manager.RemoveEventHandler(handlerMock2.Object);
-            manager.Handle(eventMock.Object);
+            var underTest = new SyncEventManager();
+            underTest.AddEventHandler(handlerMock1.Object);
+            underTest.AddEventHandler(handlerMock2.Object);
+            underTest.AddEventHandler(handlerMock3.Object);
+            underTest.RemoveEventHandler(handlerMock2.Object);
+            underTest.Handle(eventMock.Object);
 
             handlerMock1.Verify(foo => foo.Handle(eventMock.Object), Times.Once());
             handlerMock2.Verify(foo => foo.Handle(eventMock.Object), Times.Never());

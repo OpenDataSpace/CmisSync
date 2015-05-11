@@ -22,8 +22,20 @@ namespace CmisSync.Lib.Queueing {
 
     using CmisSync.Lib.Events;
 
-    public interface IEventCounter: IDisposable {
+    /// <summary>
+    /// event counter interface.
+    /// </summary>
+    public interface IEventCounter : IDisposable {
+        /// <summary>
+        /// Increase the counter if event fits.
+        /// </summary>
+        /// <param name="e">Countable event.</param>
         void Increase(ICountableEvent e);
+
+        /// <summary>
+        /// Decrease the counter if event fits.
+        /// </summary>
+        /// <param name="e">Countable event.</param>
         void Decrease(ICountableEvent e);
     }
 }

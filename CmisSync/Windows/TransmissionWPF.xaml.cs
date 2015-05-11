@@ -33,6 +33,8 @@ namespace CmisSync {
     using System.Windows.Navigation;
     using System.Windows.Shapes;
 
+    using CmisSync.Lib.FileTransmission;
+
     /// <summary>
     /// Interaction logic for TransmissionWPF.xaml
     /// </summary>
@@ -43,27 +45,32 @@ namespace CmisSync {
         }
 
         private void ApplyTransmission() {
-            ColumnRepo.Header = Properties_Resources.TransmissionTitleRepo;
-            ColumnPath.Header = Properties_Resources.TransmissionTitlePath;
-            ColumnStatus.Header = Properties_Resources.TransmissionTitleStatus;
-            ColumnProgress.Header = Properties_Resources.TransmissionTitleProgress;
-            ColumnDate.Header = Properties_Resources.TransmissionTitleLastChange;
             OkButton.Content = Properties_Resources.Close;
         }
 
         private void ListViewItem_Open(object sender, RoutedEventArgs e) {
             foreach (object item in ListView.SelectedItems) {
-                Transmission.TransmissionData data = item as Transmission.TransmissionData;
-                if (data.Done) {
-                    Process.Start(data.FullPath);
+                var transmission = item as Transmission;
+                if (transmission.Done) {
+                    try {
+                        if (System.IO.File.Exists(transmission.Path)) {
+                            Process.Start(transmission.Path);
+                        }
+                    } catch (Exception) {
+                    }
                 }
             }
         }
 
         private void ListViewItem_OpenFileLocation(object sender, RoutedEventArgs e) {
             foreach (object item in ListView.SelectedItems) {
-                Transmission.TransmissionData data = item as Transmission.TransmissionData;
-                Process.Start("explorer.exe", "/select,\"" + data.FullPath + "\"");
+                var transmission = item as Transmission;
+                try {
+                    if (System.IO.File.Exists(transmission.Path)) {
+                        Process.Start("explorer.exe", "/select,\"" + transmission.Path + "\"");
+                    }
+                } catch (Exception) {
+                }
             }
         }
     }

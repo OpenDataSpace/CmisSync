@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
     using System.IO;
 
@@ -30,8 +29,7 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// File event.
     /// </summary>
-    public class FileEvent : AbstractFolderEvent, IFilterableNameEvent, IFilterableRemotePathEvent, IFilterableRemoteObjectEvent, IFilterableLocalPathEvent
-    {
+    public class FileEvent : AbstractFolderEvent, IFilterableNameEvent, IFilterableRemotePathEvent, IFilterableRemoteObjectEvent, IFilterableLocalPathEvent {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FileEvent"/> class.
         /// </summary>
@@ -41,10 +39,8 @@ namespace CmisSync.Lib.Events
         /// <param name='remoteFile'>
         /// Remote file.
         /// </param>
-        public FileEvent(IFileInfo localFile = null, IDocument remoteFile = null)
-        {
-            if (localFile == null && remoteFile == null)
-            {
+        public FileEvent(IFileInfo localFile = null, IDocument remoteFile = null) {
+            if (localFile == null && remoteFile == null) {
                 throw new ArgumentNullException("Given local or remote file must not be null");
             }
 
@@ -154,8 +150,7 @@ namespace CmisSync.Lib.Events
         /// <returns>
         /// A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FileEvent"/>.
         /// </returns>
-        public override string ToString()
-        {
+        public override string ToString() {
             return string.Format(
                 "[FileEvent: Local={0}, LocalContent={1} on {2}, Remote={3}, RemoteContent={4}]",
                 this.Local,

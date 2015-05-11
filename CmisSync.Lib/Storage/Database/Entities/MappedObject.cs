@@ -96,7 +96,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// <param name="parentId">Parent identifier.</param>
         /// <param name="changeToken">Change token.</param>
         /// <param name="contentSize">Size of the content. Only exists on Documents.</param>
-        public MappedObject(string name, string remoteId, MappedObjectType type, string parentId, string changeToken, long contentSize = -1) {
+        public MappedObject(string name, string remoteId, MappedObjectType type, string parentId, string changeToken, long contentSize = -1, bool readOnly = false) {
             if (string.IsNullOrEmpty(name)) {
                 throw new ArgumentNullException("Given name is null or empty");
             }
@@ -118,6 +118,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
             this.LastContentSize = contentSize;
             this.ActualOperation = OperationType.No;
             this.Retries = new Dictionary<OperationType, int>();
+            this.IsReadOnly = readOnly;
         }
 
         /// <summary>
@@ -141,6 +142,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
                 this.LastContentSize = data.LastContentSize;
                 this.ActualOperation = data.ActualOperation;
                 this.Ignored = data.Ignored;
+                this.IsReadOnly = data.IsReadOnly;
                 this.Retries = data.Retries ?? new Dictionary<OperationType, int>();
                 if (data.LastChecksum == null) {
                     this.LastChecksum = null;
@@ -274,6 +276,14 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         public bool Ignored { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether this instance is read only.
+        /// </summary>
+        /// <value>true</value>
+        /// <c>false</c>
+        [DefaultValue(false)]
+        public bool IsReadOnly { get; set; }
+
+        /// <summary>
         /// Gets or sets the actual running operation.
         /// </summary>
         /// <value>The actual operation.</value>
@@ -319,6 +329,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
                     object.Equals(this.Guid, p.Guid) &&
                     object.Equals(this.LastContentSize, p.LastContentSize) &&
                     object.Equals(this.Ignored, p.Ignored) &&
+                    object.Equals(this.IsReadOnly, p.IsReadOnly) &&
                     ((this.LastChecksum == null && p.LastChecksum == null) || (this.LastChecksum != null && p.LastChecksum != null && this.LastChecksum.SequenceEqual(p.LastChecksum)));
         }
 
@@ -339,7 +350,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Data.MappedObject"/>.</returns>
         public override string ToString() {
             return string.Format(
-                "[MappedObject: ParentId={0}, Type={1}, RemoteObjectId={2}, LastChangeToken={3}, LastRemoteWriteTimeUtc={4}, LastLocalWriteTimeUtc={5}, LastChecksum={6}, ChecksumAlgorithmName={7}, Name={8}, Description={9}, Guid={10}, LastContentSize={11}, Ignored={12}]",
+                "[MappedObject: ParentId={0}, Type={1}, RemoteObjectId={2}, LastChangeToken={3}, LastRemoteWriteTimeUtc={4}, LastLocalWriteTimeUtc={5}, LastChecksum={6}, ChecksumAlgorithmName={7}, Name={8}, Description={9}, Guid={10}, LastContentSize={11}, Ignored={12}, ReadOnly={13}]",
                 this.ParentId,
                 this.Type,
                 this.RemoteObjectId,
@@ -352,7 +363,8 @@ namespace CmisSync.Lib.Storage.Database.Entities {
                 this.Description,
                 this.Guid,
                 this.LastContentSize,
-                this.Ignored);
+                this.Ignored,
+                this.IsReadOnly);
         }
     }
 }

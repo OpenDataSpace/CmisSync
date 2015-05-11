@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="IMetaDataStorage.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.Database
-{
+namespace CmisSync.Lib.Storage.Database {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -32,8 +31,7 @@ namespace CmisSync.Lib.Storage.Database
     /// <summary>
     /// I meta data storage.
     /// </summary>
-    public interface IMetaDataStorage
-    {
+    public interface IMetaDataStorage {
         /// <summary>
         /// Gets the matcher.
         /// </summary>

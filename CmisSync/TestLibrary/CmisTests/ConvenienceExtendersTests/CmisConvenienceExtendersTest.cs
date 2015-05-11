@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.CmisTests.ConvenienceExtendersTests
-{
+namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
     using System;
     using System.Collections.Generic;
 
@@ -33,8 +32,7 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class CmisConvenienceExtendersTest
-    {
+    public class CmisConvenienceExtendersTest {
         [Test, Category("Fast")]
         public void ContentStreamHashReturnNullIfNoHashIsAvailable() {
             var doc = Mock.Of<IDocument>(
@@ -78,6 +76,19 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests
                 d =>
                 d.Properties == properties);
             Assert.That(doc.ContentStreamHash(), Is.Null);
+        }
+
+        [Test, Category("Fast")]
+        public void PrivateWorkingCopyIsUpdateable([Values(true, false)]bool updateable) {
+            var session = new Mock<ISession>();
+            session.SetupPrivateWorkingCopyCapability(updateable);
+            Assert.That(session.Object.ArePrivateWorkingCopySupported(), Is.EqualTo(updateable));
+        }
+
+        [Test, Category("Fast")]
+        public void PrivateWorkingCopyIsUpdateableReturnsFalseOnException() {
+            var session = new Mock<ISession>();
+            Assert.That(session.Object.ArePrivateWorkingCopySupported(), Is.False);
         }
     }
 }

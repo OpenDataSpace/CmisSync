@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.StreamsTests
-{
+namespace TestLibrary.StreamsTests {
     using System;
     using System.IO;
     using System.Security.Cryptography;
@@ -31,8 +30,7 @@ namespace TestLibrary.StreamsTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class NonClosingHashStreamTest
-    {
+    public class NonClosingHashStreamTest {
         [Test, Category("Fast"), Category("Streams")]
         public void ConstructorTest() {
             var mock = new Mock<Stream>();
@@ -50,19 +48,15 @@ namespace TestLibrary.StreamsTests
 
         [Test, Category("Fast"), Category("Streams")]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorFailsOnHashAlgorithmIsNull()
-        {
-            using (var stream = new NonClosingHashStream(new Mock<Stream>().Object, null, CryptoStreamMode.Write))
-            {
+        public void ConstructorFailsOnHashAlgorithmIsNull() {
+            using (var stream = new NonClosingHashStream(new Mock<Stream>().Object, null, CryptoStreamMode.Write)) {
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorFailsOnStreamIsNull()
-        {
-            using (var stream = new NonClosingHashStream(null, new Mock<HashAlgorithm>().Object, CryptoStreamMode.Write))
-            {
+        public void ConstructorFailsOnStreamIsNull() {
+            using (var stream = new NonClosingHashStream(null, new Mock<HashAlgorithm>().Object, CryptoStreamMode.Write)) {
             }
         }
 
@@ -71,10 +65,8 @@ namespace TestLibrary.StreamsTests
             byte[] content = new byte[1024];
             using (var stream = new MemoryStream(content))
             using (var hashAlg = new SHA1Managed())
-            using (var outputstream = new MemoryStream())
-            {
-                using (var hashstream = new NonClosingHashStream(stream, hashAlg, CryptoStreamMode.Read))
-                {
+            using (var outputstream = new MemoryStream()) {
+                using (var hashstream = new NonClosingHashStream(stream, hashAlg, CryptoStreamMode.Read)) {
                     hashstream.CopyTo(outputstream);
                 }
 
@@ -89,8 +81,7 @@ namespace TestLibrary.StreamsTests
             byte[] content = new byte[1024];
             using (var stream = new MemoryStream(content))
             using (var hashAlg = new SHA1Managed())
-            using (var outputstream = new MemoryStream())
-            {
+            using (var outputstream = new MemoryStream()) {
                 using (var hashstream = new NonClosingHashStream(outputstream, hashAlg, CryptoStreamMode.Write)) {
                     stream.CopyTo(hashstream);
                 }

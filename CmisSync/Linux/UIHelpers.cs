@@ -78,7 +78,7 @@ namespace CmisSync {
         // Converts a Gdk RGB color to a hex value.
         // Example: from "rgb:0,0,0" to "#000000"
         [CLSCompliant(false)]
-        public static string GdkColorToHex(Gdk.Color color) {
+        public static string ToHex(this Gdk.Color color) {
             return string.Format(
                 "#{0:X2}{1:X2}{2:X2}",
                 (int)Math.Truncate(color.Red   / 256.00),

@@ -152,7 +152,16 @@
     <Compile Include="StatusIcon.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Transmission.cs" />
+    <Compile Include="UIConverter\BitsPerSecondToStringConverter.cs" />
+    <Compile Include="UIConverter\TransmissionLengthToStringConverter.cs" />
+    <Compile Include="UIConverter\TransmissionPositionToStringConverter.cs" />
+    <Compile Include="UIConverter\TransmissionStatusToDoneConverter.cs" />
+    <Compile Include="UIConverter\TransmissionStatusToVisibilityConverter.cs" />
+    <Compile Include="UIConverter\TransmissionTypeToImageConverter.cs" />
+    <Compile Include="TransmissionWidget.xaml.cs">
+      <DependentUpon>TransmissionWidget.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TransmissionWindow.cs" />
     <Compile Include="TransmissionWPF.xaml.cs">
       <DependentUpon>TransmissionWPF.xaml</DependentUpon>
     </Compile>
@@ -396,6 +405,10 @@
     <Page Include="SetupAddCustomizeWPF.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TransmissionWidget.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="TransmissionWPF.xaml">
       <SubType>Designer</SubType>

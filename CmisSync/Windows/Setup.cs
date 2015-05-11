@@ -74,7 +74,7 @@ namespace CmisSync {
         /// </summary>
         public SetupController Controller = new SetupController();
 
-        delegate Tuple<CmisServer, Exception> GetRepositoriesFuzzyDelegate(ServerCredentials credentials);
+        private delegate LoginCredentials GetRepositoriesDelegate(ServerCredentials credentials);
 
         // Public Buttons
         private Button back_button;
@@ -84,15 +84,12 @@ namespace CmisSync {
         /// <summary>
         /// Constructor.
         /// </summary>
-        public Setup()
-        {
+        public Setup() {
             Logger.Info("Entering constructor.");
 
             // Defines how to show the setup window.
-            Controller.ShowWindowEvent += delegate
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
+            Controller.ShowWindowEvent += delegate {
+                Dispatcher.BeginInvoke((Action)delegate {
                     Logger.Info("Entering ShowWindowEvent.");
                     Show();
                     Activate();
@@ -102,26 +99,21 @@ namespace CmisSync {
             };
 
             // Defines how to hide the setup windows.
-            Controller.HideWindowEvent += delegate
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
+            Controller.HideWindowEvent += delegate {
+                Dispatcher.BeginInvoke((Action)delegate {
                     Hide();
                 });
             };
 
             // Defines what to do when changing page.
             // The remote folder addition wizard has several steps.
-            Controller.ChangePageEvent += delegate(PageType type)
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
+            Controller.ChangePageEvent += delegate(PageType type) {
+                Dispatcher.BeginInvoke((Action)delegate {
                     Logger.Info("Entering ChangePageEvent.");
                     Reset();
 
                     // Show appropriate setup page.
-                    switch (type)
-                    {
+                    switch (type) {
                         // Welcome page that shows up at first run.
                         case PageType.Setup:
                             LoadWelcomeWPF();
@@ -156,8 +148,7 @@ namespace CmisSync {
                     Logger.Info("Exiting ChangePageEvent.");
                 });
             };
-            this.Closing += delegate
-            {
+            this.Closing += delegate {
                 Controller.PageCancelled();
             };
 
@@ -165,8 +156,7 @@ namespace CmisSync {
             Logger.Info("Exiting constructor.");
         }
 
-        private void LoadWelcomeWPF()
-        {
+        private void LoadWelcomeWPF() {
             // UI elements.
             Header = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
             Description = String.Format(Properties_Resources.Intro, Properties_Resources.ApplicationName);
@@ -443,8 +433,8 @@ namespace CmisSync {
                 System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
 
                 // Try to find the CMIS server (asynchronously)
-                GetRepositoriesFuzzyDelegate dlgt =
-                    new GetRepositoriesFuzzyDelegate(CmisUtils.GetRepositoriesFuzzy);
+                GetRepositoriesDelegate dlgt =
+                    new GetRepositoriesDelegate(SetupController.GetRepositories);
                 ServerCredentials credentials = new ServerCredentials() {
                     UserName = user_box.Text,
                     Password = password_box.Password,
@@ -456,13 +446,11 @@ namespace CmisSync {
                     System.Windows.Forms.Application.DoEvents();
                 }
 
-                Tuple<CmisServer, Exception> result = dlgt.EndInvoke(ar);
-                CmisServer cmisServer = result.Item1;
+                var result = dlgt.EndInvoke(ar);
+                Controller.repositories = result.Repositories.WithoutHiddenOnce();
 
-                Controller.repositories = cmisServer != null ? cmisServer.Repositories : null;
-
-                address_box.Text = cmisServer.Url.ToString();
-                binding = cmisServer.Binding;
+                address_box.Text = result.Credentials.Address.ToString();
+                binding = result.Credentials.Binding;
 
                 // Hide wait cursor
                 System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
@@ -470,7 +458,7 @@ namespace CmisSync {
 
                 if (Controller.repositories == null) {
                     // Could not retrieve repositories list from server, show warning.
-                    string warning = Controller.GetConnectionsProblemWarning(cmisServer, result.Item2);
+                    string warning = Controller.GetConnectionsProblemWarning(result.FailedException);
                     address_error_label.Text = warning;
                     address_error_label.Visibility = Visibility.Visible;
                 } else {
@@ -505,10 +493,10 @@ namespace CmisSync {
             loader = new Dictionary<string, AsyncNodeLoader>();
             // Some CMIS servers hold several repositories (ex:Nuxeo). Show one root per repository.
             bool firstRepo = true;
-            foreach (KeyValuePair<String, String> repository in Controller.repositories) {
+            foreach (var repository in Controller.repositories) {
                 RootFolder repo = new RootFolder() {
-                    Name = repository.Value,
-                    Id = repository.Key,
+                    Name = repository.Name,
+                    Id = repository.Id,
                     Address = Controller.saved_address.ToString()
                 };
                 repos.Add(repo);
@@ -524,7 +512,7 @@ namespace CmisSync {
                     Password = Controller.saved_password,
                     Address = Controller.saved_address,
                     Binding = Controller.saved_binding,
-                    RepoId = repository.Key
+                    RepoId = repository.Id
                 };
                 AsyncNodeLoader asyncLoader = new AsyncNodeLoader(repo, cred, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
                 //  GUI workaround to remove ignore folder {{
@@ -661,9 +649,9 @@ namespace CmisSync {
 
             // init UI elements.
             string localfoldername = Controller.saved_address.Host.ToString();
-            foreach (KeyValuePair<string, string> repository in Controller.repositories) {
-                if (repository.Key == Controller.saved_repository) {
-                    localfoldername += "\\" + repository.Value;
+            foreach (var repository in Controller.repositories) {
+                if (repository.Id == Controller.saved_repository) {
+                    localfoldername += "\\" + repository.Name;
                     break;
                 }
             }

@@ -176,7 +176,7 @@ namespace TestLibrary.QueueingTests {
         }
 
         [Test, Category("Medium")]
-        public void SubscribeForAllCountableEventsAndGetInformedOnAddEvent([Values(1, 5, 1000)]int events) {
+        public void SubscribeForAllCountableEventsAndGetInformedOnAddEvent([Values(1, 5, 10)]int events) {
             var category = EventCategory.PeriodicSync;
             int lastCount = -1;
             var manager = new Mock<ISyncEventManager>();
@@ -203,7 +203,7 @@ namespace TestLibrary.QueueingTests {
         }
 
         [Test, Category("Medium")]
-        public void SubscribeForCategoryCountableEventsAndGetInformedOnAddEvent([Values(1, 5, 1000)]int events) {
+        public void SubscribeForCategoryCountableEventsAndGetInformedOnAddEvent([Values(1, 5, 10)]int events) {
             var category = EventCategory.PeriodicSync;
             int lastCount = -1;
             var manager = new Mock<ISyncEventManager>();

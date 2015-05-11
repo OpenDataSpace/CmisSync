@@ -26,8 +26,10 @@ namespace CmisSync.Lib.Cmis {
     /// Repository status aggregator. All added repositories are used to calculate an aggregated sync status over all repos.
     /// </summary>
     public class RepositoryStatusAggregator : INotifyPropertyChanged {
-        private Dictionary<Repository, PropertyChangedEventHandler> repos = new Dictionary<Repository, PropertyChangedEventHandler>();
+        private Dictionary<INotifyRepositoryPropertyChanged, PropertyChangedEventHandler> repos = new Dictionary<INotifyRepositoryPropertyChanged, PropertyChangedEventHandler>();
         private SyncStatus status = SyncStatus.Disconnected;
+        private int changesFound = 0;
+        private DateTime? lastFinishedSync = null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.RepositoryStatusAggregator"/> class.
@@ -57,19 +59,40 @@ namespace CmisSync.Lib.Cmis {
             }
         }
 
+        public DateTime? LastFinishedSync {
+            get {
+                return this.lastFinishedSync;
+            }
+
+            private set {
+                if (value != this.lastFinishedSync) {
+                    this.lastFinishedSync = value;
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.LastFinishedSync));
+                }
+            }
+        }
+
         /// <summary>
         /// Add the specified repo.
         /// </summary>
         /// <param name="repo">Repository to listen to.</param>
-        public void Add(Repository repo) {
+        public void Add(INotifyRepositoryPropertyChanged repo) {
             if (!this.repos.ContainsKey(repo)) {
                 PropertyChangedEventHandler handler = delegate(object sender, PropertyChangedEventArgs e) {
-                    if (e.PropertyName == Utils.NameOf((Repository r) => r.Status)) {
+                    if (e.PropertyName == Utils.NameOf((INotifyRepositoryPropertyChanged r) => r.Status)) {
                         this.AnyStatusChanged();
+                    } else if (e.PropertyName == Utils.NameOf((INotifyRepositoryPropertyChanged r) => r.NumberOfChanges)) {
+                        this.AnyNumberChanged();
                     }
                 };
                 repo.PropertyChanged += handler;
                 this.repos.Add(repo, handler);
+                if (repo.NumberOfChanges > 0) {
+                    this.AnyNumberChanged();
+                }
+
+                this.AnyStatusChanged();
+                this.AnyDateChanged();
             }
         }
 
@@ -77,11 +100,30 @@ namespace CmisSync.Lib.Cmis {
         /// Remove the specified repo.
         /// </summary>
         /// <param name="repo">Repository to stop listening to.</param>
-        public void Remove(Repository repo) {
+        public void Remove(INotifyRepositoryPropertyChanged repo) {
             if (this.repos.ContainsKey(repo)) {
                 repo.PropertyChanged -= this.repos[repo];
                 this.repos.Remove(repo);
                 this.AnyStatusChanged();
+                this.AnyNumberChanged();
+                this.AnyDateChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets the number of changes which are actually found on queue.
+        /// </summary>
+        /// <value>The number of changes.</value>
+        public int NumberOfChanges {
+            get {
+                return this.changesFound;
+            }
+
+            private set {
+                if (value != this.changesFound) {
+                    this.changesFound = value;
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.NumberOfChanges));
+                }
             }
         }
 
@@ -139,6 +181,26 @@ namespace CmisSync.Lib.Cmis {
             } else {
                 this.Status = SyncStatus.Idle;
             }
+        }
+
+        private void AnyNumberChanged() {
+            int sum = 0;
+            foreach (var repo in repos.Keys) {
+                sum += repo.NumberOfChanges;
+            }
+
+            this.NumberOfChanges = sum;
+        }
+
+        private void AnyDateChanged() {
+            DateTime? smallestDate = DateTime.MaxValue;
+            foreach (var repo in repos.Keys) {
+                if (repo.LastFinishedSync.GetValueOrDefault() < smallestDate) {
+                    smallestDate = repo.LastFinishedSync;
+                }
+            }
+
+            this.LastFinishedSync = smallestDate == DateTime.MaxValue ? null : smallestDate;
         }
     }
 }

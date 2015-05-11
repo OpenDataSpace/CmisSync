@@ -17,16 +17,15 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.SelectiveIgnore
-{
+namespace CmisSync.Lib.SelectiveIgnore {
     using System;
     using System.Collections.Generic;
     using System.IO;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
-    public class IgnoredEntitiesCollection : IIgnoredEntitiesCollection
-    {
+    public class IgnoredEntitiesCollection : IIgnoredEntitiesCollection {
         private Dictionary<string, IIgnoredEntity> entries = new Dictionary<string, IIgnoredEntity>();
 
         public void Add(IIgnoredEntity ignore) {
@@ -49,7 +48,7 @@ namespace CmisSync.Lib.SelectiveIgnore
             if (this.IsIgnoredId(doc.Id) == IgnoredState.IGNORED) {
                 return IgnoredState.IGNORED;
             } else {
-                if (doc.Parents != null) {
+                if (doc.Parents != null && doc.Parents.Count > 0) {
                     if (this.IsIgnored(doc.Parents[0]) != IgnoredState.NOT_IGNORED) {
                         return IgnoredState.INHERITED;
                     }
@@ -67,10 +66,14 @@ namespace CmisSync.Lib.SelectiveIgnore
             if (this.IsIgnoredId(folder.Id) == IgnoredState.IGNORED) {
                 return IgnoredState.IGNORED;
             } else {
-                if (folder.FolderParent != null) {
-                    if (this.IsIgnored(folder.FolderParent) != IgnoredState.NOT_IGNORED) {
-                        return IgnoredState.INHERITED;
+                try {
+                    if (folder.FolderParent != null) {
+                        if (this.IsIgnored(folder.FolderParent) != IgnoredState.NOT_IGNORED) {
+                            return IgnoredState.INHERITED;
+                        }
                     }
+                } catch (CmisObjectNotFoundException) {
+                    return IgnoredState.NOT_IGNORED;
                 }
             }
 

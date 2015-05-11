@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.TestUtils
-{
+namespace TestLibrary.TestUtils {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -31,8 +30,7 @@ namespace TestLibrary.TestUtils
 
     using NUnit.Framework;
 
-    public static class MockOfIDocumentUtil
-    {
+    public static class MockOfIDocumentUtil {
         public static Mock<IDocument> CreateRemoteDocumentMock(string documentContentStreamId, string id, string name, string parentId, long contentLength = 0, byte[] content = null, string changeToken = "changetoken") {
             var newParentMock = Mock.Of<IFolder>(p => p.Id == parentId);
             return CreateRemoteDocumentMock(documentContentStreamId, id, name, newParentMock, contentLength, content, changeToken);
@@ -107,13 +105,22 @@ namespace TestLibrary.TestUtils
                 .Returns(doc.Object);
         }
 
-        public static void SetupCheckout(this Mock<IDocument> doc, Mock<IDocument> docPWC) {
+        public static void SetupCheckout(this Mock<IDocument> doc, Mock<IDocument> docPWC, string newChangeToken, string newObjectId = null) {
             doc.Setup(d => d.CheckOut()).Returns(() => {
                 doc.Setup(d => d.IsVersionSeriesCheckedOut).Returns(true);
                 doc.Setup(d => d.VersionSeriesCheckedOutId).Returns(docPWC.Object.Id);
-                Mock<IObjectId> objectIdPWC = new Mock<IObjectId>();
-                objectIdPWC.Setup(o => o.Id).Returns(docPWC.Object.Id);
-                return objectIdPWC.Object;
+                return Mock.Of<IObjectId>(o => o.Id == docPWC.Object.Id);
+            });
+            docPWC.Setup(d => d.CheckIn(It.IsAny<bool>(), It.IsAny<IDictionary<string, object>>(), It.IsAny<IContentStream>(), It.IsAny<string>())).Returns(() => {
+                doc.Setup(d => d.IsVersionSeriesCheckedOut).Returns(false);
+                doc.Setup(d => d.VersionSeriesCheckedOutId).Returns(() => { return null; });
+                doc.Setup(d => d.ChangeToken).Returns(newChangeToken);
+                if (!string.IsNullOrEmpty(newObjectId)) {
+                    doc.Setup(d => d.Id).Returns(newObjectId);
+                    return Mock.Of<IObjectId>(o => o.Id == newObjectId);
+                } else {
+                    return Mock.Of<IObjectId>(o => o.Id == doc.Object.Id);
+                }
             });
         }
 

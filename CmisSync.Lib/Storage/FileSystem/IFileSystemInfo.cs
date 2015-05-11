@@ -68,6 +68,13 @@ namespace CmisSync.Lib.Storage.FileSystem {
         Guid? Uuid { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Storage.FileSystem.IFileSystemInfo"/>
+        /// is read only.
+        /// </summary>
+        /// <value><c>true</c> if read only; otherwise, <c>false</c>.</value>
+        bool ReadOnly { get; set; }
+
+        /// <summary>
         /// Refresh the loaded information of this instance.
         /// </summary>
         void Refresh();

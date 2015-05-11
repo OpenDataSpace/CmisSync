@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.Database
-{
+namespace CmisSync.Lib.Storage.Database {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -32,8 +31,7 @@ namespace CmisSync.Lib.Storage.Database
     /// <remarks>
     /// The <c>IFileTransmissionObject.RemoteObjectId</c> is the primary key for the saved <code>IFileTransmissionObject</code> list.
     /// </remarks>
-    public interface IFileTransmissionStorage
-    {
+    public interface IFileTransmissionStorage {
         /// <summary>
         /// Get the saved <c>IFileTransmissionObject</c> list
         /// </summary>
@@ -60,6 +58,14 @@ namespace CmisSync.Lib.Storage.Database
         IFileTransmissionObject GetObjectByRemoteObjectId(string remoteObjectId);
 
         /// <summary>
+        /// Get the saved <c>IFileTransmissionObject</c> that has the <c>IFileTransmissionObject.LocalPath</c> with <paramref name="localPath"/>
+        /// </summary>
+        /// <param name="localPath">
+        /// <c>IFileTransmissionObject.LocalPath</c> value
+        /// </param>
+        IFileTransmissionObject GetObjectByLocalPath(string localPath);
+
+        /// <summary>
         /// Remove any saved <c>IFileTransmissionObject</c> that has the <c>IFileTransmissionObject.RemoteObjectId</c> with <paramref name="remoteObjectId"/>
         /// </summary>
         /// <param name="remoteObjectId">
@@ -71,5 +77,10 @@ namespace CmisSync.Lib.Storage.Database
         /// Remove all saved <c>IFileTransmissionObject</c> list
         /// </summary>
         void ClearObjectList();
+
+        /// <summary>
+        /// Chunk size for file transmission
+        /// </summary>
+        long ChunkSize { get; }
     }
 }

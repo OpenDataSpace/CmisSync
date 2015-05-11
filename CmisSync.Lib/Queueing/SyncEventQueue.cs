@@ -34,14 +34,22 @@ namespace CmisSync.Lib.Queueing {
     /// Sync event queue.
     /// </summary>
     public class SyncEventQueue : ICountingQueue {
+        /// <summary>
+        /// The full counter.
+        /// </summary>
+        protected IEventCounter fullCounter;
+
+        /// <summary>
+        /// The category counter.
+        /// </summary>
+        protected IEventCounter categoryCounter;
+
         private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventQueue));
         private BlockingCollection<ISyncEvent> queue = new BlockingCollection<ISyncEvent>();
         private Task consumer;
         private AutoResetEvent suspendHandle = new AutoResetEvent(false);
         private bool alreadyDisposed = false;
         private bool suspend = false;
-        protected IEventCounter fullCounter;
-        protected IEventCounter categoryCounter;
         private object subscriberLock = new object();
 
         /// <summary>
@@ -86,12 +94,20 @@ namespace CmisSync.Lib.Queueing {
             }
         }
 
+        /// <summary>
+        /// Gets the full counter for all countable events.
+        /// </summary>
+        /// <value>The full counter.</value>
         public IObservable<int> FullCounter {
             get {
                 return (IObservable<int>)this.fullCounter;
             }
         }
 
+        /// <summary>
+        /// Gets the category counter for all events with its category.
+        /// </summary>
+        /// <value>The category counter.</value>
         public IObservable<Tuple<EventCategory, int>> CategoryCounter {
             get {
                 return (IObservable<Tuple<EventCategory, int>>)this.categoryCounter;

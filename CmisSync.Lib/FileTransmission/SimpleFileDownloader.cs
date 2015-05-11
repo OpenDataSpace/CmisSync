@@ -17,22 +17,21 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.FileTransmission
-{
+namespace CmisSync.Lib.FileTransmission {
     using System;
     using System.IO;
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Streams;
+    using CmisSync.Lib.HashAlgorithm;
 
     using DotCMIS.Client;
 
     /// <summary>
     /// Simple file downloader.
     /// </summary>
-    public class SimpleFileDownloader : IFileDownloader
-    {
+    public class SimpleFileDownloader : IFileDownloader {
         private bool disposed = false;
 
         private object disposeLock = new object();
@@ -48,8 +47,7 @@ namespace CmisSync.Lib.FileTransmission
         /// <exception cref="DisposeException">If the remote object has been disposed before the dowload is finished</exception>
         /// <exception cref="AbortException">If download is aborted</exception>
         /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
-        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg)
-        {
+        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg, UpdateChecksum update = null) {
             byte[] buffer = new byte[8 * 1024];
             int len;
 
@@ -63,6 +61,8 @@ namespace CmisSync.Lib.FileTransmission
             long offset = localFileStream.Position;
             long? fileLength = remoteDocument.ContentStreamLength;
             if (fileLength <= offset) {
+                transmission.Length = fileLength.GetValueOrDefault();
+                transmission.Position = offset;
                 hashAlg.TransformFinalBlock(new byte[0], 0, 0);
                 return;
             }
@@ -70,34 +70,53 @@ namespace CmisSync.Lib.FileTransmission
             DotCMIS.Data.IContentStream contentStream = null;
             if (offset > 0) {
                 long remainingBytes = (long)fileLength - offset;
-                status.ReportProgress(new TransmissionProgressEventArgs {
-                    Length = remoteDocument.ContentStreamLength,
-                    ActualPosition = offset
-                });
+                transmission.Length = remoteDocument.ContentStreamLength;
+                transmission.Position = offset;
                 contentStream = remoteDocument.GetContentStream(remoteDocument.ContentStreamId, offset, remainingBytes);
             } else {
                 contentStream = remoteDocument.GetContentStream();
             }
 
-            using (ProgressStream progressStream = new ProgressStream(localFileStream, status))
-            using (CryptoStream hashstream = new CryptoStream(progressStream, hashAlg, CryptoStreamMode.Write))
-            using (Stream remoteStream = contentStream != null ? contentStream.Stream : new MemoryStream(0))
-            {
-                status.ReportProgress(new TransmissionProgressEventArgs {
-                    Length = remoteDocument.ContentStreamLength,
-                    ActualPosition = offset
-                });
+            using (var transmissionStream = transmission.CreateStream(localFileStream))
+            using (CryptoStream hashstream = new CryptoStream(transmissionStream, hashAlg, CryptoStreamMode.Write))
+            using (Stream remoteStream = contentStream != null ? contentStream.Stream : new MemoryStream(0)) {
+                transmission.Length = remoteDocument.ContentStreamLength;
+                transmission.Position = offset;
+                int written = 0;
                 while ((len = remoteStream.Read(buffer, 0, buffer.Length)) > 0) {
-                    lock(this.disposeLock)
-                    {
-                        if(this.disposed) {
-                            status.ReportProgress(new TransmissionProgressEventArgs { Aborted = true });
-                            throw new ObjectDisposedException(status.Path);
+                    lock (this.disposeLock) {
+                        if (this.disposed) {
+                            transmission.Status = TransmissionStatus.ABORTED;
+                            throw new ObjectDisposedException(transmission.Path);
                         }
 
-                        hashstream.Write(buffer, 0, len);
-                        hashstream.Flush();
+                        try {
+                            hashstream.Write(buffer, 0, len);
+                            hashstream.Flush();
+                            written += len;
+                        } catch (Exception ex) {
+                            UpdateHash(hashAlg, localFileStream.Length, update);
+                            throw;
+                        }
+
+                        if (written >= 1024 * 1024) {
+                            UpdateHash(hashAlg, localFileStream.Length, update);
+                            written = 0;
+                        }
                     }
+                }
+                if (written > 0) {
+                    UpdateHash(hashAlg, localFileStream.Length, update);
+                }
+            }
+        }
+
+        private void UpdateHash(HashAlgorithm hash, long length, UpdateChecksum update) {
+            HashAlgorithmReuse reuse = hash as HashAlgorithmReuse;
+            if (reuse != null && update != null) {
+                using (HashAlgorithm hashReuse = (HashAlgorithm)reuse.Clone()) {
+                    hashReuse.TransformFinalBlock(new byte[0], 0, 0);
+                    update(hashReuse.Hash, length);
                 }
             }
         }
@@ -111,8 +130,7 @@ namespace CmisSync.Lib.FileTransmission
         /// <see cref="Dispose"/>, you must release all references to the
         /// <see cref="CmisSync.Lib.FileTransmission.SimpleFileDownloader"/> so the garbage collector can reclaim the memory
         /// that the <see cref="CmisSync.Lib.FileTransmission.SimpleFileDownloader"/> was occupying.</remarks>
-        public void Dispose()
-        {
+        public void Dispose() {
             this.Dispose(true);
         }
 
@@ -126,13 +144,10 @@ namespace CmisSync.Lib.FileTransmission
         /// other objects. Only unmanaged resources can be disposed.
         /// </summary>
         /// <param name="disposing">If set to <c>true</c> disposing.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            lock(this.disposeLock)
-            {
+        protected virtual void Dispose(bool disposing) {
+            lock (this.disposeLock) {
                 // Check to see if Dispose has already been called.
-                if(!this.disposed)
-                {
+                if (!this.disposed) {
                     // Note disposing has been done.
                     this.disposed = true;
                 }

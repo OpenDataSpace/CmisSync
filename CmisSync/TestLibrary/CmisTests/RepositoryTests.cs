@@ -48,6 +48,12 @@ namespace TestLibrary.CmisTests {
         [TestFixtureSetUp]
         public void ClassInit() {
             config = ITUtils.GetConfig();
+#if __COCOA__
+            try {
+                MonoMac.AppKit.NSApplication.Init();
+            } catch (InvalidOperationException) {
+            }
+#endif
         }
 
         [Test, Category("Fast")]
@@ -57,6 +63,30 @@ namespace TestLibrary.CmisTests {
             var underTest = new TestRepository(this.repoInfo, this.listener, this.queue);
 
             Assert.That(underTest.Status, Is.EqualTo(SyncStatus.Disconnected));
+        }
+
+        [Test, Category("Fast")]
+        public void SyncStatusIsDeactivatedIfRootFolderDoesNotExists() {
+            this.SetupMocks();
+            bool notified = false;
+            var underTest = new TestRepository(this.repoInfo, this.listener, this.queue);
+
+            underTest.ShowException += (object sender, RepositoryExceptionEventArgs e) => {
+                Assert.That(sender, Is.EqualTo(underTest));
+                Assert.That(e.Level, Is.EqualTo(ExceptionLevel.Fatal));
+                Assert.That(e.Type, Is.EqualTo(ExceptionType.LocalSyncTargetDeleted));
+                notified = true;
+            };
+
+            this.localPath.Delete();
+            this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, this.localPath.FullName, true));
+            this.queue.Run();
+            Assert.That(underTest.Status, Is.EqualTo(SyncStatus.Deactivated));
+            this.localPath.Create();
+            this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, this.localPath.FullName, true));
+            this.queue.Run();
+            Assert.That(underTest.Status, Is.EqualTo(SyncStatus.Disconnected));
+            Assert.That(notified, Is.True);
         }
 
         [Test, Category("Fast")]
@@ -134,7 +164,7 @@ namespace TestLibrary.CmisTests {
         }
 
         private void SetupMocks() {
-            this.listener = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), new ActiveActivitiesManager());
+            this.listener = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), new TransmissionManager());
             var subfolder = Guid.NewGuid().ToString();
             this.queue = new SingleStepEventQueue(new SyncEventManager());
             this.queue.SwallowExceptions = true;

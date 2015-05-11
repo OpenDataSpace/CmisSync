@@ -185,7 +185,12 @@ namespace CmisSync {
                 this.Controller.SettingClicked();
             };
             this.menu.Add(settingsItem);
-            this.menu.Add(new SeparatorMenuItem());
+            MenuItem transmissionsItem = new MenuItem(
+                Properties_Resources.Transmission);
+            transmissionsItem.Activated += delegate {
+                this.Controller.TransmissionClicked();
+            };
+            this.menu.Add(transmissionsItem);
 
             // Log Menu
             MenuItem log_item = new MenuItem(
@@ -201,7 +206,7 @@ namespace CmisSync {
                 this.Controller.AboutClicked();
             };
             this.menu.Add(about_item);
-
+            this.menu.Add(new SeparatorMenuItem());
             this.quitItem = new MenuItem(
                     CmisSync.Properties_Resources.Exit) {
                 Sensitive = true
@@ -220,8 +225,7 @@ namespace CmisSync {
             this.isHandleCreated = true;
         }
 
-        private void CreateAnimationFrames()
-        {
+        private void CreateAnimationFrames() {
             this.animationFrames = new Gdk.Pixbuf[] {
                 UIHelpers.GetIcon("dataspacesync-process-syncing-i", 24),
                 UIHelpers.GetIcon("dataspacesync-process-syncing-ii", 24),
@@ -277,75 +281,5 @@ namespace CmisSync {
         public CmisSyncMenuItem(string text) : base(text) {
             this.SetProperty("always-show-image", new GLib.Value(true));
         }
-    }
-
-    [CLSCompliant(false)]
-    public class TransmissionMenuItem : ImageMenuItem {
-        private DateTime updateTime;
-        private string typeString;
-
-        public TransmissionMenuItem(FileTransmissionEvent e) : base(e.Type.ToString()) {
-            this.Path = e.Path;
-            this.Type = e.Type;
-            this.typeString = this.Type.ToString();
-            switch(this.Type) {
-            case FileTransmissionType.DOWNLOAD_NEW_FILE:
-                this.Image = new Image(UIHelpers.GetIcon("dataspacesync-downloading", 16));
-                this.typeString = Properties_Resources.NotificationFileDownload;
-                break;
-            case FileTransmissionType.UPLOAD_NEW_FILE:
-                this.Image = new Image(UIHelpers.GetIcon("dataspacesync-uploading", 16));
-                this.typeString = Properties_Resources.NotificationFileUpload;
-                break;
-            case FileTransmissionType.DOWNLOAD_MODIFIED_FILE:
-                this.typeString = Properties_Resources.NotificationFileUpdateLocal;
-                this.Image = new Image(UIHelpers.GetIcon("dataspacesync-updating", 16));
-                break;
-            case FileTransmissionType.UPLOAD_MODIFIED_FILE:
-                this.typeString = Properties_Resources.NotificationFileUpdateRemote;
-                this.Image = new Image(UIHelpers.GetIcon("dataspacesync-updating", 16));
-                break;
-            }
-
-            double percent = (e.Status.Percent == null) ? 0 : (double)e.Status.Percent;
-            Label text = this.Child as Label;
-            if (text != null) {
-                text.Text = string.Format("{0}: {1} ({2})", this.typeString, System.IO.Path.GetFileName(this.Path), CmisSync.Lib.Utils.FormatPercent(percent));
-            }
-
-            if (ConfigManager.CurrentConfig.Notifications) {
-                NotificationUtils.NotifyAsync(string.Format("{0}: {1}", this.typeString, System.IO.Path.GetFileName(this.Path)), this.Path);
-            }
-
-            e.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs status) {
-                TimeSpan diff = DateTime.Now - this.updateTime;
-                if (diff.Seconds < 1) {
-                    return;
-                }
-
-                this.updateTime = DateTime.Now;
-
-                percent = (status.Percent != null) ? (double)status.Percent : 0;
-                long? bitsPerSecond = status.BitsPerSecond;
-                if (status.Percent != null && bitsPerSecond != null && text != null) {
-                    Application.Invoke(delegate {
-                        text.Text = string.Format(
-                            "{0}: {1} ({2} {3})",
-                            this.typeString,
-                            System.IO.Path.GetFileName(this.Path),
-                            CmisSync.Lib.Utils.FormatPercent(percent),
-                            CmisSync.Lib.Utils.FormatBandwidth((long)bitsPerSecond));
-                    });
-                }
-            };
-            this.Activated += delegate(object sender, EventArgs args) {
-                Utils.OpenFolder(System.IO.Directory.GetParent(this.Path).FullName);
-            };
-            this.Sensitive = true;
-        }
-
-        public FileTransmissionType Type { get; private set; }
-
-        public string Path { get; private set; }
     }
 }

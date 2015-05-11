@@ -22,6 +22,7 @@ namespace TestLibrary.IntegrationTests {
     using System.Collections.Generic;
     using System.IO;
     using System.Net;
+    using System.Security.Cryptography;
     using System.Text;
     using System.Threading;
 
@@ -57,7 +58,7 @@ namespace TestLibrary.IntegrationTests {
         protected IFolder remoteRootDir;
         protected ISession session;
         protected FullRepoTests.CmisRepoMock repo;
-        protected ActiveActivitiesManager transmissionManager;
+        protected TransmissionManager transmissionManager;
 
         private static dynamic config;
         private string subfolder;
@@ -125,7 +126,8 @@ namespace TestLibrary.IntegrationTests {
                 RemotePath = config[2].ToString() + "/" + this.subfolder,
                 Address = new XmlUri(new Uri(config[3].ToString())),
                 User = config[4].ToString(),
-                RepositoryId = config[6].ToString()
+                RepositoryId = config[6].ToString(),
+                Binding = config[7] != null ? config[7].ToString() : BindingType.AtomPub
             };
             this.repoInfo.RemotePath = this.repoInfo.RemotePath.Replace("//", "/");
             this.repoInfo.SetPassword(config[5].ToString());
@@ -139,7 +141,7 @@ namespace TestLibrary.IntegrationTests {
 
             // Repo
             var activityListener = new Mock<IActivityListener>();
-            this.transmissionManager = new ActiveActivitiesManager();
+            this.transmissionManager = new TransmissionManager();
             var activityAggregator = new ActivityListenerAggregator(activityListener.Object, this.transmissionManager);
             var queue = new SingleStepEventQueue(new SyncEventManager());
 
@@ -147,8 +149,19 @@ namespace TestLibrary.IntegrationTests {
 
             // Session
             var cmisParameters = new Dictionary<string, string>();
-            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-            cmisParameters[SessionParameter.AtomPubUrl] = this.repoInfo.Address.ToString();
+            cmisParameters[SessionParameter.BindingType] = repoInfo.Binding;
+            switch (repoInfo.Binding) {
+            case BindingType.AtomPub:
+                cmisParameters[SessionParameter.AtomPubUrl] = this.repoInfo.Address.ToString();
+                break;
+            case BindingType.Browser:
+                cmisParameters[SessionParameter.BrowserUrl] = this.repoInfo.Address.ToString();
+                break;
+            default:
+                Assert.Fail(string.Format("Unknown binding type {0}", repoInfo.Binding));
+                break;
+            }
+
             cmisParameters[SessionParameter.User] = this.repoInfo.User;
             cmisParameters[SessionParameter.Password] = this.repoInfo.GetPassword().ToString();
             cmisParameters[SessionParameter.RepositoryId] = this.repoInfo.RepositoryId;
@@ -213,6 +226,18 @@ namespace TestLibrary.IntegrationTests {
             }
         }
 
+        protected void EnsureThatPrivateWorkingCopySupportIsAvailable() {
+            if (!this.session.ArePrivateWorkingCopySupported()) {
+                Assert.Ignore("This session does not support updates on private working copies");
+            }
+        }
+
+        protected void EnsureThatContentHashesAreSupportedByServerTypeSystem() {
+            if (!this.session.IsContentStreamHashSupported()) {
+                Assert.Ignore("Server type system does not support content hashes");
+            }
+        }
+
         protected void AssertThatDatesAreEqual(DateTime? expected, DateTime? actual, string msg = null) {
             if (msg != null) {
                 Assert.That((DateTime)actual, Is.EqualTo((DateTime)expected).Within(1).Seconds, msg);
@@ -235,13 +260,21 @@ namespace TestLibrary.IntegrationTests {
             this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(forceCrawl));
         }
 
+        protected void AssertThatContentHashIsEqualToExceptedIfSupported(IDocument doc, string content) {
+            if (this.session.IsContentStreamHashSupported()) {
+                Assert.That(doc.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(content), Is.True);
+            }
+        }
+
         protected virtual void Dispose(bool disposing) {
             if (this.disposed) {
                 return;
             }
 
             if (disposing) {
-                this.repo.Dispose();
+                if (this.repo != null) {
+                    this.repo.Dispose();
+                }
             }
 
             this.disposed = true;

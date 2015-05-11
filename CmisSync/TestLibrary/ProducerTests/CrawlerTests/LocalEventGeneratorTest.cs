@@ -79,7 +79,12 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             storage.Setup(s => s.GetLocalPath(subMappedObject)).Returns(subPath);
             storage.Setup(s => s.GetLocalPath(subSubMappedObject)).Returns(subSubPath);
 
-            List<AbstractFolderEvent> creationEvents = underTest.CreateEvents(storedObjectsForLocal, rootTree, eventMap);
+            ISet<IMappedObject> handledLocalStoredObjects = new HashSet<IMappedObject>();
+            List<AbstractFolderEvent> creationEvents = underTest.CreateEvents(storedObjectsForLocal, rootTree, eventMap, handledLocalStoredObjects);
+            foreach (var handledObjects in handledLocalStoredObjects) {
+                storedObjectsForLocal.Remove(handledObjects);
+            }
+
             storedObjectsForLocal.Remove(rootMappedObject);
             Assert.That(creationEvents, Is.Empty);
             Assert.That(storedObjectsForLocal, Is.Empty);

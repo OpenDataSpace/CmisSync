@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="SimpleFileUploader.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -61,7 +61,7 @@ namespace CmisSync.Lib.FileTransmission
         ///  If true, the local content will overwrite the existing content.
         /// </param>
         /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">If upload fails</exception>
-        public virtual IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg, bool overwrite = true) {
+        public virtual IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg, bool overwrite = true, UpdateChecksum update = null) {
             if (remoteDocument == null) {
                 throw new ArgumentException("remoteDocument can not be null");
             }
@@ -70,7 +70,7 @@ namespace CmisSync.Lib.FileTransmission
                 throw new ArgumentException("localFileStream can not be null");
             }
 
-            if (status == null) {
+            if (transmission == null) {
                 throw new ArgumentException("status can not be null");
             }
 
@@ -79,12 +79,12 @@ namespace CmisSync.Lib.FileTransmission
             }
 
             using(NonClosingHashStream hashstream = new NonClosingHashStream(localFileStream, hashAlg, CryptoStreamMode.Read))
-            using(ProgressStream progressstream = new ProgressStream(hashstream, status))
+            using(var transmissionStream = transmission.CreateStream(hashstream))
             {
                 ContentStream contentStream = new ContentStream();
                 contentStream.FileName = remoteDocument.Name;
                 contentStream.MimeType = Cmis.MimeType.GetMIMEType(contentStream.FileName);
-                contentStream.Stream = progressstream;
+                contentStream.Stream = transmissionStream;
                 try {
                     remoteDocument.SetContentStream(contentStream, overwrite, true);
                 } catch(Exception e) {
@@ -115,10 +115,9 @@ namespace CmisSync.Lib.FileTransmission
         ///  Hash alg which should be used to calculate a checksum over the appended content.
         /// </param>
         /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">If Upload fails</exception>
-        public virtual IDocument AppendFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg) {
-            using(ProgressStream progressstream = new ProgressStream(localFileStream, status))
-            using(CryptoStream hashstream = new CryptoStream(progressstream, hashAlg, CryptoStreamMode.Read))
-            {
+        public virtual IDocument AppendFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg) {
+            using (var transmissionStream = transmission.CreateStream(localFileStream))
+            using (var hashstream = new CryptoStream(transmissionStream, hashAlg, CryptoStreamMode.Read)) {
                 ContentStream contentStream = new ContentStream();
                 contentStream.FileName = remoteDocument.Name;
                 contentStream.MimeType = Cmis.MimeType.GetMIMEType(contentStream.FileName);

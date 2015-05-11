@@ -16,8 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib
-{
+namespace CmisSync.Lib.Streams {
     using System;
     using System.Diagnostics;
     using System.IO;
@@ -25,8 +24,7 @@ namespace CmisSync.Lib
     /// <summary>
     /// Chunked stream.
     /// </summary>
-    public class ChunkedStream : Stream
-    {
+    public class ChunkedStream : Stream {
         private long chunkPosition;
         private Stream source;
         private long chunkSize;
@@ -37,8 +35,7 @@ namespace CmisSync.Lib
         /// </summary>
         /// <param name="stream">Stream to chunk.</param>
         /// <param name="chunk">The chunksize.</param>
-        public ChunkedStream(Stream stream, long chunk)
-        {
+        public ChunkedStream(Stream stream, long chunk) {
             this.source = stream;
             this.chunkSize = chunk;
   ////if (!source.CanRead)
@@ -54,7 +51,7 @@ namespace CmisSync.Lib
         public override bool CanRead { get
             { return this.source.CanRead; }
         }
-        
+
         /// <summary>
         /// Gets a value indicating whether this and the source stream can written.
         /// </summary>
@@ -62,7 +59,7 @@ namespace CmisSync.Lib
         public override bool CanWrite { get
             { return this.source.CanWrite; }
         }
-        
+
         /// <summary>
         /// Gets a value indicating whether this and the source stream are able to be seeked.
         /// </summary>
@@ -75,15 +72,12 @@ namespace CmisSync.Lib
         /// Gets or sets the chunk position.
         /// </summary>
         /// <value>The chunk position.</value>
-        public long ChunkPosition
-        {
-            get
-            {
+        public long ChunkPosition {
+            get {
                 return this.chunkPosition;
             }
 
-            set
-            {
+            set {
                 this.source.Position = value;
                 this.chunkPosition = value;
             }
@@ -93,23 +87,17 @@ namespace CmisSync.Lib
         /// Gets the length of the actual chunk.
         /// </summary>
         /// <value>The length.</value>
-        public override long Length
-        {
-            get
-            {
+        public override long Length {
+            get {
                 long lengthSource = this.source.Length;
-                if (lengthSource <= this.ChunkPosition)
-                {
+                if (lengthSource <= this.ChunkPosition) {
                     return 0;
                 }
 
                 long length = lengthSource - this.ChunkPosition;
-                if (length >= this.chunkSize)
-                {
+                if (length >= this.chunkSize) {
                     return this.chunkSize;
-                }
-                else
-                {
+                } else {
                     return length;
                 }
             }
@@ -119,41 +107,34 @@ namespace CmisSync.Lib
         /// Gets or sets the position in the chunk.
         /// </summary>
         /// <value>The position.</value>
-        public override long Position
-        {
-            get
-            {
-                if (!this.CanSeek)
-                {
+        public override long Position {
+            get {
+                if (!this.CanSeek) {
                     return this.position;
                 }
 
                 long offset = this.source.Position - this.ChunkPosition;
-                if (offset < 0 || offset > this.chunkSize)
-                {
+                if (offset < 0 || offset > this.chunkSize) {
                     Debug.Assert(false, string.Format("Position {0} not in [0,{1}]", offset, this.chunkSize));
                 }
-                
+
                 return offset;
             }
 
-            set
-            {
-                if (value < 0 || value > this.chunkSize)
-                {
+            set {
+                if (value < 0 || value > this.chunkSize) {
                     throw new System.ArgumentOutOfRangeException(string.Format("Position {0} not in [0,{1}]", value, this.chunkSize));
                 }
-                
+
                 this.source.Position = this.ChunkPosition + value;
             }
         }
-        
+
         /// <summary>
         /// Flush all data of the source stream.
         /// </summary>
-        public override void Flush() 
-        {
-            this.source.Flush(); 
+        public override void Flush() {
+            this.source.Flush();
         }
 
         /// <summary>
@@ -165,23 +146,19 @@ namespace CmisSync.Lib
         /// <returns>
         /// bytes read
         /// </returns>
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            if (offset < 0)
-            {
+        public override int Read(byte[] buffer, int offset, int count) {
+            if (offset < 0) {
                 throw new System.ArgumentOutOfRangeException("offset", offset, "offset is negative");
             }
-            
-            if (count < 0)
-            {
+
+            if (count < 0) {
                 throw new System.ArgumentOutOfRangeException("count", count, "count is negative");
             }
 
-            if (count > this.chunkSize - this.Position)
-            {
+            if (count > this.chunkSize - this.Position) {
                 count = (int)(this.chunkSize - this.Position);
             }
-            
+
             count = this.source.Read(buffer, offset, count);
             this.position += count;
             return count;
@@ -193,23 +170,19 @@ namespace CmisSync.Lib
         /// <param name="buffer">The buffer to write.</param>
         /// <param name="offset">Offset to start writing.</param>
         /// <param name="count">Count of bytes.</param>
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            if (offset < 0)
-            {
+        public override void Write(byte[] buffer, int offset, int count) {
+            if (offset < 0) {
                 throw new System.ArgumentOutOfRangeException("offset", offset, "offset is negative");
             }
-            
-            if (count < 0)
-            {
+
+            if (count < 0) {
                 throw new System.ArgumentOutOfRangeException("count", count, "count is negative");
             }
 
-            if (count > this.chunkSize - this.Position)
-            {
+            if (count > this.chunkSize - this.Position) {
                 throw new System.ArgumentOutOfRangeException("count", count, "count is overflow");
             }
-            
+
             this.source.Write(buffer, offset, count);
             this.position += count;
         }
@@ -220,18 +193,16 @@ namespace CmisSync.Lib
         /// <param name="offset">The Offset.</param>
         /// <param name="origin">The Origin.</param>
         /// <returns>the found position</returns>
-        public override long Seek(long offset, SeekOrigin origin)
-        {
+        public override long Seek(long offset, SeekOrigin origin) {
             Debug.Assert(false, "TODO");
             return this.source.Seek(offset, origin);
         }
-        
+
         /// <summary>
         /// Sets the length. Is not implemented at correctly. It simply passes the call to the source stream.
         /// </summary>
         /// <param name="value">The length to set.</param>
-        public override void SetLength(long value)
-        {
+        public override void SetLength(long value) {
             Debug.Assert(false, "TODO");
             this.source.SetLength(value);
         }

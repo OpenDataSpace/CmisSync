@@ -98,6 +98,15 @@ namespace CmisSync {
                     ToolTipIcon.Warning);
             };
 
+            Program.Controller.AlertNotificationRaised += delegate(string title, string message) {
+                this.trayicon.ShowBalloonTip(
+                    60000,
+                    title,
+                    message,
+                    ToolTipIcon.Error);
+                Controller.Warning = true;
+            };
+
             this.trayicon.BalloonTipClicked += trayicon_BalloonTipClicked;
         }
 
@@ -175,6 +184,14 @@ namespace CmisSync {
                 }
             };
 
+            Controller.UpdateStatusItemEvent += delegate(string statusText) {
+                if (IsHandleCreated) {
+                    BeginInvoke((Action)delegate {
+                        this.trayicon.Text = statusText;
+                    });
+                }
+            };
+
             // Repo Submenu.
             Controller.UpdateSuspendSyncFolderEvent += delegate(string reponame) {
                 if (IsHandleCreated) {
@@ -187,6 +204,7 @@ namespace CmisSync {
                                         break;
                                     }
                                 }
+
                                 break;
                             }
                         }
@@ -215,7 +233,7 @@ namespace CmisSync {
             this.traymenu.Items.Clear();
             this.repoItems = new List<RepositoryMenuItem>();
 
-            this.trayicon.Text = String.Format("{0}\n{1}", Properties_Resources.ApplicationName, Controller.StateText);
+            this.trayicon.Text = string.Format("{0}\n{1}", Properties_Resources.ApplicationName, Controller.StateText);
 
             // Create a menu item per synchronized folder.
             if (Controller.Folders.Length > 0) {
@@ -306,107 +324,6 @@ namespace CmisSync {
                 trayicon_BalloonTipClicked(sender, e);
                 Controller.LocalFolderClicked("");
             }
-        }
-    }
-
-    /// <summary>
-    /// A specialized helper class for transmission menu items
-    /// </summary>
-    public class TransmissionMenuItem : ToolStripMenuItem {
-        private FileTransmissionType Type { get; set; }
-        private string Path { get; set; }
-        private Control ParentControl;
-        private FileTransmissionEvent transmissionEvent;
-
-        private int updateInterval = 1;
-        private DateTime updateTime;
-
-        private object disposeLock = new object();
-        private bool disposed = false;
-
-        private string TransmissionStatus(TransmissionProgressEventArgs status) {
-            double percent = (status.Percent != null) ? (double)status.Percent : 0;
-            long? bitsPerSecond = status.BitsPerSecond;
-            if (bitsPerSecond != null) {
-                return String.Format("{0} ({1} {2})",
-                    System.IO.Path.GetFileName(Path),
-                    CmisSync.Lib.Utils.FormatPercent(percent),
-                    CmisSync.Lib.Utils.FormatBandwidth((long)bitsPerSecond));
-            } else {
-                return String.Format("{0} ({1})",
-                    System.IO.Path.GetFileName(Path),
-                    CmisSync.Lib.Utils.FormatPercent(percent));
-            }
-        }
-
-        /// <summary>
-        /// Creates a new menu item, which updates itself on transmission events
-        /// </summary>
-        /// <param name="e">FileTransmissionEvent to listen to</param>
-        /// <param name="parent">Parent control to avoid threading issues</param>
-        public TransmissionMenuItem(FileTransmissionEvent e, Control parent) : base(e.Type.ToString()) {
-            Path = e.Path;
-            Type = e.Type;
-            ParentControl = parent;
-            transmissionEvent = e;
-            switch (Type) {
-                case FileTransmissionType.DOWNLOAD_NEW_FILE:
-                    Image = UIHelpers.GetBitmap("Downloading");
-                    break;
-                case FileTransmissionType.UPLOAD_NEW_FILE:
-                    Image = UIHelpers.GetBitmap("Uploading");
-                    break;
-                case FileTransmissionType.DOWNLOAD_MODIFIED_FILE:
-                    goto case FileTransmissionType.UPLOAD_MODIFIED_FILE;
-                case FileTransmissionType.UPLOAD_MODIFIED_FILE:
-                    Image = UIHelpers.GetBitmap("Updating");
-                    break;
-            }
-
-            Text = TransmissionStatus(transmissionEvent.Status);
-            transmissionEvent.TransmissionStatus += TransmissionEvent;
-            Click += TransmissionEventMenuItem_Click;
-        }
-
-        private void TransmissionEvent(object sender, TransmissionProgressEventArgs status) {
-            lock (disposeLock) {
-                if (disposed) {
-                    return;
-                }
-
-                TimeSpan diff = DateTime.Now - updateTime;
-                if (diff.Seconds < updateInterval) {
-                    return;
-                }
-
-                updateTime = DateTime.Now;
-
-                ParentControl.BeginInvoke((Action)delegate() {
-                    lock (disposeLock) {
-                        if (disposed) {
-                            return;
-                        }
-
-                        Text = TransmissionStatus(status);
-                    }
-                });
-            }
-        }
-
-        protected override void Dispose(bool disposing) {
-            lock (disposeLock) {
-                if (!disposed) {
-                    transmissionEvent.TransmissionStatus -= TransmissionEvent;
-                }
-
-                disposed = true;
-            }
-
-            base.Dispose(disposing);
-        }
-
-        void TransmissionEventMenuItem_Click(object sender, EventArgs e) {
-            Utils.OpenFolder(System.IO.Directory.GetParent(Path).FullName);
         }
     }
 }

@@ -49,7 +49,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DBreeze">
-      <HintPath>..\..\packages\DBreeze.1.61.1\lib\net45\DBreeze.dll</HintPath>
+      <HintPath>..\..\packages\DBreeze.1.71.0\lib\net40\DBreeze.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -79,7 +79,6 @@
     <Compile Include="AccumulatorTests\LocalObjectFetcherTest.cs" />
     <Compile Include="AccumulatorTests\RemoteObjectFetcherTest.cs" />
     <Compile Include="AccumulatorTests\RemoteObjectMovedOrRenamedAccumulatorTest.cs" />
-    <Compile Include="ActiveActivitiesManagerTest.cs" />
     <Compile Include="AlgorithmsTests\CyclicDependencies\NoCycleDetectionTests.cs" />
     <Compile Include="AlgorithmsTests\CyclicDependencies\SimpleCycleDetectionTests.cs" />
     <Compile Include="AlgorithmsTests\StringTarjanNode.cs" />
@@ -92,12 +91,13 @@
     <Compile Include="CmisTests\OperationContextFactoryTest.cs" />
     <Compile Include="CmisTests\UiUtilsTests\CmisUtilsTest.cs" />
     <Compile Include="ConfigTests\ConfigurationTest.cs" />
-    <Compile Include="ConfigTests\CredentialsTest.cs" />
     <Compile Include="ConfigTests\DefaultSettingsTests.cs" />
     <Compile Include="ConfigTests\RepoInfoTests.cs" />
     <Compile Include="ConsumerTests\LocalSituationDetectionTest.cs" />
     <Compile Include="ConsumerTests\RemoteSituationDetectionTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\AbstractEnhancedSolverTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\ContinueDownloadTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\ContinueUploadTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectAddedTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectChangedRemoteObjectChangedTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectChangedRemoteObjectMovedTest.cs" />
@@ -124,10 +124,8 @@
     <Compile Include="EventsTests\ActivityListenerAggregatorTest.cs" />
     <Compile Include="EventsTests\EncapsuledEventTest.cs" />
     <Compile Include="EventsTests\EventHandlerPrioritiesTest.cs" />
-    <Compile Include="EventsTests\ExceptionEventTest.cs" />
     <Compile Include="EventsTests\FileEventTest.cs" />
     <Compile Include="EventsTests\FileOrFolderEventFactoryTest.cs" />
-    <Compile Include="EventsTests\FileTransmissionEventTest.cs" />
     <Compile Include="EventsTests\FolderEventTest.cs" />
     <Compile Include="EventsTests\FsEventTest.cs" />
     <Compile Include="EventsTests\FullSyncCompletedEventTest.cs" />
@@ -150,6 +148,7 @@
     <Compile Include="FilterTests\IgnoredFoldersFilterTest.cs" />
     <Compile Include="FilterTests\InvalidFolderNameFilterTest.cs" />
     <Compile Include="FilterTests\ReportingFilterTest.cs" />
+    <Compile Include="HashAlgorithmTests\SHA1ReuseTest.cs" />
     <Compile Include="IntegrationTests\AllHandlersIT.cs" />
     <Compile Include="IntegrationTests\BaseFullRepoTest.cs" />
     <Compile Include="IntegrationTests\ClientBrandTests.cs" />
@@ -170,8 +169,6 @@
     <Compile Include="IntegrationTests\TestNameAttribute.cs" />
     <Compile Include="IntegrationTests\UploadFileIT.cs" />
     <Compile Include="MockedServer\MockOfIAclCapabilities.cs" />
-    <Compile Include="MockedServer\MockOfIRepository.cs" />
-    <Compile Include="MockedServer\MockOfISession.cs" />
     <Compile Include="MockedServer\MockOfISessionFactory.cs" />
     <Compile Include="MockedServer\MockedCmisServer.cs" />
     <Compile Include="MockedServer\MockedCmisUserAccount.cs" />
@@ -246,6 +243,88 @@
     <Compile Include="CmisTests\RepositoryTests.cs" />
     <Compile Include="IntegrationTests\RepositoryStatusIT.cs" />
     <Compile Include="UtilsTests\NameOfPropertyTest.cs" />
+    <Compile Include="TestUtils\MockOfICmisObject.cs" />
+    <Compile Include="CmisTests\ConvenienceExtendersTests\AllowableActionExtendersTest.cs" />
+    <Compile Include="ConfigTests\PasswordTest.cs" />
+    <Compile Include="ConfigTests\UserCredentialsTest.cs" />
+    <Compile Include="ConfigTests\ServerCredentialsTest.cs" />
+    <Compile Include="ConfigTests\CryptoTest.cs" />
+    <Compile Include="ConfigTests\CmisRepoCredentialsTest.cs" />
+    <Compile Include="EventsTests\PermissionDeniedExceptionTest.cs" />
+    <Compile Include="EventsTests\BaseExceptionEventTest.cs" />
+    <Compile Include="IntegrationTests\AllowableActionsTests\ReadingActionsTests.cs" />
+    <Compile Include="TestUtils\MockOfIRepositoryInfo.cs" />
+    <Compile Include="IntegrationTests\UploadSlowWrittenFile.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\PrivateWorkingCopyTests\LocalObjectAddedWithPWCTest.cs" />
+    <Compile Include="IntegrationTests\PrivateWorkingCopyTests\CreateDocumentTests.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\PrivateWorkingCopyTests\LocalObjectChangedWithPWCTest.cs" />
+    <Compile Include="IntegrationTests\PrivateWorkingCopyTests\AppendContentStreamTests.cs" />
+    <Compile Include="TestUtils\IDocumentAssertUtils.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\PrivateWorkingCopyTests\LocalObjectChangedRemoteObjectChangedWithPWCTest.cs" />
+    <Compile Include="TestUtils\MockOfIFileTransmissionStorageUtil.cs" />
+    <Compile Include="FileTransmissionTests\TransmissionTest.cs" />
+    <Compile Include="FileTransmissionTests\TransmissionManagerTest.cs" />
+    <Compile Include="TestUtils\MockOfITransmissionManagerUtil.cs" />
+    <Compile Include="FilterTests\RepositoryRootDeletedDetectionTest.cs" />
+    <Compile Include="StreamsTests\AbortableStreamTest.cs" />
+    <Compile Include="StreamsTests\BandwidthNotifyingStreamTest.cs" />
+    <Compile Include="StreamsTests\PausableStreamTest.cs" />
+    <Compile Include="StreamsTests\TransmissionStreamTest.cs" />
+    <Compile Include="CmisTests\UiUtilsTests\UiConvenienceExtendersTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\PrivateWorkingCopyTests\AbstractEnhancedSolverWithPWCTest.cs" />
+    <Compile Include="IntegrationTests\ContentHashTests\CRUDTests.cs" />
+    <Compile Include="MockedServer\MockedDocument.cs" />
+    <Compile Include="MockedServer\MockedDocumentType.cs" />
+    <Compile Include="MockedServer\MockedItemList.cs" />
+    <Compile Include="MockedServer\MockedSession.cs" />
+    <Compile Include="MockedServer\MockedRepository.cs" />
+    <Compile Include="MockedServer\MockedCmisObject.cs" />
+    <Compile Include="IntegrationTests\MockedServerTests\SetupDocumentTest.cs" />
+    <Compile Include="MockedServer\IContentChangeEventNotifier.cs" />
+    <Compile Include="MockedServer\MockedAcl.cs" />
+    <Compile Include="MockedServer\MockedAce.cs" />
+    <Compile Include="MockedServer\MockedPrincipal.cs" />
+    <Compile Include="MockedServer\MockedExtensionsData.cs" />
+    <Compile Include="MockedServer\MockedCmisExtensionElement.cs" />
+    <Compile Include="IntegrationTests\MockedServerTests\SetupFolderTest.cs" />
+    <Compile Include="MockedServer\MockedObjectType.cs" />
+    <Compile Include="MockedServer\MockedTypeDefinition.cs" />
+    <Compile Include="MockedServer\MockedFolderType.cs" />
+    <Compile Include="MockedServer\MockedFileableCmisObject.cs" />
+    <Compile Include="MockedServer\MockedContentStream.cs" />
+    <Compile Include="MockedServer\MockedProperty.cs" />
+    <Compile Include="MockedServer\MockedPropertyDefinition.cs" />
+    <Compile Include="MockedServer\MockedPropertyBooleanDefinition.cs" />
+    <Compile Include="MockedServer\MockedPropertyDateTimeDefinition.cs" />
+    <Compile Include="MockedServer\MockedPropertyDecimalDefinition.cs" />
+    <Compile Include="MockedServer\MockedPropertyHtmlDefinition.cs" />
+    <Compile Include="MockedServer\MockedPropertyIdDefinition.cs" />
+    <Compile Include="MockedServer\MockedPropertyIntegerDefinition.cs" />
+    <Compile Include="MockedServer\MockedPropertyStringDefinition.cs" />
+    <Compile Include="MockedServer\MockedPropertyUriDefinition.cs" />
+    <Compile Include="MockedServer\MockedChoice.cs" />
+    <Compile Include="MockedServer\MockedPolicyIdList.cs" />
+    <Compile Include="IntegrationTests\MockedServerTests\SetupRepositoryTest.cs" />
+    <Compile Include="MockedServer\MockedRepositoryInfo.cs" />
+    <Compile Include="MockedServer\MockedAclCapabilities.cs" />
+    <Compile Include="MockedServer\MockedPermissionDefinition.cs" />
+    <Compile Include="MockedServer\MockedPermissionMapping.cs" />
+    <Compile Include="MockedServer\MockedCmisBinding.cs" />
+    <Compile Include="MockedServer\MockedSessionFactory.cs" />
+    <Compile Include="IntegrationTests\MockedServerTests\SetupSessionFactoryTest.cs" />
+    <Compile Include="IntegrationTests\PrivateWorkingCopyTests\UploadChangedContent.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedAclService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedDiscoveryService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedMultiFilingService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedNavigationService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedObjectService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedPolicyService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedRepositoryService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedRelationshipService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedVersioningService.cs" />
+    <Compile Include="MockedServer\MockedObjectData.cs" />
+    <Compile Include="CmisTests\RepositoryStatusAggregatorTest.cs" />
+    <Compile Include="CmisTests\AbstractRepositoryTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -276,6 +355,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup />
   <ItemGroup>
     <Folder Include="CmisTests\" />
     <Folder Include="CmisTests\UiUtilsTests\" />
@@ -299,5 +379,9 @@
     <Folder Include="AlgorithmsTests\CyclicDependencies\" />
     <Folder Include="IntegrationTests\SelectiveIgnoreTests\" />
     <Folder Include="StatusTests\" />
+    <Folder Include="IntegrationTests\PrivateWorkingCopyTests\" />
+    <Folder Include="IntegrationTests\ContentHashTests\" />
+    <Folder Include="IntegrationTests\MockedServerTests\" />
+    <Folder Include="MockedServer\MockedServices\" />
   </ItemGroup>
 </Project>

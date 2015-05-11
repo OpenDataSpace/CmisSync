@@ -23,14 +23,15 @@ namespace TestLibrary.ConsumerTests {
 
     using CmisSync.Lib;
     using CmisSync.Lib.Consumer;
-    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Consumer.SituationSolver.PWC;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
-    using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
-    using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
@@ -60,7 +61,7 @@ namespace TestLibrary.ConsumerTests {
             this.storage = new Mock<IMetaDataStorage>();
             this.fileTransmissionStorage = new Mock<IFileTransmissionStorage>();
             this.activityListener = new Mock<IActivityListener>();
-            this.listener = new ActivityListenerAggregator(this.activityListener.Object, new ActiveActivitiesManager());
+            this.listener = new ActivityListenerAggregator(this.activityListener.Object, new TransmissionManager());
             this.filters = new Mock<IFilterAggregator>();
         }
 
@@ -299,6 +300,23 @@ namespace TestLibrary.ConsumerTests {
             Assert.Throws<CmisConnectionException>(() => mechanism.Handle(folderEvent));
 
             this.queue.VerifyThatNoEventIsAdded();
+        }
+
+        [Test, Category("Fast")]
+        public void DecorateDefaultSolverBySpecializedPWCSolverIfSessionSupportsPWC([Values(true, false)]bool pwcUpdateable) {
+            this.session.SetupPrivateWorkingCopyCapability(pwcUpdateable);
+
+            var underTest = this.CreateMechanism(Mock.Of<ISituationDetection<AbstractFolderEvent>>(), Mock.Of<ISituationDetection<AbstractFolderEvent>>());
+
+            if (pwcUpdateable) {
+                Assert.That(underTest.Solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] is LocalObjectAddedWithPWC);
+                Assert.That(underTest.Solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] is LocalObjectChangedWithPWC);
+                Assert.That(underTest.Solver[(int)SituationType.CHANGED, (int)SituationType.CHANGED] is LocalObjectChangedRemoteObjectChangedWithPWC);
+            } else {
+                Assert.That(underTest.Solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] is LocalObjectAdded);
+                Assert.That(underTest.Solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] is LocalObjectChanged);
+                Assert.That(underTest.Solver[(int)SituationType.CHANGED, (int)SituationType.CHANGED] is LocalObjectChangedRemoteObjectChanged);
+            }
         }
 
         private void TriggerNonExistingSolver() {

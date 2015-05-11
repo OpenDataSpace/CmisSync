@@ -17,15 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Filter
-{
+namespace CmisSync.Lib.Filter {
     using System;
 
     /// <summary>
     /// I filter aggregator.
     /// </summary>
-    public interface IFilterAggregator
-    {
+    public interface IFilterAggregator {
         /// <summary>
         /// Gets the file names filter.
         /// </summary>

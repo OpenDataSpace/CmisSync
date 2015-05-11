@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="CmisSyncLibUtilsTest.cs" company="GRAU DATA AG">
+// <copyright file="CmisUtilsTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -17,43 +17,27 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.CmisTests.UiUtilsTests
-{
+namespace TestLibrary.CmisTests.UiUtilsTests {
     using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
+    using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
 
     using CmisSync.Lib;
+    using CmisSync.Lib.Cmis.UiUtils;
+    using CmisSync.Lib.Config;
+
+    using DotCMIS;
 
     using NUnit.Framework;
 
     [TestFixture]
-    public class CmisSyncLibUtilsTest
-    {
-        private static readonly string TestFolderParent = Directory.GetCurrentDirectory();
-        private static readonly string TestFolder = Path.Combine(TestFolderParent, "conflicttest");
-
-        [SetUp]
-        public void TestInit()
-        {
-            Directory.CreateDirectory(TestFolder);
-        }
-
-        [TearDown]
-        public void TestCleanup()
-        {
-            if (Directory.Exists(TestFolder))
-            {
-                Directory.Delete(TestFolder, true);
-            }
-        }
-
+    public class CmisUtilsTest {
         [Test, Category("Fast")]
-        public void BandwidthTest()
-        {
+        public void BandwidthFormatTest() {
             long bitPerSecond = 1;
             double bitPerSecondDouble = 1d;
             Assert.AreEqual(Utils.FormatBandwidth(bitPerSecond), Utils.FormatBandwidth(bitPerSecondDouble));
@@ -87,15 +71,13 @@ namespace TestLibrary.CmisTests.UiUtilsTests
         }
 
         [Test, Category("Fast")]
-        public void FormatIntegerPercentTest()
-        {
+        public void FormatIntegerPercentTest() {
             int p = 5;
             Assert.AreEqual("5.0 %", Utils.FormatPercent(p).Replace(',', '.'));
         }
 
         [Test, Category("Fast")]
-        public void FormatDoublePercentTest()
-        {
+        public void FormatDoublePercentTest() {
             double p = 5.03;
             Assert.AreEqual("5.0 %", Utils.FormatPercent(p).Replace(',', '.'));
             p = 5.06;
@@ -105,17 +87,15 @@ namespace TestLibrary.CmisTests.UiUtilsTests
         }
 
         [Test, Category("Fast")]
-        public void CreateUserAgent()
-        {
+        public void CreateUserAgent() {
             var useragent = Utils.CreateUserAgent();
-            Assert.IsTrue(useragent.Contains(Backend.Version));
-            Assert.IsTrue(useragent.Contains("hostname="));
-            Assert.IsTrue(useragent.Contains(CultureInfo.CurrentCulture.Name));
+            Assert.That(useragent.Contains(Backend.Version));
+            Assert.That(useragent.Contains("hostname="));
+            Assert.That(useragent.Contains(CultureInfo.CurrentCulture.Name));
         }
 
         [Test, Category("Fast")]
-        public void CreateRegexFromIgnoreAllWildcard()
-        {
+        public void CreateRegexFromIgnoreAllWildcard() {
             var regex = Utils.IgnoreLineToRegex("*");
             Assert.That(regex.IsMatch(string.Empty));
             Assert.That(regex.IsMatch(" "));
@@ -124,8 +104,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests
         }
 
         [Test, Category("Fast")]
-        public void CreateRegexFromIgnoreDotsAtTheBeginningWildcard()
-        {
+        public void CreateRegexFromIgnoreDotsAtTheBeginningWildcard() {
             var regex = Utils.IgnoreLineToRegex(".*");
             Assert.That(!regex.IsMatch(string.Empty));
             Assert.That(!regex.IsMatch("s."));
@@ -135,8 +114,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests
         }
 
         [Test, Category("Fast")]
-        public void CreateRegexFromIgnoreTildeAtTheBeginningWildcard()
-        {
+        public void CreateRegexFromIgnoreTildeAtTheBeginningWildcard() {
             var regex = Utils.IgnoreLineToRegex("~*");
             Assert.That(regex.IsMatch("~test"));
             Assert.That(regex.IsMatch("~"));
@@ -145,8 +123,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests
         }
 
         [Test, Category("Fast")]
-        public void CreateRegexFromIgnoreTempFilesWildcard()
-        {
+        public void CreateRegexFromIgnoreTempFilesWildcard() {
             var regex = Utils.IgnoreLineToRegex("*.tmp");
             Assert.That(regex.IsMatch("~test.tmp"));
             Assert.That(regex.IsMatch(".tmp"));
@@ -155,12 +132,37 @@ namespace TestLibrary.CmisTests.UiUtilsTests
         }
 
         [Test, Category("Fast")]
-        public void IgnoreFolderByWildard()
-        {
+        public void IgnoreFolderByWildard() {
             var wildcards = new List<string>();
             wildcards.Add(".*");
-            Assert.IsFalse(Utils.IsInvalidFolderName("test", wildcards), "test is a valid folder name");
-            Assert.IsTrue(Utils.IsInvalidFolderName(".test", wildcards), ".test is not a valid folder name");
+            Assert.That(Utils.IsInvalidFolderName("test", wildcards), Is.False, "test is a valid folder name");
+            Assert.That(Utils.IsInvalidFolderName(".test", wildcards), Is.True, ".test is not a valid folder name");
+        }
+
+        [Test, Category("Fast")]
+        public void CreateMultipleServerCredentialsBasedOnTheGivenOne() {
+            var userName = "User";
+            var originalUrl = "https://demo.deutsche-wolke.de/wrongStuff";
+            var password = new Password(Guid.NewGuid().ToString());
+            var originalCredentials = new ServerCredentials {
+                Address = new Uri(originalUrl),
+                Password = password,
+                Binding = BindingType.Browser,
+                UserName = userName
+            };
+
+            var list = originalCredentials.CreateFuzzyCredentials();
+
+            Assert.That(list, Is.Not.Null);
+            Assert.That(list, Is.Not.Empty);
+            Assert.That(list.First().Credentials, Is.EqualTo(originalCredentials));
+            Assert.That(list[1].Credentials.Address.ToString(), Is.EqualTo(originalCredentials.Address.ToString()));
+            Assert.That(list[1].Credentials.Binding, Is.Not.EqualTo(originalCredentials.Binding));
+            foreach (var entry in list) {
+                Assert.That(entry.Credentials.Password.ToString(), Is.EqualTo(password.ToString()));
+                Assert.That(entry.Credentials.UserName, Is.EqualTo(userName));
+                Console.WriteLine(entry);
+            }
         }
     }
 }

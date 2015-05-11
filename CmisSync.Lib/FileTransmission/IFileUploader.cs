@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="IFileUploader.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.FileTransmission
-{
+namespace CmisSync.Lib.FileTransmission {
     using System;
     using System.IO;
     using System.Security.Cryptography;
@@ -30,8 +29,7 @@ namespace CmisSync.Lib.FileTransmission
     /// <summary>
     /// I file Upload Module must implement this interface.
     /// </summary>
-    public interface IFileUploader : IDisposable
-    {
+    public interface IFileUploader : IDisposable {
         /// <summary>
         /// Uploads the localFileStream to remoteDocument.
         /// </summary>
@@ -53,7 +51,7 @@ namespace CmisSync.Lib.FileTransmission
         /// <param name='overwrite'>
         /// If true, the local content will overwrite the existing content.
         /// </param>
-        IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg, bool overwrite = true);
+        IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg, bool overwrite = true, UpdateChecksum update = null);
 
         /// <summary>
         /// Appends the localFileStream to the remoteDocument.
@@ -73,6 +71,6 @@ namespace CmisSync.Lib.FileTransmission
         /// <param name='hashAlg'>
         /// Hash alg which should be used to calculate a checksum over the appended content.
         /// </param>
-        IDocument AppendFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg);
+        IDocument AppendFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg);
     }
 }

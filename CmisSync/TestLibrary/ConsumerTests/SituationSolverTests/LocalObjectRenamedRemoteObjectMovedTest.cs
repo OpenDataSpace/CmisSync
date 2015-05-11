@@ -39,7 +39,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     {
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
-        private ActiveActivitiesManager transmissionManager;
+        private TransmissionManager transmissionManager;
         private Mock<LocalObjectRenamedRemoteObjectRenamed> renameSolver;
         private Mock<LocalObjectChangedRemoteObjectChanged> changeSolver;
 
@@ -49,7 +49,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
-            this.transmissionManager = new ActiveActivitiesManager();
+            this.transmissionManager = new TransmissionManager();
             this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(this.session.Object, this.storage.Object, null, this.transmissionManager, Mock.Of<IFileSystemInfoFactory>());
             this.renameSolver = new Mock<LocalObjectRenamedRemoteObjectRenamed>(this.session.Object, this.storage.Object, this.changeSolver.Object);
         }
