@@ -222,7 +222,9 @@ SOURCES =  \
 	Storage/Database/Entities/MappedObject.cs \
 	Storage/Database/EntryNotFoundException.cs \
 	Storage/Database/FileTransmissionStorage.cs \
+	Storage/Database/GraphOutputConvenienceExtension.cs \
 	Storage/Database/ICookieStorage.cs \
+	Storage/Database/IDotTreeWriter.cs \
 	Storage/Database/IFileTransmissionStorage.cs \
 	Storage/Database/IMetaDataStorage.cs \
 	Storage/Database/IMetaDataStorageConvenienceExtender.cs \
