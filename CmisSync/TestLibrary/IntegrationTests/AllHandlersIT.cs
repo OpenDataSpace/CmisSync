@@ -324,7 +324,7 @@ namespace TestLibrary.IntegrationTests {
 
         private IMetaDataStorage GetInitializedStorage() {
             IPathMatcher matcher = new PathMatcher(this.localRoot, this.remoteRoot);
-            return new MetaDataStorage(this.engine, matcher);
+            return new MetaDataStorage(this.engine, matcher, true);
         }
 
         private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage, ObservableHandler observer, IFileSystemInfoFactory fsFactory = null) {

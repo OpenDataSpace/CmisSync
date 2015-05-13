@@ -96,7 +96,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
                 Guid = this.rootGuid,
                 LastLocalWriteTimeUtc = this.lastLocalWriteTime
             };
-            this.storage = new MetaDataStorage(this.storageEngine, this.matcher);
+            this.storage = new MetaDataStorage(this.storageEngine, this.matcher, true);
             this.storage.SaveMappedObject(this.mappedRootObject);
             this.filter = MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object;
             this.listener = new Mock<IActivityListener>();

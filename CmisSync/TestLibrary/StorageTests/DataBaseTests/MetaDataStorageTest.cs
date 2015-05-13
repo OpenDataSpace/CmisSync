@@ -59,84 +59,84 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void ConstructorFailsWithNoEngineAndNoMatcher() {
-            Assert.Throws<ArgumentNullException>(() => new MetaDataStorage(null, null));
+        public void ConstructorFailsWithNoEngineAndNoMatcher([Values(true, false)]bool withValidation) {
+            Assert.Throws<ArgumentNullException>(() => new MetaDataStorage(null, null, withValidation));
         }
 
         [Test, Category("Fast")]
-        public void ConstructorFailsWithNoEngine() {
-            Assert.Throws<ArgumentNullException>(() => new MetaDataStorage(null, this.matcher));
+        public void ConstructorFailsWithNoEngine([Values(true, false)]bool withValidation) {
+            Assert.Throws<ArgumentNullException>(() => new MetaDataStorage(null, this.matcher, withValidation));
         }
 
         [Test, Category("Fast")]
-        public void ConstructorFailsWithNoMatcher() {
-            Assert.Throws<ArgumentNullException>(() => new MetaDataStorage(this.engine, null));
+        public void ConstructorFailsWithNoMatcher([Values(true, false)]bool withValidation) {
+            Assert.Throws<ArgumentNullException>(() => new MetaDataStorage(this.engine, null, withValidation));
         }
 
         [Test, Category("Fast")]
-        public void ConstructorTakesEngineWithoutFailure() {
-            new MetaDataStorage(this.engine, this.matcher);
+        public void ConstructorTakesEngineWithoutFailure([Values(true, false)]bool withValidation) {
+            new MetaDataStorage(this.engine, this.matcher, withValidation);
         }
 
         [Test, Category("Fast")]
-        public void SetAndGetContentChangeToken() {
+        public void SetAndGetContentChangeToken([Values(true, false)]bool withValidation) {
             string token = "token";
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             storage.ChangeLogToken = token;
             Assert.That(storage.ChangeLogToken, Is.EqualTo(token));
         }
 
         [Test, Category("Fast")]
-        public void GetTokenFromEmptyStorageMustBeNull() {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+        public void GetTokenFromEmptyStorageMustBeNull([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             Assert.That(storage.ChangeLogToken, Is.Null);
         }
 
         [Test, Category("Fast")]
-        public void GetObjectByIdWithNotExistingIdMustReturnNull() {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+        public void GetObjectByIdWithNotExistingIdMustReturnNull([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             Assert.That(storage.GetObjectByRemoteId("DOESNOTEXIST"), Is.Null);
         }
 
         [Test, Category("Fast")]
-        public void GetObjectByPathThrowsExceptionOnNullArgument() {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+        public void GetObjectByPathThrowsExceptionOnNullArgument([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             Assert.Throws<ArgumentNullException>(() => storage.GetObjectByLocalPath(null));
         }
 
         [Test, Category("Fast")]
-        public void GetObjectByPathThrowsExceptionIfLocalPathDoesNotMatchToSyncPath() {
+        public void GetObjectByPathThrowsExceptionIfLocalPathDoesNotMatchToSyncPath([Values(true, false)]bool withValidation) {
             var matcher = new Mock<IPathMatcher>();
             string localpath = Path.GetTempPath();
             var folder = Mock.Of<IDirectoryInfo>(
                 f =>
                 f.FullName == localpath);
             matcher.Setup(m => m.CanCreateRemotePath(It.Is<string>(f => f == localpath))).Returns(false);
-            var storage = new MetaDataStorage(this.engine, matcher.Object);
+            var storage = new MetaDataStorage(this.engine, matcher.Object, withValidation);
 
             Assert.Throws<ArgumentException>(() => storage.GetObjectByLocalPath(folder));
         }
 
         [Test, Category("Fast")]
-        public void GetObjectByPathWithNotExistingEntryMustReturnNull() {
+        public void GetObjectByPathWithNotExistingEntryMustReturnNull([Values(true, false)]bool withValidation) {
             var matcher = new Mock<IPathMatcher>();
             string testfilename = "test";
             string testpath = Path.Combine(Path.GetTempPath(), testfilename);
             matcher.Setup(m => m.CanCreateRemotePath(It.Is<string>(f => f == testpath))).Returns(true);
             matcher.Setup(m => m.GetRelativeLocalPath(It.Is<string>(f => f == testpath))).Returns(testfilename);
-            var storage = new MetaDataStorage(this.engine, matcher.Object);
+            var storage = new MetaDataStorage(this.engine, matcher.Object, withValidation);
 
             var path = Mock.Of<IFileSystemInfo>(p => p.FullName == testpath);
             Assert.That(storage.GetObjectByLocalPath(path), Is.Null);
         }
 
         [Test, Category("Fast")]
-        public void GetObjectByPath() {
+        public void GetObjectByPath([Values(true, false)]bool withValidation) {
             var matcher = new Mock<IPathMatcher>();
             matcher.Setup(m => m.LocalTargetRootPath).Returns(Path.GetTempPath());
             matcher.Setup(m => m.CanCreateRemotePath(It.Is<string>(f => f == Path.Combine(Path.GetTempPath(), "a")))).Returns(true);
             matcher.Setup(m => m.GetRelativeLocalPath(It.Is<string>(p => p == Path.Combine(Path.GetTempPath(), "a")))).Returns("a");
-            var storage = new MetaDataStorage(this.engine, matcher.Object);
+            var storage = new MetaDataStorage(this.engine, matcher.Object, withValidation);
             var folder = Mock.Of<IDirectoryInfo>(
                 f =>
                 f.FullName == Path.Combine(Path.GetTempPath(), "a"));
@@ -151,9 +151,9 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void GetObjectByPathWithHierarchie() {
+        public void GetObjectByPathWithHierarchie([Values(true, false)]bool withValidation) {
             var matcher = new PathMatcher(Path.GetTempPath(), "/");
-            var storage = new MetaDataStorage(this.engine, matcher);
+            var storage = new MetaDataStorage(this.engine, matcher, withValidation);
             var root = Mock.Of<IDirectoryInfo>(f => f.FullName == Path.GetTempPath());
             var folder = Mock.Of<IDirectoryInfo>(
                 f =>
@@ -172,26 +172,26 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void GetChildrenOfNonExistingParentMustThrowException() {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+        public void GetChildrenOfNonExistingParentMustThrowException([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             Assert.Throws<EntryNotFoundException>(() => storage.GetChildren(Mock.Of<IMappedObject>(o => o.RemoteObjectId == "DOESNOTEXIST")));
         }
 
         [Test, Category("Fast")]
-        public void GetChildrenThrowsExceptionOnNullArgument() {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+        public void GetChildrenThrowsExceptionOnNullArgument([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             Assert.Throws<ArgumentNullException>(() => storage.GetChildren(null));
         }
 
         [Test, Category("Fast")]
-        public void GetChildrenThrowsExceptionIfMappedObjectDoesNotContainsId() {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+        public void GetChildrenThrowsExceptionIfMappedObjectDoesNotContainsId([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             Assert.Throws<ArgumentException>(() => storage.GetChildren(Mock.Of<IMappedObject>()));
         }
 
         [Test, Category("Fast")]
-        public void GetChildrenReturnsEmptyListIfNoChildrenAreAvailable() {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+        public void GetChildrenReturnsEmptyListIfNoChildrenAreAvailable([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             var folder = new MappedObject("name", "id", MappedObjectType.Folder, null, null);
             storage.SaveMappedObject(folder);
 
@@ -199,20 +199,20 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void SaveMappedObjectThrowsExceptionOnNullArgument() {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+        public void SaveMappedObjectThrowsExceptionOnNullArgument([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             Assert.Throws<ArgumentNullException>(() => storage.SaveMappedObject(null));
         }
 
         [Test, Category("Fast")]
-        public void SaveMappedObjectThrowsExceptionOnNonExistingIdInObject() {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+        public void SaveMappedObjectThrowsExceptionOnNonExistingIdInObject([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             Assert.Throws<ArgumentException>(() => storage.SaveMappedObject(Mock.Of<IMappedObject>()));
         }
 
         [Test, Category("Fast")]
-        public void SaveFolderObjectAndGetObjectReturnEqualObject() {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+        public void SaveFolderObjectAndGetObjectReturnEqualObject([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             string remoteId = "remoteId";
             var folder = new MappedObject("folder", remoteId, MappedObjectType.Folder, null, null) {
                 Description = "desc",
@@ -226,8 +226,8 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void SaveFileObjectAndGetObjectReturnsEqualObject() {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+        public void SaveFileObjectAndGetObjectReturnsEqualObject([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             string remoteId = "remoteId";
             var file = new MappedObject("file", remoteId, MappedObjectType.File, null, null) {
                 Description = "desc",
@@ -243,21 +243,21 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void RemoveObjectThrowsExceptionOnNullArgument() {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+        public void RemoveObjectThrowsExceptionOnNullArgument([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             Assert.Throws<ArgumentNullException>(() => storage.RemoveObject(null));
         }
 
         [Test, Category("Fast")]
-        public void RemoveObjectThrowsExceptionOnNonExistingIdInObject() {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+        public void RemoveObjectThrowsExceptionOnNonExistingIdInObject([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             Assert.Throws<ArgumentException>(() => storage.RemoveObject(Mock.Of<IMappedObject>()));
         }
 
         [Test, Category("Fast")]
-        public void RemoveObjectTest() {
+        public void RemoveObjectTest([Values(true, false)]bool withValidation) {
             string remoteId = "remoteId";
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             var obj = new MappedObject("name", remoteId, MappedObjectType.Folder, null, null);
             storage.SaveMappedObject(obj);
 
@@ -267,11 +267,11 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void RemoveObjectRemovesChildrenAsWell() {
+        public void RemoveObjectRemovesChildrenAsWell([Values(true, false)]bool withValidation) {
             string remoteId = "remoteId";
             string childId = "childId";
             string subChildId = "subchildId";
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             var obj = new MappedObject("name", remoteId, MappedObjectType.Folder, null, null);
             var child = new MappedObject("child", childId, MappedObjectType.Folder, remoteId, null);
             var subchild = new MappedObject("subchild", subChildId, MappedObjectType.File, childId, null);
@@ -287,11 +287,11 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void RemoveObjectDoesNotTouchParents() {
+        public void RemoveObjectDoesNotTouchParents([Values(true, false)]bool withValidation) {
             string remoteId = "remoteId";
             string childId = "childId";
             string subChildId = "subchildId";
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             var obj = new MappedObject("name", remoteId, MappedObjectType.Folder, null, null);
             var child = new MappedObject("child", childId, MappedObjectType.Folder, remoteId, null);
             var subchild = new MappedObject("subchild", subChildId, MappedObjectType.File, childId, null);
@@ -307,22 +307,22 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void GetLocalPathThrowsExceptionOnNullArgument() {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+        public void GetLocalPathThrowsExceptionOnNullArgument([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             Assert.Throws<ArgumentNullException>(() => storage.GetLocalPath(null));
         }
 
         [Test, Category("Fast")]
-        public void GetLocalPathThrowsExceptionOnNonExistingIdInObject() {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+        public void GetLocalPathThrowsExceptionOnNonExistingIdInObject([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             Assert.Throws<ArgumentException>(() => storage.GetLocalPath(Mock.Of<IMappedObject>()));
         }
 
         [Test, Category("Fast")]
-        public void GetLocalPath() {
+        public void GetLocalPath([Values(true, false)]bool withValidation) {
             var matcher = new Mock<IPathMatcher>();
             matcher.Setup(m => m.LocalTargetRootPath).Returns(Path.GetTempPath());
-            var storage = new MetaDataStorage(this.engine, matcher.Object);
+            var storage = new MetaDataStorage(this.engine, matcher.Object, withValidation);
             string id = "remoteId";
             var rootFolder = new MappedObject("name", id, MappedObjectType.Folder, null, null);
             storage.SaveMappedObject(rootFolder);
@@ -333,10 +333,10 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void GetLocalPathOfNonExistingEntryReturnsNull() {
+        public void GetLocalPathOfNonExistingEntryReturnsNull([Values(true, false)]bool withValidation) {
             var matcher = new Mock<IPathMatcher>();
             matcher.Setup(m => m.LocalTargetRootPath).Returns(Path.GetTempPath());
-            var storage = new MetaDataStorage(this.engine, matcher.Object);
+            var storage = new MetaDataStorage(this.engine, matcher.Object, withValidation);
             string id = "nonExistingId";
             var rootFolder = new MappedObject("name", "otherId", MappedObjectType.Folder, null, null);
             var otherFolder = new MappedObject("name", id, MappedObjectType.Folder, "otherId", null);
@@ -346,22 +346,22 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void GetRemotePathThrowsExceptionOnNullArgument() {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+        public void GetRemotePathThrowsExceptionOnNullArgument([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             Assert.Throws<ArgumentNullException>(() => storage.GetRemotePath(null));
         }
 
         [Test, Category("Fast")]
-        public void GetRemotePathThrowsExceptionOnNonExistingIdInObject() {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+        public void GetRemotePathThrowsExceptionOnNonExistingIdInObject([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             Assert.Throws<ArgumentException>(() => storage.GetRemotePath(Mock.Of<IMappedObject>()));
         }
 
         [Test, Category("Fast")]
-        public void GetRemotePath() {
+        public void GetRemotePath([Values(true, false)]bool withValidation) {
             var matcher = new Mock<IPathMatcher>();
             matcher.Setup(m => m.RemoteTargetRootPath).Returns("/");
-            var storage = new MetaDataStorage(this.engine, matcher.Object);
+            var storage = new MetaDataStorage(this.engine, matcher.Object, withValidation);
             var remoteFolder = new MappedObject("remoteFolder", "remoteId", MappedObjectType.Folder, null, null);
             storage.SaveMappedObject(remoteFolder);
 
@@ -371,10 +371,10 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void GetRemotePathWithCorrectSlashes() {
+        public void GetRemotePathWithCorrectSlashes([Values(true, false)]bool withValidation) {
             var matcher = new Mock<IPathMatcher>();
             matcher.Setup(m => m.RemoteTargetRootPath).Returns("/");
-            var storage = new MetaDataStorage(this.engine, matcher.Object);
+            var storage = new MetaDataStorage(this.engine, matcher.Object, withValidation);
             var remoteRootFolder = new MappedObject("/", "rootId", MappedObjectType.Folder, null, null);
             var remoteFolder = new MappedObject("remoteFolder", "remoteId", MappedObjectType.Folder, "rootId", null);
             storage.SaveMappedObject(remoteRootFolder);
@@ -386,12 +386,12 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void FindRootFolder() {
+        public void FindRootFolder([Values(true, false)]bool withValidation) {
             string id = "id";
             string path = Path.GetTempPath();
             var fsInfo = new DirectoryInfoWrapper(new DirectoryInfo(path));
             var matcher = new PathMatcher(path, "/");
-            var storage = new MetaDataStorage(this.engine, matcher);
+            var storage = new MetaDataStorage(this.engine, matcher, withValidation);
             var rootFolder = new MappedObject("/", id, MappedObjectType.Folder, null, "token");
             storage.SaveMappedObject(rootFolder);
 
@@ -400,7 +400,7 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void SaveRenamedMappedObjectOverridesExistingEntry() {
+        public void SaveRenamedMappedObjectOverridesExistingEntry([Values(true, false)]bool withValidation) {
             string id = "id";
             string oldName = "my";
             string newName = "newMy";
@@ -409,7 +409,7 @@ namespace TestLibrary.StorageTests.DataBaseTests {
             string oldToken = "oldToken";
             string newToken = "newToken";
             var matcher = new PathMatcher(path, "/");
-            var storage = new MetaDataStorage(this.engine, matcher);
+            var storage = new MetaDataStorage(this.engine, matcher, withValidation);
             var rootFolder = new MappedObject("/", parentId, MappedObjectType.Folder, null, "token");
             storage.SaveMappedObject(rootFolder);
             var folder = new MappedObject(oldName, id, MappedObjectType.Folder, parentId, oldToken);
@@ -425,14 +425,14 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void ToLinePrintReturnsEmptyStringOnEmptyDB() {
-            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+        public void ToLinePrintReturnsEmptyStringOnEmptyDB([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>(), withValidation);
             Assert.That(storage.ToFindString(), Is.EqualTo(string.Empty));
         }
 
         [Test, Category("Fast")]
-        public void ToLinePrintReturnsOneLineIfOnlyRootFolderIsInDB() {
-            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+        public void ToLinePrintReturnsOneLineIfOnlyRootFolderIsInDB([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>(), withValidation);
             var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
             storage.SaveMappedObject(rootFolder);
 
@@ -440,8 +440,8 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void ToLinePrintReturnsOneLinePerEntry() {
-            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+        public void ToLinePrintReturnsOneLinePerEntry([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>(), withValidation);
             var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
             var child1Folder = new MappedObject("sub1", "subId1", MappedObjectType.Folder, "rootId", "token");
             var child2Folder = new MappedObject("sub2", "subId2", MappedObjectType.Folder, "rootId", "token");
@@ -461,7 +461,7 @@ namespace TestLibrary.StorageTests.DataBaseTests {
 
         [Test, Category("Fast")]
         public void ToLinePrintReturnsOneLinePerNotFittingEntry() {
-            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>(), false);
             var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
             var child1Folder = new MappedObject("sub1", "subId1", MappedObjectType.Folder, "WRONGID", "token");
             storage.SaveMappedObject(rootFolder);
@@ -475,7 +475,7 @@ namespace TestLibrary.StorageTests.DataBaseTests {
 
         [Test, Category("Fast")]
         public void ValidateFolderStructureThrowsExceptionIfRootObjectIsMissingButOtherObjectsAreStored() {
-            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>(), false);
             var child1Folder = new MappedObject("sub1", "subId1", MappedObjectType.Folder, "rootId", "token");
             storage.SaveMappedObject(child1Folder);
 
@@ -484,7 +484,7 @@ namespace TestLibrary.StorageTests.DataBaseTests {
 
         [Test, Category("Fast")]
         public void ValidateFolderStructureThrowsExceptionIfParentObjectIsMissing() {
-            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>(), false);
             var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
             var child1Folder = new MappedObject("sub1", "subId1", MappedObjectType.Folder, "WRONGID", "token");
             storage.SaveMappedObject(rootFolder);
@@ -495,7 +495,7 @@ namespace TestLibrary.StorageTests.DataBaseTests {
 
         [Test, Category("Fast")]
         public void ValidateFolderStructureThrowsExceptionIfFileParentIdIsFileObject() {
-            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>(), false);
             var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
             var child1File = new MappedObject("sub1", "subId1", MappedObjectType.File, "rootId", "token");
             var child2File = new MappedObject("sub2", "subId2", MappedObjectType.File, "sub1", "token");
@@ -507,14 +507,14 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void ValidateFolderStructureIsFineIfNoObjectIsStored() {
-            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+        public void ValidateFolderStructureIsFineIfNoObjectIsStored([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>(), withValidation);
             storage.ValidateObjectStructure();
         }
 
         [Test, Category("Fast")]
-        public void ValidateFolderStructureIsFineOnCleanFolderStructure() {
-            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+        public void ValidateFolderStructureIsFineOnCleanFolderStructure([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>(), withValidation);
             var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
             var child1Folder = new MappedObject("sub1", "subId1", MappedObjectType.Folder, "rootId", "token");
             var child2File = new MappedObject("sub2", "subId2", MappedObjectType.File, "subId1", "token");
@@ -526,14 +526,14 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void GetObjectByGuidReturnsNullIfNoEntryExists() {
-            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+        public void GetObjectByGuidReturnsNullIfNoEntryExists([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>(), withValidation);
             Assert.That(storage.GetObjectByGuid(Guid.NewGuid()), Is.Null);
         }
 
         [Test, Category("Fast")]
-        public void GetObjectByGuidReturnsSavedObject() {
-            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+        public void GetObjectByGuidReturnsSavedObject([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>(), withValidation);
             var uuid = Guid.NewGuid();
             var file = new MappedObject("name" , "rootId", MappedObjectType.File, null, "token") { Guid = uuid };
             storage.SaveMappedObject(file);
@@ -542,14 +542,14 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void GetObjectTreeReturnsNullIfNoEntryExists() {
-            IMetaDataStorage storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+        public void GetObjectTreeReturnsNullIfNoEntryExists([Values(true, false)]bool withValidation) {
+            IMetaDataStorage storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>(), withValidation);
             Assert.That(storage.GetObjectTree(), Is.Null);
         }
 
         [Test, Category("Fast")]
-        public void GetObjectTreeReturnsOneItemWithEmptyChildrenList() {
-            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+        public void GetObjectTreeReturnsOneItemWithEmptyChildrenList([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>(), withValidation);
             var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
             storage.SaveMappedObject(rootFolder);
 
@@ -559,8 +559,8 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void GetObjectTreeReturnsTreeEqualToFolderStructure() {
-            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+        public void GetObjectTreeReturnsTreeEqualToFolderStructure([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>(), withValidation);
             var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
             var child1Folder = new MappedObject("sub1", "subId1", MappedObjectType.Folder, "rootId", "token");
             var child2File = new MappedObject("sub2", "subId2", MappedObjectType.File, "subId1", "token");
@@ -578,8 +578,8 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void ThrowOnDublicateGuid() {
-            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+        public void ThrowOnDublicateGuid([Values(true, false)]bool withValidation) {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>(), withValidation);
             var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
             var child1 = new MappedObject("sub1", "subId1", MappedObjectType.File, "rootId", "token");
             child1.Guid = Guid.NewGuid();

@@ -101,6 +101,8 @@ namespace TestLibrary {
             if (this.Queue.TryDequeue(out e)) {
                 try {
                     this.Manager.Handle(e);
+                } catch (System.IO.InvalidDataException) {
+                    throw;
                 } catch (Exception exp) {
                     if (!this.SwallowExceptions) {
                         throw;
