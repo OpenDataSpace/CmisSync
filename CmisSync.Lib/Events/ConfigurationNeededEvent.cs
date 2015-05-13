@@ -17,16 +17,20 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
 
     using CmisSync.Lib.Config;
 
-    public class ConfigurationNeededEvent : ExceptionEvent
-    {
-        public ConfigurationNeededEvent(Exception e) : base(e)
-        {
+    /// <summary>
+    /// Configuration needed event can be used to inform about a wrong config.
+    /// </summary>
+    public class ConfigurationNeededEvent : ExceptionEvent {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.ConfigurationNeededEvent"/> class.
+        /// </summary>
+        /// <param name="e">Exception which requires a change of a configuration.</param>
+        public ConfigurationNeededEvent(Exception e) : base(e) {
         }
     }
 }

@@ -1,7 +1,23 @@
+//-----------------------------------------------------------------------
+// <copyright file="IgnoredEntitiesStorage.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
-
-namespace CmisSync.Lib.SelectiveIgnore
-{
+namespace CmisSync.Lib.SelectiveIgnore {
     using System;
 
     using CmisSync.Lib.Storage.Database;
@@ -11,11 +27,15 @@ namespace CmisSync.Lib.SelectiveIgnore
     /// <summary>
     /// Ignored entities storage.
     /// </summary>
-    public class IgnoredEntitiesStorage : IIgnoredEntitiesStorage
-    {
+    public class IgnoredEntitiesStorage : IIgnoredEntitiesStorage {
         private IIgnoredEntitiesCollection collection;
         private IMetaDataStorage storage;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.SelectiveIgnore.IgnoredEntitiesStorage"/> class.
+        /// </summary>
+        /// <param name="collection">Ignored entries collection.</param>
+        /// <param name="storage">Meta data storage.</param>
         public IgnoredEntitiesStorage(IIgnoredEntitiesCollection collection, IMetaDataStorage storage) {
             if (collection == null) {
                 throw new ArgumentNullException("Given collection is null");
@@ -70,18 +90,38 @@ namespace CmisSync.Lib.SelectiveIgnore
             this.collection.Remove(objectId);
         }
 
+        /// <summary>
+        /// Determines whether the given Document is ignored.
+        /// </summary>
+        /// <returns><c>true</c> if the given doc is ignored; otherwise <c>false</c></returns>
+        /// <param name="doc">Document to be checked.</param>
         public IgnoredState IsIgnored(IDocument doc) {
             return this.collection.IsIgnored(doc);
         }
 
+        /// <summary>
+        /// Determines whether the given folder is ignored.
+        /// </summary>
+        /// <returns><c>true</c> if the given folder is ignored; otherwise, <c>false</c>.</returns>
+        /// <param name="folder">Folder to be checked.</param>
         public IgnoredState IsIgnored(IFolder folder) {
             return this.collection.IsIgnored(folder);
         }
 
+        /// <summary>
+        /// Determines whether the object with the given objectId is ignored.
+        /// </summary>
+        /// <returns><c>true</c> if the object with the given objectId is ignored; otherwise, <c>false</c>.</returns>
+        /// <param name="objectId">Object identifier.</param>
         public IgnoredState IsIgnoredId(string objectId) {
             return this.collection.IsIgnoredId(objectId);
         }
 
+        /// <summary>
+        /// Determines whether this the ignored path is ignored.
+        /// </summary>
+        /// <returns><c>true</c> if the local path is ignored; otherwise, <c>false</c>.</returns>
+        /// <param name="localPath">Local path.</param>
         public IgnoredState IsIgnoredPath(string localPath) {
             return this.collection.IsIgnoredPath(localPath);
         }

@@ -34,7 +34,9 @@ SOURCES =  \
 	Edit.cs \
 	gtk-gui/CmisSync.CredentialsWidget.cs \
 	gtk-gui/CmisSync.Setting.cs \
+	gtk-gui/CmisSync.TransmissionWindow.cs \
 	gtk-gui/CmisSync.Widgets.ProxyWidget.cs \
+	gtk-gui/CmisSync.Widgets.TransmissionWidget.cs \
 	gtk-gui/CmisSync.Widgets.UrlWidget.cs \
 	gtk-gui/generated.cs \
 	Notification/NotificationUtils.cs \
@@ -45,6 +47,8 @@ SOURCES =  \
 	SetupWindow.cs \
 	Spinner.cs \
 	StatusIcon.cs \
+	TransmissionWidget.cs \
+	TransmissionWindow.cs \
 	UI.cs \
 	UIHelpers.cs \
 	UrlWidget.cs \

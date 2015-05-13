@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
 
     using CmisSync.Lib.Queueing;
@@ -26,16 +25,14 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// Request ignored event.
     /// </summary>
-    public class RequestIgnoredEvent : ISyncEvent
-    {
+    public class RequestIgnoredEvent : ISyncEvent {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.RequestIgnoredEvent"/> class.
         /// </summary>
         /// <param name="ignoredEvent">Ignored event.</param>
         /// <param name="reason">Reason why it has been ignored.</param>
         /// <param name="source">The source which ignored the event.</param>
-        public RequestIgnoredEvent(ISyncEvent ignoredEvent, string reason = null, SyncEventHandler source = null)
-        {
+        public RequestIgnoredEvent(ISyncEvent ignoredEvent, string reason = null, SyncEventHandler source = null) {
             if (ignoredEvent == null) {
                 throw new ArgumentNullException("The ignored event cannot be null");
             }
@@ -64,8 +61,7 @@ namespace CmisSync.Lib.Events
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.RequestIgnoredEvent"/>.
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.RequestIgnoredEvent"/>.</returns>
-        public override string ToString()
-        {
+        public override string ToString() {
             return string.Format("[RequestIgnoredEvent: IgnoredEvent={0} Reason={1}]", this.IgnoredEvent, this.Reason);
         }
     }

@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.SelectiveIgnore
-{
+namespace CmisSync.Lib.SelectiveIgnore {
     using System;
     using System.Collections.ObjectModel;
     using System.IO;
@@ -29,8 +28,7 @@ namespace CmisSync.Lib.SelectiveIgnore
     using DotCMIS.Client;
     using DotCMIS.Enums;
 
-    public class SelectiveIgnoreEventTransformer : SyncEventHandler
-    {
+    public class SelectiveIgnoreEventTransformer : SyncEventHandler {
         private ISyncEventQueue queue;
         private IIgnoredEntitiesCollection ignores;
 
@@ -47,8 +45,7 @@ namespace CmisSync.Lib.SelectiveIgnore
             this.queue = queue;
         }
 
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             if (e is FSMovedEvent) {
                 var movedEvent = e as FSMovedEvent;
                 if (this.IsInsideIgnoredPath(movedEvent.OldPath) && !this.IsInsideIgnoredPath(movedEvent.LocalPath)) {

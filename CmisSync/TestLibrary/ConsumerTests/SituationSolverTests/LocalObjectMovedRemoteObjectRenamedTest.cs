@@ -56,7 +56,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private string newParentPath;
         private Guid localUuid = Guid.NewGuid();
         private Guid newParentUuid = Guid.NewGuid();
-        private ActiveActivitiesManager manager;
+        private TransmissionManager manager;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileSystemInfoFactory> fsFactory;
@@ -168,7 +168,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private void SetUpMocks() {
             this.newParentPath = Path.Combine(Path.GetTempPath(), this.newParentName);
             this.newPath = Path.Combine(this.newParentPath, this.newName);
-            this.manager = new ActiveActivitiesManager();
+            this.manager = new TransmissionManager();
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();

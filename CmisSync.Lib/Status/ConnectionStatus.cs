@@ -17,12 +17,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Status
-{
+namespace CmisSync.Lib.Status {
     using System;
 
-    public class ConnectionStatus
-    {
+    public class ConnectionStatus {
         private bool connected = false;
         public bool IsConnected {
             get {
@@ -33,11 +31,11 @@ namespace CmisSync.Lib.Status
                 if (value != this.connected) {
                     this.connected = value;
                     if (this.connected) {
-                        ConnectedSince = DateTime.Now;
-                        DisconnectedSince = null;
+                        this.ConnectedSince = DateTime.Now;
+                        this.DisconnectedSince = null;
                     } else {
-                        ConnectedSince = null;
-                        DisconnectedSince = DateTime.Now;
+                        this.ConnectedSince = null;
+                        this.DisconnectedSince = DateTime.Now;
                     }
                 }
             }

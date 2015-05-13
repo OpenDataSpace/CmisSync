@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
 
@@ -34,9 +33,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Local object renamed and also the remote object has been renamed.
     /// </summary>
-    public class LocalObjectRenamedRemoteObjectRenamed : AbstractEnhancedSolver
-    {
-        private LocalObjectChangedRemoteObjectChanged changeChangeSolver;
+    public class LocalObjectRenamedRemoteObjectRenamed : AbstractEnhancedSolver {
+        private readonly ISolver changeChangeSolver;
 
         /// <summary>
         /// Initializes a new instance of the
@@ -48,12 +46,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectRenamedRemoteObjectRenamed(
             ISession session,
             IMetaDataStorage storage,
-            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage) {
-            if (changeSolver == null) {
+            ISolver changeChangeSolver) : base(session, storage) {
+            if (changeChangeSolver == null) {
                 throw new ArgumentNullException("Given solver for the situation of local and remote object changed is null");
             }
 
-            this.changeChangeSolver = changeSolver;
+            this.changeChangeSolver = changeChangeSolver;
         }
 
         /// <summary>

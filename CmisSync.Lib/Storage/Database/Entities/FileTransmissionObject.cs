@@ -22,7 +22,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
     using System.IO;
     using System.Linq;
 
-    using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
@@ -39,7 +39,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// <param name="type">Type of transmission.</param>
         /// <param name="localFile">Local file.</param>
         /// <param name="remoteFile">Remote file.</param>
-        public FileTransmissionObject(FileTransmissionType type, IFileInfo localFile, IDocument remoteFile) {
+        public FileTransmissionObject(TransmissionType type, IFileInfo localFile, IDocument remoteFile) {
             if (localFile == null) {
                 throw new ArgumentNullException("localFile");
             }
@@ -84,7 +84,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// Gets or sets the type
         /// </summary>
         /// <value>The type.</value>
-        public FileTransmissionType Type { get; set; }
+        public TransmissionType Type { get; set; }
 
         /// <summary>
         /// Gets or sets the local file path
@@ -139,6 +139,12 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// <value>The last change token of last action make on CMIS server</value>
         public string LastChangeTokenPWC { get; set; }
 
+        /// <summary>
+        /// Gets or sets the last file content checksum for CMIS server remote object private working copy
+        /// </summary>
+        /// <value>The last file content checksum for local file</value>
+        public byte[] LastChecksumPWC { get; set; }
+        
         /// <summary>
         /// Gets or sets the last remote write time in UTC
         /// </summary>

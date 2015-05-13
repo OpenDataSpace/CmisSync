@@ -6,7 +6,7 @@ Release: 1%{?dist}
 Summary: A DataSpace Sync tool
 
 Group: Applications/Internet
-License: GPLv3
+License: GPLv3 and BSD License (no advertising) 
 URL: http://graudata.com/
 Source0: %{name}.tar.bz2
 

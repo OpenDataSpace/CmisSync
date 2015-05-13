@@ -14,22 +14,30 @@ SOURCES =  \
 	AccumulatorTests/LocalObjectFetcherTest.cs \
 	AccumulatorTests/RemoteObjectFetcherTest.cs \
 	AccumulatorTests/RemoteObjectMovedOrRenamedAccumulatorTest.cs \
-	ActiveActivitiesManagerTest.cs \
 	AlgorithmsTests/CyclicDependencies/NoCycleDetectionTests.cs \
 	AlgorithmsTests/CyclicDependencies/SimpleCycleDetectionTests.cs \
 	AlgorithmsTests/StringTarjanNode.cs \
 	AlgorithmsTests/TarjanSimpleLinearTests.cs \
 	AlgorithmsTests/TrajanSimpleCircleTests.cs \
+	CmisTests/AbstractRepositoryTest.cs \
 	CmisTests/AuthenticationTests/AuthProviderFactoryTest.cs \
 	CmisTests/AuthenticationTests/KerberosAuthenticationProviderTest.cs \
 	CmisTests/AuthenticationTests/PersistentStandardAuthenticationProviderTest.cs \
+	CmisTests/ConvenienceExtendersTests/AllowableActionExtendersTest.cs \
 	CmisTests/ConvenienceExtendersTests/CmisConvenienceExtendersTest.cs \
 	CmisTests/OperationContextFactoryTest.cs \
+	CmisTests/RepositoryStatusAggregatorTest.cs \
+	CmisTests/RepositoryTests.cs \
 	CmisTests/UiUtilsTests/CmisUtilsTest.cs \
+	CmisTests/UiUtilsTests/UiConvenienceExtendersTest.cs \
+	ConfigTests/CmisRepoCredentialsTest.cs \
 	ConfigTests/ConfigurationTest.cs \
-	ConfigTests/CredentialsTest.cs \
+	ConfigTests/CryptoTest.cs \
 	ConfigTests/DefaultSettingsTests.cs \
+	ConfigTests/PasswordTest.cs \
 	ConfigTests/RepoInfoTests.cs \
+	ConfigTests/ServerCredentialsTest.cs \
+	ConfigTests/UserCredentialsTest.cs \
 	ConsumerTests/LocalSituationDetectionTest.cs \
 	ConsumerTests/RemoteSituationDetectionTest.cs \
 	ConsumerTests/SituationSolverTests/AbstractEnhancedSolverTest.cs \
@@ -50,6 +58,10 @@ SOURCES =  \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedRemoteObjectMovedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedRemoteObjectRenamedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedTest.cs \
+	ConsumerTests/SituationSolverTests/PrivateWorkingCopyTests/AbstractEnhancedSolverWithPWCTest.cs \
+	ConsumerTests/SituationSolverTests/PrivateWorkingCopyTests/LocalObjectAddedWithPWCTest.cs \
+	ConsumerTests/SituationSolverTests/PrivateWorkingCopyTests/LocalObjectChangedRemoteObjectChangedWithPWCTest.cs \
+	ConsumerTests/SituationSolverTests/PrivateWorkingCopyTests/LocalObjectChangedWithPWCTest.cs \
 	ConsumerTests/SituationSolverTests/RemoteObjectAddedTest.cs \
 	ConsumerTests/SituationSolverTests/RemoteObjectChangedTest.cs \
 	ConsumerTests/SituationSolverTests/RemoteObjectDeletedTest.cs \
@@ -57,18 +69,18 @@ SOURCES =  \
 	ConsumerTests/SituationSolverTests/RemoteObjectRenamedTest.cs \
 	ConsumerTests/SyncMechanismTest.cs \
 	EventsTests/ActivityListenerAggregatorTest.cs \
+	EventsTests/BaseExceptionEventTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
 	EventsTests/EventHandlerPrioritiesTest.cs \
-	EventsTests/ExceptionEventTest.cs \
 	EventsTests/FileEventTest.cs \
 	EventsTests/FileOrFolderEventFactoryTest.cs \
-	EventsTests/FileTransmissionEventTest.cs \
 	EventsTests/FolderEventTest.cs \
 	EventsTests/FsEventTest.cs \
 	EventsTests/FullSyncCompletedEventTest.cs \
 	EventsTests/GenericSyncEventHandlerTest.cs \
 	EventsTests/InteractionNeededInitializationTest.cs \
 	EventsTests/PermissionDeniedEventCalculatesBlockingUntilTest.cs \
+	EventsTests/PermissionDeniedExceptionTest.cs \
 	EventsTests/ProxyAuthRequiredEventTest.cs \
 	EventsTests/StartNextSyncEventTest.cs \
 	FileTransmissionTests/ChunkedDownloaderTest.cs \
@@ -76,6 +88,8 @@ SOURCES =  \
 	FileTransmissionTests/ContentTaskUtilsTest.cs \
 	FileTransmissionTests/SimpleFileDownloaderTest.cs \
 	FileTransmissionTests/SimpleFileUploaderTest.cs \
+	FileTransmissionTests/TransmissionManagerTest.cs \
+	FileTransmissionTests/TransmissionTest.cs \
 	FilterTests/FilterAggregatorTest.cs \
 	FilterTests/GenericHandleDublicatedEventsFilterTest.cs \
 	FilterTests/IgnoreAlreadyHandledContentChangeEventsFilterTest.cs \
@@ -85,10 +99,14 @@ SOURCES =  \
 	FilterTests/IgnoredFoldersFilterTest.cs \
 	FilterTests/InvalidFolderNameFilterTest.cs \
 	FilterTests/ReportingFilterTest.cs \
+	FilterTests/RepositoryRootDeletedDetectionTest.cs \
+	HashAlgorithmTests/SHA1ReuseTest.cs \
 	IntegrationTests/AllHandlersIT.cs \
+	IntegrationTests/AllowableActionsTests/ReadingActionsTests.cs \
 	IntegrationTests/BaseFullRepoTest.cs \
 	IntegrationTests/ClientBrandTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
+	IntegrationTests/ContentHashTests/CRUDTests.cs \
 	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/DownloadLinkTests.cs \
 	IntegrationTests/FileSystemEventOrderTest.cs \
@@ -96,7 +114,15 @@ SOURCES =  \
 	IntegrationTests/FullRepoTests.cs \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
+	IntegrationTests/MockedServerTests/SetupDocumentTest.cs \
+	IntegrationTests/MockedServerTests/SetupFolderTest.cs \
+	IntegrationTests/MockedServerTests/SetupRepositoryTest.cs \
+	IntegrationTests/MockedServerTests/SetupSessionFactoryTest.cs \
 	IntegrationTests/NeedsLocalFileSystemFolder.cs \
+	IntegrationTests/PrivateWorkingCopyTests/AppendContentStreamTests.cs \
+	IntegrationTests/PrivateWorkingCopyTests/CreateDocumentTests.cs \
+	IntegrationTests/PrivateWorkingCopyTests/UploadChangedContent.cs \
+	IntegrationTests/RepositoryStatusIT.cs \
 	IntegrationTests/RepositoryUtilsTests.cs \
 	IntegrationTests/SelectiveIgnoreTests/CrudIT.cs \
 	IntegrationTests/SelectiveIgnoreTests/FileCrud.cs \
@@ -104,13 +130,58 @@ SOURCES =  \
 	IntegrationTests/SelectiveIgnoreTests/RenameIT.cs \
 	IntegrationTests/TestNameAttribute.cs \
 	IntegrationTests/UploadFileIT.cs \
+	IntegrationTests/UploadSlowWrittenFile.cs \
+	MockedServer/IContentChangeEventNotifier.cs \
 	MockedServer/MockOfIAclCapabilities.cs \
-	MockedServer/MockOfIRepository.cs \
-	MockedServer/MockOfISession.cs \
 	MockedServer/MockOfISessionFactory.cs \
+	MockedServer/MockedAce.cs \
+	MockedServer/MockedAcl.cs \
+	MockedServer/MockedAclCapabilities.cs \
+	MockedServer/MockedChoice.cs \
+	MockedServer/MockedCmisBinding.cs \
+	MockedServer/MockedCmisExtensionElement.cs \
+	MockedServer/MockedCmisObject.cs \
 	MockedServer/MockedCmisServer.cs \
 	MockedServer/MockedCmisUserAccount.cs \
+	MockedServer/MockedContentStream.cs \
+	MockedServer/MockedDocument.cs \
+	MockedServer/MockedDocumentType.cs \
+	MockedServer/MockedExtensionsData.cs \
+	MockedServer/MockedFileableCmisObject.cs \
 	MockedServer/MockedFolder.cs \
+	MockedServer/MockedFolderType.cs \
+	MockedServer/MockedItemList.cs \
+	MockedServer/MockedObjectData.cs \
+	MockedServer/MockedObjectType.cs \
+	MockedServer/MockedPermissionDefinition.cs \
+	MockedServer/MockedPermissionMapping.cs \
+	MockedServer/MockedPolicyIdList.cs \
+	MockedServer/MockedPrincipal.cs \
+	MockedServer/MockedProperty.cs \
+	MockedServer/MockedPropertyBooleanDefinition.cs \
+	MockedServer/MockedPropertyDateTimeDefinition.cs \
+	MockedServer/MockedPropertyDecimalDefinition.cs \
+	MockedServer/MockedPropertyDefinition.cs \
+	MockedServer/MockedPropertyHtmlDefinition.cs \
+	MockedServer/MockedPropertyIdDefinition.cs \
+	MockedServer/MockedPropertyIntegerDefinition.cs \
+	MockedServer/MockedPropertyStringDefinition.cs \
+	MockedServer/MockedPropertyUriDefinition.cs \
+	MockedServer/MockedRepository.cs \
+	MockedServer/MockedRepositoryInfo.cs \
+	MockedServer/MockedServices/MockedAclService.cs \
+	MockedServer/MockedServices/MockedDiscoveryService.cs \
+	MockedServer/MockedServices/MockedMultiFilingService.cs \
+	MockedServer/MockedServices/MockedNavigationService.cs \
+	MockedServer/MockedServices/MockedObjectService.cs \
+	MockedServer/MockedServices/MockedPolicyService.cs \
+	MockedServer/MockedServices/MockedRelationshipService.cs \
+	MockedServer/MockedServices/MockedRepositoryService.cs \
+	MockedServer/MockedServices/MockedVersioningService.cs \
+	MockedServer/MockedSession.cs \
+	MockedServer/MockedSessionFactory.cs \
+	MockedServer/MockedSessionFactory.cs \
+	MockedServer/MockedTypeDefinition.cs \
 	MoqExtensions/MoqExtensions.cs \
 	PathMatcherTests/PathMatcherTest.cs \
 	ProducerTests/ContentChangeTests/ContentChangeEventAccumulatorTest.cs \
@@ -152,20 +223,27 @@ SOURCES =  \
 	StorageTests/FileSystemTests/FileSystemWrapperTests.cs \
 	StorageTests/FileSystemTests/LongFileAndPathNameSupportTest.cs \
 	StorageTests/FileSystemTests/Utf8FileNameNormalizationTest.cs \
+	StreamsTests/AbortableStreamTest.cs \
 	StreamsTests/BandwidthLimitedStreamTest.cs \
 	StreamsTests/ChunkedStreamTest.cs \
 	StreamsTests/NonClosingHashStreamTest.cs \
 	StreamsTests/OffsetStreamTest.cs \
 	StreamsTests/ProgressStreamTest.cs \
+	StreamsTests/TransmissionStreamTest.cs \
 	TestUtils/FolderTree.cs \
 	TestUtils/FolderTreeTest.cs \
+	TestUtils/IDocumentAssertUtils.cs \
 	TestUtils/IsTestWithConfiguredLog4Net.cs \
 	TestUtils/MockMetaDataStorageUtil.cs \
+	TestUtils/MockOfICmisObject.cs \
 	TestUtils/MockOfIDocumentUtil.cs \
 	TestUtils/MockOfIFileSystemInfoFactoryUtil.cs \
+	TestUtils/MockOfIFileTransmissionStorageUtil.cs \
 	TestUtils/MockOfIFilterAggregatorUtil.cs \
 	TestUtils/MockOfIFolderUtil.cs \
+	TestUtils/MockOfIRepositoryInfo.cs \
 	TestUtils/MockOfISyncEventQueue.cs \
+	TestUtils/MockOfITransmissionManagerUtil.cs \
 	TestUtils/MockSessionUtil.cs \
 	TestUtils/ObservableHandler.cs \
 	TestUtils/ObservableHandlerTest.cs \
@@ -174,6 +252,7 @@ SOURCES =  \
 	UtilsTests/BackendTest.cs \
 	UtilsTests/EncodingTest.cs \
 	UtilsTests/HttpProxyUtilsTest.cs \
+	UtilsTests/NameOfPropertyTest.cs \
 	UtilsTests/ProcessDiagnosticsTest.cs \
 	UtilsTests/X509StoreTest.cs
 

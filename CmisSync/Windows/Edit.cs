@@ -187,7 +187,7 @@ namespace CmisSync
                 Password = passwordBox.Password
             };
 
-            CmisUtils.GetRepositories(cred);
+            cred.GetRepositories();
         }
 
         private void PasswordChecked(object sender, RunWorkerCompletedEventArgs args)

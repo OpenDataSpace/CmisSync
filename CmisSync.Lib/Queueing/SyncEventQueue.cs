@@ -16,16 +16,17 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.Collections.Generic;
 
-namespace CmisSync.Lib.Queueing
-{
+namespace CmisSync.Lib.Queueing {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
 
     using CmisSync.Lib.Events;
+
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -33,16 +34,22 @@ namespace CmisSync.Lib.Queueing
     /// Sync event queue.
     /// </summary>
     public class SyncEventQueue : ICountingQueue {
+        /// <summary>
+        /// The full counter.
+        /// </summary>
+        protected IEventCounter fullCounter;
+
+        /// <summary>
+        /// The category counter.
+        /// </summary>
+        protected IEventCounter categoryCounter;
+
         private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventQueue));
         private BlockingCollection<ISyncEvent> queue = new BlockingCollection<ISyncEvent>();
         private Task consumer;
         private AutoResetEvent suspendHandle = new AutoResetEvent(false);
         private bool alreadyDisposed = false;
         private bool suspend = false;
-        private List<IObserver<int>> fullCounterObservers;
-        private int fullCounter = 0;
-        private List<IObserver<Tuple<string, int>>> categoryCounterObservers;
-        private ConcurrentDictionary<string, int> categoryCounter;
         private object subscriberLock = new object();
 
         /// <summary>
@@ -54,9 +61,8 @@ namespace CmisSync.Lib.Queueing
                 throw new ArgumentException("manager may not be null");
             }
 
-            this.fullCounterObservers = new List<IObserver<int>>();
-            this.categoryCounterObservers = new List<IObserver<Tuple<string, int>>>();
-            this.categoryCounter = new ConcurrentDictionary<string, int>();
+            this.fullCounter = new QueuedEventsCounter();
+            this.categoryCounter = new QueuedCategorizedEventsCounter();
             this.EventManager = manager;
             this.consumer = new Task(() => this.Listen(this.queue, this.EventManager, this.suspendHandle));
             this.consumer.Start();
@@ -89,6 +95,26 @@ namespace CmisSync.Lib.Queueing
         }
 
         /// <summary>
+        /// Gets the full counter for all countable events.
+        /// </summary>
+        /// <value>The full counter.</value>
+        public IObservable<int> FullCounter {
+            get {
+                return (IObservable<int>)this.fullCounter;
+            }
+        }
+
+        /// <summary>
+        /// Gets the category counter for all events with its category.
+        /// </summary>
+        /// <value>The category counter.</value>
+        public IObservable<Tuple<EventCategory, int>> CategoryCounter {
+            get {
+                return (IObservable<Tuple<EventCategory, int>>)this.categoryCounter;
+            }
+        }
+
+        /// <summary>
         /// Adds the event to the queue.
         /// </summary>
         /// <param name="newEvent">New event.</param>
@@ -106,29 +132,19 @@ namespace CmisSync.Lib.Queueing
 
             try {
                 if (newEvent is ICountableEvent) {
-                    string category = (newEvent as ICountableEvent).Category;
-                    if (!string.IsNullOrEmpty(category)) {
-                        Interlocked.Increment(ref this.fullCounter);
-                        lock (subscriberLock) {
-                            foreach (var observer in this.fullCounterObservers) {
-                                observer.OnNext(this.fullCounter);
-                            }
-
-                            var value = this.categoryCounter.AddOrUpdate(category, 1, delegate(string cat, int counter) {
-                                return counter + 1;
-                            });
-                            foreach (var observer in this.categoryCounterObservers) {
-                                observer.OnNext(new Tuple<string, int>(category, value));
-                            }
+                    var category = (newEvent as ICountableEvent).Category;
+                    if (category != EventCategory.NoCategory) {
+                        lock (this.subscriberLock) {
+                            this.categoryCounter.Increase(newEvent as ICountableEvent);
+                            this.fullCounter.Increase(newEvent as ICountableEvent);
                         }
                     }
                 }
 
                 this.queue.Add(newEvent);
-                if(!(newEvent is IRemoveFromLoggingEvent)) {
+                if (!(newEvent is IRemoveFromLoggingEvent)) {
                     Logger.Debug(string.Format("Added Event: {0}", newEvent.ToString()));
                 }
-
             } catch(InvalidOperationException) {
                 Logger.Info(string.Format("Queue was already Stopped. Dropping Event: {0}", newEvent.ToString()));
             }
@@ -200,40 +216,6 @@ namespace CmisSync.Lib.Queueing
         }
 
         /// <summary>
-        /// Subscribe observer for all countable events.
-        /// </summary>
-        /// <param name="observer">Observer.</param>
-        /// <returns>A reference to an interface that allows observers to stop receiving notifications before the provider has finished sending them.</returns>
-        public virtual IDisposable Subscribe(IObserver<int> observer) {
-            if (observer == null) {
-                throw new ArgumentNullException("Given observer is null");
-            }
-
-            if (!this.fullCounterObservers.Contains(observer)) {
-                this.fullCounterObservers.Add(observer);
-            }
-
-            return new Unsubscriber<int>(this.fullCounterObservers, observer);
-        }
-
-        /// <summary>
-        /// Subscribe observer for all countable events and their category.
-        /// </summary>
-        /// <param name="observer">Observer.</param>
-        /// <returns>A reference to an interface that allows observers to stop receiving notifications before the provider has finished sending them.</returns>
-        public virtual IDisposable Subscribe(IObserver<Tuple<string, int>> observer) {
-            if (observer == null) {
-                throw new ArgumentNullException("Given observer is null");
-            }
-
-            if (!this.categoryCounterObservers.Contains(observer)) {
-                this.categoryCounterObservers.Add(observer);
-            }
-
-            return new Unsubscriber<Tuple<string, int>>(this.categoryCounterObservers, observer);
-        }
-
-        /// <summary>
         /// Dispose the this instance if isDisposing is true.
         /// </summary>
         /// <param name="isDisposing">If set to <c>true</c> is disposing.</param>
@@ -248,16 +230,13 @@ namespace CmisSync.Lib.Queueing
 
             if (isDisposing) {
                 this.queue.Dispose();
-                foreach (var observer in this.categoryCounterObservers) {
-                    observer.OnCompleted();
+                if (this.fullCounter != null) {
+                    this.fullCounter.Dispose();
                 }
 
-                foreach (var observer in this.fullCounterObservers) {
-                    observer.OnCompleted();
+                if (this.categoryCounter != null) {
+                    this.categoryCounter.Dispose();
                 }
-
-                this.categoryCounterObservers.Clear();
-                this.fullCounterObservers.Clear();
             }
 
             this.alreadyDisposed = true;
@@ -265,8 +244,7 @@ namespace CmisSync.Lib.Queueing
 
         private void Listen(BlockingCollection<ISyncEvent> queue, ISyncEventManager manager, WaitHandle waitHandle) {
             Logger.Debug("Starting to listen on SyncEventQueue");
-            while (!queue.IsCompleted)
-            {
+            while (!queue.IsCompleted) {
                 ISyncEvent syncEvent = null;
 
                 // Blocks if number.Count == 0
@@ -289,48 +267,25 @@ namespace CmisSync.Lib.Queueing
                         }
 
                         manager.Handle(syncEvent);
-                        if (syncEvent is ICountableEvent) {
-                            string category = (syncEvent as ICountableEvent).Category;
-                            if (!string.IsNullOrEmpty(category)) {
-                                int fullcounter = Interlocked.Decrement(ref this.fullCounter);
-                                lock (subscriberLock) {
-                                    foreach (var observer in this.fullCounterObservers) {
-                                        observer.OnNext(fullcounter);
-                                    }
-
-                                    var value = this.categoryCounter.AddOrUpdate(category, 0, delegate(string cat, int counter) {
-                                        return counter - 1;
-                                    });
-                                    foreach (var observer in this.categoryCounterObservers) {
-                                        observer.OnNext(new Tuple<string, int>(category, value));
-                                    }
-                                }
-                            }
-                        }
+                    } catch (CmisConnectionException connectionException) {
+                        this.AddEvent(new CmisConnectionExceptionEvent(connectionException));
                     } catch(Exception e) {
                         Logger.Error(string.Format("Exception in EventHandler on Event {0}: ", syncEvent.ToString()), e);
+                    }
+
+                    if (syncEvent is ICountableEvent) {
+                        var category = (syncEvent as ICountableEvent).Category;
+                        if (category != EventCategory.NoCategory) {
+                            lock (this.subscriberLock) {
+                                this.fullCounter.Decrease(syncEvent as ICountableEvent);
+                                this.categoryCounter.Decrease(syncEvent as ICountableEvent);
+                            }
+                        }
                     }
                 }
             }
 
             Logger.Debug("Stopping to listen on SyncEventQueue");
-        }
-
-        private class Unsubscriber<T> : IDisposable
-        {
-            private List<IObserver<T>>_observers;
-            private IObserver<T> _observer;
-
-            public Unsubscriber(List<IObserver<T>> observers, IObserver<T> observer) {
-                this._observers = observers;
-                this._observer = observer;
-            }
-
-            public void Dispose() {
-                if (_observer != null && _observers.Contains(_observer)) {
-                    _observers.Remove(_observer);
-                }
-            }
         }
     }
 }

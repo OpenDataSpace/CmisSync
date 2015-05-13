@@ -73,8 +73,7 @@ namespace TestLibrary.IntegrationTests {
 
     using TestLibrary.TestUtils;
 
-    // Default timeout per test is 15 minutes
-    [TestFixture, Timeout(900000)]
+    [TestFixture]
     public class RepositoryUtilsTests : IsTestWithConfiguredLog4Net {
         [TestFixtureSetUp]
         public void ClassInit() {
@@ -106,25 +105,15 @@ namespace TestLibrary.IntegrationTests {
                 Password = password
             };
 
-            Dictionary<string, string> repos = CmisUtils.GetRepositories(credentials);
+            var repos = credentials.GetRepositories();
 
-            foreach (KeyValuePair<string, string> pair in repos) {
-                Assert.That(string.IsNullOrEmpty(pair.Key), Is.False);
-                Assert.That(string.IsNullOrEmpty(pair.Value), Is.False);
+            Assert.That(repos, Is.Not.Null.Or.Empty);
+
+            foreach (var repo in repos) {
+                Assert.That(string.IsNullOrEmpty(repo.Id), Is.False);
+                Assert.That(string.IsNullOrEmpty(repo.Name), Is.False);
+                Console.WriteLine(repo.ToString());
             }
-
-            Assert.NotNull(repos);
-        }
-
-        [Test, TestCaseSource(typeof(ITUtils), "TestServersFuzzy"), Category("Slow"), Timeout(60000)]
-        public void GetRepositoriesFuzzy(string url, string user, string password) {
-            ServerCredentials credentials = new ServerCredentials() {
-                Address = new Uri(url),
-                UserName = user,
-                Password = password
-            };
-            Tuple<CmisServer, Exception> server = CmisUtils.GetRepositoriesFuzzy(credentials);
-            Assert.NotNull(server.Item1);
         }
     }
 }

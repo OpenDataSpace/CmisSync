@@ -17,16 +17,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Streams
-{
+namespace CmisSync.Lib.Streams {
     using System;
     using System.IO;
 
     /// <summary>
     /// Offset stream provides the possibility to simulate a longer stream with a virtual empty space at the beginning with the size of offset.
     /// </summary>
-    public class OffsetStream : StreamWrapper
-    {
+    public class OffsetStream : StreamWrapper {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Streams.OffsetStream"/> class.
         /// </summary>
@@ -36,13 +34,11 @@ namespace CmisSync.Lib.Streams
         /// <param name='offset'>
         /// Size of the empty offset.
         /// </param>
-        public OffsetStream(Stream stream, long offset = 0) : base(stream)
-        {
-            if (offset < 0)
-            {
+        public OffsetStream(Stream stream, long offset = 0) : base(stream) {
+            if (offset < 0) {
                 throw new ArgumentOutOfRangeException("A negative offset is forbidden");
             }
-                
+
             this.Offset = offset;
         }
 
@@ -61,10 +57,8 @@ namespace CmisSync.Lib.Streams
         /// <value>
         /// The length.
         /// </value>
-        public override long Length
-        {
-            get
-            {
+        public override long Length {
+            get {
                 return this.Stream.Length + this.Offset;
             }
         }
@@ -75,17 +69,13 @@ namespace CmisSync.Lib.Streams
         /// <value>
         /// The position.
         /// </value>
-        public override long Position
-        {
-            get
-            {
+        public override long Position {
+            get {
                 return this.Stream.Position + this.Offset;
             }
 
-            set
-            {
-                if (value < this.Offset)
-                {
+            set {
+                if (value < this.Offset) {
                     throw new ArgumentOutOfRangeException("given position is out of range");
                 }
 
@@ -102,8 +92,7 @@ namespace CmisSync.Lib.Streams
         /// <param name='origin'>
         /// Origin.
         /// </param>
-        public override long Seek(long offset, SeekOrigin origin)
-        {
+        public override long Seek(long offset, SeekOrigin origin) {
             return this.Stream.Seek(offset, origin) + this.Offset;
         }
 
@@ -113,10 +102,8 @@ namespace CmisSync.Lib.Streams
         /// <param name='length'>
         /// The new Length
         /// </param>
-        public override void SetLength(long length)
-        {
-            if (length < this.Offset)
-            {
+        public override void SetLength(long length) {
+            if (length < this.Offset) {
                 throw new ArgumentOutOfRangeException(string.Format("Given length {0} is smaller than Offset {1}", length, this.Offset));
             }
 

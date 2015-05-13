@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib
-{
+namespace CmisSync.Lib {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -41,8 +40,7 @@ namespace CmisSync.Lib
     /// DOWN     STOPPED  STOPPED
     /// DOWN     DOWN     DOWN
     /// </summary>
-    public class ActivityListenerAggregator : IActivityListener
-    {
+    public class ActivityListenerAggregator : IActivityListener {
         /// <summary>
         /// The listener to which overall activity messages are sent.
         /// </summary>
@@ -60,8 +58,7 @@ namespace CmisSync.Lib
         /// </summary>
         /// <param name="overallListener">The activity listener to which aggregated activity will be sent.</param>
         /// <param name="transmissionManager">Transmission manager.</param>
-        public ActivityListenerAggregator(IActivityListener overallListener, ActiveActivitiesManager transmissionManager)
-        {
+        public ActivityListenerAggregator(IActivityListener overallListener, TransmissionManager transmissionManager) {
             if (overallListener == null) {
                 throw new ArgumentNullException("Given listener is null");
             }
@@ -78,13 +75,12 @@ namespace CmisSync.Lib
         /// Gets the transmission manager.
         /// </summary>
         /// <value>The transmission manager.</value>
-        public ActiveActivitiesManager TransmissionManager { get; private set; }
+        public TransmissionManager TransmissionManager { get; private set; }
 
         /// <summary>
         /// Call this method to indicate that activity has started.
         /// </summary>
-        public void ActivityStarted()
-        {
+        public void ActivityStarted() {
             lock(this.countingLock) {
                 this.numberOfActiveProcesses++;
             }
@@ -95,12 +91,10 @@ namespace CmisSync.Lib
         /// <summary>
         /// Call this method to indicate that activity has stopped.
         /// </summary>
-        public void ActivityStopped()
-        {
+        public void ActivityStopped() {
             lock (this.countingLock) {
                 this.numberOfActiveProcesses--;
-                if (this.numberOfActiveProcesses == 0)
-                {
+                if (this.numberOfActiveProcesses == 0) {
                     this.overall.ActivityStopped();
                 }
             }

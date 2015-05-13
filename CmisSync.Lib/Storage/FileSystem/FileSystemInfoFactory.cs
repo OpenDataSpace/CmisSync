@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.FileSystem
-{
+namespace CmisSync.Lib.Storage.FileSystem {
     using System;
     using System.IO;
 
@@ -27,8 +26,7 @@ namespace CmisSync.Lib.Storage.FileSystem
     /// <summary>
     /// Wrapps all interfaced methods and calls the Systems.IO classes
     /// </summary>
-    public class FileSystemInfoFactory : IFileSystemInfoFactory
-    {
+    public class FileSystemInfoFactory : IFileSystemInfoFactory {
         /// <summary>
         /// Creates the directory info.
         /// </summary>
@@ -68,13 +66,11 @@ namespace CmisSync.Lib.Storage.FileSystem
             }
 
             int index = 1;
-            do
-            {
+            do {
                 filename = string.Format("{0}_{1}-version ({2}){3}", suffix, user, index.ToString(), extension);
                 conflictFile = this.CreateFileInfo(Path.Combine(file.Directory.FullName, filename));
                 index++;
-            }
-            while (conflictFile.Exists);
+            } while (conflictFile.Exists);
             return conflictFile;
         }
 

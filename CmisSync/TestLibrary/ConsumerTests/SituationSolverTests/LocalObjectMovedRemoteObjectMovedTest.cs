@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.IO;
 
@@ -37,8 +36,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestUtils;
 
     [TestFixture]
-    public class LocalObjectMovedRemoteObjectMovedTest : IsTestWithConfiguredLog4Net
-    {
+    public class LocalObjectMovedRemoteObjectMovedTest : IsTestWithConfiguredLog4Net {
         private readonly string remoteObjectId = "remoteObjectId";
         private readonly string newRemoteParentId = "newRemoteParentId";
         private readonly string oldRemoteParentId = "oldRemoteParentId";
@@ -99,7 +97,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var newLocalParent = this.CreateNewLocalParent(this.newParentUuid);
             var localFolder = this.CreateLocalFolder(this.oldName, newLocalParent, this.localModification);
             var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteObjectId, this.oldName, "/" + this.oldName, this.newRemoteParentId, this.newChangeToken, ignored: childrenAreIgnored);
-            remoteFolder.SetupLastModificationDate(remoteModification);
+            remoteFolder.SetupLastModificationDate(this.remoteModification);
 
             this.underTest.Solve(localFolder.Object, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
@@ -115,7 +113,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var localFolder = this.CreateLocalFolder(this.oldName, newLocalParent, this.localModification);
             localFolder.SetupMoveTo(Path.Combine(this.newParentPath, this.newRemoteName));
             var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteObjectId, this.newRemoteName, "/" + this.newRemoteName, this.newRemoteParentId, this.newChangeToken, ignored: childrenAreIgnored);
-            remoteFolder.SetupLastModificationDate(remoteModification);
+            remoteFolder.SetupLastModificationDate(this.remoteModification);
 
             this.underTest.Solve(localFolder.Object, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
@@ -135,7 +133,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 r =>
                 r.Rename(this.newLocalName, true))
                 .Returns(remoteFolder.Object).Callback(() => remoteFolder.SetupChangeToken(this.newChangeToken));
-            remoteFolder.SetupLastModificationDate(remoteModification);
+            remoteFolder.SetupLastModificationDate(this.remoteModification);
 
             this.underTest.Solve(localFolder.Object, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
@@ -150,20 +148,20 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.SetupOldMappedFolder();
             this.remoteModification = this.localModification - TimeSpan.FromMinutes(30);
             var newLocalParent = this.CreateNewLocalParent(this.newParentUuid);
-            var localFolder = this.CreateLocalFolder(this.newLocalName, newLocalParent, localModification);
+            var localFolder = this.CreateLocalFolder(this.newLocalName, newLocalParent, this.localModification);
             var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteObjectId, this.newRemoteName, "/" + this.oldName, this.newRemoteParentId, "change", ignored: childrenAreIgnored);
             remoteFolder.Setup(
                 r =>
                 r.Rename(this.newLocalName, true))
                 .Returns(remoteFolder.Object).Callback(() => remoteFolder.SetupChangeToken(this.newChangeToken));
-            remoteFolder.SetupLastModificationDate(remoteModification);
+            remoteFolder.SetupLastModificationDate(this.remoteModification);
 
             this.underTest.Solve(localFolder.Object, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
             remoteFolder.Verify(r => r.Rename(this.newLocalName, true), Times.Once());
             localFolder.Verify(f => f.MoveTo(It.IsAny<string>()), Times.Never());
-            remoteFolder.VerifyUpdateLastModificationDate(localModification);
-            this.VerifySavedFolder(this.newLocalName, localModification, childrenAreIgnored);
+            remoteFolder.VerifyUpdateLastModificationDate(this.localModification);
+            this.VerifySavedFolder(this.newLocalName, this.localModification, childrenAreIgnored);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -171,15 +169,15 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.SetupOldMappedFolder();
             this.localModification = this.remoteModification - TimeSpan.FromMinutes(30);
             var newLocalParent = this.CreateNewLocalParent(this.newParentUuid, this.newParentPath);
-            var localFolder = this.CreateLocalFolder(this.newLocalName, newLocalParent, localModification);
+            var localFolder = this.CreateLocalFolder(this.newLocalName, newLocalParent, this.localModification);
             var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteObjectId, this.newRemoteName, "/" + this.oldName, this.newRemoteParentId, this.newChangeToken, ignored: childrenAreIgnored);
-            remoteFolder.SetupLastModificationDate(remoteModification);
+            remoteFolder.SetupLastModificationDate(this.remoteModification);
 
             this.underTest.Solve(localFolder.Object, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
             remoteFolder.Verify(r => r.Rename(It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
             localFolder.Verify(f => f.MoveTo(Path.Combine()), Times.Never());
-            this.VerifySavedFolder(this.newRemoteName, remoteModification, childrenAreIgnored);
+            this.VerifySavedFolder(this.newRemoteName, this.remoteModification, childrenAreIgnored);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -188,8 +186,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.remoteModification = this.localModification - TimeSpan.FromMinutes(30);
             var newLocalParent = this.CreateNewLocalParent(this.newParentUuid);
             var localFile = this.CreateLocalFile(this.oldName, newLocalParent, this.localModification);
-            var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, remoteObjectId, this.oldName, newRemoteParentId, 0, new byte[0], newChangeToken);
-            remoteFile.SetupUpdateModificationDate(remoteModification);
+            var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.remoteObjectId, this.oldName, this.newRemoteParentId, 0, new byte[0], this.newChangeToken);
+            remoteFile.SetupUpdateModificationDate(this.remoteModification);
 
             this.underTest.Solve(localFile.Object, remoteFile.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
@@ -204,8 +202,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.remoteModification = this.localModification - TimeSpan.FromMinutes(30);
             var newLocalParent = this.CreateNewLocalParent(this.newParentUuid, this.newParentPath);
             var localFile = this.CreateLocalFile(this.newLocalName, newLocalParent, this.localModification);
-            var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, remoteObjectId, this.oldName, newRemoteParentId, 0, new byte[0], newChangeToken);
-            remoteFile.SetupUpdateModificationDate(remoteModification);
+            var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.remoteObjectId, this.oldName, this.newRemoteParentId, 0, new byte[0], this.newChangeToken);
+            remoteFile.SetupUpdateModificationDate(this.remoteModification);
 
             this.underTest.Solve(localFile.Object, remoteFile.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
@@ -220,8 +218,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.remoteModification = this.localModification - TimeSpan.FromMinutes(30);
             var newLocalParent = this.CreateNewLocalParent(this.newParentUuid, this.newParentPath);
             var localFile = this.CreateLocalFile(this.oldName, newLocalParent, this.localModification);
-            var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, remoteObjectId, this.newRemoteName, newRemoteParentId, 0, new byte[0], newChangeToken);
-            remoteFile.SetupUpdateModificationDate(remoteModification);
+            var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.remoteObjectId, this.newRemoteName, this.newRemoteParentId, 0, new byte[0], this.newChangeToken);
+            remoteFile.SetupUpdateModificationDate(this.remoteModification);
 
             this.underTest.Solve(localFile.Object, remoteFile.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
@@ -236,8 +234,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.localModification = this.remoteModification - TimeSpan.FromMinutes(30);
             var newLocalParent = this.CreateNewLocalParent(this.newParentUuid, this.newParentPath);
             var localFile = this.CreateLocalFile(this.newLocalName, newLocalParent, this.localModification);
-            var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, remoteObjectId, this.newRemoteName, newRemoteParentId, 0, new byte[0], newChangeToken);
-            remoteFile.SetupUpdateModificationDate(remoteModification);
+            var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.remoteObjectId, this.newRemoteName, this.newRemoteParentId, 0, new byte[0], this.newChangeToken);
+            remoteFile.SetupUpdateModificationDate(this.remoteModification);
 
             this.underTest.Solve(localFile.Object, remoteFile.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
@@ -252,8 +250,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.remoteModification = this.localModification - TimeSpan.FromMinutes(30);
             var newLocalParent = this.CreateNewLocalParent(this.newParentUuid, this.newParentPath);
             var localFile = this.CreateLocalFile(this.newLocalName, newLocalParent, this.localModification);
-            var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, remoteObjectId, this.newRemoteName, newRemoteParentId, 0, new byte[0], newChangeToken);
-            remoteFile.SetupUpdateModificationDate(remoteModification);
+            var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.remoteObjectId, this.newRemoteName, this.newRemoteParentId, 0, new byte[0], this.newChangeToken);
+            remoteFile.SetupUpdateModificationDate(this.remoteModification);
 
             this.underTest.Solve(localFile.Object, remoteFile.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 

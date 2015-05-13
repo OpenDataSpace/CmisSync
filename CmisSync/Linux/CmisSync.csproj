@@ -38,17 +38,19 @@
     <Reference Include="System" />
     <Reference Include="Mono.Posix" />
     <Reference Include="notify-sharp, Version=0.4.0.0, Culture=neutral, PublicKeyToken=2df29c54e245917a">
-      <Private>False</Private>
       <Package>notify-sharp</Package>
     </Reference>
     <Reference Include="appindicator-sharp, Version=0.2.0.0, Culture=neutral, PublicKeyToken=bcae265d1c7ab4c2">
-      <Private>False</Private>
       <Package>appindicator-sharp-0.1</Package>
     </Reference>
     <Reference Include="log4net">
       <HintPath>packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
-      <Package>log4net</Package>
     </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
+      <Package>glib-sharp-2.0</Package>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
@@ -125,6 +127,11 @@
     <Compile Include="..\TransmissionController.cs">
       <Link>TransmissionController.cs</Link>
     </Compile>
+    <Compile Include="TransmissionWidget.cs" />
+    <Compile Include="TransmissionWindow.cs" />
+    <Compile Include="gtk-gui\CmisSync.TransmissionWindow.cs" />
+    <Compile Include="gtk-gui\CmisSync.Widgets.TransmissionWidget.cs" />
+    <Compile Include="Defines.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

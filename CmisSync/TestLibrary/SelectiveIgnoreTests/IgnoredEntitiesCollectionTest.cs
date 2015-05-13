@@ -16,16 +16,16 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.Collections.Generic;
 
-namespace TestLibrary.SelectiveIgnoreTests
-{
+namespace TestLibrary.SelectiveIgnoreTests {
     using System;
+    using System.Collections.Generic;
     using System.IO;
 
     using CmisSync.Lib.SelectiveIgnore;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     using Moq;
 
@@ -34,8 +34,7 @@ namespace TestLibrary.SelectiveIgnoreTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class IgnoredEntitiesCollectionTest
-    {
+    public class IgnoredEntitiesCollectionTest {
         private string objectId;
         private string localPath;
 
@@ -51,7 +50,7 @@ namespace TestLibrary.SelectiveIgnoreTests
 
             underTest.Add(Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath));
 
-            Assert.That(underTest.IsIgnoredId(objectId), Is.EqualTo(IgnoredState.IGNORED));
+            Assert.That(underTest.IsIgnoredId(this.objectId), Is.EqualTo(IgnoredState.IGNORED));
         }
 
         [Test, Category("Fast"), Category("SelectiveIgnore")]
@@ -125,6 +124,26 @@ namespace TestLibrary.SelectiveIgnoreTests
         }
 
         [Test, Category("Fast"), Category("SelectiveIgnore")]
+        public void IgnoreCheckOfFolderIfParentIsNull() {
+            var underTest = new IgnoredEntitiesCollection();
+            var folder = new Mock<IFolder>();
+            folder.Setup(f => f.Id).Returns(Guid.NewGuid().ToString());
+            folder.Setup(f => f.FolderParent).Returns((IFolder)null);
+
+            Assert.That(underTest.IsIgnored(folder.Object), Is.EqualTo(IgnoredState.NOT_IGNORED));
+        }
+
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        public void IgnoreCheckOfFolderIfParentIsNullAndRequestThrowsOjectNotFoundException() {
+            var underTest = new IgnoredEntitiesCollection();
+            var folder = new Mock<IFolder>();
+            folder.Setup(f => f.Id).Returns(Guid.NewGuid().ToString());
+            folder.Setup(f => f.FolderParent).Throws(new CmisObjectNotFoundException());
+
+            Assert.That(underTest.IsIgnored(folder.Object), Is.EqualTo(IgnoredState.NOT_IGNORED));
+        }
+
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
         public void IgnoreCheckOfDocument() {
             var underTest = new IgnoredEntitiesCollection();
 
@@ -154,6 +173,18 @@ namespace TestLibrary.SelectiveIgnoreTests
             underTest.Add(Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath));
 
             Assert.That(underTest.IsIgnored(doc.Object), Is.EqualTo(IgnoredState.INHERITED));
+        }
+
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        public void IgnoreCheckOfSubDocumentWithoutParent() {
+            var underTest = new IgnoredEntitiesCollection();
+            var doc = new Mock<IDocument>();
+            doc.Setup(f => f.Id).Returns(Guid.NewGuid().ToString());
+            var parents = new List<IFolder>();
+            doc.Setup(f => f.Parents).Returns(parents);
+            underTest.Add(Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath));
+
+            Assert.That(underTest.IsIgnored(doc.Object), Is.EqualTo(IgnoredState.NOT_IGNORED));
         }
     }
 }

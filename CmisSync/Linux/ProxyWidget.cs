@@ -17,20 +17,17 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Widgets
-{
+namespace CmisSync.Widgets {
     using System;
 
     using CmisSync.Lib.Config;
 
     [System.ComponentModel.ToolboxItem(true)]
-    public partial class ProxyWidget : Gtk.Bin
-    {
+    public partial class ProxyWidget : Gtk.Bin {
         private ProxySettings settings;
 
         public event EventHandler Changed;
-        public ProxyWidget()
-        {
+        public ProxyWidget() {
             this.Build();
             this.IsValid = true;
         }
@@ -86,8 +83,7 @@ namespace CmisSync.Widgets
             }
         }
 
-        protected void OnNoProxyButtonActivated(object sender, EventArgs e)
-        {
+        protected void OnNoProxyButtonActivated(object sender, EventArgs e) {
             if (this.noProxyButton.Active) {
                 this.Selection = ProxySelection.NOPROXY;
             }
@@ -95,8 +91,7 @@ namespace CmisSync.Widgets
             this.OnChange(sender, e);
         }
 
-        protected void OnSystemProxyButtonActivated(object sender, EventArgs e)
-        {
+        protected void OnSystemProxyButtonActivated(object sender, EventArgs e) {
             if (this.systemProxyButton.Active) {
                 this.Selection = ProxySelection.SYSTEM;
             }
@@ -104,8 +99,7 @@ namespace CmisSync.Widgets
             this.OnChange(sender, e);
         }
 
-        protected void OnCustomProxyButtonActivated(object sender, EventArgs e)
-        {
+        protected void OnCustomProxyButtonActivated(object sender, EventArgs e) {
             if (this.customProxyButton.Active) {
                 this.Selection = ProxySelection.CUSTOM;
             }
@@ -113,8 +107,7 @@ namespace CmisSync.Widgets
             this.OnChange(sender, e);
         }
 
-        protected void OnCredentialsRequiredButtonClicked(object sender, EventArgs e)
-        {
+        protected void OnCredentialsRequiredButtonClicked(object sender, EventArgs e) {
             this.settings.LoginRequired = this.credentialsRequiredButton.Active;
             this.userEntry.Sensitive = this.credentialsRequiredButton.Active;
             this.passwordEntry.Sensitive = this.credentialsRequiredButton.Active;
@@ -130,8 +123,7 @@ namespace CmisSync.Widgets
             }
         }
 
-        protected void OnUrlWidgetChanged(object sender, EventArgs e)
-        {
+        protected void OnUrlWidgetChanged(object sender, EventArgs e) {
             this.IsValid = this.urlWidget.IsValidUrl;
             if (this.IsValid) {
                 try {

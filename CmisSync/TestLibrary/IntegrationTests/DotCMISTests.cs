@@ -108,13 +108,12 @@ namespace TestLibrary.IntegrationTests {
             string binding)
         {
             ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
-
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
             string filename = "testfile.txt";
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             IDocument doc = null;
             try {
                 doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
@@ -125,38 +124,29 @@ namespace TestLibrary.IntegrationTests {
             }
 
             string content = "test";
+            string expectedContent = string.Empty;
             doc = folder.CreateDocument(filename, content);
+            expectedContent = content;
             Assert.That(doc.ContentStreamLength == content.Length, "returned document should have got content");
             for (int i = 0; i < 10; i++) {
-                ContentStream contentStream = new ContentStream();
-                contentStream.FileName = filename;
-                contentStream.MimeType = MimeType.GetMIMEType(filename);
-                contentStream.Length = content.Length;
-                using (var memstream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
-                    contentStream.Stream = memstream;
-                    doc.AppendContentStream(contentStream, i == 9, true);
-                }
-
-                Assert.AreEqual(content.Length * (i + 2), doc.ContentStreamLength);
+                doc = doc.AppendContent(content, i == 9) ?? doc;
+                expectedContent += content;
+                Assert.AreEqual(expectedContent.Length, doc.ContentStreamLength);
             }
 
-            for (int i = 0; i < 10; i++) {
-                ContentStream contentStream = new ContentStream();
-                contentStream.FileName = filename;
-                contentStream.MimeType = MimeType.GetMIMEType(filename);
-                contentStream.Length = content.Length;
-                using (var memstream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
-                    contentStream.Stream = memstream;
-                    doc.AppendContentStream(contentStream, true, true);
-                }
+            doc.AssertThatIfContentHashExistsItIsEqualTo(expectedContent);
 
-                Assert.AreEqual(content.Length * (i + 2 + 10), doc.ContentStreamLength);
+            for (int i = 0; i < 10; i++) {
+                doc = doc.AppendContent(content) ?? doc;
+                expectedContent += content;
+                Assert.AreEqual(expectedContent.Length, doc.ContentStreamLength);
+                doc.AssertThatIfContentHashExistsItIsEqualTo(expectedContent);
             }
 
             doc.DeleteAllVersions();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Ignore("Not yet implemented by CMIS GW")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void CheckoutTest(
             string canonical_name,
             string localPath,
@@ -173,6 +163,10 @@ namespace TestLibrary.IntegrationTests {
             string filePath = subFolderPath + "/" + fileName;
 
             ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            if (!session.ArePrivateWorkingCopySupported()) {
+                Assert.Ignore("PWCs are not supported");
+            }
+
             try {
                 IFolder dir = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + subFolderName) as IFolder;
                 if (dir != null) {
@@ -184,20 +178,21 @@ namespace TestLibrary.IntegrationTests {
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             IFolder subFolder = folder.CreateFolder(subFolderName);
 
-            IDocument doc = subFolder.CreateVersionedDocument(fileName, "testContent");
-            Assert.That(doc.IsVersionSeriesCheckedOut, Is.Not.True);
-
+            IDocument doc = subFolder.CreateDocument(fileName, "testContent", checkedOut: true);
             IObjectId checkoutId = doc.CheckOut();
+            IDocument docCheckout = (IDocument)session.GetObject(checkoutId);
+            Assert.AreEqual(doc.ContentStreamLength, docCheckout.ContentStreamLength);
             doc.Refresh();
-            Assert.That(doc.IsVersionSeriesCheckedOut, Is.True);
-            Assert.That(doc.VersionSeriesCheckedOutId, Is.EqualTo(checkoutId.Id));
+            Assert.IsTrue(doc.IsVersionSeriesCheckedOut.GetValueOrDefault());
+            Assert.AreEqual(checkoutId.Id, doc.VersionSeriesCheckedOutId);
 
-            doc.CancelCheckOut();
+            docCheckout.CancelCheckOut();
             doc.Refresh();
-            Assert.That(doc.IsVersionSeriesCheckedOut, Is.False);
+            Assert.IsFalse(doc.IsVersionSeriesCheckedOut.GetValueOrDefault());
+            Assert.IsNull(doc.VersionSeriesCheckedOutId);
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Ignore("Not yet implemented by CMIS GW")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void CheckinTest(
             string canonical_name,
             string localPath,
@@ -214,6 +209,10 @@ namespace TestLibrary.IntegrationTests {
             string filePath = subFolderPath + "/" + fileName;
 
             ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            if (!session.ArePrivateWorkingCopySupported()) {
+                Assert.Ignore("PWCs are not supported");
+            }
+
             try {
                 IFolder dir = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + subFolderName) as IFolder;
                 if (dir != null) {
@@ -226,13 +225,11 @@ namespace TestLibrary.IntegrationTests {
             IFolder subFolder = folder.CreateFolder(subFolderName);
 
             string content = "testContent";
-            IDocument doc = subFolder.CreateVersionedDocument(fileName, "testContent");
-            Assert.That(doc.IsVersionSeriesCheckedOut, Is.Not.True);
 
+            IDocument doc = subFolder.CreateDocument(fileName, "testContent", checkedOut: true);
             IObjectId checkoutId = doc.CheckOut();
-            doc.Refresh();
             IDocument docCheckout = session.GetObject(checkoutId) as IDocument;
-            Assert.That(docCheckout, Is.Not.Null);
+            Assert.AreEqual(doc.ContentStreamLength, docCheckout.ContentStreamLength);
 
             ContentStream contentStream = new ContentStream();
             contentStream.FileName = fileName;
@@ -245,15 +242,11 @@ namespace TestLibrary.IntegrationTests {
                 }
                 Assert.That(docCheckout.ContentStreamLength, Is.EqualTo(content.Length * (i + 2)));
             }
-            docCheckout.CheckIn(true, null, null, "checkin");
-            docCheckout.Refresh();
-            Assert.That(docCheckout.IsVersionSeriesCheckedOut, Is.False);
 
-            doc.Refresh();
-            Assert.That(doc.IsVersionSeriesCheckedOut, Is.False);
-
-            doc = session.GetObjectByPath(filePath) as IDocument;
-            Assert.That(doc.Id, Is.EqualTo(checkoutId.Id));
+            IObjectId checkinId = docCheckout.CheckIn(true, null, null, "checkin");
+            IDocument docCheckin = session.GetObject(checkinId) as IDocument;
+            docCheckin.Refresh();   //  refresh is required, or DotCMIS will re-use the cached properties if checinId is the same as doc.Id
+            Assert.That(docCheckin.ContentStreamLength, Is.EqualTo(content.Length * (9 + 2)));
         }
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
@@ -278,9 +271,7 @@ namespace TestLibrary.IntegrationTests {
             }
 
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
-
             IFolder subFolder = folder.CreateFolder(subFolderName);
-
             IFolder subFolderInstanceCopy = (IFolder)session.GetObject(subFolder.Id);
             subFolder.DeleteTree(true, null, true);
 
@@ -328,6 +319,47 @@ namespace TestLibrary.IntegrationTests {
         }
 
         /// <summary>
+        /// Gets the root folder of repository.
+        /// </summary>
+        /// <param name='canonical_name'>
+        /// Canonical_name.
+        /// </param>
+        /// <param name='localPath'>
+        /// Local path.
+        /// </param>
+        /// <param name='remoteFolderPath'>
+        /// Remote folder path.
+        /// </param>
+        /// <param name='url'>
+        /// URL.
+        /// </param>
+        /// <param name='user'>
+        /// User.
+        /// </param>
+        /// <param name='password'>
+        /// Password.
+        /// </param>
+        /// <param name='repositoryId'>
+        /// Repository identifier.
+        /// </param>
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        public void GetRootFolderAndAllowableActions(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId,
+            string binding)
+        {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            IFolder remoteFolder = (IFolder)session.GetObject(repositoryId);
+            Assert.That(remoteFolder.AllowableActions, Is.Not.Null);
+            Assert.That(remoteFolder.AllowableActions.Actions, Is.Not.Null.Or.Empty);
+        }
+
+        /// <summary>
         /// Tests the sync property on a cmis document object.
         /// </summary>
         /// <param name='canonical_name'>
@@ -363,6 +395,7 @@ namespace TestLibrary.IntegrationTests {
             string binding)
         {
             ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            session.EnsureSelectiveIgnoreSupportIsAvailable();
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             string filename = "testfile.txt";
             try {
@@ -375,7 +408,7 @@ namespace TestLibrary.IntegrationTests {
 
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             IList<string> devices = new List<string>();
             devices.Add("*");
             properties.Add("gds:ignoreDeviceIds", devices);
@@ -388,10 +421,8 @@ namespace TestLibrary.IntegrationTests {
             var context = new OperationContext();
             IDocument requestedDoc = session.GetObject(emptyDoc, context) as IDocument;
             bool propertyFound = false;
-            foreach (var prop in requestedDoc.Properties)
-            {
-                if (prop.Id == "gds:ignoreDeviceIds")
-                {
+            foreach (var prop in requestedDoc.Properties) {
+                if (prop.Id == "gds:ignoreDeviceIds") {
                     propertyFound = true;
                     Assert.AreEqual("*", prop.FirstValue as string);
                 }
@@ -400,18 +431,6 @@ namespace TestLibrary.IntegrationTests {
             Assert.IsTrue(propertyFound);
             emptyDoc.DeleteAllVersions();
         }
-
-        /*
-        [Ignore]
-        [Test, Category("Fast")]
-        public void RegexTestForRemoteHashProperty() {
-            Regex entryRegex = new Regex(@"^\{.+\}[0-9a-fA-F]+$");
-            Assert.That(entryRegex.IsMatch("{sha-1}2fd4e1c67a2d28fced849ee1bb76e7391b93eb1233f80f8a"), Is.True);
-            Assert.That(entryRegex.IsMatch("{sha-256}e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"), Is.True);
-            Assert.That(entryRegex.IsMatch("{}1234567"), Is.False);
-            Assert.That(entryRegex.IsMatch("sha-1}1234567"), Is.False);
-            Assert.That(entryRegex.IsMatch("{sadf24er35}"), Is.False);
-        } */
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void GetContentStreamHash(
@@ -437,7 +456,7 @@ namespace TestLibrary.IntegrationTests {
 
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             using (var oneByteStream = new MemoryStream(new byte[1])) {
                 ContentStream contentStream = new ContentStream();
                 contentStream.MimeType = MimeType.GetMIMEType(filename);
@@ -509,14 +528,13 @@ namespace TestLibrary.IntegrationTests {
             string filename = "testfile.txt";
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             try {
                 IDocument doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
                 if (doc != null) {
                     doc.Delete(true);
                 }
-            } catch (CmisObjectNotFoundException)
-            {
+            } catch (CmisObjectNotFoundException) {
             }
 
             IDocument emptyDoc = folder.CreateDocument(properties, null, null);
@@ -603,8 +621,7 @@ namespace TestLibrary.IntegrationTests {
                 if (doc != null) {
                     doc.Delete(true);
                 }
-            } catch (CmisObjectNotFoundException)
-            {
+            } catch (CmisObjectNotFoundException) {
             }
 
             DateTime creationDate = DateTime.UtcNow - TimeSpan.FromDays(1);
@@ -612,7 +629,7 @@ namespace TestLibrary.IntegrationTests {
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
             Dictionary<string, object> properties = new Dictionary<string, object>();
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             properties.Add(PropertyIds.Name, filename);
             properties.Add(PropertyIds.CreationDate, creationDate);
             properties.Add(PropertyIds.LastModificationDate, modificationDate);
@@ -641,14 +658,13 @@ namespace TestLibrary.IntegrationTests {
             string filename = "testfile.txt";
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             try {
                 IDocument doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
                 if (doc != null) {
                     doc.Delete(true);
                 }
-            } catch (CmisObjectNotFoundException)
-            {
+            } catch (CmisObjectNotFoundException) {
             }
 
             IDocument emptyDoc = folder.CreateDocument(properties, null, null);
@@ -684,7 +700,7 @@ namespace TestLibrary.IntegrationTests {
             string filename = "testfile.jpg";
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             try {
                 IDocument doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
                 if (doc != null) {
@@ -879,8 +895,7 @@ namespace TestLibrary.IntegrationTests {
     /// Dot CMIS session tests. Each log in process must be able to be executed in 60 seconds, otherwise the tests will fail.
     /// </summary>
     [TestFixture, Timeout(60000)]
-    public class DotCMISSessionTests
-    {
+    public class DotCMISSessionTests {
         /// <summary>
         /// Creates a cmis Atom Pub session with the given credentials.
         /// </summary>

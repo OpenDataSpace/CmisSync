@@ -16,19 +16,14 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using CmisSync.Lib.Config;
 
-
-namespace CmisSync
-{
+namespace CmisSync {
     using System;
+    using CmisSync.Lib.Config;
 
-    public partial class Setting : Gtk.Window
-    {
+    public partial class Setting : Gtk.Window {
         private SettingController Controller = new SettingController();
-        public Setting() : 
-                base(Gtk.WindowType.Toplevel)
-        {
+        public Setting() : base(Gtk.WindowType.Toplevel) {
             this.Build();
             this.HideOnDelete();
             this.Title = Properties_Resources.EditTitle;
@@ -68,8 +63,7 @@ namespace CmisSync
             this.saveButton.Sensitive = false;
         }
 
-        protected void OnNotificationToggleButtonToggled(object sender, EventArgs e)
-        {
+        protected void OnNotificationToggleButtonToggled(object sender, EventArgs e) {
             this.saveButton.Sensitive = this.proxyWidget.IsValid;
         }
     }

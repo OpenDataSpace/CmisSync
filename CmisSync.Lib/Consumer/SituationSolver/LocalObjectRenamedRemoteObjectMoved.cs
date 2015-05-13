@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
 
@@ -30,25 +29,24 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
-    public class LocalObjectRenamedRemoteObjectMoved : AbstractEnhancedSolver
-    {
-        private LocalObjectRenamedRemoteObjectRenamed renameRenameSolver;
-        private LocalObjectChangedRemoteObjectChanged changeChangeSolver;
+    public class LocalObjectRenamedRemoteObjectMoved : AbstractEnhancedSolver {
+        private readonly ISolver renameRenameSolver;
+        private readonly ISolver changeChangeSolver;
         public LocalObjectRenamedRemoteObjectMoved(
             ISession session,
             IMetaDataStorage storage,
-            LocalObjectRenamedRemoteObjectRenamed renameSolver,
-            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage)
+            ISolver renameSolver,
+            ISolver changeChangeSolver) : base(session, storage)
         {
             if (renameSolver == null) {
                 throw new ArgumentNullException("Given solver for rename rename situation is null");
             }
 
-            if (changeSolver == null) {
+            if (changeChangeSolver == null) {
                 throw new ArgumentNullException("Given solver for change change situation is null");
             }
 
-            this.changeChangeSolver = changeSolver;
+            this.changeChangeSolver = changeChangeSolver;
             this.renameRenameSolver = renameSolver;
         }
 

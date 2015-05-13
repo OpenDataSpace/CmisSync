@@ -16,9 +16,9 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+using CmisSync.Lib;
 
-namespace TestLibrary.FileTransmissionTests
-{
+namespace TestLibrary.FileTransmissionTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -40,13 +40,14 @@ namespace TestLibrary.FileTransmissionTests
 
     using NUnit.Framework;
 
+    using TestUtils;
+
     [TestFixture]
-    public class ChunkedDownloaderTest : IDisposable
-    {
+    public class ChunkedDownloaderTest : IDisposable {
         private readonly long remoteLength = 1024 * 1024;
         private readonly long chunkSize = 1024;
         private bool disposed = false;
-        private FileTransmissionEvent transmissionEvent;
+        private Transmission transmission;
         private MemoryStream localFileStream;
         private string localFile;
         private HashAlgorithm hashAlg;
@@ -58,9 +59,9 @@ namespace TestLibrary.FileTransmissionTests
         private Mock<IFileTransmissionStorage> mockedStorage;
 
         [SetUp]
-        public void SetUp()
-        {
-            this.transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "testfile");
+        public void SetUp() {
+            this.transmission = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "testfile");
+            this.transmission.AddDefaultConstraints();
             if (this.localFileStream != null) {
                 this.localFileStream.Dispose();
             }
@@ -72,8 +73,7 @@ namespace TestLibrary.FileTransmissionTests
 
             this.hashAlg = new SHA1CryptoServiceProvider();
             this.remoteContent = new byte[this.remoteLength];
-            using (var random = RandomNumberGenerator.Create())
-            {
+            using (var random = RandomNumberGenerator.Create()) {
                 random.GetBytes(this.remoteContent);
             }
 
@@ -84,58 +84,40 @@ namespace TestLibrary.FileTransmissionTests
         }
 
         [TearDown]
-        public void TearDown()
-        {
-            if (File.Exists(this.localFile))
-            {
+        public void TearDown() {
+            if (File.Exists(this.localFile)) {
                 File.Delete(this.localFile);
             }
         }
 
         [Test, Category("Fast")]
-        public void ConstructorWithValidInputTest()
-        {
-            using (var downloader = new ChunkedDownloader(this.chunkSize))
-            {
+        public void ConstructorWithoutInput() {
+            using (var downloader = new ChunkedDownloader(this.chunkSize)) {
                 Assert.AreEqual(this.chunkSize, downloader.ChunkSize);
             }
+        }
 
-            using (var downloader = new ChunkedDownloader())
-            {
+        [Test, Category("Fast")]
+        public void ConstructorWithValidInput() {
+            using (var downloader = new ChunkedDownloader()) {
                 Assert.Greater(downloader.ChunkSize, 0);
             }
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentException))]
-        public void ConstructorFailsWithNegativeChunkSize()
-        {
-            using (new ChunkedDownloader(-1))
-            {
-            }
-        }
-
-        [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentException))]
-        public void ConstructorFailsWithZeroChunkSize()
-        {
-            using (new ChunkedDownloader(0))
-            {
-            }
+        public void ConstructorFailsWithInvalidChunkSizes([Values(0, -1, -100)]long chunksize) {
+            Assert.Throws<ArgumentException>(() => {using (new ChunkedDownloader(chunksize));});
         }
 
         [Test, Category("Medium")]
-        public void FullDownloadTest()
-        {
+        public void FullDownload() {
             SetupFullDownload();
 
-            using (var memorystream = new MemoryStream(this.remoteContent))
-            {
+            using (var memorystream = new MemoryStream(this.remoteContent)) {
                 this.mockedStream.Setup(stream => stream.Stream).Returns(memorystream);
 
-                using (IFileDownloader downloader = new ChunkedDownloader(this.chunkSize))
-                {
-                    downloader.DownloadFile(this.mock.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
+                using (IFileDownloader downloader = new ChunkedDownloader(this.chunkSize)) {
+                    downloader.DownloadFile(this.mock.Object, this.localFileStream, this.transmission, this.hashAlg);
                     Assert.AreEqual(this.remoteContent.Length, this.localFileStream.Length);
                     Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.remoteContent), this.hashAlg.Hash);
                     Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.localFileStream.ToArray()), this.hashAlg.Hash);
@@ -144,8 +126,7 @@ namespace TestLibrary.FileTransmissionTests
         }
 
         [Test, Category("Medium")]
-        public void FullDownloadWithoutLengthTest()
-        {
+        public void FullDownloadWithoutLength() {
             SetupFullDownload();
 
             this.mockedStream.Setup(stream => stream.Length).Returns((long?)null);
@@ -153,9 +134,8 @@ namespace TestLibrary.FileTransmissionTests
             mockedMemoryStream.Setup(ms => ms.Length).Throws(new NotSupportedException());
             this.mockedStream.Setup(stream => stream.Stream).Returns(mockedMemoryStream.Object);
 
-            using (IFileDownloader downloader = new ChunkedDownloader(this.chunkSize))
-            {
-                downloader.DownloadFile(this.mock.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
+            using (IFileDownloader downloader = new ChunkedDownloader(this.chunkSize)) {
+                downloader.DownloadFile(this.mock.Object, this.localFileStream, this.transmission, this.hashAlg);
                 Assert.AreEqual(this.remoteContent.Length, this.localFileStream.Length);
                 Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.remoteContent), this.hashAlg.Hash);
                 Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.localFileStream.ToArray()), this.hashAlg.Hash);
@@ -163,18 +143,15 @@ namespace TestLibrary.FileTransmissionTests
         }
 
         [Test, Category("Medium")]
-        public void ResumeDownloadTest()
-        {
+        public void ResumeDownload() {
             long startPos = this.remoteLength / 2;
             SetupResumeDownload(startPos);
 
-            using (var memorystream = new MemoryStream(this.remoteChunk))
-            {
+            using (var memorystream = new MemoryStream(this.remoteChunk)) {
                 this.mockedStream.Setup(stream => stream.Stream).Returns(memorystream);
 
-                using (IFileDownloader downloader = new ChunkedDownloader(this.chunkSize))
-                {
-                    downloader.DownloadFile(this.mock.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
+                using (IFileDownloader downloader = new ChunkedDownloader(this.chunkSize)) {
+                    downloader.DownloadFile(this.mock.Object, this.localFileStream, this.transmission, this.hashAlg);
                     Assert.AreEqual(this.remoteContent.Length, this.localFileStream.Length);
                     Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.remoteContent), this.hashAlg.Hash);
                     Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.localFileStream.ToArray()), this.hashAlg.Hash);
@@ -184,19 +161,16 @@ namespace TestLibrary.FileTransmissionTests
 
         [Ignore]
         [Test, Category("Medium")]
-        public void ResumeDownloadByRightStorage()
-        {
+        public void ResumeDownloadByRightStorage() {
             long startPos = this.remoteLength / 2;
             SetupResumeDownload(startPos);
             SetupStorage(startPos);
 
-            using (var memorystream = new MemoryStream(this.remoteChunk))
-            {
+            using (var memorystream = new MemoryStream(this.remoteChunk)) {
                 this.mockedStream.Setup(stream => stream.Stream).Returns(memorystream);
 
-                using (IFileDownloader downloader = new ChunkedDownloader(this.chunkSize, this.mockedStorage.Object))
-                {
-                    downloader.DownloadFile(this.mock.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
+                using (IFileDownloader downloader = new ChunkedDownloader(this.chunkSize, this.mockedStorage.Object)) {
+                    downloader.DownloadFile(this.mock.Object, this.localFileStream, this.transmission, this.hashAlg);
                     Assert.AreEqual(this.remoteContent.Length, this.localFileStream.Length);
                     Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.remoteContent), this.hashAlg.Hash);
                     Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.localFileStream.ToArray()), this.hashAlg.Hash);
@@ -206,8 +180,7 @@ namespace TestLibrary.FileTransmissionTests
 
         [Ignore]
         [Test, Category("Medium")]
-        public void ResumeDownloadByWrongStorage()
-        {
+        public void ResumeDownloadByWrongStorage() {
             long startPos = this.remoteLength / 2;
             SetupFullDownload();
             SetupStorage(startPos);
@@ -219,13 +192,11 @@ namespace TestLibrary.FileTransmissionTests
             byte[] checksum = this.mockedStorage.Object.GetObjectList()[0].LastChecksum;
             checksum[0] = (byte)(checksum[0] + 1);
 
-            using (var memorystream = new MemoryStream(this.remoteChunk))
-            {
+            using (var memorystream = new MemoryStream(this.remoteChunk)) {
                 this.mockedStream.Setup(stream => stream.Stream).Returns(memorystream);
 
-                using (IFileDownloader downloader = new ChunkedDownloader(this.chunkSize, this.mockedStorage.Object))
-                {
-                    downloader.DownloadFile(this.mock.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
+                using (IFileDownloader downloader = new ChunkedDownloader(this.chunkSize, this.mockedStorage.Object)) {
+                    downloader.DownloadFile(this.mock.Object, this.localFileStream, this.transmission, this.hashAlg);
                     Assert.AreEqual(this.remoteContent.Length, this.localFileStream.Length);
                     Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.remoteContent), this.hashAlg.Hash);
                     Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.localFileStream.ToArray()), this.hashAlg.Hash);
@@ -234,19 +205,16 @@ namespace TestLibrary.FileTransmissionTests
         }
 
         [Test, Category("Medium")]
-        public void ResumeDownloadWithUtils()
-        {
+        public void ResumeDownloadWithUtils() {
             long startPos = this.remoteLength / 2;
             SetupResumeDownload(startPos);
 
-            using (var memorystream = new MemoryStream(this.remoteChunk))
-            {
+            using (var memorystream = new MemoryStream(this.remoteChunk)) {
                 this.mockedStream.Setup(stream => stream.Stream).Returns(memorystream);
 
-                using (IFileDownloader downloader = new ChunkedDownloader(this.chunkSize))
-                {
+                using (IFileDownloader downloader = new ChunkedDownloader(this.chunkSize)) {
                     ContentTaskUtils.PrepareResume(startPos, this.localFileStream, this.hashAlg);
-                    downloader.DownloadFile(this.mock.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
+                    downloader.DownloadFile(this.mock.Object, this.localFileStream, this.transmission, this.hashAlg);
                     Assert.AreEqual(this.remoteContent.Length, this.localFileStream.Length);
                     Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.remoteContent), this.hashAlg.Hash);
                     Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.localFileStream.ToArray()), this.hashAlg.Hash);
@@ -256,20 +224,17 @@ namespace TestLibrary.FileTransmissionTests
 
         [Ignore]
         [Test, Category("Medium")]
-        public void ResumeDownloadWithUtilsByRightStorage()
-        {
+        public void ResumeDownloadWithUtilsByRightStorage() {
             Assert.Fail("TODO");
         }
 
         [Ignore]
         [Test, Category("Medium")]
-        public void ResumeDownloadWithUtilsByWrongStorage()
-        {
+        public void ResumeDownloadWithUtilsByWrongStorage() {
             Assert.Fail("TODO");
         }
 
-        private void SetupFullDownload()
-        {
+        private void SetupFullDownload() {
             this.mockedStream.Setup(stream => stream.Length).Returns(this.remoteLength);
 
             this.mock.Setup(doc => doc.ContentStreamLength).Returns(this.remoteLength);
@@ -280,33 +245,28 @@ namespace TestLibrary.FileTransmissionTests
                 It.Is<long?>((long? l) => l != null)))
                 .Returns(this.mockedStream.Object);
 
-            this.transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e)
-            {
-                if (e.ActualPosition != null)
-                {
-                    Assert.GreaterOrEqual((long)e.ActualPosition, 0);
-                    Assert.LessOrEqual((long)e.ActualPosition, this.remoteLength);
+            this.transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
+                var t = sender as Transmission;
+                if (e.PropertyName == Utils.NameOf(() => t.Position)) {
+                    Assert.GreaterOrEqual((long)t.Position, 0);
+                    Assert.LessOrEqual((long)t.Position, this.remoteLength);
                 }
 
-                if (e.Percent != null)
-                {
-                    Assert.GreaterOrEqual(e.Percent, 0);
-                    Assert.LessOrEqual(e.Percent, 100);
+                if (e.PropertyName == Utils.NameOf(() => t.Percent)) {
+                    Assert.That(t.Percent, Is.Null.Or.GreaterThanOrEqualTo(0));
+                    Assert.That(t.Percent, Is.Null.Or.LessThanOrEqualTo(100));
                 }
 
-                if (e.Length != null)
-                {
-                    Assert.GreaterOrEqual(e.Length, 0);
-                    Assert.LessOrEqual(e.Length, this.remoteLength);
+                if (e.PropertyName == Utils.NameOf(() => t.Length)) {
+                    Assert.That(t.Length, Is.Null.Or.GreaterThanOrEqualTo(0));
+                    Assert.That(t.Length, Is.Null.Or.LessThanOrEqualTo(this.remoteLength));
                 }
             };
         }
 
-        private void SetupResumeDownload(long startPos)
-        {
+        private void SetupResumeDownload(long startPos) {
             this.remoteChunk = new byte[this.remoteLength - startPos];
-            for (int i = 0; i < this.remoteChunk.Length; i++)
-            {
+            for (int i = 0; i < this.remoteChunk.Length; i++) {
                 this.remoteChunk[i] = this.remoteContent[i + startPos];
             }
 
@@ -324,35 +284,31 @@ namespace TestLibrary.FileTransmissionTests
                 It.Is<long?>((long? l) => l == this.remoteChunk.Length)))
                 .Returns(this.mockedStream.Object);
 
-            this.transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e)
-            {
-                if (e.ActualPosition != null)
-                {
-                    Assert.GreaterOrEqual((long)e.ActualPosition, startPos);
-                    Assert.LessOrEqual((long)e.ActualPosition, this.remoteLength);
+            this.transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
+                var t = sender as Transmission;
+                if (e.PropertyName == Utils.NameOf(() => t.Position)) {
+                    Assert.GreaterOrEqual((long)t.Position, startPos);
+                    Assert.LessOrEqual((long)t.Position, this.remoteLength);
                 }
 
-                if (e.Percent != null)
-                {
-                    Assert.GreaterOrEqual(e.Percent, startPos * 100 / this.remoteLength);
-                    Assert.LessOrEqual(e.Percent, 100);
+                if (e.PropertyName == Utils.NameOf(() => t.Percent)) {
+                    Assert.That(t.Percent, Is.Null.Or.GreaterThanOrEqualTo(startPos * 100 / this.remoteLength));
+                    Assert.That(t.Percent, Is.Null.Or.LessThanOrEqualTo(100));
                 }
 
-                if (e.Length != null)
-                {
-                    Assert.GreaterOrEqual(e.Length, startPos);
-                    Assert.LessOrEqual(e.Length, this.remoteLength);
+                if (e.PropertyName == Utils.NameOf(() => t.Length)) {
+                    Assert.That(t.Length, Is.Null.Or.GreaterThanOrEqualTo(startPos));
+                    Assert.That(t.Length, Is.Null.Or.LessThanOrEqualTo(this.remoteLength));
                 }
             };
         }
 
-        private void SetupStorage(long startPos)
-        {
+        private void SetupStorage(long startPos) {
             mock.Setup(m => m.Id).Returns("RemoteObjectId");
             mock.Setup(m => m.ChangeToken).Returns("ChangeToken");
 
             Mock<IFileTransmissionObject> obj = new Mock<IFileTransmissionObject>();
-            obj.Setup(m => m.Type).Returns(FileTransmissionType.DOWNLOAD_NEW_FILE);
+            obj.Setup(m => m.Type).Returns(TransmissionType.DOWNLOAD_NEW_FILE);
             obj.Setup(m => m.LocalPath).Returns(this.localFile);
             byte[] checksum = SHA1Managed.Create().ComputeHash(this.remoteContent, 0, (int)startPos);
             obj.Setup(m => m.LastChecksum).Returns(checksum);
@@ -360,8 +316,7 @@ namespace TestLibrary.FileTransmissionTests
             obj.Setup(m => m.RemoteObjectId).Returns("RemoteObjectId");
             obj.Setup(m => m.LastChangeToken).Returns("ChangeToken");
 
-            using (FileStream stream = File.OpenWrite(this.localFile))
-            {
+            using (FileStream stream = File.OpenWrite(this.localFile)) {
                 stream.Write(this.remoteContent, 0, (int)startPos);
             }
 
@@ -374,8 +329,7 @@ namespace TestLibrary.FileTransmissionTests
         // Implement IDisposable.
         // Do not make this method virtual.
         // A derived class should not be able to override this method.
-        public void Dispose()
-        {
+        public void Dispose() {
             this.Dispose(true);
         }
 
@@ -386,12 +340,9 @@ namespace TestLibrary.FileTransmissionTests
         // If disposing equals false, the method has been called by the
         // runtime from inside the finalizer and you should not reference
         // other objects. Only unmanaged resources can be disposed.
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (!this.disposed)
-                {
+        protected virtual void Dispose(bool disposing) {
+            if (disposing) {
+                if (!this.disposed) {
                     if (this.localFileStream != null) {
                         this.localFileStream.Dispose();
                     }

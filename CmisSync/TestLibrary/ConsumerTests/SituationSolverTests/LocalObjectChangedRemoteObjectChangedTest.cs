@@ -48,21 +48,21 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private readonly string newChangeToken = "newChangeToken";
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
-        private ActiveActivitiesManager manager;
+        private TransmissionManager manager;
         private LocalObjectChangedRemoteObjectChanged underTest;
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorTakesSessionAndStorageAndDateSyncEnabled() {
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
-            new LocalObjectChangedRemoteObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null, new ActiveActivitiesManager());
+            new LocalObjectChangedRemoteObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null, new TransmissionManager());
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorTakesSessionAndStorageAndDateSyncDisabled() {
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
-            new LocalObjectChangedRemoteObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null, new ActiveActivitiesManager());
+            new LocalObjectChangedRemoteObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null, new TransmissionManager());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -208,7 +208,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
-            this.manager = new ActiveActivitiesManager();
+            this.manager = new TransmissionManager();
             this.underTest = new LocalObjectChangedRemoteObjectChanged(this.session.Object, this.storage.Object, null, this.manager);
         }
 

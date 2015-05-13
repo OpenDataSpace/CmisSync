@@ -17,27 +17,25 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Config
-{
+namespace CmisSync.Lib.Config {
     using System;
     using System.Collections.Generic;
-    using System.Xml.Serialization;
     using System.ComponentModel;
+    using System.Xml.Serialization;
 
     /// <summary>
     /// Client Brand Configuration
     /// </summary>
     [Serializable]
-    public class Brand
-    {
+    public class Brand {
         /// <summary>
-        /// CMIS server that holds the client brand files
+        /// Gets or sets the CMIS server that holds the client brand files
         /// </summary>
         [XmlElement("server")]
         public XmlUri Server { get; set; }
 
         /// <summary>
-        /// Client brand files
+        /// Gets or sets the client branding files
         /// </summary>
         [XmlArray("files")]
         [XmlArrayItem("file")]
@@ -48,8 +46,7 @@ namespace CmisSync.Lib.Config
     /// Client Brand file configuration
     /// </summary>
     [Serializable]
-    public class BrandFile
-    {
+    public class BrandFile {
         /// <summary>
         /// pathname for the client brand file on CMIS repository
         /// </summary>

@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
     using System.Linq;
@@ -26,6 +25,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -38,32 +38,32 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Solver to handle a new object which has been found on the server
     /// </summary>
-    public class RemoteObjectAdded : AbstractEnhancedSolver
-    {
+    public class RemoteObjectAdded : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectAdded));
 
         private IFileSystemInfoFactory fsFactory;
-        private ActiveActivitiesManager manager;
+        private TransmissionManager manager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.RemoteObjectAdded"/> class.
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="transmissonManager">Transmisson manager.</param>
+        /// <param name="transmissionStorage">Transmission progress storage.</param>
+        /// <param name="transmissionManager">Transmission manager.</param>
         /// <param name="fsFactory">File system factory.</param>
         public RemoteObjectAdded(
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ActiveActivitiesManager transmissonManager,
+            TransmissionManager transmissionManager,
             IFileSystemInfoFactory fsFactory = null) : base(session, storage, transmissionStorage) {
-            if (transmissonManager == null) {
+            if (transmissionManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
             }
 
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
-            this.manager = transmissonManager;
+            this.manager = transmissionManager;
         }
 
         /// <summary>
@@ -143,9 +143,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 var cacheFile = this.fsFactory.CreateDownloadCacheFileInfo(guid);
 
                 IDocument remoteDoc = remoteId as IDocument;
-                var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName, cacheFile.FullName);
-                this.manager.AddTransmission(transmissionEvent);
-                byte[] hash = DownloadCacheFile(cacheFile, remoteDoc, transmissionEvent, this.fsFactory);
+                var transmission = this.manager.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName, cacheFile.FullName);
+                byte[] hash = DownloadCacheFile(cacheFile, remoteDoc, transmission, this.fsFactory);
 
                 try {
                     cacheFile.Uuid = guid;
@@ -183,7 +182,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                                     Logger.Debug("Could not retore the last modification date of " + targetFile.FullName, restoreException);
                                 }
                             } catch (Exception ex) {
-                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                                transmission.FailedException = ex;
                                 throw;
                             }
 
@@ -194,7 +193,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                             }
                         }
                     } else {
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = e });
+                        transmission.FailedException = e;
                         throw;
                     }
                 }
@@ -224,7 +223,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 };
                 this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local file {0} created and mapped to remote file {1}", file.FullName, remoteId.Id));
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
+                transmission.Status = TransmissionStatus.FINISHED;
             }
         }
 

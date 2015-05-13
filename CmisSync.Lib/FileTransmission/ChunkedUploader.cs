@@ -17,13 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.FileTransmission
-{
+namespace CmisSync.Lib.FileTransmission {
     using System;
     using System.IO;
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.HashAlgorithm;
     using CmisSync.Lib.Streams;
 
     using DotCMIS.Client;
@@ -33,8 +33,7 @@ namespace CmisSync.Lib.FileTransmission
     /// Chunked uploader takes a file and splits the upload into chunks.
     /// Resuming a failed upload is possible.
     /// </summary>
-    public class ChunkedUploader : SimpleFileUploader
-    {
+    public class ChunkedUploader : SimpleFileUploader {
         /// <summary>
         /// Initializes a new instance of the <see cref="ChunkedUploader"/> class.
         /// </summary>
@@ -80,17 +79,17 @@ namespace CmisSync.Lib.FileTransmission
         /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">
         /// Contains the last successful remote document state. This is needed for continue a failed upload.
         /// </exception>
-        public override IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg, bool overwrite = true) {
+        public override IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg, bool overwrite = true, UpdateChecksum update = null) {
             IDocument result = remoteDocument;
             for (long offset = localFileStream.Position; offset < localFileStream.Length; offset += this.ChunkSize) {
                 bool isFirstChunk = offset == 0;
                 bool isLastChunk = (offset + this.ChunkSize) >= localFileStream.Length;
-                using (NonClosingHashStream hashstream = new NonClosingHashStream(localFileStream, hashAlg, CryptoStreamMode.Read))
-                using (ChunkedStream chunkstream = new ChunkedStream(hashstream, this.ChunkSize))
-                using (OffsetStream offsetstream = new OffsetStream(chunkstream, offset))
-                using (ProgressStream progressstream = new ProgressStream(offsetstream, status)) {
-                    status.Status.Length = localFileStream.Length;
-                    status.Status.ActualPosition = offset;
+                using (var hashstream = new NonClosingHashStream(localFileStream, hashAlg, CryptoStreamMode.Read))
+                using (var chunkstream = new ChunkedStream(hashstream, this.ChunkSize))
+                using (var offsetstream = new OffsetStream(chunkstream, offset))
+                using (var transmissionStream = transmission.CreateStream(offsetstream)) {
+                    transmission.Length = localFileStream.Length;
+                    transmission.Position = offset;
                     chunkstream.ChunkPosition = offset;
 
                     ContentStream contentStream = new ContentStream();
@@ -102,20 +101,29 @@ namespace CmisSync.Lib.FileTransmission
                         contentStream.Length = this.ChunkSize;
                     }
 
-                    contentStream.Stream = progressstream;
+                    contentStream.Stream = transmissionStream;
                     try {
                         if (isFirstChunk && result.ContentStreamId != null && overwrite) {
                             result.DeleteContentStream(true);
                         }
 
                         result.AppendContentStream(contentStream, isLastChunk, true);
-                    } catch(Exception e) {
+                        HashAlgorithmReuse reuse = hashAlg as HashAlgorithmReuse;
+                        if (reuse != null && update != null) {
+                            using (HashAlgorithm hash = (HashAlgorithm)reuse.Clone()) {
+                                hash.TransformFinalBlock(new byte[0], 0, 0);
+                                update(hash.Hash, result.ContentStreamLength.GetValueOrDefault());
+                            }
+                        }
+                    } catch (Exception e) {
                         if (e is FileTransmission.AbortException) {
                             throw;
                         }
+
                         if (e.InnerException is FileTransmission.AbortException) {
                             throw e.InnerException;
                         }
+
                         throw new UploadFailedException(e, result);
                     }
                 }

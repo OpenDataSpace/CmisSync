@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="MockSessionUtil.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,18 +17,19 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.TestUtils
-{
+namespace TestLibrary.TestUtils {
     using System;
     using System.Collections.Generic;
     using System.IO;
 
-    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Producer.Watcher;
     using CmisSync.Lib.SelectiveIgnore;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
+    using DotCMIS;
     using DotCMIS.Binding;
     using DotCMIS.Binding.Services;
     using DotCMIS.Client;
@@ -41,16 +42,18 @@ namespace TestLibrary.TestUtils
     using NUnit.Framework;
 
     public static class MockSessionUtil {
-        public static void SetupSessionDefaultValues(this Mock<ISession> session) {
+        public static Mock<ISession> SetupSessionDefaultValues(this Mock<ISession> session) {
             session.Setup(s => s.Binding.GetRepositoryService().GetRepositoryInfos(null)).Returns((IList<IRepositoryInfo>)null);
             session.Setup(s => s.RepositoryInfo.Id).Returns("repoId");
+            return session;
         }
 
-        public static void SetupChangeLogToken(this Mock<ISession> session, string changeLogToken) {
+        public static Mock<ISession> SetupChangeLogToken(this Mock<ISession> session, string changeLogToken) {
             session.Setup(s => s.Binding.GetRepositoryService().GetRepositoryInfo(It.IsAny<string>(), null).LatestChangeLogToken).Returns(changeLogToken);
+            return session;
         }
 
-        public static void SetupCreateOperationContext(this Mock<ISession> session) {
+        public static Mock<ISession> SetupCreateOperationContext(this Mock<ISession> session) {
             session.Setup(s => s.CreateOperationContext(
                 It.IsAny<HashSet<string>>(),
                 It.IsAny<bool>(),
@@ -83,15 +86,16 @@ namespace TestLibrary.TestUtils
                 o.OrderBy == orderBy &&
                 o.CacheEnabled == cacheEnabled &&
                 o.MaxItemsPerPage == maxItemsPerPage));
+            return session;
         }
 
-        public static void SetupTypeSystem(this Mock<ISession> session, bool serverCanModifyLastModificationDate = true, bool supportsSelectiveIgnore = true) {
+        public static Mock<ISession> SetupTypeSystem(this Mock<ISession> session, bool serverCanModifyLastModificationDate = true, bool supportsSelectiveIgnore = true) {
             string repoId = "repoId";
             IList<IPropertyDefinition> props = new List<IPropertyDefinition>();
             if (serverCanModifyLastModificationDate) {
-                props.Add(Mock.Of<IPropertyDefinition>(p => p.Id == "cmis:lastModificationDate" && p.Updatability == DotCMIS.Enums.Updatability.ReadWrite));
+                props.Add(Mock.Of<IPropertyDefinition>(p => p.Id == PropertyIds.LastModificationDate && p.Updatability == DotCMIS.Enums.Updatability.ReadWrite));
             } else {
-                props.Add(Mock.Of<IPropertyDefinition>(p => p.Id == "cmis:lastModificationDate" && p.Updatability == DotCMIS.Enums.Updatability.ReadOnly));
+                props.Add(Mock.Of<IPropertyDefinition>(p => p.Id == PropertyIds.LastModificationDate && p.Updatability == DotCMIS.Enums.Updatability.ReadOnly));
             }
 
             var docType = Mock.Of<IObjectType>(d => d.PropertyDefinitions == props);
@@ -103,8 +107,8 @@ namespace TestLibrary.TestUtils
                 repositoryService = Mock.Get(session.Object.Binding.GetRepositoryService());
             }
 
-            repositoryService.Setup(s => s.GetTypeDefinition(repoId, "cmis:document", null)).Returns(docType);
-            repositoryService.Setup(s => s.GetTypeDefinition(repoId, "cmis:folder", null)).Returns(folderType);
+            repositoryService.Setup(s => s.GetTypeDefinition(repoId, BaseTypeId.CmisDocument.GetCmisValue(), null)).Returns(docType);
+            repositoryService.Setup(s => s.GetTypeDefinition(repoId, BaseTypeId.CmisFolder.GetCmisValue(), null)).Returns(folderType);
             if (supportsSelectiveIgnore) {
                 IList<IPropertyDefinition> syncProps = new List<IPropertyDefinition>();
                 syncProps.Add(Mock.Of<IPropertyDefinition>(p => p.Id == "gds:ignoreDeviceIds"));
@@ -115,6 +119,7 @@ namespace TestLibrary.TestUtils
 
             session.Setup(s => s.Binding.GetRepositoryService()).Returns(repositoryService.Object);
             session.Setup(s => s.RepositoryInfo.Id).Returns(repoId);
+            return session;
         }
 
         public static Mock<IChangeEvent> GenerateChangeEvent(DotCMIS.Enums.ChangeType type, string objectId) {
@@ -140,38 +145,39 @@ namespace TestLibrary.TestUtils
             return session;
         }
 
-        public static void AddRemoteObject(this Mock<ISession> session, ICmisObject remoteObject) {
+        public static Mock<ISession> AddRemoteObject(this Mock<ISession> session, ICmisObject remoteObject) {
             session.Setup(s => s.GetObject(It.Is<string>(id => id == remoteObject.Id))).Returns(remoteObject);
+            session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == remoteObject.Id))).Returns(remoteObject);
+            session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == remoteObject.Id), It.IsAny<IOperationContext>())).Returns(remoteObject);
             HashSet<string> paths = new HashSet<string>();
-            if (remoteObject is IFolder)
-            {
+            if (remoteObject is IFolder) {
                 paths.Add((remoteObject as IFolder).Path);
-                if ((remoteObject as IFolder).Paths != null)
-                {
-                    foreach (string path in (remoteObject as IFolder).Paths)
-                    {
+                if ((remoteObject as IFolder).Paths != null) {
+                    foreach (string path in (remoteObject as IFolder).Paths) {
+                        paths.Add(path);
+                    }
+                }
+            } else if (remoteObject is IDocument) {
+                if ((remoteObject as IDocument).Paths != null) {
+                    foreach (string path in (remoteObject as IDocument).Paths) {
                         paths.Add(path);
                     }
                 }
             }
-            else if (remoteObject is IDocument)
-            {
-                foreach (string path in (remoteObject as IDocument).Paths)
-                {
-                    paths.Add(path);
-                }
-            }
 
-            foreach (string path in paths)
-            {
+            foreach (string path in paths) {
                 session.Setup(s => s.GetObjectByPath(It.Is<string>(p => p == path))).Returns(remoteObject);
             }
+
+            return session;
         }
 
-        public static void AddRemoteObjects(this Mock<ISession> session, params ICmisObject[] remoteObjects) {
-            foreach(var obj in remoteObjects) {
+        public static Mock<ISession> AddRemoteObjects(this Mock<ISession> session, params ICmisObject[] remoteObjects) {
+            foreach (var obj in remoteObjects) {
                 session.AddRemoteObject(obj);
             }
+
+            return session;
         }
 
         public static Mock<IFolder> CreateCmisFolder(List<string> fileNames = null, List<string> folderNames = null, bool contentStream = false) {
@@ -203,6 +209,52 @@ namespace TestLibrary.TestUtils
             return remoteFolder;
         }
 
+        public static Mock<ISession> SetupPermissions(
+            this Mock<ISession> session,
+            SupportedPermissions supportedPermissions = SupportedPermissions.Basic)
+        {
+            var aclCapabilities = session.Object.RepositoryInfo.AclCapabilities ?? Mock.Of<IAclCapabilities>();
+            Mock.Get(aclCapabilities).Setup(a => a.SupportedPermissions).Returns(supportedPermissions);
+            var permissions = aclCapabilities.Permissions ?? new List<IPermissionDefinition>();
+            permissions.Add(Mock.Of<IPermissionDefinition>(d => d.Id == "cmis:read" && d.Description == "Read"));
+            permissions.Add(Mock.Of<IPermissionDefinition>(d => d.Id == "cmis:write" && d.Description == "Write"));
+            permissions.Add(Mock.Of<IPermissionDefinition>(d => d.Id == "cmis:all" && d.Description == "All"));
+            Mock.Get(aclCapabilities).Setup(a => a.Permissions).Returns(permissions);
+            session.Setup(s => s.RepositoryInfo.AclCapabilities).Returns(aclCapabilities);
+            return session;
+        }
+
+        public static Mock<IRepositoryInfo> SetupRepositoryInfo(
+            this Mock<ISession> session,
+            string productName,
+            string productVersion,
+            string vendorName)
+        {
+            var repoInfo = session.Object.RepositoryInfo ?? Mock.Of<IRepositoryInfo>();
+            Mock.Get(repoInfo).Setup(r => r.ProductVersion).Returns(productVersion);
+            Mock.Get(repoInfo).Setup(r => r.ProductName).Returns(productName);
+            Mock.Get(repoInfo).Setup(r => r.VendorName).Returns(vendorName);
+            session.Setup(s => s.RepositoryInfo).Returns(repoInfo);
+            return Mock.Get(repoInfo);
+        }
+
+        public static Mock<ISession> SetupDefaultOperationContext(
+            this Mock<ISession> session,
+            bool includeAcls,
+            bool includeActions)
+        {
+            var context = session.Object.DefaultContext ?? Mock.Of<IOperationContext>();
+            Mock.Get(context).Setup(c => c.IncludeAcls).Returns(includeAcls);
+            Mock.Get(context).Setup(c => c.IncludeAllowableActions).Returns(includeActions);
+            session.Setup(s => s.DefaultContext).Returns(context);
+            return session;
+        }
+
+        public static Mock<ISession> SetupPrivateWorkingCopyCapability(this Mock<ISession> session, bool isPwcUpdateable = true) {
+            session.Setup(f => f.RepositoryInfo.Capabilities.IsPwcUpdatableSupported).Returns(isPwcUpdateable);
+            return session;
+        }
+
         public static Mock<ISession> GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType type, string id = "folderid", string folderName = "name", string path = "path", string parentId = "", string changetoken = "changetoken") {
             if (path.Contains("\\")) {
                 throw new ArgumentException("Given remote path: " + path + " contains \\");
@@ -212,7 +264,7 @@ namespace TestLibrary.TestUtils
             var newRemoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, changetoken);
             session.Setup(s => s.GetObject(It.IsAny<string>())).Returns(newRemoteObject.Object);
             session.Setup(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>())).Returns(newRemoteObject.Object);
-         
+
             return session;
         }
 
@@ -253,8 +305,7 @@ namespace TestLibrary.TestUtils
             return session;
         }
 
-        public static void VerifyThatCachingIsDisabled(this Mock<ISession> session)
-        {
+        public static void VerifyThatCachingIsDisabled(this Mock<ISession> session) {
             session.Verify(
                 s => s.CreateOperationContext(
                 It.IsAny<HashSet<string>>(),
@@ -273,13 +324,14 @@ namespace TestLibrary.TestUtils
         public static void VerifyThatAllDefaultValuesAreSet(this Mock<ISession> session) {
             session.Verify(
                 s => s.CreateOperationContext(
-                It.Is<HashSet<string>>(set =>
-                                   set.Contains("cmis:name") &&
-                                   set.Contains("cmis:parentId") &&
-                                   set.Contains("cmis:objectId") &&
-                                   set.Contains("cmis:changeToken") &&
-                                   set.Contains("cmis:contentStreamFileName") &&
-                                   set.Contains("cmis:lastModificationDate")),
+                It.Is<HashSet<string>>(
+                set =>
+                set.Contains(PropertyIds.Name) &&
+                set.Contains(PropertyIds.ParentId) &&
+                set.Contains(PropertyIds.ObjectId) &&
+                set.Contains(PropertyIds.ChangeToken) &&
+                set.Contains(PropertyIds.ContentStreamFileName) &&
+                set.Contains(PropertyIds.LastModificationDate)),
                 It.Is<bool>(acls => acls == false),
                 It.Is<bool>(includeAllowableActions => includeAllowableActions == true),
                 It.Is<bool>(includePolicies => includePolicies == false),
@@ -295,8 +347,9 @@ namespace TestLibrary.TestUtils
         public static void VerifyThatCrawlValuesAreSet(this Mock<ISession> session) {
             session.Verify(
                 s => s.CreateOperationContext(
-                It.Is<HashSet<string>>(set =>
-                                   !set.Contains("cmis:path")),
+                It.Is<HashSet<string>>(
+                set =>
+                !set.Contains(PropertyIds.Path)),
                 It.IsAny<bool>(),
                 It.IsAny<bool>(),
                 It.IsAny<bool>(),
@@ -312,8 +365,9 @@ namespace TestLibrary.TestUtils
         public static void VerifyThatFilterContainsPath(this Mock<ISession> session) {
             session.Verify(
                 s => s.CreateOperationContext(
-                It.Is<HashSet<string>>(set =>
-                                   set.Contains("cmis:path")),
+                It.Is<HashSet<string>>(
+                set =>
+                set.Contains(PropertyIds.Path)),
                 It.IsAny<bool>(),
                 It.IsAny<bool>(),
                 It.IsAny<bool>(),
@@ -329,6 +383,12 @@ namespace TestLibrary.TestUtils
         public static void EnsureSelectiveIgnoreSupportIsAvailable(this ISession session) {
             if (!session.SupportsSelectiveIgnore()) {
                 Assert.Ignore("Selective Ignore is not available on server");
+            }
+        }
+
+        public static void EnsureServerCanUpdateModificationDate(this ISession session) {
+            if (!session.IsServerAbleToUpdateModificationDate()) {
+                Assert.Ignore("Server does not support the modification of last modified date => skip");
             }
         }
 

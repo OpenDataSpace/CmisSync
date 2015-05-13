@@ -486,4 +486,31 @@ This could lead to a lot of conflict files!</value>
   <data name="StatusSearchingForChangesAndFound" xml:space="preserve">
     <value>Searching for changes (actually {0} found)</value>
   </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="TransmissionTitleLastChange" xml:space="preserve">
+    <value>Last change</value>
+  </data>
+  <data name="FatalExceptionTitle" xml:space="preserve">
+    <value>{0}: Fatal error occured</value>
+  </data>
+  <data name="LocalRootFolderUnavailable" xml:space="preserve">
+    <value>Local sync folder "{0}" is unavailable. Synchronization aborted!</value>
+  </data>
+  <data name="UnknownExceptionOccured" xml:space="preserve">
+    <value>Unknown Exception occured</value>
+  </data>
+  <data name="WarningExceptionTitle" xml:space="preserve">
+    <value>{0}: Error occured</value>
+  </data>
+  <data name="SyncStatusDeactivated" xml:space="preserve">
+    <value>All configured connections are deactivated</value>
+  </data>
+  <data name="SyncStatusDisconnected" xml:space="preserve">
+    <value>Disconnected from server</value>
+  </data>
+  <data name="SyncStatusPaused" xml:space="preserve">
+    <value>Synchronization is paused</value>
+  </data>
 </root>

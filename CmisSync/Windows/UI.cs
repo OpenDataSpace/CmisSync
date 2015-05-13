@@ -32,72 +32,71 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-
-using System;
-using System.Windows.Forms;
-
 namespace CmisSync {
+    using System;
+    using System.Threading;
+    using System.Windows.Forms;
+    using System.Windows.Threading;
+
+    using log4net;
 
     /// <summary>
     /// User interface of CmisSync.
     /// </summary>
     public class UI {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(UI));
 
         /// <summary>
         /// Dialog shown at first run to explain how CmisSync works.
         /// </summary>
         public Setup Setup;
 
-
         /// <summary>
         /// CmisSync icon in the task bar.
         /// It contains the main CmisSync menu.
         /// </summary>
         public StatusIcon StatusIcon;
-
-
+        
         /// <summary>
         /// Small dialog showing some information about CmisSync.
         /// </summary>
         public About About;
-
-
+        
         /// <summary>
         /// Small dialog showing setting about CmisSync.
         /// </summary>
         public Setting Setting;
-
-
+        
         /// <summary>
         /// Window showing transmissions.
         /// </summary>
-        public Transmission Transmission;
-
-
+        public TransmissionWindow Transmission;
+        
         /// <summary>
         /// Constructor.
         /// </summary>
-        public UI ()
-        {   
-			// FIXME: The second time windows are shown, the windows
-			// don't have the smooth ease in animation, but appear abruptly.
-			// The ease out animation always seems to work
-            Setup      = new Setup ();
-            About      = new About ();
-            Setting    = new Setting ();
-            Transmission   = new Transmission();
-            
-            Program.Controller.UIHasLoaded ();
+        public UI() {
+            Setup      = new Setup();
+            About      = new About();
+            Setting    = new Setting();
+            Transmission   = new TransmissionWindow();
+            Program.Controller.UIHasLoaded();
         }
 
-        
         /// <summary>
         /// Run the CmisSync user interface.
         /// </summary>
-        public void Run ()
-        {
-            Application.Run (StatusIcon = new StatusIcon ());
-            StatusIcon.Dispose ();
+        public void Run() {
+            Application.ThreadException += delegate(Object sender, ThreadExceptionEventArgs args) {
+                Logger.Fatal("UI Exception occured", args.Exception);
+                Environment.Exit(-1);
+            };
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            AppDomain.CurrentDomain.UnhandledException += delegate(Object sender, UnhandledExceptionEventArgs args) {
+                Logger.Fatal(string.Format("Unhandled Exception occured on object {0}", args.ExceptionObject.ToString()));
+            };
+            Application.Run(StatusIcon = new StatusIcon());
+            StatusIcon.Dispose();
         }
     }
 }

@@ -61,7 +61,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.storage = new Mock<IMetaDataStorage>();
             this.InitializeMappedFolderOnStorage();
             this.InitializeMappedFileOnStorage();
-            var transmissionManager = new ActiveActivitiesManager();
+            var transmissionManager = new TransmissionManager();
             var fsFactory = Mock.Of<IFileSystemInfoFactory>();
             this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(this.session.Object, this.storage.Object, null, transmissionManager, fsFactory);
             this.underTest = new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.changeSolver.Object);

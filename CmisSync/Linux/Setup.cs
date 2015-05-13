@@ -60,8 +60,7 @@ namespace CmisSync {
         private string continueText = Properties_Resources.Continue;
         private string backText = Properties_Resources.Back;
 
-        private delegate Tuple<CmisServer, Exception> GetRepositoriesFuzzyDelegate(ServerCredentials credentials);
-
+        private delegate LoginCredentials GetRepositoriesDelegate(ServerCredentials credentials);
         private delegate string[] GetSubfoldersDelegate(
             string repositoryId,
             string path,
@@ -69,8 +68,7 @@ namespace CmisSync {
             string user,
             string password);
 
-        private void ShowSetupPage()
-        {
+        private void ShowSetupPage() {
             this.Header = string.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
             this.Description = string.Format(Properties_Resources.Intro, Properties_Resources.ApplicationName);
 
@@ -81,8 +79,7 @@ namespace CmisSync {
                 this.controller.SetupPageCancelled();
             };
 
-            Button continue_button = new Button(this.continueText)
-            {
+            Button continue_button = new Button(this.continueText) {
                 Sensitive = false
             };
 
@@ -102,8 +99,7 @@ namespace CmisSync {
             this.controller.CheckSetupPage();
         }
 
-        private void ShowAdd1Page()
-        {
+        private void ShowAdd1Page() {
             this.Present();
             this.Header = Properties_Resources.Where;
 
@@ -115,8 +111,7 @@ namespace CmisSync {
             VBox layout_password   = new VBox(true, 0);
 
             // Address
-            Label address_label = new Label()
-            {
+            Label address_label = new Label() {
                 UseMarkup = true,
                 Xalign = 0,
                 Markup = "<b>" +
@@ -125,12 +120,12 @@ namespace CmisSync {
             };
 
             Entry address_entry = new Entry() {
-                Text = (this.controller.PreviousAddress == null || string.IsNullOrEmpty(this.controller.PreviousAddress.ToString())) ? "https://" : this.controller.PreviousAddress.ToString(),
+                Text = (this.controller.PreviousAddress == null || string.IsNullOrEmpty(this.controller.PreviousAddress.ToString())) ? DefaultEntries.Defaults.Url : this.controller.PreviousAddress.ToString(),
+                IsEditable = DefaultEntries.Defaults.CanModifyUrl,
                 ActivatesDefault = false
             };
 
-            Label address_help_label = new Label()
-            {
+            Label address_help_label = new Label() {
                 Xalign = 0,
                 UseMarkup = true,
                 Markup = "<span foreground=\"#808080\" size=\"small\">" +
@@ -138,8 +133,7 @@ namespace CmisSync {
                 "</span>"
             };
             EventBox address_help_urlbox = new EventBox();
-            Label address_help_urllabel = new Label()
-            {
+            Label address_help_urllabel = new Label() {
                 Xalign = 0,
                 UseMarkup = true,
                 Markup = "<span foreground=\"blue\" underline=\"single\" size=\"small\">" +
@@ -157,8 +151,7 @@ namespace CmisSync {
                 address_help_urlbox.GdkWindow.Cursor = handCursor;
             };
 
-            Label address_error_label = new Label()
-            {
+            Label address_error_label = new Label() {
                 Xalign = 0,
                 UseMarkup = true,
                 Markup = string.Empty
@@ -172,7 +165,7 @@ namespace CmisSync {
             };
 
             if (string.IsNullOrEmpty(this.controller.saved_user)) {
-                user_entry.Text = Environment.UserName;
+                user_entry.Text = DefaultEntries.Defaults.Name;
             } else {
                 user_entry.Text = this.controller.saved_user;
             }
@@ -263,8 +256,8 @@ namespace CmisSync {
                 this.GdkWindow.Cursor = waitCursor;
 
                 // Try to find the CMIS server (asynchronous using a delegate)
-                GetRepositoriesFuzzyDelegate dlgt =
-                    new GetRepositoriesFuzzyDelegate(CmisUtils.GetRepositoriesFuzzy);
+                GetRepositoriesDelegate dlgt =
+                    new GetRepositoriesDelegate(SetupController.GetRepositories);
                 ServerCredentials credentials = new ServerCredentials() {
                     UserName = user_entry.Text,
                     Password = password_entry.Text,
@@ -278,27 +271,29 @@ namespace CmisSync {
                     }
                 }
 
-                Tuple<CmisServer, Exception> result = dlgt.EndInvoke(ar);
-                CmisServer cmisServer = result.Item1;
-                if (cmisServer != null) {
-                    this.controller.repositories = cmisServer.Repositories;
-                    address_entry.Text = cmisServer.Url.ToString();
+                var result = dlgt.EndInvoke(ar);
+                if (result.Repositories != null) {
+                    this.controller.repositories = result.Repositories.WithoutHiddenOnce();
+                    address_entry.Text = result.Credentials.Address.ToString();
                 } else {
                     this.controller.repositories = null;
+
+                    // Show best found Url
+                    address_entry.Text = result.Credentials.Address.ToString();
+
+                    // Show warning
+                    string warning = this.controller.GetConnectionsProblemWarning(result.FailedException);
+                    address_error_label.Markup = "<span foreground=\"red\">" + warning + "</span>";
+                    address_error_label.Show();
                 }
 
                 // Hide wait cursor
                 this.GdkWindow.Cursor = defaultCursor;
 
-                if (this.controller.repositories == null) {
-                    // Show warning
-                    string warning = this.controller.GetConnectionsProblemWarning(cmisServer, result.Item2);
-                    address_error_label.Markup = "<span foreground=\"red\">" + warning + "</span>";
-                    address_error_label.Show();
-                } else {
+                if (this.controller.repositories != null) {
                     // Continue to folder selection
                     this.controller.Add1PageCompleted(
-                        new Uri(address_entry.Text), cmisServer.Binding, user_entry.Text, password_entry.Text);
+                        new Uri(address_entry.Text), result.Credentials.Binding, user_entry.Text, password_entry.Text);
                 }
             };
 
@@ -320,19 +315,17 @@ namespace CmisSync {
             address_entry.GrabFocus();
         }
 
-        private void ShowAdd2Page()
-        {
+        private void ShowAdd2Page() {
             CmisTreeStore cmisStore = new CmisTreeStore();
             Gtk.TreeView treeView = new Gtk.TreeView(cmisStore);
 
             bool firstRepo = true;
             List<RootFolder> repositories = new List<RootFolder>();
             Dictionary<string, AsyncNodeLoader> loader = new Dictionary<string, AsyncNodeLoader>();
-            foreach (KeyValuePair<string, string> repository in this.controller.repositories)
-            {
+            foreach (var repository in this.controller.repositories) {
                 RootFolder root = new RootFolder() {
-                    Name = repository.Value,
-                    Id = repository.Key,
+                    Name = repository.Name,
+                    Id = repository.Id,
                     Address = this.controller.saved_address.ToString()
                 };
                 if (firstRepo) {
@@ -347,7 +340,7 @@ namespace CmisSync {
                     UserName = this.controller.saved_user,
                     Password = this.controller.saved_password,
                     Address = this.controller.saved_address,
-                    RepoId = repository.Key
+                    RepoId = repository.Id
                 };
                 AsyncNodeLoader asyncLoader = new AsyncNodeLoader(root, cred, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
                 asyncLoader.UpdateNodeEvent += delegate {
@@ -375,8 +368,7 @@ namespace CmisSync {
 
             continue_button.Clicked += delegate {
                 RootFolder root = repositories.Find(x => (x.Selected != false));
-                if (root != null)
-                {
+                if (root != null) {
                     foreach (AsyncNodeLoader task in loader.Values) {
                         task.Cancel();
                     }
@@ -482,13 +474,12 @@ namespace CmisSync {
             }
         }
 
-        private void ShowCustomizePage()
-        {
+        private void ShowCustomizePage() {
             this.Header = Properties_Resources.Customize;
             string localfoldername = this.controller.saved_address.Host.ToString();
-            foreach (KeyValuePair<string, string> repository in this.controller.repositories) {
-                if (repository.Key == this.controller.saved_repository) {
-                    localfoldername += "/" + repository.Value;
+            foreach (var repository in this.controller.repositories) {
+                if (repository.Id == this.controller.saved_repository) {
+                    localfoldername += "/" + repository.Name;
                     break;
                 }
             }
@@ -611,8 +602,7 @@ namespace CmisSync {
             localfolder_entry.SelectRegion(0, localfolder_entry.Text.Length);
         }
 
-        private void ShowSyncingPage()
-        {
+        private void ShowSyncingPage() {
             this.Header = Properties_Resources.AddingFolder
                 + " ‘" + this.controller.SyncingReponame + "’…";
             this.Description = Properties_Resources.MayTakeTime;
@@ -625,8 +615,7 @@ namespace CmisSync {
             this.AddButton(finish_button);
         }
 
-        private void ShowFinishedPage()
-        {
+        private void ShowFinishedPage() {
             this.UrgencyHint = true;
 
             this.Header = Properties_Resources.Ready;
@@ -652,8 +641,7 @@ namespace CmisSync {
             this.AddButton(finish_button);
         }
 
-        private void ShowTutorialPage()
-        {
+        private void ShowTutorialPage() {
             switch (this.controller.TutorialCurrentPage) {
             case 1:
             {
@@ -735,8 +723,7 @@ namespace CmisSync {
             }
         }
 
-        public Setup() : base()
-        {
+        public Setup() : base() {
             this.controller.HideWindowEvent += delegate {
                 Application.Invoke(delegate {
                     this.HideAll();
@@ -783,8 +770,7 @@ namespace CmisSync {
                     this.ShowAll();
                 });
             };
-            this.DeleteEvent += delegate
-            {
+            this.DeleteEvent += delegate {
                 this.controller.PageCancelled();
             };
         }

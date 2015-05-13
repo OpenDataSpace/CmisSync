@@ -30,6 +30,6 @@ namespace CmisSync.Lib.Events {
         /// The returned value should never ever change its value after requesting it the first time.
         /// </summary>
         /// <value>The event category.</value>
-        string Category { get; }
+        EventCategory Category { get; }
     }
 }

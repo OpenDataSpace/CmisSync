@@ -17,15 +17,16 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer
-{
+namespace CmisSync.Lib.Consumer {
     using System;
     using System.Diagnostics;
     using System.IO;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Consumer.SituationSolver;
-    using CmisSync.Lib.Filter;
+    using CmisSync.Lib.Consumer.SituationSolver.PWC;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Filter;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
 
@@ -36,8 +37,7 @@ namespace CmisSync.Lib.Consumer
     /// <summary>
     /// Sync mechanism.
     /// </summary>
-    public class SyncMechanism : ReportingSyncEventHandler
-    {
+    public class SyncMechanism : ReportingSyncEventHandler {
         /// <summary>
         /// All available solver.
         /// </summary>
@@ -59,9 +59,10 @@ namespace CmisSync.Lib.Consumer
         /// <param name="queue">Sync event queue.</param>
         /// <param name="session">CMIS Session.</param>
         /// <param name="storage">Meta data storage.</param>
+        /// <param name="transmissionStorage">File transmission storage.</param>
         /// <param name="activityListener">Active sync progress listener.</param>
+        /// <param name="filters">Ignore filter.</param>
         /// <param name="solver">Solver for custom solver matrix.</param>
-        /// <param name="isServerAbleToUpdateModificationDate">Enables the modification date sync feature.</param>
         public SyncMechanism(
             ISituationDetection<AbstractFolderEvent> localSituation,
             ISituationDetection<AbstractFolderEvent> remoteSituation,
@@ -81,13 +82,11 @@ namespace CmisSync.Lib.Consumer
                 throw new ArgumentNullException("Given storage is null");
             }
 
-            if (transmissionStorage == null)
-            {
+            if (transmissionStorage == null) {
                 throw new ArgumentNullException("Given fileTransmissionStorage is null");
             }
 
-            if (localSituation == null)
-            {
+            if (localSituation == null) {
                 throw new ArgumentNullException("Given local situation detection is null");
             }
 
@@ -128,11 +127,9 @@ namespace CmisSync.Lib.Consumer
         /// </summary>
         /// <param name="e">FileEvent or FolderEvent</param>
         /// <returns><c>true</c> if the Event has been handled, otherwise <c>false</c></returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             if (e is AbstractFolderEvent) {
                 var folderEvent = e as AbstractFolderEvent;
-
                 try {
                     this.DoHandle(folderEvent);
                 } catch (RetryException retry) {
@@ -141,6 +138,8 @@ namespace CmisSync.Lib.Consumer
                     this.Queue.AddEvent(folderEvent);
                 } catch (InteractionNeededException interaction) {
                     this.Queue.AddEvent(new InteractionNeededEvent(interaction));
+                } catch (DotCMIS.Exceptions.CmisConnectionException) {
+                    throw;
                 } catch (Exception ex) {
                     Logger.Debug("Exception in SyncMechanism, requesting FullSync and rethrowing", ex);
                     this.Queue.AddEvent(new StartNextSyncEvent(true));
@@ -153,17 +152,24 @@ namespace CmisSync.Lib.Consumer
             return false;
         }
 
-        private ISolver[,] CreateSolver()
-        {
+        private ISolver[,] CreateSolver() {
             int dim = Enum.GetNames(typeof(SituationType)).Length;
             ISolver[,] solver = new ISolver[dim, dim];
-            var changeChangeSolver = new LocalObjectChangedRemoteObjectChanged(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
-            var renameRenameSolver = new LocalObjectRenamedRemoteObjectRenamed(this.session, this.storage, changeChangeSolver);
-            var renameChangeSolver = new LocalObjectRenamedRemoteObjectChanged(this.session, this.storage, changeChangeSolver);
+            ISolver changeChangeSolver = new LocalObjectChangedRemoteObjectChanged(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
+            ISolver addedNochangeSolver = new LocalObjectAdded(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
+            ISolver changedNoChangeSolver = new LocalObjectChanged(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
+            if (this.session.ArePrivateWorkingCopySupported()) {
+                addedNochangeSolver = new LocalObjectAddedWithPWC(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager, addedNochangeSolver);
+                changedNoChangeSolver = new LocalObjectChangedWithPWC(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager, changedNoChangeSolver);
+                changeChangeSolver = new LocalObjectChangedRemoteObjectChangedWithPWC(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager, changeChangeSolver);
+            }
+
+            ISolver renameRenameSolver = new LocalObjectRenamedRemoteObjectRenamed(this.session, this.storage, changeChangeSolver);
+            ISolver renameChangeSolver = new LocalObjectRenamedRemoteObjectChanged(this.session, this.storage, changeChangeSolver);
 
             solver[(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = new NothingToDoSolver();
-            solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] = new LocalObjectAdded(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
-            solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] = new LocalObjectChanged(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
+            solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] = addedNochangeSolver;
+            solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] = changedNoChangeSolver;
             solver[(int)SituationType.MOVED, (int)SituationType.NOCHANGE] = new LocalObjectMoved(this.session, this.storage);
             solver[(int)SituationType.RENAMED, (int)SituationType.NOCHANGE] = new LocalObjectRenamed(this.session, this.storage);
             solver[(int)SituationType.REMOVED, (int)SituationType.NOCHANGE] = new LocalObjectDeleted(this.session, this.storage);
@@ -197,8 +203,7 @@ namespace CmisSync.Lib.Consumer
             return solver;
         }
 
-        private void DoHandle(AbstractFolderEvent actualEvent)
-        {
+        private void DoHandle(AbstractFolderEvent actualEvent) {
             SituationType localSituation = this.LocalSituation.Analyse(this.storage, actualEvent);
             SituationType remoteSituation = this.RemoteSituation.Analyse(this.storage, actualEvent);
             ISolver solver = this.Solver[(int)localSituation, (int)remoteSituation];
@@ -213,8 +218,7 @@ namespace CmisSync.Lib.Consumer
             Logger.Debug(string.Format("Solver {0} took {1} ms", solver.GetType(), watch.ElapsedMilliseconds));
         }
 
-        private void Solve(ISolver s, AbstractFolderEvent e)
-        {
+        private void Solve(ISolver s, AbstractFolderEvent e) {
             using (var activity = new ActivityListenerResource(this.activityListener)) {
                 if (e is FolderEvent) {
                     s.Solve((e as FolderEvent).LocalFolder, (e as FolderEvent).RemoteFolder, ContentChangeType.NONE, ContentChangeType.NONE);

@@ -17,12 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Status
-{
+namespace CmisSync.Lib.Status {
     using System;
 
-    public enum RepositoryStatus
-    {
+    /// <summary>
+    /// Repository status.
+    /// </summary>
+    public enum RepositoryStatus {
         Initialize, Blocked, ConfigNeeded, SyncActivated, Paused, Deactivated
     }
 }

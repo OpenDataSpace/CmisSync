@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.IO;
 
@@ -38,9 +37,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestUtils;
 
     [TestFixture]
-    public class LocalObjectChangedRemoteObjectMovedTest
-    {
-        private ActiveActivitiesManager manager;
+    public class LocalObjectChangedRemoteObjectMovedTest {
+        private TransmissionManager manager;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileSystemInfoFactory> fsFactory;
@@ -163,7 +161,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         private void SetUpMocks() {
-            this.manager = new ActiveActivitiesManager();
+            this.manager = new TransmissionManager();
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
@@ -178,4 +176,3 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
     }
 }
-

@@ -17,24 +17,22 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.Database.Entities
-{
+namespace CmisSync.Lib.Storage.Database.Entities {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
 
-    using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
 
     /// <summary>
     /// Interface for a file transmission object. A file transmission object is a record for a upload/download file transmission.
     /// </summary>
-    public interface IFileTransmissionObject
-    {
+    public interface IFileTransmissionObject {
         /// <summary>
         /// Gets the type
         /// </summary>
-        FileTransmissionType Type { get; }
+        TransmissionType Type { get; }
 
         /// <summary>
         /// Gets the local file path 
@@ -87,6 +85,12 @@ namespace CmisSync.Lib.Storage.Database.Entities
         /// </summary>
         /// <value>The last change token of last action make on CMIS server</value>
         string LastChangeTokenPWC { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last file content checksum for CMIS server remote object private working copy
+        /// </summary>
+        /// <value>The last file content checksum for local file</value>
+        byte[] LastChecksumPWC { get; set; }
 
         /// <summary>
         /// Gets or sets the last remote write time in UTC

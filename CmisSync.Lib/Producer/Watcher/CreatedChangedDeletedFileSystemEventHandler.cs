@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Producer.Watcher
-{
+namespace CmisSync.Lib.Producer.Watcher {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -35,8 +34,7 @@ namespace CmisSync.Lib.Producer.Watcher
     /// <summary>
     /// Created/Changed/Deleted file system events handler to report the events to the given queue.
     /// </summary>
-    public class CreatedChangedDeletedFileSystemEventHandler : IDisposable
-    {
+    public class CreatedChangedDeletedFileSystemEventHandler : IDisposable {
         /// <summary>
         /// The timer. Exposed to allow testability
         /// </summary>
@@ -97,7 +95,8 @@ namespace CmisSync.Lib.Producer.Watcher
             try {
                 bool isDirectory = false;
                 if (e.ChangeType == WatcherChangeTypes.Deleted) {
-                    var obj = this.storage.GetObjectByLocalPath(this.fsFactory.CreateFileInfo(e.FullPath));
+                    var path = this.fsFactory.CreateFileInfo(e.FullPath);
+                    var obj = this.storage.GetObjectByLocalPath(path);
                     Guid guid = Guid.Empty;
                     if (obj != null) {
                         isDirectory = obj.Type == MappedObjectType.Folder;
@@ -141,8 +140,7 @@ namespace CmisSync.Lib.Producer.Watcher
         /// <see cref="CmisSync.Lib.Producer.Watcher.CreatedChangedDeletedFileSystemEventHandler"/> so the garbage
         /// collector can reclaim the memory that the
         /// <see cref="CmisSync.Lib.Producer.Watcher.CreatedChangedDeletedFileSystemEventHandler"/> was occupying.</remarks>
-        public void Dispose()
-        {
+        public void Dispose() {
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -151,8 +149,7 @@ namespace CmisSync.Lib.Producer.Watcher
         /// Dispose the internal timer.
         /// </summary>
         /// <param name="disposing">If set to <c>true</c> disposing.</param>
-        protected virtual void Dispose(bool disposing)
-        {
+        protected virtual void Dispose(bool disposing) {
             // Check to see if Dispose has already been called.
             if (!this.disposed) {
                 if (disposing) {

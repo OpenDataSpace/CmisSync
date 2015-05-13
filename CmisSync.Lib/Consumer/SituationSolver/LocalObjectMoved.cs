@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
 
@@ -35,8 +34,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// A Local object has been moved. => Move the corresponding object on the server.
     /// </summary>
-    public class LocalObjectMoved : AbstractEnhancedSolver
-    {
+    public class LocalObjectMoved : AbstractEnhancedSolver {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectMoved"/> class.
         /// </summary>

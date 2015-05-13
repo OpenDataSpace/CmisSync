@@ -20,7 +20,16 @@
 namespace CmisSync.Lib.Storage.FileSystem {
     using System;
 
+    /// <summary>
+    /// Date time to file converter.
+    /// </summary>
     public class DateTimeToFileConverter {
+        /// <summary>
+        /// Convert the specified originalDate based on fsType to the documented limits of the fs type.
+        /// </summary>
+        /// <param name="originalDate">Original date.</param>
+        /// <param name="fsType">File system type.</param>
+        /// <returns>Fitting datetime</returns>
         public static DateTime Convert(DateTime originalDate, FSType fsType) {
 #if __MonoCS__
             // https://bugzilla.xamarin.com/show_bug.cgi?id=23933

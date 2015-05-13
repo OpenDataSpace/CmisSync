@@ -16,8 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Queueing
-{
+namespace CmisSync.Lib.Queueing {
     using System;
 
     using CmisSync.Lib.Events;
@@ -27,8 +26,7 @@ namespace CmisSync.Lib.Queueing
     /// <summary>
     /// Base class for all Event-Handlers
     /// </summary>
-    public abstract class SyncEventHandler : IComparable<SyncEventHandler>, IComparable
-    {
+    public abstract class SyncEventHandler : IComparable<SyncEventHandler>, IComparable {
         /// <summary>
         /// Gets the priority.
         /// </summary>
@@ -68,7 +66,7 @@ namespace CmisSync.Lib.Queueing
         // CompareTo is implemented for Sorting EventHandlers
         // Equals is not implemented because EventHandler removal shall work by Object.Equals
         int IComparable.CompareTo(object obj) {
-            if(!(obj is SyncEventHandler)) {
+            if (!(obj is SyncEventHandler)) {
                 throw new ArgumentException("Argument is not a SyncEventHandler", "obj");
             }
 

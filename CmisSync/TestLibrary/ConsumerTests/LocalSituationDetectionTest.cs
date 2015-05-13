@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests
-{
+namespace TestLibrary.ConsumerTests {
     using System;
     using System.IO;
 
@@ -38,8 +37,7 @@ namespace TestLibrary.ConsumerTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class LocalSituationDetectionTest
-    {
+    public class LocalSituationDetectionTest {
         private LocalSituationDetection underTest = new LocalSituationDetection();
 
         [Test, Category("Fast"), Category("SituationDetection")]
@@ -92,7 +90,7 @@ namespace TestLibrary.ConsumerTests
         [Test, Category("Fast"), Category("SituationDetection")]
         public void FileMovedWithoutStorageEntry() {
             var fileInfo = Mock.Of<IFileInfo>(f => f.Exists == true);
-            var fileEvent = new FileEvent(fileInfo) { Local = MetaDataChangeType.MOVED};
+            var fileEvent = new FileEvent(fileInfo) { Local = MetaDataChangeType.MOVED };
 
             Assert.That(this.underTest.Analyse(Mock.Of<IMetaDataStorage>(), fileEvent), Is.EqualTo(SituationType.MOVED));
         }
@@ -123,8 +121,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast"), Category("SituationDetection")]
-        public void FolderRemoved()
-        {
+        public void FolderRemoved() {
             var folderEvent = new FolderEvent(Mock.Of<IDirectoryInfo>()) { Local = MetaDataChangeType.DELETED };
 
             Assert.That(this.underTest.Analyse(Mock.Of<IMetaDataStorage>(), folderEvent), Is.EqualTo(SituationType.REMOVED));

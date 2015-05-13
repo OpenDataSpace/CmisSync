@@ -45,6 +45,14 @@ namespace CmisSync.Lib.Queueing
         ISyncEventManager EventManager { get; }
 
         /// <summary>
+        /// Gets a value indicating whether this instance is empty.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is empty; otherwise, <c>false</c>.
+        /// </value>
+        bool IsEmpty { get; }
+
+        /// <summary>
         /// Adds the event.
         /// </summary>
         /// <param name='newEvent'>
@@ -62,13 +70,5 @@ namespace CmisSync.Lib.Queueing
         /// Continue the queue consumer if it is suspended.
         /// </summary>
         void Continue();
-
-        /// <summary>
-        /// Gets a value indicating whether this instance is empty.
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if this instance is empty; otherwise, <c>false</c>.
-        /// </value>
-        bool IsEmpty { get; }
     }
 }

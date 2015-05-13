@@ -46,6 +46,7 @@ namespace CmisSync.Lib.Queueing {
         private object connectionLock = new object();
         private object repoInfoLock = new object();
         private DateTime isForbiddenUntil = DateTime.MinValue;
+        private DateTime? lastSuccessfulLogin = null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.ConnectionScheduler"/> class.
@@ -166,32 +167,45 @@ namespace CmisSync.Lib.Queueing {
                 if (changedConfig != null) {
                     lock(this.repoInfoLock) {
                         this.RepoInfo = changedConfig;
-                        this.isForbiddenUntil = DateTime.MinValue;
-                        lock(this.connectionLock) {
-                            if (this.task != null) {
-                                try {
-                                    this.cancelTaskSource.Cancel();
-                                    this.task.Wait(this.Interval);
-                                    this.task.Dispose();
-                                } catch (InvalidOperationException) {
-                                    // Disposing the login task before it is finished is not a problem.
-                                } catch (TaskCanceledException) {
-                                    // It is also fine if the task is canceled
-                                } catch (AggregateException) {
-                                    // It is also fine if the task is canceled
-                                } finally {
-                                    this.cancelTaskSource.Dispose();
-                                    this.task = null;
-                                }
-                            }
-
-                            this.Start();
-                        }
+                        // Reconnect
+                        this.Reconnect();
                     }
                 }
+            } else if (e is CmisConnectionExceptionEvent) {
+                var connectionEvent = e as CmisConnectionExceptionEvent;
+                if (this.lastSuccessfulLogin != null && connectionEvent.OccuredAt > (DateTime)this.lastSuccessfulLogin) {
+                    // Reconnect
+                    this.Reconnect();
+                }
+
+                return true;
             }
 
             return false;
+        }
+
+        private void Reconnect() {
+            this.isForbiddenUntil = DateTime.MinValue;
+            lock(this.connectionLock) {
+                if (this.task != null) {
+                    try {
+                        this.cancelTaskSource.Cancel();
+                        this.task.Wait(this.Interval);
+                        this.task.Dispose();
+                    } catch (InvalidOperationException) {
+                        // Disposing the login task before it is finished is not a problem.
+                    } catch (TaskCanceledException) {
+                        // It is also fine if the task is canceled
+                    } catch (AggregateException) {
+                        // It is also fine if the task is canceled
+                    } finally {
+                        this.cancelTaskSource.Dispose();
+                        this.task = null;
+                    }
+                }
+
+                this.Start();
+            }
         }
 
         /// <summary>
@@ -211,6 +225,7 @@ namespace CmisSync.Lib.Queueing {
                     session.DefaultContext = OperationContextFactory.CreateDefaultContext(session);
                     this.cancelToken.ThrowIfCancellationRequested();
                     this.Queue.AddEvent(new SuccessfulLoginEvent(this.RepoInfo.Address, session));
+                    this.lastSuccessfulLogin = DateTime.Now;
                     return true;
                 } catch (DotCMIS.Exceptions.CmisPermissionDeniedException e) {
                     Logger.Info(string.Format("Failed to connect to server {0}", this.RepoInfo.Address.ToString()), e);
@@ -232,6 +247,9 @@ namespace CmisSync.Lib.Queueing {
                     this.isForbiddenUntil = DateTime.MaxValue;
                 } catch (CmisObjectNotFoundException e) {
                     Logger.Error("Failed to find cmis object: ", e);
+                } catch (CmisConnectionException e) {
+                    Logger.Info(string.Format("Failed to create connection to \"{0}\". Will try again in {1} ms", this.RepoInfo.Address.ToString(), this.Interval));
+                    Logger.Debug(string.Empty, e);
                 } catch (CmisBaseException e) {
                     Logger.Error("Failed to create session to remote " + this.RepoInfo.Address.ToString() + ": ", e);
                 }

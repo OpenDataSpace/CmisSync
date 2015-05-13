@@ -16,39 +16,34 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using Gdk;
-using Gtk;
 
-namespace CmisSync.CmisTree
-{
+namespace CmisSync.CmisTree {
+    using System;
+    using Gdk;
+    using Gtk;
     /// <summary>
     /// LoadingStatus cell renderer.
     /// </summary>
     [CLSCompliant(false)]
-    public class StatusCellRenderer : Gtk.CellRendererText
-    {
+    public class StatusCellRenderer : Gtk.CellRendererText {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.CmisTree.StatusCellRenderer"/> class with the given foreground color
         /// </summary>
         /// <param name='foreground'>
         /// Foreground.
         /// </param>
-        public StatusCellRenderer (Gdk.Color foreground) : base()
-        {
+        public StatusCellRenderer(Gdk.Color foreground) : base() {
             base.ForegroundGdk = foreground;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.CmisTree.StatusCellRenderer"/> class with a default foreground color
         /// </summary>
-        public StatusCellRenderer () : base()
-        {
+        public StatusCellRenderer() : base() {
             Gdk.Color foreground = new Gdk.Color();
             /// Default color is a light gray
-            Gdk.Color.Parse ("#999", ref foreground);
+            Gdk.Color.Parse("#999", ref foreground);
             base.ForegroundGdk = foreground;
         }
     }
 }
-

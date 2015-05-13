@@ -88,9 +88,7 @@ namespace CmisSync.Lib.Storage.Database {
                 try {
                     this.ValidateObjectStructure();
                 } catch(InvalidDataException e) {
-                    Logger.Debug("Database object structure is invalid", e);
-                    Logger.Debug(this.ToString());
-                    Logger.Debug(this.ToFindString());
+                    Logger.Fatal("Database object structure is invalid", e);
                 }
             }
         }
@@ -481,10 +479,8 @@ namespace CmisSync.Lib.Storage.Database {
                 } else {
                     throw new InvalidDataException(
                         string.Format(
-                        "root object is missing but {0} objects are stored{1}{2}",
-                        objects.Count,
-                        Environment.NewLine,
-                        this.ToString()));
+                        "root object is missing but {0} objects are stored",
+                        objects.Count));
                 }
             }
 
@@ -497,10 +493,9 @@ namespace CmisSync.Lib.Storage.Database {
 
                 throw new InvalidDataException(
                     string.Format(
-                    "This objects are referencing to a not existing parentId: {0}{1}{0}{2}",
+                    "This objects are referencing to a not existing parentId: {0}{1}",
                     Environment.NewLine,
-                    sb.ToString(),
-                    this.ToString()));
+                    sb.ToString()));
             }
         }
 
@@ -643,7 +638,7 @@ namespace CmisSync.Lib.Storage.Database {
 
             MappedObject entry = value.Get;
             pathSegments.Push(entry.Name);
-            while(entry.ParentId != null) {
+            while (entry.ParentId != null) {
                 id = entry.ParentId;
                 entry = tran.Select<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, id).Value.Get;
                 pathSegments.Push(entry.Name);

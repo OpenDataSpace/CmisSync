@@ -80,11 +80,9 @@ namespace CmisSync
 
             //  Must be called after InsertEvent()
             string name = Controller.saved_address.Host.ToString();
-            foreach (KeyValuePair<String, String> repository in Controller.repositories)
-            {
-                if (repository.Key == Controller.saved_repository)
-                {
-                    name += "/" + repository.Value;
+            foreach (var repository in Controller.repositories) {
+                if (repository.Id == Controller.saved_repository) {
+                    name += "/" + repository.Name;
                     break;
                 }
             }

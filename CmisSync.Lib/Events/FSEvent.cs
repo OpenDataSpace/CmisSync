@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
     using System.IO;
 
@@ -28,14 +27,7 @@ namespace CmisSync.Lib.Events
     /// <exception cref='ArgumentNullException'>
     /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
     /// </exception>
-    public class FSEvent : IFSEvent
-    {
-        /// <summary>
-        /// Gets a value indicating whether this instance is pointing to a directory.
-        /// </summary>
-        /// <value><c>true</c> if this is directory; otherwise, <c>false</c>.</value>
-        public bool IsDirectory { get; private set; }
-
+    public class FSEvent : IFSEvent {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FSEvent"/> class.
         /// </summary>
@@ -51,8 +43,7 @@ namespace CmisSync.Lib.Events
         /// <exception cref='ArgumentNullException'>
         /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
         /// </exception>
-        public FSEvent(WatcherChangeTypes type, string path, bool isDirectory)
-        {
+        public FSEvent(WatcherChangeTypes type, string path, bool isDirectory) {
             if (path == null) {
                 throw new ArgumentNullException("Argument null in FSEvent Constructor", "path");
             }
@@ -63,6 +54,12 @@ namespace CmisSync.Lib.Events
             this.IsDirectory = isDirectory;
             this.Name = fileSystemInfo.Name;
         }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is pointing to a directory.
+        /// </summary>
+        /// <value><c>true</c> if this is directory; otherwise, <c>false</c>.</value>
+        public bool IsDirectory { get; private set; }
 
         /// <summary>
         /// Gets the type.
@@ -91,9 +88,9 @@ namespace CmisSync.Lib.Events
         /// The returned value should never ever change its value after requesting it the first time.
         /// </summary>
         /// <value>The event category is "DetectedChange".</value>
-        public string Category {
+        public EventCategory Category {
             get {
-                return "DetectedChange";
+                return EventCategory.DetectedChange;
             }
         }
 
@@ -103,8 +100,7 @@ namespace CmisSync.Lib.Events
         /// <returns>
         /// A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FSEvent"/>.
         /// </returns>
-        public override string ToString()
-        {
+        public override string ToString() {
             return string.Format("FSEvent with type \"{0}\" on path \"{1}\" and the name \"{2}\"", this.Type, this.LocalPath, this.Name);
         }
     }

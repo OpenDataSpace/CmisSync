@@ -46,6 +46,7 @@ namespace CmisSync {
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.FileSystem;
@@ -77,7 +78,7 @@ namespace CmisSync {
         /// </summary>
         private ActivityListenerAggregator activityListenerAggregator;
 
-        private ActiveActivitiesManager transmissionManager;
+        private TransmissionManager transmissionManager;
 
         /// <summary>
         /// Concurrency locks.
@@ -91,13 +92,6 @@ namespace CmisSync {
         /// List of the CmisSync synchronized folders.
         /// </summary>
         private List<Repository> repositories = new List<Repository>();
-
-        /// <summary>
-        /// A list of repositories sent to suspend because of a sleep event.
-        /// </summary>
-        private List<Repository> sleepingRepositories = new List<Repository>();
-
-        private List<IDisposable> repoUnsubscriber = new List<IDisposable>();
 
         /// <summary>
         /// Dictionary of the edit folder diaglogs
@@ -115,6 +109,8 @@ namespace CmisSync {
         /// Is this controller disposed already?
         /// </summary>
         private bool disposed = false;
+
+        private RepositoryStatusAggregator statusAggregator = new RepositoryStatusAggregator();
 
         /// <summary>
         /// Gets a value indicating whether the reporsitories have finished loading.
@@ -154,6 +150,12 @@ namespace CmisSync {
 
         public event Action OnError = delegate { };
 
+        public event Action OnDisconnected = delegate { };
+
+        public event Action OnPaused = delegate { };
+
+        public event Action OnDeactivated = delegate { };
+
         public event AlertNotificationRaisedEventHandler AlertNotificationRaised = delegate { };
 
         public delegate void AlertNotificationRaisedEventHandler(string title, string message);
@@ -179,7 +181,7 @@ namespace CmisSync {
         /// </summary>
         public ControllerBase() {
             this.FoldersPath = ConfigManager.CurrentConfig.GetFoldersPath();
-            this.transmissionManager = new ActiveActivitiesManager();
+            this.transmissionManager = new TransmissionManager();
             this.activityListenerAggregator = new ActivityListenerAggregator(this, this.transmissionManager);
             this.transmissionManager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
                 this.OnTransmissionListChanged();
@@ -195,6 +197,32 @@ namespace CmisSync {
                         SetupBrand();
                     }
                 }).Start();
+            };
+
+            this.statusAggregator.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) => {
+                switch (this.statusAggregator.Status) {
+                case SyncStatus.Idle:
+                    this.OnIdle();
+                    break;
+                case SyncStatus.Synchronizing:
+                    this.OnSyncing();
+                    break;
+                case SyncStatus.Warning:
+                    this.OnError();
+                    break;
+                case SyncStatus.Disconnected:
+                    this.OnDisconnected();
+                    break;
+                case SyncStatus.Suspend:
+                    this.OnPaused();
+                    break;
+                case SyncStatus.Deactivated:
+                    this.OnDeactivated();
+                    break;
+                default:
+                    this.OnIdle();
+                    break;
+                }
             };
         }
 
@@ -268,7 +296,7 @@ namespace CmisSync {
         /// List of actives transmissions.
         /// </summary>
         /// <returns>The transmissions.</returns>
-        public List<FileTransmissionEvent> ActiveTransmissions() {
+        public List<Transmission> ActiveTransmissions() {
             return this.transmissionManager.ActiveTransmissionsAsList();
         }
 
@@ -353,7 +381,7 @@ namespace CmisSync {
                     if (repo.Name == repoName) {
                         if (repo.Status != SyncStatus.Suspend) {
                             repo.Suspend();
-                            Logger.Debug("Requested to syspend sync of repo " + repo.Name);
+                            Logger.Debug("Requested to suspend sync of repo " + repo.Name);
                         } else {
                             repo.Resume();
                             Logger.Debug("Requested to resume sync of repo " + repo.Name);
@@ -371,22 +399,15 @@ namespace CmisSync {
                 foreach (var repo in this.Repositories) {
                     if (repo.Status != SyncStatus.Suspend) {
                         repo.Suspend();
-                        this.sleepingRepositories.Add(repo);
                     }
                 }
 
                 Logger.Debug("Start to stop all active file transmissions");
                 int wait = 0;
                 do {
-                    List<FileTransmissionEvent> activeList = this.transmissionManager.ActiveTransmissionsAsList();
-                    foreach (FileTransmissionEvent transmissionEvent in activeList) {
-                        if (transmissionEvent.Status.Aborted.GetValueOrDefault()) {
-                            continue;
-                        }
-
-                        if (!transmissionEvent.Status.Aborting.GetValueOrDefault()) {
-                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = true });
-                        }
+                    List<Transmission> activeList = this.transmissionManager.ActiveTransmissionsAsList();
+                    foreach (var transmission in activeList) {
+                        transmission.Abort();
                     }
 
                     if (activeList.Count > 0) {
@@ -407,11 +428,9 @@ namespace CmisSync {
         /// </summary>
         public void StartAll() {
             lock (this.repoLock) {
-                foreach (var repo in this.sleepingRepositories) {
+                foreach (var repo in this.repositories) {
                     repo.Resume();
                 }
-
-                this.sleepingRepositories.Clear();
             }
         }
 
@@ -512,10 +531,6 @@ namespace CmisSync {
                 lock(this.repoLock) {
                     foreach (var repo in this.repositories) {
                         repo.Dispose();
-                    }
-
-                    foreach (var unsubscriber in this.repoUnsubscriber) {
-                        unsubscriber.Dispose();
                     }
                 }
             }
@@ -642,24 +657,30 @@ namespace CmisSync {
         private void AddRepository(RepoInfo repositoryInfo) {
             try {
                 Repository repo = new Repository(repositoryInfo, this.activityListenerAggregator);
-                this.repoUnsubscriber.Add(repo.Queue.Subscribe((IObserver<Tuple<string, int>>)new CountingSubscriber(this.activityListenerAggregator)));
-                repo.SyncStatusChanged += delegate(SyncStatus status) {
-                    this.UpdateState();
+                this.transmissionManager.AddPathRepoMapping(repositoryInfo.LocalPath, repositoryInfo.DisplayName);
+                repo.ShowException += (object sender, RepositoryExceptionEventArgs e) => {
+                    string msg = string.Empty;
+                    switch (e.Type) {
+                    case ExceptionType.LocalSyncTargetDeleted:
+                        msg = string.Format(Properties_Resources.LocalRootFolderUnavailable, repositoryInfo.LocalPath);
+                        break;
+                    default:
+                        msg = e.Exception != null ? e.Exception.Message : Properties_Resources.UnknownExceptionOccured;
+                        break;
+                    }
+
+                    switch (e.Level) {
+                    case ExceptionLevel.Fatal:
+                        this.AlertNotificationRaised(string.Format(Properties_Resources.FatalExceptionTitle, repositoryInfo.DisplayName), msg);
+                        break;
+                    case ExceptionLevel.Warning:
+                        this.ShowException(string.Format(Properties_Resources.WarningExceptionTitle, repositoryInfo.DisplayName), msg);
+                        break;
+                    default:
+                        this.ShowException(string.Format(Properties_Resources.WarningExceptionTitle, repositoryInfo.DisplayName), msg);
+                        break;
+                    }
                 };
-                repo.Queue.EventManager.AddEventHandler(
-                    new GenericSyncEventHandler<FileTransmissionEvent>(
-                    50,
-                    delegate(ISyncEvent e) {
-                    FileTransmissionEvent transEvent = e as FileTransmissionEvent;
-                    transEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
-                        if (args.Aborted == true && args.FailedException != null) {
-                            this.ShowException(
-                                string.Format(Properties_Resources.TransmissionFailedOnRepo, repo.Name),
-                                string.Format("{0}{1}{2}", transEvent.Path, Environment.NewLine, args.FailedException.Message));
-                        }
-                    };
-                    return false;
-                }));
                 repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>());
                 repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<ProxyAuthRequiredEvent, SuccessfulLoginEvent>());
                 repo.Queue.EventManager.AddEventHandler(
@@ -712,6 +733,7 @@ namespace CmisSync {
                     return false;
                 }));
                 this.repositories.Add(repo);
+                this.statusAggregator.Add(repo);
                 repo.Initialize();
             } catch (ExtendedAttributeException extendedAttributeException) {
                 this.ShowException(
@@ -791,6 +813,8 @@ namespace CmisSync {
                 if (repo.LocalPath.Equals(folder.LocalPath)) {
                     repo.Dispose();
                     this.repositories.Remove(repo);
+                    this.statusAggregator.Remove(repo);
+                    repo.Dispose();
                     break;
                 }
             }
@@ -839,13 +863,6 @@ namespace CmisSync {
         }
 
         /// <summary>
-        /// Fires events for the current syncing state.
-        /// </summary>
-        private void UpdateState() {
-            this.OnIdle();
-        }
-
-        /// <summary>
         /// Fix the file attributes of a folder, recursively.
         /// </summary>
         /// <param name="path">Folder to fix</param>
@@ -865,53 +882,6 @@ namespace CmisSync {
             foreach (string file in files) {
                 if (!CmisSync.Lib.Utils.IsSymlink(file)) {
                     File.SetAttributes(file, FileAttributes.Normal);
-                }
-            }
-        }
-
-        private class CountingSubscriber : IObserver<Tuple<string, int>> {
-            private ActivityListenerAggregator aggregator;
-            private object activeLock = new object();
-            private bool activeSync = false;
-            private bool changeDetected = false;
-
-            public CountingSubscriber(ActivityListenerAggregator aggregator) {
-                this.aggregator = aggregator;
-            }
-
-            public void OnCompleted() {
-            }
-
-            public void OnError(Exception e) {
-            }
-
-            public virtual void OnNext(Tuple<string, int> changeCounter) {
-                lock (this.activeLock) {
-                    if (changeCounter.Item1 == "DetectedChange") {
-                        if (changeCounter.Item2 > 0) {
-                            if (!this.changeDetected) {
-                                this.changeDetected = true;
-                                this.aggregator.ActivityStarted();
-                            }
-                        } else {
-                            if (this.changeDetected) {
-                                this.changeDetected = false;
-                                this.aggregator.ActivityStopped();
-                            }
-                        }
-                    } else if (changeCounter.Item1 == "SyncRequested") {
-                        if (changeCounter.Item2 > 0) {
-                            if (!this.activeSync) {
-                                this.activeSync = true;
-                                this.aggregator.ActivityStarted();
-                            }
-                        } else {
-                            if (this.activeSync) {
-                                this.activeSync = false;
-                                this.aggregator.ActivityStopped();
-                            }
-                        }
-                    }
                 }
             }
         }

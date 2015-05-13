@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.EventsTests
-{
+namespace TestLibrary.EventsTests {
     using System;
 
     using CmisSync.Lib.Events;
@@ -33,33 +32,28 @@ namespace TestLibrary.EventsTests
     using TestUtils;
 
     [TestFixture]
-    public class FileEventTest
-    {
+    public class FileEventTest {
         [Test, Category("Fast")]
-        public void ConstructorTakesIFileInfoInstance()
-        {
+        public void ConstructorTakesIFileInfoInstance() {
             var file = Mock.Of<IFileInfo>();
             var ev = new FileEvent(file);
             Assert.That(ev.LocalFile, Is.EqualTo(file));
         }
 
         [Test, Category("Fast")]
-        public void ConstructorTakesRemoteFile()
-        {
+        public void ConstructorTakesRemoteFile() {
             var file = Mock.Of<IDocument>();
             var ev = new FileEvent(null, file);
             Assert.That(ev.RemoteFile, Is.EqualTo(file));
         }
 
         [Test, Category("Fast")]
-        public void ConstructorFailsOnNullParameter()
-        {
+        public void ConstructorFailsOnNullParameter() {
             Assert.Throws<ArgumentNullException>(() => new FileEvent());
         }
 
         [Test, Category("Fast")]
-        public void EqualityNull()
-        {
+        public void EqualityNull() {
             var localFile = Mock.Of<IFileInfo>();
             var fe = new FileEvent(localFile);
             Assert.That(fe.RemoteFile, Is.Null);
@@ -67,8 +61,7 @@ namespace TestLibrary.EventsTests
         }
 
         [Test, Category("Fast")]
-        public void EqualitySame()
-        {
+        public void EqualitySame() {
             var remoteFile = Mock.Of<IDocument>();
             var fe = new FileEvent(null, remoteFile);
             Assert.That(fe.LocalFile, Is.Null);
@@ -76,8 +69,7 @@ namespace TestLibrary.EventsTests
         }
 
         [Test, Category("Fast")]
-        public void ToStringDoesNotCallPathsBecauseThisIsDamnExpensive()
-        {
+        public void ToStringDoesNotCallPathsBecauseThisIsDamnExpensive() {
             var remoteFile = Mock.Of<IDocument>();
             var fe = new FileEvent(null, remoteFile);
             fe.ToString();
@@ -85,11 +77,10 @@ namespace TestLibrary.EventsTests
         }
 
         [Test, Category("Fast")]
-        public void AbstractFolderEventHasPathAttribute()
-        {
+        public void AbstractFolderEventHasPathAttribute() {
             var localFile = new Mock<IFileInfo>();
             AbstractFolderEvent fe = new FileEvent(localFile.Object);
-            Assert.That(fe.RemotePath, Is.Null);;
+            Assert.That(fe.RemotePath, Is.Null);
         }
 
         [Test, Category("Fast")]

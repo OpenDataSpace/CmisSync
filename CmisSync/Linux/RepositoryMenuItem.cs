@@ -1,6 +1,23 @@
+//-----------------------------------------------------------------------
+// <copyright file="RepositoryMenuItem.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
-namespace CmisSync
-{
+namespace CmisSync {
     using System;
 
     using CmisSync;
@@ -9,7 +26,7 @@ namespace CmisSync
     using Gtk;
 
     [CLSCompliant(false)]
-    public class RepositoryMenuItem : ImageMenuItem, IObserver<Tuple<string, int>> {
+    public class RepositoryMenuItem : ImageMenuItem {
         private StatusIconController controller;
         private ImageMenuItem openLocalFolderItem;
         private ImageMenuItem removeFolderFromSyncItem;
@@ -25,12 +42,28 @@ namespace CmisSync
         private DateTime? changesFoundAt;
         private object counterLock = new object();
         private bool disposed = false;
+        private bool successfulLogin = false;
 
         public RepositoryMenuItem(Repository repo, StatusIconController controller) : base(repo.Name) {
             this.SetProperty("always-show-image", new GLib.Value(true));
             this.repository = repo;
             this.controller = controller;
             this.Image = new Image(UIHelpers.GetIcon("dataspacesync-folder", 16));
+            this.repository.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) => {
+                if (e.PropertyName == CmisSync.Lib.Utils.NameOf((Repository r) => r.Status)) {
+                    this.Status = this.repository.Status;
+                }
+
+                if (e.PropertyName == CmisSync.Lib.Utils.NameOf((Repository r) => r.LastFinishedSync)) {
+                    this.changesFoundAt = this.repository.LastFinishedSync;
+                    this.UpdateStatusText();
+                }
+
+                if (e.PropertyName == CmisSync.Lib.Utils.NameOf((Repository r) => r.NumberOfChanges)) {
+                    this.changesFound = this.repository.NumberOfChanges;
+                    this.UpdateStatusText();
+                }
+            };
 
             this.openLocalFolderItem = new CmisSyncMenuItem(
                 CmisSync.Properties_Resources.OpenLocalFolder) {
@@ -44,7 +77,7 @@ namespace CmisSync
 
             this.suspendItem = new CmisSyncMenuItem(Properties_Resources.PauseSync);
 
-            this.Status = repo.Status;
+            this.Status = this.repository.Status;
 
             this.suspendItem.Activated += this.SuspendSyncFolderDelegate();
             this.statusItem = new MenuItem(Properties_Resources.StatusSearchingForChanges) {
@@ -68,8 +101,6 @@ namespace CmisSync
             subMenu.Add(this.separator2);
             subMenu.Add(this.removeFolderFromSyncItem);
             this.Submenu = subMenu;
-
-            this.repository.Queue.Subscribe(this);
         }
 
         // A method reference that makes sure that opening the
@@ -122,57 +153,25 @@ namespace CmisSync
 
             set {
                 this.status = value;
-                switch (this.status)
-                {
-                case SyncStatus.Idle:
-                    (this.suspendItem.Child as Label).Text = Properties_Resources.PauseSync;
-                    this.suspendItem.Image = new Image(UIHelpers.GetIcon("dataspacesync-pause", 12));
-                    break;
-                case SyncStatus.Suspend:
-                    (this.suspendItem.Child as Label).Text = Properties_Resources.ResumeSync;
-                    this.suspendItem.Image = new Image(UIHelpers.GetIcon("dataspacesync-start", 12));
-                    break;
-                }
+                Application.Invoke(delegate {
+                    switch (this.status)
+                    {
+                    case SyncStatus.Suspend:
+                        (this.suspendItem.Child as Label).Text = Properties_Resources.ResumeSync;
+                        this.suspendItem.Image = new Image(UIHelpers.GetIcon("dataspacesync-start", 12));
+                        this.suspendItem.Sensitive = true;
+                        break;
+                    default:
+                        (this.suspendItem.Child as Label).Text = Properties_Resources.PauseSync;
+                        this.suspendItem.Image = new Image(UIHelpers.GetIcon("dataspacesync-pause", 12));
+                        this.suspendItem.Sensitive = true;
+                        break;
+                    }
+                });
             }
         }
 
         public string RepositoryName { get { return this.repository.Name; } }
-
-        public void OnCompleted() {
-        }
-
-        public void OnError(Exception e) {
-        }
-
-        public virtual void OnNext(Tuple<string, int> changeCounter) {
-            if (changeCounter.Item1 == "DetectedChange") {
-                if (changeCounter.Item2 > 0) {
-                    lock(this.counterLock) {
-                        this.changesFound = changeCounter.Item2;
-                    }
-                } else {
-                    lock(this.counterLock) {
-                        this.changesFound = 0;
-                        this.changesFoundAt = this.syncRequested ? this.changesFoundAt : DateTime.Now;
-                    }
-                }
-
-                this.UpdateStatusText();
-            } else if (changeCounter.Item1 == "SyncRequested" || changeCounter.Item1 == "PeriodicSync") {
-                if (changeCounter.Item2 > 0) {
-                    lock(this.counterLock) {
-                        this.syncRequested = changeCounter.Item1 == "SyncRequested";
-                    }
-                } else {
-                    lock(this.counterLock) {
-                        this.syncRequested = false;
-                        this.changesFoundAt = this.syncRequested ? this.changesFoundAt : DateTime.Now;
-                    }
-                }
-
-                this.UpdateStatusText();
-            }
-        }
 
         /// <summary>
         /// Releases all resource used by the <see cref="CmisSync.RepositoryMenuItem"/> object.
