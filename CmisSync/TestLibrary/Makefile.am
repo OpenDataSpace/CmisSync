@@ -122,6 +122,7 @@ SOURCES =  \
 	IntegrationTests/PrivateWorkingCopyTests/AppendContentStreamTests.cs \
 	IntegrationTests/PrivateWorkingCopyTests/CreateDocumentTests.cs \
 	IntegrationTests/PrivateWorkingCopyTests/UploadChangedContent.cs \
+	IntegrationTests/PrivateWorkingCopyTests/UploadLargeFilesTest.cs \
 	IntegrationTests/RepositoryStatusIT.cs \
 	IntegrationTests/RepositoryUtilsTests.cs \
 	IntegrationTests/SelectiveIgnoreTests/CrudIT.cs \
