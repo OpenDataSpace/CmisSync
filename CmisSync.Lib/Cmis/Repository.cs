@@ -192,7 +192,7 @@ namespace CmisSync.Lib.Cmis {
             this.authProvider = AuthProviderFactory.CreateAuthProvider(repoInfo.AuthenticationType, repoInfo.Address, this.db);
 
             // Initialize storage
-            this.storage = new MetaDataStorage(this.db, new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath));
+            this.storage = new MetaDataStorage(this.db, new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath), inMemory);
             this.fileTransmissionStorage = new FileTransmissionStorage(this.db, RepoInfo.ChunkSize);
 
             // Add ignore file/folder filter
