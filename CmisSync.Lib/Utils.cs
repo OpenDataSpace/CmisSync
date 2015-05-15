@@ -325,7 +325,7 @@ namespace CmisSync.Lib {
             }
 
             DirectoryInfo dirinfo = new DirectoryInfo(path);
-            if(dirinfo.Exists) {
+            if (dirinfo.Exists) {
                 return IsSymlink(dirinfo);
             }
 
