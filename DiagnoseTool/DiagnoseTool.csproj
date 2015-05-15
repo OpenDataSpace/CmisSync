@@ -31,10 +31,10 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="log4net">
-      <HintPath>..\CmisSync\Linux\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="DBreeze">
-      <HintPath>..\CmisSync\Linux\packages\DBreeze.1.71.0\lib\net40\DBreeze.dll</HintPath>
+      <HintPath>..\packages\DBreeze.1.71.0\lib\net40\DBreeze.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 // Information about this assembly is defined by the following attributes. 
 // Change them to the values specific to your project.
-[assembly: AssemblyTitle("DancingQueen")]
+[assembly: AssemblyTitle("DiagnoseTool")]
 [assembly: AssemblyDescription("Command line tool to verify local stored DB")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("GRAU DATA AG")]

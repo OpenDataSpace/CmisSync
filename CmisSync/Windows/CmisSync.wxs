@@ -15,6 +15,7 @@
           <Directory Id='INSTALLDIR' Name='DataSpace Sync'>
             <Component Id='DataSpaceSync.exe' Guid='bab5a922-b5c4-4958-ab79-5e303b767a61'>
               <File Id='DataSpaceSync.exe' Name='DataSpaceSync.exe' Source='!(wix.root)\CmisSync\Windows\bin\Debug\DataSpaceSync.exe' KeyPath='yes' DiskId='1' />
+              <File Id='DiagnoseTool.exe' Name='DiagnoseTool.exe' Source='!(wix.root)\DiagnoseTool\bin\Debug\DiagnoseTool.exe' DiskId='1' />
             </Component>
             <Component Id='Libraries' Guid='f982a0bb-824d-4835-921d-e51b47b8598b'>
               <File Id='CmisSync.Lib.dll' Name='CmisSync.Lib.dll' Source='!(wix.root)\CmisSync\Windows\bin\Debug\CmisSync.Lib.dll' DiskId='1' />
