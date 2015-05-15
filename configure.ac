@@ -284,6 +284,8 @@ CmisSync/TestLibrary/proxy-server.json
 CmisSync/Linux/dataspacesync
 DataSpaceSync.Console/Makefile
 DataSpaceSync.Console/dsscli
+DiagnoseTool/Makefile
+DiagnoseTool/dssdiagnose
 packaging/Makefile
 packaging/dataspacesync/debian/changelog
 CmisSync/Makefile

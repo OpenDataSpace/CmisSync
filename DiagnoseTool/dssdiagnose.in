@@ -1,0 +1,74 @@
+#!/bin/sh
+
+if [ `id -u` = "0" ]; then
+  echo "DataSpace Sync can't be run as root. Things would go utterly wrong."
+  exit 1
+fi
+
+if [ -n "$XDG_RUNTIME_DIR" ]; then
+  pidfile=${XDG_RUNTIME_DIR}/cmissync.pid
+else
+  pidfile=/tmp/cmissync-${USER}.pid
+fi
+
+EXE=
+CLI=
+if [ -f @expanded_libdir@/@PACKAGE@/DiagnoseTool.exe ] ; then
+  EXE=.exe
+  CLI=mono
+fi
+
+start() {
+  if [ -e "${pidfile}" ]; then
+    cmissyncpid=`cat ${pidfile}`
+    if [ -n "`ps -p ${cmissyncpid} | grep ${cmissyncpid}`" ]; then
+      echo "DataSpace Sync is already running. Exit it and restart diagnose."
+      exit 0
+    else
+      echo "Stale DataSpace Sync PID file found, starting a new instance..."
+      rm -f $pidfile
+    fi
+  fi
+
+  echo -n "Starting Diagnose Tool... "
+  if [ -n "${SSH_AGENT_PID}" -o -n "${SSH_AUTH_SOCK}" ] ; then
+    $CLI @expanded_libdir@/@PACKAGE@/DiagnoseTool$EXE $2 &
+  else
+    ssh-agent $CLI @expanded_libdir@/@PACKAGE@/DiagnoseTool$EXE $2 &
+  fi
+  ( umask 066; echo $! > ${pidfile} )
+  echo "Done."
+}
+
+stop() {
+  if [ -e "${pidfile}" ]; then
+    cmissyncpid=`cat ${pidfile}`
+    if [ -n "`ps -p ${cmissyncpid} | grep ${cmissyncpid}`" ]; then
+      echo -n "Stopping Diagnose Tool... "
+      kill ${cmissyncpid}
+      rm -f ${pidfile}
+      echo "Done."
+    else
+      echo "DataSpace Sync or DiagnoseTool is not running, removing stale PID file..."
+      rm -f ${pidfile}
+    fi
+  else
+    echo "Diagnose Tool is not running."
+  fi
+}
+
+case $1 in
+  start|--start)
+    start
+    ;;
+  stop|--stop)
+    stop
+    ;;
+  restart|--restart)
+    stop
+    start
+    ;;
+  *)
+    $CLI @expanded_libdir@/@PACKAGE@/DiagnoseTool$EXE --help
+    ;;
+esac

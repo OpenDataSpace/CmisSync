@@ -61,12 +61,14 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %{_libdir}/dataspace-sync/DataSpaceSync
 %{_libdir}/dataspace-sync/DataSpaceSync.Console
+%{_libdir}/dataspace-sync/DiagnoseTool
 %{_libdir}/dataspace-sync/lib/*.so
 
 %files common
 %defattr(-,root,root,-)
 %{_bindir}/dataspacesync
 %{_bindir}/dsscli
+%{_bindir}/dssdiagnose
 %{_datadir}/dataspace-sync
 %{_datadir}/applications/*.desktop
 %{_datadir}/icons/*
@@ -78,5 +80,5 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/dataspace-sync/*.mdb
 
 %changelog
-* Mon Jun 10 2013 Fritz Elfert <fritz.elfert@graudata.com> @VERSION@-1
+* Mon Jun 10 2013 Fritz Elfert <fritz.elfert@graudata.com> @VERSION@-2
 - initial rpm

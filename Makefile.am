@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I build/m4/cmissync -I build/m4/shamrock
 
-basedirs = build Extras CmisSync.Lib DataSpaceSync.Console
+basedirs = build Extras CmisSync.Lib DataSpaceSync.Console DiagnoseTool
 FATBUILD_MAKEFILE=Makefile.fatbuild
 
 SUBDIRS = $(basedirs) $(GUISUBDIRS)
