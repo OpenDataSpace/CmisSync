@@ -861,29 +861,5 @@ namespace CmisSync {
             // Update UI.
             this.FolderListChanged();
         }
-
-        /// <summary>
-        /// Fix the file attributes of a folder, recursively.
-        /// </summary>
-        /// <param name="path">Folder to fix</param>
-        private void ClearFolderAttributes(string path) {
-            if (!Directory.Exists(path)) {
-                return;
-            }
-
-            string[] folders = Directory.GetDirectories(path);
-
-            foreach (string folder in folders) {
-                this.ClearFolderAttributes(folder);
-            }
-
-            string[] files = Directory.GetFiles(path);
-
-            foreach (string file in files) {
-                if (!CmisSync.Lib.Utils.IsSymlink(file)) {
-                    File.SetAttributes(file, FileAttributes.Normal);
-                }
-            }
-        }
     }
 }
