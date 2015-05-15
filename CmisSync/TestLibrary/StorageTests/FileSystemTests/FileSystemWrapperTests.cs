@@ -729,6 +729,15 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             Assert.That(file.ReadOnly, Is.True);
         }
 
+        [Test, Category("Medium")]
+        public void NormalFolderAndFilesAreNoSymlink() {
+            var dir = Factory.CreateDirectoryInfo(this.testFolder.FullName);
+            Assert.That(dir.IsSymlink, Is.False);
+            var file = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "file"));
+            using (file.Open(FileMode.CreateNew)) { }
+            Assert.That(file.IsSymlink, Is.False);
+        }
+
 #if !__MonoCS__
         [Test, Category("Fast")]
         public void AclUser() {

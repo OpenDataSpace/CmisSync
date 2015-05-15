@@ -109,6 +109,13 @@ namespace CmisSync.Lib.Storage.FileSystem {
         }
 
         /// <summary>
+        /// Gets a value indicating whether this instance is a symlink.
+        /// </summary>
+        public bool IsSymlink {
+            get { return this.fileSystemInfo.IsSymlink; }
+        }
+
+        /// <summary>
         /// Refresh the loaded information of this instance.
         /// </summary>
         public void Refresh() {

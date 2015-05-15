@@ -68,6 +68,14 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
         }
 
         [Test, Category("Fast")]
+        public void FilterHiddenReposWithoutGivenListAnWithNullList() {
+            IList<LogonRepositoryInfo> listOfRepos = null;
+            var result = listOfRepos.WithoutHiddenOnce();
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.Empty);
+        }
+
+        [Test, Category("Fast")]
         public void GetRepositoriesReturnsListOfReposInOrder() {
             var underTest = new ServerCredentials {
                 Address = new Uri("https://demo.deutsche-wolke.de/cmis/browser"),

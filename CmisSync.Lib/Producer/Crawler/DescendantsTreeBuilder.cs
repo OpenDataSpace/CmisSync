@@ -114,7 +114,7 @@ namespace CmisSync.Lib.Producer.Crawler {
             var children = new List<IObjectTree<IFileSystemInfo>>();
             foreach (var child in parent.GetDirectories()) {
                 string reason;
-                if (!filter.InvalidFolderNamesFilter.CheckFolderName(child.Name, out reason) && !filter.FolderNamesFilter.CheckFolderName(child.Name, out reason)) {
+                if (!filter.InvalidFolderNamesFilter.CheckFolderName(child.Name, out reason) && !filter.FolderNamesFilter.CheckFolderName(child.Name, out reason) && !filter.SymlinkFilter.IsSymlink(child, out reason)) {
                     children.Add(GetLocalDirectoryTree(child, filter));
                 } else {
                     Logger.Info(reason);
@@ -123,7 +123,7 @@ namespace CmisSync.Lib.Producer.Crawler {
 
             foreach (var file in parent.GetFiles()) {
                 string reason;
-                if (!filter.FileNamesFilter.CheckFile(file.Name, out reason)) {
+                if (!filter.FileNamesFilter.CheckFile(file.Name, out reason) && !filter.SymlinkFilter.IsSymlink(file, out reason)) {
                     children.Add(new ObjectTree<IFileSystemInfo> {
                         Item = file,
                         Children = new List<IObjectTree<IFileSystemInfo>>()
