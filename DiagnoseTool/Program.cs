@@ -1,5 +1,5 @@
 
-namespace DancingQueen {
+namespace DiagnoseTool {
     using System;
     using System.Collections.Generic;
     using System.IO;

@@ -7,8 +7,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{F0F479F3-8461-42B7-ABF1-19C4B41C6C1A}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>DancingQueen</RootNamespace>
-    <AssemblyName>DancingQueen</AssemblyName>
+    <RootNamespace>DiagnoseTool</RootNamespace>
+    <AssemblyName>DiagnoseTool</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
