@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotCMIS", "..\..\Extras\Ope
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLibrary", "..\TestLibrary\TestLibrary.csproj", "{295D2B18-B6EB-4EF4-9862-4E3C0C383888}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DancingQueen", "..\..\DancingQueen\DancingQueen.csproj", "{F0F479F3-8461-42B7-ABF1-19C4B41C6C1A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiagnoseTool", "..\..\DiagnoseTool\DiagnoseTool.csproj", "{F0F479F3-8461-42B7-ABF1-19C4B41C6C1A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
