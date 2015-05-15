@@ -77,7 +77,7 @@ namespace CmisSync.Lib.Storage.Database {
         /// Enables a complete DB validation after each db manipulation
         /// </param>
         [CLSCompliant(false)]
-        public MetaDataStorage(DBreezeEngine engine, IPathMatcher matcher, bool fullValidation) {
+        public MetaDataStorage(DBreezeEngine engine, IPathMatcher matcher, bool fullValidation, bool disableInitialValidation = false) {
             if (engine == null) {
                 throw new ArgumentNullException("Given DBreeze engine instance is null");
             }
@@ -90,10 +90,12 @@ namespace CmisSync.Lib.Storage.Database {
             this.matcher = matcher;
             this.fullValidationOnEachManipulation = fullValidation;
 
-            try {
-                this.ValidateObjectStructure();
-            } catch(InvalidDataException e) {
-                Logger.Fatal("Database object structure is invalid", e);
+            if (!disableInitialValidation) {
+                try {
+                    this.ValidateObjectStructure();
+                } catch(InvalidDataException e) {
+                    Logger.Fatal("Database object structure is invalid", e);
+                }
             }
         }
 
