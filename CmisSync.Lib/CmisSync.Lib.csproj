@@ -315,6 +315,7 @@
     <Compile Include="Cmis\INotifyRepositoryPropertyChanged.cs" />
     <Compile Include="Cmis\AbstractNotifyingRepository.cs" />
     <Compile Include="Cmis\SyncStatus.cs" />
+    <Compile Include="Filter\SymlinkFilter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

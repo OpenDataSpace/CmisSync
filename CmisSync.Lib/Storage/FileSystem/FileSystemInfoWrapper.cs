@@ -157,6 +157,15 @@ namespace CmisSync.Lib.Storage.FileSystem {
         }
 
         /// <summary>
+        /// Gets a value indicating whether this instance is a symlink.
+        /// </summary>
+        public bool IsSymlink {
+            get {
+                return (this.Attributes & FileAttributes.ReparsePoint) == FileAttributes.ReparsePoint;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the UUID by reading or writing extended attribute entries.
         /// </summary>
         /// <value>The UUID.</value>

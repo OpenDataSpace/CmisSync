@@ -155,6 +155,7 @@ SOURCES =  \
 	Filter/InvalidFolderNameFilter.cs \
 	Filter/ReportingFilter.cs \
 	Filter/RepositoryRootDeletedDetection.cs \
+	Filter/SymlinkFilter.cs \
 	HashAlgorithm/HashAlgorithmReuse.cs \
 	HashAlgorithm/SHA1Reuse.cs \
 	HttpProxyUtils.cs \

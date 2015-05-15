@@ -100,6 +100,7 @@ SOURCES =  \
 	FilterTests/InvalidFolderNameFilterTest.cs \
 	FilterTests/ReportingFilterTest.cs \
 	FilterTests/RepositoryRootDeletedDetectionTest.cs \
+	FilterTests/SymlinkFilterTest.cs \
 	HashAlgorithmTests/SHA1ReuseTest.cs \
 	IntegrationTests/AllHandlersIT.cs \
 	IntegrationTests/AllowableActionsTests/ReadingActionsTests.cs \

@@ -321,6 +321,7 @@
     <Compile Include="MockedServer\MockedObjectData.cs" />
     <Compile Include="CmisTests\RepositoryStatusAggregatorTest.cs" />
     <Compile Include="CmisTests\AbstractRepositoryTest.cs" />
+    <Compile Include="FilterTests\SymlinkFilterTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

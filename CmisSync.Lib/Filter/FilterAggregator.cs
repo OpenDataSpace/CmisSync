@@ -35,7 +35,8 @@ namespace CmisSync.Lib.Filter {
             IgnoredFileNamesFilter fileNamesFilter,
             IgnoredFolderNameFilter folderNamesFilter,
             InvalidFolderNameFilter invalidFolderNamesFilter,
-            IgnoredFoldersFilter ignoredFolderFilter)
+            IgnoredFoldersFilter ignoredFolderFilter,
+            SymlinkFilter symlinkFilter = null)
         {
             if (fileNamesFilter == null) {
                 throw new ArgumentNullException("Given file names filter is null");
@@ -57,6 +58,7 @@ namespace CmisSync.Lib.Filter {
             this.FolderNamesFilter = folderNamesFilter;
             this.InvalidFolderNamesFilter = invalidFolderNamesFilter;
             this.IgnoredFolderFilter = ignoredFolderFilter;
+            this.SymlinkFilter = symlinkFilter ?? new SymlinkFilter();
         }
         
         /// <summary>
@@ -82,5 +84,11 @@ namespace CmisSync.Lib.Filter {
         /// </summary>
         /// <value>The ignored folder filter.</value>
         public IgnoredFoldersFilter IgnoredFolderFilter { get; private set; }
+
+        /// <summary>
+        /// Gets the symlink filter.
+        /// </summary>
+        /// <value>The symlink filter.</value>
+        public SymlinkFilter SymlinkFilter { get; private set; }
     }
 }
