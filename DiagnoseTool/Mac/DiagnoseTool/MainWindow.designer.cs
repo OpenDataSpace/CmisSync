@@ -21,9 +21,6 @@ namespace DiagnoseTool
 		[Outlet]
 		MonoMac.AppKit.NSButton RunButton { get; set; }
 
-		[Action ("Run:")]
-		partial void Run (MonoMac.Foundation.NSObject sender);
-		
 		void ReleaseDesignerOutlets ()
 		{
 			if (folderSelection != null) {

@@ -1,20 +1,22 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
 	<string>DiagnoseTool</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.your-company.DiagnoseTool</string>
+	<string>com.graudata.DataSpaceSync.DiagnoseTool</string>
 	<key>CFBundleName</key>
 	<string>DiagnoseTool</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>LSMinimumSystemVersion</key>
-	<string>10.6</string>
+	<string>10.9</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>CFBundleIconFile</key>
+	<string>cmissync-app</string>
 </dict>
 </plist>

@@ -1,24 +1,25 @@
-﻿using System;
-using System.Drawing;
-using MonoMac.Foundation;
-using MonoMac.AppKit;
-using MonoMac.ObjCRuntime;
+﻿
+namespace DiagnoseTool {
+    using System;
+    using System.Drawing;
 
-namespace DiagnoseTool
-{
-    public partial class AppDelegate : NSApplicationDelegate
-    {
+    using MonoMac.AppKit;
+    using MonoMac.Foundation;
+    using MonoMac.ObjCRuntime;
+
+    public partial class AppDelegate : NSApplicationDelegate {
         MainWindowController mainWindowController;
 
-        public AppDelegate()
-        {
+        public AppDelegate() {
         }
 
-        public override void DidFinishLaunching(NSNotification notification)
-        {
+        public override void DidFinishLaunching(NSNotification notification) {
             mainWindowController = new MainWindowController();
             mainWindowController.Window.MakeKeyAndOrderFront(this);
         }
+
+        public override bool ApplicationShouldTerminateAfterLastWindowClosed(NSApplication sender) {
+            return true;
+        }
     }
 }
-
