@@ -70,7 +70,10 @@ debian-package: tmpinst
 apple-package:
 	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release -t:Clean
 	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release
+	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build DiagnoseTool/Mac/DiagnoseTool/DiagnoseTool.sln -c:Release -t:Clean
+	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build DiagnoseTool/Mac/DiagnoseTool/DiagnoseTool.sln -c:Release
 	(cd build; sh dmg-creator.sh ../bin/DataSpaceSync.app/; cd ..)
+	(cd build; sh dmg-creator.sh ../DiagnoseTool/Mac/DiagnoseTool/bin/Release/DiagnoseTool.app/; cd ..)
 
 rpm-package: PACKAGE_TARGET := rpm-package
 rpm-package: tmpinst
