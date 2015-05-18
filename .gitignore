@@ -54,3 +54,4 @@ StyleCop.Cache
 gendarme.html
 testdir
 SOURCES
+DiagnoseTool/Mac/DiagnoseTool/Info.plist
