@@ -286,6 +286,7 @@ DataSpaceSync.Console/Makefile
 DataSpaceSync.Console/dsscli
 DiagnoseTool/Makefile
 DiagnoseTool/dssdiagnose
+DiagnoseTool/Mac/DiagnoseTool/Info.plist
 packaging/Makefile
 packaging/dataspacesync/debian/changelog
 CmisSync/Makefile
