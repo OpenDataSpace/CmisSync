@@ -106,6 +106,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <BundleResource Include="Resources\cmissync-app.icns" />
+    <BundleResource Include="Resources\diagnose-app.icns" />
   </ItemGroup>
 </Project>

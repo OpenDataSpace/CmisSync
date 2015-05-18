@@ -17,7 +17,7 @@
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>CFBundleIconFile</key>
-	<string>cmissync-app</string>
+	<string>diagnose-app</string>
 	<key>CFBundleShortVersionString</key>
         <string>@VERSION@</string>
 	<key>LSApplicationCategoryType</key>
