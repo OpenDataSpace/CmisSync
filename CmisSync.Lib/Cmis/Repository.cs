@@ -200,13 +200,15 @@ namespace CmisSync.Lib.Cmis {
             this.ignoredFileNameFilter = new IgnoredFileNamesFilter { Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames };
             this.ignoredFolderNameFilter = new IgnoredFolderNameFilter { Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames };
             this.invalidFolderNameFilter = new InvalidFolderNameFilter();
-            this.filters = new FilterAggregator(this.ignoredFileNameFilter, this.ignoredFolderNameFilter, this.invalidFolderNameFilter, this.ignoredFoldersFilter);
+            var symlinkFilter = new SymlinkFilter();
+            this.filters = new FilterAggregator(this.ignoredFileNameFilter, this.ignoredFolderNameFilter, this.invalidFolderNameFilter, this.ignoredFoldersFilter, symlinkFilter);
             this.reportingFilter = new ReportingFilter(
                 this.Queue,
                 this.ignoredFoldersFilter,
                 this.ignoredFileNameFilter,
                 this.ignoredFolderNameFilter,
-                this.invalidFolderNameFilter);
+                this.invalidFolderNameFilter,
+                symlinkFilter);
             this.Queue.EventManager.AddEventHandler(this.reportingFilter);
             this.alreadyAddedFilter = new IgnoreAlreadyHandledFsEventsFilter(this.storage, this.fileSystemFactory);
             this.Queue.EventManager.AddEventHandler(this.alreadyAddedFilter);

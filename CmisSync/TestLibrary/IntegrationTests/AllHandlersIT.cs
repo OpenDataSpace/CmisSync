@@ -396,7 +396,7 @@ namespace TestLibrary.IntegrationTests {
             manager.AddEventHandler(failedOperationsFilder);
             */
 
-            var reportingFilter = new ReportingFilter(queue, ignoreFolderFilter, ignoreFileNamesFilter, ignoreFolderNameFilter, invalidFolderNameFilter);
+            var reportingFilter = new ReportingFilter(queue, ignoreFolderFilter, ignoreFileNamesFilter, ignoreFolderNameFilter, invalidFolderNameFilter, new SymlinkFilter());
             manager.AddEventHandler(reportingFilter);
 
             var debugHandler = new DebugLoggingHandler();

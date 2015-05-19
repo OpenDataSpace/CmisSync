@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.FilterTests
-{
+namespace TestLibrary.FilterTests {
     using System;
 
     using CmisSync.Lib.Events;
@@ -30,12 +29,12 @@ namespace TestLibrary.FilterTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class ReportingFilterTest
-    {
+    public class ReportingFilterTest {
         private IgnoredFoldersFilter ignoreFoldersFilter;
         private IgnoredFileNamesFilter ignoreFileNamesFilter;
         private IgnoredFolderNameFilter ignoreFolderNamesFilter;
         private InvalidFolderNameFilter invalidFolderNameFilter;
+        private SymlinkFilter symlinkFilter;
 
         private Mock<ISyncEventQueue> queue;
 
@@ -45,6 +44,7 @@ namespace TestLibrary.FilterTests
             this.ignoreFileNamesFilter = Mock.Of<IgnoredFileNamesFilter>();
             this.ignoreFolderNamesFilter = Mock.Of<IgnoredFolderNameFilter>();
             this.invalidFolderNameFilter = Mock.Of<InvalidFolderNameFilter>();
+            this.symlinkFilter = Mock.Of<SymlinkFilter>();
             this.queue = new Mock<ISyncEventQueue>();
         }
 
@@ -55,62 +55,74 @@ namespace TestLibrary.FilterTests
                 this.ignoreFoldersFilter,
                 this.ignoreFileNamesFilter,
                 this.ignoreFolderNamesFilter,
-                this.invalidFolderNameFilter);
+                this.invalidFolderNameFilter,
+                this.symlinkFilter);
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull() {
-            new ReportingFilter(
+            Assert.Throws<ArgumentNullException>(() => new ReportingFilter(
                 null,
                 this.ignoreFoldersFilter,
                 this.ignoreFileNamesFilter,
                 this.ignoreFolderNamesFilter,
-                this.invalidFolderNameFilter);
+                this.invalidFolderNameFilter,
+                this.symlinkFilter));
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfIgnoreFoldersFilterIsNull() {
-            new ReportingFilter(
+            Assert.Throws<ArgumentNullException>(() => new ReportingFilter(
                 this.queue.Object,
                 null,
                 this.ignoreFileNamesFilter,
                 this.ignoreFolderNamesFilter,
-                this.invalidFolderNameFilter);
+                this.invalidFolderNameFilter,
+                this.symlinkFilter));
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfIgnoreFileNamesFilterIsNull() {
-            new ReportingFilter(
+            Assert.Throws<ArgumentNullException>(() => new ReportingFilter(
                 this.queue.Object,
                 this.ignoreFoldersFilter,
                 null,
                 this.ignoreFolderNamesFilter,
-                this.invalidFolderNameFilter);
+                this.invalidFolderNameFilter,
+                this.symlinkFilter));
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfIgnoreFolderNameFilterIsNull() {
-            new ReportingFilter(
+            Assert.Throws<ArgumentNullException>(() => new ReportingFilter(
                 this.queue.Object,
                 this.ignoreFoldersFilter,
                 this.ignoreFileNamesFilter,
                 null,
-                this.invalidFolderNameFilter);
+                this.invalidFolderNameFilter,
+                this.symlinkFilter));
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfInvalidFolderNameFilterIsNull() {
-            new ReportingFilter(
+            Assert.Throws<ArgumentNullException>(() => new ReportingFilter(
                 this.queue.Object,
                 this.ignoreFoldersFilter,
                 this.ignoreFileNamesFilter,
                 this.ignoreFolderNamesFilter,
-                null);
+                null,
+                this.symlinkFilter));
+        }
+
+        [Test, Category("Fast"), Category("EventFilter")]
+        public void ConstructorThrowsExceptionIfSymlinkFilterIsNull() {
+            Assert.Throws<ArgumentNullException>(() => new ReportingFilter(
+                this.queue.Object,
+                this.ignoreFoldersFilter,
+                this.ignoreFileNamesFilter,
+                this.ignoreFolderNamesFilter,
+                this.invalidFolderNameFilter,
+                null));
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
@@ -131,7 +143,8 @@ namespace TestLibrary.FilterTests
                 this.ignoreFoldersFilter,
                 this.ignoreFileNamesFilter,
                 this.ignoreFolderNamesFilter,
-                this.invalidFolderNameFilter);
+                this.invalidFolderNameFilter,
+                this.symlinkFilter);
         }
     }
 }
