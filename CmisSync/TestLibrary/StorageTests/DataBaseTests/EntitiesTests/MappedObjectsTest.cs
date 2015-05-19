@@ -186,6 +186,13 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests {
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
+        public void LastTimeStoredPropertyIsIrrelevantForEquality([Values(MappedObjectType.File, MappedObjectType.Folder)]MappedObjectType type) {
+            var obj1 = new MappedObject("name", "id", type, null, null) { LastTimeStoredInStorage = DateTime.UtcNow };
+            var obj2 = new MappedObject("name", "id", type, null, null);
+            Assert.That(obj1, Is.EqualTo(obj2));
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
         public void IFolderConstructor() {
             string folderName = "a";
             string path = Path.Combine(Path.GetTempPath(), folderName);
