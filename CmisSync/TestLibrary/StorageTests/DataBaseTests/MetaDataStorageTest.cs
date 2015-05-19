@@ -226,6 +226,16 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
+        public void StoreDateOnStoringMappedObject([Values(true, false)]bool withValidation) {
+            var underTest = new MetaDataStorage(this.engine, this.matcher, withValidation);
+            IMappedObject obj = new MappedObject("obj", "remoteId", MappedObjectType.File, null, null);
+            Assert.That(obj.LastTimeStoredInStorage, Is.Null);
+            underTest.SaveMappedObject(obj);
+            obj = underTest.GetObjectByRemoteId("remoteId");
+            Assert.That(obj.LastTimeStoredInStorage, Is.EqualTo(DateTime.UtcNow).Within(1).Seconds);
+        }
+
+        [Test, Category("Fast")]
         public void SaveFileObjectAndGetObjectReturnsEqualObject([Values(true, false)]bool withValidation) {
             var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             string remoteId = "remoteId";

@@ -76,6 +76,9 @@ namespace CmisSync.Lib.Storage.Database {
         /// <param name='fullValidation'>
         /// Enables a complete DB validation after each db manipulation
         /// </param>
+        /// <param name="disableInitialValidation">
+        /// Disables initial validation of the object structure.
+        /// </param>
         [CLSCompliant(false)]
         public MetaDataStorage(DBreezeEngine engine, IPathMatcher matcher, bool fullValidation, bool disableInitialValidation = false) {
             if (engine == null) {
@@ -242,6 +245,7 @@ namespace CmisSync.Lib.Storage.Database {
                     throw new DublicateGuidException(string.Format("An entry with Guid {0} already exists", obj.Guid));
                 }
 
+                obj.LastTimeStoredInStorage = DateTime.UtcNow;
                 tran.Insert<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, id, obj as MappedObject);
                 if (!obj.Guid.Equals(Guid.Empty)) {
                     tran.Insert<byte[], string>(MappedObjectsGuidsTable, obj.Guid.ToByteArray(), id);
