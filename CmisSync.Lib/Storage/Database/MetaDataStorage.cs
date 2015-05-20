@@ -245,6 +245,14 @@ namespace CmisSync.Lib.Storage.Database {
                     throw new DublicateGuidException(string.Format("An entry with Guid {0} already exists", obj.Guid));
                 }
 
+                if (this.fullValidationOnEachManipulation && obj.ParentId != null) {
+                    DbCustomSerializer<MappedObject> value = tran.Select<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, obj.ParentId).Value;
+                    if (value == null) {
+                        tran.Rollback();
+                        throw new InvalidDataException();
+                    }
+                }
+
                 obj.LastTimeStoredInStorage = DateTime.UtcNow;
                 tran.Insert<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, id, obj as MappedObject);
                 if (!obj.Guid.Equals(Guid.Empty)) {
