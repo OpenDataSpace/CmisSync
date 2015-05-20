@@ -195,6 +195,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             } else {
                 sb.AppendLine(string.Format("LastModified: {0}", obj.LastModificationDate));
             }
+
             sb.AppendLine(string.Format("ObjectType:   {0}", obj.ObjectType));
             sb.AppendLine(string.Format("BaseType:     {0}", obj.BaseType.DisplayName));
             if (obj is IFolder) {
@@ -455,6 +456,61 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             } catch (NullReferenceException) {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Creates download link.
+        /// </summary>
+        /// <returns>The download link.</returns>
+        /// <param name="session">CMIS Session.</param>
+        /// <param name="expirationIn">Expiration in.</param>
+        /// <param name="password">Link Password.</param>
+        /// <param name="mailAddress">Mail address.</param>
+        /// <param name="comment">Link comment.</param>
+        /// <param name="subject">Mail subject.</param>
+        /// <param name="message">Mail message.</param>
+        /// <param name="objectIds">Object identifiers of downloadable objects.</param>
+        public static Uri CreateDownloadLink(
+            this ISession session,
+            TimeSpan? expirationIn = null,
+            string password = null,
+            string mailAddress = null,
+            string comment = null,
+            string subject = null,
+            string message = null,
+            params string[] objectIds)
+        {
+            var properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisItem.GetCmisValue());
+            var idsSecondary = new List<string>(new string[] { "cmis:rm_clientMgtRetention", "gds:downloadLink" });
+            properties.Add(PropertyIds.SecondaryObjectTypeIds, idsSecondary);
+            properties.Add("cmis:rm_expirationDate", DateTime.UtcNow + (TimeSpan)(expirationIn ?? new TimeSpan(24, 0, 0)));
+            properties.Add("gds:objectIds", new List<string>(objectIds ?? new string[0]));
+            properties.Add("gds:comment", comment ?? string.Empty);
+            properties.Add("gds:subject", subject ?? string.Empty);
+            properties.Add("gds:message", message ?? string.Empty);
+            if (mailAddress != null) {
+                properties.Add("gds:emailAddress", mailAddress);
+            }
+
+            if (password != null) {
+                properties.Add("gds:password", password);
+            }
+
+            var id = session.CreateItem(properties, session.GetObject(session.RepositoryInfo.RootFolderId));
+            var link = session.GetObject(id);
+            var url = link.GetPropertyValue("gds:url") as string;
+            return url == null ? null : new Uri(url);
+        }
+
+        /// <summary>
+        /// Ares download links supported.
+        /// </summary>
+        /// <returns><c>true</c>, if download links are supported, <c>false</c> otherwise.</returns>
+        /// <param name="session">Cmis Session.</param>
+        public static bool AreDownloadLinksSupported(this ISession session) {
+            // TODO Specify and use type system to detect support correctly
+            return double.Parse(session.RepositoryInfo.CmisVersionSupported) >= 1.1;
         }
 
         /// <summary>
