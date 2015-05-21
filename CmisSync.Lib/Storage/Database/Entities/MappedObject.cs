@@ -103,7 +103,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
             }
 
             if (string.IsNullOrEmpty(remoteId)) {
-                throw new ArgumentNullException("remoteId", "Given remote ID is null");
+                throw new ArgumentNullException("remoteId");
             }
 
             if (type == MappedObjectType.Unkown) {

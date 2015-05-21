@@ -35,7 +35,7 @@ namespace CmisSync.Lib.Events {
         /// <param name="change">Change event.</param>
         public RemoteEvent(IChangeEvent change) {
             if (change == null) {
-                throw new ArgumentNullException("change", "The given change event must not be null");
+                throw new ArgumentNullException("change");
             }
 
             this.change = change;

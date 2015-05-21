@@ -40,7 +40,7 @@ namespace CmisSync.Lib.Events {
         /// </param>
         public CrawlRequestEvent(IDirectoryInfo localFolder, IFolder remoteFolder) {
             if (localFolder == null) {
-                throw new ArgumentNullException("localFolder", "Given path is null");
+                throw new ArgumentNullException("localFolder");
             }
 
             this.RemoteFolder = remoteFolder;

@@ -146,7 +146,7 @@ namespace CmisSync.Lib.Storage.Database {
         /// </param>
         public IMappedObject GetObjectByLocalPath(IFileSystemInfo path) {
             if (path == null) {
-                throw new ArgumentNullException("path", "Given path is null");
+                throw new ArgumentNullException("path");
             }
 
             if (!this.matcher.CanCreateRemotePath(path.FullName)) {
@@ -612,7 +612,7 @@ namespace CmisSync.Lib.Storage.Database {
         /// </param>
         private string GetId(IMappedObject obj) {
             if (obj == null) {
-                throw new ArgumentNullException("obj", "The given obj is null");
+                throw new ArgumentNullException("obj");
             }
 
             string id = obj.RemoteObjectId;

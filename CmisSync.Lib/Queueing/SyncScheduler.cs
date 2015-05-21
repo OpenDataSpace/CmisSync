@@ -42,7 +42,7 @@ namespace CmisSync.Lib.Queueing {
         /// <param name="pollInterval">Poll interval.</param>
         public SyncScheduler(ISyncEventQueue queue, double pollInterval = 5000) {
             if (queue == null) {
-                throw new ArgumentNullException("queue", "Given queue must not be null");
+                throw new ArgumentNullException("queue");
             }
 
             if (pollInterval <= 0) {

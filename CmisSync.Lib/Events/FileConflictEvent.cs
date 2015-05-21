@@ -76,7 +76,7 @@ namespace CmisSync.Lib.Events {
         /// </param>
         public FileConflictEvent(FileConflictType type, string affectedPath, string createdConflictPath = null) {
             if (affectedPath == null) {
-                throw new ArgumentNullException("affectedPath", "Argument null in FileConflictEvent Constructor");
+                throw new ArgumentNullException("affectedPath");
             }
 
             this.Type = type;

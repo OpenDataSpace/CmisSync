@@ -32,7 +32,7 @@ namespace CmisSync.Lib.Queueing {
         /// </param>
         public AbstractEventProducer(ISyncEventQueue queue) {
             if (queue == null) {
-                throw new ArgumentNullException("queue", "The given event queue must no be null");
+                throw new ArgumentNullException("queue");
             }
 
             this.Queue = queue;

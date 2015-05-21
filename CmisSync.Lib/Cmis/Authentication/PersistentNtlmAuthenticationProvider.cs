@@ -51,11 +51,11 @@ namespace CmisSync.Lib.Cmis {
         /// </param>
         public PersistentNtlmAuthenticationProvider(ICookieStorage storage, Uri url) {
             if (storage == null) {
-                throw new ArgumentNullException("storage", "Given db is null");
+                throw new ArgumentNullException("storage");
             }
 
             if (url == null) {
-                throw new ArgumentNullException("url", "Given URL is null");
+                throw new ArgumentNullException("url");
             }
 
             this.storage = storage;

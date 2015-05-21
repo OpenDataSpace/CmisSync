@@ -32,7 +32,7 @@ namespace CmisSync.Lib.Events {
         /// </param>
         public ExceptionEvent(Exception e) {
             if (e == null) {
-                throw new ArgumentNullException("e", "Given Exception is null");
+                throw new ArgumentNullException("e");
             }
 
             this.Exception = e;
