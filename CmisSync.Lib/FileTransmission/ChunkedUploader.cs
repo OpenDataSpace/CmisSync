@@ -67,7 +67,7 @@ namespace CmisSync.Lib.FileTransmission {
         /// <param name='localFileStream'>
         ///  Local file stream.
         /// </param>
-        /// <param name='status'>
+        /// <param name='transmission'>
         ///  Transmission status where the uploader should report its uploading status.
         /// </param>
         /// <param name='hashAlg'>
@@ -76,10 +76,18 @@ namespace CmisSync.Lib.FileTransmission {
         /// <param name='overwrite'>
         ///  If true, the local content will overwrite the existing content.
         /// </param>
+        /// <param name="update">Is called on every new chunk, if not <c>null</c>.</param>
         /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">
         /// Contains the last successful remote document state. This is needed for continue a failed upload.
         /// </exception>
-        public override IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg, bool overwrite = true, UpdateChecksum update = null) {
+        public override IDocument UploadFile(
+            IDocument remoteDocument,
+            Stream localFileStream,
+            Transmission transmission,
+            HashAlgorithm hashAlg,
+            bool overwrite = true,
+            UpdateChecksum update = null)
+        {
             IDocument result = remoteDocument;
             for (long offset = localFileStream.Position; offset < localFileStream.Length; offset += this.ChunkSize) {
                 bool isFirstChunk = offset == 0;

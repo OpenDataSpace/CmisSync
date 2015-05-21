@@ -20,15 +20,15 @@
 namespace CmisSync.Lib.FileTransmission
 {
     using System;
-    using System.Linq;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Streams;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Streams;
 
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -73,13 +73,20 @@ namespace CmisSync.Lib.FileTransmission
         /// </summary>
         /// <param name="remoteDocument">Remote document.</param>
         /// <param name="localFileStream">Local taget file stream.</param>
-        /// <param name="status">Transmission status.</param>
+        /// <param name="transmission">Transmission status.</param>
         /// <param name="hashAlg">Hash algoritm, which should be used to calculate hash of the uploaded stream content</param>
+        /// <param name="update">Not or not yet used</param>
         /// <exception cref="IOException">On any disc or network io exception</exception>
         /// <exception cref="DisposeException">If the remote object has been disposed before the dowload is finished</exception>
         /// <exception cref="AbortException">If download is aborted</exception>
         /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
-        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg, UpdateChecksum update = null) {
+        public void DownloadFile(
+            IDocument remoteDocument,
+            Stream localFileStream,
+            Transmission transmission,
+            HashAlgorithm hashAlg,
+            UpdateChecksum update = null)
+        {
             {
                 byte[] buffer = new byte[8 * 1024];
                 int len;
