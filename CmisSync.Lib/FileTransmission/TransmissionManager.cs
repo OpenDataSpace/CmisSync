@@ -81,10 +81,11 @@ namespace CmisSync.Lib.Queueing {
                 if (entry.Key != null) {
                     transmission.RelativePath = path.Substring(entry.Key.Length).TrimStart(System.IO.Path.DirectorySeparatorChar);
                 }
+
+                transmission.PropertyChanged += this.TransmissionFinished;
+                this.activeTransmissions.Add(transmission);
             }
 
-            transmission.PropertyChanged += this.TransmissionFinished;
-            this.activeTransmissions.Add(transmission);
             return transmission;
         }
 
