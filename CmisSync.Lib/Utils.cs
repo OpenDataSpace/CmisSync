@@ -349,10 +349,10 @@ namespace CmisSync.Lib {
         /// Creates the user agent string for this client.
         /// </summary>
         /// <returns>The user agent.</returns>
-        public static string CreateUserAgent() {
+        public static string CreateUserAgent(string appName = "DSS") {
             return string.Format(
                 "{0}/{1} ({2}; {4}; hostname=\"{3}\")",
-                "DSS",
+                appName,
                 Backend.Version,
                 Environment.OSVersion.ToString(),
                 System.Environment.MachineName,
