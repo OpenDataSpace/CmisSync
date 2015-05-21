@@ -22,7 +22,10 @@ namespace CmisSync.Lib.Storage.Database {
     using System.Collections.Generic;
     using System.IO;
 
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
+
+    using DotCMIS.Client;
 
     public static class GraphOutputConvenienceExtension {
         public static void ToDotFile<T>(this IObjectTree<T> tree, string path) {
@@ -53,6 +56,14 @@ namespace CmisSync.Lib.Storage.Database {
                     return new LocalTreeDotWriter<T>();
                 }
 
+                if (typeof(T) == typeof(IFileableCmisObject)) {
+                    return new RemoteTreeDotWriter<T>();
+                }
+
+                if (typeof(T) == typeof(IMappedObject)) {
+                    return new StoredTreeDotWriter<T>();
+                }
+
                 return new StringTreeDotWriter<T>();
             }
         }
@@ -73,12 +84,31 @@ namespace CmisSync.Lib.Storage.Database {
         private class LocalTreeDotWriter<T> : IDotTreeWriter<T> {
             public void ToDotString(IObjectTree<T> tree, StreamWriter writer) {
                 IObjectTree<IFileSystemInfo> t = tree as IObjectTree<IFileSystemInfo>;
+                writer.WriteLine(string.Format("\t{0} [label=\"{1}\"];", t.Item.FullName, t.Item.Name));
                 foreach (var child in t.Children ?? new List<IObjectTree<IFileSystemInfo>>()) {
-                    writer.Write("\t");
-                    writer.Write(t.Item.Name);
-                    writer.Write(" -> ");
-                    writer.Write(child.Item.Name);
-                    writer.WriteLine(";");
+                    writer.WriteLine(string.Format("\t{0} -> {1};", t.Item.FullName, child.Item.FullName));
+                    child.ToDotString(writer);
+                }
+            }
+        }
+
+        private class RemoteTreeDotWriter<T> : IDotTreeWriter<T> {
+            public void ToDotString(IObjectTree<T> tree, StreamWriter writer) {
+                IObjectTree<IFileableCmisObject> t = tree as IObjectTree<IFileableCmisObject>;
+                writer.WriteLine(string.Format("\t{0} [label=\"{1}\"];", t.Item.Id, t.Item.Name));
+                foreach (var child in t.Children ?? new List<IObjectTree<IFileableCmisObject>>()) {
+                    writer.WriteLine(string.Format("\t{0} -> {1};", t.Item.Id, child.Item.Id));
+                    child.ToDotString(writer);
+                }
+            }
+        }
+
+        private class StoredTreeDotWriter<T> : IDotTreeWriter<T> {
+            public void ToDotString(IObjectTree<T> tree, StreamWriter writer) {
+                IObjectTree<IMappedObject> t = tree as IObjectTree<IMappedObject>;
+                writer.WriteLine(string.Format("\t{0} [label=\"{1}\"];", t.Item.RemoteObjectId, t.Item.Name));
+                foreach (var child in t.Children ?? new List<IObjectTree<IMappedObject>>()) {
+                    writer.WriteLine(string.Format("\t{0} -> {1};", t.Item.RemoteObjectId, child.Item.RemoteObjectId));
                     child.ToDotString(writer);
                 }
             }
