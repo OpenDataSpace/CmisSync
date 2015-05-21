@@ -39,7 +39,7 @@ namespace CmisSync.Lib.Cmis {
         /// <param name="log">log4net logger, which should receive the log messages of DotCMIS.</param>
         public DotCMISLogListener(log4net.ILog log) {
             if (log == null) {
-                throw new ArgumentNullException("Given logger is null");
+                throw new ArgumentNullException("log");
             }
 
             this.log = log;

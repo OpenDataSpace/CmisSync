@@ -43,7 +43,7 @@ namespace CmisSync.Lib.Producer.Crawler {
 
         public LocalEventGenerator(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) {
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage");
             }
 
             this.storage = storage;
@@ -138,7 +138,7 @@ namespace CmisSync.Lib.Producer.Crawler {
         private AbstractFolderEvent CreateLocalEventBasedOnStorage(IFileSystemInfo fsObject, IMappedObject storedParent, IMappedObject storedMappedChild) {
             AbstractFolderEvent createdEvent = null;
             if (storedParent == null) {
-                throw new ArgumentNullException("stored parent is null. Stored child: " + storedMappedChild.ToString() + Environment.NewLine + "local object is: " + fsObject.FullName);
+                throw new ArgumentNullException("storedParent", "stored parent is null. Stored child: " + storedMappedChild.ToString() + Environment.NewLine + "local object is: " + fsObject.FullName);
             }
 
             if (storedMappedChild.ParentId == storedParent.RemoteObjectId) {

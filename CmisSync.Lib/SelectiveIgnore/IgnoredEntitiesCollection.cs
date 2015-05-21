@@ -42,7 +42,7 @@ namespace CmisSync.Lib.SelectiveIgnore {
 
         public IgnoredState IsIgnored(IDocument doc) {
             if (doc == null) {
-                throw new ArgumentNullException("Given doc is null");
+                throw new ArgumentNullException("doc");
             }
 
             if (this.IsIgnoredId(doc.Id) == IgnoredState.IGNORED) {
@@ -60,7 +60,7 @@ namespace CmisSync.Lib.SelectiveIgnore {
 
         public IgnoredState IsIgnored(IFolder folder) {
             if (folder == null) {
-                throw new ArgumentNullException("Given folder is null");
+                throw new ArgumentNullException("folder");
             }
 
             if (this.IsIgnoredId(folder.Id) == IgnoredState.IGNORED) {

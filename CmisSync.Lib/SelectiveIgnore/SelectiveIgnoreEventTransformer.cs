@@ -34,11 +34,11 @@ namespace CmisSync.Lib.SelectiveIgnore {
 
         public SelectiveIgnoreEventTransformer(IIgnoredEntitiesCollection ignores, ISyncEventQueue queue) {
             if (queue == null) {
-                throw new ArgumentNullException("Given queue is empty");
+                throw new ArgumentNullException("queue");
             }
 
             if (ignores == null) {
-                throw new ArgumentNullException("Given queue is empty");
+                throw new ArgumentNullException("ignores");
             }
 
             this.ignores = ignores;

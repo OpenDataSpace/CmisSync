@@ -75,31 +75,31 @@ namespace CmisSync.Lib.Consumer {
             ISolver[,] solver = null) : base(queue)
         {
             if (session == null) {
-                throw new ArgumentNullException("Given session is null");
+                throw new ArgumentNullException("session");
             }
 
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage");
             }
 
             if (transmissionStorage == null) {
-                throw new ArgumentNullException("Given fileTransmissionStorage is null");
+                throw new ArgumentNullException("transmissionStorage");
             }
 
             if (localSituation == null) {
-                throw new ArgumentNullException("Given local situation detection is null");
+                throw new ArgumentNullException("localSituation");
             }
 
             if (remoteSituation == null) {
-                throw new ArgumentNullException("Given remote situation detection is null");
+                throw new ArgumentNullException("remoteSituation");
             }
 
             if (activityListener == null) {
-                throw new ArgumentNullException("Given activity listener is null");
+                throw new ArgumentNullException("activityListener");
             }
 
             if (filters == null) {
-                throw new ArgumentNullException("Given filter aggregator is null");
+                throw new ArgumentNullException("filters");
             }
 
             this.session = session;

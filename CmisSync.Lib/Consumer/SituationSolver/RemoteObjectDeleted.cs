@@ -42,7 +42,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <param name="storage">Meta data storage.</param>
         public RemoteObjectDeleted(ISession session, IMetaDataStorage storage, IFilterAggregator filters) : base(session, storage) {
             if (filters == null) {
-                throw new ArgumentNullException("Given filter aggregator is null");
+                throw new ArgumentNullException("filters");
             }
 
             this.filters = filters;

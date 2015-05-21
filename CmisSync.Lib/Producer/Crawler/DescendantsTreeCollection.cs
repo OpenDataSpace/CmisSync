@@ -51,15 +51,15 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// </exception>
         public DescendantsTreeCollection(IObjectTree<IMappedObject> storedTree, IObjectTree<IFileSystemInfo> localTree, IObjectTree<IFileableCmisObject> remoteTree) : this() {
             if (storedTree == null) {
-                throw new ArgumentNullException("Given storedTree is null");
+                throw new ArgumentNullException("storedTree");
             }
 
             if (localTree == null) {
-                throw new ArgumentNullException("Given localTree is null");
+                throw new ArgumentNullException("localTree");
             }
 
             if (remoteTree == null) {
-                throw new ArgumentNullException("Given remoteTree is null");
+                throw new ArgumentNullException("remoteTree");
             }
 
             this.StoredTree = storedTree;

@@ -45,7 +45,7 @@ namespace CmisSync.Lib.Events {
         /// </exception>
         public FSEvent(WatcherChangeTypes type, string path, bool isDirectory) {
             if (path == null) {
-                throw new ArgumentNullException("Argument null in FSEvent Constructor", "path");
+                throw new ArgumentNullException("path", "Argument null in FSEvent Constructor");
             }
 
             this.Type = type;

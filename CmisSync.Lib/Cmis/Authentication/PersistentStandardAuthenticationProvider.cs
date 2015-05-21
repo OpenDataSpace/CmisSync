@@ -46,11 +46,11 @@ namespace CmisSync.Lib.Cmis {
         /// <param name="url">corresponding URL of the cookies</param>
         public PersistentStandardAuthenticationProvider(ICookieStorage storage, Uri url) {
             if (storage == null) {
-                throw new ArgumentNullException("Given db is null");
+                throw new ArgumentNullException("storage", "Given db is null");
             }
 
             if (url == null) {
-                throw new ArgumentNullException("Given URL is null");
+                throw new ArgumentNullException("url", "Given URL is null");
             }
 
             this.storage = storage;

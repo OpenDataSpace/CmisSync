@@ -38,11 +38,11 @@ namespace CmisSync.Lib.SelectiveIgnore {
         /// <param name="storage">Meta data storage.</param>
         public IgnoredEntitiesStorage(IIgnoredEntitiesCollection collection, IMetaDataStorage storage) {
             if (collection == null) {
-                throw new ArgumentNullException("Given collection is null");
+                throw new ArgumentNullException("collection");
             }
 
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage");
             }
 
             this.collection = collection;

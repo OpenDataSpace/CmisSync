@@ -73,23 +73,23 @@ namespace CmisSync.Lib.Filter {
             SymlinkFilter symlinkFilter) : base(queue)
         {
             if (ignoredFoldersFilter == null) {
-                throw new ArgumentNullException("ignoredFoldersFilter", "Given folder filter is null");
+                throw new ArgumentNullException("ignoredFoldersFilter");
             }
 
             if (ignoredFileNameFilter == null) {
-                throw new ArgumentNullException("ignoredFileNameFilter", "Given file name filter is null");
+                throw new ArgumentNullException("ignoredFileNameFilter");
             }
 
             if (ignoredFolderNameFilter == null) {
-                throw new ArgumentNullException("ignoredFolderNameFilter", "Given folder name filter is null");
+                throw new ArgumentNullException("ignoredFolderNameFilter");
             }
 
             if (invalidFoderNameFilter == null) {
-                throw new ArgumentNullException("invalidFoderNameFilter", "Given invalid folder name filter is null");
+                throw new ArgumentNullException("invalidFoderNameFilter");
             }
 
             if (symlinkFilter == null) {
-                throw new ArgumentNullException("symlinkFilter", "Given symlink filter is null");
+                throw new ArgumentNullException("symlinkFilter");
             }
 
             this.ignoredFoldersFilter = ignoredFoldersFilter;

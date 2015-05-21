@@ -41,7 +41,7 @@ namespace CmisSync.Lib.Streams {
         /// <param name="transmission">Transmission object to be notified about changes and listened to events as well.</param>
         public TransmissionStream(Stream wrappedStream, Transmission transmission) {
             if (transmission == null) {
-                throw new ArgumentNullException("Given transmission is null");
+                throw new ArgumentNullException("transmission");
             }
 
             this.abort = new AbortableStream(wrappedStream);

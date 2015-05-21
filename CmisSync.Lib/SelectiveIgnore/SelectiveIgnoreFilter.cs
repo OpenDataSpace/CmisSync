@@ -42,7 +42,7 @@ namespace CmisSync.Lib.SelectiveIgnore {
         /// <param name="storage">Ignored entities storage.</param>
         public SelectiveIgnoreFilter(IIgnoredEntitiesStorage storage) {
             if (storage == null) {
-                throw new ArgumentNullException("The given storage is null");
+                throw new ArgumentNullException("storage");
             }
 
             this.storage = storage;

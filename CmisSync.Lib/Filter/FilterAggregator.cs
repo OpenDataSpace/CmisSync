@@ -39,19 +39,19 @@ namespace CmisSync.Lib.Filter {
             SymlinkFilter symlinkFilter = null)
         {
             if (fileNamesFilter == null) {
-                throw new ArgumentNullException("Given file names filter is null");
+                throw new ArgumentNullException("fileNamesFilter");
             }
 
             if (folderNamesFilter == null) {
-                throw new ArgumentNullException("Given folder names filter is null");
+                throw new ArgumentNullException("folderNamesFilter");
             }
 
             if (invalidFolderNamesFilter == null) {
-                throw new ArgumentNullException("Given invalid folder names filter is null");
+                throw new ArgumentNullException("invalidFolderNamesFilter");
             }
 
             if (ignoredFolderFilter == null) {
-                throw new ArgumentNullException("Given ignored folder filter is null");
+                throw new ArgumentNullException("ignoredFolderFilter");
             }
 
             this.FileNamesFilter = fileNamesFilter;

@@ -82,11 +82,11 @@ namespace CmisSync.Lib.Storage.Database {
         [CLSCompliant(false)]
         public MetaDataStorage(DBreezeEngine engine, IPathMatcher matcher, bool fullValidation, bool disableInitialValidation = false) {
             if (engine == null) {
-                throw new ArgumentNullException("Given DBreeze engine instance is null");
+                throw new ArgumentNullException("engine");
             }
 
             if (matcher == null) {
-                throw new ArgumentNullException("Given Matcher is null");
+                throw new ArgumentNullException("matcher");
             }
 
             this.engine = engine;
@@ -146,11 +146,11 @@ namespace CmisSync.Lib.Storage.Database {
         /// </param>
         public IMappedObject GetObjectByLocalPath(IFileSystemInfo path) {
             if (path == null) {
-                throw new ArgumentNullException("Given path is null");
+                throw new ArgumentNullException("path", "Given path is null");
             }
 
             if (!this.matcher.CanCreateRemotePath(path.FullName)) {
-                throw new ArgumentException(string.Format("Given path \"{0}\" is not able to be matched on remote path", path.FullName));
+                throw new ArgumentException(string.Format("Given path \"{0}\" is not able to be matched on remote path", path.FullName), "path");
             }
 
             using (var tran = this.engine.GetTransaction()) {
@@ -612,12 +612,12 @@ namespace CmisSync.Lib.Storage.Database {
         /// </param>
         private string GetId(IMappedObject obj) {
             if (obj == null) {
-                throw new ArgumentNullException("The given obj is null");
+                throw new ArgumentNullException("obj", "The given obj is null");
             }
 
             string id = obj.RemoteObjectId;
             if (id == null) {
-                throw new ArgumentException("The given object has no remote object id");
+                throw new ArgumentException("The given object has no remote object id", "obj");
             }
 
             return id;

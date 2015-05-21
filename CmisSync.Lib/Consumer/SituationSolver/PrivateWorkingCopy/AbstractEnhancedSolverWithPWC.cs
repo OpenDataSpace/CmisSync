@@ -38,11 +38,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
     using log4net;
 
+    /// <summary>
+    /// Abstract enhanced solver for Private Working Copy Usage and Support.
+    /// </summary>
     public abstract class AbstractEnhancedSolverWithPWC : AbstractEnhancedSolver {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(AbstractEnhancedSolverWithPWC));
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.AbstractEnhancedSolver"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.PWC.AbstractEnhancedSolverWithPWC"/> class.
         /// </summary>
         /// <param name="session">Cmis Session.</param>
         /// <param name="storage">Meta Data Storage.</param>

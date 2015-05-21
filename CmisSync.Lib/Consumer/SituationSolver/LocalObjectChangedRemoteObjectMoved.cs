@@ -47,7 +47,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ISolver changeChangeSolver) : base(session, storage)
         {
             if (changeChangeSolver == null) {
-                throw new ArgumentNullException("Given solver for the conflict situation of local and remote change is null");
+                throw new ArgumentNullException("changeChangeSolver", "Given solver for the conflict situation of local and remote change is null");
             }
 
             this.changeChangeSolver = changeChangeSolver;

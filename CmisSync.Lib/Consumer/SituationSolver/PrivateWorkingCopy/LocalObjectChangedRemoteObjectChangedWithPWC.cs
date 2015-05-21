@@ -55,11 +55,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ISolver localObjectChangedRemoteObjectChangedFallbackSolver) : base(session, storage, transmissionStorage)
         {
             if (localObjectChangedRemoteObjectChangedFallbackSolver == null) {
-                throw new ArgumentNullException("Given fallback solver is null");
+                throw new ArgumentNullException("localObjectChangedRemoteObjectChangedFallbackSolver", "Given fallback solver is null");
             }
 
             if (!session.ArePrivateWorkingCopySupported()) {
-                throw new ArgumentException("Given session does not support pwc updates");
+                throw new ArgumentException("Given session does not support pwc updates", "session");
             }
 
             this.fallbackSolver = localObjectChangedRemoteObjectChangedFallbackSolver;

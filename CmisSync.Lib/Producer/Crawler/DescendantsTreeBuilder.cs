@@ -77,23 +77,23 @@ namespace CmisSync.Lib.Producer.Crawler {
             IIgnoredEntitiesStorage ignoredStorage)
         {
             if (remoteFolder == null) {
-                throw new ArgumentNullException("Given remoteFolder is null");
+                throw new ArgumentNullException("remoteFolder");
             }
 
             if (localFolder == null) {
-                throw new ArgumentNullException("Given localFolder is null");
+                throw new ArgumentNullException("localFolder");
             }
 
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage");
             }
 
             if (filter == null) {
-                throw new ArgumentNullException("Given filter is null");
+                throw new ArgumentNullException("filter");
             }
 
             if (ignoredStorage == null) {
-                throw new ArgumentNullException("Given storage to save ignored entries is null");
+                throw new ArgumentNullException("ignoredStorage");
             }
 
             this.storage = storage;

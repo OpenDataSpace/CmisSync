@@ -215,7 +215,7 @@ namespace CmisSync.Lib {
         /// </summary>
         public static bool IsInvalidFolderName(string name, List<string> ignoreWildcards) {
             if (ignoreWildcards == null) {
-                throw new ArgumentNullException("Given wildcards are null");
+                throw new ArgumentNullException("ignoreWildcards");
             }
 
             bool ret = invalidFolderNameRegex.IsMatch(name);

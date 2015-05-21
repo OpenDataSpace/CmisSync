@@ -112,7 +112,7 @@ namespace CmisSync.Lib.FileTransmission {
         /// </param>
         public Transmission(TransmissionType type, string path, string cachePath = null) {
             if (path == null) {
-                throw new ArgumentNullException("Argument null in FSEvent Constructor", "path");
+                throw new ArgumentNullException("path");
             }
 
             this.type = type;
@@ -393,7 +393,7 @@ namespace CmisSync.Lib.FileTransmission {
         /// <param name="propertyName">Property name.</param>
         private void NotifyPropertyChanged(string propertyName) {
             if (string.IsNullOrEmpty(propertyName)) {
-                throw new ArgumentNullException("Given property name is null");
+                throw new ArgumentNullException("propertyName");
             }
 
             var handler = this.PropertyChanged;

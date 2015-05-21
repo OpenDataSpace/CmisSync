@@ -44,7 +44,7 @@ namespace CmisSync.Lib.Streams {
         /// <param name="propertyName">Property name.</param>
         protected virtual void NotifyPropertyChanged(string propertyName) {
             if (string.IsNullOrEmpty(propertyName)) {
-                throw new ArgumentNullException("Given property name is null");
+                throw new ArgumentNullException("propertyName");
             }
 
             var handler = this.PropertyChanged;

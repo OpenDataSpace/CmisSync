@@ -44,7 +44,7 @@ namespace CmisSync.Lib.Queueing {
         /// </exception>
         public ReportingSyncEventHandler(ISyncEventQueue queue) : base() {
             if (queue == null) {
-                throw new ArgumentNullException("Given SyncEventQueue was null");
+                throw new ArgumentNullException("queue", "Given SyncEventQueue was null");
             }
 
             this.Queue = queue;

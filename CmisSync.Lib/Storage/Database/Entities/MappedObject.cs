@@ -99,15 +99,15 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// <param name="readOnly">Readonly flag of the mapped object.</param>
         public MappedObject(string name, string remoteId, MappedObjectType type, string parentId, string changeToken, long contentSize = -1, bool readOnly = false) {
             if (string.IsNullOrEmpty(name)) {
-                throw new ArgumentNullException("Given name is null or empty");
+                throw new ArgumentNullException("name", "Given name is null or empty");
             }
 
             if (string.IsNullOrEmpty(remoteId)) {
-                throw new ArgumentNullException("Given remote ID is null");
+                throw new ArgumentNullException("remoteId", "Given remote ID is null");
             }
 
             if (type == MappedObjectType.Unkown) {
-                throw new ArgumentException("Given type is unknown but must be set to a known type");
+                throw new ArgumentException("Given type is unknown but must be set to a known type", "type");
             } else {
                 this.Type = type;
             }

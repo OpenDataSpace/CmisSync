@@ -53,7 +53,7 @@ namespace CmisSync.Lib.Producer.ContentChange
         /// </exception>
         public ContentChangeEventAccumulator(ISession session, ISyncEventQueue queue) : base(queue) {
             if (session == null) {
-                throw new ArgumentNullException("Session instance is needed for the ContentChangeEventAccumulator, but was null");
+                throw new ArgumentNullException("session");
             }
 
             this.session = session;

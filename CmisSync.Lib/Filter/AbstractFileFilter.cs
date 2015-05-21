@@ -39,7 +39,7 @@ namespace CmisSync.Lib.Filter {
         /// </param>
         public AbstractFileFilter(ISyncEventQueue queue) {
             if (queue == null) {
-                throw new ArgumentNullException("The given queue must not be null, bacause the Filters are reporting their filtered events to this queue");
+                throw new ArgumentNullException("queue", "The given queue must not be null, bacause the Filters are reporting their filtered events to this queue");
             }
 
             this.Queue = queue;

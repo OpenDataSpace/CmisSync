@@ -47,7 +47,7 @@ namespace CmisSync.Lib.Accumulator {
         /// <param name="fsFactory">FileSystemInfo factory.</param>
         public RemoteObjectMovedOrRenamedAccumulator(ISyncEventQueue queue, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) : base(queue) {
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage");
             }
 
             this.storage = storage;

@@ -35,11 +35,11 @@ namespace CmisSync.Lib.Events {
         /// <param name="session">Session instance.</param>
         public SuccessfulLoginEvent(Uri url, ISession session) {
             if (url == null) {
-                throw new ArgumentNullException("Given Url is null");
+                throw new ArgumentNullException("url");
             }
 
             if (session == null) {
-                throw new ArgumentNullException("Given session is null");
+                throw new ArgumentNullException("session");
             }
 
             this.url = url;

@@ -41,7 +41,7 @@ namespace CmisSync.Lib.Filter {
         /// <param name="fsFactory">Fs factory.</param>
         public IgnoreAlreadyHandledFsEventsFilter(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) {
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage", "Given storage is null");
             }
 
             this.storage = storage;

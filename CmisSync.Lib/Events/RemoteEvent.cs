@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
 
     using DotCMIS.Client;
@@ -27,18 +26,16 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// Remote event.
     /// </summary>
-    public class RemoteEvent : ISyncEvent
-    {
+    public class RemoteEvent : ISyncEvent {
         private IChangeEvent change;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.RemoteEvent"/> class.
         /// </summary>
         /// <param name="change">Change event.</param>
-        public RemoteEvent(IChangeEvent change)
-        {
-            if(change == null) {
-                throw new ArgumentNullException("The given change event must not be null");
+        public RemoteEvent(IChangeEvent change) {
+            if (change == null) {
+                throw new ArgumentNullException("change", "The given change event must not be null");
             }
 
             this.change = change;
@@ -72,8 +69,7 @@ namespace CmisSync.Lib.Events
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.RemoteEvent"/>.
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.RemoteEvent"/>.</returns>
-        public override string ToString()
-        {
+        public override string ToString() {
             return string.Format("[RemoteEvent: ChangeType={0} ObjectId={1}]", this.Type, this.ObjectId);
         }
     }

@@ -34,7 +34,7 @@ namespace CmisSync.Lib.Events {
         /// <param name="source">The source which ignored the event.</param>
         public RequestIgnoredEvent(ISyncEvent ignoredEvent, string reason = null, SyncEventHandler source = null) {
             if (ignoredEvent == null) {
-                throw new ArgumentNullException("The ignored event cannot be null");
+                throw new ArgumentNullException("ignoredEvent", "The ignored event cannot be null");
             }
 
             if (reason == null && source == null) {

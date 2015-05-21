@@ -57,7 +57,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ITransmissionManager transmissionManager) : base(session, storage, transmissionStorage)
         {
             if (transmissionManager == null) {
-                throw new ArgumentNullException("Given transmission manager is null");
+                throw new ArgumentNullException("transmissionManager");
             }
 
             this.transmissionManager = transmissionManager;

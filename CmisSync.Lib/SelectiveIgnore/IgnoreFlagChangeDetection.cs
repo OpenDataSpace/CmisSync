@@ -44,11 +44,11 @@ namespace CmisSync.Lib.SelectiveIgnore {
         /// <param name="queue">Sync Event Queue.</param>
         public IgnoreFlagChangeDetection(IIgnoredEntitiesStorage ignores, IPathMatcher matcher, ISyncEventQueue queue) : base(queue) {
             if (ignores == null) {
-                throw new ArgumentNullException("Given ignores are null");
+                throw new ArgumentNullException("ignores");
             }
 
             if (matcher == null) {
-                throw new ArgumentNullException("Given path matcher is null");
+                throw new ArgumentNullException("matcher");
             }
 
             this.ignores = ignores;

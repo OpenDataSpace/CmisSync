@@ -69,19 +69,19 @@ namespace CmisSync.Lib.Queueing {
             }
 
             if (repoInfo == null) {
-                throw new ArgumentNullException("Given repo info is null");
+                throw new ArgumentNullException("repoInfo");
             }
 
             if (queue == null) {
-                throw new ArgumentNullException("Given queue is null");
+                throw new ArgumentNullException("queue");
             }
 
             if (sessionFactory == null) {
-                throw new ArgumentNullException("Given session factory is null");
+                throw new ArgumentNullException("sessionFactory");
             }
 
             if (authProvider == null) {
-                throw new ArgumentNullException("Given authentication provider is null");
+                throw new ArgumentNullException("authProvider");
             }
 
             this.Queue = queue;

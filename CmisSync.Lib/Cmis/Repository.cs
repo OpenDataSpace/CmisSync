@@ -164,7 +164,7 @@ namespace CmisSync.Lib.Cmis {
         /// <param name="queue">Event Queue.</param>
         protected Repository(RepoInfo repoInfo, ActivityListenerAggregator activityListener, bool inMemory, ICountingQueue queue) : base(repoInfo) {
             if (activityListener == null) {
-                throw new ArgumentNullException("Given activityListener is null");
+                throw new ArgumentNullException("activityListener", "Given activityListener is null");
             }
 
             this.fileSystemFactory = new FileSystemInfoFactory();
