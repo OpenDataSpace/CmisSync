@@ -56,7 +56,7 @@ namespace CmisSync.Lib.Cmis {
             this.storage = storage;
             this.url = url;
             if (storage.Cookies != null) {
-                foreach(Cookie c in storage.Cookies) {
+                foreach (Cookie c in storage.Cookies) {
                     this.Cookies.Add(c);
                 }
             }
