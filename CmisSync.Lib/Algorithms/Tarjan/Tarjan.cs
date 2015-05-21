@@ -41,27 +41,27 @@ namespace CmisSync.Lib.Algorithms
 
         private void Run(AbstractTarjanNode node) {
             node.dfs = this.maxdfs;
-            node.lowLink = this.maxdfs;
+            node.LowLink = this.maxdfs;
             this.maxdfs++;
             this.stack.Push(node);
-            node.onStack = true;
+            node.OnStack = true;
             this.nodes.Remove(node);
             foreach (var neighbor in node.Neighbors) {
                 if (this.nodes.Contains(neighbor)) {
                     this.Run(neighbor);
-                    node.lowLink = Math.Min(node.lowLink, neighbor.lowLink);
-                } else if (neighbor.onStack) {
-                    node.lowLink = Math.Min(node.lowLink, neighbor.dfs);
+                    node.LowLink = Math.Min(node.LowLink, neighbor.LowLink);
+                } else if (neighbor.OnStack) {
+                    node.LowLink = Math.Min(node.LowLink, neighbor.dfs);
                 }
             }
 
-            if (node.lowLink == node.dfs) {
+            if (node.LowLink == node.dfs) {
                 var s = new List<AbstractTarjanNode>();
                 this.ResultSets.Add(s);
                 AbstractTarjanNode n;
                 do {
                     n = this.stack.Pop();
-                    n.onStack = false;
+                    n.OnStack = false;
                     s.Add(n);
                 } while (node != n);
             }
