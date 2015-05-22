@@ -341,6 +341,15 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         }
 
         [Test, Category("Medium")]
+        public void UuidIsNullIfNothingIsStoredInFile() {
+            this.SkipIfExtendedAttributesAreNotAvailable();
+            var underTest = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "file"));
+            using (underTest.Open(FileMode.CreateNew));
+
+            Assert.That(underTest.Uuid, Is.Null);
+        }
+
+        [Test, Category("Medium")]
         public void CreatesFirstConflictFile() {
             string fileName = "test1.txt";
             string fullPath = Path.Combine(this.testFolder.FullName, fileName);

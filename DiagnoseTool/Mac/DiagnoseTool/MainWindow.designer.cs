@@ -13,6 +13,9 @@ namespace DiagnoseTool
 	partial class MainWindow
 	{
 		[Outlet]
+		MonoMac.AppKit.NSButtonCell DumpTree { get; set; }
+
+		[Outlet]
 		MonoMac.AppKit.NSPopUpButtonCell folderSelection { get; set; }
 
 		[Outlet]
@@ -20,9 +23,14 @@ namespace DiagnoseTool
 
 		[Outlet]
 		MonoMac.AppKit.NSButton RunButton { get; set; }
-
+		
 		void ReleaseDesignerOutlets ()
 		{
+			if (DumpTree != null) {
+				DumpTree.Dispose ();
+				DumpTree = null;
+			}
+
 			if (folderSelection != null) {
 				folderSelection.Dispose ();
 				folderSelection = null;
