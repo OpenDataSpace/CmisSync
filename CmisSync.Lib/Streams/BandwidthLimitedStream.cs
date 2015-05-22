@@ -42,7 +42,6 @@ namespace CmisSync.Lib.Streams {
         private long? writeLimit = null;
         private Stopwatch readWatch;
         private Stopwatch writeWatch;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Streams.BandwidthLimitedStream"/> class.
         /// </summary>
@@ -50,7 +49,8 @@ namespace CmisSync.Lib.Streams {
         /// The stream instance, which should be limited.
         /// </param>
         public BandwidthLimitedStream(Stream s) : base(s) {
-            this.Init();
+                this.writeWatch = new Stopwatch();
+                this.readWatch = new Stopwatch();
         }
 
         /// <summary>
@@ -62,8 +62,7 @@ namespace CmisSync.Lib.Streams {
         /// <param name='limit'>
         /// Up and download limit.
         /// </param>
-        public BandwidthLimitedStream(Stream s, long limit) : base(s) {
-            this.Init();
+        public BandwidthLimitedStream(Stream s, long limit) : this(s) {
             this.ReadLimit = limit;
             this.WriteLimit = limit;
         }
@@ -180,14 +179,6 @@ namespace CmisSync.Lib.Streams {
                 // TODO Sleep must be implemented
                 this.Stream.Write(buffer, offset, count);
             }
-        }
-
-        /// <summary>
-        /// Init this instance.
-        /// </summary>
-        private void Init() {
-            this.writeWatch = new Stopwatch();
-            this.readWatch = new Stopwatch();
         }
     }
 }
