@@ -79,7 +79,7 @@ namespace TestLibrary.StreamsTests {
             }
         }
 
-        [Test, Category("Slow"), Category("Streams"), Ignore("TODO")]
+        [Test, Category("Slow"), Category("Streams")]
         public void ReadOrWriteOneByteMoreThanLimitTakesAtMinimumOneSecond([Values(true, false)]bool read) {
             byte[] buf = new byte[this.length];
             using (var memstream = new MemoryStream(this.buffer))
