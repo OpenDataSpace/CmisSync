@@ -106,7 +106,7 @@ namespace DiagnoseTool {
                         trees.StoredTree.ToDotFile(remoteTree);
                         trees.RemoteTree.ToDotFile(storedTree);
                         this.output.StringValue = string.Format("Written to:\n{0}\n{1}\n{2}", localTree, remoteTree, storedTree);
-                    } catch(Exception ex) {
+                    } catch (Exception ex) {
                         this.output.StringValue = ex.ToString();
                     }
                 }
