@@ -222,6 +222,7 @@ namespace CmisSync.Lib.Queueing {
 
                     // Create session.
                     var session = this.SessionFactory.CreateSession(this.RepoInfo, authenticationProvider: this.AuthProvider);
+                    Logger.Debug(session.RepositoryInfo.ToLogString());
                     this.cancelToken.ThrowIfCancellationRequested();
                     session.DefaultContext = OperationContextFactory.CreateDefaultContext(session);
                     this.cancelToken.ThrowIfCancellationRequested();
