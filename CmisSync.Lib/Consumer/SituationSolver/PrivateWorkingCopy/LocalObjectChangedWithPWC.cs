@@ -69,10 +69,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 var localFile = localFileSystemInfo as IFileInfo;
                 var remoteDocument = remoteId as IDocument;
 
-                IMappedObject mappedObject = this.Storage.GetObject(localFile);
+                var mappedObject = this.Storage.GetObject(localFile);
                 if (mappedObject == null) {
                     throw new ArgumentException(string.Format("Could not find db entry for {0} => invoke crawl sync", localFileSystemInfo.FullName));
                 }
+
                 if (mappedObject.LastChangeToken != (remoteId as ICmisObjectProperties).ChangeToken) {
                     throw new ArgumentException(string.Format("remote {1} {0} has also been changed since last sync => invoke crawl sync", remoteId.Id, remoteId is IDocument ? "document" : "folder"));
                 }
@@ -82,7 +83,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
                     try {
                         var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
-                        mappedObject.LastChecksum = UploadFileWithPWC(localFile, ref remoteDocument, transmission);
+                        mappedObject.LastChecksum = this.UploadFileWithPWC(localFile, ref remoteDocument, transmission);
                         mappedObject.ChecksumAlgorithmName = "SHA-1";
                         if (remoteDocument.Id != mappedObject.RemoteObjectId) {
                             this.TransmissionStorage.RemoveObjectByRemoteObjectId(mappedObject.RemoteObjectId);
@@ -113,6 +114,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             } else {
                 this.folderOrFileContentUnchangedSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
             }
+
             return;
         }
     }

@@ -176,7 +176,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                             }
                         }
 
-                        IDocument document = doc;
+                        var document = doc;
                         uploader.UploadFile(docPWC, file, transmission, hashAlg, false, (byte[] checksumUpdate, long length) => this.SaveRemotePWCDocument(localFile, document, docPWC, checksumUpdate, transmission));
                         hash = hashAlg.Hash;
                     } catch (Exception ex) {
