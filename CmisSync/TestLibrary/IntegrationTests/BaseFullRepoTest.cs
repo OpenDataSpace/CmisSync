@@ -262,7 +262,7 @@ namespace TestLibrary.IntegrationTests {
 
         protected void AssertThatContentHashIsEqualToExceptedIfSupported(IDocument doc, string content) {
             if (this.session.IsContentStreamHashSupported()) {
-                Assert.That(doc.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(content), Is.True);
+                Assert.That(doc.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(content), Is.True, "Timout exceeded");
             }
         }
 
