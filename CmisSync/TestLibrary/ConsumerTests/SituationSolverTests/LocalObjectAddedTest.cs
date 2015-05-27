@@ -204,23 +204,20 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileIsUsedByAnotherProcess() {
             this.SetUpMocks(true);
-            Exception exception = new ExtendedAttributeException();
+            var exception = new ExtendedAttributeException();
 
             Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(f => f.Length).Returns(0);
             fileInfo.SetupSet(f => f.Uuid = It.IsAny<Guid?>()).Throws(exception);
+            Mock<IDocument> document;
+            this.SetupSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, this.lastChangeToken, this.withExtendedAttributes, fileInfo, out document);
 
-            try {
-                Mock<IDocument> document;
-                this.SetupSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, this.lastChangeToken, this.withExtendedAttributes, fileInfo, out document);
-                this.RunSolveFile(fileInfo);
-                Assert.Fail();
-            } catch (RetryException e) {
-                Assert.That(e.InnerException, Is.EqualTo(exception));
-                fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
-                this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
-                fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            }
+            var e = Assert.Throws<RetryException>(() => this.RunSolveFile(fileInfo));
+
+            Assert.That(e.InnerException, Is.EqualTo(exception));
+            fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
+            this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
+            fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
 
         [Test, Category("Fast"), Category("Solver")]
