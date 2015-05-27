@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.FileSystem
-{
+namespace CmisSync.Lib.Storage.FileSystem {
     using System;
     using System.IO;
     using System.Runtime.Serialization;
@@ -27,8 +26,7 @@ namespace CmisSync.Lib.Storage.FileSystem
     /// Extended attribute exception.
     /// </summary>
     [Serializable]
-    public class ExtendedAttributeException : IOException
-    {
+    public class ExtendedAttributeException : IOException {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.ExtendedAttributeException"/> class.
         /// </summary>
