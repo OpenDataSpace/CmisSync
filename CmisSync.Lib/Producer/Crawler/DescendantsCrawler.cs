@@ -148,16 +148,20 @@ namespace CmisSync.Lib.Producer.Crawler {
         }
 
         private void CrawlDescendants() {
-            DescendantsTreeCollection trees = this.treebuilder.BuildTrees();
-            if (Logger.IsDebugEnabled) {
-                Logger.Debug(string.Format("LocalTree:  {0} Elements", trees.LocalTree.ToList().Count));
-                Logger.Debug(string.Format("RemoteTree: {0} Elements", trees.RemoteTree.ToList().Count));
-                Logger.Debug(string.Format("StoredTree: {0} Elements", trees.StoredTree.ToList().Count));
+            try {
+                DescendantsTreeCollection trees = this.treebuilder.BuildTrees();
+                if (Logger.IsDebugEnabled) {
+                    Logger.Debug(string.Format("LocalTree:  {0} Elements", trees.LocalTree.ToList().Count));
+                    Logger.Debug(string.Format("RemoteTree: {0} Elements", trees.RemoteTree.ToList().Count));
+                    Logger.Debug(string.Format("StoredTree: {0} Elements", trees.StoredTree.ToList().Count));
+                }
+
+                CrawlEventCollection events = this.eventGenerator.GenerateEvents(trees);
+
+                this.notifier.MergeEventsAndAddToQueue(events);
+            } catch (System.IO.PathTooLongException e) {
+                throw new CmisSync.Lib.Consumer.InteractionNeededException("Crawl Sync aborted because a local path is too long. Please take a look into the log to figure out the reason.", e);
             }
-
-            CrawlEventCollection events = this.eventGenerator.GenerateEvents(trees);
-
-            this.notifier.MergeEventsAndAddToQueue(events);
         }
     }
 }
