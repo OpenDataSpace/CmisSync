@@ -31,6 +31,7 @@ namespace CmisSync.Lib.Producer.Crawler {
     using DotCMIS.Client;
 
     using log4net;
+using CmisSync.Lib.Consumer;
 
     /// <summary>
     /// Decendants crawler.
@@ -135,13 +136,18 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// <returns>true if handled</returns>
         public override bool Handle(ISyncEvent e) {
             if (e is StartNextSyncEvent) {
-                Logger.Debug("Starting DecendantsCrawlSync upon " + e);
-                using (var activity = new ActivityListenerResource(this.activityListener)) {
-                    this.CrawlDescendants();
-                }
+                try {
+                    Logger.Debug("Starting DecendantsCrawlSync upon " + e);
+                    using (var activity = new ActivityListenerResource(this.activityListener)) {
+                        this.CrawlDescendants();
+                    }
 
-                this.Queue.AddEvent(new FullSyncCompletedEvent(e as StartNextSyncEvent));
-                return true;
+                    this.Queue.AddEvent(new FullSyncCompletedEvent(e as StartNextSyncEvent));
+                    return true;
+                } catch (InteractionNeededException interaction) {
+                    this.Queue.AddEvent(new InteractionNeededEvent(interaction));
+                    throw;
+                }
             }
 
             return false;
@@ -160,7 +166,8 @@ namespace CmisSync.Lib.Producer.Crawler {
 
                 this.notifier.MergeEventsAndAddToQueue(events);
             } catch (System.IO.PathTooLongException e) {
-                throw new CmisSync.Lib.Consumer.InteractionNeededException("Crawl Sync aborted because a local path is too long. Please take a look into the log to figure out the reason.", e);
+                string msg = "Crawl Sync aborted because a local path is too long. Please take a look into the log to figure out the reason.";
+                throw new InteractionNeededException(msg, e) { Title = "Local path is too long", Description = msg };
             }
         }
     }
