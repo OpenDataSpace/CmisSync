@@ -86,7 +86,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
-            if(localFile is IDirectoryInfo) {
+            if (localFile is IDirectoryInfo) {
                 if (!(remoteId is IFolder)) {
                     throw new ArgumentException("remoteId has to be a prefetched Folder");
                 }
@@ -105,7 +105,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 }
 
                 if (remoteFolder.LastModificationDate != null) {
-                    localFolder.LastWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
+                    try {
+                        localFolder.LastWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
+                    } catch (IOException e) {
+                        Logger.Info("Directory modification date could not be synced", e);
+                    }
                 }
 
                 var mappedObject = new MappedObject(remoteFolder);
