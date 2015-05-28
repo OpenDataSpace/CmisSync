@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
     using System.IO;
 
@@ -29,15 +28,12 @@ namespace CmisSync.Lib.Events
      /// <summary>
     /// File moved event.
     /// </summary>
-    public class FileMovedEvent : FileEvent
-    {
+    public class FileMovedEvent : FileEvent {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FileMovedEvent"/> class.
         /// </summary>
         /// <param name="oldLocalFile">Old local file.</param>
         /// <param name="newLocalFile">New local file.</param>
-        /// <param name="oldParentFolder">Old parent folder.</param>
-        /// <param name="newParentFolder">New parent folder.</param>
         /// <param name="oldRemoteFilePath">Old remote file path.</param>
         /// <param name="newRemoteFile">New remote file.</param>
         public FileMovedEvent(
@@ -45,8 +41,7 @@ namespace CmisSync.Lib.Events
             IFileInfo newLocalFile = null,
             string oldRemoteFilePath = null,
             IDocument newRemoteFile = null)
-            : base(newLocalFile, newRemoteFile)
-        {
+            : base(newLocalFile, newRemoteFile) {
             this.Local = MetaDataChangeType.MOVED;
             this.OldLocalFile = oldLocalFile;
             this.OldRemoteFilePath = oldRemoteFilePath;

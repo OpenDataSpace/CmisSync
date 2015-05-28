@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Filter
-{
+namespace CmisSync.Lib.Filter {
     using System;
 
     using CmisSync.Lib.Events;
@@ -33,8 +32,7 @@ namespace CmisSync.Lib.Filter
     /// <summary>
     /// Filters already handled content change events.
     /// </summary>
-    public class IgnoreAlreadyHandledContentChangeEventsFilter : SyncEventHandler
-    {
+    public class IgnoreAlreadyHandledContentChangeEventsFilter : SyncEventHandler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(IgnoreAlreadyHandledContentChangeEventsFilter));
 
         private IMetaDataStorage storage;
@@ -46,14 +44,13 @@ namespace CmisSync.Lib.Filter
         /// </summary>
         /// <param name="storage">Storage instance.</param>
         /// <param name="session">Session instance.</param>
-        public IgnoreAlreadyHandledContentChangeEventsFilter(IMetaDataStorage storage, ISession session)
-        {
+        public IgnoreAlreadyHandledContentChangeEventsFilter(IMetaDataStorage storage, ISession session) {
             if (storage == null) {
-                throw new ArgumentNullException("Given storage instance is null");
+                throw new ArgumentNullException("storage");
             }
 
             if (session == null) {
-                throw new ArgumentNullException("Given session instance is null");
+                throw new ArgumentNullException("session");
             }
 
             this.storage = storage;
@@ -65,8 +62,7 @@ namespace CmisSync.Lib.Filter
         /// </summary>
         /// <param name="e">Sync event</param>
         /// <returns><c>true</c> if the event has been already handled, otherwise <c>false</c></returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             if (e is ContentChangeEvent) {
                 ContentChangeEvent change = e as ContentChangeEvent;
                 switch (change.Type) {

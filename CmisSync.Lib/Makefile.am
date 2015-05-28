@@ -3,7 +3,7 @@ TARGET = library
 
 ASSEMBLY_INFO_SOURCE = Defines.cs
 
-LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(WEBLIBS) $(MONOPOSIX) $(MONOMAC_LIBS) $(DBREEZE_LIBS)
+LIBS = $(LOG4NET_LIBS) $(CONFIGLIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(WEBLIBS) $(MONOPOSIX) $(MONOMAC_LIBS) $(DBREEZE_LIBS)
 
 SOURCES =  \
 	Accumulator/LocalObjectFetcher.cs \
@@ -15,27 +15,45 @@ SOURCES =  \
 	Algorithms/Tarjan/AbstractTarjanNode.cs \
 	Algorithms/Tarjan/Tarjan.cs \
 	Backend.cs \
+	ClientBrandBase.cs \
+	Cmis/AbstractNotifyingRepository.cs \
 	Cmis/Authentication/AuthProviderFactory.cs \
 	Cmis/Authentication/IDisposableAuthProvider.cs \
 	Cmis/Authentication/PersistentNtlmAuthenticationProvider.cs \
 	Cmis/Authentication/PersistentStandardAuthenticationProvider.cs \
 	Cmis/Authentication/StandardAuthenticationProviderWrapper.cs \
+	Cmis/ConvenienceExtenders/AllowableActionConvenienceExtenders.cs \
 	Cmis/ConvenienceExtenders/CmisConvenienceExtenders.cs \
+	Cmis/ConvenienceExtenders/CmisRepositoryInfoConvenienceExtenders.cs \
 	Cmis/DotCMISLogListener.cs \
+	Cmis/INotifyRepositoryPropertyChanged.cs \
 	Cmis/MimeType.cs \
 	Cmis/OperationContextFactory.cs \
 	Cmis/Repository.cs \
-	Cmis/UiUtils/CmisPermissionDeniedException.cs \
-	Cmis/UiUtils/CmisServerNotFoundException.cs \
+	Cmis/RepositoryExceptionEventArgs.cs \
+	Cmis/RepositoryStatus.cs \
+	Cmis/RepositoryStatusAggregator.cs \
+	Cmis/SyncStatus.cs \
 	Cmis/UiUtils/CmisUtils.cs \
+	Cmis/UiUtils/LoginCredentials.cs \
+	Cmis/UiUtils/LoginException.cs \
+	Cmis/UiUtils/LogonRepositoryInfo.cs \
+	Cmis/UiUtils/UiConvenienceExtenders.cs \
+	Config/AuthenticationType.cs \
+	Config/Brand.cs \
+	Config/CmisRepoCredentials.cs \
 	Config/Config.cs \
 	Config/ConfigManager.cs \
 	Config/ConfigMigration.cs \
-	Config/Credentials.cs \
 	Config/Crypto.cs \
+	Config/DefaultEntries.cs \
 	Config/Feature.cs \
+	Config/Password.cs \
 	Config/ProxySettings.cs \
 	Config/RepoInfo.cs \
+	Config/ServerCredentials.cs \
+	Config/User.cs \
+	Config/UserCredentials.cs \
 	Config/XmlUri.cs \
 	Consumer/InteractionNeededException.cs \
 	Consumer/ISituationDetection.cs \
@@ -63,6 +81,10 @@ SOURCES =  \
 	Consumer/SituationSolver/LocalObjectRenamedRemoteObjectMoved.cs \
 	Consumer/SituationSolver/LocalObjectRenamedRemoteObjectRenamed.cs \
 	Consumer/SituationSolver/NothingToDoSolver.cs \
+	Consumer/SituationSolver/PrivateWorkingCopy/AbstractEnhancedSolverWithPWC.cs \
+	Consumer/SituationSolver/PrivateWorkingCopy/LocalObjectAddedWithPWC.cs \
+	Consumer/SituationSolver/PrivateWorkingCopy/LocalObjectChangedRemoteObjectChangedWithPWC.cs \
+	Consumer/SituationSolver/PrivateWorkingCopy/LocalObjectChangedWithPWC.cs \
 	Consumer/SituationSolver/RemoteObjectAdded.cs \
 	Consumer/SituationSolver/RemoteObjectChanged.cs \
 	Consumer/SituationSolver/RemoteObjectDeleted.cs \
@@ -74,22 +96,24 @@ SOURCES =  \
 	Events/AbstractFolderEvent.cs \
 	Events/BubbledEvent.cs \
 	Events/ChangeEnums.cs \
+	Events/CmisConnectionExceptionEvent.cs \
 	Events/ConfigChangedEvent.cs \
 	Events/ConfigurationNeededEvent.cs \
 	Events/ContentChangeEvent.cs \
 	Events/CrawlRequestEvent.cs \
 	Events/EncapsuledEvent.cs \
+	Events/EventCategory.cs \
 	Events/ExceptionEvent.cs \
 	Events/FileConflictEvent.cs \
 	Events/FileEvent.cs \
 	Events/FileMovedEvent.cs \
 	Events/FileOrFolderEventFactory.cs \
-	Events/FileTransmissionEvent.cs \
 	Events/FolderEvent.cs \
 	Events/FolderMovedEvent.cs \
 	Events/FSEvent.cs \
 	Events/FSMovedEvent.cs \
 	Events/FullSyncCompletedEvent.cs \
+	Events/ICountableEvent.cs \
 	Events/IFilterableEvent.cs \
 	Events/IFilterableLocalPathEvent.cs \
 	Events/IFilterableNameEvent.cs \
@@ -104,6 +128,7 @@ SOURCES =  \
 	Events/ProxyAuthRequiredEvent.cs \
 	Events/RecentChangedEvent.cs \
 	Events/RemoteEvent.cs \
+	Events/RepoConfigChangedEvent.cs \
 	Events/RequestIgnoredEvent.cs \
 	Events/StartNextSyncEvent.cs \
 	Events/SuccessfulLoginEvent.cs \
@@ -113,8 +138,11 @@ SOURCES =  \
 	FileTransmission/ContentTaskUtils.cs \
 	FileTransmission/IFileDownloader.cs \
 	FileTransmission/IFileUploader.cs \
+	FileTransmission/ITransmissionManager.cs \
 	FileTransmission/SimpleFileDownloader.cs \
 	FileTransmission/SimpleFileUploader.cs \
+	FileTransmission/Transmission.cs \
+	FileTransmission/TransmissionManager.cs \
 	FileTransmission/UploadFailedException.cs \
 	Filter/AbstractFileFilter.cs \
 	Filter/FilterAggregator.cs \
@@ -127,6 +155,10 @@ SOURCES =  \
 	Filter/IgnoredFoldersFilter.cs \
 	Filter/InvalidFolderNameFilter.cs \
 	Filter/ReportingFilter.cs \
+	Filter/RepositoryRootDeletedDetection.cs \
+	Filter/SymlinkFilter.cs \
+	HashAlgorithm/HashAlgorithmReuse.cs \
+	HashAlgorithm/SHA1Reuse.cs \
 	HttpProxyUtils.cs \
 	IActivityListener.cs \
 	PathMatcher/IPathMatcher.cs \
@@ -150,33 +182,59 @@ SOURCES =  \
 	Producer/Watcher/RenamedFileSystemEventHandler.cs \
 	Producer/Watcher/WatcherConsumer.cs \
 	Queueing/AbstractEventProducer.cs \
-	Queueing/ActiveActivitiesManager.cs \
 	Queueing/ConnectionScheduler.cs \
 	Queueing/DebugLoggingHandler.cs \
 	Queueing/DelayRetryAndNextSyncEventHandler.cs \
 	Queueing/EventHandlerPriorities.cs \
 	Queueing/GenericSyncEventHandler.cs \
 	Queueing/IConnectionScheduler.cs \
+	Queueing/ICountingQueue.cs \
 	Queueing/IDisposableSyncEventQueue.cs \
+	Queueing/IEventCounter.cs \
 	Queueing/ISyncEventManager.cs \
 	Queueing/ISyncEventQueue.cs \
+	Queueing/QueuedCategorizedEventsCounter.cs \
+	Queueing/QueuedEventsCounter.cs \
 	Queueing/ReportingSyncEventHandler.cs \
 	Queueing/SyncEventHandler.cs \
 	Queueing/SyncEventManager.cs \
 	Queueing/SyncEventQueue.cs \
 	Queueing/SyncScheduler.cs \
+	Queueing/Unsubscriber.cs \
+	SelectiveIgnore/CmisSelectiveIgnoreCapability.cs \
+	SelectiveIgnore/IgnoredEntitiesCollection.cs \
+	SelectiveIgnore/IgnoredEntitiesStorage.cs \
+	SelectiveIgnore/IgnoredEntity.cs \
+	SelectiveIgnore/IgnoredState.cs \
+	SelectiveIgnore/IgnoreFlagChangeDetection.cs \
+	SelectiveIgnore/IIgnoredEntitiesCollection.cs \
+	SelectiveIgnore/IIgnoredEntitiesStorage.cs \
+	SelectiveIgnore/IIgnoredEntity.cs \
+	SelectiveIgnore/SelectiveIgnoreEventTransformer.cs \
+	SelectiveIgnore/SelectiveIgnoreFilter.cs \
+	Status/ConnectionStatus.cs \
+	Status/RepositoryStatus.cs \
+	Status/SynchronizationStatus.cs \
 	Storage/Database/DBreezeInitializerSingleton.cs \
 	Storage/Database/DublicateGuidException.cs \
+	Storage/Database/Entities/FileTransmissionObject.cs \
 	Storage/Database/Entities/IFileConvenienceExtenders.cs \
+	Storage/Database/Entities/IFileTransmissionObject.cs \
 	Storage/Database/Entities/IMappedObject.cs \
 	Storage/Database/Entities/MappedObject.cs \
 	Storage/Database/EntryNotFoundException.cs \
+	Storage/Database/FileTransmissionStorage.cs \
+	Storage/Database/GraphOutputConvenienceExtension.cs \
 	Storage/Database/ICookieStorage.cs \
+	Storage/Database/IDotTreeWriter.cs \
+	Storage/Database/IFileTransmissionStorage.cs \
 	Storage/Database/IMetaDataStorage.cs \
+	Storage/Database/IMetaDataStorageConvenienceExtender.cs \
 	Storage/Database/IObjectTree.cs \
 	Storage/Database/MetaDataStorage.cs \
 	Storage/Database/ObjectTree.cs \
 	Storage/Database/PersistentCookieStorage.cs \
+	Storage/FileSystem/DateTimeToFileConverter.cs \
 	Storage/FileSystem/DirectoryInfoWrapper.cs \
 	Storage/FileSystem/ExtendedAttributeException.cs \
 	Storage/FileSystem/ExtendedAttributeReaderDos.cs \
@@ -184,20 +242,30 @@ SOURCES =  \
 	Storage/FileSystem/FileInfoWrapper.cs \
 	Storage/FileSystem/FileSystemInfoFactory.cs \
 	Storage/FileSystem/FileSystemInfoWrapper.cs \
+	Storage/FileSystem/FSType.cs \
 	Storage/FileSystem/IDirectoryInfo.cs \
 	Storage/FileSystem/IExtendedAttributeReader.cs \
 	Storage/FileSystem/IFileInfo.cs \
 	Storage/FileSystem/IFileSystemInfo.cs \
 	Storage/FileSystem/IFileSystemInfoFactory.cs \
 	Storage/FileSystem/IFileSystemWatcher.cs \
+	Storage/FileSystem/ReadOnlyIgnoringDirectoryInfoDecorator.cs \
+	Storage/FileSystem/ReadOnlyIgnoringFileInfoDecorator.cs \
+	Storage/FileSystem/ReadOnlyIgnoringFileSystemInfoDecorator.cs \
 	Storage/FileSystem/RestoreModificationDateException.cs \
+	Streams/AbortableStream.cs \
 	Streams/BandwidthLimitedStream.cs \
+	Streams/BandwidthNotifyingStream.cs \
 	Streams/ChunkedStream.cs \
 	Streams/ForwardReadingStream.cs \
 	Streams/NonClosingHashStream.cs \
+	Streams/NotifyPropertyChangedStream.cs \
 	Streams/OffsetStream.cs \
+	Streams/PausableStream.cs \
 	Streams/ProgressStream.cs \
+	Streams/StreamConvenienceExtensions.cs \
 	Streams/StreamWrapper.cs \
+	Streams/TransmissionStream.cs \
 	Utils.cs
 
 EXTRA_DIST = CmisSync.Lib.csproj StaticDefines.cs

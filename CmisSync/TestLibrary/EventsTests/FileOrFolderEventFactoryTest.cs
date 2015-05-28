@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.EventsTests
-{
+namespace TestLibrary.EventsTests {
     using System;
 
     using CmisSync.Lib.Events;
@@ -31,29 +30,24 @@ namespace TestLibrary.EventsTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class FileOrFolderEventFactoryTest
-    {
+    public class FileOrFolderEventFactoryTest {
         [Test, Category("Fast")]
-        public void CreateFileAddedEvent()
-        {
+        public void CreateFileAddedEvent() {
             var ev = FileOrFolderEventFactory.CreateEvent(Mock.Of<IDocument>(), null, MetaDataChangeType.CREATED);
             Assert.That(ev is FileEvent);
             Assert.That((ev as FileEvent).Remote, Is.EqualTo(MetaDataChangeType.CREATED));
         }
 
         [Test, Category("Fast")]
-        public void CreateFileEvent()
-        {
+        public void CreateFileEvent() {
             var ev = FileOrFolderEventFactory.CreateEvent(null, Mock.Of<IFileInfo>());
             Assert.That(ev is FileEvent);
         }
 
         [Test, Category("Fast")]
-        public void CreateFolderMovedEvent()
-        {
+        public void CreateFolderMovedEvent() {
             var ev = FileOrFolderEventFactory.CreateEvent(Mock.Of<IFolder>(), null, MetaDataChangeType.MOVED, oldRemotePath: "oldPath");
             Assert.That(ev is FolderMovedEvent);
         }
     }
 }
-

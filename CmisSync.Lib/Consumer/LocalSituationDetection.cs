@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer
-{
+namespace CmisSync.Lib.Consumer {
     using System;
     using System.IO;
 
@@ -32,25 +31,19 @@ namespace CmisSync.Lib.Consumer
     /// <summary>
     /// Local situation detection.
     /// </summary>
-    public class LocalSituationDetection : ISituationDetection<AbstractFolderEvent>
-    {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalSituationDetection));
-
+    public class LocalSituationDetection : ISituationDetection<AbstractFolderEvent> {
         /// <summary>
         /// Analyse the situation of the actual event in combination with the meta data storage.
         /// </summary>
         /// <param name="storage">Meta data storage.</param>
         /// <param name="actualEvent">Actual event.</param>
         /// <returns>The detected local situation.</returns>
-        public SituationType Analyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
-        {
+        public SituationType Analyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent) {
             SituationType type = this.DoAnalyse(storage, actualEvent);
-            Logger.Debug(string.Format("Local Situation is: {0}", type));
             return type;
         }
 
-        private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
-        {
+        private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent) {
             IFileSystemInfo localPath = actualEvent is FolderEvent ? (IFileSystemInfo)(actualEvent as FolderEvent).LocalFolder : (IFileSystemInfo)(actualEvent is FileEvent ? (actualEvent as FileEvent).LocalFile : null);
             switch (actualEvent.Local)
             {
@@ -81,7 +74,7 @@ namespace CmisSync.Lib.Consumer
 
                 return SituationType.CHANGED;
             case MetaDataChangeType.NONE:
-                if(actualEvent is FileEvent && (actualEvent as FileEvent).LocalContent != ContentChangeType.NONE) {
+                if (actualEvent is FileEvent && (actualEvent as FileEvent).LocalContent != ContentChangeType.NONE) {
                     return SituationType.CHANGED;
                 } else {
                     return SituationType.NOCHANGE;

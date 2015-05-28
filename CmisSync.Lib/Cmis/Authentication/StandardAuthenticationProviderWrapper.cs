@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Cmis
-{
+namespace CmisSync.Lib.Cmis {
     using System;
     using System.Net;
 
@@ -27,8 +26,7 @@ namespace CmisSync.Lib.Cmis
     /// <summary>
     /// Standard authtentication provider.
     /// </summary>
-    public class StandardAuthenticationProviderWrapper : DotCMIS.Binding.StandardAuthenticationProvider, IDisposableAuthProvider
-    {
+    public class StandardAuthenticationProviderWrapper : DotCMIS.Binding.StandardAuthenticationProvider, IDisposableAuthProvider {
         /// <summary>
         /// Releases all resource used by the <see cref="CmisSync.Lib.Cmis.StandardAuthtenticationProvider"/> object.
         /// </summary>
@@ -40,15 +38,13 @@ namespace CmisSync.Lib.Cmis
         /// <see cref="CmisSync.Lib.Cmis.StandardAuthtenticationProvider"/> so the garbage collector can reclaim the
         /// memory that the <see cref="CmisSync.Lib.Cmis.StandardAuthtenticationProvider"/> was occupying.
         /// </remarks>
-        public void Dispose()
-        {
+        public void Dispose() {
         }
 
         /// <summary>
         /// Deletes all cookies.
         /// </summary>
-        public void DeleteAllCookies()
-        {
+        public void DeleteAllCookies() {
             this.Cookies = new CookieContainer();
         }
     }

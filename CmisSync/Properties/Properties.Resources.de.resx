@@ -223,7 +223,7 @@
     <value>Synchronisation</value>
   </data>
   <data name="SyncingChanges" xml:space="preserve">
-    <value>Synchronisieren die Änderungen...</value>
+    <value>Synchronisation läuft...</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Benutzer</value>
@@ -378,5 +378,65 @@ Dies kann bei der Synchronisation zu Konfliktdateien führen.</value>
   </data>
   <data name="Version" xml:space="preserve">
     <value>Version {0} ({1})</value>
+  </data>
+  <data name="StatusChangesDetected" xml:space="preserve">
+    <value>{0} Unterschiede ermittelt</value>
+  </data>
+  <data name="StatusChangesDetectedSince" xml:space="preserve">
+    <value>{0} Unterschiede wurden seit {1} ermittelt</value>
+  </data>
+  <data name="StatusNoChangeDetected" xml:space="preserve">
+    <value>Keine Unterschiede ermittelt</value>
+  </data>
+  <data name="StatusNoChangeDetectedSince" xml:space="preserve">
+    <value>Seit {0} wurden keine Unterschiede ermittelt</value>
+  </data>
+  <data name="StatusSearchingForChanges" xml:space="preserve">
+    <value>Ermittle Unterschiede</value>
+  </data>
+  <data name="StatusSearchingForChangesAndFound" xml:space="preserve">
+    <value>Ermittle Unterschiede (aktuell {0} gefunden)</value>
+  </data>
+  <data name="Transmission" xml:space="preserve">
+    <value>Übertragungen</value>
+  </data>
+  <data name="TransmissionTitlePath" xml:space="preserve">
+    <value>Pfad</value>
+  </data>
+  <data name="TransmissionTitleProgress" xml:space="preserve">
+    <value>Fortschritt</value>
+  </data>
+  <data name="TransmissionTitleRepo" xml:space="preserve">
+    <value>Verbindung</value>
+  </data>
+  <data name="TransmissionTitleStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Schließen</value>
+  </data>
+  <data name="TransmissionTitleLastChange" xml:space="preserve">
+    <value>Letzte Änderung</value>
+  </data>
+  <data name="FatalExceptionTitle" xml:space="preserve">
+    <value>{0}: Fataler Fehler ist aufgetreten</value>
+  </data>
+  <data name="LocalRootFolderUnavailable" xml:space="preserve">
+    <value>Synchronisationsziel "{0}" nicht mehr vorhanden. Synchronisation abgebrochen!</value>
+  </data>
+  <data name="UnknownExceptionOccured" xml:space="preserve">
+    <value>Unbekannter Fehler aufgetreten</value>
+  </data>
+  <data name="WarningExceptionTitle" xml:space="preserve">
+    <value>{0}: Fehler aufgetreten</value>
+  </data>
+  <data name="SyncStatusDeactivated" xml:space="preserve">
+    <value>Alle Verbindungen sind deaktiviert</value>
+  </data>
+  <data name="SyncStatusDisconnected" xml:space="preserve">
+    <value>Verbindung zum Server ist getrennt</value>
+  </data>
+  <data name="SyncStatusPaused" xml:space="preserve">
+    <value>Synchronisation ist pausiert</value>
   </data>
 </root>

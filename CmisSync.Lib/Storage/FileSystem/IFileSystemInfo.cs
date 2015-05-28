@@ -17,16 +17,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.FileSystem
-{
+namespace CmisSync.Lib.Storage.FileSystem {
     using System;
     using System.IO;
 
     /// <summary>
     /// Interface to enable mocking of FileSystemInfo
     /// </summary>
-    public interface IFileSystemInfo
-    {
+    public interface IFileSystemInfo {
         /// <summary>
         /// Gets the full name/path.
         /// </summary>
@@ -68,6 +66,19 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// </summary>
         /// <value>The UUID.</value>
         Guid? Uuid { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Storage.FileSystem.IFileSystemInfo"/>
+        /// is read only.
+        /// </summary>
+        /// <value><c>true</c> if read only; otherwise, <c>false</c>.</value>
+        bool ReadOnly { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is a symlink.
+        /// </summary>
+        /// <value><c>true</c> if this instance is a symlink; otherwise, <c>false</c>.</value>
+        bool IsSymlink { get; }
 
         /// <summary>
         /// Refresh the loaded information of this instance.

@@ -33,6 +33,8 @@ M: System.Void CmisSync.CmisSyncMenuItem::.ctor(System.String)
 R: Gendarme.Rules.Portability.DoNotHardcodePathsRule
 M: System.Void CmisSync.UI::.cctor()
 M: System.Void TestLibrary.PathMatcherTests.PathMatcherTest::SetUp()
+M: TestLibrary.ConfigTests::TestBrand()
+M: System.Collections.Generic.List`1<System.String> CmisSync.ClientBrand::get_PathList()
 T: TestLibrary.EventsTests.EventsFilterTests.IgnoredFolderNamesFilterTest
 
 #Required to be type long for error code
@@ -61,14 +63,19 @@ T: CmisSync.StatusIconController
 T: CmisSync.UI
 T: CmisSync.CmisTree.AsyncNodeLoader
 T: CmisSync.Edit
-#Disposed in CmisRepo:
+#Disposed in CmisSync.Lib.Cmis.Repository:
 T: CmisSync.Lib.Storage.Database.PersistentCookieStorage
 T: CmisSync.Lib.Storage.Database.MetaDataStorage
+T: CmisSync.Lib.Storage.Database.FileTransmissionStorage
 
-#Windows Gendarme bug? XmlNodeList is not an IDisposal object at all
+#Windows gendarme bug? XmlNodeList is not an IDisposal object at all
 R: Gendarme.Rules.Correctness.EnsureLocalDisposalRule
 M: System.Collections.ObjectModel.Collection`1<System.String> CmisSync.Lib.Config::get_Folders()
 M: System.Void CmisSync.Lib.Config::RemoveFolder(System.String)
+
+#Ignore correct implementation of dispose pattern in ControllerBase
+R: Gendarme.Rules.Correctness.EnsureLocalDisposalRule
+M: System.Void CmisSync.ControllerBase::AddRepository(CmisSync.Lib.Config.RepoInfo)
 
 #Ignore DotCMIS based rule
 R: Gendarme.Rules.Design.Generic.DoNotExposeNestedGenericSignaturesRule
@@ -89,10 +96,12 @@ M: System.Void TestLibrary.TasksTests.ChunkedDownloaderTest::FullDownloadTest()
 M: System.Void TestLibrary.TasksTests.ChunkedDownloaderTest::ResumeDownloadTest()
 M: System.Void TestLibrary.TestUtils.IsTestWithConfiguredLog4Net::.cctor()
 
-#Ignore AvoidUnnecessarySpecializationRule for PermissionDeniedEvent and ProxyAuthRequiredEvent
+#Ignore AvoidUnnecessarySpecializationRule for PermissionDeniedEvent, CmisConnectionExceptionEvent and ProxyAuthRequiredEvent
 R: Gendarme.Rules.Maintainability.AvoidUnnecessarySpecializationRule
 T: CmisSync.Lib.Events.ProxyAuthRequiredEvent
 T: CmisSync.Lib.Events.PermissionDeniedEvent
+T: CmisSync.Lib.Events.CmisConnectionExceptionEvent
+M: System.Void CmisSync.Lib.Consumer.SituationSolver.AbstractEnhancedSolver::EnsureThatLocalFileNameContainsLegalCharacters(CmisSync.Lib.Storage.FileSystem.IFileSystemInfo,DotCMIS.Exceptions.CmisConstraintException)
 
 #Ignore DoNotExposeNestedGenericSignaturesRule where DotCmis forces us
 R: Gendarme.Rules.Design.Generic.DoNotExposeNestedGenericSignaturesRule
@@ -101,12 +110,13 @@ T: CmisSync.Lib.Cmis.UiUtils.CmisUtils/NodeTree
 #Ignore DoNotHardCodePaths
 R: Gendarme.Rules.Portability.DoNotHardcodePathsRule
 T: TestLibrary.ConfigTests.RepoInfoTests
+T: CmisSync.ClientBrand 
 # Install dir
 T: CmisSync.Controller
 
 # Test for Events which have nested exceptions
 R: Gendarme.Rules.BadPractice.CheckNewExceptionWithoutThrowingRule
-T: TestLibrary.EventsTests.EventsFilterTests.GenericHandleDublicatedEventsFilterTest
+T: TestLibrary.FilterTests.GenericHandleDublicatedEventsFilterTest
 
 # Ignore disturbing Rule
 R: Gendarme.Rules.Maintainability.AvoidUnnecessarySpecializationRule
@@ -116,5 +126,16 @@ T: CmisSync.CircularProgressBar
 R: Gendarme.Rules.Design.Generic.DoNotExposeNestedGenericSignaturesRule
 M: System.Collections.Generic.IList`1<CmisSync.Lib.Storage.Database.IObjectTree`1<T>> CmisSync.Lib.Storage.Database.IObjectTree`1::get_Children()
 M: System.Collections.Generic.IList`1<CmisSync.Lib.Storage.Database.IObjectTree`1<T>> CmisSync.Lib.Storage.Database.ObjectTree`1::get_Children()
-M: System.Void CmisSync.Lib.Storage.Database.ObjectTree`1::set_Children(System.Collections.Generic.IList`1<CmisSync.Lib.Storage.Database.IObjectTree`1<T>>)
+M: System.Void CmisSync.Lib.Storage.Database.ObjectTree`1::set_Children
+(System.Collections.Generic.IList`1<CmisSync.Lib.Storage.Database.IObjectTree`1<T>>)
 M: CmisSync.Lib.Storage.Database.IObjectTree`1<DotCMIS.Client.IFileableCmisObject> CmisSync.Lib.Producer.Crawler.DescendantsCrawler::GetRemoteDirectoryTree(DotCMIS.Client.IFolder,System.Collections.Generic.IList`1<DotCMIS.Client.ITree`1<DotCMIS.Client.IFileableCmisObject>>,CmisSync.Lib.Filter.IFilterAggregator)
+M: System.IDisposable CmisSync.Lib.Queueing.SyncEventQueue::Subscribe(System.IObserver`1<System.Tuple`2<System.String,System.Int32>>)
+
+# TryParseRule should not give any warning in test library
+R: Gendarme.Rules.BadPractice.PreferTryParseRule
+A: TestLibrary, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+
+#Ignore DoNotExposeNestedGenericSignaturesRule where it is very helpful
+R: Gendarme.Rules.Design.Generic.DoNotExposeNestedGenericSignaturesRule
+M: System.String CmisSync.Lib.Utils::NameOf(System.Linq.Expressions.Expression`1<System.Func`1<T>>)
+M: System.String CmisSync.Lib.Utils::NameOf(System.Linq.Expressions.Expression`1<System.Func`2<TModel,TProperty>>)

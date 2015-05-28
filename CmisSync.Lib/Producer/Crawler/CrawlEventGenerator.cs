@@ -16,8 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Producer.Crawler
-{
+namespace CmisSync.Lib.Producer.Crawler {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -30,17 +29,15 @@ namespace CmisSync.Lib.Producer.Crawler
 
     using DotCMIS.Client;
 
-    public class CrawlEventGenerator
-    {
+    public class CrawlEventGenerator {
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
         private LocalEventGenerator localEventGenerator;
         private RemoteEventGenerator remoteEventGenerator;
 
-        public CrawlEventGenerator(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null)
-        {
+        public CrawlEventGenerator(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) {
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage");
             }
 
             this.storage = storage;
@@ -61,16 +58,24 @@ namespace CmisSync.Lib.Producer.Crawler
             CrawlEventCollection createdEvents = new CrawlEventCollection();
             List<IMappedObject> storedObjectsForRemote = storedTree.ToList();
             List<IMappedObject> storedObjectsForLocal = new List<IMappedObject>(storedObjectsForRemote);
-
+            ISet<IMappedObject> handledLocalStoredObjects = new HashSet<IMappedObject>();
+            ISet<IMappedObject> handledRemoteStoredObjects = new HashSet<IMappedObject>();
             Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap = new Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>>();
-            createdEvents.creationEvents = this.remoteEventGenerator.CreateEvents(storedObjectsForRemote, remoteTree, eventMap);
-            createdEvents.creationEvents.AddRange(this.localEventGenerator.CreateEvents(storedObjectsForLocal, localTree, eventMap));
+            createdEvents.creationEvents = this.remoteEventGenerator.CreateEvents(storedObjectsForRemote, remoteTree, eventMap, handledRemoteStoredObjects);
+            createdEvents.creationEvents.AddRange(this.localEventGenerator.CreateEvents(storedObjectsForLocal, localTree, eventMap, handledLocalStoredObjects));
 
             createdEvents.mergableEvents = eventMap;
 
-            IMappedObject rootNode = storedTree.Item;
-            storedObjectsForLocal.Remove(rootNode);
-            storedObjectsForRemote.Remove(rootNode);
+            handledLocalStoredObjects.Add(storedTree.Item);
+            handledRemoteStoredObjects.Add(storedTree.Item);
+
+            foreach (var handledObject in handledLocalStoredObjects) {
+                storedObjectsForLocal.Remove(handledObject);
+            }
+
+            foreach (var handledObject in handledRemoteStoredObjects) {
+                storedObjectsForRemote.Remove(handledObject);
+            }
 
             this.AddDeletedObjectsToMergableEvents(storedObjectsForLocal, eventMap, true);
             this.AddDeletedObjectsToMergableEvents(storedObjectsForRemote, eventMap, false);
@@ -81,9 +86,14 @@ namespace CmisSync.Lib.Producer.Crawler
         private void AddDeletedObjectsToMergableEvents(
             List<IMappedObject> storedObjectList,
             Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap,
-            bool areLocalEvents) {
+            bool areLocalEvents)
+        {
             foreach (var deleted in storedObjectList) {
                 string path = this.storage.GetLocalPath(deleted);
+                if (path == null) {
+                    continue;
+                }
+
                 IFileSystemInfo info = deleted.Type == MappedObjectType.File ? (IFileSystemInfo)this.fsFactory.CreateFileInfo(path) : (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(path);
                 var newEvent = FileOrFolderEventFactory.CreateEvent(
                     null,

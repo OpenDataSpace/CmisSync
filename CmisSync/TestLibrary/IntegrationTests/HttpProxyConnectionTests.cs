@@ -16,8 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace TestLibrary.IntegrationTests
-{
+namespace TestLibrary.IntegrationTests {
     using System;
     using System.Collections.Generic;
     using System.Net;
@@ -33,11 +32,9 @@ namespace TestLibrary.IntegrationTests
     using NUnit.Framework;
 
     [TestFixture, Timeout(60000)]
-    public class HttpProxyConnectionTests
-    {
+    public class HttpProxyConnectionTests {
         [SetUp, TearDown]
-        public void ResetToDefaultProxySettings()
-        {
+        public void ResetToDefaultProxySettings() {
             ProxySettings settings = new ProxySettings();
             settings.Selection = ProxySelection.SYSTEM;
             settings.LoginRequired = false;
@@ -45,14 +42,12 @@ namespace TestLibrary.IntegrationTests
         }
 
         [TestFixtureSetUp]
-        public void DisableSSLVerification()
-        {
+        public void DisableSSLVerification() {
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
         }
 
         [TestFixtureTearDown]
-        public void EnableSSLVerification()
-        {
+        public void EnableSSLVerification() {
             ServicePointManager.ServerCertificateValidationCallback = null;
         }
 
@@ -78,8 +73,7 @@ namespace TestLibrary.IntegrationTests
                 Assert.Ignore();
             }
 
-            ServerCredentials credentials = new ServerCredentials
-            {
+            ServerCredentials credentials = new ServerCredentials {
                 Address = new Uri(cmisServerUrl),
                 UserName = cmisUser,
                 Password = cmisPassword
@@ -89,15 +83,14 @@ namespace TestLibrary.IntegrationTests
             proxySettings.Selection = string.IsNullOrEmpty(cmisServerUrl) ? ProxySelection.NOPROXY : ProxySelection.CUSTOM;
             proxySettings.Server = new Uri(proxyUrl);
             proxySettings.LoginRequired = !string.IsNullOrEmpty(proxyUser);
-            if (proxySettings.LoginRequired)
-            {
+            if (proxySettings.LoginRequired) {
                 proxySettings.Username = proxyUser;
                 proxySettings.ObfuscatedPassword = Crypto.Obfuscate(proxyPassword);
             }
 
             HttpProxyUtils.SetDefaultProxy(proxySettings, true);
 
-            Assert.That(CmisUtils.GetRepositories(credentials), Is.Not.Empty);
+            Assert.That(credentials.GetRepositories(), Is.Not.Empty);
         }
     }
 }

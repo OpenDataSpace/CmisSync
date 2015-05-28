@@ -9,7 +9,6 @@
         <Canvas x:Name="canvas" HorizontalAlignment="Left" Height="248" Margin="0,0,0,0" VerticalAlignment="Top" Width="620">
             <Image x:Name="image" HorizontalAlignment="Left" Height="260" VerticalAlignment="Top" Width="640"/>
             <Label x:Name="version" Content="version" HorizontalAlignment="Left" Canvas.Left="289" Canvas.Top="92" FontSize="11" VerticalAlignment="Top"/>
-            <Label x:Name="updates" Content="updates" HorizontalAlignment="Left" Canvas.Left="289" Canvas.Top="109" FontSize="11" VerticalAlignment="Top"/>
             <TextBlock x:Name="credits" HorizontalAlignment="Left" Canvas.Left="294" Canvas.Top="142" FontSize="11" TextWrapping="Wrap" Text="credits" VerticalAlignment="Top" Width="318"/>
         </Canvas>
     </Grid>

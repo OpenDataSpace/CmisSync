@@ -438,6 +438,24 @@ This could lead to a lot of conflict files!</value>
   <data name="Notifications" xml:space="preserve">
     <value>Notifications</value>
   </data>
+  <data name="BindingType" xml:space="preserve">
+    <value>Binding Type</value>
+  </data>
+  <data name="Transmission" xml:space="preserve">
+    <value>Transmissions</value>
+  </data>
+  <data name="TransmissionTitlePath" xml:space="preserve">
+    <value>Path</value>
+  </data>
+  <data name="TransmissionTitleProgress" xml:space="preserve">
+    <value>Progress</value>
+  </data>
+  <data name="TransmissionTitleRepo" xml:space="preserve">
+    <value>Repo</value>
+  </data>
+  <data name="TransmissionTitleStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
   <data name="LoginFailedLockedUntil" xml:space="preserve">
     <value>Account is locked until {0}</value>
   </data>
@@ -449,5 +467,50 @@ This could lead to a lot of conflict files!</value>
   </data>
   <data name="ProblemWithFS" xml:space="preserve">
     <value>Problems on file system:{0}{1}</value>
+  </data>
+  <data name="StatusChangesDetected" xml:space="preserve">
+    <value>{0} changes detected</value>
+  </data>
+  <data name="StatusChangesDetectedSince" xml:space="preserve">
+    <value>{0} changes detected since {1}</value>
+  </data>
+  <data name="StatusNoChangeDetected" xml:space="preserve">
+    <value>No changes detected</value>
+  </data>
+  <data name="StatusNoChangeDetectedSince" xml:space="preserve">
+    <value>No changes detected since {0}</value>
+  </data>
+  <data name="StatusSearchingForChanges" xml:space="preserve">
+    <value>Searching for changes</value>
+  </data>
+  <data name="StatusSearchingForChangesAndFound" xml:space="preserve">
+    <value>Searching for changes (actually {0} found)</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="TransmissionTitleLastChange" xml:space="preserve">
+    <value>Last change</value>
+  </data>
+  <data name="FatalExceptionTitle" xml:space="preserve">
+    <value>{0}: Fatal error occured</value>
+  </data>
+  <data name="LocalRootFolderUnavailable" xml:space="preserve">
+    <value>Local sync folder "{0}" is unavailable. Synchronization aborted!</value>
+  </data>
+  <data name="UnknownExceptionOccured" xml:space="preserve">
+    <value>Unknown Exception occured</value>
+  </data>
+  <data name="WarningExceptionTitle" xml:space="preserve">
+    <value>{0}: Error occured</value>
+  </data>
+  <data name="SyncStatusDeactivated" xml:space="preserve">
+    <value>All configured connections are deactivated</value>
+  </data>
+  <data name="SyncStatusDisconnected" xml:space="preserve">
+    <value>Disconnected from server</value>
+  </data>
+  <data name="SyncStatusPaused" xml:space="preserve">
+    <value>Synchronization is paused</value>
   </data>
 </root>

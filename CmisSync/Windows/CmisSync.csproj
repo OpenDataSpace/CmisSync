@@ -112,11 +112,15 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Properties.Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="..\TransmissionController.cs">
+      <Link>TransmissionController.cs</Link>
+    </Compile>
     <Compile Include="AboutWPF.xaml.cs">
       <DependentUpon>AboutWPF.xaml</DependentUpon>
     </Compile>
     <Compile Include="CertPolicyWindow.cs" />
     <Compile Include="CircularProgressBar.xaml.cs" />
+    <Compile Include="ClientBrand.cs" />
     <Compile Include="Edit.cs" />
     <Compile Include="EditWPF.xaml.cs">
       <DependentUpon>EditWPF.xaml</DependentUpon>
@@ -131,6 +135,9 @@
     <Compile Include="FolderTreeMVC\IgnoreStatusConverter.cs" />
     <Compile Include="FolderTreeMVC\LoadingStatusModel.cs" />
     <Compile Include="FolderTreeMVC\LoadingStatusConverter.cs" />
+    <Compile Include="RepositoryMenuItem.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Setting.cs" />
     <Compile Include="SettingWPF.xaml.cs">
       <DependentUpon>SettingWPF.xaml</DependentUpon>
@@ -144,6 +151,19 @@
     <Compile Include="Shortcut.cs" />
     <Compile Include="StatusIcon.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UIConverter\BitsPerSecondToStringConverter.cs" />
+    <Compile Include="UIConverter\TransmissionLengthToStringConverter.cs" />
+    <Compile Include="UIConverter\TransmissionPositionToStringConverter.cs" />
+    <Compile Include="UIConverter\TransmissionStatusToDoneConverter.cs" />
+    <Compile Include="UIConverter\TransmissionStatusToVisibilityConverter.cs" />
+    <Compile Include="UIConverter\TransmissionTypeToImageConverter.cs" />
+    <Compile Include="TransmissionWidget.xaml.cs">
+      <DependentUpon>TransmissionWidget.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TransmissionWindow.cs" />
+    <Compile Include="TransmissionWPF.xaml.cs">
+      <DependentUpon>TransmissionWPF.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI.cs" />
     <Compile Include="About.cs" />
@@ -385,6 +405,14 @@
     <Page Include="SetupAddCustomizeWPF.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TransmissionWidget.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TransmissionWPF.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>

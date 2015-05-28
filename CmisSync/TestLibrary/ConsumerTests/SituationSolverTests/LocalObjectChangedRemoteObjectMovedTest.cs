@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectChangedRemoteObjectMovedTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.IO;
 
@@ -38,9 +37,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestUtils;
 
     [TestFixture]
-    public class LocalObjectChangedRemoteObjectMovedTest
-    {
-        private ActiveActivitiesManager manager;
+    public class LocalObjectChangedRemoteObjectMovedTest {
+        private TransmissionManager manager;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileSystemInfoFactory> fsFactory;
@@ -60,47 +58,39 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void MoveLocalFolder() {
+        public void MoveLocalFolder([Values(true, false)]bool childrenAreIgnored) {
             this.SetUpMocks();
             string oldPath = Path.Combine(Path.GetTempPath(), "old", "name");
             string newPath = Path.Combine(Path.GetTempPath(), "new", "name");
             var mappedObject = new MappedObject("name", "remoteId", MappedObjectType.Folder, "oldParentId", "changeToken") { Guid = Guid.NewGuid() };
             this.storage.AddMappedFolder(mappedObject);
-            var remoteFolder = Mock.Of<IFolder>(
-                f =>
-                f.Id == "remoteId" &&
-                f.Name == "name" &&
-                f.ParentId == "parentId");
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("remoteId", "name", "path", "parentId", ignored: childrenAreIgnored);
             var dir = Mock.Of<IDirectoryInfo>(
                 d =>
                 d.FullName == oldPath);
-            this.storage.Setup(s => s.Matcher.CreateLocalPath(remoteFolder)).Returns(newPath);
-            this.underTest.Solve(dir, remoteFolder, ContentChangeType.NONE, ContentChangeType.NONE);
+            this.storage.Setup(s => s.Matcher.CreateLocalPath(remoteFolder.Object)).Returns(newPath);
+            this.underTest.Solve(dir, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
             Mock.Get(dir).Verify(d => d.MoveTo(newPath), Times.Once());
-            this.changeSolver.Verify(s => s.Solve(dir, remoteFolder, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "remoteId", "name", "parentId", "changeToken");
+            this.changeSolver.Verify(s => s.Solve(dir, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "remoteId", "name", "parentId", "changeToken", ignored: childrenAreIgnored);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void MoveAndRenameLocalFolder() {
+        public void MoveAndRenameLocalFolder([Values(true, false)]bool childrenAreIgnored) {
             this.SetUpMocks();
             string oldPath = Path.Combine(Path.GetTempPath(), "old", "oldname");
             string newPath = Path.Combine(Path.GetTempPath(), "new", "newname");
             var mappedObject = new MappedObject("oldname", "remoteId", MappedObjectType.Folder, "oldParentId", "changeToken") { Guid = Guid.NewGuid() };
             this.storage.AddMappedFolder(mappedObject);
-            var remoteFolder = Mock.Of<IFolder>(
-                f =>
-                f.Id == "remoteId" &&
-                f.Name == "newname" &&
-                f.ParentId == "parentId");
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("remoteId", "newname", "path", "parentId", ignored: childrenAreIgnored);
             var dir = Mock.Of<IDirectoryInfo>(
                 d =>
                 d.FullName == oldPath);
-            this.storage.Setup(s => s.Matcher.CreateLocalPath(remoteFolder)).Returns(newPath);
-            this.underTest.Solve(dir, remoteFolder, ContentChangeType.NONE, ContentChangeType.NONE);
+            this.storage.Setup(s => s.Matcher.CreateLocalPath(remoteFolder.Object)).Returns(newPath);
+            this.underTest.Solve(dir, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
             Mock.Get(dir).Verify(d => d.MoveTo(newPath), Times.Once());
-            this.changeSolver.Verify(s => s.Solve(dir, remoteFolder, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "remoteId", "newname", "parentId", "changeToken");
+            this.changeSolver.Verify(s => s.Solve(dir, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "remoteId", "newname", "parentId", "changeToken", ignored: childrenAreIgnored);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -171,7 +161,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         private void SetUpMocks() {
-            this.manager = new ActiveActivitiesManager();
+            this.manager = new TransmissionManager();
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
@@ -179,10 +169,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(
                 this.session.Object,
                 this.storage.Object,
+                null,
                 this.manager,
                 this.fsFactory.Object);
             this.underTest = new LocalObjectChangedRemoteObjectMoved(this.session.Object, this.storage.Object, this.changeSolver.Object);
         }
     }
 }
-

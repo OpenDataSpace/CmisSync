@@ -17,6 +17,7 @@ SOURCES =  \
 	../SettingController.cs \
 	../SetupController.cs \
 	../StatusIconController.cs \
+	../TransmissionController.cs \
 	../Windows/FolderTreeMVC/IgnoredFolderLoader.cs \
 	../Windows/FolderTreeMVC/LoadingStatusModel.cs \
 	../Windows/FolderTreeMVC/LocalFolderLoader.cs \
@@ -25,6 +26,7 @@ SOURCES =  \
 	../Windows/FolderTreeMVC/NodeModelUtils.cs \
 	About.cs \
 	CertPolicyWindow.cs \
+	ClientBrand.cs \
 	CmisTree/CmisTreeStore.cs \
 	CmisTree/StatusCellRenderer.cs \
 	Controller.cs \
@@ -32,16 +34,21 @@ SOURCES =  \
 	Edit.cs \
 	gtk-gui/CmisSync.CredentialsWidget.cs \
 	gtk-gui/CmisSync.Setting.cs \
+	gtk-gui/CmisSync.TransmissionWindow.cs \
 	gtk-gui/CmisSync.Widgets.ProxyWidget.cs \
+	gtk-gui/CmisSync.Widgets.TransmissionWidget.cs \
 	gtk-gui/CmisSync.Widgets.UrlWidget.cs \
 	gtk-gui/generated.cs \
 	Notification/NotificationUtils.cs \
 	ProxyWidget.cs \
+	RepositoryMenuItem.cs \
 	Setting.cs \
 	Setup.cs \
 	SetupWindow.cs \
 	Spinner.cs \
 	StatusIcon.cs \
+	TransmissionWidget.cs \
+	TransmissionWindow.cs \
 	UI.cs \
 	UIHelpers.cs \
 	UrlWidget.cs \

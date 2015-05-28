@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Streams
-{
+namespace CmisSync.Lib.Streams {
     using System;
     using System.Diagnostics;
     using System.IO;
@@ -26,8 +25,7 @@ namespace CmisSync.Lib.Streams
     /// <summary>
     /// Bandwidth limited stream.
     /// </summary>
-    public class BandwidthLimitedStream : StreamWrapper
-    {
+    public class BandwidthLimitedStream : NotifyPropertyChangedStream {
         /// <summary>
         /// Locks the limit manipulation to prevent concurrent accesses
         /// </summary>
@@ -36,14 +34,14 @@ namespace CmisSync.Lib.Streams
         /// <summary>
         /// The Limit of bytes which could be read per second. The limit is disabled if set to -1.
         /// </summary>
-        private long readLimit = -1;
+        private long? readLimit = null;
 
         /// <summary>
         /// The Limit of bytes which could be written per second. The limit is disabled if set to -1.
         /// </summary>
-        private long writeLimit = -1;
-        private Stopwatch ReadWatch;
-        private Stopwatch WriteWatch;
+        private long? writeLimit = null;
+        private Stopwatch readWatch;
+        private Stopwatch writeWatch;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Streams.BandwidthLimitedStream"/> class.
@@ -51,8 +49,7 @@ namespace CmisSync.Lib.Streams
         /// <param name='s'>
         /// The stream instance, which should be limited.
         /// </param>
-        public BandwidthLimitedStream(Stream s) : base(s)
-        {
+        public BandwidthLimitedStream(Stream s) : base(s) {
             this.Init();
         }
 
@@ -63,13 +60,12 @@ namespace CmisSync.Lib.Streams
         /// The stream instance, which should be limited.
         /// </param>
         /// <param name='limit'>
-        /// Limit.
+        /// Up and download limit.
         /// </param>
-        public BandwidthLimitedStream(Stream s, long limit) : base(s)
-        {
+        public BandwidthLimitedStream(Stream s, long limit) : base(s) {
             this.Init();
-            ReadLimit = limit;
-            WriteLimit = limit;
+            this.ReadLimit = limit;
+            this.WriteLimit = limit;
         }
 
         /// <summary>
@@ -78,23 +74,21 @@ namespace CmisSync.Lib.Streams
         /// <value>
         /// The read limit.
         /// </value>
-        public long ReadLimit
-        {
-            get
-            {
-                return this.readLimit; 
+        public long? ReadLimit {
+            get {
+                return this.readLimit;
             }
 
-            set
-            {
-                if (value <= 0)
-                {
+            set {
+                if (value != null && value <= 0) {
                     throw new ArgumentException("Limit cannot be negative");
                 }
 
-                lock (this.limitLock)
-                {
-                    this.readLimit = value;
+                lock (this.limitLock) {
+                    if (value != this.readLimit) {
+                        this.readLimit = value;
+                        this.NotifyPropertyChanged(Utils.NameOf(() => this.ReadLimit));
+                    }
                 }
             }
         }
@@ -105,23 +99,21 @@ namespace CmisSync.Lib.Streams
         /// <value>
         /// The write limit.
         /// </value>
-        public long WriteLimit
-        {
-            get
-            {
+        public long? WriteLimit {
+            get {
                 return this.writeLimit;
             }
 
-            set
-            {
-                if (value <= 0)
-                {
+            set {
+                if (value != null && value <= 0) {
                     throw new ArgumentException("Limit cannot be negative");
                 }
 
-                lock (this.limitLock)
-                {
-                    this.writeLimit = value;
+                lock (this.limitLock) {
+                    if (value != this.writeLimit) {
+                        this.writeLimit = value;
+                        this.NotifyPropertyChanged(Utils.NameOf(() => this.WriteLimit));
+                    }
                 }
             }
         }
@@ -129,35 +121,23 @@ namespace CmisSync.Lib.Streams
         /// <summary>
         /// Disables the limits.
         /// </summary>
-        public void DisableLimits()
-        {
-            lock (this.limitLock)
-            {
-                this.readLimit = -1;
-                this.writeLimit = -1;
-            }
+        public void DisableLimits() {
+            this.DisableReadLimit();
+            this.DisableWriteLimit();
         }
 
         /// <summary>
         /// Disables the read limit.
         /// </summary>
-        public void DisableReadLimit()
-        {
-            lock (this.limitLock)
-            {
-                this.readLimit = -1;
-            }
+        public void DisableReadLimit() {
+            this.ReadLimit = null;
         }
 
         /// <summary>
         /// Disables the write limit.
         /// </summary>
-        public void DisableWriteLimit()
-        {
-            lock (this.limitLock)
-            {
-                this.writeLimit = -1;
-            }
+        public void DisableWriteLimit() {
+            this.WriteLimit = null;
         }
 
         /// <summary>
@@ -172,14 +152,10 @@ namespace CmisSync.Lib.Streams
         /// <param name='count'>
         /// Count of bytes.
         /// </param>
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            if (this.readLimit < 0)
-            {
+        public override int Read(byte[] buffer, int offset, int count) {
+            if (this.ReadLimit == null) {
                 return Stream.Read(buffer, offset, count);
-            }
-            else
-            {
+            } else {
                 // TODO Sleep must be implemented
                 return Stream.Read(buffer, offset, count);
             }
@@ -197,14 +173,10 @@ namespace CmisSync.Lib.Streams
         /// <param name='count'>
         /// Count.
         /// </param>
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            if (this.WriteLimit < 0)
-            {
+        public override void Write(byte[] buffer, int offset, int count) {
+            if (this.WriteLimit == null) {
                 this.Stream.Write(buffer, offset, count);
-            }
-            else
-            {
+            } else {
                 // TODO Sleep must be implemented
                 this.Stream.Write(buffer, offset, count);
             }
@@ -213,10 +185,9 @@ namespace CmisSync.Lib.Streams
         /// <summary>
         /// Init this instance.
         /// </summary>
-        private void Init()
-        {
-            this.WriteWatch = new Stopwatch();
-            this.ReadWatch = new Stopwatch();
+        private void Init() {
+            this.writeWatch = new Stopwatch();
+            this.readWatch = new Stopwatch();
         }
     }
 }

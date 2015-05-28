@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.FileSystem
-{
+namespace CmisSync.Lib.Storage.FileSystem {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -29,16 +28,14 @@ namespace CmisSync.Lib.Storage.FileSystem
     /// <summary>
     /// Wrapper for FileInfo
     /// </summary>
-    public class FileInfoWrapper : FileSystemInfoWrapper, IFileInfo
-    {
+    public class FileInfoWrapper : FileSystemInfoWrapper, IFileInfo {
         private FileInfo original;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.FileInfoWrapper"/> class.
         /// </summary>
         /// <param name="fileInfo">File info.</param>
-        public FileInfoWrapper(FileInfo fileInfo) : base(fileInfo)
-        {
+        public FileInfoWrapper(FileInfo fileInfo) : base(fileInfo) {
             this.original = fileInfo;
         }
 
@@ -67,8 +64,7 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// </summary>
         /// <param name="mode">Open mode.</param>
         /// <returns>Stream of the content.</returns>
-        public Stream Open(FileMode mode)
-        {
+        public Stream Open(FileMode mode) {
             return this.original.Open(mode);
         }
 
@@ -78,8 +74,7 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// <param name="mode">Open mode.</param>
         /// <param name="access">Access Mode.</param>
         /// <returns>Stream of the content</returns>
-        public Stream Open(FileMode mode, FileAccess access)
-        {
+        public Stream Open(FileMode mode, FileAccess access) {
             return this.original.Open(mode, access);
         }
 
@@ -90,8 +85,7 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// <param name="access">Access mode.</param>
         /// <param name="share">Share mode.</param>
         /// <returns>Stream of the content</returns>
-        public Stream Open(FileMode mode, FileAccess access, FileShare share)
-        {
+        public Stream Open(FileMode mode, FileAccess access, FileShare share) {
             return this.original.Open(mode, access, share);
         }
 
@@ -99,16 +93,14 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// Moves to target file.
         /// </summary>
         /// <param name="target">Target file name.</param>
-        public void MoveTo(string target)
-        {
+        public void MoveTo(string target) {
             this.original.MoveTo(target);
         }
 
         /// <summary>
         /// Deletes the file on the fs.
         /// </summary>
-        public void Delete()
-        {
+        public void Delete() {
             this.original.Delete();
         }
 
@@ -121,8 +113,7 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// <param name="destinationBackupFileName">Destination backup file name.</param>
         /// <param name="ignoreMetadataErrors"><c>true</c> to ignore merge errors (such as attributes and ACLs) from the replaced file to the replacement file; otherwise <c>false</c>.</param>
         /// <returns>A IFileInfo object that encapsulates information about the file described by the destFileName parameter.</returns>
-        public IFileInfo Replace(IFileInfo destinationFile, IFileInfo destinationBackupFileName, bool ignoreMetadataErrors)
-        {
+        public IFileInfo Replace(IFileInfo destinationFile, IFileInfo destinationBackupFileName, bool ignoreMetadataErrors) {
 #if __MonoCS__
             var reader = new ExtendedAttributeReaderUnix();
             var oldSourceEAs = new Dictionary<string, string>();

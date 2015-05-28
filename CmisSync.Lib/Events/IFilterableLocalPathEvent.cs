@@ -17,15 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
 
     /// <summary>
     /// Interface for all events which are able to be filtered by local path.
     /// </summary>
-    public interface IFilterableLocalPathEvent
-    {
+    public interface IFilterableLocalPathEvent : ISyncEvent {
         /// <summary>
         /// Gets the local path.
         /// </summary>

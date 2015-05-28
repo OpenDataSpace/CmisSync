@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="RepoInfo.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Config
-{
+namespace CmisSync.Lib.Config {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -28,13 +27,14 @@ namespace CmisSync.Lib.Config
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
 
+    using DotCMIS;
+
     /// <summary>
     /// All the info for a particular CmisSync synchronized folder.
     /// Contains local info, as well as remote info to connect to the CMIS folder.
     /// </summary>
     [Serializable]
-    public class RepoInfo
-    {
+    public class RepoInfo {
         private CmisRepoCredentials credentials = new CmisRepoCredentials();
         private double pollInterval = Config.DefaultPollInterval;
         private long chunkSize = Config.DefaultChunkSize;
@@ -65,16 +65,28 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <value>The remote URL.</value>
         [XmlElement("url")]
-        public XmlUri Address
-        {
-            get
-            {
+        public XmlUri Address {
+            get {
                 return this.credentials.Address;
             }
 
-            set
-            {
+            set {
                 this.credentials.Address = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the binding type.
+        /// </summary>
+        /// <value>The binding type.</value>
+        [XmlElement("binding"), System.ComponentModel.DefaultValue(BindingType.AtomPub)]
+        public string Binding {
+            get {
+                return this.credentials.Binding;
+            }
+
+            set {
+                this.credentials.Binding = value;
             }
         }
 
@@ -99,15 +111,12 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <value>The name of the user.</value>
         [XmlElement("user")]
-        public string User
-        {
-            get
-            {
+        public string User {
+            get {
                 return this.credentials.UserName;
             }
 
-            set
-            {
+            set {
                 this.credentials.UserName = value;
             }
         }
@@ -117,15 +126,12 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <value>The obfuscated password.</value>
         [XmlElement("password")]
-        public string ObfuscatedPassword
-        {
-            get
-            {
+        public string ObfuscatedPassword {
+            get {
                 return this.credentials.Password.ObfuscatedPassword;
             }
 
-            set
-            {
+            set {
                 this.credentials.Password = new Password { ObfuscatedPassword = value };
             }
         }
@@ -142,7 +148,15 @@ namespace CmisSync.Lib.Config
                 /// </summary>
                 /// <value>The repository identifier.</value>
         [XmlElement("repository")]
-        public string RepositoryId { get; set; }
+        public string RepositoryId {
+            get {
+                return this.credentials.RepoId;
+            }
+
+            set {
+                this.credentials.RepoId = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the poll interval in milliseconds.
@@ -150,15 +164,12 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <value>The poll interval.</value>
         [XmlElement("pollinterval"), System.ComponentModel.DefaultValue(Config.DefaultPollInterval)]
-        public double PollInterval
-        {
-            get
-            {
+        public double PollInterval {
+            get {
                 return this.pollInterval;
             }
 
-            set
-            {
+            set {
                 this.pollInterval = value > 0 ? value : Config.DefaultPollInterval;
             }
         }
@@ -221,15 +232,12 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <value>The size of the chunk.</value>
         [XmlElement("chunkSize"), System.ComponentModel.DefaultValue(Config.DefaultChunkSize)]
-        public long ChunkSize
-        {
-            get
-            {
+        public long ChunkSize {
+            get {
                 return this.chunkSize;
             }
 
-            set
-            {
+            set {
                 this.chunkSize = (value < 0) ? 0 : value;
             }
         }
@@ -239,15 +247,12 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <value>The upload retries.</value>
         [XmlElement("maxUploadRetries", IsNullable = true)]
-        public int? MaxUploadRetries
-        {
-            get
-            {
+        public int? MaxUploadRetries {
+            get {
                 return this.uploadRetries;
             }
 
-            set
-            {
+            set {
                 this.uploadRetries = (value == null || value < 0) ? 2 : (int)value;
             }
         }
@@ -257,15 +262,12 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <value>Down load retries.</value>
         [XmlElement("maxDownloadRetries", IsNullable = true)]
-        public int? MaxDownloadRetries
-        {
-            get
-            {
+        public int? MaxDownloadRetries {
+            get {
                 return this.downloadRetries;
             }
 
-            set
-            {
+            set {
                 this.downloadRetries = (value == null || value < 0) ? 2 : (int)value;
             }
         }
@@ -275,15 +277,12 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <value>The deletion retries.</value>
         [XmlElement("maxDeletionRetries", IsNullable = true)]
-        public int? MaxDeletionRetries
-        {
-            get
-            {
+        public int? MaxDeletionRetries {
+            get {
                 return this.deletionRetries;
             }
 
-            set
-            {
+            set {
                 this.deletionRetries = (value == null || value < 0) ? 2 : (int)value;
             }
         }
@@ -293,23 +292,26 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <value>The ignored folders.</value>
         [XmlElement("ignoreFolder")]
-        public List<IgnoredFolder> IgnoredFolders
-        {
-            get
-            {
-                if (this.ignoredFolders == null)
-                {
+        public List<IgnoredFolder> IgnoredFolders {
+            get {
+                if (this.ignoredFolders == null) {
                     return new List<IgnoredFolder>();
-                }
-                else
-                {
+                } else {
                     return this.ignoredFolders;
                 }
             }
 
-            set
-            {
+            set {
                 this.ignoredFolders = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the CmisRepoCredentials
+        /// </summary>
+        public CmisRepoCredentials Credentials {
+            get {
+                return this.credentials;
             }
         }
 
@@ -317,12 +319,10 @@ namespace CmisSync.Lib.Config
         /// Gets the ignored paths.
         /// </summary>
         /// <returns>The ignored paths.</returns>
-        public List<string> GetIgnoredPaths()
-        {
+        public List<string> GetIgnoredPaths() {
             List<string> list = new List<string>();
 
-            foreach(IgnoredFolder folder in this.IgnoredFolders)
-            {
+            foreach (IgnoredFolder folder in this.IgnoredFolders) {
                 list.Add(folder.Path);
             }
 
@@ -335,8 +335,7 @@ namespace CmisSync.Lib.Config
         /// <param name='ignorePath'>
         /// Ignore path.
         /// </param>
-        public void AddIgnorePath(string ignorePath)
-        {
+        public void AddIgnorePath(string ignorePath) {
             this.IgnoredFolders.Add(new IgnoredFolder { Path = ignorePath });
         }
 
@@ -346,8 +345,7 @@ namespace CmisSync.Lib.Config
         /// <returns>
         /// Full path
         /// </returns>
-        public virtual string GetDatabasePath()
-        {
+        public virtual string GetDatabasePath() {
             string name = this.DisplayName.Replace("\\", "_");
             name = name.Replace("/", "_");
             return Path.Combine(ConfigManager.CurrentConfig.GetConfigPath(), name + "_DB");
@@ -357,8 +355,7 @@ namespace CmisSync.Lib.Config
         /// Gets the password.
         /// </summary>
         /// <returns>The password.</returns>
-        public virtual Password GetPassword()
-        {
+        public virtual Password GetPassword() {
             return new Password { ObfuscatedPassword = this.credentials.Password.ObfuscatedPassword };
         }
 
@@ -366,8 +363,7 @@ namespace CmisSync.Lib.Config
         /// Sets the password.
         /// </summary>
         /// <param name="password">Password instance.</param>
-        public virtual void SetPassword(Password password)
-        {
+        public virtual void SetPassword(Password password) {
             this.credentials.Password = new Password { ObfuscatedPassword = password.ObfuscatedPassword };
         }
 
@@ -381,26 +377,20 @@ namespace CmisSync.Lib.Config
         /// <returns>
         /// <c>true</c> if the path should be ignored, otherwise <c>false</c>
         /// </returns>
-        public bool IsPathIgnored(string path)
-        {
+        public bool IsPathIgnored(string path) {
             string[] names = path.Split("/".ToCharArray());
-            foreach(string name in names)
-            {
-                if (Utils.IsInvalidFolderName(name, new List<string>()))
-                {
+            foreach (string name in names) {
+                if (Utils.IsInvalidFolderName(name, new List<string>())) {
                     return true;
                 }
             }
 
-            return !string.IsNullOrEmpty(this.GetIgnoredPaths().Find(delegate(string ignore)
-            {
-                if (string.IsNullOrEmpty(ignore))
-                {
+            return !string.IsNullOrEmpty(this.GetIgnoredPaths().Find(delegate(string ignore) {
+                if (string.IsNullOrEmpty(ignore)) {
                     return false;
                 }
 
-                if(path.Equals(ignore))
-                {
+                if (path.Equals(ignore)) {
                     return true;
                 }
 
@@ -412,8 +402,7 @@ namespace CmisSync.Lib.Config
         /// Ignored folder
         /// </summary>
         [Serializable]
-        public struct IgnoredFolder
-        {
+        public struct IgnoredFolder {
             /// <summary>
             /// Gets or sets the path of the ignored folder.
             /// </summary>

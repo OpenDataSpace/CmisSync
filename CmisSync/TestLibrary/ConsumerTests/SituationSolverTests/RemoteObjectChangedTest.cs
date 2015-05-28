@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="RemoteObjectChangedTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.IO;
     using System.Security.Cryptography;
@@ -41,9 +40,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class RemoteObjectChangedTest
-    {
-        private ActiveActivitiesManager manager;
+    public class RemoteObjectChangedTest {
+        private TransmissionManager manager;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileSystemInfoFactory> fsFactory;
@@ -51,29 +49,26 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
         [SetUp]
         public void SetUp() {
-            this.manager = new ActiveActivitiesManager();
+            this.manager = new TransmissionManager();
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.fsFactory = new Mock<IFileSystemInfoFactory>();
-            this.underTest = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.manager, this.fsFactory.Object);
+            this.underTest = new RemoteObjectChanged(this.session.Object, this.storage.Object, null, this.manager, this.fsFactory.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorThrowsExceptionIfTransmissionManagerIsNull()
-        {
-            Assert.Throws<ArgumentNullException>(() => new RemoteObjectChanged(this.session.Object, this.storage.Object, null));
+        public void ConstructorThrowsExceptionIfTransmissionManagerIsNull() {
+            Assert.Throws<ArgumentNullException>(() => new RemoteObjectChanged(this.session.Object, this.storage.Object, null, null));
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorTakesQueueAndTransmissionManager()
-        {
-            new RemoteObjectChanged(this.session.Object, this.storage.Object, this.manager);
+        public void ConstructorTakesQueueAndTransmissionManager() {
+            new RemoteObjectChanged(this.session.Object, this.storage.Object, null, this.manager);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFolderChangedAndModificationDateCouldNotBeSet()
-        {
+        public void RemoteFolderChangedAndModificationDateCouldNotBeSet([Values(true, false)]bool childrenAreIgnored) {
             DateTime creationDate = DateTime.UtcNow;
             string folderName = "a";
             string path = Path.Combine(Path.GetTempPath(), folderName);
@@ -102,18 +97,17 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             this.storage.AddMappedFolder(mappedObject);
 
-            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, newChangeToken);
+            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, newChangeToken, childrenAreIgnored);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)creationDate);
 
             this.underTest.Solve(dirInfo.Object, remoteObject.Object);
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, newChangeToken, lastLocalModification: modification);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, newChangeToken, lastLocalModification: modification, ignored: childrenAreIgnored);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(creationDate)), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFolderChanged()
-        {
+        public void RemoteFolderChanged([Values(true, false)]bool childrenAreIgnored) {
             DateTime creationDate = DateTime.UtcNow;
             string folderName = "a";
             string path = Path.Combine(Path.GetTempPath(), folderName);
@@ -139,18 +133,17 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             this.storage.AddMappedFolder(mappedObject);
 
-            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, newChangeToken);
+            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, newChangeToken, childrenAreIgnored);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)creationDate);
 
             this.underTest.Solve(dirInfo.Object, remoteObject.Object);
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, newChangeToken);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, newChangeToken, ignored: childrenAreIgnored);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(creationDate)), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteDocumentsMetaDataChanged()
-        {
+        public void RemoteDocumentsMetaDataChanged() {
             byte[] hash = new byte[20];
             DateTime modificationDate = DateTime.UtcNow;
             string fileName = "a";
@@ -190,8 +183,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteDocumentChanged()
-        {
+        public void RemoteDocumentChanged() {
             DateTime creationDate = DateTime.UtcNow;
             string fileName = "a";
             string path = Path.Combine(Path.GetTempPath(), fileName);
@@ -232,7 +224,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, new DateTime(0));
                 localFile.Setup(f => f.FullName).Returns(path);
                 var cacheFile = this.fsFactory.SetupDownloadCacheFile(localFile.Object);
-                cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
+                cacheFile.Setup(c => c.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)).Returns(stream);
                 cacheFile.Setup(
                     c =>
                     c.Replace(localFile.Object, backupFile.Object, It.IsAny<bool>())).Returns(localFile.Object).Callback(
@@ -295,7 +287,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, new DateTime(0));
                 localFile.Setup(f => f.FullName).Returns(path);
                 var cacheFile = this.fsFactory.SetupDownloadCacheFile(localFile.Object);
-                cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
+                cacheFile.Setup(c => c.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)).Returns(stream);
 
                 this.SetupContentWithCallBack(remoteObject, newContent, fileName).Callback(
                     () =>
@@ -323,8 +315,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteDocumentChangedAndResetUuidFailsOnLocalModificationDate()
-        {
+        public void RemoteDocumentChangedAndResetUuidFailsOnLocalModificationDate() {
             DateTime creationDate = DateTime.UtcNow;
             string fileName = "a";
             string path = Path.Combine(Path.GetTempPath(), fileName);
@@ -365,7 +356,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, new DateTime(0));
                 localFile.Setup(f => f.FullName).Returns(path);
                 var cacheFile = this.fsFactory.SetupDownloadCacheFile(localFile.Object);
-                cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
+                cacheFile.Setup(c => c.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)).Returns(stream);
                 cacheFile.Setup(
                     c =>
                     c.Replace(localFile.Object, backupFile.Object, It.IsAny<bool>())).Returns(localFile.Object).Callback(
@@ -375,7 +366,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     b.Open(FileMode.Open, FileAccess.Read, FileShare.None)).Returns(oldContentStream));
                 backupFile.SetupSet(b => b.Uuid = It.IsAny<Guid?>()).Throws<RestoreModificationDateException>();
 
-                this.underTest.Solve(localFile.Object, remoteObject.Object, remoteContent:ContentChangeType.CHANGED);
+                this.underTest.Solve(localFile.Object, remoteObject.Object, remoteContent: ContentChangeType.CHANGED);
 
                 this.storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, true, creationDate, creationDate, expectedHash, newContent.Length);
                 Assert.That(localFile.Object.LastWriteTimeUtc, Is.EqualTo(creationDate));
@@ -385,8 +376,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteDocumentChangedAndSetUuidFailsOnLocalModificationDate()
-        {
+        public void RemoteDocumentChangedAndSetUuidFailsOnLocalModificationDate() {
             DateTime creationDate = DateTime.UtcNow;
             string fileName = "a";
             string path = Path.Combine(Path.GetTempPath(), fileName);
@@ -427,7 +417,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, new DateTime(0));
                 localFile.Setup(f => f.FullName).Returns(path);
                 var cacheFile = this.fsFactory.SetupDownloadCacheFile(localFile.Object);
-                cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
+                cacheFile.Setup(c => c.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)).Returns(stream);
                 cacheFile.Setup(
                     c =>
                     c.Replace(localFile.Object, backupFile.Object, It.IsAny<bool>())).Returns(localFile.Object).Callback(
@@ -437,7 +427,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     b.Open(FileMode.Open, FileAccess.Read, FileShare.None)).Returns(oldContentStream));
                 localFile.SetupSet(l => l.Uuid = It.IsAny<Guid?>()).Throws<RestoreModificationDateException>();
 
-                this.underTest.Solve(localFile.Object, remoteObject.Object, remoteContent:ContentChangeType.CHANGED);
+                this.underTest.Solve(localFile.Object, remoteObject.Object, remoteContent: ContentChangeType.CHANGED);
 
                 this.storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, true, creationDate, creationDate, expectedHash, newContent.Length);
                 Assert.That(localFile.Object.LastWriteTimeUtc, Is.EqualTo(creationDate));

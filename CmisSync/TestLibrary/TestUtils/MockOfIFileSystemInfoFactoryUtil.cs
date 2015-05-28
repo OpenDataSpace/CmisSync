@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="MockOfIFileSystemInfoFactoryUtil.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.TestUtils
-{
+namespace TestLibrary.TestUtils {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -28,15 +27,12 @@ namespace TestLibrary.TestUtils
 
     using Moq;
 
-    public static class MockOfIFileSystemInfoFactoryUtil
-    {
-        public static void AddIDirectoryInfo(this Mock<IFileSystemInfoFactory> fsFactory, IDirectoryInfo dirInfo)
-        {
+    public static class MockOfIFileSystemInfoFactoryUtil {
+        public static void AddIDirectoryInfo(this Mock<IFileSystemInfoFactory> fsFactory, IDirectoryInfo dirInfo) {
             fsFactory.Setup(f => f.CreateDirectoryInfo(dirInfo.FullName)).Returns(dirInfo);
         }
 
-        public static Mock<IDirectoryInfo> AddDirectory(this Mock<IFileSystemInfoFactory> fsFactory, string path, bool exists = true)
-        {
+        public static Mock<IDirectoryInfo> AddDirectory(this Mock<IFileSystemInfoFactory> fsFactory, string path, bool exists = true) {
             if (path.EndsWith("/")) {
                 throw new ArgumentException("FileName gives last tuple of path not ending on / so path should not end with /");
             }
@@ -49,21 +45,18 @@ namespace TestLibrary.TestUtils
             return dir;
         }
 
-        public static Mock<IDirectoryInfo> AddDirectory(this Mock<IFileSystemInfoFactory> fsFactory, string path, Guid guid, bool exists = true)
-        {
+        public static Mock<IDirectoryInfo> AddDirectory(this Mock<IFileSystemInfoFactory> fsFactory, string path, Guid guid, bool exists = true) {
             var dir = fsFactory.AddDirectory(path, exists);
             dir.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(guid.ToString());
             dir.Setup(d => d.Uuid).Returns(guid);
             return dir;
         }
 
-        public static void SetupDirectories(this Mock<IDirectoryInfo> parent, params IDirectoryInfo[] dirs)
-        {
+        public static void SetupDirectories(this Mock<IDirectoryInfo> parent, params IDirectoryInfo[] dirs) {
             parent.Setup(p => p.GetDirectories()).Returns(dirs);
         }
 
-        public static void SetupFiles(this Mock<IDirectoryInfo> parent, params IFileInfo[] files)
-        {
+        public static void SetupFiles(this Mock<IDirectoryInfo> parent, params IFileInfo[] files) {
             parent.Setup(p => p.GetFiles()).Returns(files);
         }
 
@@ -98,8 +91,7 @@ namespace TestLibrary.TestUtils
             file.Setup(f => f.Open(FileMode.Open, FileAccess.Read, It.IsAny<FileShare>())).Returns(() => new MemoryStream(content));
         }
 
-        public static void SetupFilesAndDirectories(this Mock<IDirectoryInfo> parent, params IFileSystemInfo[] children)
-        {
+        public static void SetupFilesAndDirectories(this Mock<IDirectoryInfo> parent, params IFileSystemInfo[] children) {
             List<IDirectoryInfo> dirs = new List<IDirectoryInfo>();
             List<IFileInfo> files = new List<IFileInfo>();
             foreach (var child in children) {
@@ -114,8 +106,7 @@ namespace TestLibrary.TestUtils
             parent.SetupDirectories(dirs.ToArray());
         }
 
-        public static void AddDirectoryWithParents(this Mock<IFileSystemInfoFactory> fsFactory, string path)
-        {
+        public static void AddDirectoryWithParents(this Mock<IFileSystemInfoFactory> fsFactory, string path) {
             if (path.Length > 0) {
                 fsFactory.AddDirectory(path);
             }
@@ -134,8 +125,7 @@ namespace TestLibrary.TestUtils
             }
         }
 
-        public static Mock<IFileInfo> AddFile(this Mock<IFileSystemInfoFactory> fsFactory, string path, bool exists = true)
-        {
+        public static Mock<IFileInfo> AddFile(this Mock<IFileSystemInfoFactory> fsFactory, string path, bool exists = true) {
             Mock<IFileInfo> file = new Mock<IFileInfo>();
             file.Setup(f => f.Name).Returns(Path.GetFileName(path));
             file.Setup(f => f.FullName).Returns(path);
@@ -144,8 +134,7 @@ namespace TestLibrary.TestUtils
             return file;
         }
 
-        public static Mock<IFileInfo> AddFile(this Mock<IFileSystemInfoFactory> fsFactory, string path, Guid guid, bool exists = true)
-        {
+        public static Mock<IFileInfo> AddFile(this Mock<IFileSystemInfoFactory> fsFactory, string path, Guid guid, bool exists = true) {
             var file = fsFactory.AddFile(path, exists);
             file.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(guid.ToString());
             file.Setup(f => f.Uuid).Returns(guid);
@@ -204,6 +193,12 @@ namespace TestLibrary.TestUtils
         public static void SetupGuid(this Mock<IDirectoryInfo> dirInfo, Guid uuid) {
             dirInfo.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(uuid.ToString());
             dirInfo.Setup(f => f.Uuid).Returns(uuid);
+        }
+
+        public static void SetupOpenThrows<TException>(this Mock<IFileInfo> fileInfo, TException exception = default(TException)) where TException : System.Exception {
+            fileInfo.Setup(f => f.Open(It.IsAny<FileMode>())).Throws(exception);
+            fileInfo.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Throws(exception);
+            fileInfo.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Throws(exception);
         }
 
         public static void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(this Mock<IFileSystemInfo> fsInfo) {

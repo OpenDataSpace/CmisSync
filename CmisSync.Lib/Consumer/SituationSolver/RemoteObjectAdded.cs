@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="RemoteObjectAdded.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
     using System.Linq;
@@ -26,6 +25,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -38,31 +38,32 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Solver to handle a new object which has been found on the server
     /// </summary>
-    public class RemoteObjectAdded : AbstractEnhancedSolver
-    {
+    public class RemoteObjectAdded : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectAdded));
 
         private IFileSystemInfoFactory fsFactory;
-        private ActiveActivitiesManager manager;
+        private TransmissionManager manager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.RemoteObjectAdded"/> class.
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="transmissonManager">Transmisson manager.</param>
+        /// <param name="transmissionStorage">Transmission progress storage.</param>
+        /// <param name="transmissionManager">Transmission manager.</param>
         /// <param name="fsFactory">File system factory.</param>
         public RemoteObjectAdded(
             ISession session,
             IMetaDataStorage storage,
-            ActiveActivitiesManager transmissonManager,
-            IFileSystemInfoFactory fsFactory = null) : base(session, storage) {
-            if (transmissonManager == null) {
-                throw new ArgumentNullException("Given transmission manager is null");
+            IFileTransmissionStorage transmissionStorage,
+            TransmissionManager transmissionManager,
+            IFileSystemInfoFactory fsFactory = null) : base(session, storage, transmissionStorage) {
+            if (transmissionManager == null) {
+                throw new ArgumentNullException("transmissionManager");
             }
 
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
-            this.manager = transmissonManager;
+            this.manager = transmissionManager;
         }
 
         /// <summary>
@@ -85,7 +86,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
-            if(localFile is IDirectoryInfo) {
+            if (localFile is IDirectoryInfo) {
                 if (!(remoteId is IFolder)) {
                     throw new ArgumentException("remoteId has to be a prefetched Folder");
                 }
@@ -104,24 +105,29 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 }
 
                 if (remoteFolder.LastModificationDate != null) {
-                    localFolder.LastWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
+                    try {
+                        localFolder.LastWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
+                    } catch (IOException e) {
+                        Logger.Info("Directory modification date could not be synced", e);
+                    }
                 }
 
                 var mappedObject = new MappedObject(remoteFolder);
                 mappedObject.Guid = uuid;
                 mappedObject.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
                 mappedObject.LastLocalWriteTimeUtc = localFolder.LastWriteTimeUtc;
+                mappedObject.Ignored = remoteFolder.AreAllChildrenIgnored();
                 this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local folder {0} created and mapped to remote folder {1}", localFolder.FullName, remoteId.Id));
             } else if (localFile is IFileInfo) {
-                Guid guid = Guid.NewGuid();
-                byte[] localFileHash = null;
-                DateTime? lastLocalFileModificationDate = null;
-                var file = localFile as IFileInfo;
                 if (!(remoteId is IDocument)) {
                     throw new ArgumentException("remoteId has to be a prefetched Document");
                 }
 
+                Guid guid = Guid.NewGuid();
+                byte[] localFileHash = null;
+                DateTime? lastLocalFileModificationDate = null;
+                var file = localFile as IFileInfo;
                 if (file.Exists) {
                     Guid? uuid = file.Uuid;
                     if (uuid != null) {
@@ -141,22 +147,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 var cacheFile = this.fsFactory.CreateDownloadCacheFileInfo(guid);
 
                 IDocument remoteDoc = remoteId as IDocument;
-                var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName, cacheFile.FullName);
-                this.manager.AddTransmission(transmissionEvent);
-                byte[] hash = null;
-                using (var hashAlg = new SHA1Managed())
-                using (var fileStream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.Read))
-                using (var downloader = FileTransmission.ContentTaskUtils.CreateDownloader())
-                {
-                    try {
-                        downloader.DownloadFile(remoteDoc, fileStream, transmissionEvent, hashAlg);
-                    } catch(Exception ex) {
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                        throw;
-                    }
-
-                    hash = hashAlg.Hash;
-                }
+                var transmission = this.manager.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName, cacheFile.FullName);
+                byte[] hash = DownloadCacheFile(cacheFile, remoteDoc, transmission, this.fsFactory);
 
                 try {
                     cacheFile.Uuid = guid;
@@ -194,7 +186,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                                     Logger.Debug("Could not retore the last modification date of " + targetFile.FullName, restoreException);
                                 }
                             } catch (Exception ex) {
-                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                                transmission.FailedException = ex;
                                 throw;
                             }
 
@@ -205,7 +197,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                             }
                         }
                     } else {
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = e });
+                        transmission.FailedException = e;
                         throw;
                     }
                 }
@@ -235,7 +227,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 };
                 this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local file {0} created and mapped to remote file {1}", file.FullName, remoteId.Id));
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
+                transmission.Status = TransmissionStatus.FINISHED;
             }
         }
 

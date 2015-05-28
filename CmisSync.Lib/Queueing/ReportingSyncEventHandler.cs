@@ -16,8 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Queueing
-{
+namespace CmisSync.Lib.Queueing {
     using System;
 
     using log4net;
@@ -28,8 +27,7 @@ namespace CmisSync.Lib.Queueing
     /// <exception cref='ArgumentNullException'>
     /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
     /// </exception>
-    public abstract class ReportingSyncEventHandler : SyncEventHandler
-    {
+    public abstract class ReportingSyncEventHandler : SyncEventHandler {
         /// <summary>
         /// The queue.
         /// </summary>
@@ -45,8 +43,8 @@ namespace CmisSync.Lib.Queueing
         /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
         /// </exception>
         public ReportingSyncEventHandler(ISyncEventQueue queue) : base() {
-            if(queue == null) {
-                throw new ArgumentNullException("Given SyncEventQueue was null");
+            if (queue == null) {
+                throw new ArgumentNullException("queue");
             }
 
             this.Queue = queue;

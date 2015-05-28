@@ -14,7 +14,7 @@
     </ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>none</DebugType>
+    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin</OutputPath>
     <ErrorReport>prompt</ErrorReport>
@@ -29,6 +29,8 @@
     <I18n>cjk,mideast,other,rare,west</I18n>
     <UseSGen>true</UseSGen>
     <DefineConstants>__COCOA__</DefineConstants>
+    <UseRefCounting>false</UseRefCounting>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <Optimize>false</Optimize>
@@ -46,6 +48,7 @@
     <PackageSigningKey>Developer ID Installer</PackageSigningKey>
     <I18n>
     </I18n>
+    <UseRefCounting>false</UseRefCounting>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -185,6 +188,21 @@
     <Compile Include="..\SettingController.cs">
       <Link>SettingController.cs</Link>
     </Compile>
+    <Compile Include="..\TransmissionController.cs">
+      <Link>TransmissionController.cs</Link>
+    </Compile>
+    <Compile Include="TransmissionWidget.cs" />
+    <Compile Include="TransmissionWidgetController.cs" />
+    <Compile Include="TransmissionWidget.designer.cs">
+      <DependentUpon>TransmissionWidget.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ClientBrand.cs" />
+    <Compile Include="UIHelpers.cs" />
+    <Compile Include="RepositoryMenuItem.cs" />
+    <Compile Include="TransmissionWidgetItem.cs" />
+    <Compile Include="TransmissionWidgetItem.designer.cs">
+      <DependentUpon>TransmissionWidgetItem.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -291,6 +309,8 @@
     <InterfaceDefinition Include="EditWizard.xib" />
     <InterfaceDefinition Include="GeneralSettings.xib" />
     <InterfaceDefinition Include="ProxySettings.xib" />
+    <InterfaceDefinition Include="TransmissionWidget.xib" />
+    <InterfaceDefinition Include="TransmissionWidgetItem.xib" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Properties\Properties.Resources.cs.resx" />

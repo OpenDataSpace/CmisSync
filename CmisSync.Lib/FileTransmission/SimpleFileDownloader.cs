@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="SimpleFileDownloader.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,13 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.FileTransmission
-{
+namespace CmisSync.Lib.FileTransmission {
     using System;
     using System.IO;
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.HashAlgorithm;
     using CmisSync.Lib.Streams;
 
     using DotCMIS.Client;
@@ -31,8 +31,7 @@ namespace CmisSync.Lib.FileTransmission
     /// <summary>
     /// Simple file downloader.
     /// </summary>
-    public class SimpleFileDownloader : IFileDownloader
-    {
+    public class SimpleFileDownloader : IFileDownloader {
         private bool disposed = false;
 
         private object disposeLock = new object();
@@ -42,43 +41,79 @@ namespace CmisSync.Lib.FileTransmission
         /// </summary>
         /// <param name="remoteDocument">Remote document.</param>
         /// <param name="localFileStream">Local taget file stream.</param>
-        /// <param name="status">Transmission status.</param>
+        /// <param name="transmission">Transmission status.</param>
         /// <param name="hashAlg">Hash algoritm, which should be used to calculate hash of the uploaded stream content</param>
         /// <exception cref="IOException">On any disc or network io exception</exception>
         /// <exception cref="DisposeException">If the remote object has been disposed before the dowload is finished</exception>
         /// <exception cref="AbortException">If download is aborted</exception>
         /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
-        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg)
+        public void DownloadFile(
+            IDocument remoteDocument,
+            Stream localFileStream,
+            Transmission transmission,
+            HashAlgorithm hashAlg,
+            UpdateChecksum update = null)
         {
-            long? fileLength = remoteDocument.ContentStreamLength;
-            DotCMIS.Data.IContentStream contentStream = remoteDocument.GetContentStream();
+            byte[] buffer = new byte[8 * 1024];
+            int len;
 
-            // Skip downloading empty content, just go on with an empty file
-            if (null == fileLength || fileLength == 0 || contentStream == null) {
+            if (localFileStream.Length > 0) {
+                localFileStream.Seek(0, SeekOrigin.Begin);
+                while ((len = localFileStream.Read(buffer, 0, buffer.Length)) > 0) {
+                    hashAlg.TransformBlock(buffer, 0, len, buffer, 0);
+                }
+            }
+
+            long offset = localFileStream.Position;
+            long? fileLength = remoteDocument.ContentStreamLength;
+            if (fileLength <= offset) {
+                transmission.Length = fileLength.GetValueOrDefault();
+                transmission.Position = offset;
                 hashAlg.TransformFinalBlock(new byte[0], 0, 0);
                 return;
             }
 
-            using (ProgressStream progressStream = new ProgressStream(localFileStream, status))
-            using (CryptoStream hashstream = new CryptoStream(progressStream, hashAlg, CryptoStreamMode.Write))
-            using (Stream remoteStream = contentStream.Stream) {
-                status.ReportProgress(new TransmissionProgressEventArgs {
-                    Length = remoteDocument.ContentStreamLength,
-                    ActualPosition = 0
-                });
-                byte[] buffer = new byte[8 * 1024];
-                int len;
+            DotCMIS.Data.IContentStream contentStream = null;
+            if (offset > 0) {
+                long remainingBytes = (long)fileLength - offset;
+                transmission.Length = remoteDocument.ContentStreamLength;
+                transmission.Position = offset;
+                contentStream = remoteDocument.GetContentStream(remoteDocument.ContentStreamId, offset, remainingBytes);
+            } else {
+                contentStream = remoteDocument.GetContentStream();
+            }
+
+            using (var transmissionStream = transmission.CreateStream(localFileStream))
+            using (CryptoStream hashstream = new CryptoStream(transmissionStream, hashAlg, CryptoStreamMode.Write))
+            using (Stream remoteStream = contentStream != null ? contentStream.Stream : new MemoryStream(0)) {
+                transmission.Length = remoteDocument.ContentStreamLength;
+                transmission.Position = offset;
+                int written = 0;
                 while ((len = remoteStream.Read(buffer, 0, buffer.Length)) > 0) {
-                    lock(this.disposeLock)
-                    {
-                        if(this.disposed) {
-                            status.ReportProgress(new TransmissionProgressEventArgs { Aborted = true });
-                            throw new ObjectDisposedException(status.Path);
+                    lock (this.disposeLock) {
+                        if (this.disposed) {
+                            transmission.Status = TransmissionStatus.ABORTED;
+                            throw new ObjectDisposedException(transmission.Path);
                         }
 
-                        hashstream.Write(buffer, 0, len);
-                        hashstream.Flush();
+                        try {
+                            hashstream.Write(buffer, 0, len);
+                            hashstream.Flush();
+                            written += len;
+                        } catch (Exception) {
+                            this.UpdateHash(hashAlg, localFileStream.Length, update);
+                            throw;
+                        }
+
+                        if (written >= 1024 * 1024) {
+                            this.UpdateHash(hashAlg, localFileStream.Length, update);
+                            written = 0;
+                        }
                     }
+                }
+
+                if (written > 0) {
+                    this.UpdateHash(hashAlg, localFileStream.Length, update);
                 }
             }
         }
@@ -92,8 +127,7 @@ namespace CmisSync.Lib.FileTransmission
         /// <see cref="Dispose"/>, you must release all references to the
         /// <see cref="CmisSync.Lib.FileTransmission.SimpleFileDownloader"/> so the garbage collector can reclaim the memory
         /// that the <see cref="CmisSync.Lib.FileTransmission.SimpleFileDownloader"/> was occupying.</remarks>
-        public void Dispose()
-        {
+        public void Dispose() {
             this.Dispose(true);
         }
 
@@ -107,15 +141,22 @@ namespace CmisSync.Lib.FileTransmission
         /// other objects. Only unmanaged resources can be disposed.
         /// </summary>
         /// <param name="disposing">If set to <c>true</c> disposing.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            lock(this.disposeLock)
-            {
+        protected virtual void Dispose(bool disposing) {
+            lock (this.disposeLock) {
                 // Check to see if Dispose has already been called.
-                if(!this.disposed)
-                {
+                if (!this.disposed) {
                     // Note disposing has been done.
                     this.disposed = true;
+                }
+            }
+        }
+
+        private void UpdateHash(HashAlgorithm hash, long length, UpdateChecksum update) {
+            HashAlgorithmReuse reuse = hash as HashAlgorithmReuse;
+            if (reuse != null && update != null) {
+                using (HashAlgorithm hashReuse = (HashAlgorithm)reuse.Clone()) {
+                    hashReuse.TransformFinalBlock(new byte[0], 0, 0);
+                    update(hashReuse.Hash, length);
                 }
             }
         }

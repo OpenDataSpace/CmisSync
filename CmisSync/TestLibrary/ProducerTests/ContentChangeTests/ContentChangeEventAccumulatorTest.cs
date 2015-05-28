@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ProducerTests.ContentChangeTests
-{
+namespace TestLibrary.ProducerTests.ContentChangeTests {
     using System;
 
     using CmisSync.Lib.Events;
@@ -34,8 +33,7 @@ namespace TestLibrary.ProducerTests.ContentChangeTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class ContentChangeEventAccumulatorTest 
-    {
+    public class ContentChangeEventAccumulatorTest {
         private static readonly string Id = "myId";
 
         [Test, Category("Fast"), Category("ContentChange")]
@@ -46,9 +44,8 @@ namespace TestLibrary.ProducerTests.ContentChangeTests
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void DbNullContstructorTest() {
-            new ContentChangeEventAccumulator(null, new Mock<ISyncEventQueue>().Object);
+            Assert.Throws<ArgumentNullException>(() => new ContentChangeEventAccumulator(null, new Mock<ISyncEventQueue>().Object));
         }
 
         [Test, Category("Fast"), Category("ContentChange")]

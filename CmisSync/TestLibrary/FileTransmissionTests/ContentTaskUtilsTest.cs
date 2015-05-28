@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="ContentTaskUtilsTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,21 +17,20 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.FileTransmissionTests
-{
+namespace TestLibrary.FileTransmissionTests {
     using System;
     using System.IO;
     using System.Security.Cryptography;
 
     using CmisSync.Lib.FileTransmission;
+    using CmisSync.Lib.Storage.Database;
 
     using Moq;
 
     using NUnit.Framework;
 
     [TestFixture]
-    public class ContentTaskUtilsTest
-    {
+    public class ContentTaskUtilsTest {
         private readonly long successfulLength = 1024 * 1024;
 
         [Test, Category("Fast")]
@@ -49,8 +48,7 @@ namespace TestLibrary.FileTransmissionTests
         }
 
         [Test, Category("Fast")]
-        public void CreateNewSimpleUploaderByPassingNegativeChunkSize()
-        {
+        public void CreateNewSimpleUploaderByPassingNegativeChunkSize() {
             var uploader = ContentTaskUtils.CreateUploader(-1);
             Assert.IsTrue(uploader is SimpleFileUploader);
         }
@@ -58,7 +56,13 @@ namespace TestLibrary.FileTransmissionTests
         [Test, Category("Fast")]
         public void CreateNewChunkedDownloader() {
             long chunkSize = 1024;
-            var downloader = ContentTaskUtils.CreateDownloader(chunkSize);
+            var downloader = ContentTaskUtils.CreateDownloader(chunkSize, Mock.Of<IFileTransmissionStorage>());
+            Assert.IsTrue(downloader is ChunkedDownloader);
+            Assert.AreEqual(chunkSize, (downloader as ChunkedDownloader).ChunkSize);
+            downloader = ContentTaskUtils.CreateDownloader(chunkSize, null);
+            Assert.IsTrue(downloader is ChunkedDownloader);
+            Assert.AreEqual(chunkSize, (downloader as ChunkedDownloader).ChunkSize);
+            downloader = ContentTaskUtils.CreateDownloader(chunkSize);
             Assert.IsTrue(downloader is ChunkedDownloader);
             Assert.AreEqual(chunkSize, (downloader as ChunkedDownloader).ChunkSize);
         }
@@ -70,15 +74,13 @@ namespace TestLibrary.FileTransmissionTests
         }
 
         [Test, Category("Fast")]
-        public void CreateNewSimpleDownloaderByPassingNegativeChunkSize()
-        {
+        public void CreateNewSimpleDownloaderByPassingNegativeChunkSize() {
             var downloader = ContentTaskUtils.CreateDownloader(-1);
             Assert.IsTrue(downloader is SimpleFileDownloader);
         }
 
         [Test, Category("Fast")]
-        public void PrepareResumeWithExactFittingStream()
-        {
+        public void PrepareResumeWithExactFittingStream() {
             byte[] localContent = new byte[this.successfulLength];
             using (RandomNumberGenerator random = RandomNumberGenerator.Create()) {
                 random.GetBytes(localContent);
@@ -87,8 +89,7 @@ namespace TestLibrary.FileTransmissionTests
             byte[] localHash = new SHA1Managed().ComputeHash(localContent);
 
             using (MemoryStream stream = new MemoryStream(localContent))
-            using (HashAlgorithm hashAlg = new SHA1Managed())
-            {
+            using (HashAlgorithm hashAlg = new SHA1Managed()) {
                 ContentTaskUtils.PrepareResume(this.successfulLength, stream, hashAlg);
                 hashAlg.TransformFinalBlock(new byte[0], 0, 0);
                 Assert.AreEqual(localHash, hashAlg.Hash);
@@ -96,32 +97,25 @@ namespace TestLibrary.FileTransmissionTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(IOException))]
-        public void PrepareResumeFailsOnIOException()
-        {
+        public void PrepareResumeFailsOnIOException() {
             var streamMock = new Mock<Stream>();
             streamMock.Setup(s => s.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Throws(new IOException());
-            using (HashAlgorithm hashAlg = new SHA1Managed())
-            {
-                ContentTaskUtils.PrepareResume(this.successfulLength, streamMock.Object, hashAlg);
+            using (HashAlgorithm hashAlg = new SHA1Managed()) {
+                Assert.Throws<IOException>(() => ContentTaskUtils.PrepareResume(this.successfulLength, streamMock.Object, hashAlg));
             }
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(IOException))]
-        public void PrepareResumeFailsOnTooShortInputStream()
-        {
+        public void PrepareResumeFailsOnTooShortInputStream() {
             var streamMock = new Mock<Stream>();
             streamMock.Setup(s => s.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Returns(0);
-            using (HashAlgorithm hashAlg = new SHA1Managed())
-            {
-                ContentTaskUtils.PrepareResume(this.successfulLength, streamMock.Object, hashAlg);
+            using (HashAlgorithm hashAlg = new SHA1Managed()) {
+                Assert.Throws<IOException>(() => ContentTaskUtils.PrepareResume(this.successfulLength, streamMock.Object, hashAlg));
             }
         }
 
         [Test, Category("Fast")]
-        public void PrepareResumeWithLongerLocalStream()
-        {
+        public void PrepareResumeWithLongerLocalStream() {
             byte[] localContent = new byte[this.successfulLength];
             using (RandomNumberGenerator random = RandomNumberGenerator.Create()) {
                 random.GetBytes(localContent);
@@ -130,8 +124,7 @@ namespace TestLibrary.FileTransmissionTests
             byte[] localHash = new SHA1Managed().ComputeHash(localContent);
 
             using (MemoryStream stream = new MemoryStream())
-            using (HashAlgorithm hashAlg = new SHA1Managed())
-            {
+            using (HashAlgorithm hashAlg = new SHA1Managed()) {
                 stream.Write(localContent, 0, (int)this.successfulLength);
                 stream.Write(localContent, 0, (int)this.successfulLength);
                 stream.Seek(0, SeekOrigin.Begin);
@@ -142,13 +135,11 @@ namespace TestLibrary.FileTransmissionTests
         }
 
         [Test, Category("Fast")]
-        public void PrepareResumeDoesNotChangeHashOnZeroLengthInputStream()
-        {
+        public void PrepareResumeDoesNotChangeHashOnZeroLengthInputStream() {
             byte[] localContent = new byte[0];
             byte[] localHash = new SHA1Managed().ComputeHash(localContent);
             using (MemoryStream stream = new MemoryStream(localContent))
-            using (HashAlgorithm hashAlg = new SHA1Managed())
-            {
+            using (HashAlgorithm hashAlg = new SHA1Managed()) {
                 ContentTaskUtils.PrepareResume(0, stream, hashAlg);
                 hashAlg.TransformFinalBlock(new byte[0], 0, 0);
                 Assert.AreEqual(localHash, hashAlg.Hash);

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -35,14 +35,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DBreeze">
-      <HintPath>..\packages\DBreeze.1.61.1\lib\net45\DBreeze.dll</HintPath>
+      <HintPath>..\packages\DBreeze.1.71.0\lib\net40\DBreeze.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Security" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
-    <Reference Include="Mono.Data.Sqlite" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="XamMac">
@@ -52,17 +50,26 @@
     <Reference Include="log4net">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System.Net" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms\Tarjan\AbstractTarjanNode.cs" />
     <Compile Include="Backend.cs" />
+    <Compile Include="ClientBrandBase.cs" />
     <Compile Include="Cmis\MimeType.cs" />
+    <Compile Include="Config\Brand.cs" />
     <Compile Include="Defines.cs" />
+    <Compile Include="HashAlgorithm\HashAlgorithmReuse.cs" />
+    <Compile Include="HashAlgorithm\SHA1Reuse.cs" />
+    <Compile Include="Storage\Database\Entities\FileTransmissionObject.cs" />
+    <Compile Include="Storage\Database\Entities\IFileTransmissionObject.cs" />
+    <Compile Include="Storage\Database\FileTransmissionStorage.cs" />
+    <Compile Include="Storage\Database\IFileTransmissionStorage.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="ActivityListenerAggregator.cs" />
     <Compile Include="Cmis\DotCMISLogListener.cs" />
@@ -113,18 +120,14 @@
     <Compile Include="FileTransmission\SimpleFileUploader.cs" />
     <Compile Include="FileTransmission\UploadFailedException.cs" />
     <Compile Include="FileTransmission\ContentTaskUtils.cs" />
-    <Compile Include="Config\Credentials.cs" />
     <Compile Include="Config\Crypto.cs" />
     <Compile Include="Cmis\Authentication\AuthProviderFactory.cs" />
     <Compile Include="Cmis\Authentication\IDisposableAuthProvider.cs" />
     <Compile Include="Cmis\Authentication\PersistentNtlmAuthenticationProvider.cs" />
     <Compile Include="Cmis\Authentication\PersistentStandardAuthenticationProvider.cs" />
     <Compile Include="Cmis\Authentication\StandardAuthenticationProviderWrapper.cs" />
-    <Compile Include="Cmis\UiUtils\CmisPermissionDeniedException.cs" />
-    <Compile Include="Cmis\UiUtils\CmisServerNotFoundException.cs" />
     <Compile Include="Cmis\UiUtils\CmisUtils.cs" />
     <Compile Include="Cmis\Repository.cs" />
-    <Compile Include="Queueing\ActiveActivitiesManager.cs" />
     <Compile Include="Queueing\EventHandlerPriorities.cs" />
     <Compile Include="Queueing\GenericSyncEventHandler.cs" />
     <Compile Include="Queueing\SyncEventQueue.cs" />
@@ -148,7 +151,6 @@
     <Compile Include="Events\FileConflictEvent.cs" />
     <Compile Include="Events\FileEvent.cs" />
     <Compile Include="Events\FileMovedEvent.cs" />
-    <Compile Include="Events\FileTransmissionEvent.cs" />
     <Compile Include="Events\FolderEvent.cs" />
     <Compile Include="Events\FolderMovedEvent.cs" />
     <Compile Include="Events\FSEvent.cs" />
@@ -246,12 +248,77 @@
     <Compile Include="Consumer\SituationSolver\LocalObjectRenamedRemoteObjectMoved.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectChangedRemoteObjectRenamed.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectMovedRemoteObjectRenamed.cs" />
+    <Compile Include="SelectiveIgnore\SelectiveIgnoreFilter.cs" />
+    <Compile Include="SelectiveIgnore\SelectiveIgnoreEventTransformer.cs" />
+    <Compile Include="SelectiveIgnore\IgnoredEntitiesCollection.cs" />
+    <Compile Include="SelectiveIgnore\IgnoredEntity.cs" />
+    <Compile Include="SelectiveIgnore\IIgnoredEntity.cs" />
+    <Compile Include="SelectiveIgnore\IgnoreFlagChangeDetection.cs" />
+    <Compile Include="Storage\FileSystem\DateTimeToFileConverter.cs" />
+    <Compile Include="Storage\FileSystem\FSType.cs" />
     <Compile Include="Algorithms\CyclicDependencies\ICycleDetector.cs" />
     <Compile Include="Algorithms\Tarjan\Tarjan.cs" />
     <Compile Include="Events\ConfigurationNeededEvent.cs" />
     <Compile Include="Algorithms\CyclicDependencies\CycleDetector.cs" />
+    <Compile Include="SelectiveIgnore\IgnoredState.cs" />
+    <Compile Include="Config\DefaultEntries.cs" />
     <Compile Include="Events\InteractionNeededEvent.cs" />
     <Compile Include="Consumer\InteractionNeededException.cs" />
+    <Compile Include="SelectiveIgnore\CmisSelectiveIgnoreCapability.cs" />
+    <Compile Include="SelectiveIgnore\IIgnoredEntitiesCollection.cs" />
+    <Compile Include="SelectiveIgnore\IIgnoredEntitiesStorage.cs" />
+    <Compile Include="SelectiveIgnore\IgnoredEntitiesStorage.cs" />
+    <Compile Include="Events\ICountableEvent.cs" />
+    <Compile Include="Queueing\ICountingQueue.cs" />
+    <Compile Include="Status\ConnectionStatus.cs" />
+    <Compile Include="Status\RepositoryStatus.cs" />
+    <Compile Include="Status\SynchronizationStatus.cs" />
+    <Compile Include="Events\RepoConfigChangedEvent.cs" />
+    <Compile Include="Queueing\QueuedEventsCounter.cs" />
+    <Compile Include="Queueing\QueuedCategorizedEventsCounter.cs" />
+    <Compile Include="Queueing\Unsubscriber.cs" />
+    <Compile Include="Queueing\IEventCounter.cs" />
+    <Compile Include="Events\CmisConnectionExceptionEvent.cs" />
+    <Compile Include="Cmis\RepositoryStatus.cs" />
+    <Compile Include="Cmis\RepositoryStatusAggregator.cs" />
+    <Compile Include="Events\EventCategory.cs" />
+    <Compile Include="Config\UserCredentials.cs" />
+    <Compile Include="Config\Password.cs" />
+    <Compile Include="Config\CmisRepoCredentials.cs" />
+    <Compile Include="Config\ServerCredentials.cs" />
+    <Compile Include="Config\User.cs" />
+    <Compile Include="Config\AuthenticationType.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\AllowableActionConvenienceExtenders.cs" />
+    <Compile Include="Storage\FileSystem\ReadOnlyIgnoringFileInfoDecorator.cs" />
+    <Compile Include="Storage\FileSystem\ReadOnlyIgnoringFileSystemInfoDecorator.cs" />
+    <Compile Include="Storage\FileSystem\ReadOnlyIgnoringDirectoryInfoDecorator.cs" />
+    <Compile Include="Consumer\SituationSolver\PrivateWorkingCopy\LocalObjectAddedWithPWC.cs" />
+    <Compile Include="Storage\Database\IMetaDataStorageConvenienceExtender.cs" />
+    <Compile Include="Consumer\SituationSolver\PrivateWorkingCopy\LocalObjectChangedWithPWC.cs" />
+    <Compile Include="Consumer\SituationSolver\PrivateWorkingCopy\AbstractEnhancedSolverWithPWC.cs" />
+    <Compile Include="Consumer\SituationSolver\PrivateWorkingCopy\LocalObjectChangedRemoteObjectChangedWithPWC.cs" />
+    <Compile Include="FileTransmission\TransmissionManager.cs" />
+    <Compile Include="FileTransmission\Transmission.cs" />
+    <Compile Include="FileTransmission\ITransmissionManager.cs" />
+    <Compile Include="Streams\AbortableStream.cs" />
+    <Compile Include="Streams\PausableStream.cs" />
+    <Compile Include="Streams\BandwidthNotifyingStream.cs" />
+    <Compile Include="Filter\RepositoryRootDeletedDetection.cs" />
+    <Compile Include="Cmis\RepositoryExceptionEventArgs.cs" />
+    <Compile Include="Streams\NotifyPropertyChangedStream.cs" />
+    <Compile Include="Streams\TransmissionStream.cs" />
+    <Compile Include="Cmis\UiUtils\LoginCredentials.cs" />
+    <Compile Include="Cmis\UiUtils\LogonRepositoryInfo.cs" />
+    <Compile Include="Cmis\UiUtils\LoginException.cs" />
+    <Compile Include="Cmis\UiUtils\UiConvenienceExtenders.cs" />
+    <Compile Include="Streams\StreamConvenienceExtensions.cs" />
+    <Compile Include="Cmis\INotifyRepositoryPropertyChanged.cs" />
+    <Compile Include="Cmis\AbstractNotifyingRepository.cs" />
+    <Compile Include="Cmis\SyncStatus.cs" />
+    <Compile Include="Storage\Database\GraphOutputConvenienceExtension.cs" />
+    <Compile Include="Storage\Database\IDotTreeWriter.cs" />
+    <Compile Include="Filter\SymlinkFilter.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\CmisRepositoryInfoConvenienceExtenders.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -305,17 +372,5 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Config\" />
-    <Folder Include="Storage\FileSystem\" />
-    <Folder Include="Storage\Database\" />
-    <Folder Include="Storage\Database\Entities\" />
-    <Folder Include="Cmis\Authentication\" />
-    <Folder Include="Cmis\UiUtils\" />
-    <Folder Include="Producer\ContentChange\" />
-    <Folder Include="Cmis\ConvenienceExtenders\" />
-    <Folder Include="Algorithms\" />
-    <Folder Include="Algorithms\CyclicDependencies\" />
-    <Folder Include="Algorithms\Tarjan\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="DBreezeTests.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,12 +17,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.StorageTests.DataBaseTests
-{
+namespace TestLibrary.StorageTests.DataBaseTests {
     using System;
+    using System.Collections.Generic;
     using System.IO;
 
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DBreeze;
     using DBreeze.DataTypes;
@@ -33,41 +35,43 @@ namespace TestLibrary.StorageTests.DataBaseTests
 
     using NUnit.Framework;
 
-    public class DBreezeTests
-    {
+    public class DBreezeTests : IDisposable {
         private DBreezeEngine engine = null;
         private string path = null;
+        private Mock<IFileInfo> file = null;
 
         [TestFixtureSetUp]
-        public void InitCustomSerializator()
-        {
+        public void InitCustomSerializator() {
             // Use Newtonsoft.Json as Serializator
             DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject; 
             DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
         }
 
         [SetUp]
-        public void SetUp()
-        {
+        public void SetUp() {
             this.path = Path.Combine(Path.GetTempPath(), "DBreeze");
             this.engine = new DBreezeEngine(new DBreezeConfiguration { Storage = DBreezeConfiguration.eStorage.MEMORY });
+            this.file = new Mock<IFileInfo>();
+            this.file.SetupAllProperties();
+            this.file.Setup(f => f.Length).Returns(1024);
+            this.file.Setup(f => f.Name).Returns("FileTransmissionObjectsTest.file");
+            this.file.Setup(f => f.FullName).Returns(Path.Combine(Path.GetTempPath(), this.file.Object.Name));
+            this.file.Setup(f => f.Exists).Returns(true);
+            this.file.Object.LastWriteTimeUtc = DateTime.UtcNow;
         }
 
         [TearDown]
-        public void TearDown()
-        {
+        public void TearDown() {
             this.engine.Dispose();
-            if (Directory.Exists(this.path))
-            {
+            this.engine = null;
+            if (Directory.Exists(this.path)) {
                 Directory.Delete(this.path, true);
             }
         }
 
         [Test, Category("Fast"), Category("IT")]
-        public void InsertInteger()
-        {
-            using (var tran = this.engine.GetTransaction())
-            {
+        public void InsertInteger() {
+            using (var tran = this.engine.GetTransaction()) {
                 tran.Insert<int, int>("t1", 1, 2);
                 tran.Commit();
                 Assert.AreEqual(2, tran.Select<int, int>("t1", 1).Value);
@@ -75,12 +79,9 @@ namespace TestLibrary.StorageTests.DataBaseTests
         }
 
         [Test, Category("Fast"), Category("IT")]
-        public void InsertTestObject()
-        {
-            using (var tran = this.engine.GetTransaction())
-            {
-                var folder = new TestClass
-                {
+        public void InsertTestObject() {
+            using (var tran = this.engine.GetTransaction()) {
+                var folder = new TestClass {
                     Name = "Name"
                 };
                 tran.Insert<int, DbCustomSerializer<TestClass>>("objects", 1, folder);
@@ -90,18 +91,14 @@ namespace TestLibrary.StorageTests.DataBaseTests
         }
 
         [Test, Category("Medium"), Category("IT")]
-        public void CreateDbOnFsAndInsertAndSelectObject()
-        {
-            var conf = new DBreezeConfiguration
-            {
+        public void CreateDbOnFsAndInsertAndSelectObject() {
+            var conf = new DBreezeConfiguration {
                 DBreezeDataFolderName = this.path,
                 Storage = DBreezeConfiguration.eStorage.DISK
             };
             using (var engine = new DBreezeEngine(conf))
-            using (var tran = engine.GetTransaction())
-            {
-                var folder = new TestClass
-                {
+            using (var tran = engine.GetTransaction()) {
+                var folder = new TestClass {
                     Name = "Name"
                 };
                 tran.Insert<int, DbCustomSerializer<TestClass>>("objects", 1, folder);
@@ -111,10 +108,8 @@ namespace TestLibrary.StorageTests.DataBaseTests
         }
 
         [Test, Category("Fast"), Category("IT")]
-        public void InsertAndSelectMappedObjectData()
-        {
-            using (var tran = this.engine.GetTransaction())
-            {
+        public void InsertAndSelectMappedObjectData() {
+            using (var tran = this.engine.GetTransaction()) {
                 string key = "key";
                 string name = "name";
                 var file = new MappedObject(name, key, MappedObjectType.File, null, null);
@@ -123,9 +118,30 @@ namespace TestLibrary.StorageTests.DataBaseTests
             }
         }
 
+        [Test, Category("Fast"), Category("IT")]
+        public void InsertAndSelectFileTransmissionObjectData() {
+            using (var tran = this.engine.GetTransaction()) {
+                string key = "key";
+                var remoteFile = new Mock<DotCMIS.Client.IDocument>();
+                remoteFile.Setup(m => m.Id).Returns("RemoteObjectId");
+                remoteFile.Setup(m => m.Paths).Returns(new List<string>() { "/RemoteFile" });
+                var data = new FileTransmissionObject(TransmissionType.UPLOAD_NEW_FILE, this.file.Object, remoteFile.Object);
+                tran.Insert<string, DbCustomSerializer<FileTransmissionObject>>("objects", key, data);
+                Assert.That((tran.Select<string, DbCustomSerializer<FileTransmissionObject>>("objects", key).Value.Get as FileTransmissionObject).Equals(data));
+            }
+        }
+
+        #region builerplatecode
+        public void Dispose() {
+            if (this.engine != null) {
+                this.engine.Dispose();
+                this.engine = null;
+            }
+        }
+        #endregion
+
         [Serializable]
-        public class TestClass
-        {
+        public class TestClass {
             public string Name { get; set; }
         }
     }

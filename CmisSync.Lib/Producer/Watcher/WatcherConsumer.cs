@@ -16,11 +16,10 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Producer.Watcher
-{
+
+namespace CmisSync.Lib.Producer.Watcher {
     using System;
     using System.Collections.Generic;
-    using System.Data.Common;
     using System.Diagnostics;
     using System.IO;
     using System.Text;
@@ -37,10 +36,7 @@ namespace CmisSync.Lib.Producer.Watcher
     /// <summary>
     /// Watcher sync.
     /// </summary>
-    public class WatcherConsumer : ReportingSyncEventHandler
-    {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(WatcherConsumer));
-
+    public class WatcherConsumer : ReportingSyncEventHandler {
         private IFileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
 
         /// <summary>
@@ -49,8 +45,7 @@ namespace CmisSync.Lib.Producer.Watcher
         /// <param name='queue'>
         /// Queue where the FSEvents and also the FileEvents and FolderEvents are reported.
         /// </param>
-        public WatcherConsumer(ISyncEventQueue queue) : base(queue)
-        {
+        public WatcherConsumer(ISyncEventQueue queue) : base(queue) {
         }
 
         /// <summary>
@@ -62,14 +57,11 @@ namespace CmisSync.Lib.Producer.Watcher
         /// <returns>
         /// True if handled.
         /// </returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             var fsevent = e as IFSEvent;
             if (fsevent == null) {
                 return false;
             }
-
-            Logger.Debug("Handling FSEvent: " + e);
 
             if (fsevent.IsDirectory) {
                 this.HandleFolderEvents(fsevent);
@@ -80,8 +72,7 @@ namespace CmisSync.Lib.Producer.Watcher
             return true;
         }
 
-        private void HandleFolderEvents(IFSEvent e)
-        {
+        private void HandleFolderEvents(IFSEvent e) {
             var movedEvent = e as IFSMovedEvent;
             FolderEvent folderEvent;
             if (movedEvent != null) {
@@ -89,7 +80,8 @@ namespace CmisSync.Lib.Producer.Watcher
                     this.fsFactory.CreateDirectoryInfo(movedEvent.OldPath),
                     this.fsFactory.CreateDirectoryInfo(movedEvent.LocalPath),
                     null,
-                    null)
+                    null,
+                    this)
                 { Local = MetaDataChangeType.MOVED };
             } else {
                 folderEvent = new FolderEvent(this.fsFactory.CreateDirectoryInfo(e.LocalPath), null, this);
@@ -109,7 +101,6 @@ namespace CmisSync.Lib.Producer.Watcher
                 }
             }
 
-            Logger.Debug("Adding Event: " + folderEvent);
             Queue.AddEvent(folderEvent);
         }
 
@@ -119,8 +110,7 @@ namespace CmisSync.Lib.Producer.Watcher
         /// <param name='e'>
         /// The FSEvent.
         /// </param>
-        private void HandleFileEvents(IFSEvent e)
-        {
+        private void HandleFileEvents(IFSEvent e) {
             var movedEvent = e as IFSMovedEvent;
             if (movedEvent != null) {
                 var oldfile = this.fsFactory.CreateFileInfo(movedEvent.OldPath);
@@ -130,7 +120,6 @@ namespace CmisSync.Lib.Producer.Watcher
                     newfile,
                     null,
                     null);
-                Logger.Debug("Adding Event: " + newEvent);
                 Queue.AddEvent(newEvent);
             } else {
                 var file = this.fsFactory.CreateFileInfo(e.LocalPath);
@@ -148,8 +137,6 @@ namespace CmisSync.Lib.Producer.Watcher
                     newEvent.LocalContent = ContentChangeType.DELETED;
                     break;
                 }
-
-                Logger.Debug("Adding Event: " + newEvent);
 
                 Queue.AddEvent(newEvent);
             }

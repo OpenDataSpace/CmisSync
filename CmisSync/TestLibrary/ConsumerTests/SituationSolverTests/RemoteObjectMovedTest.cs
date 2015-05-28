@@ -37,8 +37,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
     using TestLibrary.TestUtils;
     [TestFixture]
-    public class RemoteObjectMovedTest
-    {
+    public class RemoteObjectMovedTest {
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private Mock<IPathMatcher> matcher;
@@ -55,14 +54,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void DefaultConstructorTest()
-        {
+        public void DefaultConstructorTest() {
             new RemoteObjectMoved(this.session.Object, this.storage.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void MoveFolderToNewLocation()
-        {
+        public void MoveFolderToNewLocation([Values(true, false)]bool childrenAreIgnored) {
             DateTime modifiedDate = DateTime.UtcNow.AddMinutes(1);
             string oldFolderName = "a";
             string subFolderName = "sub";
@@ -80,7 +77,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             dirInfo.Setup(d => d.Name).Returns(oldFolderName);
             dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>(p => p.FullName == Path.GetTempPath()));
 
-            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, newFolderName, newPath, subFolderId, lastChangeToken);
+            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, newFolderName, newPath, subFolderId, lastChangeToken, childrenAreIgnored);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)modifiedDate);
 
             var mappedFolder = Mock.Of<IMappedObject>(
@@ -90,14 +87,18 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 f.LastChangeToken == "oldToken" &&
                 f.LastRemoteWriteTimeUtc == DateTime.UtcNow &&
                 f.Type == MappedObjectType.Folder &&
-                f.ParentId == parentId);
+                f.ParentId == parentId &&
+                f.Guid == Guid.NewGuid() &&
+                f.LastContentSize == -1);
             var mappedSubFolder = Mock.Of<IMappedObject>(
                 f =>
                 f.Name == subFolderName &&
                 f.RemoteObjectId == subFolderId &&
                 f.LastChangeToken == "oldToken" &&
                 f.Type == MappedObjectType.Folder &&
-                f.ParentId == parentId);
+                f.ParentId == parentId &&
+                f.Guid == Guid.NewGuid() &&
+                f.LastContentSize == -1);
             this.storage.AddMappedFolder(mappedFolder, oldPath, oldRemotePath);
             this.storage.AddMappedFolder(mappedSubFolder, Path.Combine(Path.GetTempPath(), subFolderName), "/" + subFolderName);
             this.matcher.Setup(m => m.CreateLocalPath(It.Is<IFolder>(f => f == remoteObject.Object))).Returns(newPath);
@@ -106,15 +107,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             dirInfo.Verify(d => d.MoveTo(It.Is<string>(p => p.Equals(newPath))), Times.Once());
 
-            this.storage.Verify(
-                s => s.SaveMappedObject(
-                It.Is<IMappedObject>(f => this.VerifySavedFolder(f, MappedObjectType.Folder, id, newFolderName, subFolderId, lastChangeToken, modifiedDate))),
-                Times.Once());
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, newFolderName, subFolderId, lastChangeToken, lastRemoteModification: modifiedDate, ignored: childrenAreIgnored);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void MoveFileToNewLocation()
-        {
+        public void MoveFileToNewLocation() {
             DateTime modifiedDate = DateTime.UtcNow.AddMinutes(1);
             string oldFileName = "a";
             string subFolderName = "sub";
@@ -168,8 +165,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void DoNotMoveFolderToSameLocation()
-        {
+        public void DoNotMoveFolderToSameLocation() {
             DateTime modifiedDate = DateTime.UtcNow.AddMinutes(1);
             string oldFolderName = "a";
             string subFolderName = "sub";
@@ -215,8 +211,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
         }
 
-        private bool VerifySavedFolder(IMappedObject folder, MappedObjectType type, string id, string name, string parentId, string changeToken, DateTime modifiedTime)
-        {
+        private bool VerifySavedFolder(IMappedObject folder, MappedObjectType type, string id, string name, string parentId, string changeToken, DateTime modifiedTime) {
             Assert.That(folder.Type, Is.EqualTo(type));
             Assert.That(folder.RemoteObjectId, Is.EqualTo(id));
             Assert.That(folder.ParentId, Is.EqualTo(parentId));

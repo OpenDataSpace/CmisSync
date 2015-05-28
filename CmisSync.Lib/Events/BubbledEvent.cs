@@ -17,23 +17,20 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
 
     /// <summary>
     /// Bubbled event ca be used to add an event of given source to another Queue
     /// </summary>
-    public class BubbledEvent : EncapsuledEvent
-    {
+    public class BubbledEvent : EncapsuledEvent {
         /// <summary>
-        /// Creates a new BubbleEvent with an embedded event and context
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.BubbledEvent"/> class with an embedded event and context
         /// informations of the given event.
         /// </summary>
         /// <param name="source">Context Informations of the given event</param>
         /// <param name="e">An Event from another context. Must not be null</param>
-        public BubbledEvent(object source, ISyncEvent e) : base(e)
-        {
+        public BubbledEvent(object source, ISyncEvent e) : base(e) {
             this.Source = source;
         }
 
@@ -49,8 +46,7 @@ namespace CmisSync.Lib.Events
         /// Returns the description of the source and the bubbled event
         /// </summary>
         /// <returns>The content of the encapsuled event</returns>
-        public override string ToString()
-        {
+        public override string ToString() {
             return string.Format("Bubbled Event: From \"{0}\" with bubbled Event \"{1}\"", this.Source, this.Event.ToString());
         }
     }

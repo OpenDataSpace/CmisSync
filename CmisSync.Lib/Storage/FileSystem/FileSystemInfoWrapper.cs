@@ -17,24 +17,32 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.FileSystem
-{
+namespace CmisSync.Lib.Storage.FileSystem {
     using System;
     using System.IO;
+#if !__MonoCS__
+    using System.Security.AccessControl;
+    using System.Security.Principal;
+#endif
     using System.Threading;
+
+#if __MonoCS__
+    using Mono.Unix;
+#endif
 
     /// <summary>
     /// Wrapper for DirectoryInfo
     /// </summary>
-    public abstract class FileSystemInfoWrapper : IFileSystemInfo
-    {
-        private static IExtendedAttributeReader reader = null;
+    public abstract class FileSystemInfoWrapper : IFileSystemInfo {
         private static readonly string ExtendedAttributeKey = "DSS-UUID";
-
+        private static IExtendedAttributeReader reader = null;
+#if !__MonoCS__
+        private static SecurityIdentifier actualUser = null;
+#endif
         private FileSystemInfo original;
+        private FSType fsType;
 
-        static FileSystemInfoWrapper()
-        {
+        static FileSystemInfoWrapper() {
             switch (Environment.OSVersion.Platform)
             {
             case PlatformID.MacOSX:
@@ -44,6 +52,9 @@ namespace CmisSync.Lib.Storage.FileSystem
                 break;
             case PlatformID.Win32NT:
                 reader = new ExtendedAttributeReaderDos();
+#if !__MonoCS__
+                actualUser = new NTAccount(Environment.UserName).Translate(typeof(SecurityIdentifier)) as SecurityIdentifier;
+#endif
                 break;
             }
         }
@@ -52,9 +63,13 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.FileSystemInfoWrapper"/> class.
         /// </summary>
         /// <param name="original">original internal instance.</param>
-        protected FileSystemInfoWrapper(FileSystemInfo original)
-        {
+        protected FileSystemInfoWrapper(FileSystemInfo original) {
             this.original = original;
+#if __MonoCS__
+            this.fsType = FSTypeCreator.GetType(new UnixDriveInfo(Path.GetPathRoot(this.original.FullName)).DriveFormat);
+#else
+            this.fsType = FSTypeCreator.GetType(new DriveInfo(Path.GetPathRoot(this.original.FullName)).DriveFormat);
+#endif
         }
 
         /// <summary>
@@ -62,17 +77,13 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// </summary>
         /// <value>The last write time in UTC.</value>
         public DateTime LastWriteTimeUtc {
-            get
-            {
+            get {
                 return this.original.LastWriteTimeUtc;
             }
 
-            set
-            {
-#if __MonoCS__
-                value = value < new DateTime(1972, 1, 1) ? new DateTime(1972, 1, 1) : value;
-#endif
-                this.original.LastWriteTimeUtc = value < new DateTime(1601, 1, 1) ? new DateTime(1601, 1, 1) : value;
+            set {
+                var date = DateTimeToFileConverter.Convert(value, this.fsType);
+                this.original.LastWriteTimeUtc = date;
             }
         }
 
@@ -118,6 +129,46 @@ namespace CmisSync.Lib.Storage.FileSystem
             get { return this.original.Attributes; }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this
+        /// <see cref="CmisSync.Lib.Storage.FileSystem.FileSystemInfoWrapper"/> read only.
+        /// </summary>
+        /// <value><c>true</c> if read only; otherwise, <c>false</c>.</value>
+        public bool ReadOnly {
+            get {
+                return (this.original.Attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly;
+            }
+
+            set {
+                if (value != this.ReadOnly) {
+                    if (value) {
+                        this.original.Attributes |= FileAttributes.ReadOnly;
+#if !__MonoCS__
+                        this.AddReadOnlyAclsToOriginal();
+#endif
+                    } else {
+                        this.original.Attributes &= ~FileAttributes.ReadOnly;
+#if !__MonoCS__
+                        this.RemoveReadOnlyAclsFromOriginal();
+#endif
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is a symlink.
+        /// </summary>
+        public bool IsSymlink {
+            get {
+                return (this.Attributes & FileAttributes.ReparsePoint) == FileAttributes.ReparsePoint;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the UUID by reading or writing extended attribute entries.
+        /// </summary>
+        /// <value>The UUID.</value>
         public Guid? Uuid {
             get {
                 int retries = 100;
@@ -148,7 +199,7 @@ namespace CmisSync.Lib.Storage.FileSystem
                     try {
                         this.SetExtendedAttribute(ExtendedAttributeKey, value == null ? null : value.ToString(), true);
                         break;
-                    } catch (ExtendedAttributeException) {
+                    } catch(ExtendedAttributeException) {
                         Thread.Sleep(50);
                         retries--;
                         if (retries <= 0) {
@@ -162,8 +213,7 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// <summary>
         /// Refresh the loaded information of this instance.
         /// </summary>
-        public void Refresh()
-        {
+        public void Refresh() {
             this.original.Refresh();
         }
 
@@ -172,14 +222,10 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// </summary>
         /// <returns>The extended attribute value.</returns>
         /// <param name="key">Attribute name.</param>
-        public string GetExtendedAttribute(string key)
-        {
-            if(reader != null)
-            {
+        public string GetExtendedAttribute(string key) {
+            if (reader != null) {
                 return reader.GetExtendedAttribute(this.original.FullName, key);
-            }
-            else
-            {
+            } else {
                 throw new ExtendedAttributeException("Feature is not supported");
             }
         }
@@ -190,14 +236,10 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// <param name="key">Attribute name.</param>
         /// <param name="value">Attribute value.</param>
         /// <param name="restoreModificationDate">Restore the modification date of the file after setting ea.</param>
-        public void SetExtendedAttribute(string key, string value, bool restoreModificationDate = false)
-        {
-            if(reader != null)
-            {
+        public void SetExtendedAttribute(string key, string value, bool restoreModificationDate = false) {
+            if (reader != null) {
                 reader.SetExtendedAttribute(this.original.FullName, key, value, restoreModificationDate);
-            }
-            else
-            {
+            } else {
                 throw new ExtendedAttributeException("Feature is not supported");
             }
         }
@@ -206,15 +248,52 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// Determines whether instance is able to save extended attributes.
         /// </summary>
         /// <returns><c>true</c> if extended attributes are available, otherwise<c>false</c></returns>
-        public bool IsExtendedAttributeAvailable()
-        {
+        public bool IsExtendedAttributeAvailable() {
             if (reader != null) {
                 return reader.IsFeatureAvailable(this.original.FullName);
-            }
-            else
-            {
+            } else {
                 return false;
             }
         }
+
+#if !__MonoCS__
+        private void AddReadOnlyAclsToOriginal() {
+            if (this.original is DirectoryInfo) {
+                var dir = this.original as DirectoryInfo;
+                var acls = dir.GetAccessControl();
+                acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.WriteData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.CreateDirectories, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.CreateFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                dir.SetAccessControl(acls);
+            } else if (this.original is FileInfo) {
+                var file = this.original as FileInfo;
+                var acls = file.GetAccessControl();
+                acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.WriteData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.AppendData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                file.SetAccessControl(acls);
+            }
+        }
+
+        private void RemoveReadOnlyAclsFromOriginal() {
+            if (this.original is DirectoryInfo) {
+                var dir = this.original as DirectoryInfo;
+                var acls = dir.GetAccessControl();
+                acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.WriteData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.CreateDirectories, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.CreateFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                dir.SetAccessControl(acls);
+            } else if (this.original is FileInfo) {
+                var file = this.original as FileInfo;
+                var acls = file.GetAccessControl();
+                acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.WriteData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.AppendData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                file.SetAccessControl(acls);
+            }
+        }
+#endif
     }
 }

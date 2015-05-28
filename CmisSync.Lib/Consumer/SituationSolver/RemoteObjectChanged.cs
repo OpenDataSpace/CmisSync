@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="RemoteObjectChanged.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -24,6 +24,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.Linq;
     using System.Security.Cryptography;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
@@ -43,7 +44,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectChanged));
 
         private IFileSystemInfoFactory fsFactory;
-        private ActiveActivitiesManager transmissonManager;
+        private TransmissionManager transmissonManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.RemoteObjectChanged"/> class.
@@ -55,11 +56,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public RemoteObjectChanged(
             ISession session,
             IMetaDataStorage storage,
-            ActiveActivitiesManager transmissonManager,
-            IFileSystemInfoFactory fsFactory = null) : base(session, storage)
+            IFileTransmissionStorage transmissionStorage,
+            TransmissionManager transmissonManager,
+            IFileSystemInfoFactory fsFactory = null) : base(session, storage, transmissionStorage)
         {
             if (transmissonManager == null) {
-                throw new ArgumentNullException("Given transmission manager is null");
+                throw new ArgumentNullException("transmissonManager");
             }
 
             this.transmissonManager = transmissonManager;
@@ -93,6 +95,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         Logger.Debug("Couldn't set the server side modification date", e);
                     }
 
+                    obj.Ignored = remoteFolder.AreAllChildrenIgnored();
                     obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
                 }
             } else if (remoteId is IDocument) {

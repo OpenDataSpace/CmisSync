@@ -17,16 +17,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Filter
-{
+namespace CmisSync.Lib.Filter {
     using System;
     using System.Collections.Generic;
 
     /// <summary>
     /// Ignored folders filter.
     /// </summary>
-    public class IgnoredFoldersFilter
-    {
+    public class IgnoredFoldersFilter {
         /// <summary>
         /// The ignored paths.
         /// </summary>
@@ -48,12 +46,9 @@ namespace CmisSync.Lib.Filter
         /// <value>
         /// The ignored paths.
         /// </value>
-        public List<string> IgnoredPaths
-        {
-            set
-            {
-                lock (this.listLock)
-                {
+        public List<string> IgnoredPaths {
+            set {
+                lock (this.listLock) {
                     this.ignoredPaths = value;
                 }
             }
@@ -65,12 +60,9 @@ namespace CmisSync.Lib.Filter
         /// <value>
         /// The ignore wildcards.
         /// </value>
-        public List<string> IgnoreWildcards
-        {
-            set
-            {
-                lock (this.listLock)
-                {
+        public List<string> IgnoreWildcards {
+            set {
+                lock (this.listLock) {
                     this.wildcards = value;
                 }
             }
@@ -86,10 +78,8 @@ namespace CmisSync.Lib.Filter
         /// The local path which should be checked, if it should be ignored.
         /// </param>
         /// <param name="reason">Reason of the result value if returns <c>true</c></param>
-        public virtual bool CheckPath(string localPath, out string reason)
-        {
-            lock (this.listLock)
-            {
+        public virtual bool CheckPath(string localPath, out string reason) {
+            lock (this.listLock) {
                 string r = string.Empty;
                 bool result = !string.IsNullOrEmpty(this.ignoredPaths.Find(delegate(string ignore) {
                     bool found = localPath.StartsWith(ignore);

@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="SyncMechanismTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,24 +17,25 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests
-{
+namespace TestLibrary.ConsumerTests {
     using System;
     using System.IO;
 
     using CmisSync.Lib;
     using CmisSync.Lib.Consumer;
-    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Consumer.SituationSolver.PWC;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
-    using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
-    using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
+    using DotCMIS.Exceptions;
 
     using Moq;
 
@@ -43,30 +44,29 @@ namespace TestLibrary.ConsumerTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class SyncMechanismTest
-    {
+    public class SyncMechanismTest {
         private Mock<ISession> session;
         private Mock<ISyncEventQueue> queue;
         private Mock<IMetaDataStorage> storage;
+        private Mock<IFileTransmissionStorage> fileTransmissionStorage;
         private ActivityListenerAggregator listener;
         private Mock<IActivityListener> activityListener;
         private Mock<IFilterAggregator> filters;
 
         [SetUp]
-        public void SetUp()
-        {
+        public void SetUp() {
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.queue = new Mock<ISyncEventQueue>();
             this.storage = new Mock<IMetaDataStorage>();
+            this.fileTransmissionStorage = new Mock<IFileTransmissionStorage>();
             this.activityListener = new Mock<IActivityListener>();
-            this.listener = new ActivityListenerAggregator(this.activityListener.Object, new ActiveActivitiesManager());
+            this.listener = new ActivityListenerAggregator(this.activityListener.Object, new TransmissionManager());
             this.filters = new Mock<IFilterAggregator>();
         }
 
         [Test, Category("Fast")]
-        public void ConstructorWorksWithValidInput()
-        {
+        public void ConstructorWorksWithValidInput() {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var mechanism = this.CreateMechanism(localDetection.Object, remoteDetection.Object);
@@ -78,25 +78,24 @@ namespace TestLibrary.ConsumerTests
         [Test, Category("Fast")]
         public void ConstructorFailsWithLocalDetectionNull() {
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            Assert.Throws<ArgumentNullException>(() => new SyncMechanism(null, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object, this.listener, this.filters.Object));
+            Assert.Throws<ArgumentNullException>(() => new SyncMechanism(null, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object, this.fileTransmissionStorage.Object, this.listener, this.filters.Object));
         }
 
         [Test, Category("Fast")]
         public void ConstructorFailsWithRemoteDetectionNull() {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            Assert.Throws<ArgumentNullException>(() => new SyncMechanism(localDetection.Object, null, this.queue.Object, this.session.Object, this.storage.Object, this.listener, this.filters.Object));
+            Assert.Throws<ArgumentNullException>(() => new SyncMechanism(localDetection.Object, null, this.queue.Object, this.session.Object, this.storage.Object, this.fileTransmissionStorage.Object, this.listener, this.filters.Object));
         }
 
         [Test, Category("Fast")]
         public void ConstructorThrowsExceptionIfFiltersAreNull() {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            Assert.Throws<ArgumentNullException>(() => new SyncMechanism(localDetection.Object, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object, this.listener, null));
+            Assert.Throws<ArgumentNullException>(() => new SyncMechanism(localDetection.Object, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object, this.fileTransmissionStorage.Object, this.listener, null));
         }
 
         [Test, Category("Fast")]
-        public void ConstructorForTestWorksWithValidInput()
-        {
+        public void ConstructorForTestWorksWithValidInput() {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
@@ -109,8 +108,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast")]
-        public void ChooseCorrectSolverForNoChange()
-        {
+        public void ChooseCorrectSolverForNoChange() {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
@@ -146,8 +144,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast")]
-        public void IgnoreNonFileOrFolderEvents()
-        {
+        public void IgnoreNonFileOrFolderEvents() {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var mechanism = this.CreateMechanism(localDetection.Object, remoteDetection.Object);
@@ -158,8 +155,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast"), Category("IT")]
-        public void RemoteFolderAddedSituation()
-        {
+        public void RemoteFolderAddedSituation() {
             var remoteFolder = Mock.Of<IFolder>(
                 f =>
                 f.Id == "remoteId" &&
@@ -189,8 +185,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast"), Category("IT")]
-        public void LocalFolderAddedSituation()
-        {
+        public void LocalFolderAddedSituation() {
             var localFolder = Mock.Of<IDirectoryInfo>();
             var localFolderAddedSolver = new Mock<ISolver>();
             var localDetection = new LocalSituationDetection();
@@ -213,14 +208,12 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast")]
-        public void ThrowNotImplementedOnMissingSolver()
-        {
+        public void ThrowNotImplementedOnMissingSolver() {
             Assert.Throws<NotImplementedException>(() => this.TriggerNonExistingSolver());
         }
 
         [Test, Category("Fast")]
-        public void RequestFullSyncOnMissingSolver()
-        {
+        public void RequestFullSyncOnMissingSolver() {
             try {
                 this.TriggerNonExistingSolver();
             } catch (Exception) {
@@ -231,8 +224,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast")]
-        public void AddingEventBackToQueueOnRetryExceptionInSolverAndIncrementRetryCounter()
-        {
+        public void AddingEventBackToQueueOnRetryExceptionInSolverAndIncrementRetryCounter() {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
@@ -258,8 +250,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast")]
-        public void AddingInteractionNeededEventToQueueOnInteractionNeededException()
-        {
+        public void AddingInteractionNeededEventToQueueOnInteractionNeededException() {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
@@ -285,6 +276,49 @@ namespace TestLibrary.ConsumerTests
             this.queue.VerifyThatNoOtherEventIsAddedThan<InteractionNeededEvent>();
         }
 
+        [Test, Category("Fast")]
+        public void ThrowExceptionOnCmisConnectionExceptionOccurence() {
+            var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
+            var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
+            int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
+            ISolver[,] solver = new ISolver[numberOfSolver, numberOfSolver];
+            var interactionNeededProducer = new Mock<ISolver>();
+            var exception = new CmisConnectionException("reason");
+            interactionNeededProducer.Setup(
+                r =>
+                r.Solve(
+                It.IsAny<IFileSystemInfo>(),
+                It.IsAny<IObjectId>(),
+                It.IsAny<ContentChangeType>(),
+                It.IsAny<ContentChangeType>())).Throws(exception);
+            solver[(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = interactionNeededProducer.Object;
+            var mechanism = this.CreateMechanism(localDetection.Object, remoteDetection.Object, solver);
+            localDetection.Setup(d => d.Analyse(this.storage.Object, It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
+            remoteDetection.Setup(d => d.Analyse(this.storage.Object, It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
+            var folderEvent = new FolderEvent(Mock.Of<IDirectoryInfo>(), Mock.Of<IFolder>()) { Local = MetaDataChangeType.NONE, Remote = MetaDataChangeType.NONE };
+
+            Assert.Throws<CmisConnectionException>(() => mechanism.Handle(folderEvent));
+
+            this.queue.VerifyThatNoEventIsAdded();
+        }
+
+        [Test, Category("Fast")]
+        public void DecorateDefaultSolverBySpecializedPWCSolverIfSessionSupportsPWC([Values(true, false)]bool pwcUpdateable) {
+            this.session.SetupPrivateWorkingCopyCapability(pwcUpdateable);
+
+            var underTest = this.CreateMechanism(Mock.Of<ISituationDetection<AbstractFolderEvent>>(), Mock.Of<ISituationDetection<AbstractFolderEvent>>());
+
+            if (pwcUpdateable) {
+                Assert.That(underTest.Solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] is LocalObjectAddedWithPWC);
+                Assert.That(underTest.Solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] is LocalObjectChangedWithPWC);
+                Assert.That(underTest.Solver[(int)SituationType.CHANGED, (int)SituationType.CHANGED] is LocalObjectChangedRemoteObjectChangedWithPWC);
+            } else {
+                Assert.That(underTest.Solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] is LocalObjectAdded);
+                Assert.That(underTest.Solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] is LocalObjectChanged);
+                Assert.That(underTest.Solver[(int)SituationType.CHANGED, (int)SituationType.CHANGED] is LocalObjectChangedRemoteObjectChanged);
+            }
+        }
+
         private void TriggerNonExistingSolver() {
             var detection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
@@ -304,9 +338,9 @@ namespace TestLibrary.ConsumerTests
 
         private SyncMechanism CreateMechanism(ISituationDetection<AbstractFolderEvent> localDetection, ISituationDetection<AbstractFolderEvent> remoteDetection, ISolver[,] solver = null) {
             if (solver != null) {
-                return new SyncMechanism(localDetection, remoteDetection, this.queue.Object, this.session.Object, this.storage.Object, this.listener, this.filters.Object, solver);
+                return new SyncMechanism(localDetection, remoteDetection, this.queue.Object, this.session.Object, this.storage.Object, this.fileTransmissionStorage.Object, this.listener, this.filters.Object, solver);
             } else {
-                return new SyncMechanism(localDetection, remoteDetection, this.queue.Object, this.session.Object, this.storage.Object, this.listener, this.filters.Object);
+                return new SyncMechanism(localDetection, remoteDetection, this.queue.Object, this.session.Object, this.storage.Object, this.fileTransmissionStorage.Object, this.listener, this.filters.Object);
             }
         }
 

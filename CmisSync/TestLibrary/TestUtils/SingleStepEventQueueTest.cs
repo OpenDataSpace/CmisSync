@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.QueueingTests
-{
+namespace TestLibrary.QueueingTests {
     using System;
 
     using CmisSync.Lib.Events;
@@ -29,8 +28,7 @@ namespace TestLibrary.QueueingTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class SingleStepEventQueueTest
-    {
+    public class SingleStepEventQueueTest {
         [Test, Category("Fast")]
         public void InitialState() {
             var manager = new Mock<ISyncEventManager>();
@@ -76,12 +74,11 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(Exception))]
         public void QueueRethrowsExceptionsByDefault() {
             var manager = new Mock<ISyncEventManager>();
-            manager.Setup(m => m.Handle(It.IsAny<ISyncEvent>())).Throws(new Exception());
+            manager.Setup(m => m.Handle(It.IsAny<ISyncEvent>())).Throws<Exception>();
             var queue = new SingleStepEventQueue(manager.Object);
-            queue.RunStartSyncEvent();
+            Assert.Throws<Exception>(() => queue.RunStartSyncEvent());
         }
 
         [Test, Category("Fast")]
@@ -91,6 +88,23 @@ namespace TestLibrary.QueueingTests
             var queue = new SingleStepEventQueue(manager.Object);
             queue.SwallowExceptions = true;
             queue.RunStartSyncEvent();
+        }
+
+        [Test, Category("Fast")]
+        public void DropAllFSEventsIfConfigured([Values(true, false)]bool dropAll) {
+            var manager = new SyncEventManager();
+            var handler = new Mock<SyncEventHandler>() { CallBase = true };
+            handler.Setup(h => h.Priority).Returns(EventHandlerPriorities.CRITICAL);
+            var underTest = new SingleStepEventQueue(manager);
+            manager.AddEventHandler(handler.Object);
+
+            underTest.DropAllLocalFileSystemEvents = dropAll;
+            underTest.AddEvent(Mock.Of<IFSEvent>());
+            underTest.AddEvent(Mock.Of<ISyncEvent>());
+            underTest.Run();
+
+            handler.Verify(h => h.Handle(It.IsAny<IFSEvent>()), dropAll ? Times.Never() : Times.Once());
+            handler.Verify(h => h.Handle(It.IsAny<ISyncEvent>()), dropAll ? Times.Once() : Times.Exactly(2));
         }
     }
 }

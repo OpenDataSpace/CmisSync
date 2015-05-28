@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Producer.ContentChange
-{
+namespace CmisSync.Lib.Producer.ContentChange {
     using System;
     using System.IO;
     using System.Threading;
@@ -37,8 +36,7 @@ namespace CmisSync.Lib.Producer.ContentChange
     /// <summary>
     /// Content changes are collected and published to the queue.
     /// </summary>
-    public class ContentChanges : ReportingSyncEventHandler
-    {
+    public class ContentChanges : ReportingSyncEventHandler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ContentChanges));
         private ISession session;
         private IMetaDataStorage storage;
@@ -61,15 +59,15 @@ namespace CmisSync.Lib.Producer.ContentChange
             int maxNumberOfContentChanges = 100,
             bool isPropertyChangesSupported = false) : base(queue) {
             if (session == null) {
-                throw new ArgumentNullException("Session instance is needed for the ChangeLogStrategy, but was null");
+                throw new ArgumentNullException("session");
             }
 
             if (storage == null) {
-                throw new ArgumentNullException("MetaDataStorage instance is needed for the ChangeLogStrategy, but was null");
+                throw new ArgumentNullException("storage");
             }
 
             if (maxNumberOfContentChanges <= 1) {
-                throw new ArgumentException("MaxNumberOfContentChanges must be greater then one");
+                throw new ArgumentException("MaxNumberOfContentChanges must be greater then one", "maxNumberOfContentChanges");
             }
 
             this.session = session;
@@ -83,8 +81,7 @@ namespace CmisSync.Lib.Producer.ContentChange
         /// </summary>
         /// <param name="e">The event to handle.</param>
         /// <returns>true if handled</returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             StartNextSyncEvent syncEvent = e as StartNextSyncEvent;
             if (syncEvent != null) {
                 if (syncEvent.FullSyncRequested) {
@@ -134,7 +131,7 @@ namespace CmisSync.Lib.Producer.ContentChange
                 }
 
                 return true;
-            } catch(CmisRuntimeException e) {
+            } catch (CmisRuntimeException e) {
                 Logger.Warn("ContentChangeSync not successfull, fallback to CrawlSync");
                 Logger.Debug(e.Message);
                 Logger.Debug(e.StackTrace);
@@ -144,8 +141,7 @@ namespace CmisSync.Lib.Producer.ContentChange
             }
         }
 
-        private void Sync()
-        {
+        private void Sync() {
             // Get last change log token on server side.
             this.session.Binding.GetRepositoryService().GetRepositoryInfos(null);    // refresh
             string lastTokenOnServer = this.session.Binding.GetRepositoryService().GetRepositoryInfo(this.session.RepositoryInfo.Id, null).LatestChangeLogToken;
@@ -161,15 +157,13 @@ namespace CmisSync.Lib.Producer.ContentChange
                 return;
             }
 
-            do
-            {
+            do {
                 // Check which files/folders have changed.
                 IChangeEvents changes = this.session.GetContentChanges(lastTokenOnClient, this.isPropertyChangesSupported, this.maxNumberOfContentChanges);
 
                 // Replicate each change to the local side.
                 bool first = true;
-                foreach (IChangeEvent change in changes.ChangeEventList)
-                {
+                foreach (IChangeEvent change in changes.ChangeEventList) {
                     // ignore first event when lists overlapp
                     if (first) {
                         first = false;
@@ -199,8 +193,7 @@ namespace CmisSync.Lib.Producer.ContentChange
                 // refresh
                 this.session.Binding.GetRepositoryService().GetRepositoryInfos(null);
                 lastTokenOnServer = this.session.Binding.GetRepositoryService().GetRepositoryInfo(this.session.RepositoryInfo.Id, null).LatestChangeLogToken;
-            }
-            while (!lastTokenOnServer.Equals(lastTokenOnClient));
+            } while (!lastTokenOnServer.Equals(lastTokenOnClient));
         }
     }
 }

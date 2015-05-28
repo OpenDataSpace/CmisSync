@@ -17,10 +17,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
@@ -29,16 +29,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
-    public class LocalObjectRenamedRemoteObjectChanged : AbstractEnhancedSolver
-    {
-        private LocalObjectChangedRemoteObjectChanged changeChangeSolver;
+    public class LocalObjectRenamedRemoteObjectChanged : AbstractEnhancedSolver {
+        private readonly ISolver changeChangeSolver;
 
         public LocalObjectRenamedRemoteObjectChanged(
             ISession session,
             IMetaDataStorage storage,
-            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage) {
+            ISolver changeSolver) : base(session, storage) {
             if (changeSolver == null) {
-                throw new ArgumentNullException("Given situation solver for local and remote changes is null");
+                throw new ArgumentNullException("changeSolver", "Given situation solver for local and remote changes is null");
             }
 
             this.changeChangeSolver = changeSolver;
@@ -72,6 +71,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             }
 
             obj.Name = localFileSystemInfo.Name;
+            obj.Ignored = (remoteId as ICmisObject).AreAllChildrenIgnored();
             this.Storage.SaveMappedObject(obj);
             this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
         }

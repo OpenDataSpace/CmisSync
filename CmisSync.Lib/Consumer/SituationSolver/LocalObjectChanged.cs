@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectChanged.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
     using System.Linq;
@@ -40,11 +39,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// A local object has been changed and should be uploaded (if necessary) to server or updated on the server.
     /// </summary>
-    public class LocalObjectChanged : AbstractEnhancedSolver
-    {
+    public class LocalObjectChanged : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChanged));
 
-        private ActiveActivitiesManager transmissionManager;
+        private ITransmissionManager transmissionManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectChanged"/> class.
@@ -55,10 +53,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectChanged(
             ISession session,
             IMetaDataStorage storage,
-            ActiveActivitiesManager transmissionManager) : base(session, storage)
+            IFileTransmissionStorage transmissionStorage,
+            ITransmissionManager transmissionManager) : base(session, storage, transmissionStorage)
         {
             if (transmissionManager == null) {
-                throw new ArgumentNullException("Given transmission manager is null");
+                throw new ArgumentNullException("transmissionManager");
             }
 
             this.transmissionManager = transmissionManager;
@@ -84,19 +83,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             }
 
             // Match local changes to remote changes and updated them remotely
-            IMappedObject mappedObject = null;
-            try {
-                Guid? guid = localFileSystemInfo.Uuid;
-                if (guid != null) {
-                    mappedObject = this.Storage.GetObjectByGuid((Guid)guid);
-                }
-            } catch(Exception) {
-            }
-
-            if (mappedObject == null) {
-                mappedObject = this.Storage.GetObjectByLocalPath(localFileSystemInfo);
-            }
-
+            IMappedObject mappedObject = this.Storage.GetObject(localFileSystemInfo);
             if (mappedObject == null) {
                 throw new ArgumentException(string.Format("Could not find db entry for {0} => invoke crawl sync", localFileSystemInfo.FullName));
             }
@@ -111,7 +98,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
                 var doc = remoteId as IDocument;
                 try {
-                    mappedObject.LastChecksum = AbstractEnhancedSolver.UploadFile(localFile, doc, this.transmissionManager);
+                    var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                    mappedObject.LastChecksum = UploadFile(localFile, doc, transmission);
                 } catch(Exception ex) {
                     if (ex.InnerException is CmisPermissionDeniedException) {
                         OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", localFile.FullName));

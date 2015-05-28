@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Queueing
-{
+namespace CmisSync.Lib.Queueing {
     using System;
     using System.Collections.Generic;
 
@@ -30,16 +29,18 @@ namespace CmisSync.Lib.Queueing
     using CmisSync.Lib.Producer.Crawler;
     using CmisSync.Lib.Producer.Watcher;
     using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.SelectiveIgnore;
 
     /// <summary>
     /// Default event handler priorities.
     /// </summary>
-    public static class EventHandlerPriorities
-    {
+    public static class EventHandlerPriorities {
         /// <summary>
         /// The DEBUG handler priority.
         /// </summary>
         public static readonly int DEBUG = 100000;
+
+        public static readonly int CRITICAL = 99999;
 
         /// <summary>
         /// The FILTER handler priority.
@@ -69,8 +70,7 @@ namespace CmisSync.Lib.Queueing
         /// <summary>
         /// Initializes static members of the <see cref="CmisSync.Lib.Queueing.EventHandlerPriorities"/> class.
         /// </summary>
-        static EventHandlerPriorities()
-        {
+        static EventHandlerPriorities() {
             map[typeof(DebugLoggingHandler)] = DEBUG;
 
             map[typeof(ReportingFilter)] = FILTER;
@@ -92,6 +92,11 @@ namespace CmisSync.Lib.Queueing
             map[typeof(RemoteObjectFetcher)] = HIGH;
             map[typeof(LocalObjectFetcher)] = HIGH;
 
+            // SelectedIgnore filter and transformer do need the fetched objects and must be called before the NORMAL category
+            map[typeof(IgnoreFlagChangeDetection)] = NORMAL + 3;
+            map[typeof(SelectiveIgnoreEventTransformer)] = NORMAL + 2;
+            map[typeof(SelectiveIgnoreFilter)] = NORMAL + 1;
+
             map[typeof(ContentChangeEventTransformer)] = NORMAL;
             map[typeof(SyncScheduler)] = NORMAL;
             map[typeof(WatcherConsumer)] = NORMAL;
@@ -111,8 +116,7 @@ namespace CmisSync.Lib.Queueing
         /// <param name='type'>
         /// Type of the event handler.
         /// </param>
-        public static int GetPriority(Type type)
-        {
+        public static int GetPriority(Type type) {
             return map[type];
         }
     }

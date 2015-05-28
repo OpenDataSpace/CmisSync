@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
-{
+namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -35,127 +34,111 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
     using TestUtils;
     
     [TestFixture]
-    public class MappedObjectsTest
-    {
+    public class MappedObjectsTest {
         private readonly string localRootPathName = "folder";
         private readonly string localRootPath = Path.Combine("local", "test", "folder");
         private readonly string localFileName = "file.test";
         private readonly string localFilePath = Path.Combine("local", "test", "folder", "file.test");
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorTakesData()
+        public void ConstructorTakesData(
+            [Values(true, false)]bool ignored,
+            [Values(true, false)]bool readOnly,
+            [Values(MappedObjectType.File, MappedObjectType.Folder)]MappedObjectType type)
         {
-            var data = new MappedObject("name", "remoteId", MappedObjectType.File, "parentId", "changeToken") {
-                LastChecksum = new byte[20]
+            var data = new MappedObject("name", "remoteId", type, "parentId", "changeToken") {
+                LastChecksum = new byte[20],
+                Ignored = ignored,
+                Guid = Guid.NewGuid(),
+                LastLocalWriteTimeUtc = DateTime.Now,
+                LastRemoteWriteTimeUtc = DateTime.UtcNow,
+                Description = "desc",
+                LastContentSize = type == MappedObjectType.File ? 2345 : 0,
+                IsReadOnly = readOnly,
+                LastTimeStoredInStorage = DateTime.UtcNow
             };
 
             var file = new MappedObject(data);
 
             Assert.That(data, Is.EqualTo(file));
+            Assert.That(file.LastTimeStoredInStorage, Is.EqualTo(data.LastTimeStoredInStorage));
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorSetsDefaultParamsToNull()
-        {
-            var file = new MappedObject("name", "remoteId", MappedObjectType.File, "parentId", "changeToken");
-            Assert.IsNull(file.ChecksumAlgorithmName);
-            Assert.IsNull(file.Description);
-            Assert.IsNull(file.LastChecksum);
-            Assert.IsNull(file.LastLocalWriteTimeUtc);
-            Assert.IsNull(file.LastRemoteWriteTimeUtc);
-            Assert.AreEqual(-1, file.LastContentSize);
-            Assert.That(file.Ignored, Is.False);
-            Assert.That(file.ActualOperation, Is.EqualTo(OperationType.No));
-            Assert.That(file.Retries, Is.Empty);
+        public void ConstructorSetsDefaultParamsToNull([Values(MappedObjectType.File, MappedObjectType.Folder)]MappedObjectType type) {
+            var obj = new MappedObject("name", "remoteId", type, "parentId", "changeToken");
+            Assert.IsNull(obj.ChecksumAlgorithmName);
+            Assert.IsNull(obj.Description);
+            Assert.IsNull(obj.LastChecksum);
+            Assert.IsNull(obj.LastLocalWriteTimeUtc);
+            Assert.IsNull(obj.LastRemoteWriteTimeUtc);
+            Assert.AreEqual(-1, obj.LastContentSize);
+            Assert.That(obj.Ignored, Is.False);
+            Assert.That(obj.ActualOperation, Is.EqualTo(OperationType.No));
+            Assert.That(obj.Retries, Is.Empty);
+            Assert.That(obj.IsReadOnly, Is.False);
+            Assert.That(obj.LastTimeStoredInStorage, Is.Null);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorTakesName()
-        {
-            var obj = new MappedObject("name", "remoteId", MappedObjectType.File, null, null);
+        public void ConstructorTakesName([Values(MappedObjectType.File, MappedObjectType.Folder)]MappedObjectType type) {
+            var obj = new MappedObject("name", "remoteId", type, null, null);
             Assert.That(obj.Name, Is.EqualTo("name"));
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionOnEmptyName()
-        {
-            new MappedObject(string.Empty, "remoteId", MappedObjectType.File, null, null);
+        public void ConstructorThrowsExceptionOnEmptyName([Values(MappedObjectType.File, MappedObjectType.Folder)]MappedObjectType type) {
+            Assert.Throws<ArgumentNullException>(() => new MappedObject(string.Empty, "remoteId", type, null, null));
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfNameIsNull()
-        {
-            new MappedObject(null, "remoteId", MappedObjectType.File, null, null);
+        public void ConstructorThrowsExceptionIfNameIsNull([Values(MappedObjectType.File, MappedObjectType.Folder)]MappedObjectType type) {
+            Assert.Throws<ArgumentNullException>(() => new MappedObject(null, "remoteId", type, null, null));
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorTakesRemoteId()
-        {
-            var obj = new MappedObject("name", "remoteId", MappedObjectType.File, null, null);
+        public void ConstructorTakesRemoteId([Values(MappedObjectType.File, MappedObjectType.Folder)]MappedObjectType type) {
+            var obj = new MappedObject("name", "remoteId", type, null, null);
             Assert.That(obj.RemoteObjectId, Is.EqualTo("remoteId"));
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionOnEmptyRemoteId()
-        {
-            new MappedObject("name", string.Empty, MappedObjectType.File, null, null);
+        public void ConstructorThrowsExceptionOnEmptyRemoteId([Values(MappedObjectType.File, MappedObjectType.Folder)]MappedObjectType type) {
+            Assert.Throws<ArgumentNullException>(() => new MappedObject("name", string.Empty, type, null, null));
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfRemoteIdIsNull()
-        {
-            new MappedObject("name", null, MappedObjectType.File, null, null);
+        public void ConstructorThrowsExceptionIfRemoteIdIsNull([Values(MappedObjectType.File, MappedObjectType.Folder)]MappedObjectType type) {
+            Assert.Throws<ArgumentNullException>(() => new MappedObject("name", null, type, null, null));
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        [ExpectedException(typeof(ArgumentException))]
-        public void ConstructorThrowsExceptionIfTypeIsUnknown()
-        {
-            new MappedObject("name", "remoteId", MappedObjectType.Unkown, null, null);
+        public void ConstructorThrowsExceptionIfTypeIsUnknown() {
+            Assert.Throws<ArgumentException>(() => new MappedObject("name", "remoteId", MappedObjectType.Unkown, null, null));
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorTakesFileType()
-        {
-            var obj = new MappedObject("name", "remoteId", MappedObjectType.File, null, null);
-            Assert.That(obj.Type, Is.EqualTo(MappedObjectType.File));
+        public void ConstructorTakesType([Values(MappedObjectType.File, MappedObjectType.Folder)]MappedObjectType type) {
+            var obj = new MappedObject("name", "remoteId", type, null, null);
+            Assert.That(obj.Type, Is.EqualTo(type));
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorTakesFolderType()
-        {
-            var obj = new MappedObject("name", "remoteId", MappedObjectType.Folder, null, null);
-            Assert.That(obj.Type, Is.EqualTo(MappedObjectType.Folder));
+        public void ConstructorTakesParentId(
+            [Values("parentId", null)]string parentId,
+            [Values(MappedObjectType.File, MappedObjectType.Folder)]MappedObjectType type) {
+            var obj = new MappedObject("name", "id", type, parentId, null);
+            Assert.That(obj.ParentId, Is.EqualTo(parentId));
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorTakesNullParentId()
-        {
-            var obj = new MappedObject("name", "id", MappedObjectType.File, null, null);
-            Assert.That(obj.ParentId, Is.Null);
-        }
-
-        [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorTakesParentId()
-        {
-            var obj = new MappedObject("name", "id", MappedObjectType.File, "parentId", null);
-            Assert.That(obj.ParentId, Is.EqualTo("parentId"));
-        }
-
-        [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorTakesChangeLogToken()
-        {
-            var obj = new MappedObject("name", "id", MappedObjectType.File, "parentId", "changes");
+        public void ConstructorTakesChangeLogToken([Values(MappedObjectType.File, MappedObjectType.Folder)]MappedObjectType type) {
+            var obj = new MappedObject("name", "id", type, "parentId", "changes");
             Assert.That(obj.LastChangeToken, Is.EqualTo("changes"));
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void HashAlgorithmProperty()
-        {
+        public void HashAlgorithmProperty() {
             var file = new MappedObject("name", "remoteId", MappedObjectType.File, null, null) { ChecksumAlgorithmName = "MD5" };
             Assert.AreEqual("MD5", file.ChecksumAlgorithmName);
 
@@ -164,9 +147,8 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void DescriptionProperty()
-        {
-            var file = new MappedObject("name", "remoteId", MappedObjectType.File, null, null) { Description = "desc" };
+        public void DescriptionProperty([Values(MappedObjectType.File, MappedObjectType.Folder)]MappedObjectType type) {
+            var file = new MappedObject("name", "remoteId", type, null, null) { Description = "desc" };
             Assert.AreEqual("desc", file.Description);
 
             file.Description = "other desc";
@@ -174,15 +156,19 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void IgnoredProperty()
-        {
-            var obj = new MappedObject("name", "id", MappedObjectType.File, null, null) { Ignored = true };
+        public void IgnoredProperty([Values(MappedObjectType.File, MappedObjectType.Folder)]MappedObjectType type) {
+            var obj = new MappedObject("name", "id", type, null, null) { Ignored = true };
             Assert.That(obj.Ignored, Is.True);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void RetriesDictionaryProperty()
-        {
+        public void ReadOnlyProperty([Values(MappedObjectType.File, MappedObjectType.Folder)]MappedObjectType type) {
+            var obj = new MappedObject("name", "id", type, null, null) { IsReadOnly = true };
+            Assert.That(obj.IsReadOnly, Is.True);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void RetriesDictionaryProperty() {
             var dict = new Dictionary<OperationType, int>();
             dict.Add(OperationType.Download, 1);
             var obj = new MappedObject("name", "id", MappedObjectType.File, null, null) { Retries = dict };
@@ -191,8 +177,23 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void IFolderConstructor()
-        {
+        public void LastTimeStoredInStorageProperty([Values(MappedObjectType.File, MappedObjectType.Folder)]MappedObjectType type) {
+            var date = DateTime.Now;
+            var underTest = new MappedObject("name", "id", type, null, null) {
+                LastTimeStoredInStorage = date
+            };
+            Assert.That(underTest.LastTimeStoredInStorage, Is.EqualTo(date));
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void LastTimeStoredPropertyIsIrrelevantForEquality([Values(MappedObjectType.File, MappedObjectType.Folder)]MappedObjectType type) {
+            var obj1 = new MappedObject("name", "id", type, null, null) { LastTimeStoredInStorage = DateTime.UtcNow };
+            var obj2 = new MappedObject("name", "id", type, null, null);
+            Assert.That(obj1, Is.EqualTo(obj2));
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void IFolderConstructor() {
             string folderName = "a";
             string path = Path.Combine(Path.GetTempPath(), folderName);
             string id = "id";
@@ -207,15 +208,12 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
             Assert.That(mappedObject.Type, Is.EqualTo(MappedObjectType.Folder), "Type incorrect");
         }
 
-        private Mock<IFileSystemInfoFactory> CreateFactoryWithLocalPathInfos()
-        {
+        private Mock<IFileSystemInfoFactory> CreateFactoryWithLocalPathInfos() {
             return MappedObjectMockUtils.CreateFsFactory(this.localRootPath, this.localRootPathName, this.localFilePath, this.localFileName);
         }
 
-        public class MappedObjectMockUtils
-        {
-            public static Mock<IFileSystemInfoFactory> CreateFsFactory(string localRootPath, string localRootPathName, string localFilePath = null, string localFileName = null)
-            {
+        public class MappedObjectMockUtils {
+            public static Mock<IFileSystemInfoFactory> CreateFsFactory(string localRootPath, string localRootPathName, string localFilePath = null, string localFileName = null) {
                 var factory = new Mock<IFileSystemInfoFactory>();
                 var dirinfo = new Mock<IDirectoryInfo>();
                 dirinfo.Setup(dir => dir.Name).Returns(localRootPathName);

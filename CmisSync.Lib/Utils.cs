@@ -17,13 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib
-{
+namespace CmisSync.Lib {
     using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Reflection;
     using System.Security;
     using System.Security.Permissions;
@@ -41,8 +41,7 @@ namespace CmisSync.Lib
     /// <summary>
     /// Static methods that are useful in the context of synchronization.
     /// </summary>
-    public static class Utils
-    {
+    public static class Utils {
         /// <summary>
         /// Log 4 net logger.
         /// </summary>
@@ -63,12 +62,10 @@ namespace CmisSync.Lib
         /// </summary>
         /// <param name="path">Absolut path to be checked for permissions</param>
         /// <returns><c>true</c> if the write permission is granted, otherwise <c>false</c></returns>
-        public static bool HasWritePermissionOnDir(string path)
-        {
+        public static bool HasWritePermissionOnDir(string path) {
             var writeAllow = false;
             var writeDeny = false;
-            try
-            {
+            try {
                 var accessControlList = Directory.GetAccessControl(path);
                 if (accessControlList == null) {
                     return false;
@@ -112,12 +109,10 @@ namespace CmisSync.Lib
         /// </summary>
         /// <param name="ex">The exception to create the string from.</param>
         /// <returns>A formated log string</returns>
-        public static string ToLogString(this Exception ex)
-        {
+        public static string ToLogString(this Exception ex) {
             StringBuilder msg = new StringBuilder();
  
-            if (ex != null)
-            {
+            if (ex != null) {
                 string newline = Environment.NewLine;
 
                 Exception orgEx = ex;
@@ -125,41 +120,35 @@ namespace CmisSync.Lib
                 msg.Append("Exception:");
         
                 msg.Append(newline);
-                while (orgEx != null)
-                {
+                while (orgEx != null) {
                     msg.Append(orgEx.Message);
                     msg.Append(newline);
                     orgEx = orgEx.InnerException;
                 }
  
-                if (ex.Data != null)
-                {
-                    foreach (object i in ex.Data)
-                    {
+                if (ex.Data != null) {
+                    foreach (object i in ex.Data) {
                         msg.Append("Data :");
                         msg.Append(i.ToString());
                         msg.Append(newline);
                     }
                 }
  
-                if (ex.StackTrace != null)
-                {
+                if (ex.StackTrace != null) {
                     msg.Append("StackTrace:");
                     msg.Append(newline);
                     msg.Append(ex.StackTrace);
                     msg.Append(newline);
                 }
  
-                if (ex.Source != null)
-                {
+                if (ex.Source != null) {
                     msg.Append("Source:");
                     msg.Append(newline);
                     msg.Append(ex.Source);
                     msg.Append(newline);
                 }
  
-                if (ex.TargetSite != null)
-                {
+                if (ex.TargetSite != null) {
                     msg.Append("TargetSite:");
                     msg.Append(newline);
                     msg.Append(ex.TargetSite.ToString());
@@ -167,8 +156,7 @@ namespace CmisSync.Lib
                 }
  
                 Exception baseException = ex.GetBaseException();
-                if (baseException != null)
-                {
+                if (baseException != null) {
                     msg.Append("BaseException:");
                     msg.Append(newline);
                     msg.Append(ex.GetBaseException());
@@ -185,21 +173,18 @@ namespace CmisSync.Lib
         /// <param name="filename"></param>
         /// <param name="ignoreWildcards"></param>
         /// <returns></returns>
-        public static bool WorthSyncing(string filename, List<string> ignoreWildcards)
-        {
+        public static bool WorthSyncing(string filename, List<string> ignoreWildcards) {
             if (null == filename) {
                 return false;
             }
 
-            if(IsInvalidFileName(filename)) {
+            if (IsInvalidFileName(filename)) {
                 return false;
             }
 
-            foreach(var wildcard in ignoreWildcards)
-            {
+            foreach(var wildcard in ignoreWildcards) {
                 var regex = IgnoreLineToRegex(wildcard);
-                if (regex.IsMatch(filename))
-                {
+                if (regex.IsMatch(filename)) {
                     Logger.Debug(string.Format("Unworth syncing: \"{0}\" because it matches \"{1}\"", filename, wildcard));
                     return false;
                 }
@@ -211,8 +196,7 @@ namespace CmisSync.Lib
         /// <summary>
         /// Check whether a file name is valid or not.
         /// </summary>
-        public static bool IsInvalidFileName(string name)
-        {
+        public static bool IsInvalidFileName(string name) {
             bool ret = invalidFileNameRegex.IsMatch(name);
             if (ret) {
                 Logger.Debug(string.Format("The given file name {0} contains invalid patterns", name));
@@ -222,18 +206,16 @@ namespace CmisSync.Lib
             return ret;
         }
 
-        public static bool IsInvalidFolderName(string name) 
-        {
+        public static bool IsInvalidFolderName(string name) {
             return IsInvalidFolderName(name, new List<string>());
         }
 
         /// <summary>
         /// Check whether a folder name is valid or not.
         /// </summary>
-        public static bool IsInvalidFolderName(string name, List<string> ignoreWildcards)
-        {
+        public static bool IsInvalidFolderName(string name, List<string> ignoreWildcards) {
             if (ignoreWildcards == null) {
-                throw new ArgumentNullException("Given wildcards are null");
+                throw new ArgumentNullException("ignoreWildcards");
             }
 
             bool ret = invalidFolderNameRegex.IsMatch(name);
@@ -258,8 +240,7 @@ namespace CmisSync.Lib
         /// </summary>
         /// <param name="byteCount">byte count</param>
         /// <returns>Formatted file size</returns>
-        public static string FormatSize(double byteCount)
-        {
+        public static string FormatSize(double byteCount) {
             if (byteCount >= 1099511627776) {
                 return string.Format("{0:##.##} TB", Math.Round(byteCount / 1099511627776, 1));
             } else if (byteCount >= 1073741824) {
@@ -282,8 +263,7 @@ namespace CmisSync.Lib
         /// <param name='bitsPerSecond'>
         /// Bits per second.
         /// </param>
-        public static string FormatBandwidth(double bitsPerSecond)
-        {
+        public static string FormatBandwidth(double bitsPerSecond) {
             if (bitsPerSecond >= (1000d * 1000d * 1000d * 1000d)) {
                 return string.Format("{0:##.##} TBit/s", Math.Round(bitsPerSecond / (1000d * 1000d * 1000d * 1000d), 1));
             } else if (bitsPerSecond >= (1000d * 1000d * 1000d)) {
@@ -306,8 +286,7 @@ namespace CmisSync.Lib
         /// <param name='p'>
         /// the percentage
         /// </param>
-        public static string FormatPercent(double p)
-        {
+        public static string FormatPercent(double p) {
             return string.Format("{0:0.0} %", Math.Truncate(p * 10) / 10);
         }
 
@@ -317,8 +296,7 @@ namespace CmisSync.Lib
         /// </summary>
         /// <param name="byteCount">byte count</param>
         /// <returns>The formatted size</returns>
-        public static string FormatSize(long byteCount)
-        {
+        public static string FormatSize(long byteCount) {
             return FormatSize((double)byteCount);
         }
 
@@ -331,8 +309,7 @@ namespace CmisSync.Lib
         /// <param name='bitsPerSecond'>
         /// Bits per second.
         /// </param>
-        public static string FormatBandwidth(long bitsPerSecond)
-        {
+        public static string FormatBandwidth(long bitsPerSecond) {
             return FormatBandwidth((double)bitsPerSecond);
         }
 
@@ -341,15 +318,14 @@ namespace CmisSync.Lib
         /// </summary>
         /// <returns><c>true</c> if the specified path is a symlink; otherwise, <c>false</c>.</returns>
         /// <param name="path">Path to be checked.</param>
-        public static bool IsSymlink(string path)
-        {
+        public static bool IsSymlink(string path) {
             FileInfo fileinfo = new FileInfo(path);
             if (fileinfo.Exists) {
                 return IsSymlink(fileinfo);
             }
 
             DirectoryInfo dirinfo = new DirectoryInfo(path);
-            if(dirinfo.Exists) {
+            if (dirinfo.Exists) {
                 return IsSymlink(dirinfo);
             }
 
@@ -365,8 +341,7 @@ namespace CmisSync.Lib
         /// <param name='fsi'>
         /// If set to <c>true</c> fsi.
         /// </param>
-        public static bool IsSymlink(FileSystemInfo fsi)
-        {
+        public static bool IsSymlink(FileSystemInfo fsi) {
             return (fsi.Attributes & FileAttributes.ReparsePoint) == FileAttributes.ReparsePoint;
         }
 
@@ -374,11 +349,10 @@ namespace CmisSync.Lib
         /// Creates the user agent string for this client.
         /// </summary>
         /// <returns>The user agent.</returns>
-        public static string CreateUserAgent()
-        {
+        public static string CreateUserAgent(string appName = "DSS") {
             return string.Format(
                 "{0}/{1} ({2}; {4}; hostname=\"{3}\")",
-                "DSS",
+                appName,
                 Backend.Version,
                 Environment.OSVersion.ToString(),
                 System.Environment.MachineName,
@@ -388,16 +362,13 @@ namespace CmisSync.Lib
         /// <summary>
         /// Ensures the needed dependencies are available.
         /// </summary>
-        public static void EnsureNeededDependenciesAreAvailable()
-        {
-            Type[] types = new Type[]
-            {
+        public static void EnsureNeededDependenciesAreAvailable() {
+            Type[] types = new Type[] {
                 typeof(Newtonsoft.Json.JsonConvert),
                 typeof(DotCMIS.Client.Impl.Session),
                 typeof(DBreeze.DBreezeEngine)
             };
-            foreach (var type in types)
-            {
+            foreach (var type in types) {
                 System.Reflection.Assembly info = type.Assembly;
                 Logger.Debug(string.Format("Needed dependency \"{0}\" is available", info));
             }
@@ -408,8 +379,7 @@ namespace CmisSync.Lib
         /// </summary>
         /// <returns>The line to regex.</returns>
         /// <param name="line">whildcard line.</param>
-        public static Regex IgnoreLineToRegex(string line)
-        {
+        public static Regex IgnoreLineToRegex(string line) {
             return new Regex("^" + Regex.Escape(line).Replace("\\*", ".*").Replace("\\?", ".") + "$");
         }
 
@@ -419,10 +389,9 @@ namespace CmisSync.Lib
         /// <returns><c>true</c> if is repo name hidden the specified name hiddenRepos; otherwise, <c>false</c>.</returns>
         /// <param name="name">repo name.</param>
         /// <param name="hiddenRepos">Hidden repos.</param>
-        public static bool IsRepoNameHidden(string name, List<string> hiddenRepos) {
-            foreach (string wildcard in hiddenRepos) {
+        public static bool IsRepoNameHidden(string name, params string[] hiddenRepos) {
+            foreach (var wildcard in hiddenRepos) {
                 if (Utils.IgnoreLineToRegex(wildcard).IsMatch(name)) {
-                    Logger.Debug(string.Format("The given repo name \"{0}\" is hidden, because it matches the wildcard \"{1}\"", name, wildcard));
                     return true;
                 }
             }
@@ -447,11 +416,36 @@ namespace CmisSync.Lib
         /// <param name='input'>
         /// If set to <c>true</c> input.
         /// </param>
-        public static bool IsValidISO885915(string input)
-        {
+        public static bool IsValidISO885915(string input) {
             byte[] bytes = Encoding.GetEncoding(28605).GetBytes(input);
             string result = Encoding.GetEncoding(28605).GetString(bytes);
             return string.Equals(input, result);
+        }
+
+        /// <summary>
+        /// Helper method to return the property name of a given instance property.
+        /// https://stackoverflow.com/questions/4266426/c-sharp-how-to-get-the-name-in-string-of-a-class-property
+        /// Credits to: https://stackoverflow.com/users/115413/christian-hayter
+        /// </summary>
+        /// <returns>The property name as string.</returns>
+        /// <param name="expr">Expression which points to a property.</param>
+        /// <typeparam name="T">The 1st type parameter.</typeparam>
+        public static string NameOf<T>(Expression<Func<T>> expr) {
+            return ((MemberExpression)expr.Body).Member.Name;
+        }
+
+        /// <summary>
+        /// Helper method to return the property name of a given class property.
+        /// http://stackoverflow.com/questions/8136480/is-it-possible-to-get-an-object-property-name-string-without-creating-the-object
+        /// Credits to: http://stackoverflow.com/users/295635/peter
+        /// </summary>
+        /// <returns>The property name as string.</returns>
+        /// <param name="property">Property.</param>
+        /// <typeparam name="TModel">The 1st type parameter.</typeparam>
+        /// <typeparam name="TProperty">The 2nd type parameter.</typeparam>
+        public static string NameOf<TModel, TProperty>(Expression<Func<TModel, TProperty>> property) {
+            MemberExpression memberExpression = (MemberExpression)property.Body;
+            return memberExpression.Member.Name;
         }
     }
 }

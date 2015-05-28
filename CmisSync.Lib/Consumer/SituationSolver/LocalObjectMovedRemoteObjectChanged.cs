@@ -17,10 +17,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
@@ -29,25 +29,24 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
-    public class LocalObjectMovedRemoteObjectChanged : AbstractEnhancedSolver
-    {
-        private LocalObjectRenamedRemoteObjectChanged renameChangeSolver;
-        private LocalObjectChangedRemoteObjectChanged changeChangeSolver;
+    public class LocalObjectMovedRemoteObjectChanged : AbstractEnhancedSolver {
+        private readonly ISolver renameChangeSolver;
+        private readonly ISolver changeChangeSolver;
         public LocalObjectMovedRemoteObjectChanged(
             ISession session,
             IMetaDataStorage storage,
-            LocalObjectRenamedRemoteObjectChanged renameSolver,
-            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage) {
-            if (renameSolver == null) {
-                throw new ArgumentNullException("Given sitation solver for local rename and remote change is null");
+            ISolver renameChangeSolver,
+            ISolver changeChangeSolver) : base(session, storage) {
+            if (renameChangeSolver == null) {
+                throw new ArgumentNullException("renameChangeSolver", "Given sitation solver for local rename and remote change is null");
             }
 
-            if (changeSolver == null) {
-                throw new ArgumentNullException("Given situation solver for local and remote changes is null");
+            if (changeChangeSolver == null) {
+                throw new ArgumentNullException("changeChangeSolver", "Given situation solver for local and remote changes is null");
             }
 
-            this.renameChangeSolver = renameSolver;
-            this.changeChangeSolver = changeSolver;
+            this.renameChangeSolver = renameChangeSolver;
+            this.changeChangeSolver = changeChangeSolver;
         }
 
         public override void Solve(
@@ -72,6 +71,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             }
 
             obj.ParentId = targetId;
+            obj.Ignored = remoteObject.AreAllChildrenIgnored();
             this.Storage.SaveMappedObject(obj);
 
             if (obj.Name != localFileSystemInfo.Name) {

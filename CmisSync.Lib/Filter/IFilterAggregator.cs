@@ -17,15 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Filter
-{
+namespace CmisSync.Lib.Filter {
     using System;
 
     /// <summary>
     /// I filter aggregator.
     /// </summary>
-    public interface IFilterAggregator
-    {
+    public interface IFilterAggregator {
         /// <summary>
         /// Gets the file names filter.
         /// </summary>
@@ -49,5 +47,11 @@ namespace CmisSync.Lib.Filter
         /// </summary>
         /// <value>The ignored folder filter.</value>
         IgnoredFoldersFilter IgnoredFolderFilter { get; }
+
+        /// <summary>
+        /// Gets the symlink filter.
+        /// </summary>
+        /// <value>The symlink filter.</value>
+        SymlinkFilter SymlinkFilter { get; }
     }
 }

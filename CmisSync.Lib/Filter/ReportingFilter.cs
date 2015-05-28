@@ -17,10 +17,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Filter
-{
+namespace CmisSync.Lib.Filter {
     using System;
-    
+
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
 
@@ -29,8 +28,7 @@ namespace CmisSync.Lib.Filter
     /// <summary>
     /// Reporting filter.
     /// </summary>
-    public class ReportingFilter : ReportingSyncEventHandler
-    {
+    public class ReportingFilter : ReportingSyncEventHandler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ReportingSyncEventHandler));
 
         /// <summary>
@@ -54,6 +52,11 @@ namespace CmisSync.Lib.Filter
         private InvalidFolderNameFilter invalidFolderNameFilter;
 
         /// <summary>
+        /// The symlink filter.
+        /// </summary>
+        private SymlinkFilter symlinkFilter;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ReportingFilter"/> class.
         /// </summary>
         /// <param name="queue">Sync Event Queue to put work on.</param>
@@ -66,28 +69,34 @@ namespace CmisSync.Lib.Filter
             IgnoredFoldersFilter ignoredFoldersFilter,
             IgnoredFileNamesFilter ignoredFileNameFilter,
             IgnoredFolderNameFilter ignoredFolderNameFilter,
-            InvalidFolderNameFilter invalidFoderNameFilter) : base(queue)
+            InvalidFolderNameFilter invalidFoderNameFilter,
+            SymlinkFilter symlinkFilter) : base(queue)
         {
             if (ignoredFoldersFilter == null) {
-                throw new ArgumentNullException("Given folder filter is null");
+                throw new ArgumentNullException("ignoredFoldersFilter");
             }
 
             if (ignoredFileNameFilter == null) {
-                throw new ArgumentNullException("Given file name filter is null");
+                throw new ArgumentNullException("ignoredFileNameFilter");
             }
 
             if (ignoredFolderNameFilter == null) {
-                throw new ArgumentNullException("Given folder name filter is null");
+                throw new ArgumentNullException("ignoredFolderNameFilter");
             }
 
             if (invalidFoderNameFilter == null) {
-                throw new ArgumentNullException("Given invalid folder name filter is null");
+                throw new ArgumentNullException("invalidFoderNameFilter");
+            }
+
+            if (symlinkFilter == null) {
+                throw new ArgumentNullException("symlinkFilter");
             }
 
             this.ignoredFoldersFilter = ignoredFoldersFilter;
             this.ignoredFileNameFilter = ignoredFileNameFilter;
             this.ignoredFolderNameFilter = ignoredFolderNameFilter;
             this.invalidFolderNameFilter = invalidFoderNameFilter;
+            this.symlinkFilter = symlinkFilter;
         }
 
         /// <summary>
@@ -95,8 +104,7 @@ namespace CmisSync.Lib.Filter
         /// </summary>
         /// <param name="e">The event to handle.</param>
         /// <returns>true if handled</returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             string reason;
             try {
                 var nameEvent = e as IFilterableNameEvent;
@@ -125,12 +133,28 @@ namespace CmisSync.Lib.Filter
                     }
 
                     string[] folderNames = pathEvent.RemotePath.Split('/');
-                    foreach(var name in folderNames) {
+                    foreach (var name in folderNames) {
                         if (this.invalidFolderNameFilter.CheckFolderName(name, out reason)) {
                             this.Queue.AddEvent(new RequestIgnoredEvent(e, reason, this));
                             Logger.Info(reason);
                             return true;
                         }
+                    }
+                }
+
+                var localFolderObjectEvent = e as FolderEvent;
+                if (localFolderObjectEvent != null) {
+                    if (this.symlinkFilter.IsSymlink(localFolderObjectEvent.LocalFolder, out reason)) {
+                        Logger.Info(reason);
+                        return true;
+                    }
+                }
+
+                var localFileObjectEvent = e as FileEvent;
+                if (localFileObjectEvent != null) {
+                    if (this.symlinkFilter.IsSymlink(localFileObjectEvent.LocalFile, out reason)) {
+                        Logger.Info(reason);
+                        return true;
                     }
                 }
             } catch (System.IO.DirectoryNotFoundException) {

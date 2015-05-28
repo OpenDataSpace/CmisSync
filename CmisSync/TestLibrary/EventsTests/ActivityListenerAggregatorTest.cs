@@ -17,21 +17,19 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary
-{
+namespace TestLibrary.EventsTests {
     using System;
 
     using CmisSync.Lib;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
 
-    using NUnit.Framework;
-
     using Moq;
 
+    using NUnit.Framework;
+
     [TestFixture]
-    public class ActivityListenerAggregatorTest
-    {
+    public class ActivityListenerAggregatorTest {
         [Test, Category("Fast")]
         public void ConstructorThrowsExceptionIfTransmissionManagerIsNull() {
             Assert.Throws<ArgumentNullException>(() => new ActivityListenerAggregator(Mock.Of<IActivityListener>(), null));
@@ -39,12 +37,12 @@ namespace TestLibrary
 
         [Test, Category("Fast")]
         public void ConstructorThrowsExceptionIfActivityListenerIsNull() {
-            Assert.Throws<ArgumentNullException>(() => new ActivityListenerAggregator(null, new ActiveActivitiesManager()));
+            Assert.Throws<ArgumentNullException>(() => new ActivityListenerAggregator(null, new TransmissionManager()));
         }
 
         [Test, Category("Fast")]
         public void ConstructorTakesTransmissionManager() {
-            var manager = new ActiveActivitiesManager();
+            var manager = new TransmissionManager();
             var agg = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), manager);
             Assert.That(agg.TransmissionManager, Is.EqualTo(manager));
         }

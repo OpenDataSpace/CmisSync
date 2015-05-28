@@ -17,15 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync
-{
+namespace CmisSync {
     using System;
 
     using CmisSync.Lib.Config;
 
     [System.ComponentModel.ToolboxItem(true)]
-    public partial class CredentialsWidget : Gtk.Bin
-    {
+    public partial class CredentialsWidget : Gtk.Bin {
         public event EventHandler Changed;
         public string UserName {
             get {
@@ -57,32 +55,30 @@ namespace CmisSync
             }
         }
 
-        public CredentialsWidget()
-        {
+        public CredentialsWidget() {
             this.Build();
             this.addressLabel.Text = Properties_Resources.CmisWebAddress;
             this.urlWidget.ValidationActivated = false;
             this.urlWidget.IsUrlEditable = false;
             this.urlWidget.Changed += (object sender, EventArgs e) => {
-                if (this.Changed != null) {
-                    this.Changed(this, e);
+                var handler = this.Changed;
+                if (handler != null) {
+                    handler(this, e);
                 }
             };
         }
 
-        protected void OnPasswordChanged(object sender, EventArgs e)
-        {
+        protected void OnPasswordChanged(object sender, EventArgs e) {
             var handler = this.Changed;
             if (handler != null) {
-                this.Changed(this, e);
+                handler(this, e);
             }
         }
 
-        protected void OnUrlWidgetChanged(object sender, EventArgs e)
-        {
+        protected void OnUrlWidgetChanged(object sender, EventArgs e) {
             var handler = this.Changed;
             if (handler != null) {
-                this.Changed(this, e);
+                handler(this, e);
             }
         }
     }

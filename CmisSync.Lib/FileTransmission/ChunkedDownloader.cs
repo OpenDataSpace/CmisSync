@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="ChunkedDownloader.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -20,10 +20,14 @@
 namespace CmisSync.Lib.FileTransmission
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Streams;
 
     using DotCMIS.Client;
@@ -43,12 +47,14 @@ namespace CmisSync.Lib.FileTransmission
         /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.ChunkedDownloader"/> class.
         /// </summary>
         /// <param name="chunkSize">Chunk size.</param>
-        public ChunkedDownloader(long chunkSize = 1024 * 1024) {
+        /// <param name="storage"><c>IFileTransmissionStorage</c> to persist</param>
+        public ChunkedDownloader(long chunkSize = 1024 * 1024, IFileTransmissionStorage storage = null) {
             if (chunkSize <= 0) {
                 throw new ArgumentException("The chunk size must be a positive number and cannot be zero or less");
             }
 
             this.ChunkSize = chunkSize;
+            this.Storage = storage;
         }
 
         /// <summary>
@@ -58,17 +64,29 @@ namespace CmisSync.Lib.FileTransmission
         public long ChunkSize { get; private set; }
 
         /// <summary>
+        /// Gets the <c>IFileTransmissionStorage for persistence support</c>.
+        /// </summary>
+        public IFileTransmissionStorage Storage { get; private set; }
+
+        /// <summary>
         /// Downloads the file and returns the SHA-1 hash of the content of the saved file
         /// </summary>
         /// <param name="remoteDocument">Remote document.</param>
         /// <param name="localFileStream">Local taget file stream.</param>
-        /// <param name="status">Transmission status.</param>
+        /// <param name="transmission">Transmission status.</param>
         /// <param name="hashAlg">Hash algoritm, which should be used to calculate hash of the uploaded stream content</param>
+        /// <param name="update">Not or not yet used</param>
         /// <exception cref="IOException">On any disc or network io exception</exception>
         /// <exception cref="DisposeException">If the remote object has been disposed before the dowload is finished</exception>
         /// <exception cref="AbortException">If download is aborted</exception>
         /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
-        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg) {
+        public void DownloadFile(
+            IDocument remoteDocument,
+            Stream localFileStream,
+            Transmission transmission,
+            HashAlgorithm hashAlg,
+            UpdateChecksum update = null)
+        {
             {
                 byte[] buffer = new byte[8 * 1024];
                 int len;
@@ -85,10 +103,13 @@ namespace CmisSync.Lib.FileTransmission
                 long remainingBytes = (fileLength != null) ? (long)fileLength - offset : this.ChunkSize;
                 try {
                     do {
-                        offset += this.DownloadNextChunk(remoteDocument, offset, remainingBytes, status, localFileStream, hashAlg);
+                        offset += this.DownloadNextChunk(remoteDocument, offset, remainingBytes, transmission, localFileStream, hashAlg);
                     } while(fileLength == null);
                 } catch (DotCMIS.Exceptions.CmisConstraintException) {
                 }
+            } else {
+                transmission.Position = 0;
+                transmission.Length = 0;
             }
 
             hashAlg.TransformFinalBlock(new byte[0], 0, 0);
@@ -128,26 +149,21 @@ namespace CmisSync.Lib.FileTransmission
             }
         }
 
-        private int DownloadNextChunk(IDocument remoteDocument, long offset, long remainingBytes, FileTransmissionEvent status, Stream outputstream, HashAlgorithm hashAlg) {
-            lock(this.disposeLock)
-            {
+        private int DownloadNextChunk(IDocument remoteDocument, long offset, long remainingBytes, Transmission transmission, Stream outputstream, HashAlgorithm hashAlg) {
+            lock(this.disposeLock) {
                 if (this.disposed) {
-                    status.ReportProgress(new TransmissionProgressEventArgs() { Aborted = true });
-                    throw new ObjectDisposedException(status.Path);
+                    transmission.Status = TransmissionStatus.ABORTED;
+                    throw new ObjectDisposedException(transmission.Path);
                 }
 
                 IContentStream contentStream = remoteDocument.GetContentStream(remoteDocument.ContentStreamId, offset, remainingBytes);
-                status.ReportProgress(new TransmissionProgressEventArgs {
-                    Length = remoteDocument.ContentStreamLength,
-                    ActualPosition = offset,
-                    Resumed = offset > 0
-                });
+                transmission.Length = remoteDocument.ContentStreamLength;
+                transmission.Position = offset;
 
-                using (Stream remoteStream = contentStream.Stream)
-                using (ForwardReadingStream forwardstream = new ForwardReadingStream(remoteStream))
-                using (OffsetStream offsetstream = new OffsetStream(forwardstream, offset))
-                using (ProgressStream progress = new ProgressStream(offsetstream, status))
-                {
+                using (var remoteStream = contentStream.Stream)
+                using (var forwardstream = new ForwardReadingStream(remoteStream))
+                using (var offsetstream = new OffsetStream(forwardstream, offset))
+                using (var progress = transmission.CreateStream(offsetstream)) {
                     byte[] buffer = new byte[8 * 1024];
                     int result = 0;
                     int len;

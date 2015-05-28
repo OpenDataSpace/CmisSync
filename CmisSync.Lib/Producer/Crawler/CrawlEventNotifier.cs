@@ -16,8 +16,8 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Producer.Crawler
-{
+
+namespace CmisSync.Lib.Producer.Crawler {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -31,18 +31,16 @@ namespace CmisSync.Lib.Producer.Crawler
     /// <summary>
     /// Crawl event notifier takes crawled events and notifies the queue about them.
     /// </summary>
-    public class CrawlEventNotifier
-    {
+    public class CrawlEventNotifier {
         private ISyncEventQueue queue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Producer.Crawler.CrawlEventNotifier"/> class.
         /// </summary>
         /// <param name="queue">Sync event queue which should be notified about the crawled events.</param>
-        public CrawlEventNotifier(ISyncEventQueue queue)
-        {
+        public CrawlEventNotifier(ISyncEventQueue queue) {
             if (queue == null) {
-                throw new ArgumentNullException("Given queue is null");
+                throw new ArgumentNullException("queue");
             }
 
             this.queue = queue;
@@ -50,19 +48,18 @@ namespace CmisSync.Lib.Producer.Crawler
 
         public void MergeEventsAndAddToQueue(CrawlEventCollection events) {
             if (events.creationEvents == null) {
-                throw new ArgumentNullException("Given creationEvents list is null");
+                throw new ArgumentNullException("events", "Given creationEvents list is null");
             }
 
             if (events.mergableEvents == null) {
-                throw new ArgumentNullException("Given mergable events are null");
+                throw new ArgumentNullException("events", "Given mergable events are null");
             }
 
             this.MergeAndSendEvents(events.mergableEvents);
             events.creationEvents.ForEach(e => this.queue.AddEvent(e));
         }
 
-        private void MergeAndSendEvents(Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap)
-        {
+        private void MergeAndSendEvents(Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap) {
             foreach (var entry in eventMap) {
                 if (entry.Value == null) {
                     continue;

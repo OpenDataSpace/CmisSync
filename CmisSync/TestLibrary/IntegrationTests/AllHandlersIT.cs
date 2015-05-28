@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="AllHandlersIT.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.IntegrationTests
-{
+namespace TestLibrary.IntegrationTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -27,16 +26,17 @@ namespace TestLibrary.IntegrationTests
     using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Consumer;
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.PathMatcher;
-    using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Crawler;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.SelectiveIgnore;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DBreeze;
 
@@ -58,8 +58,7 @@ namespace TestLibrary.IntegrationTests
     using Strategy = CmisSync.Lib.Producer.Watcher;
 
     [TestFixture]
-    public class AllHandlersIT : IsTestWithConfiguredLog4Net
-    {
+    public class AllHandlersIT : IsTestWithConfiguredLog4Net, IDisposable {
         private readonly string localRoot = Path.GetTempPath();
         private readonly string remoteRoot = "remoteroot";
 
@@ -69,28 +68,25 @@ namespace TestLibrary.IntegrationTests
         private DBreezeEngine engine;
 
         [TestFixtureSetUp]
-        public void ClassInit()
-        {
+        public void ClassInit() {
             // Use Newtonsoft.Json as Serializator
             DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject;
             DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
         }
 
         [SetUp]
-        public void SetupEngine()
-        {
+        public void SetupEngine() {
             this.engine = new DBreezeEngine(new DBreezeConfiguration { Storage = DBreezeConfiguration.eStorage.MEMORY });
         }
 
         [TearDown]
-        public void DestroyEngine()
-        {
+        public void DestroyEngine() {
             this.engine.Dispose();
+            this.engine = null;
         }
 
         [Test, Category("Medium")]
-        public void RunFakeEvent()
-        {
+        public void RunFakeEvent() {
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
             var observer = new ObservableHandler();
@@ -103,8 +99,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Medium")]
-        public void RunStartNewSyncEvent()
-        {
+        public void RunStartNewSyncEvent() {
             string rootFolderName = "/";
             string rootFolderId = "root";
             var storage = this.GetInitializedStorage();
@@ -121,8 +116,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Medium")]
-        public void RunFSEventFileDeleted()
-        {
+        public void RunFSEventFileDeleted() {
             var storage = this.GetInitializedStorage();
             var path = new Mock<IFileInfo>();
             var name = "a";
@@ -148,8 +142,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Medium")]
-        public void RunFSEventFolderDeleted()
-        {
+        public void RunFSEventFolderDeleted() {
             var storage = this.GetInitializedStorage();
             var path = new Mock<IFileInfo>();
             var name = "a";
@@ -175,8 +168,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Medium")]
-        public void ContentChangeIndicatesFolderDeletionOfExistingFolder()
-        {
+        public void ContentChangeIndicatesFolderDeletionOfExistingFolder() {
             var storage = this.GetInitializedStorage();
             var name = "a";
             string path = Path.Combine(this.localRoot, name);
@@ -199,8 +191,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Medium")]
-        public void ContentChangeIndicatesFolderRenameOfExistingFolder()
-        {
+        public void ContentChangeIndicatesFolderRenameOfExistingFolder() {
             var storage = this.GetInitializedStorage();
             string name = "a";
             string newName = "b";
@@ -247,8 +238,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Medium")]
-        public void ContentChangeIndicatesFolderCreation()
-        {
+        public void ContentChangeIndicatesFolderCreation() {
             string rootFolderName = "/";
             string rootFolderId = "root";
             string folderName = "folder";
@@ -283,8 +273,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Medium")]
-        public void ContentChangeIndicatesFolderMove()
-        {
+        public void ContentChangeIndicatesFolderMove() {
             // Moves /a/b to /b
             string rootFolderId = "rootId";
             string folderAName = "a";
@@ -316,8 +305,16 @@ namespace TestLibrary.IntegrationTests
             folderBInfo.Verify(d => d.MoveTo(Path.Combine(this.localRoot, folderBName)), Times.Once());
         }
 
-        private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage)
-        {
+        #region boilerplatecode
+        public void Dispose() {
+            if (this.engine != null) {
+                this.engine.Dispose();
+                this.engine = null;
+            }
+        }
+        #endregion
+
+        private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage) {
             return this.CreateQueue(session, storage, new ObservableHandler());
         }
 
@@ -325,14 +322,12 @@ namespace TestLibrary.IntegrationTests
             return this.CreateQueue(session, storage, new ObservableHandler(), fsFactory);
         }
 
-        private IMetaDataStorage GetInitializedStorage()
-        {
+        private IMetaDataStorage GetInitializedStorage() {
             IPathMatcher matcher = new PathMatcher(this.localRoot, this.remoteRoot);
-            return new MetaDataStorage(this.engine, matcher);
+            return new MetaDataStorage(this.engine, matcher, true);
         }
 
-        private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage, ObservableHandler observer, IFileSystemInfoFactory fsFactory = null)
-        {
+        private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage, ObservableHandler observer, IFileSystemInfoFactory fsFactory = null) {
             var manager = new SyncEventManager();
             SingleStepEventQueue queue = new SingleStepEventQueue(manager);
 
@@ -361,7 +356,7 @@ namespace TestLibrary.IntegrationTests
 
             var localDetection = new LocalSituationDetection();
             var remoteDetection = new RemoteSituationDetection();
-            var transmissionManager = new ActiveActivitiesManager();
+            var transmissionManager = new TransmissionManager();
             var activityAggregator = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), transmissionManager);
 
             var ignoreFolderFilter = new IgnoredFoldersFilter();
@@ -370,14 +365,16 @@ namespace TestLibrary.IntegrationTests
             var invalidFolderNameFilter = new InvalidFolderNameFilter();
             var filterAggregator = new FilterAggregator(ignoreFileNamesFilter, ignoreFolderNameFilter, invalidFolderNameFilter, ignoreFolderFilter);
 
-            var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage, activityAggregator, filterAggregator);
+            var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage, Mock.Of<IFileTransmissionStorage>(), activityAggregator, filterAggregator);
             manager.AddEventHandler(syncMechanism);
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder();
-
+            remoteFolder.Setup(r => r.Path).Returns(this.remoteRoot);
             var localFolder = new Mock<IDirectoryInfo>();
+            localFolder.Setup(f => f.FullName).Returns(this.localRoot);
             var generator = new CrawlEventGenerator(storage, fsFactory);
-            var treeBuilder = new DescendantsTreeBuilder(storage, remoteFolder.Object, localFolder.Object, filterAggregator);
+            var ignoreStorage = new IgnoredEntitiesStorage(new IgnoredEntitiesCollection(), storage);
+            var treeBuilder = new DescendantsTreeBuilder(storage, remoteFolder.Object, localFolder.Object, filterAggregator, ignoreStorage);
             var notifier = new CrawlEventNotifier(queue);
             var crawler = new DescendantsCrawler(queue, treeBuilder, generator, notifier, Mock.Of<IActivityListener>());
             manager.AddEventHandler(crawler);
@@ -399,7 +396,7 @@ namespace TestLibrary.IntegrationTests
             manager.AddEventHandler(failedOperationsFilder);
             */
 
-            var reportingFilter = new ReportingFilter(queue, ignoreFolderFilter, ignoreFileNamesFilter, ignoreFolderNameFilter, invalidFolderNameFilter);
+            var reportingFilter = new ReportingFilter(queue, ignoreFolderFilter, ignoreFileNamesFilter, ignoreFolderNameFilter, invalidFolderNameFilter, new SymlinkFilter());
             manager.AddEventHandler(reportingFilter);
 
             var debugHandler = new DebugLoggingHandler();

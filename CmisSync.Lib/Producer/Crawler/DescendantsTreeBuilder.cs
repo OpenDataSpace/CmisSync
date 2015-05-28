@@ -16,13 +16,16 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Producer.Crawler
-{
+
+namespace CmisSync.Lib.Producer.Crawler {
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Filter;
+    using CmisSync.Lib.PathMatcher;
+    using CmisSync.Lib.SelectiveIgnore;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -38,13 +41,14 @@ namespace CmisSync.Lib.Producer.Crawler
     /// <attribution license="cc4" from="Microsoft" modified="false" /><para>The exception that is thrown when a null
     /// reference (Nothing in Visual Basic) is passed to a method that does not accept it as a valid argument. </para>
     /// </exception>
-    public class DescendantsTreeBuilder : IDescendantsTreeBuilder
-    {
+    public class DescendantsTreeBuilder : IDescendantsTreeBuilder {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(DescendantsTreeBuilder));
         private IMetaDataStorage storage;
         private IFolder remoteFolder;
         private IDirectoryInfo localFolder;
         private IFilterAggregator filter;
+        private IPathMatcher matcher;
+        private IIgnoredEntitiesStorage ignoredStorage;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Producer.Crawler.DescendantsTreeBuilder"/> class.
@@ -65,28 +69,39 @@ namespace CmisSync.Lib.Producer.Crawler
         /// <attribution license="cc4" from="Microsoft" modified="false" /><para>The exception that is thrown when a
         /// null reference (Nothing in Visual Basic) is passed to a method that does not accept it as a valid argument. </para>
         /// </exception>
-        public DescendantsTreeBuilder(IMetaDataStorage storage, IFolder remoteFolder, IDirectoryInfo localFolder, IFilterAggregator filter)
+        public DescendantsTreeBuilder(
+            IMetaDataStorage storage,
+            IFolder remoteFolder,
+            IDirectoryInfo localFolder,
+            IFilterAggregator filter,
+            IIgnoredEntitiesStorage ignoredStorage)
         {
             if (remoteFolder == null) {
-                throw new ArgumentNullException("Given remoteFolder is null");
+                throw new ArgumentNullException("remoteFolder");
             }
 
             if (localFolder == null) {
-                throw new ArgumentNullException("Given localFolder is null");
+                throw new ArgumentNullException("localFolder");
             }
 
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage");
             }
 
             if (filter == null) {
-                throw new ArgumentNullException("Given filter is null");
+                throw new ArgumentNullException("filter");
+            }
+
+            if (ignoredStorage == null) {
+                throw new ArgumentNullException("ignoredStorage");
             }
 
             this.storage = storage;
             this.remoteFolder = remoteFolder;
             this.localFolder = localFolder;
             this.filter = filter;
+            this.matcher = new PathMatcher(localFolder.FullName, remoteFolder.Path);
+            this.ignoredStorage = ignoredStorage;
         }
 
         /// <summary>
@@ -97,25 +112,30 @@ namespace CmisSync.Lib.Producer.Crawler
         /// <param name="filter">Filter for files.</param>
         public static IObjectTree<IFileSystemInfo> GetLocalDirectoryTree(IDirectoryInfo parent, IFilterAggregator filter) {
             var children = new List<IObjectTree<IFileSystemInfo>>();
-            foreach (var child in parent.GetDirectories()) {
-                string reason;
-                if (!filter.InvalidFolderNamesFilter.CheckFolderName(child.Name, out reason) && !filter.FolderNamesFilter.CheckFolderName(child.Name, out reason)) {
-                    children.Add(GetLocalDirectoryTree(child, filter));
-                } else {
-                    Logger.Info(reason);
+            try {
+                foreach (var child in parent.GetDirectories()) {
+                    string reason;
+                    if (!filter.InvalidFolderNamesFilter.CheckFolderName(child.Name, out reason) && !filter.FolderNamesFilter.CheckFolderName(child.Name, out reason) && !filter.SymlinkFilter.IsSymlink(child, out reason)) {
+                        children.Add(GetLocalDirectoryTree(child, filter));
+                    } else {
+                        Logger.Info(reason);
+                    }
                 }
-            }
 
-            foreach (var file in parent.GetFiles()) {
-                string reason;
-                if (!filter.FileNamesFilter.CheckFile(file.Name, out reason)) {
-                    children.Add(new ObjectTree<IFileSystemInfo> {
-                        Item = file,
-                        Children = new List<IObjectTree<IFileSystemInfo>>()
-                    });
-                } else {
-                    Logger.Info(reason);
+                foreach (var file in parent.GetFiles()) {
+                    string reason;
+                    if (!filter.FileNamesFilter.CheckFile(file.Name, out reason) && !filter.SymlinkFilter.IsSymlink(file, out reason)) {
+                        children.Add(new ObjectTree<IFileSystemInfo> {
+                            Item = file,
+                            Children = new List<IObjectTree<IFileSystemInfo>>()
+                        });
+                    } else {
+                        Logger.Info(reason);
+                    }
                 }
+            } catch (System.IO.PathTooLongException) {
+                Logger.Fatal(string.Format("One or more children paths of \"{0}\" are to long to be synchronized, synchronization is impossible since the problem is fixed", parent.FullName));
+                throw;
             }
 
             IObjectTree<IFileSystemInfo> tree = new ObjectTree<IFileSystemInfo> {
@@ -132,14 +152,25 @@ namespace CmisSync.Lib.Producer.Crawler
         /// <param name="parent">Parent folder.</param>
         /// <param name="descendants">Descendants of remote object.</param>
         /// <param name="filter">Filter of ignored or invalid files and folder</param>
-        public static IObjectTree<IFileableCmisObject> GetRemoteDirectoryTree(IFolder parent, IList<ITree<IFileableCmisObject>> descendants, IFilterAggregator filter) {
+        public static IObjectTree<IFileableCmisObject> GetRemoteDirectoryTree(IFolder parent, IList<ITree<IFileableCmisObject>> descendants, IFilterAggregator filter, IIgnoredEntitiesStorage ignoredStorage, IPathMatcher matcher) {
             IList<IObjectTree<IFileableCmisObject>> children = new List<IObjectTree<IFileableCmisObject>>();
             if (descendants != null) {
                 foreach (var child in descendants) {
                     if (child.Item is IFolder) {
                         string reason;
-                        if (!filter.FolderNamesFilter.CheckFolderName(child.Item.Name, out reason) && !filter.InvalidFolderNamesFilter.CheckFolderName(child.Item.Name, out reason)) {
-                            children.Add(GetRemoteDirectoryTree(child.Item as IFolder, child.Children, filter));
+                        var folder = child.Item as IFolder;
+                        if (!filter.FolderNamesFilter.CheckFolderName(folder.Name, out reason) && !filter.InvalidFolderNamesFilter.CheckFolderName(folder.Name, out reason)) {
+                            if (folder.AreAllChildrenIgnored()) {
+                                ignoredStorage.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(new IgnoredEntity(folder, matcher));
+                                Logger.Info(string.Format("Folder {0} with Id {1} is ignored", folder.Name, folder.Id));
+                                children.Add(new ObjectTree<IFileableCmisObject> {
+                                    Item = child.Item,
+                                    Children = new List<IObjectTree<IFileableCmisObject>>()
+                                });
+                            } else {
+                                ignoredStorage.Remove(folder.Id);
+                                children.Add(GetRemoteDirectoryTree(folder, child.Children, filter, ignoredStorage, matcher));
+                            }
                         } else {
                             Logger.Info(reason);
                         }
@@ -176,14 +207,19 @@ namespace CmisSync.Lib.Producer.Crawler
             IObjectTree<IFileSystemInfo> localTree = null;
             IObjectTree<IFileableCmisObject> remoteTree = null;
 
+            /*
             // Request 3 trees in parallel
             Task[] tasks = new Task[3];
-            tasks[0] = Task.Factory.StartNew(() => storedTree = this.storage.GetObjectTree());
-            tasks[1] = Task.Factory.StartNew(() => localTree = GetLocalDirectoryTree(this.localFolder, this.filter));
-            tasks[2] = Task.Factory.StartNew(() => remoteTree = GetRemoteDirectoryTree(this.remoteFolder, this.remoteFolder.GetDescendants(-1), this.filter));
+            tasks[0] = Task.Factory.StartNew(() => );
+            tasks[1] = Task.Factory.StartNew(() => );
+            tasks[2] = Task.Factory.StartNew(() => );
 
             // Wait until all tasks are finished
             Task.WaitAll(tasks);
+            */
+            localTree = GetLocalDirectoryTree(this.localFolder, this.filter);
+            remoteTree = GetRemoteDirectoryTree(this.remoteFolder, this.remoteFolder.GetDescendants(-1), this.filter, this.ignoredStorage, this.matcher);
+            storedTree = this.storage.GetObjectTree();
             return new DescendantsTreeCollection(storedTree, localTree, remoteTree);
         }
     }

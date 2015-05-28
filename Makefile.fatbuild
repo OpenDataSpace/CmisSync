@@ -122,9 +122,11 @@ preparelibs: $(GLUELIBS) $(SHARPDLLS)
 fat: preparelibs 
 	@echo "### Generating fat binaries"
 	cp /etc/mono/config mono_config
+	sed -i "/MonoPosixHelper/d" mono_config ; \
 	export MONO_PATH="$(EASYDEPS)"; \
 	mkbundle --static --config ./mono_config -o DataSpaceSync DataSpaceSync.exe --deps $(FATDLLS) --machine-config /etc/mono/4.5/machine.config -z ; \
-	mkbundle --static --config ./mono_config -o DataSpaceSync.Console DataSpaceSync.Console.exe --deps $(FATDLLS) --machine-config /etc/mono/4.5/machine.config -z
+	mkbundle --static --config ./mono_config -o DataSpaceSync.Console DataSpaceSync.Console.exe --deps $(FATDLLS) --machine-config /etc/mono/4.5/machine.config -z ; \
+	mkbundle --static --config ./mono_config -o DiagnoseTool DiagnoseTool.exe --deps $(FATDLLS) --machine-config /etc/mono/4.5/machine.config -z
 
 clean:
 	rm -f $(INCLIBDIR)/*.dll

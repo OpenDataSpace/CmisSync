@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectMovedRemoteObjectChangedTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -49,7 +49,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private readonly string remoteObjectId = "remoteId";
         private readonly string changeToken = "changeToken";
 
-        private ActiveActivitiesManager manager;
+        private TransmissionManager manager;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileSystemInfoFactory> fsFactory;
@@ -125,7 +125,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFolderMoved() {
+        public void LocalFolderMoved([Values(true, false)]bool childrenAreIgnored) {
             this.SetUpMocks();
             string folderName = "name";
             var dir = Mock.Of<IDirectoryInfo>(
@@ -133,22 +133,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 d.FullName == Path.Combine(Path.GetTempPath(), this.newParentsName, folderName) &&
                 d.Name == folderName &&
                 d.Parent.Uuid == this.parentUuid);
-            var folder = Mock.Of<IFolder>(
-                f =>
-                f.Id == this.remoteObjectId &&
-                f.ParentId == this.oldParentsId);
-            Mock.Get(folder).Setup(d => d.Move(It.IsAny<IObjectId>(), It.IsAny<IObjectId>())).Returns(folder);
+            var folder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteObjectId, folderName, "path", this.oldParentsId, ignored: childrenAreIgnored);
+            folder.Setup(d => d.Move(It.IsAny<IObjectId>(), It.IsAny<IObjectId>())).Returns(folder.Object);
             var obj = new MappedObject(folderName, this.remoteObjectId, MappedObjectType.Folder, this.oldParentsId, this.changeToken) { Guid = Guid.NewGuid() };
             this.storage.AddMappedFolder(obj);
-            this.underTest.Solve(dir, folder, ContentChangeType.NONE, ContentChangeType.NONE);
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteObjectId, folderName, this.newParentsId, this.changeToken);
-            Mock.Get(folder).Verify(d => d.Move(It.Is<IObjectId>(o => o.Id == this.oldParentsId), It.Is<IObjectId>(o => o.Id == this.newParentsId)));
-            this.changeSolver.Verify(s => s.Solve(dir, folder, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
+            this.underTest.Solve(dir, folder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteObjectId, folderName, this.newParentsId, this.changeToken, ignored: childrenAreIgnored);
+            folder.Verify(d => d.Move(It.Is<IObjectId>(o => o.Id == this.oldParentsId), It.Is<IObjectId>(o => o.Id == this.newParentsId)));
+            this.changeSolver.Verify(s => s.Solve(dir, folder.Object, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
             this.renameSolver.Verify(s => s.Solve(It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>(), It.IsAny<ContentChangeType>(), It.IsAny<ContentChangeType>()), Times.Never);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFolderMovedAndRenamed() {
+        public void LocalFolderMovedAndRenamed([Values(true, false)]bool childrenAreIgnored) {
             this.SetUpMocks();
             string oldDirName = "oldName";
             string newDirName = "newName";
@@ -157,17 +154,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 d.FullName == Path.Combine(Path.GetTempPath(), this.newParentsName, newDirName) &&
                 d.Name == newDirName &&
                 d.Parent.Uuid == this.parentUuid);
-            var folder = Mock.Of<IFolder>(
-                f =>
-                f.Id == this.remoteObjectId &&
-                f.ParentId == this.oldParentsId);
-            Mock.Get(folder).Setup(d => d.Move(It.IsAny<IObjectId>(), It.IsAny<IObjectId>())).Returns(folder);
+            var folder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteObjectId, oldDirName, "path", this.oldParentsId, ignored: childrenAreIgnored);
+            folder.Setup(d => d.Move(It.IsAny<IObjectId>(), It.IsAny<IObjectId>())).Returns(folder.Object);
             var obj = new MappedObject(oldDirName, this.remoteObjectId, MappedObjectType.Folder, this.oldParentsId, this.changeToken) { Guid = Guid.NewGuid() };
             this.storage.AddMappedFolder(obj);
-            this.underTest.Solve(dir, folder, ContentChangeType.NONE, ContentChangeType.NONE);
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteObjectId, newDirName, this.newParentsId, this.changeToken, Times.Exactly(2));
-            Mock.Get(folder).Verify(d => d.Move(It.Is<IObjectId>(o => o.Id == this.oldParentsId), It.Is<IObjectId>(o => o.Id == this.newParentsId)));
-            this.renameSolver.Verify(s => s.Solve(dir, folder, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
+            this.underTest.Solve(dir, folder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteObjectId, newDirName, this.newParentsId, this.changeToken, Times.Exactly(2), ignored: childrenAreIgnored);
+            folder.Verify(d => d.Move(It.Is<IObjectId>(o => o.Id == this.oldParentsId), It.Is<IObjectId>(o => o.Id == this.newParentsId)));
+            this.renameSolver.Verify(s => s.Solve(dir, folder.Object, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
             this.changeSolver.Verify(s => s.Solve(It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>(), It.IsAny<ContentChangeType>(), It.IsAny<ContentChangeType>()), Times.Never);
         }
 
@@ -199,7 +193,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         private void SetUpMocks() {
-            this.manager = new ActiveActivitiesManager();
+            this.manager = new TransmissionManager();
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
@@ -207,11 +201,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(
                 this.session.Object,
                 this.storage.Object,
+                null,
                 this.manager,
                 this.fsFactory.Object);
             var changeSolverForRenameSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(
                 this.session.Object,
                 this.storage.Object,
+                null,
                 this.manager,
                 this.fsFactory.Object);
             this.renameSolver = new Mock<LocalObjectRenamedRemoteObjectChanged>(

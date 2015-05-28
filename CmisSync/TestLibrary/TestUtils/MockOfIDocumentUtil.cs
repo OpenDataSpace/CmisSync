@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="MockOfIDocumentUtil.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.TestUtils
-{
+namespace TestLibrary.TestUtils {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -31,8 +30,7 @@ namespace TestLibrary.TestUtils
 
     using NUnit.Framework;
 
-    public static class MockOfIDocumentUtil
-    {
+    public static class MockOfIDocumentUtil {
         public static Mock<IDocument> CreateRemoteDocumentMock(string documentContentStreamId, string id, string name, string parentId, long contentLength = 0, byte[] content = null, string changeToken = "changetoken") {
             var newParentMock = Mock.Of<IFolder>(p => p.Id == parentId);
             return CreateRemoteDocumentMock(documentContentStreamId, id, name, newParentMock, contentLength, content, changeToken);
@@ -44,6 +42,7 @@ namespace TestLibrary.TestUtils
             newRemoteObject.Setup(d => d.ContentStreamLength).Returns(contentLength);
             newRemoteObject.Setup(d => d.Id).Returns(id);
             newRemoteObject.Setup(d => d.Name).Returns(name);
+            newRemoteObject.Setup(d => d.Parents).Returns(new List<IFolder>() { parent });
             newRemoteObject.Setup(d => d.ChangeToken).Returns(changeToken);
             newRemoteObject.SetupContent(content, name);
             newRemoteObject.SetupParent(parent);
@@ -59,6 +58,10 @@ namespace TestLibrary.TestUtils
                     s.FileName == fileName &&
                     s.Stream == new MemoryStream(content));
                 doc.Setup(d => d.GetContentStream()).Returns(stream);
+                doc.Setup(d => d.GetContentStream(It.IsAny<string>(), It.IsAny<long?>(), It.IsAny<long?>())).Callback((string id, long? offset, long? length) => {
+                    stream.Stream.Seek((long)offset, SeekOrigin.Begin);
+                    stream.Stream.SetLength((long)offset + (long)length);
+                }).Returns(stream);
             }
         }
 
@@ -100,6 +103,25 @@ namespace TestLibrary.TestUtils
                     (dict, b) =>
                     doc.Setup(d => d.LastModificationDate).Returns((DateTime?)dict[PropertyIds.LastModificationDate]))
                 .Returns(doc.Object);
+        }
+
+        public static void SetupCheckout(this Mock<IDocument> doc, Mock<IDocument> docPWC, string newChangeToken, string newObjectId = null) {
+            doc.Setup(d => d.CheckOut()).Returns(() => {
+                doc.Setup(d => d.IsVersionSeriesCheckedOut).Returns(true);
+                doc.Setup(d => d.VersionSeriesCheckedOutId).Returns(docPWC.Object.Id);
+                return Mock.Of<IObjectId>(o => o.Id == docPWC.Object.Id);
+            });
+            docPWC.Setup(d => d.CheckIn(It.IsAny<bool>(), It.IsAny<IDictionary<string, object>>(), It.IsAny<IContentStream>(), It.IsAny<string>())).Returns(() => {
+                doc.Setup(d => d.IsVersionSeriesCheckedOut).Returns(false);
+                doc.Setup(d => d.VersionSeriesCheckedOutId).Returns(() => { return null; });
+                doc.Setup(d => d.ChangeToken).Returns(newChangeToken);
+                if (!string.IsNullOrEmpty(newObjectId)) {
+                    doc.Setup(d => d.Id).Returns(newObjectId);
+                    return Mock.Of<IObjectId>(o => o.Id == newObjectId);
+                } else {
+                    return Mock.Of<IObjectId>(o => o.Id == doc.Object.Id);
+                }
+            });
         }
 
         public static void VerifySetContentStream(this Mock<IDocument> doc, bool overwrite = true, bool refresh = true, string mimeType = null) {

@@ -17,28 +17,25 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.StreamsTests
-{
+namespace TestLibrary.StreamsTests {
     using System;
     using System.IO;
 
     using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
+    using CmisSync.Lib.Streams;
 
     using NUnit.Framework;
 
     [TestFixture]
-    public class ChunkedStreamTest
-    {
+    public class ChunkedStreamTest {
         private readonly int chunkSize = 1024;
 
         [Test, Category("Fast"), Category("Streams")]
-        public void TestWrite()
-        {
+        public void TestWrite() {
             using (MemoryStream file = new MemoryStream())
-            using (ChunkedStream chunked = new ChunkedStream(file, this.chunkSize))
-            {
+            using (ChunkedStream chunked = new ChunkedStream(file, this.chunkSize)) {
                 byte[] buffer = new byte[2 * this.chunkSize];
                 this.FillArray<byte>(buffer, (byte)'a');
 
@@ -121,11 +118,9 @@ namespace TestLibrary.StreamsTests
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void TestRead()
-        {
+        public void TestRead() {
             byte[] content = null;
-            using (MemoryStream file = new MemoryStream())
-            {
+            using (MemoryStream file = new MemoryStream()) {
                 byte[] buffer = new byte[this.chunkSize];
 
                 this.FillArray<byte>(buffer, (byte)'1');
@@ -140,8 +135,7 @@ namespace TestLibrary.StreamsTests
             }
 
             using (Stream file = new MemoryStream(content))
-            using (ChunkedStream chunked = new ChunkedStream(file, this.chunkSize))
-            {
+            using (ChunkedStream chunked = new ChunkedStream(file, this.chunkSize)) {
                 byte[] buffer = new byte[this.chunkSize];
                 byte[] result = new byte[this.chunkSize];
 
@@ -188,8 +182,7 @@ namespace TestLibrary.StreamsTests
 
                 this.FillArray<byte>(buffer, (byte)'2');
 
-                for (int i = 0; i < this.chunkSize; ++i)
-                {
+                for (int i = 0; i < this.chunkSize; ++i) {
                     Assert.AreEqual(1, chunked.Read(result, i, 1));
                 }
 
@@ -200,20 +193,15 @@ namespace TestLibrary.StreamsTests
             }
         }
 
-        private void FillArray<T>(T[] array, T value)
-        {
-            for (int i = 0; i < array.Length; ++i)
-            {
+        private void FillArray<T>(T[] array, T value) {
+            for (int i = 0; i < array.Length; ++i) {
                 array[i] = value;
             }
         }
 
-        private bool EqualArray<T>(T[] array1, T[] array2, int size)
-        {
-            for (int i = 0; i < size && i < array1.Length && i < array2.Length; ++i)
-            {
-                if (!array1[i].Equals(array2[i]))
-                {
+        private bool EqualArray<T>(T[] array1, T[] array2, int size) {
+            for (int i = 0; i < size && i < array1.Length && i < array2.Length; ++i) {
+                if (!array1[i].Equals(array2[i])) {
                     return false;
                 }
             }

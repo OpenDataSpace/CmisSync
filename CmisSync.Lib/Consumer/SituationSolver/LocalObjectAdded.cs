@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectAdded.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
@@ -49,24 +48,25 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Solver to handle the situation of a locally added file/folderobject.
     /// </summary>
-    public class LocalObjectAdded : AbstractEnhancedSolver
-    {
+    public class LocalObjectAdded : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAdded));
-        private ActiveActivitiesManager transmissionManager;
+        private ITransmissionManager transmissionManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectAdded"/> class.
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
+        /// <param name="transmissionStorage">File transmission storage.</param>
         /// <param name="manager">Activitiy manager for transmission propagations</param>
-        /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
         public LocalObjectAdded(
             ISession session,
             IMetaDataStorage storage,
-            ActiveActivitiesManager manager) : base(session, storage) {
+            IFileTransmissionStorage transmissionStorage,
+            ITransmissionManager manager) : base(session, storage, transmissionStorage)
+        {
             if (manager == null) {
-                throw new ArgumentNullException("Given transmission manager is null");
+                throw new ArgumentNullException("manager");
             }
 
             this.transmissionManager = manager;
@@ -88,20 +88,25 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             Stopwatch completewatch = new Stopwatch();
             completewatch.Start();
             Logger.Debug("Starting LocalObjectAdded");
-            string parentId = this.GetParentId(localFileSystemInfo, this.Storage);
+            localFileSystemInfo.Refresh();
+            if (!localFileSystemInfo.Exists) {
+                throw new FileNotFoundException(string.Format("Local file/folder {0} has been renamed/moved/deleted", localFileSystemInfo.FullName));
+            }
+
+            string parentId = Storage.GetRemoteId(this.GetParent(localFileSystemInfo));
+            if (parentId == null) {
+                if (this.IsParentReadOnly(localFileSystemInfo)) {
+                    return;
+                } else {
+                    throw new ArgumentException("ParentId is null => invoke crawl sync to create parent first");
+                }
+            }
 
             ICmisObject addedObject;
             try {
                 addedObject = this.AddCmisObject(localFileSystemInfo, parentId, this.Session);
             } catch (CmisConstraintException e) {
-                if (!Utils.IsValidISO885915(localFileSystemInfo.Name)) {
-                    OperationsLogger.Warn(string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFileSystemInfo.Name), e);
-                    throw new InteractionNeededException(string.Format("Server denied creation of {0}", localFileSystemInfo.Name), e) {
-                        Title = string.Format("Server denied creation of {0}", localFileSystemInfo.Name),
-                        Description = string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFileSystemInfo.FullName)
-                    };
-                }
-
+                this.EnsureThatLocalFileNameContainsLegalCharacters(localFileSystemInfo, e);
                 throw;
             } catch (CmisPermissionDeniedException e) {
                 OperationsLogger.Warn(string.Format("Permission denied while trying to Create the locally added object {0} on the server ({1}).", localFileSystemInfo.FullName, e.Message));
@@ -132,30 +137,21 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             var localFile = localFileSystemInfo as IFileInfo;
 
             if (localFile != null) {
-                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
-                this.transmissionManager.AddTransmission(transmissionEvent);
+                var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
                 if (localFile.Length > 0) {
                     Stopwatch watch = new Stopwatch();
                     OperationsLogger.Debug(string.Format("Uploading file content of {0}", localFile.FullName));
                     watch.Start();
-                    IFileUploader uploader = ContentTaskUtils.CreateUploader();
-                    using (SHA1 hashAlg = new SHA1Managed()) {
-                        try {
-                            using (var fileStream = localFile.Open(FileMode.Open, FileAccess.Read)) {
-                                uploader.UploadFile(addedObject as IDocument, fileStream, transmissionEvent, hashAlg);
-                                mapped.ChecksumAlgorithmName = "SHA-1";
-                                mapped.LastChecksum = hashAlg.Hash;
-                            }
-                        } catch (Exception ex) {
-                            if (ex is UploadFailedException && (ex as UploadFailedException).InnerException is CmisStorageException) {
-                                OperationsLogger.Warn(string.Format("Could not upload file content of {0}:", localFile.FullName), (ex as UploadFailedException).InnerException);
-                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                                return;
-                            }
-
-                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                            throw;
+                    try {
+                        mapped.LastChecksum = this.UploadFile(localFile, addedObject as IDocument, transmission);
+                        mapped.ChecksumAlgorithmName = "SHA-1";
+                    } catch (Exception ex) {
+                        if (ex is UploadFailedException && (ex as UploadFailedException).InnerException is CmisStorageException) {
+                            OperationsLogger.Warn(string.Format("Could not upload file content of {0}:", localFile.FullName), (ex as UploadFailedException).InnerException);
+                            return;
                         }
+
+                        throw;
                     }
 
                     watch.Stop();
@@ -168,72 +164,21 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     mapped.LastChangeToken = addedObject.ChangeToken;
                     mapped.LastRemoteWriteTimeUtc = addedObject.LastModificationDate;
                     mapped.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
-                    if (mapped.RemoteObjectId != addedObject.Id) {
-                        this.Storage.RemoveObject(mapped);
-                        mapped.RemoteObjectId = addedObject.Id;
-                    }
 
                     this.Storage.SaveMappedObject(mapped);
                     OperationsLogger.Info(string.Format("Uploaded file content of {0} in [{1} msec]", localFile.FullName, watch.ElapsedMilliseconds));
+                } else {
+                    transmission.Length = 0;
+                    transmission.Position = 0;
+                    transmission.Status = TransmissionStatus.FINISHED;
                 }
-
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
             }
 
             completewatch.Stop();
             Logger.Debug(string.Format("Finished LocalObjectAdded after [{0} msec]", completewatch.ElapsedMilliseconds));
         }
 
-        private Guid WriteOrUseUuidIfSupported(IFileSystemInfo localFile)
-        {
-            Guid uuid = Guid.Empty;
-            if (localFile.IsExtendedAttributeAvailable())
-            {
-                try {
-                    Guid? localUuid = localFile.Uuid;
-                    if (localUuid == null || this.Storage.GetObjectByGuid((Guid)localUuid) != null) {
-                        uuid = Guid.NewGuid();
-                        try {
-                            localFile.Uuid = uuid;
-                        } catch (RestoreModificationDateException restoreException) {
-                            Logger.Debug("Could not retore the last modification date of " + localFile.FullName, restoreException);
-                        }
-                    } else {
-                        uuid = localUuid ?? Guid.NewGuid();
-                    }
-                } catch (ExtendedAttributeException ex) {
-                    throw new RetryException(ex.Message, ex);
-                }
-            }
-
-            return uuid;
-        }
-
-        private string GetParentId(IFileSystemInfo fileInfo, IMetaDataStorage storage)
-        {
-            IDirectoryInfo parent = null;
-            if (fileInfo is IDirectoryInfo) {
-                IDirectoryInfo localDirInfo = fileInfo as IDirectoryInfo;
-                parent = localDirInfo.Parent;
-            } else {
-                IFileInfo localFileInfo = fileInfo as IFileInfo;
-                parent = localFileInfo.Directory;
-            }
-
-            try {
-                Guid? uuid = parent.Uuid;
-                if (uuid != null) {
-                    return storage.GetObjectByGuid((Guid)uuid).RemoteObjectId;
-                }
-            } catch (IOException) {
-            }
-
-            IMappedObject mappedParent = storage.GetObjectByLocalPath(parent);
-            return mappedParent.RemoteObjectId;
-        }
-
-        private ICmisObject AddCmisObject(IFileSystemInfo localFile, string parentId, ISession session)
-        {
+        private ICmisObject AddCmisObject(IFileSystemInfo localFile, string parentId, ISession session) {
             string name = localFile.Name;
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);
@@ -245,19 +190,19 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             Stopwatch watch = new Stopwatch();
             ICmisObject result;
             if (localFile is IDirectoryInfo) {
-                properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
+                properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisFolder.GetCmisValue());
                 watch.Start();
                 var objId = session.CreateFolder(properties, new ObjectId(parentId));
                 watch.Stop();
                 Logger.Debug(string.Format("CreatedFolder in [{0} msec]", watch.ElapsedMilliseconds));
                 watch.Restart();
-                var operationContext = OperationContextFactory.CreateContext(session, true, false, "cmis:name", "cmis:lastModificationDate", "cmis:changeToken");
+                var operationContext = OperationContextFactory.CreateContext(session, true, false, PropertyIds.Name, PropertyIds.LastModificationDate, PropertyIds.ChangeToken);
                 result = session.GetObject(objId, operationContext);
                 watch.Stop();
                 Logger.Debug(string.Format("GetFolder in [{0} msec]", watch.ElapsedMilliseconds));
             } else {
                 bool emptyFile = (localFile as IFileInfo).Length == 0;
-                properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+                properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
                 watch.Start();
                 using (var emptyStream = new MemoryStream(new byte[0])) {
                     var objId = session.CreateDocument(
@@ -271,7 +216,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     watch.Stop();
                     Logger.Debug(string.Format("CreatedDocument in [{0} msec]", watch.ElapsedMilliseconds));
                     watch.Restart();
-                    var operationContext = OperationContextFactory.CreateContext(session, true, false, "cmis:name", "cmis:lastModificationDate", "cmis:changeToken", "cmis:contentStreamLength");
+                    var operationContext = OperationContextFactory.CreateContext(session, true, false, PropertyIds.Name, PropertyIds.LastModificationDate, PropertyIds.ChangeToken, PropertyIds.ContentStreamLength);
                     result = session.GetObject(objId, operationContext);
                     watch.Stop();
                     Logger.Debug(string.Format("GetDocument in [{0} msec]", watch.ElapsedMilliseconds));

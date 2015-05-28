@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Cmis
-{
+namespace CmisSync.Lib.Cmis {
     using System;
     using System.Net;
 
@@ -34,8 +33,7 @@ namespace CmisSync.Lib.Cmis
     /// <summary>
     /// Persistent ntlm authentication provider.
     /// </summary>
-    public class PersistentNtlmAuthenticationProvider : NtlmAuthenticationProvider, IDisposableAuthProvider
-    {
+    public class PersistentNtlmAuthenticationProvider : NtlmAuthenticationProvider, IDisposableAuthProvider {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(PersistentStandardAuthenticationProvider));
 
         private ICookieStorage storage;
@@ -51,23 +49,20 @@ namespace CmisSync.Lib.Cmis
         /// <param name='url'>
         /// URL of the cookies.
         /// </param>
-        public PersistentNtlmAuthenticationProvider(ICookieStorage storage, Uri url)
-        {
-            if (storage == null)
-            {
-                throw new ArgumentNullException("Given db is null");
+        public PersistentNtlmAuthenticationProvider(ICookieStorage storage, Uri url) {
+            if (storage == null) {
+                throw new ArgumentNullException("storage");
             }
 
-            if (url == null)
-            {
-                throw new ArgumentNullException("Given URL is null");
+            if (url == null) {
+                throw new ArgumentNullException("url");
             }
 
             this.storage = storage;
             this.url = url;
-            
-            if(storage.Cookies != null) {
-                foreach(Cookie c in storage.Cookies) {
+
+            if (storage.Cookies != null) {
+                foreach (Cookie c in storage.Cookies) {
                     this.Cookies.Add(c);
                 }
             }
@@ -80,11 +75,9 @@ namespace CmisSync.Lib.Cmis
         /// <param name='connection'>
         /// <see cref="System.Net.HttpWebResponse"/> should be passed.
         /// </param>
-        public override void HandleResponse(object connection)
-        {
+        public override void HandleResponse(object connection) {
             HttpWebResponse response = connection as HttpWebResponse;
-            if (response != null)
-            {
+            if (response != null) {
                 // AtomPub and browser binding authentictaion
                 this.Cookies.Add(response.Cookies);
             }
@@ -101,8 +94,7 @@ namespace CmisSync.Lib.Cmis
         /// <see cref="CmisSync.Lib.Cmis.PersistentNtlmAuthenticationProvider"/> so the garbage collector can reclaim
         /// the memory that the <see cref="CmisSync.Lib.Cmis.PersistentNtlmAuthenticationProvider"/> was occupying.
         /// </remarks>
-        public void Dispose()
-        {
+        public void Dispose() {
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -110,8 +102,7 @@ namespace CmisSync.Lib.Cmis
         /// <summary>
         /// Deletes all cookies.
         /// </summary>
-        public void DeleteAllCookies()
-        {
+        public void DeleteAllCookies() {
             this.Cookies = new CookieContainer();
         }
 
@@ -121,19 +112,13 @@ namespace CmisSync.Lib.Cmis
         /// <param name='disposing'>
         /// Dispose managed resources if <c>true</c>
         /// </param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if(!this.disposed)
-            {
-                if(disposing)
-                {
+        protected virtual void Dispose(bool disposing) {
+            if (!this.disposed) {
+                if (disposing) {
                     // Dispose managed resources.
-                    try
-                    {
+                    try {
                         this.storage.Cookies = this.Cookies.GetCookies(this.url);
-                    }
-                    catch(Exception e)
-                    {
+                    } catch(Exception e) {
                         Logger.Debug(string.Format("Failed to save session cookies of \"{0}\" in db", this.url.AbsolutePath), e);
                     }
                 }

@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Accumulator
-{
+namespace CmisSync.Lib.Accumulator {
     using System;
 
     using CmisSync.Lib.Events;
@@ -34,8 +33,7 @@ namespace CmisSync.Lib.Accumulator
     /// Takes File/Folder Events and checks if the remote object has been moved or renamed.
     /// If the file/folder was moved, the privious local path will be added to the event.
     /// </summary>
-    public class RemoteObjectMovedOrRenamedAccumulator : ReportingSyncEventHandler
-    {
+    public class RemoteObjectMovedOrRenamedAccumulator : ReportingSyncEventHandler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectMovedOrRenamedAccumulator));
 
         private IFileSystemInfoFactory fsFactory;
@@ -47,10 +45,9 @@ namespace CmisSync.Lib.Accumulator
         /// <param name="queue">Sync event queue.</param>
         /// <param name="storage">Meta data storage.</param>
         /// <param name="fsFactory">FileSystemInfo factory.</param>
-        public RemoteObjectMovedOrRenamedAccumulator(ISyncEventQueue queue, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) : base(queue)
-        {
+        public RemoteObjectMovedOrRenamedAccumulator(ISyncEventQueue queue, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) : base(queue) {
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage");
             }
 
             this.storage = storage;
@@ -62,8 +59,7 @@ namespace CmisSync.Lib.Accumulator
         /// </summary>
         /// <param name="e">The event to handle.</param>
         /// <returns><c>false</c> on every event</returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             if (!this.CouldLocalObjectBeAccumulated(e as AbstractFolderEvent)) {
                 return false;
             }
@@ -102,7 +98,7 @@ namespace CmisSync.Lib.Accumulator
         private IMappedObject GetStoredObject(AbstractFolderEvent e) {
             if (e is FolderEvent) {
                 return this.storage.GetObjectByRemoteId((e as FolderEvent).RemoteFolder.Id);
-            } else if(e is FileEvent) {
+            } else if (e is FileEvent) {
                 return this.storage.GetObjectByRemoteId((e as FileEvent).RemoteFile.Id);
             }
 
@@ -112,7 +108,7 @@ namespace CmisSync.Lib.Accumulator
         private string GetParentId(AbstractFolderEvent e) {
             if (e is FolderEvent) {
                 return (e as FolderEvent).RemoteFolder.ParentId;
-            } else if(e is FileEvent) {
+            } else if (e is FileEvent) {
                 return (e as FileEvent).RemoteFile.Parents[0].Id;
             } else {
                 throw new ArgumentException();
@@ -129,14 +125,13 @@ namespace CmisSync.Lib.Accumulator
             }
         }
 
-        private void AccumulateEvent(AbstractFolderEvent abstractFolderEvent, IMappedObject storedObject)
-        {
+        private void AccumulateEvent(AbstractFolderEvent abstractFolderEvent, IMappedObject storedObject) {
             Logger.Debug("Accumulating: " + this.storage.GetLocalPath(storedObject));
-            if(abstractFolderEvent is FolderEvent) {
+            if (abstractFolderEvent is FolderEvent) {
                 (abstractFolderEvent as FolderEvent).LocalFolder = this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(storedObject));
             }
 
-            if(abstractFolderEvent is FileEvent) {
+            if (abstractFolderEvent is FileEvent) {
                 (abstractFolderEvent as FileEvent).LocalFile = this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(storedObject));
             }
         }

@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Queueing
-{
+namespace CmisSync.Lib.Queueing {
     using System;
     using System.Timers;
 
@@ -27,8 +26,7 @@ namespace CmisSync.Lib.Queueing
     /// <summary>
     /// Sync scheduler. Inserts every pollInterval a new StartNextSyncEvent into the Queue
     /// </summary>
-    public class SyncScheduler : SyncEventHandler, IDisposable
-    {
+    public class SyncScheduler : SyncEventHandler, IDisposable {
         /// <summary>
         /// The default Queue Event Handler PRIORITY.
         /// </summary>
@@ -42,14 +40,13 @@ namespace CmisSync.Lib.Queueing
         /// </summary>
         /// <param name="queue">Sync event queue.</param>
         /// <param name="pollInterval">Poll interval.</param>
-        public SyncScheduler(ISyncEventQueue queue, double pollInterval = 5000)
-        {
+        public SyncScheduler(ISyncEventQueue queue, double pollInterval = 5000) {
             if (queue == null) {
-                throw new ArgumentNullException("Given queue must not be null");
+                throw new ArgumentNullException("queue");
             }
 
             if (pollInterval <= 0) {
-                throw new ArgumentException("pollinterval must be greater than zero");
+                throw new ArgumentException("pollinterval must be greater than zero", "pollInterval");
             }
 
             this.interval = pollInterval;
@@ -80,8 +77,7 @@ namespace CmisSync.Lib.Queueing
         /// </summary>
         /// <param name="e">Sync event.</param>
         /// <returns><c>false</c> on every event.</returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             RepoConfigChangedEvent config = e as RepoConfigChangedEvent;
             if (config != null) {
                 double newInterval = config.RepoInfo.PollInterval;

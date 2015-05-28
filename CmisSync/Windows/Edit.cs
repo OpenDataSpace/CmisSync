@@ -182,11 +182,12 @@ namespace CmisSync
             ServerCredentials cred = new ServerCredentials()
             {
                 Address = Credentials.Address,
+                Binding = Credentials.Binding,
                 UserName = Credentials.UserName,
                 Password = passwordBox.Password
             };
 
-            CmisUtils.GetRepositories(cred);
+            cred.GetRepositories();
         }
 
         private void PasswordChecked(object sender, RunWorkerCompletedEventArgs args)

@@ -80,11 +80,9 @@ namespace CmisSync
 
             //  Must be called after InsertEvent()
             string name = Controller.saved_address.Host.ToString();
-            foreach (KeyValuePair<String, String> repository in Controller.repositories)
-            {
-                if (repository.Key == Controller.saved_repository)
-                {
-                    name += "/" + repository.Value;
+            foreach (var repository in Controller.repositories) {
+                if (repository.Id == Controller.saved_repository) {
+                    name += "/" + repository.Name;
                     break;
                 }
             }
@@ -117,7 +115,7 @@ namespace CmisSync
                 "Yes, I understand the risk",
                 null,
                 "");
-            alert.Icon = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "process-syncing-error.icns"));
+            alert.Icon = new NSImage (UIHelpers.GetImagePathname ("process-syncing-error", "icns"));
             int i = alert.RunModal();
             return (i == 0);
         }

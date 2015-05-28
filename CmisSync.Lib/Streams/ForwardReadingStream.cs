@@ -17,16 +17,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Streams
-{
+namespace CmisSync.Lib.Streams {
     using System;
     using System.IO;
 
     /// <summary>
     /// Forward reading stream.
     /// </summary>
-    public class ForwardReadingStream : StreamWrapper
-    {
+    public class ForwardReadingStream : StreamWrapper {
         /// <summary>
         /// The position.
         /// </summary>
@@ -38,8 +36,7 @@ namespace CmisSync.Lib.Streams
         /// <param name='nonSeekableStream'>
         /// Non seekable stream.
         /// </param>
-        public ForwardReadingStream(Stream nonSeekableStream) : base(nonSeekableStream)
-        {
+        public ForwardReadingStream(Stream nonSeekableStream) : base(nonSeekableStream) {
         }
 
         /// <summary>
@@ -48,15 +45,12 @@ namespace CmisSync.Lib.Streams
         /// <value>
         /// The position in the stream.
         /// </value>
-        public override long Position
-        {
-            get
-            {
+        public override long Position {
+            get {
                 return this.pos;
             }
 
-            set 
-            {
+            set {
                 base.Position = value;
                 this.pos = value;
             }
@@ -74,8 +68,7 @@ namespace CmisSync.Lib.Streams
         /// <param name='count'>
         /// Count.
         /// </param>
-        public override int Read(byte[] buffer, int offset, int count)
-        {
+        public override int Read(byte[] buffer, int offset, int count) {
             int read = base.Read(buffer, offset, count);
             this.pos += read;
             return read;

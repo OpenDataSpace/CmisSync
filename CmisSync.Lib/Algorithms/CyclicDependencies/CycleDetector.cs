@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Algorithms.CyclicDependencies
-{
+namespace CmisSync.Lib.Algorithms.CyclicDependencies {
     using System;
     using System.Collections.Generic;
 
@@ -26,12 +25,10 @@ namespace CmisSync.Lib.Algorithms.CyclicDependencies
     using CmisSync.Lib.Producer.Crawler;
     using CmisSync.Lib.Storage.Database;
 
-    public class CycleDetector : ICycleDetector
-    {
-        public CycleDetector(IMetaDataStorage storage)
-        {
+    public class CycleDetector : ICycleDetector {
+        public CycleDetector(IMetaDataStorage storage) {
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage");
             }
         }
 

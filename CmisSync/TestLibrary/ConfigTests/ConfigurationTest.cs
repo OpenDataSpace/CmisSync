@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="ConfigurationTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -78,6 +78,42 @@ namespace TestLibrary.ConfigTests
             config.Save();
             config = Config.CreateOrLoadByPath(this.configPath);
             Assert.That(config.IgnoreFileNames.Contains(ignoreFileNames));
+        }
+
+        [Test, Category("Medium")]
+        public void TestBrand()
+        {
+            Uri url = new Uri("http://localhost/cmis/atom");
+            string path1 = "/brand/1.png";
+            DateTime date1 = DateTime.Now;
+            string path2 = "/brand/2.png";
+            DateTime date2 = DateTime.Now;
+
+            // Create new config file with default values
+            Config config = Config.CreateInitialConfig(this.configPath);
+
+            Assert.IsNull(config.Brand);
+
+            config.Brand = new Brand();
+            config.Brand.Server = url;
+            config.Brand.Files = new List<BrandFile>();
+            BrandFile file1 = new BrandFile();
+            file1.Path = path1;
+            file1.Date = date1;
+            BrandFile file2 = new BrandFile();
+            file2.Path = path2;
+            file2.Date = date2;
+            config.Brand.Files.Add(file1);
+            config.Brand.Files.Add(file2);
+            config.Save();
+
+            config = Config.CreateOrLoadByPath(this.configPath);
+            Assert.AreEqual(url.ToString(), config.Brand.Server.ToString());
+            Assert.AreEqual(2, config.Brand.Files.Count);
+            Assert.AreEqual(path1, config.Brand.Files[0].Path);
+            Assert.AreEqual(date1, config.Brand.Files[0].Date);
+            Assert.AreEqual(path2, config.Brand.Files[1].Path);
+            Assert.AreEqual(date2, config.Brand.Files[1].Date);
         }
     }
 }

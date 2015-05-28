@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="IFileConvenienceExtenders.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -42,7 +42,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
         public static bool IsContentChangedTo(this IFileInfo file, IMappedObject obj, out byte[] actualHash, bool scanOnlyIfModificationDateDiffers = false) {
             actualHash = null;
             if (obj == null) {
-                throw new ArgumentNullException("Given obj is null");
+                throw new ArgumentNullException("obj");
             }
 
             if (obj.LastContentSize < 0) {

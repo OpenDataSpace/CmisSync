@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Streams
-{
+namespace CmisSync.Lib.Streams {
     using System;
     using System.IO;
     using System.Security.Cryptography;
@@ -27,8 +26,7 @@ namespace CmisSync.Lib.Streams
     /// This stream can be used like a CryptoStream, but does not closes/finilizes the given HashAlgorithm on dispose.
     /// Also any other operation than READ/WRITE are directly passed to the given stream.
     /// </summary>
-    public class NonClosingHashStream : StreamWrapper
-    {
+    public class NonClosingHashStream : StreamWrapper {
         /// <summary>
         /// The used hash algorithm.
         /// </summary>
@@ -51,10 +49,9 @@ namespace CmisSync.Lib.Streams
         /// <param name='mode'>
         /// Setting the mode, when hashing should be executed. On Read will transform the hash while reading, or Write mode for transforming while writing.
         /// </param>
-        public NonClosingHashStream(Stream stream, HashAlgorithm hashAlg, CryptoStreamMode mode) : base(stream)
-        {
+        public NonClosingHashStream(Stream stream, HashAlgorithm hashAlg, CryptoStreamMode mode) : base(stream) {
             if (hashAlg == null) {
-                throw new ArgumentNullException("Given hash algorithm must not be null");
+                throw new ArgumentNullException("hashAlg");
             }
 
             this.hashAlg = hashAlg;
@@ -87,8 +84,7 @@ namespace CmisSync.Lib.Streams
         /// Count.
         /// </param>
         /// <returns>Count of read bytes</returns>
-        public override int Read(byte[] buffer, int offset, int count)
-        {
+        public override int Read(byte[] buffer, int offset, int count) {
             int result = base.Read(buffer, offset, count);
             if (this.mode == CryptoStreamMode.Read) {
                 this.hashAlg.TransformBlock(buffer, offset, result, buffer, offset);
@@ -110,8 +106,7 @@ namespace CmisSync.Lib.Streams
         /// <param name='count'>
         /// Count of bytes.
         /// </param>
-        public override void Write(byte[] buffer, int offset, int count)
-        {
+        public override void Write(byte[] buffer, int offset, int count) {
             if (this.mode == CryptoStreamMode.Write) {
                 this.hashAlg.TransformBlock(buffer, offset, count, buffer, offset);
             }

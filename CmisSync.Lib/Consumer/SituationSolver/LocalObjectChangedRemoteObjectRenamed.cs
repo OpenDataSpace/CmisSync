@@ -17,30 +17,29 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 
-    public class LocalObjectChangedRemoteObjectRenamed : AbstractEnhancedSolver
-    {
-        private LocalObjectChangedRemoteObjectChanged changeChangeSolver;
+    public class LocalObjectChangedRemoteObjectRenamed : AbstractEnhancedSolver {
+        private readonly ISolver changeChangeSolver;
         public LocalObjectChangedRemoteObjectRenamed(
             ISession session,
             IMetaDataStorage storage,
-            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage)
+            ISolver changeChangeSolver) : base(session, storage)
         {
-            if (changeSolver == null) {
-                throw new ArgumentNullException("Given solver for the situation of local and remote changes is null");
+            if (changeChangeSolver == null) {
+                throw new ArgumentNullException("changeChangeSolver", "Given solver for the situation of local and remote changes is null");
             }
 
-            this.changeChangeSolver = changeSolver;
+            this.changeChangeSolver = changeChangeSolver;
         }
 
         public override void Solve(
@@ -56,6 +55,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             string newPath = Path.Combine(parentPath, (remoteId as ICmisObject).Name);
             this.MoveTo(localFileSystemInfo, oldPath, newPath);
             savedObject.Name = (remoteId as ICmisObject).Name;
+            savedObject.Ignored = (remoteId as ICmisObject).AreAllChildrenIgnored();
             this.Storage.SaveMappedObject(savedObject);
             this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
         }

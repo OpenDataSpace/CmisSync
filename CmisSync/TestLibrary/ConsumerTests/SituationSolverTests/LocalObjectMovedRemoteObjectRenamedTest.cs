@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectMovedRemoteObjectRenamedTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -56,7 +56,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private string newParentPath;
         private Guid localUuid = Guid.NewGuid();
         private Guid newParentUuid = Guid.NewGuid();
-        private ActiveActivitiesManager manager;
+        private TransmissionManager manager;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileSystemInfoFactory> fsFactory;
@@ -96,16 +96,16 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFolderMoveRemoteRename() {
+        public void LocalFolderMoveRemoteRename([Values(true, false)]bool childrenAreIgnored) {
             this.SetUpMocks();
             var dir = this.CreateLocalDirAndInitStorage();
-            var folder = this.CreateRemoteFolder();
+            var folder = this.CreateRemoteFolder(childrenAreIgnored);
 
             this.underTest.Solve(dir.Object, folder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
             folder.Verify(d => d.Move(It.Is<IObjectId>(o => o.Id == this.oldParentId), It.Is<IObjectId>(o => o.Id == this.newParentId)), Times.Once());
             dir.Verify(f => f.MoveTo(this.newPath), Times.Once());
-            this.VerifySavedFolder(this.newName);
+            this.VerifySavedFolder(this.newName, childrenAreIgnored);
             this.VerifyThatChangeSolverIsCalled(dir.Object, folder.Object);
         }
 
@@ -138,37 +138,37 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFolderMoveAndRenameRemoteRename() {
+        public void LocalFolderMoveAndRenameRemoteRename([Values(true, false)]bool childrenAreIgnored) {
             this.SetUpMocks();
             var dir = this.CreateLocalDirAndInitStorage(this.differentLocalName);
-            var folder = this.CreateRemoteFolder();
+            var folder = this.CreateRemoteFolder(childrenAreIgnored);
 
             this.underTest.Solve(dir.Object, folder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
             folder.Verify(d => d.Move(It.Is<IObjectId>(o => o.Id == this.oldParentId), It.Is<IObjectId>(o => o.Id == this.newParentId)), Times.Once());
             dir.Verify(f => f.MoveTo(It.IsAny<string>()), Times.Never);
-            this.VerifySavedFolder(this.oldName);
+            this.VerifySavedFolder(this.oldName, childrenAreIgnored);
             this.VerifyThatRenameSolverIsCalled(dir.Object, folder.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFolderMoveAndRenameRemoteRenameToSameNewName() {
+        public void LocalFolderMoveAndRenameRemoteRenameToSameNewName([Values(true, false)]bool childrenAreIgnored) {
             this.SetUpMocks();
             var dir = this.CreateLocalDirAndInitStorage(this.newName);
-            var folder = this.CreateRemoteFolder();
+            var folder = this.CreateRemoteFolder(childrenAreIgnored);
 
             this.underTest.Solve(dir.Object, folder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
             folder.Verify(d => d.Move(It.Is<IObjectId>(o => o.Id == this.oldParentId), It.Is<IObjectId>(o => o.Id == this.newParentId)), Times.Once());
             dir.Verify(f => f.MoveTo(It.IsAny<string>()), Times.Never);
-            this.VerifySavedFolder(this.newName);
+            this.VerifySavedFolder(this.newName, childrenAreIgnored);
             this.VerifyThatChangeSolverIsCalled(dir.Object, folder.Object);
         }
 
         private void SetUpMocks() {
             this.newParentPath = Path.Combine(Path.GetTempPath(), this.newParentName);
             this.newPath = Path.Combine(this.newParentPath, this.newName);
-            this.manager = new ActiveActivitiesManager();
+            this.manager = new TransmissionManager();
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
@@ -186,6 +186,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(
                 this.session.Object,
                 this.storage.Object,
+                null,
                 this.manager,
                 this.fsFactory.Object);
             this.renameSolver = new Mock<LocalObjectRenamedRemoteObjectRenamed>(
@@ -240,17 +241,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             return mock;
         }
 
-        private Mock<IFolder> CreateRemoteFolder() {
-            var folder = Mock.Of<IFolder>(
-                f =>
-                f.Id == this.remoteId &&
-                f.Name == this.newName);
-            var mock = Mock.Get(folder);
-            mock.Setup(
+        private Mock<IFolder> CreateRemoteFolder(bool ignored) {
+            var folder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteId, this.newName, "path", this.oldParentId, ignored: ignored);
+            folder.Setup(
                 d =>
                 d.Move(It.Is<IObjectId>(o => o.Id == this.oldParentId), It.Is<IObjectId>(o => o.Id == this.newParentId)))
-                .Returns(folder);
-            return mock;
+                .Returns(folder.Object);
+            return folder;
         }
 
         private Mock<IDocument> CreateRemoteDoc() {
@@ -266,8 +263,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             return mock;
         }
 
-        private void VerifySavedFolder(string name) {
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteId, name, this.newParentId, this.changeToken);
+        private void VerifySavedFolder(string name, bool ignored) {
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteId, name, this.newParentId, this.changeToken, ignored: ignored);
         }
 
         private void VerifySavedFile(string name) {

@@ -32,29 +32,25 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+namespace CmisSync {
+    using System;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Reflection;
+    using Forms = System.Windows.Forms;
 
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Reflection;
-using Forms = System.Windows.Forms;
+    using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Config;
 
-using CmisSync.Lib.Cmis;
-using CmisSync.Lib.Config;
-
-namespace CmisSync
-{
     /// <summary>
     /// Windows-specific part of the main CmisSync controller.
     /// </summary>
-    public class Controller : ControllerBase
-    {
+    public class Controller : ControllerBase {
         /// <summary>
         /// Constructor.
         /// </summary>
         public Controller()
-            : base()
-        {
+            : base() {
         }
 
 
@@ -62,8 +58,7 @@ namespace CmisSync
         /// Initialize the controller
         /// </summary>
         /// <param name="firstRun">Whether it is the first time that CmisSync is being run.</param>
-        public override void Initialize(Boolean firstRun)
-        {
+        public override void Initialize(Boolean firstRun) {
             base.Initialize(firstRun);
         }
 
@@ -71,8 +66,7 @@ namespace CmisSync
         /// <summary>
         /// Add CmisSync to the list of programs to be started up when the user logs into Windows.
         /// </summary>
-        public override void CreateStartupItem()
-        {
+        public override void CreateStartupItem() {
             string startup_folder_path = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
             string shortcut_path = Path.Combine(startup_folder_path, "DataSpace Sync.lnk");
 
@@ -89,8 +83,7 @@ namespace CmisSync
         /// <summary>
         /// Add CmisSync to the user's Windows Explorer bookmarks.
         /// </summary>
-        public override void AddToBookmarks()
-        {
+        public override void AddToBookmarks() {
             string user_profile_path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             string shortcut_path = Path.Combine(user_profile_path, "Links", "DataSpace Sync.lnk");
 
@@ -108,8 +101,7 @@ namespace CmisSync
         /// This folder contains databases, the settings file and the log file.
         /// </summary>
         /// <returns></returns>
-        public override bool CreateCmisSyncFolder()
-        {
+        public override bool CreateCmisSyncFolder() {
             if (Directory.Exists(FoldersPath)) {
                 File.SetAttributes(FoldersPath, File.GetAttributes(FoldersPath) & ~FileAttributes.System);
                 return false;
@@ -123,10 +115,10 @@ namespace CmisSync
             string app_path = Path.GetDirectoryName(Forms.Application.ExecutablePath);
             string icon_file_path = Path.Combine(app_path, "Pixmaps", "cmissync-folder.ico");
 
-            if (!File.Exists(icon_file_path))
-            {
+            if (!File.Exists(icon_file_path)) {
                 icon_file_path = Assembly.GetExecutingAssembly().Location;
             }
+
             string ini_file_path = Path.Combine(FoldersPath, "desktop.ini");
 
             string ini_file = "[.ShellClassInfo]\r\n" +
@@ -139,18 +131,15 @@ namespace CmisSync
                     "Vid=\r\n" +
                     "FolderType=Generic\r\n";
 
-            try
-            {
+            try {
                 File.WriteAllText(ini_file_path, ini_file);
 
                 File.SetAttributes(ini_file_path,
                     File.GetAttributes(ini_file_path) | FileAttributes.Hidden | FileAttributes.System);
-
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 Logger.Info("Config | Failed setting icon for '" + FoldersPath + "': " + e.Message);
             }
+
             return true;
         }
 
@@ -158,8 +147,7 @@ namespace CmisSync
         /// <summary>
         /// With Windows Explorer, open the folder where the local synchronized folders are.
         /// </summary>
-        public void OpenCmisSyncFolder()
-        {
+        public void OpenCmisSyncFolder() {
             Utils.OpenFolder(ConfigManager.CurrentConfig.GetFoldersPath());
         }
 
@@ -168,22 +156,21 @@ namespace CmisSync
         /// With Windows Explorer, open the local folder of a CmisSync synchronized folder.
         /// </summary>
         /// <param name="name">Name of the synchronized folder</param>
-        public void OpenCmisSyncFolder(string name)
-        {
+        public void OpenCmisSyncFolder(string name) {
             RepoInfo folder = ConfigManager.CurrentConfig.GetRepoInfo(name);
-            if (folder != null)
+            if (folder != null) {
                 Utils.OpenFolder(folder.LocalPath);
-            else if (String.IsNullOrWhiteSpace(name))
+            } else if (String.IsNullOrWhiteSpace(name)) {
                 OpenCmisSyncFolder();
-            else
+            } else {
                 Logger.Warn("Could not find requested config for \"" + name + "\"");
+            }
         }
 
         /// <summary>
         /// Quit CmisSync.
         /// </summary>
-        public override void Quit()
-        {
+        public override void Quit() {
             base.Quit();
         }
 
@@ -191,10 +178,8 @@ namespace CmisSync
         /// Open the log file so that the user can check what is going on, and send it to developers.
         /// </summary>
         /// <param name="path">Path to the log file</param>
-        public void ShowLog(string path)
-        {
+        public void ShowLog(string path) {
             Process.Start("notepad.exe", path);
         }
-
     }
 }

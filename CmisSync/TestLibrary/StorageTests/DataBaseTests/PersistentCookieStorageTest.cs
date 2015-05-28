@@ -15,10 +15,8 @@
 //   along with this program. If not, see http://www.gnu.org/licenses/.
 //
 // </copyright>
-                                                                         
 
-namespace TestLibrary.StorageTests.DataBaseTests
-{
+namespace TestLibrary.StorageTests.DataBaseTests {
     using System;
     using System.Net;
 
@@ -33,47 +31,39 @@ namespace TestLibrary.StorageTests.DataBaseTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class PersistentCookieStorageTest
-    {
+    public class PersistentCookieStorageTest : IDisposable {
         private DBreezeEngine engine;
 
         [TestFixtureSetUp]
-        public void InitCustomSerializator()
-        {
+        public void InitCustomSerializator() {
             // Use Newtonsoft.Json as Serializator
-            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject; 
+            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject;
             DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
         }
 
         [SetUp]
-        public void SetUp()
-        {
+        public void SetUp() {
             this.engine = new DBreezeEngine(new DBreezeConfiguration { Storage = DBreezeConfiguration.eStorage.MEMORY });
         }
 
         [TearDown]
-        public void TearDown()
-        {
+        public void TearDown() {
             this.engine.Dispose();
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfDbEngineIsNull()
-        {
-            new PersistentCookieStorage(null);
+        public void ConstructorThrowsExceptionIfDbEngineIsNull() {
+            Assert.Throws<ArgumentNullException>(() => new PersistentCookieStorage(null));
         }
 
         [Test, Category("Fast")]
-        public void GetCookieCollectionReturnEmptyCollectionOnNewDatabase()
-        {
+        public void GetCookieCollectionReturnEmptyCollectionOnNewDatabase() {
             var storage = new PersistentCookieStorage(this.engine);
             Assert.That(storage.Cookies, Is.Empty);
         }
 
         [Test, Category("Fast")]
-        public void SetAndGetEmptyCookieCollection()
-        {
+        public void SetAndGetEmptyCookieCollection() {
             var storage = new PersistentCookieStorage(this.engine);
 
             storage.Cookies = new CookieCollection();
@@ -82,8 +72,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
         }
 
         [Test, Category("Fast")]
-        public void SetCookieCollectionToNullCleansCollection()
-        {
+        public void SetCookieCollectionToNullCleansCollection() {
             var storage = new PersistentCookieStorage(this.engine);
             var collection = new CookieCollection();
             collection.Add(new Cookie {
@@ -91,7 +80,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
                 Expired = false,
                 Expires = DateTime.Now.AddDays(1)
             });
-            storage.Cookies = collection; 
+            storage.Cookies = collection;
 
             storage.Cookies = null;
 
@@ -99,8 +88,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
         }
 
         [Test, Category("Fast")]
-        public void SetAndGetCookieCollectionsAreEqual()
-        {
+        public void SetAndGetCookieCollectionsAreEqual() {
             var storage = new PersistentCookieStorage(this.engine);
             var collection = new CookieCollection();
             collection.Add(new Cookie {
@@ -114,8 +102,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
         }
 
         [Test, Category("Fast")]
-        public void SaveCookieWithoutExpirationDate()
-        {
+        public void SaveCookieWithoutExpirationDate() {
             var storage = new PersistentCookieStorage(this.engine);
             var collection = new CookieCollection();
             collection.Add(new Cookie {
@@ -128,5 +115,14 @@ namespace TestLibrary.StorageTests.DataBaseTests
 
             Assert.That(storage.Cookies, Is.EqualTo(collection));
         }
+
+        #region boilerplatecode
+        public void Dispose() {
+            if (this.engine != null) {
+                this.engine.Dispose();
+                this.engine = null;
+            }
+        }
+        #endregion
     }
 }

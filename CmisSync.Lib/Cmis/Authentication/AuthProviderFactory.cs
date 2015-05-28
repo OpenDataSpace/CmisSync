@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Cmis
-{
+namespace CmisSync.Lib.Cmis {
     using System;
     using System.Net;
 
@@ -30,8 +29,7 @@ namespace CmisSync.Lib.Cmis
     /// <summary>
     /// Auth provider factory.
     /// </summary>
-    public static class AuthProviderFactory
-    {
+    public static class AuthProviderFactory {
         /// <summary>
         /// Creates the auth provider fitting to the given type and url
         /// </summary>
@@ -48,12 +46,10 @@ namespace CmisSync.Lib.Cmis
         /// storage engine
         /// </param>
         [CLSCompliant(false)]
-        public static IDisposableAuthProvider CreateAuthProvider(Config.AuthenticationType type, Uri url, DBreezeEngine db)
-        {
+        public static IDisposableAuthProvider CreateAuthProvider(Config.AuthenticationType type, Uri url, DBreezeEngine db) {
             ICookieStorage storage = new PersistentCookieStorage(db);
 
-            switch(type)
-            {
+            switch (type) {
             case Config.AuthenticationType.BASIC:
                 return new PersistentStandardAuthenticationProvider(storage, url);
             case Config.AuthenticationType.KERBEROS:

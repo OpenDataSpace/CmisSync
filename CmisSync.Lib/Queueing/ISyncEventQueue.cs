@@ -19,12 +19,8 @@
 namespace CmisSync.Lib.Queueing
 {
     using System;
-    using System.Collections.Concurrent;
-    using System.Threading.Tasks;
 
     using CmisSync.Lib.Events;
-
-    using log4net;
 
     /// <summary>
     /// Interface for all implementations of SyncEventQueues.
@@ -49,6 +45,14 @@ namespace CmisSync.Lib.Queueing
         ISyncEventManager EventManager { get; }
 
         /// <summary>
+        /// Gets a value indicating whether this instance is empty.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is empty; otherwise, <c>false</c>.
+        /// </value>
+        bool IsEmpty { get; }
+
+        /// <summary>
         /// Adds the event.
         /// </summary>
         /// <param name='newEvent'>
@@ -66,13 +70,5 @@ namespace CmisSync.Lib.Queueing
         /// Continue the queue consumer if it is suspended.
         /// </summary>
         void Continue();
-
-        /// <summary>
-        /// Gets a value indicating whether this instance is empty.
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if this instance is empty; otherwise, <c>false</c>.
-        /// </value>
-        bool IsEmpty { get; }
     }
 }

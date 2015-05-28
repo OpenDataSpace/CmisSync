@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Config
-{
+namespace CmisSync.Lib.Config {
     using System;
     using System.Xml.Serialization;
 
@@ -26,8 +25,7 @@ namespace CmisSync.Lib.Config
     /// Feature Toggles.
     /// </summary>
     [Serializable]
-    public class Feature
-    {
+    public class Feature {
         /// <summary>
         /// Gets or sets the getFolderTree support.
         /// </summary>
@@ -76,5 +74,12 @@ namespace CmisSync.Lib.Config
         /// <value>The chunked download support.</value>
         [XmlElement("chunkedDownloadSupport")]
         public bool? ChunkedDownloadSupport { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether private working copy support is disabled.
+        /// </summary>
+        /// <value><c>true</c> if pwc support is disabled; otherwise, <c>false</c> or <c>null</c>.</value>
+        [XmlElement("disablePWCSupport")]
+        public bool? IsPwcSupportDisabled { get; set; }
     }
 }

@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Cmis
-{
+namespace CmisSync.Lib.Cmis {
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -33,8 +32,7 @@ namespace CmisSync.Lib.Cmis
     /// <summary>
     /// Persistent standard authentication provider.
     /// </summary>
-    public class PersistentStandardAuthenticationProvider : DotCMIS.Binding.StandardAuthenticationProvider, IDisposableAuthProvider
-    {
+    public class PersistentStandardAuthenticationProvider : DotCMIS.Binding.StandardAuthenticationProvider, IDisposableAuthProvider {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(PersistentStandardAuthenticationProvider));
 
         private ICookieStorage storage;
@@ -46,22 +44,19 @@ namespace CmisSync.Lib.Cmis
         /// </summary>
         /// <param name="storage">Storage of saved cookies</param>
         /// <param name="url">corresponding URL of the cookies</param>
-        public PersistentStandardAuthenticationProvider(ICookieStorage storage, Uri url)
-        {
-            if(storage == null)
-            {
-                throw new ArgumentNullException("Given db is null");
+        public PersistentStandardAuthenticationProvider(ICookieStorage storage, Uri url) {
+            if (storage == null) {
+                throw new ArgumentNullException("storage");
             }
 
-            if(url == null)
-            {
-                throw new ArgumentNullException("Given URL is null");
+            if (url == null) {
+                throw new ArgumentNullException("url");
             }
 
             this.storage = storage;
             this.url = url;
-            if(storage.Cookies != null) {
-                foreach(Cookie c in storage.Cookies) {
+            if (storage.Cookies != null) {
+                foreach (Cookie c in storage.Cookies) {
                     this.Cookies.Add(c);
                 }
             }
@@ -71,11 +66,9 @@ namespace CmisSync.Lib.Cmis
         /// Handles the HttpWebResponse by extracting the cookies.
         /// </summary>
         /// <param name="connection">Connection instance of the response</param>
-        public override void HandleResponse(object connection)
-        {
+        public override void HandleResponse(object connection) {
             HttpWebResponse response = connection as HttpWebResponse;
-            if (response != null)
-            {
+            if (response != null) {
                 // AtomPub and browser binding authentication
                 this.Cookies.Add(response.Cookies);
             }
@@ -90,8 +83,7 @@ namespace CmisSync.Lib.Cmis
         /// After calling <see cref="Dispose"/>, you must release all references to the
         /// <see cref="CmisSync.Lib.Cmis.PersistentStandardAuthenticationProvider"/> so the garbage collector can
         /// reclaim the memory that the <see cref="CmisSync.Lib.Cmis.PersistentStandardAuthenticationProvider"/> was occupying.</remarks>
-        public void Dispose()
-        {
+        public void Dispose() {
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -99,8 +91,7 @@ namespace CmisSync.Lib.Cmis
         /// <summary>
         /// Deletes all cookies.
         /// </summary>
-        public void DeleteAllCookies()
-        {
+        public void DeleteAllCookies() {
             this.Cookies = new CookieContainer();
         }
 
@@ -108,19 +99,13 @@ namespace CmisSync.Lib.Cmis
         /// Dispose the specified disposing.
         /// </summary>
         /// <param name="disposing">If set to <c>true</c> disposing.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if(!this.disposed)
-            {
-                if(disposing)
-                {
+        protected virtual void Dispose(bool disposing) {
+            if (!this.disposed) {
+                if (disposing) {
                     // Dispose managed resources.
-                    try
-                    {
+                    try {
                         this.storage.Cookies = this.Cookies.GetCookies(this.url);
-                    }
-                    catch(Exception e)
-                    {
+                    } catch(Exception e) {
                         Logger.Debug(string.Format("Failed to save session cookies of \"{0}\" in db", this.url.AbsolutePath), e);
                     }
                 }

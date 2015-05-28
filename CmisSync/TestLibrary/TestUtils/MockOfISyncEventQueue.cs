@@ -32,5 +32,9 @@ namespace TestLibrary.TestUtils
         public static void VerifyThatNoOtherEventIsAddedThan<T>(this Mock<ISyncEventQueue> queue) {
             queue.Verify(q => q.AddEvent(It.Is<ISyncEvent>(e => !(e is T))), Times.Never());
         }
+
+        public static void VerifyThatNoEventIsAdded(this Mock<ISyncEventQueue> queue) {
+            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
+        }
     }
 }

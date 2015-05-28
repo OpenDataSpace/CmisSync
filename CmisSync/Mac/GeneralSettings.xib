@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="12F45" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5056" systemVersion="13E28" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5056"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="GeneralSettingsController">
@@ -49,7 +49,7 @@
                                             <rect key="frame" x="17" y="189" width="526" height="67"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                            <size key="cellSize" width="162" height="18"/>
+                                            <size key="cellSize" width="161" height="18"/>
                                             <size key="intercellSpacing" width="4" height="2"/>
                                             <buttonCell key="prototype" type="radio" title="Radio" imagePosition="left" alignment="left" inset="2" id="nRm-5B-wZ4">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -161,6 +161,22 @@
                                     </subviews>
                                 </view>
                             </tabViewItem>
+                            <tabViewItem label="Features" identifier="2" id="ceX-6Y-t7P">
+                                <view key="view" id="ZoE-Lc-FsD">
+                                    <rect key="frame" x="10" y="33" width="560" height="259"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <button id="g1O-YO-wuU">
+                                            <rect key="frame" x="15" y="240" width="530" height="18"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="check" title="Notifications" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="DoR-Y2-ioS">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                        </button>
+                                    </subviews>
+                                </view>
+                            </tabViewItem>
                         </tabViewItems>
                     </tabView>
                     <button verticalHuggingPriority="750" id="fZo-ke-tHN">
@@ -203,6 +219,7 @@
                 <outlet property="HelpButton" destination="tOT-dI-cEZ" id="h6E-uV-Zk0"/>
                 <outlet property="ManualProxyButton" destination="2HG-la-V7V" id="nVN-Sq-Huh"/>
                 <outlet property="NoProxyButton" destination="pRY-GC-Bfp" id="6TG-XC-dbC"/>
+                <outlet property="NotificationsFeaturesButton" destination="DoR-Y2-ioS" id="r1U-qh-JAO"/>
                 <outlet property="ProxyPassword" destination="B9w-Re-bgg" id="9gd-Bc-GBa"/>
                 <outlet property="ProxyPasswordLabel" destination="07K-W3-nSA" id="G8U-Cf-p2M"/>
                 <outlet property="ProxyServer" destination="C6T-sd-v9k" id="MsG-FA-KiM"/>

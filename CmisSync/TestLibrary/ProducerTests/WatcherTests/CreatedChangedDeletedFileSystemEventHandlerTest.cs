@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 #if ! __COCOA__
-namespace TestLibrary.ProducerTests.WatcherTests
-{
+namespace TestLibrary.ProducerTests.WatcherTests {
     using System;
     using System.IO;
     using System.Linq;
@@ -37,8 +36,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
     using TestUtils;
 
     [TestFixture]
-    public class CreatedChangedDeletedFileSystemEventHandlerTest : IsTestWithConfiguredLog4Net
-    {
+    public class CreatedChangedDeletedFileSystemEventHandlerTest : IsTestWithConfiguredLog4Net {
         private static readonly string Name = "Cat";
         private static readonly string Directory = Path.GetTempPath();
         private static readonly long Threshold = 100;
@@ -68,17 +66,13 @@ namespace TestLibrary.ProducerTests.WatcherTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull() {
-            using (new CreatedChangedDeletedFileSystemEventHandler(null, this.storage.Object)) {
-            }
+            Assert.Throws<ArgumentNullException>(() => { using (new CreatedChangedDeletedFileSystemEventHandler(null, this.storage.Object)); });
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfStorageIsNull() {
-            using (new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, null)) {
-            }
+            Assert.Throws<ArgumentNullException>(() => { using (new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, null)); });
         }
 
         [Test, Category("Medium")]
@@ -209,7 +203,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
         }
 
         [Test, Category("Medium")]
-        public void AggregatesFolderDeletedAndCreatedEventToFSMovedEvent() {
+        public void AggregatesFolderDeletedAndCreatedEventToFSMovedEvent([Values(true, false)]bool ordered) {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 string newName = "new";
                 string oldName = "old";
@@ -218,10 +212,16 @@ namespace TestLibrary.ProducerTests.WatcherTests
                 string oldPath = Path.Combine(Directory, oldName);
                 this.fsFactory.Setup(f => f.IsDirectory(newPath)).Returns((bool?)true);
                 this.fsFactory.AddDirectory(newPath, guid, true);
+                this.fsFactory.Setup(f => f.CreateFileInfo(oldPath)).Returns(Mock.Of<IFileInfo>(file => file.Exists == false && file.FullName == oldPath));
                 this.storage.AddLocalFolder(oldPath, "id", guid);
 
-                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, Directory, oldName));
-                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, this.path, newName));
+                if (ordered) {
+                    underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, Directory, oldName));
+                    underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, this.path, newName));
+                } else {
+                    underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, this.path, newName));
+                    underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, Directory, oldName));
+                }
 
                 this.WaitForThreshold();
                 this.queue.Verify(q => q.AddEvent(It.Is<FSMovedEvent>(e => e.IsDirectory == true && e.Name == newName && e.OldPath == oldPath && e.LocalPath == newPath)), Times.Once());
@@ -245,29 +245,6 @@ namespace TestLibrary.ProducerTests.WatcherTests
 
                 this.WaitForThreshold();
                 this.queue.Verify(q => q.AddEvent(It.IsAny<FSMovedEvent>()), Times.Never());
-            }
-        }
-
-        [Test, Category("Medium")]
-        public void AggregatesFolderDeletedAndCreatedEventToFSMovedEventIfTheyOccurInDifferentOrder() {
-            using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
-                string newName = "new";
-                string oldName = "old";
-                Guid guid = Guid.NewGuid();
-                string newPath = Path.Combine(this.path, newName);
-                string oldPath = Path.Combine(Directory, oldName);
-                this.fsFactory.Setup(f => f.IsDirectory(newPath)).Returns((bool?)true);
-                this.fsFactory.AddDirectory(newPath, guid, true);
-                this.storage.AddLocalFolder(oldPath, "id", guid);
-
-                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, this.path, newName));
-                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, Directory, oldName));
-
-                this.WaitForThreshold();
-                this.queue.Verify(q => q.AddEvent(It.Is<FSMovedEvent>(e => e.IsDirectory == true && e.Name == newName && e.OldPath == oldPath && e.LocalPath == newPath)), Times.Once());
-
-                this.WaitForThreshold();
-                this.queue.VerifyThatNoOtherEventIsAddedThan<FSMovedEvent>();
             }
         }
 

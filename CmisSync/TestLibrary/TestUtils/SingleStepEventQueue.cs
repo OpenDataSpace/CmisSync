@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary
-{
+namespace TestLibrary {
     using System;
     using System.Collections.Concurrent;
 
@@ -30,13 +29,27 @@ namespace TestLibrary
     /// </summary>
     /// Do not use this in production code.
     /// It contains public fields that could do a lot of harm
-    public class SingleStepEventQueue : IDisposableSyncEventQueue
-    {
+    public class SingleStepEventQueue : ICountingQueue {
+        private IEventCounter fullCounter;
+        private IEventCounter categoryCounter;
+        private SyncEventHandler dropAllFsEventsHandler;
+        private bool isDroppingAllFsEvents = false;
         public ISyncEventManager Manager;
         public ConcurrentQueue<ISyncEvent> Queue = new ConcurrentQueue<ISyncEvent>();
 
-        public SingleStepEventQueue(ISyncEventManager manager) {
+        public SingleStepEventQueue(
+            ISyncEventManager manager,
+            IEventCounter fullCounter = null,
+            IEventCounter categoryCounter = null)
+        {
             this.Manager = manager;
+            this.fullCounter = fullCounter ?? new QueuedEventsCounter();
+            this.categoryCounter = categoryCounter ?? new QueuedCategorizedEventsCounter();
+            this.dropAllFsEventsHandler = new GenericSyncEventHandler<IFSEvent>(
+                int.MaxValue,
+                delegate(ISyncEvent e) {
+                return true;
+            });
         }
 
         public ISyncEventManager EventManager {
@@ -57,7 +70,29 @@ namespace TestLibrary
 
         public bool SwallowExceptions { get; set; }
 
+        public bool DropAllLocalFileSystemEvents {
+            get {
+                return this.isDroppingAllFsEvents;
+            }
+
+            set {
+                if (value != this.isDroppingAllFsEvents) {
+                    this.isDroppingAllFsEvents = value;
+                    if (this.isDroppingAllFsEvents) {
+                        this.Manager.AddEventHandler(this.dropAllFsEventsHandler);
+                    } else {
+                        this.Manager.RemoveEventHandler(this.dropAllFsEventsHandler);
+                    }
+                }
+            }
+        }
+
         public void AddEvent(ISyncEvent e) {
+            if (e is ICountableEvent && (e as ICountableEvent).Category != EventCategory.NoCategory) {
+                this.fullCounter.Increase(e as ICountableEvent);
+                this.categoryCounter.Increase(e as ICountableEvent);
+            }
+
             this.Queue.Enqueue(e);
         }
 
@@ -66,12 +101,19 @@ namespace TestLibrary
             if (this.Queue.TryDequeue(out e)) {
                 try {
                     this.Manager.Handle(e);
+                } catch (System.IO.InvalidDataException) {
+                    throw;
                 } catch (Exception exp) {
                     if (!this.SwallowExceptions) {
                         throw;
                     } else {
                         Console.WriteLine(exp.ToString());
                     }
+                }
+
+                if (e is ICountableEvent && (e as ICountableEvent).Category != EventCategory.NoCategory) {
+                    this.fullCounter.Decrease(e as ICountableEvent);
+                    this.categoryCounter.Decrease(e as ICountableEvent);
                 }
             }
         }
@@ -89,6 +131,13 @@ namespace TestLibrary
         }
 
         public void Dispose() {
+            if (this.categoryCounter != null) {
+                this.categoryCounter.Dispose();
+            }
+
+            if (this.fullCounter != null) {
+                this.fullCounter.Dispose();
+            }
         }
 
         public bool WaitForStopped(int timeout) {
@@ -102,6 +151,26 @@ namespace TestLibrary
         }
 
         public void Continue() {
+        }
+
+        public IDisposable Subscribe(IObserver<int> observer) {
+            return null;
+        }
+
+        public IDisposable Subscribe(IObserver<Tuple<EventCategory, int>> observer) {
+            return null;
+        }
+
+        public IObservable<int> FullCounter {
+            get {
+                return (IObservable<int>)this.fullCounter;
+            }
+        }
+
+        public IObservable<Tuple<EventCategory, int>> CategoryCounter {
+            get {
+                return (IObservable<Tuple<EventCategory, int>>)this.categoryCounter;
+            }
         }
     }
 }

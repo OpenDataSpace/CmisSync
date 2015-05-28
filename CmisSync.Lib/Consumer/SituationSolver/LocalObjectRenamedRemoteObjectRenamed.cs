@@ -17,16 +17,15 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
@@ -34,9 +33,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Local object renamed and also the remote object has been renamed.
     /// </summary>
-    public class LocalObjectRenamedRemoteObjectRenamed : AbstractEnhancedSolver
-    {
-        private LocalObjectChangedRemoteObjectChanged changeChangeSolver;
+    public class LocalObjectRenamedRemoteObjectRenamed : AbstractEnhancedSolver {
+        private readonly ISolver changeChangeSolver;
 
         /// <summary>
         /// Initializes a new instance of the
@@ -44,16 +42,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
+        /// <param name="changeChangeSolver">Fallback solver for local and remote change situation after renaming is done.</param>
         public LocalObjectRenamedRemoteObjectRenamed(
             ISession session,
             IMetaDataStorage storage,
-            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage) {
-            if (changeSolver == null) {
-                throw new ArgumentNullException("Given solver for the situation of local and remote object changed is null");
+            ISolver changeChangeSolver) : base(session, storage) {
+            if (changeChangeSolver == null) {
+                throw new ArgumentNullException("changeChangeSolver", "Given solver for the situation of local and remote object changed is null");
             }
 
-            this.changeChangeSolver = changeSolver;
+            this.changeChangeSolver = changeChangeSolver;
         }
 
         /// <summary>
@@ -90,6 +88,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
                         throw;
                     }
+
                     mappedObject.Name = remoteFolder.Name;
                     OperationsLogger.Info(string.Format("Renamed remote folder {0} with id {2} to {1}", oldName, remoteFolder.Id, remoteFolder.Name));
                 } else {
@@ -102,6 +101,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 mappedObject.LastLocalWriteTimeUtc = localFolder.LastWriteTimeUtc;
                 mappedObject.LastRemoteWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
                 mappedObject.LastChangeToken = remoteFolder.ChangeToken;
+                mappedObject.Ignored = remoteFolder.AreAllChildrenIgnored();
                 this.Storage.SaveMappedObject(mappedObject);
             } else if (localFileSystemInfo is IFileInfo) {
                 var localFile = localFileSystemInfo as IFileInfo;

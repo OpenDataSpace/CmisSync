@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectChangedRemoteObjectChanged.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
     using System.Linq;
@@ -26,6 +25,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -39,11 +39,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Local object changed and remote object changed.
     /// </summary>
-    public class LocalObjectChangedRemoteObjectChanged : AbstractEnhancedSolver
-    {
+    public class LocalObjectChangedRemoteObjectChanged : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChangedRemoteObjectChanged));
 
-        private ActiveActivitiesManager transmissionManager;
+        private ITransmissionManager transmissionManager;
         private IFileSystemInfoFactory fsFactory;
 
         /// <summary>
@@ -52,14 +51,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
+        /// <param name="transmissionStorage">Transmission storage.</param>
+        /// <param name="transmissionManager">Transmission manager.</param>
+        /// <param name="fsFactory">File system factory.</param>
         public LocalObjectChangedRemoteObjectChanged(
             ISession session,
             IMetaDataStorage storage,
-            ActiveActivitiesManager transmissionManager,
-            IFileSystemInfoFactory fsFactory = null) : base(session, storage) {
+            IFileTransmissionStorage transmissionStorage,
+            ITransmissionManager transmissionManager,
+            IFileSystemInfoFactory fsFactory = null) : base(session, storage, transmissionStorage) {
             if (transmissionManager == null) {
-                throw new ArgumentNullException("Given transmission manager is null");
+                throw new ArgumentNullException("transmissionManager");
             }
 
             this.transmissionManager = transmissionManager;
@@ -84,6 +86,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 obj.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
                 obj.LastRemoteWriteTimeUtc = (remoteId as IFolder).LastModificationDate;
                 obj.LastChangeToken = (remoteId as IFolder).ChangeToken;
+                obj.Ignored = (remoteId as IFolder).AreAllChildrenIgnored();
                 this.Storage.SaveMappedObject(obj);
             } else if (localFileSystemInfo is IFileInfo) {
                 var fileInfo = localFileSystemInfo as IFileInfo;
@@ -95,7 +98,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         // Upload local content
                         updateRemoteDate = true;
                         try {
-                            obj.LastChecksum = LocalObjectChanged.UploadFile(fileInfo, doc, this.transmissionManager);
+                            var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UPLOAD_MODIFIED_FILE, fileInfo.FullName);
+                            obj.LastChecksum = this.UploadFile(fileInfo, doc, transmission);
                             obj.LastContentSize = doc.ContentStreamLength ?? fileInfo.Length;
                         } catch(Exception ex) {
                             if (ex.InnerException is CmisPermissionDeniedException) {
@@ -139,13 +143,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                             // Both are different => Check modification dates
                             // Download remote version and create conflict file
                             updateLocalDate = true;
-                            obj.LastChecksum = DownloadChanges(fileInfo, doc, obj, this.fsFactory, this.transmissionManager, Logger);
+                            obj.LastChecksum = this.DownloadChanges(fileInfo, doc, obj, this.fsFactory, this.transmissionManager, Logger);
                             obj.LastContentSize = doc.ContentStreamLength ?? 0;
                         }
                     } else {
                         // Download remote content
                         updateLocalDate = true;
-                        obj.LastChecksum = DownloadChanges(fileInfo, doc, obj, this.fsFactory, this.transmissionManager, Logger);
+                        obj.LastChecksum = this.DownloadChanges(fileInfo, doc, obj, this.fsFactory, this.transmissionManager, Logger);
                         obj.LastContentSize = doc.ContentStreamLength ?? 0;
                     }
                 }

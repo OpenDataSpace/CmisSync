@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
     using System.Collections.Generic;
 
@@ -27,16 +26,14 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// Permission denied event.
     /// </summary>
-    public class PermissionDeniedEvent : ExceptionEvent
-    {
+    public class PermissionDeniedEvent : ExceptionEvent {
         private static readonly string HttpHeaderRetryAfter = "Retry-After";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.PermissionDeniedEvent"/> class.
         /// </summary>
         /// <param name="e">thrown permission denied exception</param>
-        public PermissionDeniedEvent(DotCMIS.Exceptions.CmisPermissionDeniedException e) : base(e)
-        {
+        public PermissionDeniedEvent(CmisPermissionDeniedException e) : base(e) {
             if (e.Data != null && e.Data.Contains(HttpHeaderRetryAfter)) {
                 string[] values = e.Data[HttpHeaderRetryAfter] as string[];
                 if (values == null) {

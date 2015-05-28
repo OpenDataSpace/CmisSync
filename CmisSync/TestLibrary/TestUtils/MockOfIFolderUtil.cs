@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="MockOfIFolderUtil.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,10 +17,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.TestUtils
-{
+namespace TestLibrary.TestUtils {
     using System;
     using System.Collections.Generic;
+
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
     using DotCMIS;
     using DotCMIS.Client;
@@ -29,8 +30,7 @@ namespace TestLibrary.TestUtils
 
     using NUnit.Framework;
 
-    public static class MockOfIFolderUtil
-    {
+    public static class MockOfIFolderUtil {
         /// <summary>
         /// Setups the descendants.
         /// </summary>
@@ -41,7 +41,7 @@ namespace TestLibrary.TestUtils
             foreach (var child in children) {
                 var tree = new Mock<ITree<IFileableCmisObject>>();
                 tree.Setup(t => t.Item).Returns(child);
-                tree.Setup(t => t.Children).Returns((child is IFolder ? (child as IFolder).GetDescendants(-1) : new List<ITree<IFileableCmisObject>>()));
+                tree.Setup(t => t.Children).Returns(child is IFolder ? (child as IFolder).GetDescendants(-1) : new List<ITree<IFileableCmisObject>>());
                 list.Add(tree.Object);
             }
 
@@ -49,11 +49,24 @@ namespace TestLibrary.TestUtils
             folder.Setup(f => f.GetDescendants(It.Is<int>(d => d != -1))).Throws(new ArgumentOutOfRangeException("Get Descendants should not be limited"));
         }
 
+        /// <summary>
+        /// Setup the children of a folder.
+        /// </summary>
+        /// <param name="folder">Folder containing the children.</param>
+        /// <param name="children">The children of the folder.</param>
+        public static void SetupChildren(this Mock<IFolder> folder, params ICmisObject[] children) {
+            var list = new Mock<IItemEnumerable<ICmisObject>>();
+            var internalList = new List<ICmisObject>(children);
+            list.Setup(l => l.TotalNumItems).Returns(children.LongLength);
+            list.Setup(l => l.GetEnumerator()).Returns(internalList.GetEnumerator());
+            folder.Setup(f => f.GetChildren()).Returns(list.Object);
+        }
+
         public static void SetupLastModificationDate(this Mock<IFolder> folder, DateTime? modificationDate) {
             folder.Setup(f => f.LastModificationDate).Returns(modificationDate);
             folder.Setup(f => f.UpdateProperties(It.IsAny<IDictionary<string, object>>(), true)).Callback<IDictionary<string, object>, bool>((d, b) => {
-                if (d.ContainsKey("cmis:lastModificationDate")) {
-                    folder.SetupLastModificationDate((DateTime?)d["cmis:lastModificationDate"]);
+                if (d.ContainsKey(PropertyIds.LastModificationDate)) {
+                    folder.SetupLastModificationDate((DateTime?)d[PropertyIds.LastModificationDate]);
                 }
             });
         }
@@ -62,16 +75,55 @@ namespace TestLibrary.TestUtils
             folder.Setup(f => f.ChangeToken).Returns(changeToken);
         }
 
-        public static Mock<IFolder> CreateRemoteFolderMock(string id, string name, string path, string parentId = null, string changetoken = "changetoken") {
+        public static void SetupIgnore(this Mock<IFolder> folder, params string[] devices) {
+            IList<IProperty> props = new List<IProperty>();
+            if (folder.Object.Properties != null) {
+                foreach (var prop in folder.Object.Properties) {
+                    if (prop.Id != "gds:ignoreDeviceIds") {
+                        props.Add(prop);
+                    }
+                }
+            }
+
+            props.Add(Mock.Of<IProperty>(p => p.Id == "gds:ignoreDeviceIds" && p.Values == new List<object>(devices)));
+
+            folder.Setup(f => f.Properties).Returns(props);
+        }
+
+        public static Mock<IFolder> CreateRemoteFolderMock(string id, string name, string path, string parentId = null, string changetoken = "changetoken", bool ignored = false) {
             var newRemoteObject = new Mock<IFolder>();
             newRemoteObject.Setup(d => d.Id).Returns(id);
             newRemoteObject.Setup(d => d.Path).Returns(path);
             newRemoteObject.Setup(d => d.ParentId).Returns(parentId);
+            newRemoteObject.Setup(d => d.Parents).Returns(new List<IFolder>() { Mock.Of<IFolder>(f => f.Id == parentId) });
             newRemoteObject.Setup(d => d.Name).Returns(name);
             newRemoteObject.Setup(d => d.ChangeToken).Returns(changetoken);
             newRemoteObject.Setup(d => d.GetDescendants(It.IsAny<int>())).Returns(new List<ITree<IFileableCmisObject>>());
             newRemoteObject.Setup(d => d.Move(It.IsAny<IObjectId>(), It.IsAny<IObjectId>())).Returns((IObjectId old, IObjectId current) => CreateRemoteFolderMock(id, name, path, current.Id, changetoken).Object);
+            newRemoteObject.SetupIgnoreFlag(ignored);
             return newRemoteObject;
+        }
+
+        public static void SetupIgnoreFlag(this Mock<IFolder> folder, bool ignored) {
+            var properties = folder.Object.Properties ?? new List<IProperty>();
+            if (ignored && !folder.Object.AreAllChildrenIgnored()) {
+                var ignoreEntry = new Mock<IProperty>();
+                ignoreEntry.Setup(i => i.Id).Returns("gds:ignoreDeviceIds");
+                IList<object> values = new List<object>();
+                values.Add("*");
+                ignoreEntry.Setup(i => i.Values).Returns(values);
+                properties.Add(ignoreEntry.Object);
+            }
+
+            if (!ignored && folder.Object.AreAllChildrenIgnored()) {
+                foreach (var prop in properties) {
+                    if (prop.Id == "gds:ignoreDeviceIds") {
+                        properties.Remove(prop);
+                    }
+                }
+            }
+
+            folder.Setup(d => d.Properties).Returns(properties);
         }
 
         public static void VerifyUpdateLastModificationDate(this Mock<IFolder> folder, DateTime modificationDate, bool refresh = true) {

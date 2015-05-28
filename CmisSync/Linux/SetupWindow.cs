@@ -32,27 +32,25 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Timers;
-
-using Gtk;
-using Mono.Unix;
-
 namespace CmisSync {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Text.RegularExpressions;
+    using System.Timers;
+
+    using Gtk;
+    using Mono.Unix;
 
     [CLSCompliant(false)]
     public class SetupWindow : Window {
-
         // TODO: capscmi
-        private HBox HBox;
-        private VBox VBox;
-        private VBox Wrapper;
-        private VBox OptionArea;
-        private HBox Buttons;
+        private HBox hBox;
+        private VBox vBox;
+        private VBox wrapper;
+        private VBox optionArea;
+        private HBox buttons;
 
         public string Header;
         public string Description;
@@ -61,77 +59,69 @@ namespace CmisSync {
 
         public Container Content;
 
-        public SetupWindow () : base ("")
-        {
-            Title          = String.Format("{0} {1}", Properties_Resources.ApplicationName, Catalog.GetString ("Setup"));
-            BorderWidth    = 0;
-            IconName       = "dataspacesync-app";
-            Resizable      = false;
-            WindowPosition = WindowPosition.Center;
-            Deletable      = false;
+        public SetupWindow() : base(string.Empty) {
+            this.Title          = string.Format("{0} {1}", Properties_Resources.ApplicationName, Catalog.GetString("Setup"));
+            this.BorderWidth    = 0;
+            this.IconName       = "dataspacesync-app";
+            this.Resizable      = false;
+            this.WindowPosition = WindowPosition.Center;
+            this.Deletable      = false;
 
-            DeleteEvent += delegate (object sender, DeleteEventArgs args) {
+            this.DeleteEvent += delegate(object sender, DeleteEventArgs args) {
                 args.RetVal = true;
             };
 
-            SecondaryTextColor = UIHelpers.GdkColorToHex (Style.Foreground (StateType.Insensitive));
+            this.SecondaryTextColor = Style.Foreground(StateType.Insensitive).ToHex();
 
-            SecondaryTextColorSelected =
-                UIHelpers.GdkColorToHex (
-                    MixColors (
-                        new TreeView ().Style.Foreground (StateType.Selected),
-                        new TreeView ().Style.Background (StateType.Selected),
-                        0.15
-                    )
-                );
+            this.SecondaryTextColorSelected = this.MixColors(
+                new TreeView().Style.Foreground(StateType.Selected),
+                new TreeView().Style.Background(StateType.Selected),
+                0.15).ToHex();
 
-            SetSizeRequest (680, 400);
+            this.SetSizeRequest(680, 400);
 
-            HBox = new HBox (false, 0);
+            this.hBox = new HBox(false, 0);
 
-                VBox = new VBox (false, 0);
+            this.vBox = new VBox(false, 0);
 
-                    Wrapper = new VBox (false, 0) {
-                        BorderWidth = 0
-                    };
+            this.wrapper = new VBox(false, 0) {
+                BorderWidth = 0
+            };
 
-                    OptionArea = new VBox (false, 0) {
-                        BorderWidth = 0
-                    };
+            this.optionArea = new VBox(false, 0) {
+                BorderWidth = 0
+            };
 
-                    Buttons = CreateButtonBox ();
+            this.buttons = this.CreateButtonBox();
 
+            HBox layout_horizontal = new HBox(false, 0) {
+                BorderWidth = 0
+            };
 
-                HBox layout_horizontal = new HBox (false , 0) {
-                    BorderWidth = 0
-                };
+            layout_horizontal.PackStart(this.optionArea, true, true, 0);
+            layout_horizontal.PackStart(this.buttons, false, false, 0);
 
-                layout_horizontal.PackStart (OptionArea, true, true, 0);
-                layout_horizontal.PackStart (Buttons, false, false, 0);
+            this.vBox.PackStart(this.wrapper, true, true, 0);
+            this.vBox.PackStart(layout_horizontal, false, false, 15);
 
-                VBox.PackStart (Wrapper, true, true, 0);
-                VBox.PackStart (layout_horizontal, false, false, 15);
+            EventBox box = new EventBox();
+            Gdk.Color bg_color = new Gdk.Color();
+            Gdk.Color.Parse("#000", ref bg_color);
+            box.ModifyBg(StateType.Normal, bg_color);
 
-                EventBox box = new EventBox ();
-                Gdk.Color bg_color = new Gdk.Color ();
-                Gdk.Color.Parse ("#000", ref bg_color);
-                box.ModifyBg (StateType.Normal, bg_color);
+            Image side_splash = UIHelpers.GetImage("side-splash.png");
+            side_splash.Yalign = 1;
 
-                Image side_splash = UIHelpers.GetImage ("side-splash.png");
-                side_splash.Yalign = 1;
+            box.Add(side_splash);
 
-            box.Add (side_splash);
+            this.hBox.PackStart(box, false, false, 0);
+            this.hBox.PackStart(this.vBox, true, true, 30);
 
-            HBox.PackStart (box, false, false, 0);
-            HBox.PackStart (VBox, true, true, 30);
-
-            base.Add (HBox);
+            base.Add(this.hBox);
         }
 
-
-        private HBox CreateButtonBox ()
-        {
-            return new HBox () {
+        private HBox CreateButtonBox() {
+            return new HBox() {
                 BorderWidth = 0,
                 //Layout      = ButtonBoxStyle.End,
                 Homogeneous = false,
@@ -140,90 +130,84 @@ namespace CmisSync {
         }
 
         [CLSCompliant(false)]
-        public void AddButton (Button button)
-        {
+        public void AddButton(Button button) {
             (button.Child as Label).Xpad = 15;
-            Buttons.Add (button);
+            this.buttons.Add(button);
         }
 
         [CLSCompliant(false)]
-        public void AddOption (Widget widget)
-        {
-            OptionArea.Add (widget);
+        public void AddOption(Widget widget) {
+            this.optionArea.Add(widget);
         }
 
         [CLSCompliant(false)]
-        new public void Add (Widget widget)
-        {
-            Label header = new Label ("<span size='large'><b>" + Header + "</b></span>") {
+        new public void Add(Widget widget) {
+            Label header = new Label("<span size='large'><b>" + this.Header + "</b></span>") {
                 UseMarkup = true,
                 Xalign = 0,
             };
 
-            VBox layout_vertical = new VBox (false, 0);
-            layout_vertical.PackStart (new Label (""), false, false, 6);
-            layout_vertical.PackStart (header, false, false, 0);
+            VBox layout_vertical = new VBox(false, 0);
+            layout_vertical.PackStart(new Label(string.Empty), false, false, 6);
+            layout_vertical.PackStart(header, false, false, 0);
 
-            if (!string.IsNullOrEmpty (Description)) {
-                Label description = new Label (Description) {
+            if (!string.IsNullOrEmpty(this.Description)) {
+                Label description = new Label(this.Description) {
                     Xalign = 0,
                     LineWrap = true,
                     LineWrapMode = Pango.WrapMode.WordChar
                 };
 
-                layout_vertical.PackStart (description, false, false, 21);
+                layout_vertical.PackStart(description, false, false, 21);
             }
 
-            if (widget != null)
-                layout_vertical.PackStart (widget, true, true, 0);
+            if (widget != null) {
+                layout_vertical.PackStart(widget, true, true, 0);
+            }
 
-            Wrapper.PackStart (layout_vertical, true, true, 0);
-            ShowAll ();
+            this.wrapper.PackStart(layout_vertical, true, true, 0);
+            this.ShowAll();
         }
 
+        public void Reset() {
+            this.Header = string.Empty;
+            this.Description = string.Empty;
 
-        public void Reset ()
-        {
-            Header      = "";
-            Description = "";
+            if (this.optionArea.Children.Length > 0) {
+                this.optionArea.Remove(this.optionArea.Children[0]);
+            }
 
-            if (OptionArea.Children.Length > 0)
-                OptionArea.Remove (OptionArea.Children [0]);
+            if (this.wrapper.Children.Length > 0) {
+                this.wrapper.Remove(this.wrapper.Children[0]);
+            }
 
-            if (Wrapper.Children.Length > 0)
-                Wrapper.Remove (Wrapper.Children [0]);
+            foreach (Button button in this.buttons) {
+                this.buttons.Remove(button);
+            }
 
-            foreach (Button button in Buttons)
-                Buttons.Remove (button);
-
-            ShowAll ();
+            this.ShowAll();
         }
 
-
-        new public void ShowAll ()
-        {
-            if (Buttons.Children.Length > 0) {
-                Button default_button = (Button) Buttons.Children [Buttons.Children.Length - 1];
+        new public void ShowAll() {
+            if (this.buttons.Children.Length > 0) {
+                Button default_button = (Button)this.buttons.Children[this.buttons.Children.Length - 1];
 
                 default_button.CanDefault = true;
-                Default = default_button;
+                this.Default = default_button;
             }
 
-            base.ShowAll ();
-            base.Present ();
+            base.ShowAll();
+            base.Present();
         }
 
-
-        private Gdk.Color MixColors (Gdk.Color first_color, Gdk.Color second_color, double ratio)
-        {
-            return new Gdk.Color (
-                Convert.ToByte ((255 * (Math.Min (65535, first_color.Red * (1.0 - ratio) +
-                    second_color.Red   * ratio))) / 65535),
-                Convert.ToByte ((255 * (Math.Min (65535, first_color.Green * (1.0 - ratio) +
+        private Gdk.Color MixColors(Gdk.Color first_color, Gdk.Color second_color, double ratio) {
+            return new Gdk.Color(
+                Convert.ToByte((255 * (Math.Min(65535, first_color.Red * (1.0 - ratio) +
+                    second_color.Red * ratio))) / 65535),
+                Convert.ToByte((255 * (Math.Min(65535, first_color.Green * (1.0 - ratio) +
                     second_color.Green * ratio))) / 65535),
-                Convert.ToByte ((255 * (Math.Min (65535, first_color.Blue * (1.0 - ratio) +
-                    second_color.Blue  * ratio))) / 65535)
-            );
+                Convert.ToByte((255 * (Math.Min(65535, first_color.Blue * (1.0 - ratio) +
+                    second_color.Blue * ratio))) / 65535));
         }
     }
 }
