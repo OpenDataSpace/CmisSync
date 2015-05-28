@@ -46,9 +46,13 @@ namespace DiagnoseTool {
 
             foreach (var repoInfo in config.Folders) {
                 using (var dbEngine = new DBreezeEngine(repoInfo.GetDatabasePath())) {
-                    var storage = new MetaDataStorage(dbEngine, new PathMatcher(repoInfo.LocalPath, repoInfo.RemotePath), false);
                     Console.WriteLine(string.Format("Checking {0} and DB Path \"{1}\"", repoInfo.DisplayName, repoInfo.GetDatabasePath()));
-                    storage.ValidateObjectStructure();
+                    try {
+                        var storage = new MetaDataStorage(dbEngine, new PathMatcher(repoInfo.LocalPath, repoInfo.RemotePath), false);
+                        storage.ValidateObjectStructure();
+                    } catch (Exception e) {
+                        Console.WriteLine("Database object structure is invalid: " + e.Message + Environment.NewLine + e.StackTrace);
+                    }
                 }
             }
 
