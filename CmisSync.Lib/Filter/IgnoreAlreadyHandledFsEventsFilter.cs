@@ -95,6 +95,38 @@ namespace CmisSync.Lib.Filter {
                     }
 
                     return false;
+                case WatcherChangeTypes.Changed:
+                    try {
+                        var guid = path.Uuid;
+                        if (guid != null && guid.GetValueOrDefault() != Guid.Empty) {
+                            IMappedObject mappedObject = this.storage.GetObjectByGuid(guid.GetValueOrDefault());
+                            if (mappedObject.LastLocalWriteTimeUtc == path.LastWriteTimeUtc &&
+                                path.Name == mappedObject.Name &&
+                                path.ReadOnly == mappedObject.IsReadOnly) {
+                                if (path is IFileInfo) {
+                                    var fileInfo = path as IFileInfo;
+                                    if (mappedObject.Type == MappedObjectType.File &&
+                                        fileInfo.Length == mappedObject.LastContentSize) {
+                                        var storedParent = this.storage.GetObjectByGuid((Guid)fileInfo.Directory.Uuid);
+                                        if (storedParent.RemoteObjectId == mappedObject.ParentId) {
+                                            return true;
+                                        }
+                                    }
+                                } else if (path is IDirectoryInfo) {
+                                    var dirInfo = path as IDirectoryInfo;
+                                    if (mappedObject.Type == MappedObjectType.Folder) {
+                                        var storedParent = this.storage.GetObjectByGuid((Guid)dirInfo.Parent.Uuid);
+                                        if (storedParent.RemoteObjectId == mappedObject.ParentId) {
+                                            return true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception) {
+                    }
+
+                    return false;
                 default:
                     return false;
                 }
