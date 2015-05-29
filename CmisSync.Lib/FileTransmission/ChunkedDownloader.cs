@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.FileTransmission
-{
+namespace CmisSync.Lib.FileTransmission {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -38,8 +37,7 @@ namespace CmisSync.Lib.FileTransmission
     /// <summary>
     /// Chunked downloader.
     /// </summary>
-    public class ChunkedDownloader : IFileDownloader
-    {
+    public class ChunkedDownloader : IFileDownloader {
         private bool disposed = false;
         private object disposeLock = new object();
 
@@ -150,7 +148,7 @@ namespace CmisSync.Lib.FileTransmission
         }
 
         private int DownloadNextChunk(IDocument remoteDocument, long offset, long remainingBytes, Transmission transmission, Stream outputstream, HashAlgorithm hashAlg) {
-            lock(this.disposeLock) {
+            lock (this.disposeLock) {
                 if (this.disposed) {
                     transmission.Status = TransmissionStatus.ABORTED;
                     throw new ObjectDisposedException(transmission.Path);
