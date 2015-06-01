@@ -83,6 +83,9 @@ namespace CmisSync {
             Environment.SetEnvironmentVariable("MONO_XMLSERIALIZER_THS", "no");
 #endif
 
+#if __COCOA__
+            MonoMac.AppKit.NSApplication.Init();
+#endif
             bool firstRun = !File.Exists(ConfigManager.CurrentConfigFile);
 
             // Disable SSLv3 to avoid POODLE Attack
