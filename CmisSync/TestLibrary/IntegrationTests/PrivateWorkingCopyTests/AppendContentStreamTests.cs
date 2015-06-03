@@ -122,7 +122,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             doc.CancelCheckOut();
             Assert.Catch<DotCMIS.Exceptions.CmisBaseException>(() => doc.AppendContent(content));
             oldDoc.Refresh();
-            Assert.That(oldDoc.ContentStreamLength, Is.EqualTo(0));
+            Assert.That(oldDoc.ContentStreamLength, Is.Null.Or.EqualTo(0));
             Assert.That(oldDoc.VersionSeriesCheckedOutId, Is.Null);
         }
     }
