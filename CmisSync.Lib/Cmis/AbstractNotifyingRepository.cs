@@ -187,10 +187,11 @@ namespace CmisSync.Lib.Cmis {
         /// </summary>
         /// <param name="level">Exception level.</param>
         /// <param name="type">Exception type.</param>
-        protected void PassExceptionToListener(ExceptionLevel level, ExceptionType type) {
+        /// <param name="source">Source exception.</param>
+        protected void PassExceptionToListener(ExceptionLevel level, ExceptionType type, Exception source = null) {
             var handler = this.ShowException;
             if (handler != null) {
-                handler(this, new RepositoryExceptionEventArgs(level, type));
+                handler(this, new RepositoryExceptionEventArgs(level, type, source));
             }
         }
 

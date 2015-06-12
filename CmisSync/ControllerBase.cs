@@ -664,6 +664,9 @@ namespace CmisSync {
                     case ExceptionType.LocalSyncTargetDeleted:
                         msg = string.Format(Properties_Resources.LocalRootFolderUnavailable, repositoryInfo.LocalPath);
                         break;
+                    case ExceptionType.FileUploadBlockedDueToVirusDetected:
+                        msg = string.Format("Virus detected! Upload denied: {0}{1}{2}", e.Exception.Message, Environment.NewLine, e.Exception.StackTrace);
+                        break;
                     default:
                         msg = e.Exception != null ? e.Exception.Message : Properties_Resources.UnknownExceptionOccured;
                         break;

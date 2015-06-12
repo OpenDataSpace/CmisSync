@@ -20,26 +20,78 @@
 namespace CmisSync.Lib.Cmis {
     using System;
 
+    /// <summary>
+    /// Exception level.
+    /// </summary>
     public enum ExceptionLevel {
+        /// <summary>
+        /// Information for the user
+        /// </summary>
         Info,
+
+        /// <summary>
+        /// Warning about a problem
+        /// </summary>
         Warning,
+
+        /// <summary>
+        /// Fatal warning
+        /// </summary>
         Fatal
     }
 
+    /// <summary>
+    /// Exception type.
+    /// </summary>
     public enum ExceptionType {
+        /// <summary>
+        /// Unknown Exception Type
+        /// </summary>
         Unknown,
-        LocalSyncTargetDeleted
+
+        /// <summary>
+        /// The local sync target folder is deleted.
+        /// </summary>
+        LocalSyncTargetDeleted,
+
+        /// <summary>
+        /// The file upload is blocked due to virus detection on the server.
+        /// </summary>
+        FileUploadBlockedDueToVirusDetected
     }
 
+    /// <summary>
+    /// Repository exception event arguments.
+    /// </summary>
     public class RepositoryExceptionEventArgs : EventArgs {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.RepositoryExceptionEventArgs"/> class.
+        /// </summary>
+        /// <param name="level">Exception Level.</param>
+        /// <param name="type">Exception Type.</param>
+        /// <param name="e">Original exception.</param>
         public RepositoryExceptionEventArgs(ExceptionLevel level, ExceptionType type, Exception e = null) {
             this.Level = level;
             this.Exception = e;
             this.Type = type;
         }
 
+        /// <summary>
+        /// Gets the type of the exception.
+        /// </summary>
+        /// <value>The type.</value>
         public ExceptionType Type { get; private set; }
+
+        /// <summary>
+        /// Gets the level of the exception.
+        /// </summary>
+        /// <value>The level.</value>
         public ExceptionLevel Level { get; private set; }
+
+        /// <summary>
+        /// Gets the original exception.
+        /// </summary>
+        /// <value>The exception.</value>
         public Exception Exception { get; private set; }
     }
 }
