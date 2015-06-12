@@ -413,7 +413,7 @@ namespace CmisSync.Lib.Cmis {
         /// </summary>
         /// <param name="disposing">If set to <c>true</c> disposing.</param>
         protected virtual void Dispose(bool disposing) {
-            Suspend();
+            this.Suspend();
 
             if (!this.disposed) {
                 this.connectionScheduler.Dispose();
@@ -423,10 +423,15 @@ namespace CmisSync.Lib.Cmis {
 
                 if (disposing) {
                     bool transmissionRun = false;
+
+                    // Maximum timeout is 10 sec (5 for aborting transmissions and 5 for stopping queue)
+                    int timeout = 5000;
                     do {
                         if (transmissionRun) {
                             Thread.Sleep(10);
+                            timeout -= 10;
                         }
+
                         transmissionRun = false;
                         List<Transmission> transmissions = this.activityListener.TransmissionManager.ActiveTransmissionsAsList();
                         foreach (Transmission transmission in transmissions) {
@@ -440,9 +445,9 @@ namespace CmisSync.Lib.Cmis {
                                 transmission.Abort();
                             }
                         }
-                    } while (transmissionRun);
+                    } while (transmissionRun && timeout > 0);
 
-                    int timeout = 5000;
+                    timeout = 5000;
                     if (!this.Queue.WaitForStopped(timeout)) {
                         Logger.Debug(string.Format("Event Queue of {0} has not been closed in {1} miliseconds", this.RemoteUrl.ToString(), timeout));
                     }
@@ -462,6 +467,10 @@ namespace CmisSync.Lib.Cmis {
             }
         }
 
+        /// <summary>
+        /// Creates a default EventManager and Queue.
+        /// </summary>
+        /// <returns>The queue.</returns>
         protected static ICountingQueue CreateQueue() {
             var manager = new SyncEventManager();
             return new SyncEventQueue(manager);
