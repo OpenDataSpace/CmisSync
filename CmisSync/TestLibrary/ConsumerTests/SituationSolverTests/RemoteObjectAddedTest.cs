@@ -81,7 +81,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         public void RemoteFolderAdded(
             [Values(true, false)]bool childrenAreIgnored,
             [Values(true, false)]bool extendedAttributesAvailable,
-            [Values(true, false)]bool throwExceptionOnUpdateModificationDate)
+            [Values(true, false)]bool throwExceptionOnUpdateModificationDate,
+            [Values(true, false)]bool readOnly)
         {
             var localModificationDate = DateTime.Now - TimeSpan.FromDays(1);
             var dirInfo = new Mock<IDirectoryInfo>();
@@ -101,12 +102,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 this.path,
                 this.parentId,
                 this.lastChangeToken,
-                ignored: childrenAreIgnored);
+                ignored: childrenAreIgnored,
+                readOnly: readOnly);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
             this.underTest.Solve(dirInfo.Object, remoteObject.Object);
 
             dirInfo.Verify(d => d.Create(), Times.Once());
+            dirInfo.VerifySet(d => d.ReadOnly = It.Is<bool>(r => r == readOnly), readOnly ? Times.Once() : Times.Never());
             this.storage.VerifySavedMappedObject(
                 MappedObjectType.Folder,
                 this.id,
@@ -116,7 +119,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 extendedAttributesAvailable,
                 lastLocalModification: throwExceptionOnUpdateModificationDate ? localModificationDate : this.creationDate,
                 lastRemoteModification: this.creationDate,
-                ignored: childrenAreIgnored);
+                ignored: childrenAreIgnored,
+                readOnly: readOnly);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
             dirInfo.VerifySet(d => d.Uuid = It.IsAny<Guid?>(), extendedAttributesAvailable ? Times.Once() : Times.Never());
             if (extendedAttributesAvailable) {

@@ -47,6 +47,13 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
         }
 
         [Test, Category("Fast")]
+        public void IsReadOnly([Values(true, false)]bool readOnly) {
+            var underTest = new Mock<IFolder>();
+            underTest.SetupReadOnly(readOnly);
+            Assert.That(underTest.Object.IsReadOnly(), Is.EqualTo(readOnly));
+        }
+
+        [Test, Category("Fast")]
         public void CanGetChildrenIfNoActionIsAvailable() {
             var underTest = new Mock<IFolder>();
             Assert.That(underTest.Object.CanGetChildren(), Is.Null);

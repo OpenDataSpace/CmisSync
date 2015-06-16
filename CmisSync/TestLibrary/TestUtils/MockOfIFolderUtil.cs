@@ -90,7 +90,15 @@ namespace TestLibrary.TestUtils {
             folder.Setup(f => f.Properties).Returns(props);
         }
 
-        public static Mock<IFolder> CreateRemoteFolderMock(string id, string name, string path, string parentId = null, string changetoken = "changetoken", bool ignored = false) {
+        public static Mock<IFolder> CreateRemoteFolderMock(
+            string id,
+            string name,
+            string path,
+            string parentId = null,
+            string changetoken = "changetoken",
+            bool ignored = false,
+            bool? readOnly = null)
+        {
             var newRemoteObject = new Mock<IFolder>();
             newRemoteObject.Setup(d => d.Id).Returns(id);
             newRemoteObject.Setup(d => d.Path).Returns(path);
@@ -101,6 +109,10 @@ namespace TestLibrary.TestUtils {
             newRemoteObject.Setup(d => d.GetDescendants(It.IsAny<int>())).Returns(new List<ITree<IFileableCmisObject>>());
             newRemoteObject.Setup(d => d.Move(It.IsAny<IObjectId>(), It.IsAny<IObjectId>())).Returns((IObjectId old, IObjectId current) => CreateRemoteFolderMock(id, name, path, current.Id, changetoken).Object);
             newRemoteObject.SetupIgnoreFlag(ignored);
+            if (readOnly != null) {
+                newRemoteObject.SetupReadOnly((bool)readOnly);
+            }
+
             return newRemoteObject;
         }
 

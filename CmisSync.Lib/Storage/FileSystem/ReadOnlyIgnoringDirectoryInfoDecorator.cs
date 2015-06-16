@@ -55,7 +55,13 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// Creates a directory.
         /// </summary>
         public void Create() {
-            this.dirInfo.Create();
+            if (this.Parent.ReadOnly) {
+                this.Parent.ReadOnly = false;
+                this.dirInfo.Create();
+                this.Parent.ReadOnly = true;
+            } else {
+                this.dirInfo.Create();
+            }
         }
 
         /// <summary>

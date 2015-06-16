@@ -92,8 +92,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 }
 
                 var remoteFolder = remoteId as IFolder;
-                IDirectoryInfo localFolder = localFile as IDirectoryInfo;
+                var localFolder = localFile as IDirectoryInfo;
                 localFolder.Create();
+                if (remoteFolder.IsReadOnly()) {
+                    localFolder.ReadOnly = true;
+                }
 
                 Guid uuid = Guid.Empty;
                 if (localFolder.IsExtendedAttributeAvailable()) {
@@ -117,6 +120,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 mappedObject.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
                 mappedObject.LastLocalWriteTimeUtc = localFolder.LastWriteTimeUtc;
                 mappedObject.Ignored = remoteFolder.AreAllChildrenIgnored();
+                mappedObject.IsReadOnly = localFolder.ReadOnly;
                 this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local folder {0} created and mapped to remote folder {1}", localFolder.FullName, remoteId.Id));
             } else if (localFile is IFileInfo) {
