@@ -57,8 +57,11 @@ namespace CmisSync.Lib.Storage.FileSystem {
         public void Create() {
             if (this.Parent.ReadOnly) {
                 this.Parent.ReadOnly = false;
-                this.dirInfo.Create();
-                this.Parent.ReadOnly = true;
+                try {
+                    this.dirInfo.Create();
+                } finally {
+                    this.Parent.ReadOnly = true;
+                }
             } else {
                 this.dirInfo.Create();
             }
@@ -95,7 +98,16 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// </summary>
         /// <param name="recursive">Deletes recursive if set to <c>true</c>.</param>
         public void Delete(bool recursive) {
-            this.dirInfo.Delete(recursive);
+            if (this.Parent.ReadOnly) {
+                this.Parent.ReadOnly = false;
+                try {
+                    this.dirInfo.Delete(recursive);
+                } finally {
+                    this.Parent.ReadOnly = true;
+                }
+            } else {
+                this.dirInfo.Delete(recursive);
+            }
         }
 
         /// <summary>

@@ -224,6 +224,7 @@ SOURCES =  \
 	StorageTests/FileSystemTests/ExtendedAttributeReaderUnixTest.cs \
 	StorageTests/FileSystemTests/FileSystemWrapperTests.cs \
 	StorageTests/FileSystemTests/LongFileAndPathNameSupportTest.cs \
+	StorageTests/FileSystemTests/ReadOnlyIgnoringDecorator/IDirectoryInfoDecoratorTest.cs \
 	StorageTests/FileSystemTests/Utf8FileNameNormalizationTest.cs \
 	StreamsTests/AbortableStreamTest.cs \
 	StreamsTests/BandwidthLimitedStreamTest.cs \
