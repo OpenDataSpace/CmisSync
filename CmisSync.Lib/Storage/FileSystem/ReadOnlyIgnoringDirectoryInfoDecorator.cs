@@ -98,6 +98,10 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// </summary>
         /// <param name="recursive">Deletes recursive if set to <c>true</c>.</param>
         public void Delete(bool recursive) {
+            if (this.dirInfo.ReadOnly) {
+                this.dirInfo.ReadOnly = false;
+            }
+
             if (this.Parent.ReadOnly) {
                 this.Parent.ReadOnly = false;
                 try {

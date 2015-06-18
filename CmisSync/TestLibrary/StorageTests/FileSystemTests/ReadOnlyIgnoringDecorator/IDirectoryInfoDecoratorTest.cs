@@ -63,17 +63,20 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         public void RemoveDirectory(
             [Values(true, false)]bool parentIsReadOnly,
             [Values(true, false)]bool doesNotExists,
+            [Values(true, false)]bool folderItselfIsReadOnly,
             [Values(true, false)]bool recursive)
         {
             var readOnlyParent = new Mock<IDirectoryInfo>(MockBehavior.Strict);
             readOnlyParent.SetupProperty(d => d.ReadOnly, parentIsReadOnly);
             var hiddenDirInfo = new Mock<IDirectoryInfo>(MockBehavior.Strict);
             hiddenDirInfo.Setup(d => d.Parent).Returns(readOnlyParent.Object);
+            hiddenDirInfo.SetupProperty(d => d.ReadOnly, folderItselfIsReadOnly);
             if (doesNotExists) {
                 hiddenDirInfo.Setup(d => d.Delete(recursive)).Throws<DirectoryNotFoundException>();
             } else {
                 hiddenDirInfo.Setup(d => d.Delete(recursive));
             }
+
             var underTest = new ReadOnlyIgnoringDirectoryInfoDecorator(hiddenDirInfo.Object);
 
             if (doesNotExists) {
@@ -82,12 +85,22 @@ namespace TestLibrary.StorageTests.FileSystemTests {
                 underTest.Delete(recursive);
             }
 
-
+            hiddenDirInfo.VerifyGet(d => d.ReadOnly, Times.Once());
+            hiddenDirInfo.VerifySet(d => d.ReadOnly = false, folderItselfIsReadOnly ? Times.Once() : Times.Never());
             readOnlyParent.VerifyGet(d => d.ReadOnly, Times.Once());
             readOnlyParent.VerifySet(d => d.ReadOnly = false, parentIsReadOnly ? Times.Once() : Times.Never());
             readOnlyParent.VerifySet(d => d.ReadOnly = true, parentIsReadOnly ? Times.Once() : Times.Never());
             hiddenDirInfo.Verify(d => d.Delete(recursive), Times.Once());
             Assert.That(readOnlyParent.Object.ReadOnly, Is.EqualTo(parentIsReadOnly));
+        }
+
+        [Test, Category("Fast"), Ignore("TODO")]
+        public void MoveDirectory(
+            [Values(true, false)]bool sourceParentIsReadOnly,
+            [Values(true, false)]bool targetParentIsReadOnly,
+            [Values(true, false)]bool doesNotExists,
+            [Values(true, false)]bool targetExists)
+        {
         }
     }
 }
