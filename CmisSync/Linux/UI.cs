@@ -103,6 +103,11 @@ namespace CmisSync {
                 this.Setting = null;
             }
 
+            if (this.Transmissions != null) {
+                this.Transmissions.Dispose();
+                this.Transmissions = null;
+            }
+
             this.disposed = true;
         }
     }
