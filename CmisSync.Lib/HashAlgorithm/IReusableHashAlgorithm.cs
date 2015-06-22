@@ -21,6 +21,6 @@ namespace CmisSync.Lib.HashAlgorithm {
     using System;
     using System.Security.Cryptography;
 
-    interface HashAlgorithmReuse : ICloneable {
+    interface IReusableHashAlgorithm : ICloneable {
     }
 }

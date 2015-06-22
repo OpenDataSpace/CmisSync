@@ -152,7 +152,7 @@ namespace CmisSync.Lib.FileTransmission {
         }
 
         private void UpdateHash(HashAlgorithm hash, long length, UpdateChecksum update) {
-            HashAlgorithmReuse reuse = hash as HashAlgorithmReuse;
+            IReusableHashAlgorithm reuse = hash as IReusableHashAlgorithm;
             if (reuse != null && update != null) {
                 using (HashAlgorithm hashReuse = (HashAlgorithm)reuse.Clone()) {
                     hashReuse.TransformFinalBlock(new byte[0], 0, 0);

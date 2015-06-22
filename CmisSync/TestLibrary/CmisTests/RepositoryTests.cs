@@ -192,5 +192,14 @@ namespace TestLibrary.CmisTests {
                 SingleStepEventQueue queue) : base(repoInfo, activityListener, true, queue) {
             }
         }
+
+        #region boilerplatecode
+        public void Dispose() {
+            if (this.queue != null) {
+                this.queue.Dispose();
+                this.queue = null;
+            }
+        }
+        #endregion
     }
 }

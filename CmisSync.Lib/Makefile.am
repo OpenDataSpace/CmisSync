@@ -157,7 +157,7 @@ SOURCES =  \
 	Filter/ReportingFilter.cs \
 	Filter/RepositoryRootDeletedDetection.cs \
 	Filter/SymlinkFilter.cs \
-	HashAlgorithm/HashAlgorithmReuse.cs \
+	HashAlgorithm/IReusableHashAlgorithm.cs \
 	HashAlgorithm/SHA1Reuse.cs \
 	HttpProxyUtils.cs \
 	IActivityListener.cs \

@@ -17,6 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+[assembly: System.CLSCompliant(true)]
 namespace DiagnoseTool {
     using System;
     using System.Collections.Generic;
