@@ -151,6 +151,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
                     throw;
                 }
+
                 watch.Stop();
 
                 mapped.LastContentSize = localFile.Length;

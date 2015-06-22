@@ -119,8 +119,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
         /// <returns>The SHA-1 hash of the uploaded file content.</returns>
         /// <param name="localFile">Local file.</param>
         /// <param name="doc">Remote document.</param>
-        /// <param name="transmissionManager">Transmission manager.</param>
-        /// <param name="transmissionEvent">File Transmission event.</param>
+        /// <param name="transmission">File transmission object.</param>
         /// <param name="mappedObject">Mapped object saved in <c>Storage</c></param>
         protected byte[] UploadFileWithPWC(IFileInfo localFile, ref IDocument doc, Transmission transmission, IMappedObject mappedObject = null) {
             byte[] checksum = null;
