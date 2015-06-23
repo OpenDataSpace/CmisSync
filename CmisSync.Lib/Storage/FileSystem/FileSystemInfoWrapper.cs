@@ -260,6 +260,12 @@ namespace CmisSync.Lib.Storage.FileSystem {
             }
         }
 
+        /// <summary>
+        /// Gets the type of the FS.
+        /// </summary>
+        /// <value>The type of the FS.</value>
+        public FSType FSType { get { return this.fsType; } }
+
 #if !__MonoCS__
         private void AddReadOnlyAclsToOriginal() {
             if (this.original is DirectoryInfo) {
