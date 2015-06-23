@@ -613,7 +613,7 @@ namespace CmisSync {
                         string pathname = Path.Combine(config.GetConfigPath(), this.BrandConfigFolder, path.Substring(1));
                         Directory.CreateDirectory(Path.GetDirectoryName(pathname));
                         try {
-                            using (FileStream output = File.OpenWrite(pathname)) {
+                            using (FileStream output = File.Open(pathname, FileMode.Truncate, FileAccess.Write)) {
                                 if (!clientBrand.GetFile(path, output)) {
                                     success = false;
                                     break;
