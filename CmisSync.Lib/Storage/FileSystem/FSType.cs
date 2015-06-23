@@ -21,7 +21,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
     using System;
 
     public enum FSType {
-        Unkown,
+        Unknown,
         NTFS,
         FAT12,
         FAT16,
@@ -54,7 +54,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
             case "hfs":
                 return FSType.HFS_Plus;
             default:
-                return FSType.Unkown;
+                return FSType.Unknown;
             }
         }
     } 
