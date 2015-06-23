@@ -753,7 +753,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         [Test, Category("Medium")]
         public void CreateWrapperOnNetworkShare([Values("\\\\server\\share\\")]string uncPath) {
             var wrapper = new DirectoryInfoWrapper(new DirectoryInfo(uncPath));
-            Assert.That(wrapper.GetType(), Is.EqualTo(FSType.Unkown));
+            Assert.That(wrapper.GetType(), Is.EqualTo(FSType.Unknown));
         }
 #endif
 

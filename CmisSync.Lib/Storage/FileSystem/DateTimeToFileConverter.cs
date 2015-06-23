@@ -61,11 +61,11 @@ namespace CmisSync.Lib.Storage.FileSystem {
             case FSType.reiserfs:
                 goto case FSType.ext3;
             case FSType.zfs:
-                goto case FSType.Unkown;
-            case FSType.Unkown:
+                goto case FSType.Unknown;
+            case FSType.Unknown:
                 return originalDate;
             default:
-                goto case FSType.Unkown;
+                goto case FSType.Unknown;
             }
         }
 
