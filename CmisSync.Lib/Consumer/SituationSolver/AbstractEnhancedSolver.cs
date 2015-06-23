@@ -108,7 +108,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent,
             ContentChangeType remoteContent);
 
-        private void SaveCacheFile(IFileInfo target, IDocument remoteDocument, byte[] hash, long length, Transmission transmissionEvent) {
+        private void SaveCacheFile(
+            IFileInfo target,
+            IDocument remoteDocument,
+            byte[] hash,
+            long length,
+            Transmission transmissionEvent)
+        {
             if (this.TransmissionStorage == null) {
                 return;
             }
@@ -185,7 +191,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 using (var filestream = target.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
                 using (var downloader = ContentTaskUtils.CreateDownloader()) {
                     try {
-                        downloader.DownloadFile(remoteDocument, filestream, transmission, hashAlg, (byte[] checksumUpdate, long length) => this.SaveCacheFile(target, remoteDocument, checksumUpdate, length, transmission));
+                        downloader.DownloadFile(
+                            remoteDocument,
+                            filestream,
+                            transmission,
+                            hashAlg,
+                            (byte[] checksumUpdate, long length) => this.SaveCacheFile(target, remoteDocument, checksumUpdate, length, transmission));
                         if (this.TransmissionStorage != null) {
                             this.TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
                         }
@@ -200,7 +211,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             }
         }
 
-        protected byte[] DownloadChanges(IFileInfo target, IDocument remoteDocument, IMappedObject obj, IFileSystemInfoFactory fsFactory, ITransmissionManager transmissionManager, ILog logger) {
+        protected byte[] DownloadChanges(
+            IFileInfo target,
+            IDocument remoteDocument,
+            IMappedObject obj,
+            IFileSystemInfoFactory fsFactory,
+            ITransmissionManager transmissionManager,
+            ILog logger)
+        {
             // Download changes
             byte[] hash = null;
 
@@ -307,7 +325,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 string parentId = Storage.GetRemoteId(parent);
                 if (parentId != null) {
                     var remoteObject = this.Session.GetObject(parentId);
-                    if (remoteObject.CanCreateFolder() == false && remoteObject.CanCreateDocument() == false) {
+                    if (remoteObject.IsReadOnly()) {
                         return true;
                     }
 
