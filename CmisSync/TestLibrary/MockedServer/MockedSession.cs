@@ -77,15 +77,6 @@ namespace TestLibrary.MockedServer {
             }
         }
 
-        #region boilerplatecode
-        public void Dispose() {
-            if (this.Binding != null) {
-                this.Binding.Dispose();
-                this.Binding = null;
-            }
-        }
-        #endregion
-
         private ICmisObject GetObjectByPath(string path) {
             var obj = this.Objects.First((o) => (o.Value is IFileableCmisObject && (o.Value as IFileableCmisObject).Paths.Contains(path))).Value;
             if (obj == null) {
