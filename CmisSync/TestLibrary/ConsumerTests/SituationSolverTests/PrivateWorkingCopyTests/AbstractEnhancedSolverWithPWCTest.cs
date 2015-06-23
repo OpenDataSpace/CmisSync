@@ -59,13 +59,16 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             Assert.Throws<ArgumentException>(() => new SolverClass(session, Mock.Of<IMetaDataStorage>(), Mock.Of<IFileTransmissionStorage>()));
         }
 
-        [Test, Category("Fast"), Ignore("TODO")]
-        public void UploadFileContentByPassingCheckedOutDocument([Values(0, 1024, 1024 * 1024, 10 * 1024 * 1024)]int fileLength, [Values(1024)]long chunkSize) {
+        [Test, Category("Fast")]
+        public void UploadFileContentByPassingCheckedOutDocument([Values(0, 512, 1024, 1024 + 512, 1024 * 1024 + 123)]int fileLength, [Values(1024)]long chunkSize) {
             byte[] content = new byte[fileLength];
             byte[] expectedHash = SHA1Managed.Create().ComputeHash(content);
             var underTest = this.InitializeMocksAndCreateSolver(chunkSize: chunkSize);
-            var localFile = new Mock<IFileInfo>();
+            var localFile = new Mock<IFileInfo>(MockBehavior.Strict);
             localFile.SetupStream(content);
+            localFile.Setup(f => f.Exists).Returns(true);
+            localFile.Setup(f => f.FullName).Returns("testfile.bin");
+            localFile.SetupProperty(f => f.LastWriteTimeUtc);
             var checkedOutDoc = new Mock<IDocument>();
             var checkedOutId = Guid.NewGuid().ToString();
             checkedOutDoc.Setup(d => d.Name).Returns("testfile.bin");
@@ -75,6 +78,17 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 checkedOutDoc.Setup(d => d.ContentStreamId).Returns((string)null);
                 checkedOutDoc.Setup(d => d.ContentStreamLength).Returns(0);
                 checkedOutDoc.Setup(d => d.GetContentStream()).Returns((IContentStream)null);
+            });
+            long remoteDocLength = 0;
+            checkedOutDoc.Setup(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), true)).Callback<IContentStream, bool, bool>((IContentStream s, bool l, bool refresh) => {
+                using (var stream = Stream.Null) {
+                    s.Stream.CopyTo(stream);
+                    remoteDocLength += (long)s.Length;
+                }
+
+                if (l) {
+                    checkedOutDoc.Setup(document => document.ContentStreamLength).Returns(remoteDocLength);
+                }
             });
             var mockedDoc = new Mock<IDocument>();
             var mockedDocId = Guid.NewGuid().ToString();
@@ -87,6 +101,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
             Assert.That(hash, Is.EqualTo(expectedHash));
             checkedOutDoc.Verify(d => d.CheckIn(true, It.IsAny<IDictionary<string, object>>(), It.IsAny<IContentStream>(), It.IsAny<string>()), Times.Once);
+            Assert.That(transmission.Status, Is.EqualTo(TransmissionStatus.FINISHED));
         }
 
         private SolverClass InitializeMocksAndCreateSolver(TransmissionType type = TransmissionType.UPLOAD_NEW_FILE, long chunkSize = 1024) {
