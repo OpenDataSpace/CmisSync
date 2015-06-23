@@ -68,7 +68,11 @@ namespace CmisSync.Lib.Storage.FileSystem {
 #if __MonoCS__
             this.fsType = FSTypeCreator.GetType(new UnixDriveInfo(Path.GetPathRoot(this.original.FullName)).DriveFormat);
 #else
-            this.fsType = FSTypeCreator.GetType(new DriveInfo(Path.GetPathRoot(this.original.FullName)).DriveFormat);
+            try {
+                this.fsType = FSTypeCreator.GetType(new DriveInfo(Path.GetPathRoot(this.original.FullName)).DriveFormat);
+            } catch (ArgumentException) {
+                this.fsType = FSType.Unknown;
+            }
 #endif
         }
 
