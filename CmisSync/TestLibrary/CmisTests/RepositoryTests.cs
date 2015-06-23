@@ -38,7 +38,7 @@ namespace TestLibrary.CmisTests {
     using TestLibrary.IntegrationTests;
 
     [TestFixture]
-    public class RepositoryTests {
+    public class RepositoryTests : IDisposable {
         private static dynamic config;
         private ActivityListenerAggregator listener;
         private RepoInfo repoInfo;
