@@ -99,7 +99,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             return remotePWCDocument;
         }
 
-        private void SaveRemotePWCDocument(IFileInfo localFile, IDocument remoteDocument, IDocument remotePWCDocument, byte[] checksum, Transmission transmissionEvent) {
+        private void SaveRemotePWCDocument(
+            IFileInfo localFile,
+            IDocument remoteDocument,
+            IDocument remotePWCDocument,
+            byte[] checksum,
+            Transmission transmissionEvent)
+        {
             if (remotePWCDocument == null) {
                 return;
             }
@@ -176,7 +182,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                         }
 
                         var document = doc;
-                        uploader.UploadFile(docPWC, file, transmission, hashAlg, false, (byte[] checksumUpdate, long length) => this.SaveRemotePWCDocument(localFile, document, docPWC, checksumUpdate, transmission));
+                        uploader.UploadFile(
+                            remoteDocument: docPWC,
+                            localFileStream: file,
+                            transmission: transmission,
+                            hashAlg: hashAlg,
+                            overwrite: false,
+                            update: (byte[] checksumUpdate, long length) => this.SaveRemotePWCDocument(localFile, document, docPWC, checksumUpdate, transmission));
                         hash = hashAlg.Hash;
                     } catch (Exception ex) {
                         transmission.FailedException = ex;
