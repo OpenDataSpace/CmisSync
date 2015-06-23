@@ -189,7 +189,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             return obj.IsActionAllowed(Actions.CanApplyAcl);
         }
 
-        public static bool IsReadOnly(this IFileableCmisObject obj) {
+        public static bool IsReadOnly(this ICmisObject obj) {
             return obj.CanCreateFolder() == false && obj.CanCreateDocument() == false;
         }
 
