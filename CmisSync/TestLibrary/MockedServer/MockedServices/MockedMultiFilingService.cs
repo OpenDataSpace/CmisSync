@@ -1,5 +1,5 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="HashAlgorithmReuse.cs" company="GRAU DATA AG">
+//-----------------------------------------------------------------------
+// <copyright file="MockedMultiFilingService.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -17,10 +17,15 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.HashAlgorithm {
+namespace TestLibrary.MockedServer.MockedServices {
     using System;
-    using System.Security.Cryptography;
 
-    interface HashAlgorithmReuse : ICloneable {
+    using DotCMIS.Binding.Services;
+
+    using Moq;
+
+    public class MockedMultiFilingService : Mock<IMultiFilingService> {
+        public MockedMultiFilingService(MockBehavior behavior = MockBehavior.Strict) : base(behavior) {
+        }
     }
 }

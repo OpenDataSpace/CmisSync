@@ -88,21 +88,13 @@ namespace CmisSync.Lib.Cmis {
             get {
                 if (this.Deactivated) {
                     return SyncStatus.Deactivated;
-                }
-
-                if (this.Paused) {
+                } else if (this.Paused) {
                     return SyncStatus.Suspend;
-                }
-
-                if (this.Warning) {
+                } else if (this.Warning) {
                     return SyncStatus.Warning;
-                }
-
-                if (!this.Connected) {
+                } else if (!this.Connected) {
                     return SyncStatus.Disconnected;
-                }
-
-                if (this.SyncRequested || this.KnownChanges > 0) {
+                } else if (this.SyncRequested || this.KnownChanges > 0) {
                     return SyncStatus.Synchronizing;
                 } else {
                     return SyncStatus.Idle;

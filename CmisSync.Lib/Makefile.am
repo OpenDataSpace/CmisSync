@@ -16,6 +16,7 @@ SOURCES =  \
 	Algorithms/Tarjan/Tarjan.cs \
 	Backend.cs \
 	ClientBrandBase.cs \
+	Cmis/AbstractNotifyingRepository.cs \
 	Cmis/Authentication/AuthProviderFactory.cs \
 	Cmis/Authentication/IDisposableAuthProvider.cs \
 	Cmis/Authentication/PersistentNtlmAuthenticationProvider.cs \
@@ -23,13 +24,16 @@ SOURCES =  \
 	Cmis/Authentication/StandardAuthenticationProviderWrapper.cs \
 	Cmis/ConvenienceExtenders/AllowableActionConvenienceExtenders.cs \
 	Cmis/ConvenienceExtenders/CmisConvenienceExtenders.cs \
+	Cmis/ConvenienceExtenders/CmisRepositoryInfoConvenienceExtenders.cs \
 	Cmis/DotCMISLogListener.cs \
+	Cmis/INotifyRepositoryPropertyChanged.cs \
 	Cmis/MimeType.cs \
 	Cmis/OperationContextFactory.cs \
 	Cmis/Repository.cs \
 	Cmis/RepositoryExceptionEventArgs.cs \
 	Cmis/RepositoryStatus.cs \
 	Cmis/RepositoryStatusAggregator.cs \
+	Cmis/SyncStatus.cs \
 	Cmis/UiUtils/CmisUtils.cs \
 	Cmis/UiUtils/LoginCredentials.cs \
 	Cmis/UiUtils/LoginException.cs \
@@ -152,7 +156,8 @@ SOURCES =  \
 	Filter/InvalidFolderNameFilter.cs \
 	Filter/ReportingFilter.cs \
 	Filter/RepositoryRootDeletedDetection.cs \
-	HashAlgorithm/HashAlgorithmReuse.cs \
+	Filter/SymlinkFilter.cs \
+	HashAlgorithm/IReusableHashAlgorithm.cs \
 	HashAlgorithm/SHA1Reuse.cs \
 	HttpProxyUtils.cs \
 	IActivityListener.cs \
@@ -219,7 +224,9 @@ SOURCES =  \
 	Storage/Database/Entities/MappedObject.cs \
 	Storage/Database/EntryNotFoundException.cs \
 	Storage/Database/FileTransmissionStorage.cs \
+	Storage/Database/GraphOutputConvenienceExtension.cs \
 	Storage/Database/ICookieStorage.cs \
+	Storage/Database/IDotTreeWriter.cs \
 	Storage/Database/IFileTransmissionStorage.cs \
 	Storage/Database/IMetaDataStorage.cs \
 	Storage/Database/IMetaDataStorageConvenienceExtender.cs \

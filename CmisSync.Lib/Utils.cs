@@ -215,7 +215,7 @@ namespace CmisSync.Lib {
         /// </summary>
         public static bool IsInvalidFolderName(string name, List<string> ignoreWildcards) {
             if (ignoreWildcards == null) {
-                throw new ArgumentNullException("Given wildcards are null");
+                throw new ArgumentNullException("ignoreWildcards");
             }
 
             bool ret = invalidFolderNameRegex.IsMatch(name);
@@ -325,7 +325,7 @@ namespace CmisSync.Lib {
             }
 
             DirectoryInfo dirinfo = new DirectoryInfo(path);
-            if(dirinfo.Exists) {
+            if (dirinfo.Exists) {
                 return IsSymlink(dirinfo);
             }
 
@@ -349,10 +349,10 @@ namespace CmisSync.Lib {
         /// Creates the user agent string for this client.
         /// </summary>
         /// <returns>The user agent.</returns>
-        public static string CreateUserAgent() {
+        public static string CreateUserAgent(string appName = "DSS") {
             return string.Format(
                 "{0}/{1} ({2}; {4}; hostname=\"{3}\")",
-                "DSS",
+                appName,
                 Backend.Version,
                 Environment.OSVersion.ToString(),
                 System.Environment.MachineName,
@@ -389,8 +389,8 @@ namespace CmisSync.Lib {
         /// <returns><c>true</c> if is repo name hidden the specified name hiddenRepos; otherwise, <c>false</c>.</returns>
         /// <param name="name">repo name.</param>
         /// <param name="hiddenRepos">Hidden repos.</param>
-        public static bool IsRepoNameHidden(string name, IList<string> hiddenRepos) {
-            foreach (string wildcard in hiddenRepos) {
+        public static bool IsRepoNameHidden(string name, params string[] hiddenRepos) {
+            foreach (var wildcard in hiddenRepos) {
                 if (Utils.IgnoreLineToRegex(wildcard).IsMatch(name)) {
                     return true;
                 }

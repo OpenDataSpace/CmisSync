@@ -65,7 +65,7 @@ namespace CmisSync.Lib.Producer.Watcher {
             FileSystemInfoFactory fsFactory = null)
         {
             if (watcher == null) {
-                throw new ArgumentNullException("The given fs watcher must not be null");
+                throw new ArgumentNullException("watcher");
             }
 
             if (string.IsNullOrEmpty(watcher.Path)) {
@@ -73,11 +73,11 @@ namespace CmisSync.Lib.Producer.Watcher {
             }
 
             if (queue == null) {
-                throw new ArgumentNullException("The given queue must not be null");
+                throw new ArgumentNullException("queue");
             }
 
             if (storage == null) {
-                throw new ArgumentNullException("The given storage must not be null");
+                throw new ArgumentNullException("storage");
             }
 
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();

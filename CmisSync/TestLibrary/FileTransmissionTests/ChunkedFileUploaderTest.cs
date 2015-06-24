@@ -175,16 +175,10 @@ namespace TestLibrary.FileTransmissionTests {
             this.mockedDocument.Setup(doc => doc.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.Is<bool>(b => b == true)))
                 .Throws(new IOException());
             using (IFileUploader uploader = new ChunkedUploader(this.chunkSize)) {
-                try {
-                    uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg);
-                    Assert.Fail();
-                }
-                catch (Exception e)
-                {
-                    Assert.IsInstanceOf(typeof(UploadFailedException), e);
-                    Assert.IsInstanceOf(typeof(IOException), e.InnerException);
-                    Assert.AreEqual(this.mockedDocument.Object, ((UploadFailedException)e).LastSuccessfulDocument);
-                }
+                var e = Assert.Throws<UploadFailedException>(() => uploader.UploadFile(this.mockedDocument.Object, this.localFileStream, this.transmission, this.hashAlg));
+                Assert.IsInstanceOf(typeof(UploadFailedException), e);
+                Assert.IsInstanceOf(typeof(IOException), e.InnerException);
+                Assert.AreEqual(this.mockedDocument.Object, ((UploadFailedException)e).LastSuccessfulDocument);
             }
         }
 

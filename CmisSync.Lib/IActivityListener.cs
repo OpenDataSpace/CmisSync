@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib
-{
+namespace CmisSync.Lib {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -30,8 +29,7 @@ namespace CmisSync.Lib
     /// - Start spinning when activity starts
     /// - Stop spinning when activity stops
     /// </summary>
-    public interface IActivityListener
-    {
+    public interface IActivityListener {
         /// <summary>
         /// Call this method to indicate that activity has started.
         /// </summary>
@@ -46,8 +44,7 @@ namespace CmisSync.Lib
     /// <summary>
     /// RAII class for IActivityListener
     /// </summary>
-    public class ActivityListenerResource : IDisposable
-    {
+    public class ActivityListenerResource : IDisposable {
         private IActivityListener activityListener;
 
         private bool disposed = false;
@@ -56,8 +53,7 @@ namespace CmisSync.Lib
         /// Initializes a new instance of the <see cref="CmisSync.Lib.ActivityListenerResource"/> class.
         /// </summary>
         /// <param name="listener">Activity listener.</param>
-        public ActivityListenerResource(IActivityListener listener)
-        {
+        public ActivityListenerResource(IActivityListener listener) {
             this.activityListener = listener;
             this.activityListener.ActivityStarted();
         }
@@ -66,16 +62,14 @@ namespace CmisSync.Lib
         /// Releases unmanaged resources and performs other cleanup operations before the
         /// <see cref="CmisSync.Lib.ActivityListenerResource"/> is reclaimed by garbage collection.
         /// </summary>
-        ~ActivityListenerResource()
-        {
+        ~ActivityListenerResource() {
             this.Dispose(false);
         }
 
         /// <summary>
         /// Implement <code>IDisposable.Dispose</code>
         /// </summary>
-        public void Dispose()
-        {
+        public void Dispose() {
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -84,10 +78,8 @@ namespace CmisSync.Lib
         /// Dispose the specified disposing.
         /// </summary>
         /// <param name="disposing">If set to <c>true</c> disposing.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if(!this.disposed)
-            {
+        protected virtual void Dispose(bool disposing) {
+            if (!this.disposed) {
                 this.activityListener.ActivityStopped();
                 this.disposed = true;
             }

@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-m4_define([cmissync_version], [2.1.0])
+m4_define([cmissync_version], [2.1.1])
 
 AC_PREREQ([2.54])
 AC_INIT([DataSpace Sync], cmissync_version)
@@ -53,8 +53,8 @@ AC_SUBST(JSON_PATH,[[\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.8/lib/net40/N
 AC_SUBST(LOG4NET_LIBS,[[-r:\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client/log4net.dll]])
 AC_SUBST(LOG4NET_PATH,[[\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client/log4net.dll]])
 
-AC_SUBST(DBREEZE_LIBS,[-r:\$\(top_srcdir\)/packages/DBreeze.1.61.1/lib/net45/DBreeze.dll])
-AC_SUBST(DBREEZE_PATH,[\$\(top_srcdir\)/packages/DBreeze.1.61.1/lib/net45/DBreeze.dll])
+AC_SUBST(DBREEZE_LIBS,[-r:\$\(top_srcdir\)/packages/DBreeze.1.71.0/lib/net40/DBreeze.dll])
+AC_SUBST(DBREEZE_PATH,[\$\(top_srcdir\)/packages/DBreeze.1.71.0/lib/net40/DBreeze.dll])
 
 AC_SUBST(MOQ_LIBS,[[-r:\$\(top_srcdir\)/packages/Moq.4.2.1409.1722/lib/net40/Moq.dll]])
 AC_SUBST(MOQ_PATH,[[\$\(top_srcdir\)/packages/Moq.4.2.1409.1722/lib/net40/Moq.dll]])
@@ -284,6 +284,9 @@ CmisSync/TestLibrary/proxy-server.json
 CmisSync/Linux/dataspacesync
 DataSpaceSync.Console/Makefile
 DataSpaceSync.Console/dsscli
+DiagnoseTool/Makefile
+DiagnoseTool/dssdiagnose
+DiagnoseTool/Mac/DiagnoseTool/Info.plist
 packaging/Makefile
 packaging/dataspacesync/debian/changelog
 CmisSync/Makefile

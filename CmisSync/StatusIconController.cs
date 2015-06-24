@@ -35,10 +35,11 @@ namespace CmisSync {
     /// </summary>
     public enum IconState {
         Idle,
-        SyncingUp,
-        SyncingDown,
         Syncing,
-        Error
+        Error,
+        Paused,
+        Deactivated,
+        Disconnected
     }
 
     /// <summary>
@@ -140,7 +141,7 @@ namespace CmisSync {
         /// Current frame of the animation being shown.
         /// First frame is the still icon.
         /// </summary>
-        private int animation_frame_number;
+        private int animationFrameNumber;
         
         /// <summary>
         /// Constructor.
@@ -156,7 +157,7 @@ namespace CmisSync {
                     if (Program.Controller.Folders.Count == 0) {
                         this.StateText = string.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
                     } else {
-                        this.StateText = Properties_Resources.FilesUpToDate;
+                        this.StateText = Properties_Resources.StatusNoChangeDetected;
                     }
                 }
 
@@ -172,15 +173,11 @@ namespace CmisSync {
                     if (Program.Controller.Folders.Count == 0) {
                         this.StateText = string.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
                     } else {
-                        this.StateText = Properties_Resources.FilesUpToDate;
+                        this.StateText = Properties_Resources.StatusNoChangeDetected;
                     }
                 }
 
                 this.UpdateStatusItemEvent(this.StateText);
-
-                this.animation.Stop();
-
-                this.UpdateIconEvent(0);
             };
 
             Program.Controller.OnTransmissionListChanged += delegate {
@@ -193,8 +190,40 @@ namespace CmisSync {
                     this.CurrentState = IconState.Syncing;
                     this.StateText = Properties_Resources.SyncingChanges;
                     this.UpdateStatusItemEvent(this.StateText);
-                    this.animation.Start();
+                    if (!this.animation.Enabled) {
+                        this.animation.Start();
+                    }
                 }
+            };
+
+            // Paused.
+            Program.Controller.OnPaused += delegate {
+                if (this.CurrentState != IconState.Error) {
+                    this.CurrentState = IconState.Paused;
+                    this.StateText = Properties_Resources.SyncStatusPaused;
+                }
+
+                this.UpdateStatusItemEvent(this.StateText);
+            };
+
+            // Deactivated.
+            Program.Controller.OnDeactivated += delegate {
+                if (this.CurrentState != IconState.Error) {
+                    this.CurrentState = IconState.Deactivated;
+                    this.StateText = Properties_Resources.SyncStatusDeactivated;
+                }
+
+                this.UpdateStatusItemEvent(this.StateText);
+            };
+
+            // Disconnected.
+            Program.Controller.OnDisconnected += delegate {
+                if (this.CurrentState != IconState.Error) {
+                    this.CurrentState = IconState.Disconnected;
+                    this.StateText = Properties_Resources.SyncStatusDisconnected;
+                }
+
+                this.UpdateStatusItemEvent(this.StateText);
             };
         }
 
@@ -274,20 +303,23 @@ namespace CmisSync {
         /// Start the tray icon animation.
         /// </summary>
         private void InitAnimation() {
-            this.animation_frame_number = 0;
+            this.animationFrameNumber = 0;
 
             this.animation = new Timer() {
                 Interval = 100
             };
 
             this.animation.Elapsed += delegate {
-                if (this.animation_frame_number < 4) {
-                    this.animation_frame_number++;
+                if (this.animationFrameNumber < 4) {
+                    this.animationFrameNumber++;
                 } else {
-                    this.animation_frame_number = 0;
+                    this.animationFrameNumber = 0;
+                    if (this.CurrentState != IconState.Syncing) {
+                        this.animation.Stop();
+                    }
                 }
 
-                this.UpdateIconEvent(this.animation_frame_number);
+                this.UpdateIconEvent(this.animationFrameNumber);
             };
         }
     }

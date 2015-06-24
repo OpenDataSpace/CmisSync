@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.Database
-{
+namespace CmisSync.Lib.Storage.Database {
     using System;
     using System.Collections.Generic;
 
@@ -26,8 +25,7 @@ namespace CmisSync.Lib.Storage.Database
     /// Object Tree interface. The tree has got the possibility to flag each node.
     /// </summary>
     /// <typeparam name="T">Type of the saved item.</typeparam>
-    public interface IObjectTree<T>
-    {
+    public interface IObjectTree<T> {
         /// <summary>
         /// Gets the item.
         /// </summary>

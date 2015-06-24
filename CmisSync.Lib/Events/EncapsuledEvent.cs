@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
     using System.Collections.Generic;
     using System.Text;
@@ -29,17 +28,14 @@ namespace CmisSync.Lib.Events
     /// another queue without loosing context informations which are implicit given
     /// on the source queue.
     /// </summary>
-    public class EncapsuledEvent : ISyncEvent
-    {
+    public class EncapsuledEvent : ISyncEvent {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.EncapsuledEvent"/> class with an embedded event.
         /// </summary>
         /// <param name="e">An Event from another context. Must not be null</param>
-        public EncapsuledEvent(ISyncEvent e)
-        {
-            if (e == null)
-            {
-                throw new ArgumentNullException("A EncapsuledEvent needs a ISyncEvent as parameter, but null was given");
+        public EncapsuledEvent(ISyncEvent e) {
+            if (e == null) {
+                throw new ArgumentNullException("e", "A EncapsuledEvent needs a ISyncEvent as parameter, but null was given");
             }
 
             this.Event = e;
@@ -54,8 +50,7 @@ namespace CmisSync.Lib.Events
         /// Returns the description of the embedded event
         /// </summary>
         /// <returns>A description and the toString of the embedded event</returns>
-        public override string ToString()
-        {
+        public override string ToString() {
             return string.Format("EncapsuledEvent: with embedded event \"{0}\"", this.Event.ToString());
         }
     }

@@ -20,17 +20,25 @@
 namespace TestLibrary.MockedServer {
     using System;
 
+    using DotCMIS;
     using DotCMIS.Client;
     using DotCMIS.Enums;
 
     using Moq;
 
     public class MockedFolderType : MockedObjectType<IFolderType> {
-        public MockedFolderType(MockBehavior behavior = MockBehavior.Strict) : base(behavior) {
+        public MockedFolderType(bool modificationDateUpdatable = true, MockBehavior behavior = MockBehavior.Strict) : base(behavior) {
             this.Id = BaseTypeId.CmisFolder.GetCmisValue();
             this.BaseType = this.Object;
             this.IsBaseType = true;
             this.BaseTypeId = BaseTypeId.CmisFolder;
+            this.Description = "mocked C# folder type";
+            this.DisplayName = "mocked folder type";
+            var modificationDateDefinition = new MockedPropertyDateTimeDefinition() {
+                Id = PropertyIds.LastModificationDate,
+                Updatability = modificationDateUpdatable ? Updatability.ReadWrite : Updatability.ReadOnly
+            }.Object;
+            this.PropertyDefinitions.Add(modificationDateDefinition);
         }
     }
 }

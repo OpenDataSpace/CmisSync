@@ -25,6 +25,7 @@ namespace TestLibrary.MockedServer {
     using DotCMIS.Client;
     using DotCMIS.Data;
     using DotCMIS.Enums;
+    using DotCMIS.Exceptions;
 
     using Moq;
 
@@ -43,12 +44,54 @@ namespace TestLibrary.MockedServer {
             this.Setup(m => m.GetChildren(It.IsAny<IOperationContext>())).Returns(this.children.Object);
             this.Setup(m => m.IsRootFolder).Returns(this.parent == null);
             this.Setup(m => m.FolderParent).Returns(() => this.parent);
-            this.ObjectType = new MockedFolderType(behavior).Object;
+            this.ObjectType = new MockedFolderType(behavior: behavior).Object;
 //            this.Setup(m => m.Path).Returns(this.parent.Path + "/" + this.name);
             this.Setup(m => m.LastModificationDate).Returns(this.lastModification);
             this.Setup(m => m.CreationDate).Returns(this.creationDate);
             this.UpdateChangeToken();
 //            this.Setup(m => m.Move(It.Is<IObjectId>(obj => obj.Id == this.Object.ParentId), It.IsAny<IObjectId>())).Returns(this.Object);
+            this.Setup(m => m.DeleteTree(It.IsAny<bool>(), It.IsAny<UnfileObject?>(), It.IsAny<bool>())).Returns<bool, UnfileObject?, bool>((a, u, c) => this.DeleteTree(a, u, c));
+            this.Setup(m => m.Delete(It.IsAny<bool>())).Callback<bool>((allVersions) => this.Delete(allVersions));
+        }
+
+        public MockedSession Session { get; set; }
+
+        private IList<string> DeleteTree(bool allVersions, UnfileObject? unfile, bool continueOnFailure) {
+            if (this.Session != null && !this.Session.Objects.ContainsKey(this.Object.Id)) {
+                throw new CmisObjectNotFoundException();
+            }
+
+            List<string> notDeletedEntries = new List<string>();
+            foreach (var child in this.Object.GetChildren()) {
+                try {
+                    if (child is IFolder) {
+                        notDeletedEntries.AddRange((child as IFolder).DeleteTree(allVersions, unfile, continueOnFailure));
+                    } else {
+                        child.Delete(allVersions);
+                    }
+                } catch (CmisBaseException) {
+                    notDeletedEntries.Add(child.Id);
+                    if (!continueOnFailure) {
+                        return notDeletedEntries;
+                    }
+                }
+            }
+
+            try {
+                this.Object.Delete(allVersions);
+            } catch (CmisBaseException) {
+                notDeletedEntries.Add(this.Object.Id);
+            }
+
+            return notDeletedEntries;
+        }
+
+        private void Delete(bool allVersions) {
+            if (this.Session != null) {
+                this.Session.Delete(this.Object.Id);
+            }
+
+            this.NotifyChanges(ChangeType.Deleted);
         }
     }
 }

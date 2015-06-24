@@ -67,7 +67,7 @@ namespace CmisSync.Lib.Producer.ContentChange
         /// </exception>
         public ContentChangeEventTransformer(ISyncEventQueue queue, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) : base(queue) {
             if (storage == null) {
-                throw new ArgumentNullException("Storage instance is needed for the ContentChangeEventTransformer, but was null");
+                throw new ArgumentNullException("storage");
             }
 
             this.storage = storage;

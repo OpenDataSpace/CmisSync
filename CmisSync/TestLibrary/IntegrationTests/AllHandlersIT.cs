@@ -324,7 +324,7 @@ namespace TestLibrary.IntegrationTests {
 
         private IMetaDataStorage GetInitializedStorage() {
             IPathMatcher matcher = new PathMatcher(this.localRoot, this.remoteRoot);
-            return new MetaDataStorage(this.engine, matcher);
+            return new MetaDataStorage(this.engine, matcher, true);
         }
 
         private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage, ObservableHandler observer, IFileSystemInfoFactory fsFactory = null) {
@@ -396,7 +396,7 @@ namespace TestLibrary.IntegrationTests {
             manager.AddEventHandler(failedOperationsFilder);
             */
 
-            var reportingFilter = new ReportingFilter(queue, ignoreFolderFilter, ignoreFileNamesFilter, ignoreFolderNameFilter, invalidFolderNameFilter);
+            var reportingFilter = new ReportingFilter(queue, ignoreFolderFilter, ignoreFileNamesFilter, ignoreFolderNameFilter, invalidFolderNameFilter, new SymlinkFilter());
             manager.AddEventHandler(reportingFilter);
 
             var debugHandler = new DebugLoggingHandler();

@@ -22,6 +22,7 @@ namespace TestLibrary.MockedServer {
     using System.Collections.Generic;
     using System.Linq;
 
+    using DotCMIS.Binding.Services;
     using DotCMIS.Client;
     using DotCMIS.Data;
     using DotCMIS.Enums;
@@ -30,49 +31,34 @@ namespace TestLibrary.MockedServer {
 
     using TestLibrary.TestUtils;
 
-    public class MockedRepository : Mock<IRepository> {
-        private static Dictionary<string, MockedRepository> repositories = new Dictionary<string, MockedRepository>();
+    public class MockedRepository : MockedRepositoryInfo<IRepository> {
+        public MockedRepository(
+            string id = null,
+            string name = "name",
+            MockedFolder rootFolder = null,
+            MockBehavior behavior = MockBehavior.Strict) : base(id, name, behavior) {
+            this.MockedRootFolder = rootFolder ?? new MockedFolder("/");
+            this.Objects = new Dictionary<string, ICmisObject>();
+            this.Objects.Add(this.MockedRootFolder.Object.Id, this.MockedRootFolder.Object);
+            this.RootFolderId = this.MockedRootFolder.Object.Id;
+            this.Setup(r => r.CreateSession()).Returns(() => {
+                var session = new MockedSession(this.Object.Id) {
+                    Binding = new MockedCmisBinding(behavior) {
+                        RepositoryService = this.RepositoryService
+                    }.Object,
+                    Objects = this.Objects
+                };
 
-        private MockedFolder rootFolder = new MockedFolder("/");
-
-        public IFolder RootFolder {
-            get {
-                return this.rootFolder.Object;
-            }
+                session.AddObjects(this.MockedRootFolder.Object);
+                this.MockedRootFolder.Session = session;
+                return session.Object;
+            });
         }
 
-        public static MockedRepository GetRepository(string id) {
-            lock (repositories) {
-                MockedRepository repo;
-                if (!repositories.TryGetValue(id, out repo)) {
-                    repo = new MockedRepository(id);
-                    repositories[id] = repo;
-                }
+        public MockedFolder MockedRootFolder { get; set; }
 
-                return repo;
-            }
-        }
+        public IRepositoryService RepositoryService { get; set; }
 
-        public void SetupName(string name) {
-            this.Setup(r => r.Name).Returns(name);
-        }
-
-        public void Destroy() {
-            repositories.Remove(this.Object.Id);
-        }
-
-        private MockedRepository(string id) : base(MockBehavior.Strict) {
-            this.Setup(r => r.Name).Returns("name");
-            this.Setup(r => r.Id).Returns(id);
-            this.Setup(r => r.Description).Returns("desc");
-            this.Setup(r => r.ProductName).Returns("GRAU DATA AG in memory cmis repo");
-            this.Setup(r => r.VendorName).Returns("GRAU DATA AG");
-            var acls = Mock.Of<IAclCapabilities>(
-                c =>
-                c.SupportedPermissions == SupportedPermissions.Basic &&
-                c.PermissionMapping == new Dictionary<string, IPermissionMapping>());
-            this.Setup(r => r.AclCapabilities).Returns(acls);
-            this.Setup(r => r.CreateSession()).Returns(new MockedSession(this).Object);
-        }
+        public Dictionary<string, ICmisObject> Objects { get; private set; }
     }
 }

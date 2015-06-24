@@ -174,5 +174,17 @@ namespace TestLibrary.SelectiveIgnoreTests {
 
             Assert.That(underTest.IsIgnored(doc.Object), Is.EqualTo(IgnoredState.INHERITED));
         }
+
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        public void IgnoreCheckOfSubDocumentWithoutParent() {
+            var underTest = new IgnoredEntitiesCollection();
+            var doc = new Mock<IDocument>();
+            doc.Setup(f => f.Id).Returns(Guid.NewGuid().ToString());
+            var parents = new List<IFolder>();
+            doc.Setup(f => f.Parents).Returns(parents);
+            underTest.Add(Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath));
+
+            Assert.That(underTest.IsIgnored(doc.Object), Is.EqualTo(IgnoredState.NOT_IGNORED));
+        }
     }
 }

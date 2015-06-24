@@ -25,6 +25,7 @@ namespace CmisSync.Lib.Queueing {
     using System.Timers;
 
     using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
 
@@ -68,19 +69,19 @@ namespace CmisSync.Lib.Queueing {
             }
 
             if (repoInfo == null) {
-                throw new ArgumentNullException("Given repo info is null");
+                throw new ArgumentNullException("repoInfo");
             }
 
             if (queue == null) {
-                throw new ArgumentNullException("Given queue is null");
+                throw new ArgumentNullException("queue");
             }
 
             if (sessionFactory == null) {
-                throw new ArgumentNullException("Given session factory is null");
+                throw new ArgumentNullException("sessionFactory");
             }
 
             if (authProvider == null) {
-                throw new ArgumentNullException("Given authentication provider is null");
+                throw new ArgumentNullException("authProvider");
             }
 
             this.Queue = queue;
@@ -220,7 +221,8 @@ namespace CmisSync.Lib.Queueing {
                     }
 
                     // Create session.
-                    var session = this.SessionFactory.CreateSession(this.GetCmisParameter(this.RepoInfo), null, this.AuthProvider, null);
+                    var session = this.SessionFactory.CreateSession(this.RepoInfo, authenticationProvider: this.AuthProvider);
+                    Logger.Debug(session.RepositoryInfo.ToLogString());
                     this.cancelToken.ThrowIfCancellationRequested();
                     session.DefaultContext = OperationContextFactory.CreateDefaultContext(session);
                     this.cancelToken.ThrowIfCancellationRequested();
@@ -256,36 +258,6 @@ namespace CmisSync.Lib.Queueing {
 
                 return false;
             }
-        }
-
-        /// <summary>
-        /// Parameter to use for all CMIS requests.
-        /// </summary>
-        /// <returns>
-        /// The cmis parameter.
-        /// </returns>
-        /// <param name='repoInfo'>
-        /// The repository infos.
-        /// </param>
-        private Dictionary<string, string> GetCmisParameter(RepoInfo repoInfo) {
-            Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
-            if (repoInfo.Binding == DotCMIS.BindingType.AtomPub) {
-                cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-                cmisParameters[SessionParameter.AtomPubUrl] = repoInfo.Address.ToString();
-            } else if (repoInfo.Binding == DotCMIS.BindingType.Browser) {
-                cmisParameters[SessionParameter.BindingType] = BindingType.Browser;
-                cmisParameters[SessionParameter.BrowserUrl] = repoInfo.Address.ToString();
-            }
-
-            cmisParameters[SessionParameter.User] = repoInfo.User;
-            cmisParameters[SessionParameter.Password] = repoInfo.GetPassword().ToString();
-            cmisParameters[SessionParameter.RepositoryId] = repoInfo.RepositoryId;
-            cmisParameters[SessionParameter.ConnectTimeout] = repoInfo.ConnectionTimeout.ToString();
-            cmisParameters[SessionParameter.ReadTimeout] = repoInfo.ReadTimeout.ToString();
-            cmisParameters[SessionParameter.DeviceIdentifier] = ConfigManager.CurrentConfig.DeviceId.ToString();
-            cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
-            cmisParameters[SessionParameter.Compression] = bool.TrueString;
-            return cmisParameters;
         }
     }
 }

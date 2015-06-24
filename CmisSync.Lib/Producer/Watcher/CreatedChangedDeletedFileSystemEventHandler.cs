@@ -65,11 +65,11 @@ namespace CmisSync.Lib.Producer.Watcher {
             long threshold = 100)
         {
             if (queue == null) {
-                throw new ArgumentNullException("Given queue is null");
+                throw new ArgumentNullException("queue");
             }
 
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage");
             }
 
             this.queue = queue;

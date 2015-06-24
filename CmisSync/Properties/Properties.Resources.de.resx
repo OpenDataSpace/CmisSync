@@ -223,7 +223,7 @@
     <value>Synchronisation</value>
   </data>
   <data name="SyncingChanges" xml:space="preserve">
-    <value>Synchronisieren die Änderungen...</value>
+    <value>Synchronisation läuft...</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Benutzer</value>
@@ -429,5 +429,14 @@ Dies kann bei der Synchronisation zu Konfliktdateien führen.</value>
   </data>
   <data name="WarningExceptionTitle" xml:space="preserve">
     <value>{0}: Fehler aufgetreten</value>
+  </data>
+  <data name="SyncStatusDeactivated" xml:space="preserve">
+    <value>Alle Verbindungen sind deaktiviert</value>
+  </data>
+  <data name="SyncStatusDisconnected" xml:space="preserve">
+    <value>Verbindung zum Server ist getrennt</value>
+  </data>
+  <data name="SyncStatusPaused" xml:space="preserve">
+    <value>Synchronisation ist pausiert</value>
   </data>
 </root>

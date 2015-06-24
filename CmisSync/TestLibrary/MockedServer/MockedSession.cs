@@ -29,46 +29,69 @@ namespace TestLibrary.MockedServer {
     using DotCMIS.Data;
     using DotCMIS.Data.Extensions;
     using DotCMIS.Enums;
+    using DotCMIS.Exceptions;
 
     using Moq;
 
     using TestLibrary.TestUtils;
 
     public class MockedSession : Mock<ISession> {
-        private Mock<ICmisBinding> binding = new Mock<ICmisBinding>(MockBehavior.Strict);
-        private Mock<IRepositoryService> repoService = new Mock<IRepositoryService>(MockBehavior.Strict);
+        public MockedSession(string repoId, MockBehavior behavior = MockBehavior.Strict) : base(behavior) {
+            this.Objects = new Dictionary<string, ICmisObject>();
+            this.Setup(s => s.ObjectFactory).Returns(() => this.ObjectFactory);
+            this.Setup(s => s.Binding).Returns(() => this.Binding);
+            this.Setup(s => s.RepositoryInfo).Returns(() => this.Binding.GetRepositoryService().GetRepositoryInfo(repoId, null));
 
-        public MockedSession(MockedRepository repo, MockBehavior behavior = MockBehavior.Strict) : base(behavior) {
-            // TypeSystem
-            IList<IPropertyDefinition> props = new List<IPropertyDefinition>();
-            props.Add(Mock.Of<IPropertyDefinition>(p => p.Id == PropertyIds.LastModificationDate && p.Updatability == DotCMIS.Enums.Updatability.ReadWrite));
-            var docType = Mock.Of<IObjectType>(d => d.PropertyDefinitions == props);
-            var folderType = Mock.Of<IObjectType>(d => d.PropertyDefinitions == props);
-            this.repoService.Setup(s => s.GetTypeDefinition(repo.Object.Id, BaseTypeId.CmisDocument.GetCmisValue(), null)).Returns(docType);
-            this.repoService.Setup(s => s.GetTypeDefinition(repo.Object.Id, BaseTypeId.CmisFolder.GetCmisValue(), null)).Returns(folderType);
-
-            this.repoService.Setup(s => s.GetRepositoryInfos(It.IsAny<IExtensionsData>())).Returns((IList<IRepositoryInfo>)null);
-            this.binding.Setup(b => b.GetRepositoryService()).Returns(this.repoService.Object);
-            this.Setup(s => s.Binding).Returns(this.binding.Object);
-            this.Setup(s => s.RepositoryInfo.Id).Returns(repo.Object.Id);
-
-            this.Setup(s => s.Delete(It.Is<IObjectId>(o => this.Objects.ContainsKey(o.Id)))).Callback<IObjectId>((o) => this.Objects.Remove(o.Id));
-            this.Setup(s => s.Delete(It.Is<IObjectId>(o => this.Objects.ContainsKey(o.Id)), It.IsAny<bool>())).Callback<IObjectId, bool>((o, a) => this.Objects.Remove(o.Id));
+            this.Setup(s => s.Delete(It.Is<IObjectId>(o => this.Objects.ContainsKey(o.Id)))).Callback<IObjectId>((o) => this.Delete(o.Id));
+            this.Setup(s => s.Delete(It.Is<IObjectId>(o => this.Objects.ContainsKey(o.Id)), It.IsAny<bool>())).Callback<IObjectId, bool>((o, a) => this.Delete(o.Id));
 
             this.Setup(s => s.GetContentStream(It.Is<IObjectId>(o => (this.Objects[o.Id] as IDocument) != null))).Returns<IObjectId>((o) => (this.Objects[o.Id] as IDocument).GetContentStream());
 
-            this.Setup(s => s.GetRootFolder()).Returns(() => this.RootFolder);
-            this.Setup(s => s.GetRootFolder(It.IsAny<IOperationContext>())).Returns(() => this.RootFolder);
+            this.Setup(s => s.GetRootFolder()).Returns(() => this.GetObject(this.Object.RepositoryInfo.RootFolderId) as IFolder);
+            this.Setup(s => s.GetRootFolder(It.IsAny<IOperationContext>())).Returns(() => this.GetObject(this.Object.RepositoryInfo.RootFolderId) as IFolder);
 
             this.Setup(s => s.GetObjectByPath(It.Is<string>(p => !string.IsNullOrEmpty(p)))).Returns<string>((p) => this.GetObjectByPath(p));
+            this.Setup(s => s.GetObjectByPath(It.Is<string>(p => !string.IsNullOrEmpty(p)), It.IsAny<IOperationContext>())).Returns<string, IOperationContext>((p, c) => this.GetObjectByPath(p));
+
+            this.Setup(s => s.GetObject(It.IsAny<string>())).Returns<string>((objectId) => this.GetObject(objectId));
+            this.Setup(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>())).Returns<string, IOperationContext>((objectId, ctx) => this.GetObject(objectId));
+            this.Setup(s => s.GetObject(It.IsAny<IObjectId>())).Returns<IObjectId>((objectId) => this.GetObject(objectId.Id));
+            this.Setup(s => s.GetObject(It.IsAny<IObjectId>(), It.IsAny<IOperationContext>())).Returns<IObjectId, IOperationContext>((objectId, ctx) => this.GetObject(objectId.Id));
         }
 
         public Dictionary<string, ICmisObject> Objects { get; set; }
 
-        public IFolder RootFolder { get; set; }
+        public ICmisBinding Binding { get; set; }
+
+        public IObjectFactory ObjectFactory { get; set; }
+
+        public void Delete(string objectId) {
+            if (!this.Objects.Remove(objectId)) {
+                throw new CmisObjectNotFoundException();
+            }
+        }
+
+        public void AddObjects(params ICmisObject[] objects) {
+            foreach (var obj in objects) {
+                this.Objects[obj.Id] = obj;
+            }
+        }
 
         private ICmisObject GetObjectByPath(string path) {
-            return this.Objects.First((o) => (o.Value is IFileableCmisObject && (o.Value as IFileableCmisObject).Paths.Contains(path))).Value;
+            var obj = this.Objects.First((o) => (o.Value is IFileableCmisObject && (o.Value as IFileableCmisObject).Paths.Contains(path))).Value;
+            if (obj == null) {
+                throw new CmisObjectNotFoundException();
+            } else {
+                return obj;
+            }
+        }
+
+        private ICmisObject GetObject(string objectId) {
+            if (!this.Objects.ContainsKey(objectId)) {
+                throw new CmisObjectNotFoundException();
+            }
+
+            return this.Objects[objectId];
         }
     }
 }

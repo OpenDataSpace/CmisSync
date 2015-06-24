@@ -59,15 +59,15 @@ namespace CmisSync.Lib.Producer.ContentChange {
             int maxNumberOfContentChanges = 100,
             bool isPropertyChangesSupported = false) : base(queue) {
             if (session == null) {
-                throw new ArgumentNullException("Session instance is needed for the ChangeLogStrategy, but was null");
+                throw new ArgumentNullException("session");
             }
 
             if (storage == null) {
-                throw new ArgumentNullException("MetaDataStorage instance is needed for the ChangeLogStrategy, but was null");
+                throw new ArgumentNullException("storage");
             }
 
             if (maxNumberOfContentChanges <= 1) {
-                throw new ArgumentException("MaxNumberOfContentChanges must be greater then one");
+                throw new ArgumentException("MaxNumberOfContentChanges must be greater then one", "maxNumberOfContentChanges");
             }
 
             this.session = session;
@@ -131,7 +131,7 @@ namespace CmisSync.Lib.Producer.ContentChange {
                 }
 
                 return true;
-            } catch(CmisRuntimeException e) {
+            } catch (CmisRuntimeException e) {
                 Logger.Warn("ContentChangeSync not successfull, fallback to CrawlSync");
                 Logger.Debug(e.Message);
                 Logger.Debug(e.StackTrace);

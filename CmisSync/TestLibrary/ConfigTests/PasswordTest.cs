@@ -80,13 +80,6 @@ namespace TestLibrary.ConfigTests {
             Assert.That(underTest, Is.EqualTo(new Password("secret")));
         }
 
-        [Test, Category("Fast"), Ignore("Fails on windows due to not yet known reasons, but the call is not important for production code")]
-        public void HashCodeIsEqualIfBothContentsAreEqual() {
-            var underTest = new Password("secret");
-            var otherPassword = new Password("secret");
-            Assert.That(underTest.GetHashCode(), Is.EqualTo(otherPassword.GetHashCode()), string.Format("HashCode of \"{0}\" is not equal to HashCode of \"{1}\"", underTest.ToString(), otherPassword.ToString()));
-        }
-
         [Test, Category("Fast")]
         public void EqualsOnNullReturnsFalse() {
             Assert.That(new Password("secret").Equals(null), Is.False);

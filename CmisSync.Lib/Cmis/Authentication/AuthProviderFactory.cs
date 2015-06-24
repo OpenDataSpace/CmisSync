@@ -49,8 +49,7 @@ namespace CmisSync.Lib.Cmis {
         public static IDisposableAuthProvider CreateAuthProvider(Config.AuthenticationType type, Uri url, DBreezeEngine db) {
             ICookieStorage storage = new PersistentCookieStorage(db);
 
-            switch(type)
-            {
+            switch (type) {
             case Config.AuthenticationType.BASIC:
                 return new PersistentStandardAuthenticationProvider(storage, url);
             case Config.AuthenticationType.KERBEROS:

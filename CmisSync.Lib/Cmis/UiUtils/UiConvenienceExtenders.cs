@@ -32,11 +32,11 @@ namespace CmisSync.Lib.Cmis.UiUtils {
     /// User interface convenience extenders.
     /// </summary>
     public static class UiConvenienceExtenders {
-        public static IList<LogonRepositoryInfo> WithoutHiddenOnce(this IList<LogonRepositoryInfo> repositories, IList<string> hiddenNames = null) {
+        public static IList<LogonRepositoryInfo> WithoutHiddenOnce(this IList<LogonRepositoryInfo> repositories, List<string> hiddenNames = null) {
             var result = new List<LogonRepositoryInfo>();
-            hiddenNames = hiddenNames ?? ConfigManager.CurrentConfig.HiddenRepoNames;
-            foreach (var repo in repositories) {
-                if (!Utils.IsRepoNameHidden(repo.Name, hiddenNames)) {
+            hiddenNames = hiddenNames ?? ConfigManager.CurrentConfig.HiddenRepoNames ?? new List<string>();
+            foreach (var repo in repositories ?? result) {
+                if (!Utils.IsRepoNameHidden(repo.Name, hiddenNames.ToArray())) {
                     result.Add(repo);
                 }
             }

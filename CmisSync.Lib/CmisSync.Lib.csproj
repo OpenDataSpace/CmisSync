@@ -35,7 +35,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DBreeze">
-      <HintPath>..\packages\DBreeze.1.61.1\lib\net45\DBreeze.dll</HintPath>
+      <HintPath>..\packages\DBreeze.1.71.0\lib\net40\DBreeze.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Security" />
@@ -64,7 +64,6 @@
     <Compile Include="Cmis\MimeType.cs" />
     <Compile Include="Config\Brand.cs" />
     <Compile Include="Defines.cs" />
-    <Compile Include="HashAlgorithm\HashAlgorithmReuse.cs" />
     <Compile Include="HashAlgorithm\SHA1Reuse.cs" />
     <Compile Include="Storage\Database\Entities\FileTransmissionObject.cs" />
     <Compile Include="Storage\Database\Entities\IFileTransmissionObject.cs" />
@@ -315,6 +314,14 @@
     <Compile Include="UiUtils\IIconLoader.cs" />
     <Compile Include="UiUtils\AggregatingIconLoader.cs" />
     <Compile Include="Streams\StreamConvenienceExtensions.cs" />
+    <Compile Include="Cmis\INotifyRepositoryPropertyChanged.cs" />
+    <Compile Include="Cmis\AbstractNotifyingRepository.cs" />
+    <Compile Include="Cmis\SyncStatus.cs" />
+    <Compile Include="Storage\Database\GraphOutputConvenienceExtension.cs" />
+    <Compile Include="Storage\Database\IDotTreeWriter.cs" />
+    <Compile Include="Filter\SymlinkFilter.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\CmisRepositoryInfoConvenienceExtenders.cs" />
+    <Compile Include="HashAlgorithm\IReusableHashAlgorithm.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

@@ -57,17 +57,13 @@ namespace TestLibrary.StreamsTests {
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnAllParameterNull() {
-            using (new ProgressStream(null)) {
-            }
+            Assert.Throws<ArgumentNullException>(() => { using (new ProgressStream(null)); });
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnStreamIsNull() {
-            using (new ProgressStream(null)) {
-            }
+            Assert.Throws<ArgumentNullException>(() => { using (new ProgressStream(null)); });
         }
 
         [Test, Category("Fast"), Category("Streams")]

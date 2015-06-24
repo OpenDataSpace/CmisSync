@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="ActiveActivitiesManager.cs" company="GRAU DATA AG">
+// <copyright file="TransmissionManager.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -81,17 +81,18 @@ namespace CmisSync.Lib.Queueing {
                 if (entry.Key != null) {
                     transmission.RelativePath = path.Substring(entry.Key.Length).TrimStart(System.IO.Path.DirectorySeparatorChar);
                 }
+
+                transmission.PropertyChanged += this.TransmissionFinished;
+                this.activeTransmissions.Add(transmission);
             }
 
-            transmission.PropertyChanged += this.TransmissionFinished;
-            this.activeTransmissions.Add(transmission);
             return transmission;
         }
 
         /// <summary>
         /// Adds the path repo mapping entry to internal storage.
         /// </summary>
-        /// <param name="path">Path.</param>
+        /// <param name="path">Local path.</param>
         /// <param name="repoName">Repo name.</param>
         public void AddPathRepoMapping(string path, string repoName) {
             lock (this.collectionLock) {
@@ -120,12 +121,12 @@ namespace CmisSync.Lib.Queueing {
                 return;
             }
 
-            var transmission = (sender as Transmission);
+            var transmission = sender as Transmission;
             if (transmission != null &&
                 (transmission.Status == TransmissionStatus.ABORTED || transmission.Status == TransmissionStatus.FINISHED)) {
                 lock (this.collectionLock) {
                     this.activeTransmissions.Remove(transmission);
-                    transmission.PropertyChanged -= TransmissionFinished;
+                    transmission.PropertyChanged -= this.TransmissionFinished;
                     Logger.Debug("Transmission removed");
                 }
             }

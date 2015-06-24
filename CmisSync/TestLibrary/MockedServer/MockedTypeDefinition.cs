@@ -19,6 +19,7 @@
 
 namespace TestLibrary.MockedServer {
     using System;
+    using System.Collections.Generic;
 
     using DotCMIS.Data;
     using DotCMIS.Enums;
@@ -27,6 +28,7 @@ namespace TestLibrary.MockedServer {
 
     public class MockedTypeDefinition<T> : Mock<T> where T: class, ITypeDefinition {
         public MockedTypeDefinition(MockBehavior behavior = MockBehavior.Strict) : base(behavior) {
+            this.PropertyDefinitions = new List<IPropertyDefinition>();
             this.Setup(m => m.Description).Returns(() => this.Description);
             this.Setup(m => m.DisplayName).Returns(() => this.DisplayName);
             this.Setup(m => m.Id).Returns(() => this.Id);
@@ -35,6 +37,7 @@ namespace TestLibrary.MockedServer {
             this.Setup(m => m.QueryName).Returns(() => this.QueryName);
             this.Setup(m => m.BaseTypeId).Returns(() => this.BaseTypeId);
             this.Setup(m => m.ParentTypeId).Returns(() => this.ParentTypeId);
+            this.Setup(m => m.PropertyDefinitions).Returns(() => new List<IPropertyDefinition>(this.PropertyDefinitions));
         }
 
         public string Description { get; set; }
@@ -52,5 +55,7 @@ namespace TestLibrary.MockedServer {
         public BaseTypeId BaseTypeId { get; set; }
 
         public string ParentTypeId { get; set; }
+
+        public IList<IPropertyDefinition> PropertyDefinitions { get; set; }
     }
 }

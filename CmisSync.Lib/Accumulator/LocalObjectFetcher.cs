@@ -54,7 +54,7 @@ namespace CmisSync.Lib.Accumulator {
         /// </exception>
         public LocalObjectFetcher(IPathMatcher matcher, IFileSystemInfoFactory fsFactory = null) {
             if (matcher == null) {
-                throw new ArgumentNullException("matcher can not be null");
+                throw new ArgumentNullException("matcher");
             }
 
             this.matcher = matcher;

@@ -90,11 +90,11 @@ namespace CmisSync.Lib.Producer.Watcher {
         /// <param name="latency">Maximum latency for file system events.</param>
         public MacWatcher(string pathname, ISyncEventQueue queue, TimeSpan latency) {
             if (string.IsNullOrEmpty(pathname)) {
-                throw new ArgumentNullException("The given fs stream must not be null");
+                throw new ArgumentNullException("pathname", "The given fs stream must not be null");
             }
 
             if (queue == null) {
-                throw new ArgumentNullException("The given queue must not be null");
+                throw new ArgumentNullException("queue", "The given queue must not be null");
             }
 
             this.Queue = queue;

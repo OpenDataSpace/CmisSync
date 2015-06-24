@@ -23,6 +23,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
     using System.IO;
 
     using CmisSync.Lib;
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.PathMatcher;
@@ -96,7 +97,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
                 Guid = this.rootGuid,
                 LastLocalWriteTimeUtc = this.lastLocalWriteTime
             };
-            this.storage = new MetaDataStorage(this.storageEngine, this.matcher);
+            this.storage = new MetaDataStorage(this.storageEngine, this.matcher, true);
             this.storage.SaveMappedObject(this.mappedRootObject);
             this.filter = MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object;
             this.listener = new Mock<IActivityListener>();
@@ -560,6 +561,20 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Remote == MetaDataChangeType.DELETED && e.Local == MetaDataChangeType.NONE && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Never());
             this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
             this.VerifyThatListenerHasBeenUsed();
+        }
+
+        [Test, Category("Fast")]
+        public void PathTooLongExceptionGetsEmbeddedIntoInteractionNeededException([Values(true, false)]bool filesThrowsException) {
+            var crawler = this.CreateCrawler();
+            if (filesThrowsException) {
+                this.localFolder.Setup(f => f.GetFiles()).Throws<PathTooLongException>();
+            } else {
+                this.localFolder.Setup(f => f.GetDirectories()).Throws<PathTooLongException>();
+            }
+
+            var exception = Assert.Throws<InteractionNeededException>(() => crawler.Handle(new StartNextSyncEvent()));
+
+            Assert.That(exception.InnerException, Is.TypeOf<PathTooLongException>());
         }
 
         #region boilerplatecode

@@ -49,7 +49,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DBreeze">
-      <HintPath>..\..\packages\DBreeze.1.61.1\lib\net45\DBreeze.dll</HintPath>
+      <HintPath>..\..\packages\DBreeze.1.71.0\lib\net40\DBreeze.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -302,6 +302,29 @@
     <Compile Include="MockedServer\MockedPropertyUriDefinition.cs" />
     <Compile Include="MockedServer\MockedChoice.cs" />
     <Compile Include="MockedServer\MockedPolicyIdList.cs" />
+    <Compile Include="IntegrationTests\MockedServerTests\SetupRepositoryTest.cs" />
+    <Compile Include="MockedServer\MockedRepositoryInfo.cs" />
+    <Compile Include="MockedServer\MockedAclCapabilities.cs" />
+    <Compile Include="MockedServer\MockedPermissionDefinition.cs" />
+    <Compile Include="MockedServer\MockedPermissionMapping.cs" />
+    <Compile Include="MockedServer\MockedCmisBinding.cs" />
+    <Compile Include="MockedServer\MockedSessionFactory.cs" />
+    <Compile Include="IntegrationTests\MockedServerTests\SetupSessionFactoryTest.cs" />
+    <Compile Include="IntegrationTests\PrivateWorkingCopyTests\UploadChangedContent.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedAclService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedDiscoveryService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedMultiFilingService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedNavigationService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedObjectService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedPolicyService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedRepositoryService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedRelationshipService.cs" />
+    <Compile Include="MockedServer\MockedServices\MockedVersioningService.cs" />
+    <Compile Include="MockedServer\MockedObjectData.cs" />
+    <Compile Include="CmisTests\RepositoryStatusAggregatorTest.cs" />
+    <Compile Include="CmisTests\AbstractRepositoryTest.cs" />
+    <Compile Include="StorageTests\DataBaseTests\GraphOutputTest.cs" />
+    <Compile Include="FilterTests\SymlinkFilterTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -337,5 +360,6 @@
     <Folder Include="IntegrationTests\PrivateWorkingCopyTests\" />
     <Folder Include="IntegrationTests\ContentHashTests\" />
     <Folder Include="IntegrationTests\MockedServerTests\" />
+    <Folder Include="MockedServer\MockedServices\" />
   </ItemGroup>
 </Project>

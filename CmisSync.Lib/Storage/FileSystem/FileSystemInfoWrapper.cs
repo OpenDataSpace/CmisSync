@@ -68,7 +68,11 @@ namespace CmisSync.Lib.Storage.FileSystem {
 #if __MonoCS__
             this.fsType = FSTypeCreator.GetType(new UnixDriveInfo(Path.GetPathRoot(this.original.FullName)).DriveFormat);
 #else
-            this.fsType = FSTypeCreator.GetType(new DriveInfo(Path.GetPathRoot(this.original.FullName)).DriveFormat);
+            try {
+                this.fsType = FSTypeCreator.GetType(new DriveInfo(Path.GetPathRoot(this.original.FullName)).DriveFormat);
+            } catch (ArgumentException) {
+                this.fsType = FSType.Unknown;
+            }
 #endif
         }
 
@@ -153,6 +157,15 @@ namespace CmisSync.Lib.Storage.FileSystem {
 #endif
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is a symlink.
+        /// </summary>
+        public bool IsSymlink {
+            get {
+                return (this.Attributes & FileAttributes.ReparsePoint) == FileAttributes.ReparsePoint;
             }
         }
 
@@ -246,6 +259,12 @@ namespace CmisSync.Lib.Storage.FileSystem {
                 return false;
             }
         }
+
+        /// <summary>
+        /// Gets the type of the FS.
+        /// </summary>
+        /// <value>The type of the FS.</value>
+        public FSType FSType { get { return this.fsType; } }
 
 #if !__MonoCS__
         private void AddReadOnlyAclsToOriginal() {

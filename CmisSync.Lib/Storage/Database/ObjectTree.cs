@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.Database
-{
+namespace CmisSync.Lib.Storage.Database {
     using System;
     using System.Collections.Generic;
 
@@ -26,8 +25,7 @@ namespace CmisSync.Lib.Storage.Database
     /// Object tree implementation.
     /// </summary>
     /// <typeparam name="T">Type of the stored node item.</typeparam>
-    public class ObjectTree<T> : IObjectTree<T>
-    {
+    public class ObjectTree<T> : IObjectTree<T> {
         /// <summary>
         /// Gets or sets the item.
         /// </summary>

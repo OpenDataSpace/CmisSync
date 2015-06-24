@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.MockedServer
-{
+namespace TestLibrary.MockedServer {
     using System;
     using System.Collections.Generic;
 
@@ -31,8 +30,7 @@ namespace TestLibrary.MockedServer
 
     using TestLibrary.TestUtils;
 
-    public static class MockOfISessionFactory
-    {
+    public static class MockOfISessionFactory {
         public static void SetupRepositories(this Mock<ISessionFactory> factory, params IRepository[] repos) {
             factory.Setup(f => f.GetRepositories(It.IsAny<IDictionary<string, string>>())).Returns(new List<IRepository>(repos));
             foreach (var repo in repos) {

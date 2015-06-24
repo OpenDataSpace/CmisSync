@@ -10,7 +10,8 @@ if [ $# -ne 1 ]; then
 fi
 
 source=$1
-applicationName="DataSpaceSync"
+basename=$(basename "$source")
+applicationName="${basename%.*}"
 backgroundPictureName="dmgBackground.png"
 title=$applicationName
 finalDMGName=$applicationName"-@ASM_VERSION@.dmg"

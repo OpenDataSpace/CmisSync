@@ -52,11 +52,11 @@ namespace CmisSync.Lib.Accumulator {
         /// <param name="storage">Storage to look for mapped objects.</param>
         public RemoteObjectFetcher(ISession session, IMetaDataStorage storage) {
             if (session == null) {
-                throw new ArgumentNullException("Session instance is needed , but was null");
+                throw new ArgumentNullException("session");
             }
 
             if (storage == null) {
-                throw new ArgumentNullException("MetaDataStorage instance is needed, but was null");
+                throw new ArgumentNullException("storage");
             }
 
             this.session = session;

@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.FilterTests
-{
+namespace TestLibrary.FilterTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -36,37 +35,30 @@ namespace TestLibrary.FilterTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class IgnoreAlreadyHandledFsEventsFilterTest
-    {
+    public class IgnoreAlreadyHandledFsEventsFilterTest {
         [Test, Category("Fast")]
-        public void ConstructorTakesStorage()
-        {
+        public void ConstructorTakesStorage() {
             new IgnoreAlreadyHandledFsEventsFilter(Mock.Of<IMetaDataStorage>());
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfStorageIsNull()
-        {
-            new IgnoreAlreadyHandledFsEventsFilter(null);
+        public void ConstructorThrowsExceptionIfStorageIsNull() {
+            Assert.Throws<ArgumentNullException>(() => new IgnoreAlreadyHandledFsEventsFilter(null));
         }
 
         [Test, Category("Fast")]
-        public void ConstructorTakesStorageAndFsFactory()
-        {
+        public void ConstructorTakesStorageAndFsFactory() {
             new IgnoreAlreadyHandledFsEventsFilter(Mock.Of<IMetaDataStorage>(), Mock.Of<IFileSystemInfoFactory>());
         }
 
         [Test, Category("Fast")]
-        public void FilterIgnoresNonFsEvents()
-        {
+        public void FilterIgnoresNonFsEvents() {
             var filter = new IgnoreAlreadyHandledFsEventsFilter(Mock.Of<IMetaDataStorage>(), Mock.Of<IFileSystemInfoFactory>());
             Assert.That(filter.Handle(Mock.Of<ISyncEvent>()), Is.False);
         }
 
         [Test, Category("Fast")]
-        public void FilterIgnoresNonExistingPaths()
-        {
+        public void FilterIgnoresNonExistingPaths() {
             var storage = new Mock<IMetaDataStorage>();
             var fsFactory = new Mock<IFileSystemInfoFactory>();
             var filter = new IgnoreAlreadyHandledFsEventsFilter(storage.Object, fsFactory.Object);
@@ -75,8 +67,7 @@ namespace TestLibrary.FilterTests
         }
 
         [Test, Category("Fast")]
-        public void FilterHandlesAlreadyExistingFolderEntries()
-        {
+        public void FilterHandlesAlreadyExistingFolderEntries() {
             string path = "path";
             var storage = new Mock<IMetaDataStorage>();
             var fsFactory = new Mock<IFileSystemInfoFactory>();
@@ -92,8 +83,7 @@ namespace TestLibrary.FilterTests
         }
 
         [Test, Category("Fast")]
-        public void FilterHandlesAlreadyMovedFolderEntries()
-        {
+        public void FilterHandlesAlreadyMovedFolderEntries() {
             string path = "path";
             string oldPath = "oldpath";
             Guid guid = Guid.NewGuid();
@@ -109,8 +99,7 @@ namespace TestLibrary.FilterTests
         }
 
         [Test, Category("Fast")]
-        public void FilterHandlesAlreadyExistingFileEntries()
-        {
+        public void FilterHandlesAlreadyExistingFileEntries() {
             string path = "path";
             var storage = new Mock<IMetaDataStorage>();
             var fsFactory = new Mock<IFileSystemInfoFactory>();
@@ -128,8 +117,7 @@ namespace TestLibrary.FilterTests
         }
 
         [Test, Category("Fast")]
-        public void FilterDeleteFsEventsIfNoCorrespondingElementExistsInStorage()
-        {
+        public void FilterDeleteFsEventsIfNoCorrespondingElementExistsInStorage() {
             string path = "path";
             var filter = new IgnoreAlreadyHandledFsEventsFilter(Mock.Of<IMetaDataStorage>(), Mock.Of<IFileSystemInfoFactory>());
             var fsEvent = new Mock<IFSEvent>();
@@ -141,8 +129,7 @@ namespace TestLibrary.FilterTests
         }
 
         [Test, Category("Fast")]
-        public void FilterDeletesFsEventsIfLocalFileSystemContainsTheElementOfTheStorage()
-        {
+        public void FilterDeletesFsEventsIfLocalFileSystemContainsTheElementOfTheStorage() {
             string path = "path";
             Guid guid = Guid.NewGuid();
             var storage = new Mock<IMetaDataStorage>();

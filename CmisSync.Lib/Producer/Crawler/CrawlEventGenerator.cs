@@ -37,7 +37,7 @@ namespace CmisSync.Lib.Producer.Crawler {
 
         public CrawlEventGenerator(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) {
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage");
             }
 
             this.storage = storage;

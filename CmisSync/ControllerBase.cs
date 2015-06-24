@@ -150,6 +150,12 @@ namespace CmisSync {
 
         public event Action OnError = delegate { };
 
+        public event Action OnDisconnected = delegate { };
+
+        public event Action OnPaused = delegate { };
+
+        public event Action OnDeactivated = delegate { };
+
         public event AlertNotificationRaisedEventHandler AlertNotificationRaised = delegate { };
 
         public delegate void AlertNotificationRaisedEventHandler(string title, string message);
@@ -194,7 +200,7 @@ namespace CmisSync {
             };
 
             this.statusAggregator.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) => {
-                switch(this.statusAggregator.Status) {
+                switch (this.statusAggregator.Status) {
                 case SyncStatus.Idle:
                     this.OnIdle();
                     break;
@@ -203,6 +209,15 @@ namespace CmisSync {
                     break;
                 case SyncStatus.Warning:
                     this.OnError();
+                    break;
+                case SyncStatus.Disconnected:
+                    this.OnDisconnected();
+                    break;
+                case SyncStatus.Suspend:
+                    this.OnPaused();
+                    break;
+                case SyncStatus.Deactivated:
+                    this.OnDeactivated();
                     break;
                 default:
                     this.OnIdle();
@@ -598,7 +613,7 @@ namespace CmisSync {
                         string pathname = Path.Combine(config.GetConfigPath(), this.BrandConfigFolder, path.Substring(1));
                         Directory.CreateDirectory(Path.GetDirectoryName(pathname));
                         try {
-                            using (FileStream output = File.OpenWrite(pathname)) {
+                            using (FileStream output = File.Open(pathname, FileMode.Truncate, FileAccess.Write)) {
                                 if (!clientBrand.GetFile(path, output)) {
                                     success = false;
                                     break;
@@ -845,30 +860,6 @@ namespace CmisSync {
 
             // Update UI.
             this.FolderListChanged();
-        }
-
-        /// <summary>
-        /// Fix the file attributes of a folder, recursively.
-        /// </summary>
-        /// <param name="path">Folder to fix</param>
-        private void ClearFolderAttributes(string path) {
-            if (!Directory.Exists(path)) {
-                return;
-            }
-
-            string[] folders = Directory.GetDirectories(path);
-
-            foreach (string folder in folders) {
-                this.ClearFolderAttributes(folder);
-            }
-
-            string[] files = Directory.GetFiles(path);
-
-            foreach (string file in files) {
-                if (!CmisSync.Lib.Utils.IsSymlink(file)) {
-                    File.SetAttributes(file, FileAttributes.Normal);
-                }
-            }
         }
     }
 }

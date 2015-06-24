@@ -61,7 +61,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             IFileSystemInfoFactory fsFactory = null) : base(session, storage, transmissionStorage)
         {
             if (transmissonManager == null) {
-                throw new ArgumentNullException("Given transmission manager is null");
+                throw new ArgumentNullException("transmissonManager");
             }
 
             this.transmissonManager = transmissonManager;

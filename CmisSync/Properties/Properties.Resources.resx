@@ -504,4 +504,13 @@ This could lead to a lot of conflict files!</value>
   <data name="WarningExceptionTitle" xml:space="preserve">
     <value>{0}: Error occured</value>
   </data>
+  <data name="SyncStatusDeactivated" xml:space="preserve">
+    <value>All configured connections are deactivated</value>
+  </data>
+  <data name="SyncStatusDisconnected" xml:space="preserve">
+    <value>Disconnected from server</value>
+  </data>
+  <data name="SyncStatusPaused" xml:space="preserve">
+    <value>Synchronization is paused</value>
+  </data>
 </root>

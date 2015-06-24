@@ -19,12 +19,14 @@ SOURCES =  \
 	AlgorithmsTests/StringTarjanNode.cs \
 	AlgorithmsTests/TarjanSimpleLinearTests.cs \
 	AlgorithmsTests/TrajanSimpleCircleTests.cs \
+	CmisTests/AbstractRepositoryTest.cs \
 	CmisTests/AuthenticationTests/AuthProviderFactoryTest.cs \
 	CmisTests/AuthenticationTests/KerberosAuthenticationProviderTest.cs \
 	CmisTests/AuthenticationTests/PersistentStandardAuthenticationProviderTest.cs \
 	CmisTests/ConvenienceExtendersTests/AllowableActionExtendersTest.cs \
 	CmisTests/ConvenienceExtendersTests/CmisConvenienceExtendersTest.cs \
 	CmisTests/OperationContextFactoryTest.cs \
+	CmisTests/RepositoryStatusAggregatorTest.cs \
 	CmisTests/RepositoryTests.cs \
 	CmisTests/UiUtilsTests/CmisUtilsTest.cs \
 	CmisTests/UiUtilsTests/UiConvenienceExtendersTest.cs \
@@ -98,6 +100,7 @@ SOURCES =  \
 	FilterTests/InvalidFolderNameFilterTest.cs \
 	FilterTests/ReportingFilterTest.cs \
 	FilterTests/RepositoryRootDeletedDetectionTest.cs \
+	FilterTests/SymlinkFilterTest.cs \
 	HashAlgorithmTests/SHA1ReuseTest.cs \
 	IntegrationTests/AllHandlersIT.cs \
 	IntegrationTests/AllowableActionsTests/ReadingActionsTests.cs \
@@ -114,9 +117,12 @@ SOURCES =  \
 	IntegrationTests/IntegrationTestUtils.cs \
 	IntegrationTests/MockedServerTests/SetupDocumentTest.cs \
 	IntegrationTests/MockedServerTests/SetupFolderTest.cs \
+	IntegrationTests/MockedServerTests/SetupRepositoryTest.cs \
+	IntegrationTests/MockedServerTests/SetupSessionFactoryTest.cs \
 	IntegrationTests/NeedsLocalFileSystemFolder.cs \
 	IntegrationTests/PrivateWorkingCopyTests/AppendContentStreamTests.cs \
 	IntegrationTests/PrivateWorkingCopyTests/CreateDocumentTests.cs \
+	IntegrationTests/PrivateWorkingCopyTests/UploadChangedContent.cs \
 	IntegrationTests/RepositoryStatusIT.cs \
 	IntegrationTests/RepositoryUtilsTests.cs \
 	IntegrationTests/SelectiveIgnoreTests/CrudIT.cs \
@@ -131,7 +137,9 @@ SOURCES =  \
 	MockedServer/MockOfISessionFactory.cs \
 	MockedServer/MockedAce.cs \
 	MockedServer/MockedAcl.cs \
+	MockedServer/MockedAclCapabilities.cs \
 	MockedServer/MockedChoice.cs \
+	MockedServer/MockedCmisBinding.cs \
 	MockedServer/MockedCmisExtensionElement.cs \
 	MockedServer/MockedCmisObject.cs \
 	MockedServer/MockedCmisServer.cs \
@@ -144,7 +152,10 @@ SOURCES =  \
 	MockedServer/MockedFolder.cs \
 	MockedServer/MockedFolderType.cs \
 	MockedServer/MockedItemList.cs \
+	MockedServer/MockedObjectData.cs \
 	MockedServer/MockedObjectType.cs \
+	MockedServer/MockedPermissionDefinition.cs \
+	MockedServer/MockedPermissionMapping.cs \
 	MockedServer/MockedPolicyIdList.cs \
 	MockedServer/MockedPrincipal.cs \
 	MockedServer/MockedProperty.cs \
@@ -158,7 +169,19 @@ SOURCES =  \
 	MockedServer/MockedPropertyStringDefinition.cs \
 	MockedServer/MockedPropertyUriDefinition.cs \
 	MockedServer/MockedRepository.cs \
+	MockedServer/MockedRepositoryInfo.cs \
+	MockedServer/MockedServices/MockedAclService.cs \
+	MockedServer/MockedServices/MockedDiscoveryService.cs \
+	MockedServer/MockedServices/MockedMultiFilingService.cs \
+	MockedServer/MockedServices/MockedNavigationService.cs \
+	MockedServer/MockedServices/MockedObjectService.cs \
+	MockedServer/MockedServices/MockedPolicyService.cs \
+	MockedServer/MockedServices/MockedRelationshipService.cs \
+	MockedServer/MockedServices/MockedRepositoryService.cs \
+	MockedServer/MockedServices/MockedVersioningService.cs \
 	MockedServer/MockedSession.cs \
+	MockedServer/MockedSessionFactory.cs \
+	MockedServer/MockedSessionFactory.cs \
 	MockedServer/MockedTypeDefinition.cs \
 	MoqExtensions/MoqExtensions.cs \
 	PathMatcherTests/PathMatcherTest.cs \
@@ -193,6 +216,7 @@ SOURCES =  \
 	StorageTests/DataBaseTests/EntitiesTests/IFileConvenienceExtendersTest.cs \
 	StorageTests/DataBaseTests/EntitiesTests/MappedObjectsTest.cs \
 	StorageTests/DataBaseTests/FileTransmissionStorageTest.cs \
+	StorageTests/DataBaseTests/GraphOutputTest.cs \
 	StorageTests/DataBaseTests/MetaDataStorageTest.cs \
 	StorageTests/DataBaseTests/PersistentCookieStorageTest.cs \
 	StorageTests/FileSystemTests/DateTimeConverterTest.cs \

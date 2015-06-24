@@ -40,10 +40,14 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
         public void CheckOutDocumentAppendContentAndCheckIn() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             var doc = this.remoteRootDir.CreateDocument(this.fileName, (string)null);
-
+            var oldId = doc.Id;
             var newId = doc.CheckOut();
+            var oldDoc = this.session.GetObject(oldId) as IDocument;
+            oldDoc.Refresh();
+            Assert.That(oldDoc.VersionSeriesCheckedOutId, Is.Not.Null);
             doc = newId == null ? doc : this.session.GetObject(newId) as IDocument;
             doc = doc.AppendContent(content) ?? doc;
+            Assert.That(doc.Id, Is.EqualTo(oldDoc.VersionSeriesCheckedOutId));
             var newObjectId = doc.CheckIn(true, null, null, string.Empty);
             var newDocument = this.session.GetObject(newObjectId) as IDocument;
             newDocument.Refresh();
@@ -52,6 +56,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(this.fileName));
             Assert.That(newDocument.Name, Is.EqualTo(this.fileName));
             Assert.That(newDocument.ContentStreamLength, Is.EqualTo(this.content.Length));
+            Assert.That(newDocument.VersionSeriesCheckedOutId, Is.Null);
             this.AssertThatContentHashIsEqualToExceptedIfSupported(newDocument, this.content);
         }
 
@@ -102,6 +107,23 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
 
             doc = this.remoteRootDir.GetChildren().First() as IDocument;
             this.AssertThatContentHashIsEqualToExceptedIfSupported(doc, this.content);
+        }
+
+        [Test, Category("Slow"), MaxTime(180000)]
+        public void AppendingAfterPWCIsCanceledMustFail() {
+            this.EnsureThatPrivateWorkingCopySupportIsAvailable();
+            var doc = this.remoteRootDir.CreateDocument(this.fileName, (string)null);
+            var oldId = doc.Id;
+            var newId = doc.CheckOut();
+            var oldDoc = this.session.GetObject(oldId) as IDocument;
+            oldDoc.Refresh();
+            doc = newId == null ? doc : this.session.GetObject(newId) as IDocument;
+            doc = doc.AppendContent(content, lastChunk: false) ?? doc;
+            doc.CancelCheckOut();
+            Assert.Catch<DotCMIS.Exceptions.CmisBaseException>(() => doc.AppendContent(content));
+            oldDoc.Refresh();
+            Assert.That(oldDoc.ContentStreamLength, Is.Null.Or.EqualTo(0));
+            Assert.That(oldDoc.VersionSeriesCheckedOutId, Is.Null);
         }
     }
 }

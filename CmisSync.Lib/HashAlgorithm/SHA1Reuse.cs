@@ -56,7 +56,7 @@ namespace CmisSync.Lib.HashAlgorithm {
     /// <summary>
     /// Cloneable SHA1 implementation based on SHA1Managed
     /// </summary>
-    public class SHA1Reuse : SHA1Managed, HashAlgorithmReuse {
+    public class SHA1Reuse : SHA1Managed, IReusableHashAlgorithm {
         /// <summary>
         /// Clone this instance with its internal states.
         /// </summary>
