@@ -67,7 +67,7 @@ namespace CmisSync.Lib.FileTransmission {
         /// <param name='localFileStream'>
         ///  Local file stream.
         /// </param>
-        /// <param name='status'>
+        /// <param name='transmission'>
         ///  Transmission status where the uploader should report its uploading status.
         /// </param>
         /// <param name='hashAlg'>
@@ -76,11 +76,19 @@ namespace CmisSync.Lib.FileTransmission {
         /// <param name='overwrite'>
         ///  If true, the local content will overwrite the existing content.
         /// </param>
+        /// <param name="update">Is called on every new chunk, if not <c>null</c>.</param>
         /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">
         /// Contains the last successful remote document state. This is needed for continue a failed upload.
         /// </exception>
-        public override IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg, bool overwrite = true, UpdateChecksum update = null) {
-            IDocument result = remoteDocument;
+        public override IDocument UploadFile(
+            IDocument remoteDocument,
+            Stream localFileStream,
+            Transmission transmission,
+            HashAlgorithm hashAlg,
+            bool overwrite = true,
+            UpdateChecksum update = null)
+        {
+            var result = remoteDocument;
             for (long offset = localFileStream.Position; offset < localFileStream.Length; offset += this.ChunkSize) {
                 bool isFirstChunk = offset == 0;
                 bool isLastChunk = (offset + this.ChunkSize) >= localFileStream.Length;
@@ -92,7 +100,7 @@ namespace CmisSync.Lib.FileTransmission {
                     transmission.Position = offset;
                     chunkstream.ChunkPosition = offset;
 
-                    ContentStream contentStream = new ContentStream();
+                    var contentStream = new ContentStream();
                     contentStream.FileName = remoteDocument.Name;
                     contentStream.MimeType = Cmis.MimeType.GetMIMEType(remoteDocument.Name);
                     if (isLastChunk) {
@@ -108,7 +116,7 @@ namespace CmisSync.Lib.FileTransmission {
                         }
 
                         result.AppendContentStream(contentStream, isLastChunk, true);
-                        HashAlgorithmReuse reuse = hashAlg as HashAlgorithmReuse;
+                        var reuse = hashAlg as IReusableHashAlgorithm;
                         if (reuse != null && update != null) {
                             using (HashAlgorithm hash = (HashAlgorithm)reuse.Clone()) {
                                 hash.TransformFinalBlock(new byte[0], 0, 0);

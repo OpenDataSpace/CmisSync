@@ -89,27 +89,27 @@ namespace CmisSync.Lib {
             IFileSystemInfoFactory fsFactory = null) : base(queue)
         {
             if (storage == null) {
-                throw new ArgumentNullException("storage null");
+                throw new ArgumentNullException("storage");
             }
 
             if (fileTransmissionStorage == null) {
-                throw new ArgumentNullException("fileTransmissionStorage null");
+                throw new ArgumentNullException("fileTransmissionStorage");
             }
 
             if (repoInfo == null) {
-                throw new ArgumentNullException("Repoinfo null");
+                throw new ArgumentNullException("repoInfo");
             }
 
             if (filter == null) {
-                throw new ArgumentNullException("Filter null");
+                throw new ArgumentNullException("filter");
             }
 
             if (activityListener == null) {
-                throw new ArgumentNullException("Given activityListener is null");
+                throw new ArgumentNullException("activityListener");
             }
 
             if (ignoredStorage == null) {
-                throw new ArgumentNullException("Given storage for ignored entries is null");
+                throw new ArgumentNullException("ignoredStorage", "Given storage for ignored entries is null");
             }
 
             if (fsFactory == null) {

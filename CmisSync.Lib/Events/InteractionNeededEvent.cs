@@ -36,7 +36,7 @@ namespace CmisSync.Lib.Events {
         /// <param name="e">Exception which invokes a need for a user interaction.</param>
         public InteractionNeededEvent(InteractionNeededException e) : base(e) {
             if (e == null) {
-                throw new ArgumentNullException("Given Exception is null");
+                throw new ArgumentNullException("e");
             }
 
             this.AffectedFiles = new List<IFileSystemInfo>(e.AffectedFiles);

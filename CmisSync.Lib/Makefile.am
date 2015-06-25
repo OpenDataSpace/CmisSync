@@ -24,6 +24,7 @@ SOURCES =  \
 	Cmis/Authentication/StandardAuthenticationProviderWrapper.cs \
 	Cmis/ConvenienceExtenders/AllowableActionConvenienceExtenders.cs \
 	Cmis/ConvenienceExtenders/CmisConvenienceExtenders.cs \
+	Cmis/ConvenienceExtenders/CmisRepositoryInfoConvenienceExtenders.cs \
 	Cmis/DotCMISLogListener.cs \
 	Cmis/INotifyRepositoryPropertyChanged.cs \
 	Cmis/MimeType.cs \
@@ -155,7 +156,8 @@ SOURCES =  \
 	Filter/InvalidFolderNameFilter.cs \
 	Filter/ReportingFilter.cs \
 	Filter/RepositoryRootDeletedDetection.cs \
-	HashAlgorithm/HashAlgorithmReuse.cs \
+	Filter/SymlinkFilter.cs \
+	HashAlgorithm/IReusableHashAlgorithm.cs \
 	HashAlgorithm/SHA1Reuse.cs \
 	HttpProxyUtils.cs \
 	IActivityListener.cs \
@@ -223,7 +225,9 @@ SOURCES =  \
 	Storage/Database/Entities/MappedObject.cs \
 	Storage/Database/EntryNotFoundException.cs \
 	Storage/Database/FileTransmissionStorage.cs \
+	Storage/Database/GraphOutputConvenienceExtension.cs \
 	Storage/Database/ICookieStorage.cs \
+	Storage/Database/IDotTreeWriter.cs \
 	Storage/Database/IFileTransmissionStorage.cs \
 	Storage/Database/IMetaDataStorage.cs \
 	Storage/Database/IMetaDataStorageConvenienceExtender.cs \

@@ -17,15 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
 
     /// <summary>
     /// Interface for all events, which could be filtered by object file name.
     /// </summary>
-    public interface IFilterableNameEvent : IFilterableEvent
-    {
+    public interface IFilterableNameEvent : IFilterableEvent {
         /// <summary>
         /// Gets the name.
         /// </summary>

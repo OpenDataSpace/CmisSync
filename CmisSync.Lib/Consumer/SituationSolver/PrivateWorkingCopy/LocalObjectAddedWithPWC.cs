@@ -64,11 +64,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ISolver localFolderOrEmptyFileAddedSolver) : base(session, storage, transmissionStorage)
         {
             if (localFolderOrEmptyFileAddedSolver == null) {
-                throw new ArgumentNullException("Given solver for locally added folders is null");
+                throw new ArgumentNullException("localFolderOrEmptyFileAddedSolver", "Given solver for locally added folders is null");
             }
 
             if (!session.ArePrivateWorkingCopySupported()) {
-                throw new ArgumentException("Given session doesn't support private working copies");
+                throw new ArgumentException("Given session doesn't support private working copies", "session");
             }
 
             this.folderOrEmptyFileAddedSolver = localFolderOrEmptyFileAddedSolver;
@@ -151,6 +151,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
                     throw;
                 }
+
                 watch.Stop();
 
                 mapped.LastContentSize = localFile.Length;

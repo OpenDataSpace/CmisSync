@@ -39,11 +39,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ISolver changeChangeSolver) : base(session, storage)
         {
             if (renameSolver == null) {
-                throw new ArgumentNullException("Given solver for rename rename situation is null");
+                throw new ArgumentNullException("renameSolver", "Given solver for rename rename situation is null");
             }
 
             if (changeChangeSolver == null) {
-                throw new ArgumentNullException("Given solver for change change situation is null");
+                throw new ArgumentNullException("changeChangeSolver", "Given solver for change change situation is null");
             }
 
             this.changeChangeSolver = changeChangeSolver;

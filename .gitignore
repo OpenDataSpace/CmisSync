@@ -46,6 +46,7 @@ cmissync-*.zip
 cmissync-*.tar*
 build/cmissync.spec
 DataSpaceSync.Console/dsscli
+DiagnoseTool/dssdiagnose
 TestResult.xml
 *covdb*
 *covreport*
@@ -55,3 +56,4 @@ testdir
 SOURCES
 i386/
 amd64/
+DiagnoseTool/Mac/DiagnoseTool/Info.plist

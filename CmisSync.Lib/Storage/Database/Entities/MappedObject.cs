@@ -96,17 +96,18 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// <param name="parentId">Parent identifier.</param>
         /// <param name="changeToken">Change token.</param>
         /// <param name="contentSize">Size of the content. Only exists on Documents.</param>
+        /// <param name="readOnly">Readonly flag of the mapped object.</param>
         public MappedObject(string name, string remoteId, MappedObjectType type, string parentId, string changeToken, long contentSize = -1, bool readOnly = false) {
             if (string.IsNullOrEmpty(name)) {
-                throw new ArgumentNullException("Given name is null or empty");
+                throw new ArgumentNullException("name", "Given name is null or empty");
             }
 
             if (string.IsNullOrEmpty(remoteId)) {
-                throw new ArgumentNullException("Given remote ID is null");
+                throw new ArgumentNullException("remoteId");
             }
 
             if (type == MappedObjectType.Unkown) {
-                throw new ArgumentException("Given type is unknown but must be set to a known type");
+                throw new ArgumentException("Given type is unknown but must be set to a known type", "type");
             } else {
                 this.Type = type;
             }
@@ -144,6 +145,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
                 this.Ignored = data.Ignored;
                 this.IsReadOnly = data.IsReadOnly;
                 this.Retries = data.Retries ?? new Dictionary<OperationType, int>();
+                this.LastTimeStoredInStorage = data.LastTimeStoredInStorage;
                 if (data.LastChecksum == null) {
                     this.LastChecksum = null;
                 } else {
@@ -278,8 +280,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// <summary>
         /// Gets or sets a value indicating whether this instance is read only.
         /// </summary>
-        /// <value>true</value>
-        /// <c>false</c>
+        /// <value><c>true</c> if this object is readonly, otherwise <c>false</c></value>
         [DefaultValue(false)]
         public bool IsReadOnly { get; set; }
 
@@ -294,6 +295,12 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// </summary>
         /// <value>The retries.</value>
         public Dictionary<OperationType, int> Retries { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last time when this object has been stored in the storage.
+        /// </summary>
+        /// <value>The last stored datetime.</value>
+        public DateTime? LastTimeStoredInStorage { get; set; }
 
         /// <summary>
         /// Determines whether the specified <see cref="System.Object"/> is equal to the current <see cref="CmisSync.Lib.Data.MappedObjectData"/>.

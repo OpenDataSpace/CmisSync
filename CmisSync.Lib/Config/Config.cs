@@ -37,7 +37,7 @@ namespace CmisSync.Lib.Config {
         /// <summary>
         /// The default size of a chunk.
         /// </summary>
-        public const long DefaultChunkSize = 1024 * 1024;
+        public const long DefaultChunkSize = 4 * 1024 * 1024;
 
         /// <summary>
         /// The default poll interval.

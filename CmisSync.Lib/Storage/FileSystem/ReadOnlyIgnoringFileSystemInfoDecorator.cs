@@ -34,7 +34,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <param name="info">Decorated file system info instance.</param>
         public ReadOnlyIgnoringFileSystemInfoDecorator(IFileSystemInfo info) {
             if (info == null) {
-                throw new ArgumentNullException("Given file system info instance is null");
+                throw new ArgumentNullException("info");
             }
 
             this.fileSystemInfo = info;
@@ -106,6 +106,13 @@ namespace CmisSync.Lib.Storage.FileSystem {
         public bool ReadOnly {
             get { return this.fileSystemInfo.ReadOnly; }
             set { this.fileSystemInfo.ReadOnly = value; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is a symlink.
+        /// </summary>
+        public bool IsSymlink {
+            get { return this.fileSystemInfo.IsSymlink; }
         }
 
         /// <summary>

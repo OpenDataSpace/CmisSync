@@ -24,9 +24,12 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
     using System.Text;
 
     using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Config;
 
     using DotCMIS;
+    using DotCMIS.Binding;
     using DotCMIS.Client;
+    using DotCMIS.Client.Impl.Cache;
     using DotCMIS.Data.Impl;
     using DotCMIS.Enums;
     using DotCMIS.Exceptions;
@@ -264,7 +267,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
                 var devices = obj.IgnoredDevices();
                 if (deviceIds == null || deviceIds.Length == 0) {
                     if (devices.Remove("*") ||
-                        devices.Remove(Config.ConfigManager.CurrentConfig.DeviceId.ToString().ToLower())) {
+                        devices.Remove(ConfigManager.CurrentConfig.DeviceId.ToString().ToLower())) {
                         if (devices.Count > 0) {
                             Dictionary<string, object> properties = new Dictionary<string, object>();
                             properties.Add("gds:ignoreDeviceIds", devices);
@@ -352,7 +355,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="obj">Remote cmis object.</param>
         public static bool AreAllChildrenIgnored(this ICmisObject obj) {
             IList<string> devices = obj.IgnoredDevices();
-            if (devices.Contains("*") || devices.Contains(Config.ConfigManager.CurrentConfig.DeviceId.ToString().ToLower())) {
+            if (devices.Contains("*") || devices.Contains(ConfigManager.CurrentConfig.DeviceId.ToString().ToLower())) {
                 return true;
             } else {
                 return false;
@@ -455,6 +458,46 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             } catch (NullReferenceException) {
                 return false;
             }
+        }
+
+        public static ISession CreateSession(
+            this ISessionFactory factory,
+            RepoInfo repoInfo,
+            IObjectFactory objectFactory = null,
+            IAuthenticationProvider authenticationProvider = null,
+            ICache cache = null,
+            string appName = null)
+        {
+            return factory.CreateSession(repoInfo.AsSessionParameter(appName), objectFactory, authenticationProvider, cache);
+        }
+
+        public static ISession CreateSession(
+            this ISessionFactory factory,
+            RepoInfo repoInfo,
+            string appName = null)
+        {
+            return factory.CreateSession(repoInfo.AsSessionParameter(appName));
+        }
+
+        public static Dictionary<string, string> AsSessionParameter(this RepoInfo repoInfo, string appName = null) {
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            if (repoInfo.Binding == DotCMIS.BindingType.AtomPub) {
+                parameters[SessionParameter.BindingType] = BindingType.AtomPub;
+                parameters[SessionParameter.AtomPubUrl] = repoInfo.Address.ToString();
+            } else if (repoInfo.Binding == DotCMIS.BindingType.Browser) {
+                parameters[SessionParameter.BindingType] = BindingType.Browser;
+                parameters[SessionParameter.BrowserUrl] = repoInfo.Address.ToString();
+            }
+
+            parameters[SessionParameter.User] = repoInfo.User;
+            parameters[SessionParameter.Password] = repoInfo.GetPassword().ToString();
+            parameters[SessionParameter.RepositoryId] = repoInfo.RepositoryId;
+            parameters[SessionParameter.ConnectTimeout] = repoInfo.ConnectionTimeout.ToString();
+            parameters[SessionParameter.ReadTimeout] = repoInfo.ReadTimeout.ToString();
+            parameters[SessionParameter.DeviceIdentifier] = ConfigManager.CurrentConfig.DeviceId.ToString();
+            parameters[SessionParameter.UserAgent] = appName != null ? Utils.CreateUserAgent(appName) : Utils.CreateUserAgent();
+            parameters[SessionParameter.Compression] = bool.TrueString;
+            return parameters;
         }
 
         /// <summary>

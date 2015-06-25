@@ -77,23 +77,23 @@ namespace CmisSync.Lib.Producer.Crawler {
             IIgnoredEntitiesStorage ignoredStorage)
         {
             if (remoteFolder == null) {
-                throw new ArgumentNullException("Given remoteFolder is null");
+                throw new ArgumentNullException("remoteFolder");
             }
 
             if (localFolder == null) {
-                throw new ArgumentNullException("Given localFolder is null");
+                throw new ArgumentNullException("localFolder");
             }
 
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage");
             }
 
             if (filter == null) {
-                throw new ArgumentNullException("Given filter is null");
+                throw new ArgumentNullException("filter");
             }
 
             if (ignoredStorage == null) {
-                throw new ArgumentNullException("Given storage to save ignored entries is null");
+                throw new ArgumentNullException("ignoredStorage");
             }
 
             this.storage = storage;
@@ -112,25 +112,30 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// <param name="filter">Filter for files.</param>
         public static IObjectTree<IFileSystemInfo> GetLocalDirectoryTree(IDirectoryInfo parent, IFilterAggregator filter) {
             var children = new List<IObjectTree<IFileSystemInfo>>();
-            foreach (var child in parent.GetDirectories()) {
-                string reason;
-                if (!filter.InvalidFolderNamesFilter.CheckFolderName(child.Name, out reason) && !filter.FolderNamesFilter.CheckFolderName(child.Name, out reason)) {
-                    children.Add(GetLocalDirectoryTree(child, filter));
-                } else {
-                    Logger.Info(reason);
+            try {
+                foreach (var child in parent.GetDirectories()) {
+                    string reason;
+                    if (!filter.InvalidFolderNamesFilter.CheckFolderName(child.Name, out reason) && !filter.FolderNamesFilter.CheckFolderName(child.Name, out reason) && !filter.SymlinkFilter.IsSymlink(child, out reason)) {
+                        children.Add(GetLocalDirectoryTree(child, filter));
+                    } else {
+                        Logger.Info(reason);
+                    }
                 }
-            }
 
-            foreach (var file in parent.GetFiles()) {
-                string reason;
-                if (!filter.FileNamesFilter.CheckFile(file.Name, out reason)) {
-                    children.Add(new ObjectTree<IFileSystemInfo> {
-                        Item = file,
-                        Children = new List<IObjectTree<IFileSystemInfo>>()
-                    });
-                } else {
-                    Logger.Info(reason);
+                foreach (var file in parent.GetFiles()) {
+                    string reason;
+                    if (!filter.FileNamesFilter.CheckFile(file.Name, out reason) && !filter.SymlinkFilter.IsSymlink(file, out reason)) {
+                        children.Add(new ObjectTree<IFileSystemInfo> {
+                            Item = file,
+                            Children = new List<IObjectTree<IFileSystemInfo>>()
+                        });
+                    } else {
+                        Logger.Info(reason);
+                    }
                 }
+            } catch (System.IO.PathTooLongException) {
+                Logger.Fatal(string.Format("One or more children paths of \"{0}\" are to long to be synchronized, synchronization is impossible since the problem is fixed", parent.FullName));
+                throw;
             }
 
             IObjectTree<IFileSystemInfo> tree = new ObjectTree<IFileSystemInfo> {

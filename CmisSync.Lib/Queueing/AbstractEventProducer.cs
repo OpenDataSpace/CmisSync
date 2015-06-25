@@ -17,26 +17,22 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Queueing
-{
+namespace CmisSync.Lib.Queueing {
     using System;
 
     /// <summary>
     /// Abstract event producer.
     /// </summary>
-    public abstract class AbstractEventProducer
-    {
+    public abstract class AbstractEventProducer {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.AbstractEventProducer"/> class.
         /// </summary>
         /// <param name='queue'>
         /// The queue which could be used to pass events to.
         /// </param>
-        public AbstractEventProducer(ISyncEventQueue queue)
-        {
-            if (queue == null)
-            {
-                throw new ArgumentNullException("The given event queue must no be null");
+        public AbstractEventProducer(ISyncEventQueue queue) {
+            if (queue == null) {
+                throw new ArgumentNullException("queue");
             }
 
             this.Queue = queue;

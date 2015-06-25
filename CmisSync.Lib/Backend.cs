@@ -20,8 +20,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib
-{
+namespace CmisSync.Lib {
     using System;
     using System.IO;
     using System.Reflection;
@@ -30,10 +29,9 @@ namespace CmisSync.Lib
     /// <summary>
     /// Information about the version of CmisSync.Lib and the version of the operating system.
     /// </summary>
-    public static class Backend
-    {
+    public static class Backend {
         private static DateTime? linkerTimestamp = null;
-        private static object singletonLock = new Object();
+        private static object singletonLock = new object();
 
         /// <summary>
         /// Gets the Version of CmisSync.Lib
@@ -45,6 +43,10 @@ namespace CmisSync.Lib
             }
         }
 
+        /// <summary>
+        /// Gets the linker timestamp.
+        /// </summary>
+        /// <value>Linker timestamp.</value>
         public static DateTime? RetrieveLinkerTimestamp {
             get {
                 if (linkerTimestamp == null) {

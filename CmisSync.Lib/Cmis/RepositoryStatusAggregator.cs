@@ -133,7 +133,7 @@ namespace CmisSync.Lib.Cmis {
         /// <param name="propertyName">Property name.</param>
         private void NotifyPropertyChanged(string propertyName) {
             if (string.IsNullOrEmpty(propertyName)) {
-                throw new ArgumentNullException("Given property name is null");
+                throw new ArgumentNullException("propertyName");
             }
 
             var handler = this.PropertyChanged;

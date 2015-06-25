@@ -43,7 +43,7 @@ namespace CmisSync.Lib.Producer.Watcher {
         /// <param name="fsFactory">File system factory.</param>
         public RenamedFileSystemEventHandler(ISyncEventQueue queue, IFileSystemInfoFactory fsFactory = null) {
             if (queue == null) {
-                throw new ArgumentNullException("Given queue is null");
+                throw new ArgumentNullException("queue");
             }
 
             this.queue = queue;

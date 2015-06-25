@@ -75,6 +75,12 @@ namespace CmisSync.Lib.Storage.FileSystem {
         bool ReadOnly { get; set; }
 
         /// <summary>
+        /// Gets a value indicating whether this instance is a symlink.
+        /// </summary>
+        /// <value><c>true</c> if this instance is a symlink; otherwise, <c>false</c>.</value>
+        bool IsSymlink { get; }
+
+        /// <summary>
         /// Refresh the loaded information of this instance.
         /// </summary>
         void Refresh();

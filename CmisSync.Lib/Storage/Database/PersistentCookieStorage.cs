@@ -44,7 +44,7 @@ namespace CmisSync.Lib.Storage.Database {
         [CLSCompliant(false)]
         public PersistentCookieStorage(DBreezeEngine db) {
             if (db == null) {
-                throw new ArgumentNullException("Given db engine is null");
+                throw new ArgumentNullException("db");
             }
 
             this.db = db;

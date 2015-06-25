@@ -38,11 +38,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
     using log4net;
 
+    /// <summary>
+    /// Abstract enhanced solver for Private Working Copy Usage and Support.
+    /// </summary>
     public abstract class AbstractEnhancedSolverWithPWC : AbstractEnhancedSolver {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(AbstractEnhancedSolverWithPWC));
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.AbstractEnhancedSolver"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.PWC.AbstractEnhancedSolverWithPWC"/> class.
         /// </summary>
         /// <param name="session">Cmis Session.</param>
         /// <param name="storage">Meta Data Storage.</param>
@@ -118,8 +119,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
         /// <returns>The SHA-1 hash of the uploaded file content.</returns>
         /// <param name="localFile">Local file.</param>
         /// <param name="doc">Remote document.</param>
-        /// <param name="transmissionManager">Transmission manager.</param>
-        /// <param name="transmissionEvent">File Transmission event.</param>
+        /// <param name="transmission">File transmission object.</param>
         /// <param name="mappedObject">Mapped object saved in <c>Storage</c></param>
         protected byte[] UploadFileWithPWC(IFileInfo localFile, ref IDocument doc, Transmission transmission, IMappedObject mappedObject = null) {
             byte[] checksum = null;
@@ -175,7 +175,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                             }
                         }
 
-                        IDocument document = doc;
+                        var document = doc;
                         uploader.UploadFile(docPWC, file, transmission, hashAlg, false, (byte[] checksumUpdate, long length) => this.SaveRemotePWCDocument(localFile, document, docPWC, checksumUpdate, transmission));
                         hash = hashAlg.Hash;
                     } catch (Exception ex) {

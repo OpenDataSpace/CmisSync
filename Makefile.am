@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I build/m4/cmissync -I build/m4/shamrock
 
-basedirs = build Extras CmisSync.Lib DataSpaceSync.Console
+basedirs = build Extras CmisSync.Lib DataSpaceSync.Console DiagnoseTool
 FATBUILD_MAKEFILE=Makefile.fatbuild
 
 SUBDIRS = $(basedirs) $(GUISUBDIRS)
@@ -73,7 +73,10 @@ debian-package: tmpinst
 apple-package:
 	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release -t:Clean
 	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release
+	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build DiagnoseTool/Mac/DiagnoseTool/DiagnoseTool.sln -c:Release -t:Clean
+	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build DiagnoseTool/Mac/DiagnoseTool/DiagnoseTool.sln -c:Release
 	(cd build; sh dmg-creator.sh ../bin/DataSpaceSync.app/; cd ..)
+	(cd build; sh dmg-creator.sh ../DiagnoseTool/Mac/DiagnoseTool/bin/Release/DiagnoseTool.app/; cd ..)
 
 rpm-package: PACKAGE_TARGET := rpm-package
 rpm-package: tmpinst

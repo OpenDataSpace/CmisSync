@@ -95,6 +95,15 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
         }
 
         [Test, Category("Fast")]
+        public void CreateUserAgentWithGivenAppName([Values("TestApp")]string name) {
+            var useragent = Utils.CreateUserAgent(name);
+            Assert.That(useragent.Contains(Backend.Version));
+            Assert.That(useragent.Contains("hostname="));
+            Assert.That(useragent.Contains(CultureInfo.CurrentCulture.Name));
+            Assert.That(useragent.Contains(name));
+        }
+
+        [Test, Category("Fast")]
         public void CreateRegexFromIgnoreAllWildcard() {
             var regex = Utils.IgnoreLineToRegex("*");
             Assert.That(regex.IsMatch(string.Empty));

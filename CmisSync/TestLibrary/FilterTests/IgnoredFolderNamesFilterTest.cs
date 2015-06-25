@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.FilterTests
-{
+namespace TestLibrary.FilterTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -31,17 +30,14 @@ namespace TestLibrary.FilterTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class IgnoredFolderNamesFilterTest
-    {
+    public class IgnoredFolderNamesFilterTest {
         [Test, Category("Fast"), Category("EventFilter")]
-        public void DefaultConstructor()
-        {
+        public void DefaultConstructor() {
             new IgnoredFolderNameFilter();
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        public void FilterLetsFSEventsPassIfNoWildcardsAreSet()
-        {
+        public void FilterLetsFSEventsPassIfNoWildcardsAreSet() {
             var filter = new IgnoredFolderNameFilter();
             string reason;
             Assert.That(filter.CheckFolderName("foldername", out reason), Is.False);
@@ -49,8 +45,7 @@ namespace TestLibrary.FilterTests
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        public void FilterTakesWildcardsWithoutFailure()
-        {
+        public void FilterTakesWildcardsWithoutFailure() {
             var filter = new IgnoredFolderNameFilter();
             var wildcards = new List<string>();
             wildcards.Add("*.tmp");
@@ -58,23 +53,19 @@ namespace TestLibrary.FilterTests
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        public void FilterTakesEmptyWildcardsWithoutFailure()
-        {
+        public void FilterTakesEmptyWildcardsWithoutFailure() {
             var filter = new IgnoredFolderNameFilter();
             filter.Wildcards = new List<string>();
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void FilterFailsTakingNullWildcard()
-        {
+        public void FilterFailsTakingNullWildcard() {
             var filter = new IgnoredFolderNameFilter();
-            filter.Wildcards = null;
+            Assert.Throws<ArgumentNullException>(() => filter.Wildcards = null);
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        public void FilterFiltersEventsMatchingWildcard()
-        {
+        public void FilterFiltersEventsMatchingWildcard() {
             var wildcards = new List<string>();
             wildcards.Add(".*");
             var filter = new IgnoredFolderNameFilter { Wildcards = wildcards };
@@ -84,8 +75,7 @@ namespace TestLibrary.FilterTests
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        public void FilterLetsEventsPassIfNotMatchingWildcard()
-        {
+        public void FilterLetsEventsPassIfNotMatchingWildcard() {
             var wildcards = new List<string>();
             wildcards.Add(".tmp");
             var filter = new IgnoredFolderNameFilter { Wildcards = wildcards };

@@ -36,7 +36,7 @@ namespace CmisSync.Lib.Streams {
         /// </param>
         public StreamWrapper(Stream stream) {
             if (stream == null) {
-                throw new ArgumentNullException("Given stream must not be null");
+                throw new ArgumentNullException("stream");
             }
 
             this.Stream = stream;

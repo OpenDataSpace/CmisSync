@@ -164,7 +164,7 @@ namespace CmisSync.Lib.Cmis {
         /// <param name="queue">Event Queue.</param>
         protected Repository(RepoInfo repoInfo, ActivityListenerAggregator activityListener, bool inMemory, ICountingQueue queue) : base(repoInfo) {
             if (activityListener == null) {
-                throw new ArgumentNullException("Given activityListener is null");
+                throw new ArgumentNullException("activityListener");
             }
 
             this.fileSystemFactory = new FileSystemInfoFactory();
@@ -192,7 +192,7 @@ namespace CmisSync.Lib.Cmis {
             this.authProvider = AuthProviderFactory.CreateAuthProvider(repoInfo.AuthenticationType, repoInfo.Address, this.db);
 
             // Initialize storage
-            this.storage = new MetaDataStorage(this.db, new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath));
+            this.storage = new MetaDataStorage(this.db, new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath), inMemory);
             this.fileTransmissionStorage = new FileTransmissionStorage(this.db, RepoInfo.ChunkSize);
 
             // Add ignore file/folder filter
@@ -200,13 +200,15 @@ namespace CmisSync.Lib.Cmis {
             this.ignoredFileNameFilter = new IgnoredFileNamesFilter { Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames };
             this.ignoredFolderNameFilter = new IgnoredFolderNameFilter { Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames };
             this.invalidFolderNameFilter = new InvalidFolderNameFilter();
-            this.filters = new FilterAggregator(this.ignoredFileNameFilter, this.ignoredFolderNameFilter, this.invalidFolderNameFilter, this.ignoredFoldersFilter);
+            var symlinkFilter = new SymlinkFilter();
+            this.filters = new FilterAggregator(this.ignoredFileNameFilter, this.ignoredFolderNameFilter, this.invalidFolderNameFilter, this.ignoredFoldersFilter, symlinkFilter);
             this.reportingFilter = new ReportingFilter(
                 this.Queue,
                 this.ignoredFoldersFilter,
                 this.ignoredFileNameFilter,
                 this.ignoredFolderNameFilter,
-                this.invalidFolderNameFilter);
+                this.invalidFolderNameFilter,
+                symlinkFilter);
             this.Queue.EventManager.AddEventHandler(this.reportingFilter);
             this.alreadyAddedFilter = new IgnoreAlreadyHandledFsEventsFilter(this.storage, this.fileSystemFactory);
             this.Queue.EventManager.AddEventHandler(this.alreadyAddedFilter);
@@ -411,7 +413,7 @@ namespace CmisSync.Lib.Cmis {
         /// </summary>
         /// <param name="disposing">If set to <c>true</c> disposing.</param>
         protected virtual void Dispose(bool disposing) {
-            Suspend();
+            this.Suspend();
 
             if (!this.disposed) {
                 this.connectionScheduler.Dispose();
@@ -421,10 +423,15 @@ namespace CmisSync.Lib.Cmis {
 
                 if (disposing) {
                     bool transmissionRun = false;
+
+                    // Maximum timeout is 10 sec (5 for aborting transmissions and 5 for stopping queue)
+                    int timeout = 5000;
                     do {
                         if (transmissionRun) {
                             Thread.Sleep(10);
+                            timeout -= 10;
                         }
+
                         transmissionRun = false;
                         List<Transmission> transmissions = this.activityListener.TransmissionManager.ActiveTransmissionsAsList();
                         foreach (Transmission transmission in transmissions) {
@@ -438,9 +445,9 @@ namespace CmisSync.Lib.Cmis {
                                 transmission.Abort();
                             }
                         }
-                    } while (transmissionRun);
+                    } while (transmissionRun && timeout > 0);
 
-                    int timeout = 5000;
+                    timeout = 5000;
                     if (!this.Queue.WaitForStopped(timeout)) {
                         Logger.Debug(string.Format("Event Queue of {0} has not been closed in {1} miliseconds", this.RemoteUrl.ToString(), timeout));
                     }
@@ -460,6 +467,10 @@ namespace CmisSync.Lib.Cmis {
             }
         }
 
+        /// <summary>
+        /// Creates a default EventManager and Queue.
+        /// </summary>
+        /// <returns>The queue.</returns>
         protected static ICountingQueue CreateQueue() {
             var manager = new SyncEventManager();
             return new SyncEventQueue(manager);

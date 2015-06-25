@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
     using System.IO;
 
@@ -29,8 +28,7 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// Crawl request event.
     /// </summary>
-    public class CrawlRequestEvent : ISyncEvent
-    {
+    public class CrawlRequestEvent : ISyncEvent {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.CrawlRequestEvent"/> class.
         /// </summary>
@@ -40,11 +38,9 @@ namespace CmisSync.Lib.Events
         /// <param name='remoteFolder'>
         /// Remote folder.
         /// </param>
-        public CrawlRequestEvent(IDirectoryInfo localFolder, IFolder remoteFolder)
-        {
-            if (localFolder == null)
-            {
-                throw new ArgumentNullException("Given path is null");
+        public CrawlRequestEvent(IDirectoryInfo localFolder, IFolder remoteFolder) {
+            if (localFolder == null) {
+                throw new ArgumentNullException("localFolder");
             }
 
             this.RemoteFolder = remoteFolder;
@@ -69,8 +65,7 @@ namespace CmisSync.Lib.Events
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.CrawlRequestEvent"/>.
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.CrawlRequestEvent"/>.</returns>
-        public override string ToString()
-        {
+        public override string ToString() {
             return string.Format(
                 "[CrawlRequestEvent: RemoteFolder={0}, LocalFolder={1}]",
                 this.RemoteFolder == null ? string.Empty : this.RemoteFolder.Name,

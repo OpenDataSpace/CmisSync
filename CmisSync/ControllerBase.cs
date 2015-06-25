@@ -613,7 +613,7 @@ namespace CmisSync {
                         string pathname = Path.Combine(config.GetConfigPath(), this.BrandConfigFolder, path.Substring(1));
                         Directory.CreateDirectory(Path.GetDirectoryName(pathname));
                         try {
-                            using (FileStream output = File.OpenWrite(pathname)) {
+                            using (FileStream output = File.Open(pathname, FileMode.Truncate, FileAccess.Write)) {
                                 if (!clientBrand.GetFile(path, output)) {
                                     success = false;
                                     break;
@@ -860,30 +860,6 @@ namespace CmisSync {
 
             // Update UI.
             this.FolderListChanged();
-        }
-
-        /// <summary>
-        /// Fix the file attributes of a folder, recursively.
-        /// </summary>
-        /// <param name="path">Folder to fix</param>
-        private void ClearFolderAttributes(string path) {
-            if (!Directory.Exists(path)) {
-                return;
-            }
-
-            string[] folders = Directory.GetDirectories(path);
-
-            foreach (string folder in folders) {
-                this.ClearFolderAttributes(folder);
-            }
-
-            string[] files = Directory.GetFiles(path);
-
-            foreach (string file in files) {
-                if (!CmisSync.Lib.Utils.IsSymlink(file)) {
-                    File.SetAttributes(file, FileAttributes.Normal);
-                }
-            }
         }
     }
 }

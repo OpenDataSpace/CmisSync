@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="TransmissionController.cs" company="GRAU DATA AG">
+// <copyright file="Transmission.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -96,10 +96,10 @@ namespace CmisSync.Lib.FileTransmission {
         private long? position = null;
         private long? bitsPerSecond = null;
         private Exception failedException = null;
-        DateTime lastModification = DateTime.Now;
+        private DateTime lastModification = DateTime.Now;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.TransmissionController"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.Transmission"/> class.
         /// </summary>
         /// <param name='type'>
         /// Type of the transmission.
@@ -112,7 +112,7 @@ namespace CmisSync.Lib.FileTransmission {
         /// </param>
         public Transmission(TransmissionType type, string path, string cachePath = null) {
             if (path == null) {
-                throw new ArgumentNullException("Argument null in FSEvent Constructor", "path");
+                throw new ArgumentNullException("path");
             }
 
             this.type = type;
@@ -120,6 +120,9 @@ namespace CmisSync.Lib.FileTransmission {
             this.CachePath = cachePath;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.Transmission"/> class, but should only be used by UI templates in design phase.
+        /// </summary>
         [Obsolete("Should only be used by UI templates", true)]
         public Transmission() {
             this.type = TransmissionType.UPLOAD_NEW_FILE;
@@ -249,7 +252,7 @@ namespace CmisSync.Lib.FileTransmission {
         }
 
         /// <summary>
-        /// Gets the status of the transmission.
+        /// Gets or sets the status of the transmission.
         /// </summary>
         /// <value>The status.</value>
         public TransmissionStatus Status {
@@ -338,7 +341,7 @@ namespace CmisSync.Lib.FileTransmission {
             }
 
             set {
-                if (Math.Abs((value - this.lastModification).TotalSeconds) > 1 ) {
+                if (Math.Abs((value - this.lastModification).TotalSeconds) > 1) {
                     this.lastModification = value;
                     this.NotifyPropertyChanged(Utils.NameOf(() => this.LastModification));
                 }
@@ -365,24 +368,38 @@ namespace CmisSync.Lib.FileTransmission {
             return base.GetHashCode();
         }
 
+        /// <summary>
+        /// Pause the transmission async.
+        /// </summary>
         public void Pause() {
             if (this.Status == TransmissionStatus.TRANSMITTING) {
                 this.Status = TransmissionStatus.PAUSED;
             }
         }
 
+        /// <summary>
+        /// Resume the transmission async.
+        /// </summary>
         public void Resume() {
             if (this.Status == TransmissionStatus.PAUSED) {
                 this.Status = TransmissionStatus.TRANSMITTING;
             }
         }
 
+        /// <summary>
+        /// Abort the transmission async.
+        /// </summary>
         public void Abort() {
             if (this.Status == TransmissionStatus.PAUSED || this.Status == TransmissionStatus.TRANSMITTING) {
                 this.Status = TransmissionStatus.ABORTING;
             }
         }
 
+        /// <summary>
+        /// Creates the stream.
+        /// </summary>
+        /// <returns>The stream.</returns>
+        /// <param name="wrappedStream">Wrapped stream.</param>
         public Stream CreateStream(Stream wrappedStream) {
             return new TransmissionStream(wrappedStream, this);
         }
@@ -393,7 +410,7 @@ namespace CmisSync.Lib.FileTransmission {
         /// <param name="propertyName">Property name.</param>
         private void NotifyPropertyChanged(string propertyName) {
             if (string.IsNullOrEmpty(propertyName)) {
-                throw new ArgumentNullException("Given property name is null");
+                throw new ArgumentNullException("propertyName");
             }
 
             var handler = this.PropertyChanged;

@@ -1,5 +1,5 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="HashAlgorithmReuse.cs" company="GRAU DATA AG">
+//-----------------------------------------------------------------------
+// <copyright file="SymlinkFilter.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -17,10 +17,20 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.HashAlgorithm {
+namespace CmisSync.Lib.Filter {
     using System;
-    using System.Security.Cryptography;
 
-    interface HashAlgorithmReuse : ICloneable {
+    using CmisSync.Lib.Storage.FileSystem;
+
+    public class SymlinkFilter {
+        public bool IsSymlink(IFileSystemInfo fsInfo, out string reason) {
+            reason = string.Empty;
+            if (fsInfo.Exists && fsInfo.IsSymlink) {
+                reason = string.Format("{0} is a symbolic link", fsInfo.FullName);
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
 }

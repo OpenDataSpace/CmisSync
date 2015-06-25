@@ -47,5 +47,11 @@ namespace CmisSync.Lib.Filter {
         /// </summary>
         /// <value>The ignored folder filter.</value>
         IgnoredFoldersFilter IgnoredFolderFilter { get; }
+
+        /// <summary>
+        /// Gets the symlink filter.
+        /// </summary>
+        /// <value>The symlink filter.</value>
+        SymlinkFilter SymlinkFilter { get; }
     }
 }

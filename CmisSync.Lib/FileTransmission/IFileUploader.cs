@@ -42,7 +42,7 @@ namespace CmisSync.Lib.FileTransmission {
         /// <param name='localFileStream'>
         /// Local file stream.
         /// </param>
-        /// <param name='status'>
+        /// <param name='transmission'>
         /// Transmission status where the uploader should report its uploading status.
         /// </param>
         /// <param name='hashAlg'>
@@ -51,7 +51,14 @@ namespace CmisSync.Lib.FileTransmission {
         /// <param name='overwrite'>
         /// If true, the local content will overwrite the existing content.
         /// </param>
-        IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg, bool overwrite = true, UpdateChecksum update = null);
+        /// <param name="update">Will be called on every new chunk which is uploaded.</param>
+        IDocument UploadFile(
+            IDocument remoteDocument,
+            Stream localFileStream,
+            Transmission transmission,
+            HashAlgorithm hashAlg,
+            bool overwrite = true,
+            UpdateChecksum update = null);
 
         /// <summary>
         /// Appends the localFileStream to the remoteDocument.
@@ -65,12 +72,16 @@ namespace CmisSync.Lib.FileTransmission {
         /// <param name='localFileStream'>
         /// Local file stream.
         /// </param>
-        /// <param name='status'>
+        /// <param name='transmission'>
         /// Transmission status where the uploader should report its appending status.
         /// </param>
         /// <param name='hashAlg'>
         /// Hash alg which should be used to calculate a checksum over the appended content.
         /// </param>
-        IDocument AppendFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg);
+        IDocument AppendFile(
+            IDocument remoteDocument,
+            Stream localFileStream,
+            Transmission transmission,
+            HashAlgorithm hashAlg);
     }
 }

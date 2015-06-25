@@ -41,7 +41,7 @@ namespace CmisSync.Lib.Queueing {
         /// <returns>A reference to an interface that allows observers to stop receiving notifications before the provider has finished sending them.</returns>
         public virtual IDisposable Subscribe(IObserver<Tuple<EventCategory, int>> observer) {
             if (observer == null) {
-                throw new ArgumentNullException("Given observer is null");
+                throw new ArgumentNullException("observer");
             }
 
             if (!this.categoryCounterObservers.Contains(observer)) {

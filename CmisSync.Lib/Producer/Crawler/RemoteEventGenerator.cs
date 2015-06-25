@@ -35,7 +35,7 @@ namespace CmisSync.Lib
         public RemoteEventGenerator(IMetaDataStorage storage)
         {
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage");
             }
 
             this.storage = storage;

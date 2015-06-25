@@ -17,16 +17,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.TestUtils
-{
+namespace TestLibrary.TestUtils {
     using System;
 
     using CmisSync.Lib.Filter;
 
     using Moq;
 
-    public static class MockOfIFilterAggregatorUtil
-    {
+    public static class MockOfIFilterAggregatorUtil {
         public static Mock<IFilterAggregator> CreateFilterAggregator() {
             string reason;
             var filter = Mock.Of<IFilterAggregator>(
@@ -42,7 +40,8 @@ namespace TestLibrary.TestUtils
                 i.CheckFolderName(It.IsAny<string>(), out reason) == false) &&
                 f.IgnoredFolderFilter == Mock.Of<IgnoredFoldersFilter>(
                 i =>
-                i.CheckPath(It.IsAny<string>(), out reason) == false));
+                i.CheckPath(It.IsAny<string>(), out reason) == false) &&
+                f.SymlinkFilter == new SymlinkFilter());
             return Mock.Get(filter);
         }
     }

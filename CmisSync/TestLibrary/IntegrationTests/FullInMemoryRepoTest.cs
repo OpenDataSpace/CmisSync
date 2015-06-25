@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.IntegrationTests
-{
+namespace TestLibrary.IntegrationTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -39,8 +38,7 @@ namespace TestLibrary.IntegrationTests
     using TestLibrary.TestUtils;
 
     [TestFixture, Timeout(900000), Ignore, TestName("FullInMemoryRepoTests")]
-    public class FullInMemoryRepoTest : BaseFullRepoTest
-    {
+    public class FullInMemoryRepoTest : BaseFullRepoTest {
         [Test, Category("Medium")]
         public void TestToConnect() {
         }

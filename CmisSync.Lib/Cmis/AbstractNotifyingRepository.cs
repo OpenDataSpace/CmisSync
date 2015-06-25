@@ -48,7 +48,7 @@ namespace CmisSync.Lib.Cmis {
         public AbstractNotifyingRepository(RepoInfo repoInfo) {
             this.Status = this.RepoStatusFlags.Status;
             if (repoInfo == null) {
-                throw new ArgumentNullException("Given repoInfo is null");
+                throw new ArgumentNullException("repoInfo");
             }
 
             // Initialize local variable
@@ -200,7 +200,7 @@ namespace CmisSync.Lib.Cmis {
         /// <param name="propertyName">Property name.</param>
         protected void NotifyPropertyChanged(string propertyName) {
             if (string.IsNullOrEmpty(propertyName)) {
-                throw new ArgumentNullException("Given property name is null");
+                throw new ArgumentNullException("propertyName");
             }
 
             var handler = this.PropertyChanged;

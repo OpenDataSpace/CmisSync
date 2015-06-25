@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.QueueingTests
-{
+namespace TestLibrary.QueueingTests {
     using System;
 
     using CmisSync.Lib.Events;
@@ -29,8 +28,7 @@ namespace TestLibrary.QueueingTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class SingleStepEventQueueTest
-    {
+    public class SingleStepEventQueueTest {
         [Test, Category("Fast")]
         public void InitialState() {
             var manager = new Mock<ISyncEventManager>();
@@ -76,12 +74,11 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(Exception))]
         public void QueueRethrowsExceptionsByDefault() {
             var manager = new Mock<ISyncEventManager>();
-            manager.Setup(m => m.Handle(It.IsAny<ISyncEvent>())).Throws(new Exception());
+            manager.Setup(m => m.Handle(It.IsAny<ISyncEvent>())).Throws<Exception>();
             var queue = new SingleStepEventQueue(manager.Object);
-            queue.RunStartSyncEvent();
+            Assert.Throws<Exception>(() => queue.RunStartSyncEvent());
         }
 
         [Test, Category("Fast")]

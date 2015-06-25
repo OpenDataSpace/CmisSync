@@ -60,11 +60,11 @@ namespace CmisSync.Lib {
         /// <param name="transmissionManager">Transmission manager.</param>
         public ActivityListenerAggregator(IActivityListener overallListener, TransmissionManager transmissionManager) {
             if (overallListener == null) {
-                throw new ArgumentNullException("Given listener is null");
+                throw new ArgumentNullException("overallListener");
             }
 
             if (transmissionManager == null) {
-                throw new ArgumentNullException("Given transmission manager is null");
+                throw new ArgumentNullException("transmissionManager");
             }
 
             this.overall = overallListener;
