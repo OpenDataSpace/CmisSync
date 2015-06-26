@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 ﻿
-namespace TestLibrary.StorageTests.FileSystemTests {
+namespace TestLibrary.StorageTests.FileSystemTests.ReadOnlyIgnoringDecorator {
     using System;
     using System.IO;
 
