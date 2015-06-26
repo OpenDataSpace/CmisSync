@@ -129,6 +129,22 @@ namespace TestLibrary.StorageTests.FileSystemTests.ReadOnlyIgnoringDecorator {
             fileSystemInfo.Verify(f => f.Refresh(), Times.Once());
         }
 
+        [Test, Category("Fast")]
+        public void TryToResetTheReadOnlyPropertyAfterFailingWriteOperation() {
+            var fileSystemInfo = this.CreateMock();
+            fileSystemInfo.SetupProperty(f => f.ReadOnly, true);
+
+            var underTest = new ReadOnlyIgnoringFileSystemInfoDecoratorImpl(fileSystemInfo.Object);
+
+            Assert.Throws<IOException>(() => underTest.InnerDisableAndEnableReadOnlyForOperation(() => {
+                fileSystemInfo.VerifySet(f => f.ReadOnly = false, Times.Once());
+                Assert.That(fileSystemInfo.Object.ReadOnly, Is.False);
+                throw new IOException("Generic exception to simulate that write operation failed");
+            }));
+            fileSystemInfo.VerifySet(f => f.ReadOnly = true, Times.Once());
+            fileSystemInfo.Verify(f => f.Refresh(), Times.Once());
+        }
+
         private Mock<IFileSystemInfo> CreateMock() {
             var fileSystemInfo = new Mock<IFileSystemInfo>(MockBehavior.Strict);
             fileSystemInfo.Setup(f => f.Refresh());
