@@ -69,6 +69,30 @@ namespace TestLibrary.StorageTests.FileSystemTests.ReadOnlyIgnoringDecorator {
             Assert.That(underTest.Exists, Is.EqualTo(exists));
             fileSystemInfo.VerifyGet(f => f.Exists, Times.Once());
         }
+
+        [Test, Category("Fast")]
+        public void DoesSupportExtendedAttributes(
+            [Values("", "value")]string extendedAttribute)
+        {
+            var fileSystemInfo = new Mock<IFileSystemInfo>(MockBehavior.Strict);
+            var key = Guid.NewGuid().ToString();
+            fileSystemInfo.Setup(f => f.GetExtendedAttribute(key)).Returns(extendedAttribute);
+            var underTest = new ReadOnlyIgnoringFileSystemInfoDecoratorImpl(fileSystemInfo.Object);
+
+            Assert.That(underTest.GetExtendedAttribute(key), Is.EqualTo(extendedAttribute));
+            fileSystemInfo.Verify(f => f.GetExtendedAttribute(key), Times.Once());
+            fileSystemInfo.Verify(f => f.GetExtendedAttribute(It.Is<string>(s => s != key)), Times.Never());
+        }
+
+        [Test, Category("Fast")]
+        public void DoesSupportExtendedAttributes([Values(true, false)]bool supportsExtendendAttributes) {
+            var fileSystemInfo = new Mock<IFileSystemInfo>(MockBehavior.Strict);
+            fileSystemInfo.Setup(f => f.IsExtendedAttributeAvailable()).Returns(supportsExtendendAttributes);
+            var underTest = new ReadOnlyIgnoringFileSystemInfoDecoratorImpl(fileSystemInfo.Object);
+
+            Assert.That(underTest.IsExtendedAttributeAvailable(), Is.EqualTo(supportsExtendendAttributes));
+            fileSystemInfo.Verify(f => f.IsExtendedAttributeAvailable(), Times.Once());
+        }
         #endregion
 
         #region ReadWriteAccess
