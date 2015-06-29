@@ -80,7 +80,7 @@ namespace TestLibrary.StreamsTests {
         }
 
         [Test, Category("Slow"), Category("Streams"), Timeout(10200)]
-        public void ReadOrWriteOneByteMoreThanLimitTakesAtMinimumOneSecond([Values(true, false)]bool read) {
+        public void LimitReadOrWriteStream([Values(true, false)]bool read) {
             using (var sourceOrTargetStream  = new MemoryStream(new byte[this.length]))
             using (var wrappedStream = new MemoryStream(this.buffer))
             using (var monitorStream = new BandwidthNotifyingStream(wrappedStream))
