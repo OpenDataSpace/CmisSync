@@ -22,33 +22,25 @@ using MonoMac.Foundation;
 using MonoMac.AppKit;
 using log4net;
 
-namespace CmisSync
-{
-    class CertPolicyWindow : NSObject
-    {
+namespace CmisSync {
+    class CertPolicyWindow : NSObject {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(CertPolicyWindow));
 
         private CertPolicyHandler Handler { get; set; }
 
-        public CertPolicyWindow(CertPolicyHandler handler)
-        {
+        public CertPolicyWindow(CertPolicyHandler handler) {
             Handler = handler;
             Handler.ShowWindowEvent += ShowCertDialog;
         }
 
-        private void ShowCertDialog()
-        {
+        private void ShowCertDialog() {
             Logger.Debug("Showing Cert Dialog: " + Handler.UserMessage);
             CertPolicyHandler.Response ret = CertPolicyHandler.Response.None;
-            using (var signal = new AutoResetEvent(false))
-            {
-                InvokeOnMainThread(delegate
-                {
-                    try
-                    {
+            using (var signal = new AutoResetEvent(false)) {
+                InvokeOnMainThread(delegate {
+                    try {
                         NSAlert alert = NSAlert.WithMessage("Untrusted Certificate", "No", "Always", "Just now", Handler.UserMessage + "\n\nDo you trust this certificate?");
-                        switch (alert.RunModal())
-                        {
+                        switch (alert.RunModal()) {
                             case 1:
                                 ret = CertPolicyHandler.Response.CertDeny;
                                 break;
@@ -62,21 +54,17 @@ namespace CmisSync
                                 ret = CertPolicyHandler.Response.None;
                                 break;
                         }
-                    }
-                    catch (Exception)
-                    {
+                    } catch (Exception) {
                         ret = CertPolicyHandler.Response.None;
-                    }
-                    finally
-                    {
+                    } finally {
                         signal.Set();
                     }
                 });
                 signal.WaitOne();
             }
+
             Logger.Debug("Cert Dialog return:" + ret.ToString());
             Handler.UserResponse = ret;
         }
     }
 }
-

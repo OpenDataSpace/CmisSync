@@ -110,12 +110,10 @@ namespace CmisSync {
             LinkButton website_link = new LinkButton(this.Controller.WebsiteLinkAddress, Properties_Resources.Website);
             website_link.ModifyFg(StateType.Active, fgcolor);
             LinkButton credits_link = new LinkButton(this.Controller.CreditsLinkAddress, Properties_Resources.Credits);
-            LinkButton report_problem_link = new LinkButton(this.Controller.ReportProblemLinkAddress, Properties_Resources.ReportProblem);
 
             HBox layout_links = new HBox(false, 0);
             layout_links.PackStart(website_link, false, false, 0);
             layout_links.PackStart(credits_link, false, false, 0);
-            layout_links.PackStart(report_problem_link, false, false, 0);
 
             VBox layout_vertical = new VBox(false, 0);
             layout_vertical.PackStart(new Label(string.Empty), false, false, 42);

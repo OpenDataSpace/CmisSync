@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.StreamsTests
-{
+namespace TestLibrary.StreamsTests {
     using System;
     using System.IO;
     using System.Security.Cryptography;
@@ -31,15 +30,13 @@ namespace TestLibrary.StreamsTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class OffsetStreamTest
-    {
+    public class OffsetStreamTest {
         private long offset;
         private long contentLength;
         private byte[] content;
 
         [SetUp]
-        public void SetUp()
-        {
+        public void SetUp() {
             this.offset = 100;
             this.contentLength = 100;
             this.content = new byte[this.contentLength];
@@ -49,89 +46,60 @@ namespace TestLibrary.StreamsTests
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void ConstructorWithoutOffset()
-        {
-            using (var stream = new OffsetStream(new Mock<Stream>().Object))
-            {
+        public void ConstructorWithoutOffset() {
+            using (var stream = new OffsetStream(new Mock<Stream>().Object)) {
                 Assert.AreEqual(0, stream.Offset);
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void ConstructorWithOffset()
-        {
-            using (var stream = new OffsetStream(new Mock<Stream>().Object, 10))
-            {
+        public void ConstructorWithOffset() {
+            using (var stream = new OffsetStream(new Mock<Stream>().Object, 10)) {
                 Assert.AreEqual(10, stream.Offset);
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorFailsOnStreamIsNull()
-        {
-            using (new OffsetStream(null))
-            {
-            }
+        public void ConstructorFailsOnStreamIsNull() {
+            Assert.Throws<ArgumentNullException>(() => { using (new OffsetStream(null)); });
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorFailsOnStreamIsNullAnOffsetIsGiven()
-        {
-            using (new OffsetStream(null, 10))
-            {
-            }
+        public void ConstructorFailsOnStreamIsNullAnOffsetIsGiven() {
+            Assert.Throws<ArgumentNullException>(() => { using (new OffsetStream(null, 10)); });
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
-        public void ConstructorFailsOnNegativeOffset()
-        {
-            using (new OffsetStream(new Mock<Stream>().Object, -1))
-            {
-            }
+        public void ConstructorFailsOnNegativeOffset() {
+            Assert.Throws<ArgumentOutOfRangeException>(() => { using (new OffsetStream(new Mock<Stream>().Object, -1)); });
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void LengthTest()
-        {
+        public void LengthTest() {
             // static length test
             using (MemoryStream memstream = new MemoryStream(this.content))
-            using (OffsetStream offsetstream = new OffsetStream(memstream, this.offset))
-            {
+            using (OffsetStream offsetstream = new OffsetStream(memstream, this.offset)) {
                 Assert.AreEqual(this.offset + this.content.Length, offsetstream.Length);
             }
 
             // dynamic length test
             using (MemoryStream memstream = new MemoryStream())
-                using (OffsetStream offsetstream = new OffsetStream(memstream, this.offset))
-            {
+            using (OffsetStream offsetstream = new OffsetStream(memstream, this.offset)) {
                 Assert.AreEqual(0, memstream.Length);
                 Assert.AreEqual(this.offset, offsetstream.Length);
                 offsetstream.SetLength(200);
                 Assert.AreEqual(200, offsetstream.Length);
                 Assert.AreEqual(200 - this.offset, memstream.Length);
-                try
-                {
-                    offsetstream.SetLength(50);
-                    Assert.Fail();
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                }
-
+                Assert.Throws<ArgumentOutOfRangeException>(() => offsetstream.SetLength(50));
                 Assert.AreEqual(200, offsetstream.Length);
                 Assert.AreEqual(200 - this.offset, memstream.Length);
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void SeekTest()
-        {
+        public void SeekTest() {
             using (MemoryStream memstream = new MemoryStream(this.content))
-                using (OffsetStream offsetstream = new OffsetStream(memstream, this.offset))
-            {
+            using (OffsetStream offsetstream = new OffsetStream(memstream, this.offset)) {
                 Assert.True(offsetstream.CanSeek);
                 Assert.AreEqual(memstream.CanSeek, offsetstream.CanSeek);
                 Assert.AreEqual(memstream.Position + this.offset, offsetstream.Position);
@@ -158,15 +126,7 @@ namespace TestLibrary.StreamsTests
                 Assert.AreEqual(0, memstream.Position);
 
                 // seek into illegal areas
-                try
-                {
-                    pos = offsetstream.Seek(-10, SeekOrigin.Current);
-                    Assert.Fail();
-                }
-                catch (IOException)
-                {
-                }
-
+                Assert.Throws<IOException>(() => { pos = offsetstream.Seek(-10, SeekOrigin.Current); });
                 Assert.AreEqual(this.offset, pos);
                 Assert.AreEqual(0, memstream.Position);
             }
@@ -180,13 +140,11 @@ namespace TestLibrary.StreamsTests
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void ReadTest()
-        {
+        public void ReadTest() {
             // Read block
             byte[] buffer = new byte[this.contentLength];
             using (MemoryStream memstream = new MemoryStream(this.content))
-                using (OffsetStream offsetstream = new OffsetStream(memstream, this.offset))
-            {
+            using (OffsetStream offsetstream = new OffsetStream(memstream, this.offset)) {
                 Assert.AreEqual(0, memstream.Position);
                 Assert.AreEqual(this.offset, offsetstream.Position);
                 int len = offsetstream.Read(buffer, 0, buffer.Length);
@@ -199,12 +157,10 @@ namespace TestLibrary.StreamsTests
         }
         
         [Test, Category("Fast"), Category("Streams")]
-        public void WriteTest()
-        {
+        public void WriteTest() {
             // Write one block
             using (MemoryStream memstream = new MemoryStream())
-                using (OffsetStream offsetstream = new OffsetStream(memstream, this.offset))
-            {
+            using (OffsetStream offsetstream = new OffsetStream(memstream, this.offset)) {
                 Assert.AreEqual(0, memstream.Position);
                 Assert.AreEqual(this.offset, offsetstream.Position);
                 offsetstream.Write(this.content, 0, this.content.Length);
@@ -214,8 +170,7 @@ namespace TestLibrary.StreamsTests
 
             // Write single bytes
             using (MemoryStream memstream = new MemoryStream())
-                using (OffsetStream offsetstream = new OffsetStream(memstream, this.offset))
-            {
+            using (OffsetStream offsetstream = new OffsetStream(memstream, this.offset)) {
                 Assert.AreEqual(0, memstream.Position);
                 Assert.AreEqual(this.offset, offsetstream.Position);
                 foreach (byte b in this.content) {

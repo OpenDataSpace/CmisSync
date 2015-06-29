@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer
-{
+namespace CmisSync.Lib.Consumer {
     using System;
     using System.Collections.Generic;
     using System.Runtime.Serialization;
@@ -31,8 +30,7 @@ namespace CmisSync.Lib.Consumer
     /// Interaction needed exception. This exception should be thrown if a user must be informed about a needed interaction to solve a problem/conflict.
     /// </summary>
     [Serializable]
-    public class InteractionNeededException : Exception
-    {
+    public class InteractionNeededException : Exception {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.InteractionNeededException"/> class.
         /// </summary>

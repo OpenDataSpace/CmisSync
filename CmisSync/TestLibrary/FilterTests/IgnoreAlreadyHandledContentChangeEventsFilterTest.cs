@@ -17,18 +17,17 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.FilterTests
-{
+namespace TestLibrary.FilterTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
 
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Filter;
-    using CmisSync.Lib.Storage.FileSystem;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 
@@ -39,46 +38,37 @@ namespace TestLibrary.FilterTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class IgnoreAlreadyHandledContentChangeEventsFilterTest
-    {
+    public class IgnoreAlreadyHandledContentChangeEventsFilterTest {
         [Test, Category("Fast")]
-        public void ConstructorTakesStorageAndSeesionInstance()
-        {
+        public void ConstructorTakesStorageAndSeesionInstance() {
             new IgnoreAlreadyHandledContentChangeEventsFilter(Mock.Of<IMetaDataStorage>(), Mock.Of<ISession>());
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionOnNullStorage()
-        {
-            new IgnoreAlreadyHandledContentChangeEventsFilter(null, Mock.Of<ISession>());
+        public void ConstructorThrowsExceptionOnNullStorage() {
+            Assert.Throws<ArgumentNullException>(() => new IgnoreAlreadyHandledContentChangeEventsFilter(null, Mock.Of<ISession>()));
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionOnNullSession()
-        {
-            new IgnoreAlreadyHandledContentChangeEventsFilter(Mock.Of<IMetaDataStorage>(), null);
+        public void ConstructorThrowsExceptionOnNullSession() {
+            Assert.Throws<ArgumentNullException>(() => new IgnoreAlreadyHandledContentChangeEventsFilter(Mock.Of<IMetaDataStorage>(), null));
         }
 
         [Test, Category("Fast")]
-        public void PriorityIsFilterPriority()
-        {
+        public void PriorityIsFilterPriority() {
             var filter = new IgnoreAlreadyHandledContentChangeEventsFilter(Mock.Of<IMetaDataStorage>(), Mock.Of<ISession>());
             Assert.That(filter.Priority, Is.EqualTo(EventHandlerPriorities.FILTER));
         }
 
         [Test, Category("Fast")]
-        public void DoesNotHandleUnknownEvents()
-        {
+        public void DoesNotHandleUnknownEvents() {
             var filter = new IgnoreAlreadyHandledContentChangeEventsFilter(Mock.Of<IMetaDataStorage>(), Mock.Of<ISession>());
 
             Assert.That(filter.Handle(Mock.Of<ISyncEvent>()), Is.False);
         }
 
         [Test, Category("Fast")]
-        public void DoesNotFilterAddEventsOfNotExistingObjects()
-        {
+        public void DoesNotFilterAddEventsOfNotExistingObjects() {
             string remoteId = "remoteId";
             var filter = new IgnoreAlreadyHandledContentChangeEventsFilter(Mock.Of<IMetaDataStorage>(), Mock.Of<ISession>());
             var contentChangeEvent = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Created, remoteId);
@@ -87,8 +77,7 @@ namespace TestLibrary.FilterTests
         }
 
         [Test, Category("Fast")]
-        public void DoesNotFilterChangeEventsOfNotExistingObjects()
-        {
+        public void DoesNotFilterChangeEventsOfNotExistingObjects() {
             string remoteId = "remoteId";
             var filter = new IgnoreAlreadyHandledContentChangeEventsFilter(Mock.Of<IMetaDataStorage>(), Mock.Of<ISession>());
             var contentChangeEvent = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Updated, remoteId);
@@ -97,8 +86,7 @@ namespace TestLibrary.FilterTests
         }
 
         [Test, Category("Fast")]
-        public void DoesNotFilterChangeEventsOfExistingButDifferentObjects()
-        {
+        public void DoesNotFilterChangeEventsOfExistingButDifferentObjects() {
             string remoteId = "remoteId";
             string oldToken = "oldToken";
             string newToken = "newToken";
@@ -120,8 +108,7 @@ namespace TestLibrary.FilterTests
         }
 
         [Test, Category("Fast")]
-        public void FilterHandlesDeletedEventsOfNonLocalExistingObjects()
-        {
+        public void FilterHandlesDeletedEventsOfNonLocalExistingObjects() {
             var filter = new IgnoreAlreadyHandledContentChangeEventsFilter(Mock.Of<IMetaDataStorage>(), Mock.Of<ISession>());
             var contentChangeEvent = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Deleted, "remoteId");
 
@@ -129,8 +116,7 @@ namespace TestLibrary.FilterTests
         }
 
         [Test, Category("Fast")]
-        public void FilterIgnoresDeletedEventsOfLocalExistingObjects()
-        {
+        public void FilterIgnoresDeletedEventsOfLocalExistingObjects() {
             string remoteId = "remoteId";
             var storage = new Mock<IMetaDataStorage>();
             storage.Setup(s => s.GetObjectByRemoteId(It.Is<string>(id => id == remoteId))).Returns(Mock.Of<IMappedObject>());
@@ -141,8 +127,7 @@ namespace TestLibrary.FilterTests
         }
 
         [Test, Category("Fast")]
-        public void FiltersChangeEventsIfChangeLogTokenIsEqualToLocalObject()
-        {
+        public void FiltersChangeEventsIfChangeLogTokenIsEqualToLocalObject() {
             string remoteId = "remoteId";
             string changeToken = "Token";
             string parentId = "parentId";
@@ -166,8 +151,7 @@ namespace TestLibrary.FilterTests
         }
 
         [Test, Category("Fast")]
-        public void FilterIgnoresFolderChangedEventsIfChangeLogTokenIsEqualButParentIdIsDifferent()
-        {
+        public void FilterIgnoresFolderChangedEventsIfChangeLogTokenIsEqualButParentIdIsDifferent() {
             string remoteId = "remoteId";
             string changeToken = "Token";
             var session = new Mock<ISession>();
@@ -191,8 +175,7 @@ namespace TestLibrary.FilterTests
         }
 
         [Test, Category("Fast")]
-        public void FilterIgnoresFileChangedEventsIfChangeLogTokenIsEqualButParentIdIsDifferent()
-        {
+        public void FilterIgnoresFileChangedEventsIfChangeLogTokenIsEqualButParentIdIsDifferent() {
             string remoteId = "remoteId";
             string changeToken = "Token";
             var session = new Mock<ISession>();

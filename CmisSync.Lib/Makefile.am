@@ -24,6 +24,7 @@ SOURCES =  \
 	Cmis/Authentication/StandardAuthenticationProviderWrapper.cs \
 	Cmis/ConvenienceExtenders/AllowableActionConvenienceExtenders.cs \
 	Cmis/ConvenienceExtenders/CmisConvenienceExtenders.cs \
+	Cmis/ConvenienceExtenders/CmisRepositoryInfoConvenienceExtenders.cs \
 	Cmis/DotCMISLogListener.cs \
 	Cmis/INotifyRepositoryPropertyChanged.cs \
 	Cmis/MimeType.cs \
@@ -156,7 +157,7 @@ SOURCES =  \
 	Filter/ReportingFilter.cs \
 	Filter/RepositoryRootDeletedDetection.cs \
 	Filter/SymlinkFilter.cs \
-	HashAlgorithm/HashAlgorithmReuse.cs \
+	HashAlgorithm/IReusableHashAlgorithm.cs \
 	HashAlgorithm/SHA1Reuse.cs \
 	HttpProxyUtils.cs \
 	IActivityListener.cs \

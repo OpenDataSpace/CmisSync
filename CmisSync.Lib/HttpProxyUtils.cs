@@ -16,8 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib
-{
+namespace CmisSync.Lib {
     using System;
     using System.Net;
     
@@ -27,8 +26,7 @@ namespace CmisSync.Lib
     /// <summary>
     /// Http proxy utils.
     /// </summary>
-    public class HttpProxyUtils
-    {
+    public class HttpProxyUtils {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(HttpProxyUtils));
 
         /// <summary>
@@ -37,12 +35,10 @@ namespace CmisSync.Lib
         /// </summary>
         /// <param name="settings">proxy settings.</param>
         /// <param name="throwExceptions">If set to <c>true</c> throw exceptions.</param>
-        public static void SetDefaultProxy(Config.ProxySettings settings, bool throwExceptions = false)
-        {
-            try
-            {
+        public static void SetDefaultProxy(Config.ProxySettings settings, bool throwExceptions = false) {
+            try {
                 IWebProxy proxy = null;
-                switch(settings.Selection) {
+                switch (settings.Selection) {
                     case Config.ProxySelection.SYSTEM:
                         proxy = WebRequest.GetSystemWebProxy();
                         break;
@@ -56,9 +52,7 @@ namespace CmisSync.Lib
                 }
 
                 WebRequest.DefaultWebProxy = proxy;
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 if (throwExceptions) {
                     throw;
                 }

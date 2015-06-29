@@ -115,7 +115,6 @@ namespace CmisSync {
         private void CreateLink() {
             Link website_link = new Link(Properties_Resources.Website, Controller.WebsiteLinkAddress);
             Link credits_link = new Link(Properties_Resources.Credits, Controller.CreditsLinkAddress);
-            Link report_problem_link = new Link(Properties_Resources.ReportProblem, Controller.ReportProblemLinkAddress);
 
             canvas.Children.Add(website_link);
             Canvas.SetLeft(website_link, 289);
@@ -124,10 +123,6 @@ namespace CmisSync {
             canvas.Children.Add(credits_link);
             Canvas.SetLeft(credits_link, 289 + website_link.ActualWidth + 60);
             Canvas.SetTop(credits_link, 222);
-
-            canvas.Children.Add(report_problem_link);
-            Canvas.SetLeft(report_problem_link, 289 + website_link.ActualWidth + credits_link.ActualWidth + 115);
-            Canvas.SetTop(report_problem_link, 222);
         }
         
         /// <summary>

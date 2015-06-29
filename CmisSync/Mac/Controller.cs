@@ -141,10 +141,6 @@ namespace CmisSync {
         }
 
         public Controller() : base() {
-            using (var a = new NSAutoreleasePool()) {
-                NSApplication.Init ();
-            }
-
             NSWorkspace.SharedWorkspace.NotificationCenter.AddObserver(
                 NSWorkspace.WillSleepNotification,
                 delegate {

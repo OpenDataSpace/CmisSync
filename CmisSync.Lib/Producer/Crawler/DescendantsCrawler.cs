@@ -31,6 +31,7 @@ namespace CmisSync.Lib.Producer.Crawler {
     using DotCMIS.Client;
 
     using log4net;
+using CmisSync.Lib.Consumer;
 
     /// <summary>
     /// Decendants crawler.
@@ -135,29 +136,39 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// <returns>true if handled</returns>
         public override bool Handle(ISyncEvent e) {
             if (e is StartNextSyncEvent) {
-                Logger.Debug("Starting DecendantsCrawlSync upon " + e);
-                using (var activity = new ActivityListenerResource(this.activityListener)) {
-                    this.CrawlDescendants();
-                }
+                try {
+                    Logger.Debug("Starting DecendantsCrawlSync upon " + e);
+                    using (var activity = new ActivityListenerResource(this.activityListener)) {
+                        this.CrawlDescendants();
+                    }
 
-                this.Queue.AddEvent(new FullSyncCompletedEvent(e as StartNextSyncEvent));
-                return true;
+                    this.Queue.AddEvent(new FullSyncCompletedEvent(e as StartNextSyncEvent));
+                    return true;
+                } catch (InteractionNeededException interaction) {
+                    this.Queue.AddEvent(new InteractionNeededEvent(interaction));
+                    throw;
+                }
             }
 
             return false;
         }
 
         private void CrawlDescendants() {
-            DescendantsTreeCollection trees = this.treebuilder.BuildTrees();
-            if (Logger.IsDebugEnabled) {
-                Logger.Debug(string.Format("LocalTree:  {0} Elements", trees.LocalTree.ToList().Count));
-                Logger.Debug(string.Format("RemoteTree: {0} Elements", trees.RemoteTree.ToList().Count));
-                Logger.Debug(string.Format("StoredTree: {0} Elements", trees.StoredTree.ToList().Count));
+            try {
+                DescendantsTreeCollection trees = this.treebuilder.BuildTrees();
+                if (Logger.IsDebugEnabled) {
+                    Logger.Debug(string.Format("LocalTree:  {0} Elements", trees.LocalTree.ToList().Count));
+                    Logger.Debug(string.Format("RemoteTree: {0} Elements", trees.RemoteTree.ToList().Count));
+                    Logger.Debug(string.Format("StoredTree: {0} Elements", trees.StoredTree.ToList().Count));
+                }
+
+                CrawlEventCollection events = this.eventGenerator.GenerateEvents(trees);
+
+                this.notifier.MergeEventsAndAddToQueue(events);
+            } catch (System.IO.PathTooLongException e) {
+                string msg = "Crawl Sync aborted because a local path is too long. Please take a look into the log to figure out the reason.";
+                throw new InteractionNeededException(msg, e) { Title = "Local path is too long", Description = msg };
             }
-
-            CrawlEventCollection events = this.eventGenerator.GenerateEvents(trees);
-
-            this.notifier.MergeEventsAndAddToQueue(events);
         }
     }
 }

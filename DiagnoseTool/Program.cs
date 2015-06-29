@@ -17,6 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+[assembly: System.CLSCompliant(true)]
 namespace DiagnoseTool {
     using System;
     using System.Collections.Generic;
@@ -42,48 +43,56 @@ namespace DiagnoseTool {
 
     class MainClass {
         public static void Main(string[] args) {
-            var config = ConfigManager.CurrentConfig;
+            try {
+                var config = ConfigManager.CurrentConfig;
 
-            foreach (var repoInfo in config.Folders) {
-                using (var dbEngine = new DBreezeEngine(repoInfo.GetDatabasePath())) {
-                    var storage = new MetaDataStorage(dbEngine, new PathMatcher(repoInfo.LocalPath, repoInfo.RemotePath), false);
-                    Console.WriteLine(string.Format("Checking {0} and DB Path \"{1}\"", repoInfo.DisplayName, repoInfo.GetDatabasePath()));
-                    storage.ValidateObjectStructure();
-                }
-            }
-
-            foreach (var repoInfo in config.Folders) {
-                try {
+                foreach (var repoInfo in config.Folders) {
                     using (var dbEngine = new DBreezeEngine(repoInfo.GetDatabasePath())) {
-                        var storage = new MetaDataStorage(dbEngine, new PathMatcher(repoInfo.LocalPath, repoInfo.RemotePath), false);
-                        var ignoreStorage = new IgnoredEntitiesStorage(new IgnoredEntitiesCollection(), storage);
-                        var session = SessionFactory.NewInstance().CreateSession(repoInfo, "DSS-DIAGNOSE-TOOL");
-                        var remoteFolder = session.GetObjectByPath(repoInfo.RemotePath) as IFolder;
-                        var filterAggregator = new FilterAggregator(
-                            new IgnoredFileNamesFilter(),
-                            new IgnoredFolderNameFilter(),
-                            new InvalidFolderNameFilter(),
-                            new IgnoredFoldersFilter());
-                        var treeBuilder = new DescendantsTreeBuilder(
-                            storage,
-                            remoteFolder,
-                            new DirectoryInfoWrapper(new DirectoryInfo(repoInfo.LocalPath)),
-                            filterAggregator,
-                            ignoreStorage);
-                        Console.WriteLine(string.Format("Creating local, stored and remote tree in \"{0}\"", Path.GetTempPath()));
-                        var trees = treeBuilder.BuildTrees();
-                        var suffix = string.Format("{0}-{1}", repoInfo.DisplayName.Replace(Path.DirectorySeparatorChar,'_'), Guid.NewGuid().ToString());
-                        var localTree = Path.Combine(Path.GetTempPath(), string.Format("LocalTree-{0}.dot", suffix));
-                        var remoteTree = Path.Combine(Path.GetTempPath(), string.Format("StoredTree-{0}.dot", suffix));
-                        var storedTree = Path.Combine(Path.GetTempPath(), string.Format("RemoteTree-{0}.dot", suffix));
-                        trees.LocalTree.ToDotFile(localTree);
-                        trees.StoredTree.ToDotFile(remoteTree);
-                        trees.RemoteTree.ToDotFile(storedTree);
-                        Console.WriteLine(string.Format("Written to:\n{0}\n{1}\n{2}", localTree, remoteTree, storedTree));
+                        Console.WriteLine(string.Format("Checking {0} and DB Path \"{1}\"", repoInfo.DisplayName, repoInfo.GetDatabasePath()));
+                        try {
+                            var storage = new MetaDataStorage(dbEngine, new PathMatcher(repoInfo.LocalPath, repoInfo.RemotePath), false);
+                            storage.ValidateObjectStructure();
+                        } catch (Exception e) {
+                            Console.WriteLine("Database object structure is invalid: " + e.Message + Environment.NewLine + e.StackTrace);
+                        }
                     }
-                } catch (Exception ex) {
-                    Console.Error.WriteLine(ex.Message);
                 }
+
+                foreach (var repoInfo in config.Folders) {
+                    try {
+                        using (var dbEngine = new DBreezeEngine(repoInfo.GetDatabasePath())) {
+                            var storage = new MetaDataStorage(dbEngine, new PathMatcher(repoInfo.LocalPath, repoInfo.RemotePath), false);
+                            var ignoreStorage = new IgnoredEntitiesStorage(new IgnoredEntitiesCollection(), storage);
+                            var session = SessionFactory.NewInstance().CreateSession(repoInfo, "DSS-DIAGNOSE-TOOL");
+                            var remoteFolder = session.GetObjectByPath(repoInfo.RemotePath) as IFolder;
+                            var filterAggregator = new FilterAggregator(
+                                new IgnoredFileNamesFilter(),
+                                new IgnoredFolderNameFilter(),
+                                new InvalidFolderNameFilter(),
+                                new IgnoredFoldersFilter());
+                            var treeBuilder = new DescendantsTreeBuilder(
+                                storage,
+                                remoteFolder,
+                                new DirectoryInfoWrapper(new DirectoryInfo(repoInfo.LocalPath)),
+                                filterAggregator,
+                                ignoreStorage);
+                            Console.WriteLine(string.Format("Creating local, stored and remote tree in \"{0}\"", Path.GetTempPath()));
+                            var trees = treeBuilder.BuildTrees();
+                            var suffix = string.Format("{0}-{1}", repoInfo.DisplayName.Replace(Path.DirectorySeparatorChar,'_'), Guid.NewGuid().ToString());
+                            var localTree = Path.Combine(Path.GetTempPath(), string.Format("LocalTree-{0}.dot", suffix));
+                            var remoteTree = Path.Combine(Path.GetTempPath(), string.Format("StoredTree-{0}.dot", suffix));
+                            var storedTree = Path.Combine(Path.GetTempPath(), string.Format("RemoteTree-{0}.dot", suffix));
+                            trees.LocalTree.ToDotFile(localTree);
+                            trees.StoredTree.ToDotFile(remoteTree);
+                            trees.RemoteTree.ToDotFile(storedTree);
+                            Console.WriteLine(string.Format("Written to:\n{0}\n{1}\n{2}", localTree, remoteTree, storedTree));
+                        }
+                    } catch (Exception ex) {
+                        Console.Error.WriteLine(ex.Message);
+                    }
+                }
+            } catch (Exception e) {
+                Console.Error.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
             }
         }
     }

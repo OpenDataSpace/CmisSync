@@ -88,7 +88,7 @@ namespace CmisSync.Lib.FileTransmission {
             bool overwrite = true,
             UpdateChecksum update = null)
         {
-            IDocument result = remoteDocument;
+            var result = remoteDocument;
             for (long offset = localFileStream.Position; offset < localFileStream.Length; offset += this.ChunkSize) {
                 bool isFirstChunk = offset == 0;
                 bool isLastChunk = (offset + this.ChunkSize) >= localFileStream.Length;
@@ -100,7 +100,7 @@ namespace CmisSync.Lib.FileTransmission {
                     transmission.Position = offset;
                     chunkstream.ChunkPosition = offset;
 
-                    ContentStream contentStream = new ContentStream();
+                    var contentStream = new ContentStream();
                     contentStream.FileName = remoteDocument.Name;
                     contentStream.MimeType = Cmis.MimeType.GetMIMEType(remoteDocument.Name);
                     if (isLastChunk) {
@@ -116,7 +116,7 @@ namespace CmisSync.Lib.FileTransmission {
                         }
 
                         result.AppendContentStream(contentStream, isLastChunk, true);
-                        HashAlgorithmReuse reuse = hashAlg as HashAlgorithmReuse;
+                        var reuse = hashAlg as IReusableHashAlgorithm;
                         if (reuse != null && update != null) {
                             using (HashAlgorithm hash = (HashAlgorithm)reuse.Clone()) {
                                 hash.TransformFinalBlock(new byte[0], 0, 0);
