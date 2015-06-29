@@ -54,7 +54,6 @@ namespace TestLibrary.StreamsTests {
         [Test, Category("Fast"), Category("Streams")]
         public void AbortReadIfAbortIsCalled() {
             var transmission = new Transmission(TransmissionType.DOWNLOAD_MODIFIED_FILE, "path");
-            byte[] content = new byte[1024];
             using (var outputStream = new MemoryStream())
             using (var stream = new Mock<MemoryStream>() { CallBase = true }.Object)
             using (var underTest = new TransmissionStream(stream, transmission)) {
@@ -78,17 +77,16 @@ namespace TestLibrary.StreamsTests {
             }
         }
 
-        [Test, Category("Fast"), Category("Streams")]
+        [Test, Category("Medium"), Category("Streams"), Category("IT"), Timeout(2200)]
         public void BandwidthLimitsArePropagatedAndUsed(
             [Values(true, false)]bool readFromTransmissionStream,
-            [Values(true, false)]bool isBandwidthLimited,
             [Values(true, false)]bool isBandwidthLimitedAfterInit)
         {
             int limit = 1024;
-            int contentSize = 10 * limit;
+            int contentSize = 2 * limit;
 
             var transmission = new Transmission(TransmissionType.DOWNLOAD_MODIFIED_FILE, "path");
-            if (isBandwidthLimited && !isBandwidthLimitedAfterInit) {
+            if (!isBandwidthLimitedAfterInit) {
                 transmission.MaxBandwidth = limit;
             }
 
@@ -96,12 +94,10 @@ namespace TestLibrary.StreamsTests {
             using (var stream = new MemoryStream(new byte[contentSize]))
             using (var underTest = new TransmissionStream(stream, transmission)) {
                 transmission.PropertyChanged += (sender, e) => {
-                    if (isBandwidthLimited) {
-                        Assert.That(transmission.BitsPerSecond, Is.Null.Or.LessThanOrEqualTo(limit));
-                    }
+                    Assert.That(transmission.BitsPerSecond, Is.Null.Or.LessThanOrEqualTo(limit));
                 };
 
-                if (isBandwidthLimited && isBandwidthLimitedAfterInit) {
+                if (isBandwidthLimitedAfterInit) {
                     transmission.MaxBandwidth = limit;
                 }
 
