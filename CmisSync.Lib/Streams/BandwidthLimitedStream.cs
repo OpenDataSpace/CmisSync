@@ -42,6 +42,7 @@ namespace CmisSync.Lib.Streams {
         private long? writeLimit = null;
         private Stopwatch readWatch;
         private Stopwatch writeWatch;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Streams.BandwidthLimitedStream"/> class.
         /// </summary>
@@ -151,6 +152,7 @@ namespace CmisSync.Lib.Streams {
         /// <param name='count'>
         /// Count of bytes.
         /// </param>
+        /// <returns>The count of read bytes.</returns>
         public override int Read(byte[] buffer, int offset, int count) {
             if (this.ReadLimit == null) {
                 return Stream.Read(buffer, offset, count);
