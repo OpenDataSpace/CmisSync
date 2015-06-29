@@ -77,5 +77,40 @@ namespace TestLibrary.StreamsTests {
                 Mock.Get(stream).Verify(s => s.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never());
             }
         }
+
+        [Test, Category("Fast"), Category("Streams")]
+        public void BandwidthLimitsArePropagatedAndUsed(
+            [Values(true, false)]bool readFromTransmissionStream,
+            [Values(true, false)]bool isBandwidthLimited,
+            [Values(true, false)]bool isBandwidthLimitedAfterInit)
+        {
+            int limit = 1024;
+            int contentSize = 10 * limit;
+
+            var transmission = new Transmission(TransmissionType.DOWNLOAD_MODIFIED_FILE, "path");
+            if (isBandwidthLimited && !isBandwidthLimitedAfterInit) {
+                transmission.MaxBandwidth = limit;
+            }
+
+            using (var inputOrOutputStream = new MemoryStream(new byte[contentSize]))
+            using (var stream = new MemoryStream(new byte[contentSize]))
+            using (var underTest = new TransmissionStream(stream, transmission)) {
+                transmission.PropertyChanged += (sender, e) => {
+                    if (isBandwidthLimited) {
+                        Assert.That(transmission.BitsPerSecond, Is.Null.Or.LessThanOrEqualTo(limit));
+                    }
+                };
+
+                if (isBandwidthLimited && isBandwidthLimitedAfterInit) {
+                    transmission.MaxBandwidth = limit;
+                }
+
+                if (readFromTransmissionStream) {
+                    underTest.CopyTo(inputOrOutputStream);
+                } else {
+                    inputOrOutputStream.CopyTo(underTest);
+                }
+            }
+        }
     }
 }

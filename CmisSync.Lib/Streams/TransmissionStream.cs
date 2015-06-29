@@ -32,6 +32,7 @@ namespace CmisSync.Lib.Streams {
         private PausableStream pause;
         private AbortableStream abort;
         private ProgressStream progress;
+        private BandwidthLimitedStream bandwidthLimit;
         private bool disposed = false;
 
         /// <summary>
@@ -46,7 +47,8 @@ namespace CmisSync.Lib.Streams {
 
             this.abort = new AbortableStream(wrappedStream);
             this.pause = new PausableStream(this.abort);
-            this.bandwidthNotify = new BandwidthNotifyingStream(this.pause);
+            this.bandwidthLimit = new BandwidthLimitedStream(this.pause);
+            this.bandwidthNotify = new BandwidthNotifyingStream(this.bandwidthLimit);
             this.progress = new ProgressStream(this.bandwidthNotify);
             this.abort.PropertyChanged += (object sender, PropertyChangedEventArgs e) => {
                 var a = sender as AbortableStream;
@@ -80,10 +82,22 @@ namespace CmisSync.Lib.Streams {
                     } else if (t.Status == TransmissionStatus.TRANSMITTING) {
                         this.pause.Resume();
                     }
+                } else if (e.PropertyName == Utils.NameOf(() => t.MaxBandwidth)) {
+                    if (t.MaxBandwidth > 0) {
+                        this.bandwidthLimit.ReadLimit = t.MaxBandwidth;
+                        this.bandwidthLimit.WriteLimit = t.MaxBandwidth;
+                    } else {
+                        this.bandwidthLimit.DisableLimits();
+                    }
                 }
             };
             if (transmission.Status == TransmissionStatus.ABORTING || transmission.Status == TransmissionStatus.ABORTED) {
                 this.abort.Abort();
+            }
+
+            if (transmission.MaxBandwidth > 0) {
+                this.bandwidthLimit.ReadLimit = transmission.MaxBandwidth;
+                this.bandwidthLimit.WriteLimit = transmission.MaxBandwidth;
             }
         }
 

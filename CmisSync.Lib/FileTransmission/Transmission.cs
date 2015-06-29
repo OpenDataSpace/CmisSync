@@ -97,6 +97,7 @@ namespace CmisSync.Lib.FileTransmission {
         private long? bitsPerSecond = null;
         private Exception failedException = null;
         private DateTime lastModification = DateTime.Now;
+        private long maxBandwidth = 0;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.Transmission"/> class.
@@ -344,6 +345,23 @@ namespace CmisSync.Lib.FileTransmission {
                 if (Math.Abs((value - this.lastModification).TotalSeconds) > 1) {
                     this.lastModification = value;
                     this.NotifyPropertyChanged(Utils.NameOf(() => this.LastModification));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum bandwidth. Zero or negative value will disable the limitations.
+        /// </summary>
+        /// <value>The max bandwidth.</value>
+        public long MaxBandwidth {
+            get {
+                return this.maxBandwidth;
+            }
+
+            set {
+                if (this.maxBandwidth != value) {
+                    this.maxBandwidth = value;
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.MaxBandwidth));
                 }
             }
         }
