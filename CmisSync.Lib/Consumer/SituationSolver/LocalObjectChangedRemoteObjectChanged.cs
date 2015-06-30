@@ -58,13 +58,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ITransmissionFactory transmissionManager,
+            ITransmissionFactory transmissionFactory,
             IFileSystemInfoFactory fsFactory = null) : base(session, storage, transmissionStorage) {
-            if (transmissionManager == null) {
+            if (transmissionFactory == null) {
                 throw new ArgumentNullException("transmissionManager");
             }
 
-            this.transmissionManager = transmissionManager;
+            this.transmissionManager = transmissionFactory;
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
         }
 

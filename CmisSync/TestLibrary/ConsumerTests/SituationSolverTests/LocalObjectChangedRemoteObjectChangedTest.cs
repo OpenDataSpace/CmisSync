@@ -17,15 +17,16 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.IO;
     using System.Security.Cryptography;
     using System.Text;
 
+    using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -40,8 +41,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class LocalObjectChangedRemoteObjectChangedTest
-    {
+    public class LocalObjectChangedRemoteObjectChangedTest {
         private readonly string remoteId = "remoteId";
         private readonly string parentId = "parentId";
         private readonly string oldChangeToken = "oldChangeToken";
@@ -49,20 +49,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private TransmissionManager manager;
+        private ITransmissionFactory transmissionFactory;
         private LocalObjectChangedRemoteObjectChanged underTest;
 
         [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorTakesSessionAndStorageAndDateSyncEnabled() {
+        public void ConstructorTakesSessionAndStorageAndDateSyncEnabled([Values(true, false)]bool serverCanModifyLastModificationDate) {
             var session = new Mock<ISession>();
-            session.SetupTypeSystem();
-            new LocalObjectChangedRemoteObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null, new TransmissionManager());
-        }
-
-        [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorTakesSessionAndStorageAndDateSyncDisabled() {
-            var session = new Mock<ISession>();
-            session.SetupTypeSystem();
-            new LocalObjectChangedRemoteObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null, new TransmissionManager());
+            session.SetupTypeSystem(serverCanModifyLastModificationDate: serverCanModifyLastModificationDate);
+            new LocalObjectChangedRemoteObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null, Mock.Of<ITransmissionFactory>());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -209,7 +203,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.manager = new TransmissionManager();
-            this.underTest = new LocalObjectChangedRemoteObjectChanged(this.session.Object, this.storage.Object, null, this.manager);
+            this.transmissionFactory = this.manager.CreateFactory();
+            this.underTest = new LocalObjectChangedRemoteObjectChanged(this.session.Object, this.storage.Object, null, this.transmissionFactory);
         }
 
         private Mock<IDocument> CreateRemoteDocument(DateTime lastRemoteModification, long contentLength, byte[] contentHash) {

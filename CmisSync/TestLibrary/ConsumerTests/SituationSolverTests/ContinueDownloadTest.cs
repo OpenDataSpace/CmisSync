@@ -23,6 +23,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System.IO;
     using System.Security.Cryptography;
 
+    using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.FileTransmission;
@@ -47,13 +48,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private readonly string parentId = "parentId";
         private readonly string changeToken = "changeToken";
         private readonly long chunkSize = 8 * 1024;
-        private int chunkCount = 4;
         private readonly byte[] emptyHash = SHA1.Create().ComputeHash(new byte[0]);
+        private int chunkCount = 4;
 
         private Mock<ISession> session;
         private Mock<IFileSystemInfoFactory> fsFactory;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileTransmissionStorage> transmissionStorage;
+        private ITransmissionFactory transmissionFactory;
         private TransmissionManager transmissionManager;
 
         private string parentPath;
@@ -69,58 +71,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
         [SetUp]
         public void SetUp() {
-            Setup(4);
-        }
-
-        private void Setup(int chunk) {
-            this.chunkCount = chunk;
-
-            this.session = new Mock<ISession>();
-            this.session.SetupTypeSystem();
-            this.fsFactory = new Mock<IFileSystemInfoFactory>(MockBehavior.Strict);
-            this.storage = new Mock<IMetaDataStorage>();
-            this.transmissionStorage = new Mock<IFileTransmissionStorage>();
-            this.transmissionManager = new TransmissionManager();
-
-            this.transmissionStorage.Setup(f => f.SaveObject(It.IsAny<IFileTransmissionObject>())).Callback<IFileTransmissionObject>((o) => {
-                this.transmissionStorage.Setup(f => f.GetObjectByRemoteObjectId(It.IsAny<string>())).Returns(o);
-            });
-            this.transmissionStorage.Setup(f => f.RemoveObjectByRemoteObjectId(It.IsAny<string>())).Callback(() => {
-                this.transmissionStorage.Setup(f => f.GetObjectByRemoteObjectId(It.IsAny<string>())).Returns((IFileTransmissionObject)null);
-            });
-
-            this.parentPath = Path.GetTempPath();
-            this.localPath = Path.Combine(this.parentPath, this.objectName);
-            this.fileContentOld = new byte[this.chunkCount * this.chunkSize];
-            this.fileContentOld[0] = 0;
-            this.fileHashOld = SHA1.Create().ComputeHash(this.fileContentOld);
-            this.fileContent = new byte[this.chunkCount * this.chunkSize];
-            this.fileContent[0] = 1;
-            this.fileHash = SHA1.Create().ComputeHash(this.fileContent);
-
-            var parentDir = Mock.Of<IDirectoryInfo>(d => d.FullName == this.parentPath && d.Name == Path.GetFileName(this.parentPath));
-            this.localFile = Mock.Get(Mock.Of<IFileInfo>(
-                f =>
-                f.FullName == this.localPath &&
-                f.Name == this.objectName &&
-                f.Directory == parentDir));
-            this.localFileLength = 0;
-
-            this.cacheFile = this.fsFactory.SetupDownloadCacheFile();
-            this.cacheFile.SetupAllProperties();
-            this.cacheFile.Setup(f => f.FullName).Returns(this.localPath + ".sync");
-            this.cacheFile.Setup(f => f.Name).Returns(this.objectName + ".sync");
-            this.cacheFile.Setup(f => f.Directory).Returns(parentDir);
-            this.cacheFile.Setup(f => f.IsExtendedAttributeAvailable()).Returns(true);
-            this.fsFactory.AddIFileInfo(this.cacheFile.Object);
-            this.cacheFile.Setup(f => f.Length).Returns(() => { return this.localFileLength; });
-
-            this.backupFile = new Mock<IFileInfo>();
+            this.Setup(4);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileAdded() {
-            var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+            var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, this.fsFactory.Object);
 
             this.RunSolverToAbortDownload(solver);
 
@@ -135,8 +91,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         /// </summary>
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileAddedWithTwoSave() {
-            Setup((int)((1024 * 1024 + this.chunkSize - 1 + 2 * this.chunkSize) / this.chunkSize));
-            var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+            this.Setup((int)(((1024 * 1024) + this.chunkSize - 1 + (2 * this.chunkSize)) / this.chunkSize));
+            var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, this.fsFactory.Object);
 
             this.RunSolverToAbortDownload(solver);
 
@@ -152,8 +108,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         /// </summary>
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileAddedWithThreeSave() {
-            Setup((int)((1024 * 1024 + 2 * this.chunkSize - 1 + 2 * this.chunkSize) / this.chunkSize));
-            var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+            this.Setup((int)(((1024 * 1024) + (2 * this.chunkSize) - 1 + (2 * this.chunkSize)) / this.chunkSize));
+            var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, this.fsFactory.Object);
 
             this.RunSolverToAbortDownload(solver);
 
@@ -167,7 +123,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         public void RemoteFileChanged() {
             this.SetupRemoteFileChanged();
 
-            var solver = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+            var solver = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, this.fsFactory.Object);
 
             this.RunSolverToAbortDownload(solver, remoteContent: ContentChangeType.CHANGED);
 
@@ -178,7 +134,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileAddedWhileChangeLocalCacheBeforeContinue() {
-            var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+            var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, this.fsFactory.Object);
 
             this.RunSolverToAbortDownload(solver);
 
@@ -191,7 +147,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         public void RemoteFileChangedWhileChangeLocalCacheBeforeContinue() {
             this.SetupRemoteFileChanged();
 
-            var solver = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+            var solver = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, this.fsFactory.Object);
 
             this.RunSolverToAbortDownload(solver, remoteContent: ContentChangeType.CHANGED);
 
@@ -202,7 +158,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileAddedWhileChangeRemoteBeforeContinue() {
-            var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+            var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, this.fsFactory.Object);
 
             this.RunSolverToAbortDownload(solver);
 
@@ -215,7 +171,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         public void RemoteFileChangedWhileChangeRemoteBeforeContinue() {
             this.SetupRemoteFileChanged();
 
-            var solver = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+            var solver = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, this.fsFactory.Object);
 
             this.RunSolverToAbortDownload(solver, remoteContent: ContentChangeType.CHANGED);
 
@@ -226,7 +182,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileAddedWhileDeleteLocalCacheBeforeContinue() {
-            var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+            var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, this.fsFactory.Object);
 
             this.RunSolverToAbortDownload(solver);
             this.RunSolverToDeleteLocalCacheBeforeContinue(solver);
@@ -238,7 +194,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         public void RemoteFileChangedWhileDeleteLocalCacheBeforeContinue() {
             this.SetupRemoteFileChanged();
 
-            var solver = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+            var solver = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, this.fsFactory.Object);
 
             this.RunSolverToAbortDownload(solver, remoteContent: ContentChangeType.CHANGED);
 
@@ -446,6 +402,53 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.transmissionStorage.Verify(f => f.GetObjectByRemoteObjectId(this.objectId), Times.Exactly(2));
             this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.AtLeastOnce());
             this.transmissionStorage.Verify(f => f.RemoveObjectByRemoteObjectId(this.objectId), Times.Once());
+        }
+
+        private void Setup(int chunk) {
+            this.chunkCount = chunk;
+
+            this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
+            this.fsFactory = new Mock<IFileSystemInfoFactory>(MockBehavior.Strict);
+            this.storage = new Mock<IMetaDataStorage>();
+            this.transmissionStorage = new Mock<IFileTransmissionStorage>();
+            this.transmissionManager = new TransmissionManager();
+            this.transmissionFactory = this.transmissionManager.CreateFactory();
+
+            this.transmissionStorage.Setup(f => f.SaveObject(It.IsAny<IFileTransmissionObject>())).Callback<IFileTransmissionObject>((o) => {
+                this.transmissionStorage.Setup(f => f.GetObjectByRemoteObjectId(It.IsAny<string>())).Returns(o);
+            });
+            this.transmissionStorage.Setup(f => f.RemoveObjectByRemoteObjectId(It.IsAny<string>())).Callback(() => {
+                this.transmissionStorage.Setup(f => f.GetObjectByRemoteObjectId(It.IsAny<string>())).Returns((IFileTransmissionObject)null);
+            });
+
+            this.parentPath = Path.GetTempPath();
+            this.localPath = Path.Combine(this.parentPath, this.objectName);
+            this.fileContentOld = new byte[this.chunkCount * this.chunkSize];
+            this.fileContentOld[0] = 0;
+            this.fileHashOld = SHA1.Create().ComputeHash(this.fileContentOld);
+            this.fileContent = new byte[this.chunkCount * this.chunkSize];
+            this.fileContent[0] = 1;
+            this.fileHash = SHA1.Create().ComputeHash(this.fileContent);
+
+            var parentDir = Mock.Of<IDirectoryInfo>(d => d.FullName == this.parentPath && d.Name == Path.GetFileName(this.parentPath));
+            this.localFile = Mock.Get(Mock.Of<IFileInfo>(
+                f =>
+                f.FullName == this.localPath &&
+                f.Name == this.objectName &&
+                f.Directory == parentDir));
+            this.localFileLength = 0;
+
+            this.cacheFile = this.fsFactory.SetupDownloadCacheFile();
+            this.cacheFile.SetupAllProperties();
+            this.cacheFile.Setup(f => f.FullName).Returns(this.localPath + ".sync");
+            this.cacheFile.Setup(f => f.Name).Returns(this.objectName + ".sync");
+            this.cacheFile.Setup(f => f.Directory).Returns(parentDir);
+            this.cacheFile.Setup(f => f.IsExtendedAttributeAvailable()).Returns(true);
+            this.fsFactory.AddIFileInfo(this.cacheFile.Object);
+            this.cacheFile.Setup(f => f.Length).Returns(() => { return this.localFileLength; });
+
+            this.backupFile = new Mock<IFileInfo>();
         }
 
         private void SetupToChangeLocalCache() {

@@ -23,8 +23,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System.Security.Cryptography;
     using System.Text;
 
+    using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -46,15 +48,17 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileSystemInfoFactory> fsFactory;
         private RemoteObjectChanged underTest;
+        private ITransmissionFactory transmissionFactory;
 
         [SetUp]
         public void SetUp() {
             this.manager = new TransmissionManager();
+            this.transmissionFactory = this.manager.CreateFactory();
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.fsFactory = new Mock<IFileSystemInfoFactory>();
-            this.underTest = new RemoteObjectChanged(this.session.Object, this.storage.Object, null, this.manager, this.fsFactory.Object);
+            this.underTest = new RemoteObjectChanged(this.session.Object, this.storage.Object, null, this.transmissionFactory, this.fsFactory.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -64,7 +68,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorTakesQueueAndTransmissionManager() {
-            new RemoteObjectChanged(this.session.Object, this.storage.Object, null, this.manager);
+            new RemoteObjectChanged(this.session.Object, this.storage.Object, null, this.transmissionFactory);
         }
 
         [Test, Category("Fast"), Category("Solver")]

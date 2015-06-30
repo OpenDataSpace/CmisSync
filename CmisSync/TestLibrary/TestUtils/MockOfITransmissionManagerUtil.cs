@@ -21,7 +21,10 @@ namespace TestLibrary.TestUtils {
     using System;
 
     using CmisSync.Lib;
+    using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Config;
     using CmisSync.Lib.FileTransmission;
+    using CmisSync.Lib.Queueing;
 
     using Moq;
 
@@ -73,6 +76,26 @@ namespace TestLibrary.TestUtils {
 
         public static Transmission AddDefaultConstraints(this Transmission transmission) {
             return transmission.AddLengthConstraint(Is.GreaterThanOrEqualTo(0)).AddPercentConstraint(Is.InRange(0, 100)).AddPositionConstraint(Is.GreaterThanOrEqualTo(0));
+        }
+
+        public static ITransmissionFactory CreateFactory(AbstractNotifyingRepository repo = null, ITransmissionAggregator aggregator = null) {
+            if (repo == null) {
+                repo = new Mock<AbstractNotifyingRepository>(new RepoInfo() { DisplayName = "mockedRepo" }).Object;
+            }
+
+            if (aggregator == null) {
+                aggregator = new TransmissionManager();
+            }
+
+            return new TransmissionFactory(repo, aggregator);
+        }
+
+        public static ITransmissionFactory CreateFactory(this ITransmissionAggregator aggregator, AbstractNotifyingRepository repo = null) {
+            if (repo == null) {
+                repo = new Mock<AbstractNotifyingRepository>(new RepoInfo() { DisplayName = "mockedRepo" }).Object;
+            }
+
+            return new TransmissionFactory(repo, aggregator);
         }
     }
 }

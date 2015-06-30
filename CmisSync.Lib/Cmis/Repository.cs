@@ -127,6 +127,8 @@ namespace CmisSync.Lib.Cmis {
         /// </summary>
         private ISessionFactory sessionFactory;
 
+        private ITransmissionFactory transmissionFactory;
+
         private ContentChangeEventTransformer transformer;
 
         private DBreezeEngine db;
@@ -209,6 +211,7 @@ namespace CmisSync.Lib.Cmis {
                 this.ignoredFolderNameFilter,
                 this.invalidFolderNameFilter,
                 symlinkFilter);
+            this.transmissionFactory = new TransmissionFactory(this, activityListener.TransmissionManager);
             this.Queue.EventManager.AddEventHandler(this.reportingFilter);
             this.alreadyAddedFilter = new IgnoreAlreadyHandledFsEventsFilter(this.storage, this.fileSystemFactory);
             this.Queue.EventManager.AddEventHandler(this.alreadyAddedFilter);
@@ -239,7 +242,7 @@ namespace CmisSync.Lib.Cmis {
 
             this.ignoredStorage = new IgnoredEntitiesStorage(new IgnoredEntitiesCollection(), this.storage);
 
-            this.Queue.EventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.fileTransmissionStorage, this.ignoredStorage, this.RepoInfo, this.filters, activityListener, this.fileSystemFactory));
+            this.Queue.EventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.fileTransmissionStorage, this.ignoredStorage, this.RepoInfo, this.filters, activityListener, this.transmissionFactory, this.fileSystemFactory));
 
             this.Queue.EventManager.AddEventHandler(new DelayRetryAndNextSyncEventHandler(this.Queue));
 
