@@ -31,7 +31,7 @@ namespace TestLibrary.StreamsTests {
 
     [TestFixture]
     public class BandwidthLimitedStreamTest {
-        private readonly int length = 1024 * 10;
+        private readonly int length = 1024 * 10 + 5;
         private byte[] buffer;
         private long limit = 1024;
 
@@ -79,15 +79,19 @@ namespace TestLibrary.StreamsTests {
             }
         }
 
-        [Test, Category("Slow"), Category("Streams"), Timeout(10200)]
+        [Test, Category("Slow"), Category("Streams"), MaxTime(10200)]
         public void LimitReadOrWriteStream([Values(true, false)]bool read) {
-            using (var sourceOrTargetStream  = new MemoryStream(new byte[this.length]))
+            byte[] otherBuffer = new byte[this.length];
+            new Random().NextBytes(this.buffer);
+            new Random().NextBytes(otherBuffer);
+            using (var sourceOrTargetStream  = new MemoryStream(otherBuffer))
             using (var wrappedStream = new MemoryStream(this.buffer))
             using (var monitorStream = new BandwidthNotifyingStream(wrappedStream))
             using (var underTest = new BandwidthLimitedStream(monitorStream, limit: this.limit)) {
                 monitorStream.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) => {
                     if (e.PropertyName == Utils.NameOf(() => monitorStream.BitsPerSecond)) {
-                        Assert.That(monitorStream.BitsPerSecond, Is.Null.Or.LessThanOrEqualTo(this.limit));
+                        //Console.WriteLine(monitorStream.BitsPerSecond / 8);
+                        Assert.That(monitorStream.BitsPerSecond / 8, Is.Null.Or.LessThanOrEqualTo(this.limit));
                     }
                 };
 
@@ -96,6 +100,8 @@ namespace TestLibrary.StreamsTests {
                 } else {
                     sourceOrTargetStream.CopyTo(underTest);
                 }
+
+                Assert.That(wrappedStream.ToArray(), Is.EqualTo(sourceOrTargetStream.ToArray()));
             }
         }
 
