@@ -306,6 +306,12 @@ namespace CmisSync.Lib.Config {
             }
         }
 
+        [XmlElement("downloadLimit"), System.ComponentModel.DefaultValue(0)]
+        public long DownloadLimit { get; set; }
+
+        [XmlElement("uploadLimit"), System.ComponentModel.DefaultValue(0)]
+        public long UploadLimit { get; set; }
+
         /// <summary>
         /// Gets the CmisRepoCredentials
         /// </summary>
