@@ -323,6 +323,7 @@
     <Compile Include="CmisTests\AbstractRepositoryTest.cs" />
     <Compile Include="StorageTests\DataBaseTests\GraphOutputTest.cs" />
     <Compile Include="FilterTests\SymlinkFilterTest.cs" />
+    <Compile Include="FileTransmissionTests\TransmissionFactoryTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
