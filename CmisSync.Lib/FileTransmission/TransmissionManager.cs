@@ -34,7 +34,7 @@ namespace CmisSync.Lib.Queueing {
     /// <summary>
     /// Transmission manager.
     /// </summary>
-    public class TransmissionManager : ITransmissionManager {
+    public class TransmissionManager : ITransmissionFactory {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(TransmissionManager));
 
         private object collectionLock = new object();

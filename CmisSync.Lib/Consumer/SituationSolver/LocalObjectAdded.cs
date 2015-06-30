@@ -50,7 +50,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     /// </summary>
     public class LocalObjectAdded : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAdded));
-        private ITransmissionManager transmissionManager;
+        private ITransmissionFactory transmissionManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectAdded"/> class.
@@ -63,7 +63,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ITransmissionManager manager) : base(session, storage, transmissionStorage)
+            ITransmissionFactory manager) : base(session, storage, transmissionStorage)
         {
             if (manager == null) {
                 throw new ArgumentNullException("manager");
