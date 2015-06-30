@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
     using System.Linq;
@@ -39,12 +38,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Remote object has been changed. => update the metadata locally.
     /// </summary>
-    public class RemoteObjectChanged : AbstractEnhancedSolver
-    {
+    public class RemoteObjectChanged : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectChanged));
 
         private IFileSystemInfoFactory fsFactory;
-        private TransmissionManager transmissonManager;
+        private ITransmissionManager transmissonManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.RemoteObjectChanged"/> class.
@@ -57,14 +55,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            TransmissionManager transmissonManager,
+            ITransmissionManager manager,
             IFileSystemInfoFactory fsFactory = null) : base(session, storage, transmissionStorage)
         {
-            if (transmissonManager == null) {
+            if (manager == null) {
                 throw new ArgumentNullException("transmissonManager");
             }
 
-            this.transmissonManager = transmissonManager;
+            this.transmissonManager = manager;
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
         }
 

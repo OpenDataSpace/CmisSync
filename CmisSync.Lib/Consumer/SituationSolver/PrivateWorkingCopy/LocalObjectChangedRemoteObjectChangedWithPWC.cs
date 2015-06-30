@@ -36,7 +36,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     /// </summary>
     public class LocalObjectChangedRemoteObjectChangedWithPWC : AbstractEnhancedSolverWithPWC {
         private readonly ISolver fallbackSolver;
-        private readonly TransmissionManager transmissionManager;
+        private readonly ITransmissionManager transmissionManager;
 
         /// <summary>
         /// Initializes a new instance of the
@@ -51,7 +51,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            TransmissionManager manager,
+            ITransmissionManager manager,
             ISolver localObjectChangedRemoteObjectChangedFallbackSolver) : base(session, storage, transmissionStorage)
         {
             if (localObjectChangedRemoteObjectChangedFallbackSolver == null) {
