@@ -53,8 +53,25 @@ namespace CmisSync {
         /// </summary>
         public CmisRepoCredentials Credentials;
 
-        public long UploadLimit { get; set; }
-        public long DownloadLimit { get; set; }
+        public long UploadLimit {
+            get {
+                return this.bandwidthSettingsWidget.UploadLimit;
+            }
+
+            set {
+                this.bandwidthSettingsWidget.UploadLimit = value;
+            }
+        }
+
+        public long DownloadLimit {
+            get {
+                return this.bandwidthSettingsWidget.DownloadLimit;
+            }
+
+            set {
+                this.bandwidthSettingsWidget.DownloadLimit = value;
+            }
+        }
 
         private string remotePath;
         private string localPath;
@@ -65,6 +82,8 @@ namespace CmisSync {
         };
 
         private EditType type;
+        private CmisSync.Widgets.BandwidthSettingsWidget bandwidthSettingsWidget;
+
 
         /// <summary>
         /// Constructor
@@ -128,13 +147,8 @@ namespace CmisSync {
                 UserName = this.Credentials.UserName
             };
             credentialsWidget.Changed += (object sender, EventArgs e) => finish_button.Sensitive = true;
-            var bandwidthSettingsWidget = new Widgets.BandwidthSettingsWidget() {
-                DownloadLimit = this.DownloadLimit,
-                UploadLimit = this.UploadLimit
-            };
+            this.bandwidthSettingsWidget = new Widgets.BandwidthSettingsWidget() {};
             bandwidthSettingsWidget.Changed += (object sender, EventArgs e) => {
-                this.UploadLimit = bandwidthSettingsWidget.UploadLimit;
-                this.DownloadLimit = bandwidthSettingsWidget.DownloadLimit;
                 finish_button.Sensitive = true;
             };
             tab_view.AppendPage(credentialsWidget, new Label(Properties_Resources.Credentials));
