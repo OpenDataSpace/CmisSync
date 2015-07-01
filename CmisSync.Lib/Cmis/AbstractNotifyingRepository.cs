@@ -211,7 +211,12 @@ namespace CmisSync.Lib.Cmis {
             }
 
             set {
+                if (this.repoInfo != null) {
+                    this.repoInfo.Saved -= this.UpdateLimits;
+                }
+
                 this.repoInfo = value;
+                this.repoInfo.Saved += this.UpdateLimits;
                 this.Name = this.RepoInfo.DisplayName;
                 this.LocalPath = this.RepoInfo.LocalPath;
                 this.RemoteUrl = this.RepoInfo.Address;
@@ -245,6 +250,12 @@ namespace CmisSync.Lib.Cmis {
             if (handler != null) {
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
+        }
+
+        private void UpdateLimits(object sender, EventArgs args) {
+            var repoInfo = sender as RepoInfo ?? this.RepoInfo;
+            this.DownloadLimit = repoInfo.DownloadLimit;
+            this.UploadLimit = repoInfo.UploadLimit;
         }
     }
 }
