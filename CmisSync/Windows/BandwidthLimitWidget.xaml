@@ -6,8 +6,8 @@
              mc:Ignorable="d" 
              d:DesignHeight="42" d:DesignWidth="217">
     <Grid>
-        <CheckBox HorizontalAlignment="Left" Margin="10,10,0,10"/>
-        <TextBox Margin="45,7,51,0" TextWrapping="Wrap" Text="100" Height="23" VerticalAlignment="Top" FlowDirection="RightToLeft" PreviewTextInput="TextBox_PreviewTextInput" DataObject.Pasting="PastingHandler" />
+        <CheckBox x:Name="isLimitedCheckbox" HorizontalAlignment="Left" Margin="10,10,0,10" IsThreeState="False" Click="isLimitedCheckbox_Click"/>
+        <TextBox x:Name="limitTextBox" Margin="45,7,51,0" TextWrapping="Wrap" Text="100" Height="23" VerticalAlignment="Top" FlowDirection="RightToLeft" PreviewTextInput="TextBox_PreviewTextInput" DataObject.Pasting="PastingHandler" />
         <Label Content="KB/s" Margin="0,5,10,0" VerticalAlignment="Top" Height="36" HorizontalAlignment="Right" Width="36"/>
     </Grid>
 </UserControl>

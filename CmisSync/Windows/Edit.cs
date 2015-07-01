@@ -53,8 +53,25 @@ namespace CmisSync {
         /// </summary>
         public CmisRepoCredentials Credentials;
 
-        public long DownloadLimit { get; set; }
-        public long UploadLimit { get; set; }
+        public long DownloadLimit {
+            get {
+                return this.downloadLimitWidget.Limit;
+            }
+
+            set {
+                this.downloadLimitWidget.Limit = value;
+            }
+        }
+
+        public long UploadLimit {
+            get {
+                return this.uploadLimitWidget.Limit;
+            }
+
+            set {
+                this.uploadLimitWidget.Limit = value;
+            }
+        }
 
         private BackgroundWorker backgroundWorker = new BackgroundWorker();
 
@@ -67,6 +84,9 @@ namespace CmisSync {
         };
 
         private EditType type;
+
+        private BandwidthLimitWidget uploadLimitWidget;
+        private BandwidthLimitWidget downloadLimitWidget;
 
         /// <summary>
         /// Constructor
@@ -250,7 +270,8 @@ namespace CmisSync {
             passwordHelp = editWPF.FindName("passwordHelp") as TextBlock;
             finishButton = editWPF.FindName("finishButton") as Button;
             cancelButton = editWPF.FindName("cancelButton") as Button;
-
+            this.uploadLimitWidget = editWPF.FindName("uploadLimitWidget") as BandwidthLimitWidget;
+            this.downloadLimitWidget = editWPF.FindName("downloadLimitWidget") as BandwidthLimitWidget;
             //  GUI workaround to remove ignore folder {{
             //tabItemSelection.Content = treeView;
             //  GUI workaround to remove ignore folder }}

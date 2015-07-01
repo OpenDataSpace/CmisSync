@@ -21,6 +21,27 @@ namespace CmisSync {
             InitializeComponent();
         }
 
+        public long Limit {
+            get {
+                if (this.isLimitedCheckbox.IsChecked == false) {
+                    return 0;
+                }
+
+                long limit;
+                if (long.TryParse(this.limitTextBox.Text, out limit)) {
+                    return limit > 0 ? limit * 1024 : 0;
+                } else {
+                    return 0;
+                }
+            }
+
+            set {
+                this.isLimitedCheckbox.IsChecked = value > 0;
+                this.limitTextBox.IsEnabled = this.isLimitedCheckbox.IsChecked == true;
+                this.limitTextBox.Text = value > 0 ? (value/1024).ToString() : "100";
+            }
+        }
+
         private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e) {
             e.Handled = !this.IsPositivNumeric(e.Text);
         }
@@ -43,6 +64,10 @@ namespace CmisSync {
             } else {
                 e.CancelCommand();
             }
+        }
+
+        private void isLimitedCheckbox_Click(object sender, RoutedEventArgs e) {
+            this.limitTextBox.IsEnabled = this.isLimitedCheckbox.IsChecked == true;
         }
     }
 }
