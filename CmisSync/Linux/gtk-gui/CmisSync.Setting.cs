@@ -5,15 +5,25 @@ namespace CmisSync
 	public partial class Setting
 	{
 		private global::Gtk.VBox vbox5;
+		
 		private global::Gtk.Notebook tabs;
+		
 		private global::CmisSync.Widgets.ProxyWidget proxyWidget;
+		
 		private global::Gtk.Label label1;
+		
 		private global::Gtk.VBox vbox1;
+		
 		private global::Gtk.CheckButton notificationToggleButton;
+		
 		private global::Gtk.Label label2;
+		
 		private global::Gtk.HBox hbox2;
+		
 		private global::Gtk.Label label3;
+		
 		private global::Gtk.Button saveButton;
+		
 		private global::Gtk.Button cancelButton;
 
 		protected virtual void Build ()
@@ -32,7 +42,7 @@ namespace CmisSync
 			this.tabs = new global::Gtk.Notebook ();
 			this.tabs.CanFocus = true;
 			this.tabs.Name = "tabs";
-			this.tabs.CurrentPage = 1;
+			this.tabs.CurrentPage = 0;
 			// Container child tabs.Gtk.Notebook+NotebookChild
 			this.proxyWidget = new global::CmisSync.Widgets.ProxyWidget ();
 			this.proxyWidget.Events = ((global::Gdk.EventMask)(256));

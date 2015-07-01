@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync
-{
+namespace CmisSync {
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
@@ -33,8 +32,7 @@ namespace CmisSync
     /// It allows user to edit the selected and ignored folders
     /// </summary>
     [CLSCompliant(false)]
-    public class Edit : SetupWindow
-    {
+    public class Edit : SetupWindow {
         /// <summary>
         /// Controller
         /// </summary>
@@ -55,6 +53,9 @@ namespace CmisSync
         /// </summary>
         public CmisRepoCredentials Credentials;
 
+        public long UploadLimit { get; set; }
+        public long DownloadLimit { get; set; }
+
         private string remotePath;
         private string localPath;
 
@@ -68,7 +69,13 @@ namespace CmisSync
         /// <summary>
         /// Constructor
         /// </summary>
-        public Edit(EditType type, CmisRepoCredentials credentials, string name, string remotePath, List<string> ignores, string localPath)
+        public Edit(
+            EditType type,
+            CmisRepoCredentials credentials,
+            string name,
+            string remotePath,
+            List<string> ignores,
+            string localPath)
         {
             this.FolderName = name;
             this.Credentials = credentials;
@@ -86,8 +93,7 @@ namespace CmisSync
                 this.Controller.CloseWindow();
             };
 
-            this.Controller.OpenWindowEvent += delegate
-            {
+            this.Controller.OpenWindowEvent += delegate {
                 this.ShowAll();
                 this.Activate();
             };
@@ -96,8 +102,7 @@ namespace CmisSync
         /// <summary>
         /// Create the UI
         /// </summary>
-        private void CreateEdit()
-        {
+        private void CreateEdit() {
             this.Header = CmisSync.Properties_Resources.EditTitle;
 
             VBox layout_vertical   = new VBox(false, 12);
@@ -117,12 +122,23 @@ namespace CmisSync
             layout_vertical.PackStart(new Label(string.Empty), false, false, 0);
             Notebook tab_view = new Notebook();
             //tab_view.AppendPage(layout_vertical, new Label("Edit Folders"));
-            var credentialsWidget = new CredentialsWidget();
-            credentialsWidget.Password = this.Credentials.Password.ToString();
-            credentialsWidget.Address = this.Credentials.Address.ToString();
-            credentialsWidget.UserName = this.Credentials.UserName;
+            var credentialsWidget = new CredentialsWidget(){
+                Password = this.Credentials.Password.ToString(),
+                Address = this.Credentials.Address.ToString(),
+                UserName = this.Credentials.UserName
+            };
             credentialsWidget.Changed += (object sender, EventArgs e) => finish_button.Sensitive = true;
+            var bandwidthSettingsWidget = new Widgets.BandwidthSettingsWidget() {
+                DownloadLimit = this.DownloadLimit,
+                UploadLimit = this.UploadLimit
+            };
+            bandwidthSettingsWidget.Changed += (object sender, EventArgs e) => {
+                this.UploadLimit = bandwidthSettingsWidget.UploadLimit;
+                this.DownloadLimit = bandwidthSettingsWidget.DownloadLimit;
+                finish_button.Sensitive = true;
+            };
             tab_view.AppendPage(credentialsWidget, new Label(Properties_Resources.Credentials));
+            tab_view.AppendPage(bandwidthSettingsWidget, new Label(Properties_Resources.Features));
             this.Add(tab_view);
             this.AddButton(cancel_button);
             this.AddButton(finish_button);
@@ -135,8 +151,7 @@ namespace CmisSync
         /// <summary>
         /// Close the UI
         /// </summary>
-        public void Close()
-        {
+        public void Close() {
             this.Controller.CloseWindow();
             this.Destroy();
         }

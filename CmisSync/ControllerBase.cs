@@ -773,7 +773,10 @@ namespace CmisSync {
                     }
                 }
 
-                edit = new Edit(type, credentials, folder.DisplayName, folder.RemotePath, oldIgnores, folder.LocalPath);
+                edit = new Edit(type, credentials, folder.DisplayName, folder.RemotePath, oldIgnores, folder.LocalPath) {
+                    DownloadLimit = folder.DownloadLimit,
+                    UploadLimit = folder.UploadLimit
+                };
                 this.edits.Add(reponame, edit);
 
                 edit.Controller.SaveFolderEvent += delegate {
@@ -784,6 +787,8 @@ namespace CmisSync {
                         }
 
                         folder.SetPassword(edit.Credentials.Password);
+                        folder.DownloadLimit = edit.DownloadLimit;
+                        folder.UploadLimit = edit.UploadLimit;
                         ConfigManager.CurrentConfig.Save();
                         foreach (Repository repo in this.repositories) {
                             if (repo.Name == reponame) {

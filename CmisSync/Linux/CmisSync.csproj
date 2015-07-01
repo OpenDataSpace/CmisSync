@@ -132,6 +132,10 @@
     <Compile Include="gtk-gui\CmisSync.TransmissionWindow.cs" />
     <Compile Include="gtk-gui\CmisSync.Widgets.TransmissionWidget.cs" />
     <Compile Include="Defines.cs" />
+    <Compile Include="BandwidthLimitWidget.cs" />
+    <Compile Include="gtk-gui\CmisSync.Widgets.BandwidthLimitWidget.cs" />
+    <Compile Include="BandwidthSettingsWidget.cs" />
+    <Compile Include="gtk-gui\CmisSync.Widgets.BandwidthSettingsWidget.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
