@@ -12,10 +12,10 @@ namespace CmisSync.Widgets {
             this.Build();
         }
 
-        public long Limit {
+        public double Limit {
             get {
                 if (this.activateLimitToggle.Active) {
-                    return this.bandwidthSpinButton.ValueAsInt;
+                    return this.bandwidthSpinButton.Value;
                 } else {
                     return 0;
                 }

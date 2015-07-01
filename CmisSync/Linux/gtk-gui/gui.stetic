@@ -683,7 +683,7 @@
           <widget class="Gtk.CheckButton" id="activateLimitToggle">
             <property name="MemberName" />
             <property name="CanFocus">True</property>
-            <property name="Label" translatable="yes">Limit bandwidth to</property>
+            <property name="Label" translatable="yes" />
             <property name="DrawIndicator">True</property>
             <property name="HasLabel">True</property>
             <property name="UseUnderline">True</property>

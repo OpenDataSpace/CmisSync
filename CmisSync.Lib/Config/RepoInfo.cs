@@ -46,6 +46,11 @@ namespace CmisSync.Lib.Config {
         private List<IgnoredFolder> ignoredFolders;
 
         /// <summary>
+        /// Occurs when saved.
+        /// </summary>
+        public event EventHandler Saved;
+
+        /// <summary>
         /// Gets or sets the display name.
         /// </summary>
         /// <value>The display name.</value>
@@ -402,6 +407,16 @@ namespace CmisSync.Lib.Config {
 
                 return path.StartsWith(ignore) && path[ignore.Length] == '/';
             }));
+        }
+
+        /// <summary>
+        /// Raises the saved event.
+        /// </summary>
+        public void OnSaved() {
+            var handler = this.Saved;
+            if (handler != null) {
+                handler(this, new EventArgs());
+            }
         }
 
         /// <summary>
