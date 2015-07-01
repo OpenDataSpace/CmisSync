@@ -26,7 +26,7 @@ namespace CmisSync.Widgets
 			this.activateLimitToggle = new global::Gtk.CheckButton ();
 			this.activateLimitToggle.CanFocus = true;
 			this.activateLimitToggle.Name = "activateLimitToggle";
-			this.activateLimitToggle.Label = global::Mono.Unix.Catalog.GetString ("Limit bandwidth to");
+			this.activateLimitToggle.Label = "";
 			this.activateLimitToggle.DrawIndicator = true;
 			this.activateLimitToggle.UseUnderline = true;
 			this.hbox1.Add (this.activateLimitToggle);
