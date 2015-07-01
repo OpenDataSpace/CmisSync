@@ -138,10 +138,12 @@ SOURCES =  \
 	FileTransmission/ContentTaskUtils.cs \
 	FileTransmission/IFileDownloader.cs \
 	FileTransmission/IFileUploader.cs \
+	FileTransmission/ITransmissionAggregator.cs \
 	FileTransmission/ITransmissionFactory.cs \
 	FileTransmission/SimpleFileDownloader.cs \
 	FileTransmission/SimpleFileUploader.cs \
 	FileTransmission/Transmission.cs \
+	FileTransmission/TransmissionFactory.cs \
 	FileTransmission/TransmissionManager.cs \
 	FileTransmission/UploadFailedException.cs \
 	Filter/AbstractFileFilter.cs \
