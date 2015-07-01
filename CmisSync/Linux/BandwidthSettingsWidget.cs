@@ -15,7 +15,7 @@ namespace CmisSync.Widgets {
 
         public long UploadLimit {
             get {
-                return this.uploadLimitWidget.Limit * 1024;
+                return (long)this.uploadLimitWidget.Limit * 1024;
             }
 
             set {
@@ -25,7 +25,7 @@ namespace CmisSync.Widgets {
 
         public long DownloadLimit {
             get {
-                return this.downloadLimitWidget.Limit * 1024;
+                return (long)this.downloadLimitWidget.Limit * 1024;
             }
 
             set {
