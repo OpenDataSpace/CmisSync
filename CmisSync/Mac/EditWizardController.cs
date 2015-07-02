@@ -70,6 +70,7 @@ namespace CmisSync {
                 });
             };
         }
+
         // Shared initialization code
         void Initialize() {
         }
@@ -91,14 +92,48 @@ namespace CmisSync {
         public List<string> Ignores;
         public CmisRepoCredentials Credentials;
 
-        public long DownloadLimit {
-            get;
-            set;
+        public long DownloadLimit { get; set; }
+
+        public long UploadLimit { get; set;
+/*            get {
+                if (this.UploadLimitCheckBox.State == NSCellStateValue.Off) {
+                    return 0;
+                } else {
+                    long result;
+                    if (long.TryParse(this.UploadLimitTextField.StringValue, out result)) {
+                        return result;
+                    } else {
+                        return 0;
+                    }
+                }
+            }
+
+            set {
+                value = value / 1024;
+                this.UploadLimitCheckBox.State = value > 0 ? NSCellStateValue.On : NSCellStateValue.Off;
+                this.UploadLimitTextField.Enabled = value > 0;
+                this.UploadLimitTextField.StringValue = value.ToString();
+            }*/
+            /*            get {
+            if (this.DownloadLimitCheckBox.State == NSCellStateValue.Off) {
+                return 0;
+            } else {
+                long result;
+                if (long.TryParse(this.DownloadLimitTextField.StringValue, out result)) {
+                    return result;
+                } else {
+                    return 0;
+                }
+            }
         }
 
-        public long UploadLimit {
-            get;
-            set;
+        set {
+            value = value / 1024;
+            this.DownloadLimitCheckBox.State = value > 0 ? NSCellStateValue.On : NSCellStateValue.Off;
+            this.DownloadLimitTextField.Enabled = value > 0;
+            this.DownloadLimitTextField.StringValue = value.ToString();
+        }*/
+
         }
 
         private string remotePath;
@@ -159,6 +194,16 @@ namespace CmisSync {
             this.LoginStatusLabel.Hidden = true;
             this.FolderTab.Label = Properties_Resources.AddingFolder;
             this.CredentialsTab.Label = Properties_Resources.Credentials;
+            this.DownloadLimitCheckBox.State = this.DownloadLimit > 0 ? NSCellStateValue.On : NSCellStateValue.Off;
+            this.DownloadLimitTextField.Enabled = this.DownloadLimit > 0;
+            this.DownloadLimitTextField.StringValue = this.DownloadLimit > 0 ? (this.DownloadLimit / 1024).ToString() : "100";
+            this.UploadLimitCheckBox.State = this.UploadLimit > 0 ? NSCellStateValue.On : NSCellStateValue.Off;
+            this.UploadLimitTextField.Enabled = this.UploadLimit > 0;
+            this.UploadLimitTextField.StringValue = this.UploadLimit > 0 ? (this.UploadLimit / 1024).ToString() : "100";
+            this.BandwidthTabView.Label = Properties_Resources.Bandwidth;
+            this.UploadLimitBox.Title = Properties_Resources.UploadLimit;
+            this.DownloadLimitBox.Title = Properties_Resources.DownloadLimit;
+
             switch (this.type) {
             case EditType.EditFolder:
                 TabView.SelectAt(0);
@@ -323,8 +368,38 @@ namespace CmisSync {
             RemoveEvent();
             Ignores = NodeModelUtils.GetIgnoredFolder(Repo);
             Credentials.Password = PasswordText.StringValue;
+            if (this.UploadLimitCheckBox.State == NSCellStateValue.Off) {
+                this.UploadLimit = 0;
+            } else {
+                long limit;
+                if (long.TryParse(this.UploadLimitTextField.StringValue, out limit)) {
+                    this.UploadLimit = limit * 1024;
+                } else {
+                    this.UploadLimit = 0;
+                }
+            }
+
+            if (this.DownloadLimitCheckBox.State == NSCellStateValue.Off) {
+                this.DownloadLimit = 0;
+            } else {
+                long limit;
+                if (long.TryParse(this.DownloadLimitTextField.StringValue, out limit)) {
+                    this.DownloadLimit = limit * 1024;
+                } else {
+                    this.DownloadLimit = 0;
+                }
+            }
+
             Controller.SaveFolder();
             Controller.CloseWindow();
+        }
+
+        partial void DownloadLimitClicked(NSObject sender) {
+            this.DownloadLimitTextField.Enabled = this.DownloadLimitCheckBox.State == NSCellStateValue.On;
+        }
+
+        partial void UploadLimitClicked(NSObject sender) {
+            this.UploadLimitTextField.Enabled = this.UploadLimitCheckBox.State == NSCellStateValue.On;
         }
 
         //strongly typed window accessor

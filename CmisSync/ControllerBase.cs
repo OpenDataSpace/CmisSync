@@ -773,10 +773,9 @@ namespace CmisSync {
                     }
                 }
 
-                edit = new Edit(type, credentials, folder.DisplayName, folder.RemotePath, oldIgnores, folder.LocalPath) {
-                    DownloadLimit = folder.DownloadLimit,
-                    UploadLimit = folder.UploadLimit
-                };
+                edit = new Edit(type, credentials, folder.DisplayName, folder.RemotePath, oldIgnores, folder.LocalPath);
+                edit.DownloadLimit = folder.DownloadLimit;
+                edit.UploadLimit = folder.UploadLimit;
                 this.edits.Add(reponame, edit);
 
                 edit.Controller.SaveFolderEvent += delegate {
