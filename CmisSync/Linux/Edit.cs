@@ -126,7 +126,7 @@ namespace CmisSync {
 
             VBox layout_vertical   = new VBox(false, 12);
 
-            Button cancel_button = new Button(CmisSync.Properties_Resources.Cancel);
+            Button cancel_button = new Button(CmisSync.Properties_Resources.DiscardChanges);
             cancel_button.Clicked += delegate {
                 this.Close();
             };
