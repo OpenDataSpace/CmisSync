@@ -19,16 +19,16 @@
                     <TextBlock x:Name="passwordHelp" HorizontalAlignment="Left" Margin="220,145,0,0" TextWrapping="NoWrap" Text="passwordHelp" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
-            <TabItem x:Name="tabItemSelection" Header="Features">
+            <TabItem x:Name="tabItemBandwidth" Header="Features">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="49*"/>
                         <ColumnDefinition Width="386*"/>
                     </Grid.ColumnDefinitions>
-                    <GroupBox Header="Upload Limit" Margin="10,10,10,0" VerticalAlignment="Top" Height="60" Grid.ColumnSpan="2">
+                    <GroupBox x:Name="uploadLimitBox" Header="Upload Limit" Margin="10,10,10,0" VerticalAlignment="Top" Height="60" Grid.ColumnSpan="2">
                         <local:BandwidthLimitWidget x:Name="uploadLimitWidget" HorizontalAlignment="Left" Height="63" VerticalAlignment="Top" Width="403" Margin="0,0,0,-12"/>
                     </GroupBox>
-                    <GroupBox Header="Download Limit" HorizontalAlignment="Left" Margin="10,75,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2" Height="60" Width="415">
+                    <GroupBox x:Name="downloadLimitBox" Header="Download Limit" HorizontalAlignment="Left" Margin="10,75,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2" Height="60" Width="415">
                         <local:BandwidthLimitWidget x:Name="downloadLimitWidget" HorizontalAlignment="Left" Height="73" VerticalAlignment="Top" Width="403"/>
                     </GroupBox>
                 </Grid>

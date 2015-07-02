@@ -124,6 +124,15 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bandwidth.
+        /// </summary>
+        internal static string Bandwidth {
+            get {
+                return ResourceManager.GetString("Bandwidth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Binding Type.
         /// </summary>
         internal static string BindingType {
@@ -285,6 +294,15 @@ namespace CmisSync {
         internal static string DoNotIgnoreFolder {
             get {
                 return ResourceManager.GetString("DoNotIgnoreFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Download Limit.
+        /// </summary>
+        internal static string DownloadLimit {
+            get {
+                return ResourceManager.GetString("DownloadLimit", resourceCulture);
             }
         }
         
@@ -1119,6 +1137,15 @@ namespace CmisSync {
         internal static string UntrustedCertificate {
             get {
                 return ResourceManager.GetString("UntrustedCertificate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Upload Limit.
+        /// </summary>
+        internal static string UploadLimit {
+            get {
+                return ResourceManager.GetString("UploadLimit", resourceCulture);
             }
         }
         
