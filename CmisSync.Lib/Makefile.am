@@ -25,6 +25,7 @@ SOURCES =  \
 	Cmis/ConvenienceExtenders/AllowableActionConvenienceExtenders.cs \
 	Cmis/ConvenienceExtenders/CmisConvenienceExtenders.cs \
 	Cmis/ConvenienceExtenders/CmisRepositoryInfoConvenienceExtenders.cs \
+	Cmis/ConvenienceExtenders/ExceptionConvenienceExtenders.cs \
 	Cmis/DotCMISLogListener.cs \
 	Cmis/INotifyRepositoryPropertyChanged.cs \
 	Cmis/MimeType.cs \
