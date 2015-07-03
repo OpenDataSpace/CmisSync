@@ -44,7 +44,8 @@ namespace TestLibrary.IntegrationTests.VirusDetectionTests {
                 contentStream.FileName = fileName;
                 contentStream.MimeType = MimeType.GetMIMEType(contentStream.FileName);
                 contentStream.Stream = stream;
-                Assert.Throws<CmisConstraintException>(() => doc.SetContentStream(contentStream, true, false));
+                var ex = Assert.Throws<CmisConstraintException>(() => doc.SetContentStream(contentStream, true, false));
+                Assert.That(ex.IsVirusDetectionException(), Is.True);
             }
         }
     }
