@@ -522,4 +522,7 @@ This could lead to a lot of conflict files!</value>
   <data name="UploadLimit" xml:space="preserve">
     <value>Upload Limit</value>
   </data>
+  <data name="TransmissionExceptionDetails" xml:space="preserve">
+    <value>Details</value>
+  </data>
 </root>
