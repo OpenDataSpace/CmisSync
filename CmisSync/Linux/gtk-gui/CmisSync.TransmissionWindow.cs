@@ -5,6 +5,7 @@ namespace CmisSync
 	public partial class TransmissionWindow
 	{
 		private global::Gtk.ScrolledWindow GtkScrolledWindow;
+		
 		private global::Gtk.VBox transmissionList;
 
 		protected virtual void Build ()

@@ -53,8 +53,6 @@ namespace CmisSync {
         private NSButton hidden_close_button;
         private CmisSyncLink website_link;
         private CmisSyncLink credits_link;
-        private CmisSyncLink report_problem_link;
-
 
         public About(IntPtr handle) : base(handle) { }
 
@@ -79,11 +77,6 @@ namespace CmisSync {
                     new PointF(this.website_link.Frame.X + this.website_link.Frame.Width + 10, 25),
                     this.credits_link.Frame.Size);
 
-                this.report_problem_link = new CmisSyncLink(Properties_Resources.ReportProblem, Controller.ReportProblemLinkAddress);
-                this.report_problem_link.Frame = new RectangleF(
-                    new PointF(this.credits_link.Frame.X + this.credits_link.Frame.Width + 10, 25),
-                    this.report_problem_link.Frame.Size);
-
                 this.hidden_close_button = new NSButton() {
                     Frame                     = new RectangleF(0, 0, 0, 0),
                     KeyEquivalentModifierMask = NSEventModifierMask.CommandKeyMask,
@@ -100,7 +93,6 @@ namespace CmisSync {
 
                 ContentView.AddSubview(this.website_link);
                 ContentView.AddSubview(this.credits_link);
-                ContentView.AddSubview(this.report_problem_link);
             }
 
             Controller.HideWindowEvent += delegate {

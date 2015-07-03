@@ -513,4 +513,13 @@ This could lead to a lot of conflict files!</value>
   <data name="SyncStatusPaused" xml:space="preserve">
     <value>Synchronization is paused</value>
   </data>
+  <data name="Bandwidth" xml:space="preserve">
+    <value>Bandwidth</value>
+  </data>
+  <data name="DownloadLimit" xml:space="preserve">
+    <value>Download Limit</value>
+  </data>
+  <data name="UploadLimit" xml:space="preserve">
+    <value>Upload Limit</value>
+  </data>
 </root>

@@ -27,6 +27,7 @@ namespace TestLibrary.QueueingTests {
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Crawler;
@@ -55,40 +56,101 @@ namespace TestLibrary.QueueingTests {
         [SetUp]
         public void SetUp() {
             this.queue = new Mock<ISyncEventQueue>();
-            this.listener = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), new TransmissionManager());
+            var manager = new TransmissionManager();
+            this.listener = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), manager);
         }
 
         [Test, Category("Fast")]
         public void ConstructorTakesQueueAndManagerAndStorage() {
-            new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), Mock.Of<IFileTransmissionStorage>(), Mock.Of<IIgnoredEntitiesStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
+            new EventManagerInitializer(
+                Mock.Of<ISyncEventQueue>(),
+                Mock.Of<IMetaDataStorage>(),
+                Mock.Of<IFileTransmissionStorage>(),
+                Mock.Of<IIgnoredEntitiesStorage>(),
+                CreateRepoInfo(),
+                MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object,
+                this.listener,
+                Mock.Of<ITransmissionFactory>());
         }
 
         [Test, Category("Fast")]
         public void ConstructorThrowsExceptionIfQueueIsNull() {
-            Assert.Throws<ArgumentNullException>(() => new EventManagerInitializer(null, Mock.Of<IMetaDataStorage>(), Mock.Of<IFileTransmissionStorage>(), Mock.Of<IIgnoredEntitiesStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener));
+            Assert.Throws<ArgumentNullException>(() => new EventManagerInitializer(
+                null,
+                Mock.Of<IMetaDataStorage>(),
+                Mock.Of<IFileTransmissionStorage>(),
+                Mock.Of<IIgnoredEntitiesStorage>(),
+                CreateRepoInfo(),
+                MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object,
+                this.listener,
+                Mock.Of<ITransmissionFactory>()));
         }
 
         [Test, Category("Fast")]
         public void ConstructorThrowsExceptionIfStorageIsNull() {
-            Assert.Throws<ArgumentNullException>(() => new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), null, Mock.Of<IFileTransmissionStorage>(), Mock.Of<IIgnoredEntitiesStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener));
+            Assert.Throws<ArgumentNullException>(() => new EventManagerInitializer(
+                Mock.Of<ISyncEventQueue>(),
+                null,
+                Mock.Of<IFileTransmissionStorage>(),
+                Mock.Of<IIgnoredEntitiesStorage>(),
+                CreateRepoInfo(),
+                MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object,
+                this.listener,
+                Mock.Of<ITransmissionFactory>()));
         }
 
         [Test, Category("Fast")]
         public void ConstructorThrowsExceptionIfFileTransmissionStorageIsNull() {
-            Assert.Throws<ArgumentNullException>(() => new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), null, Mock.Of<IIgnoredEntitiesStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener));
+            Assert.Throws<ArgumentNullException>(() => new EventManagerInitializer(
+                Mock.Of<ISyncEventQueue>(),
+                Mock.Of<IMetaDataStorage>(),
+                null,
+                Mock.Of<IIgnoredEntitiesStorage>(),
+                CreateRepoInfo(),
+                MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object,
+                this.listener,
+                Mock.Of<ITransmissionFactory>()));
         }
 
         [Test, Category("Fast")]
         public void ConstructorThrowsExceptionIfRepoInfoIsNull() {
-            Assert.Throws<ArgumentNullException>(() => new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), Mock.Of<IFileTransmissionStorage>(), Mock.Of<IIgnoredEntitiesStorage>(), null, MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener));
+            Assert.Throws<ArgumentNullException>(() => new EventManagerInitializer(
+                Mock.Of<ISyncEventQueue>(),
+                Mock.Of<IMetaDataStorage>(),
+                Mock.Of<IFileTransmissionStorage>(),
+                Mock.Of<IIgnoredEntitiesStorage>(),
+                null,
+                MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object,
+                this.listener,
+                Mock.Of<ITransmissionFactory>()));
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorThrowsExceptionIfTransmissionFactoryIsNull() {
+            Assert.Throws<ArgumentNullException>(() => new EventManagerInitializer(
+                Mock.Of<ISyncEventQueue>(),
+                Mock.Of<IMetaDataStorage>(),
+                Mock.Of<IFileTransmissionStorage>(),
+                Mock.Of<IIgnoredEntitiesStorage>(),
+                CreateRepoInfo(),
+                MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object,
+                this.listener,
+                null));
         }
 
         [Test, Category("Fast")]
         public void IgnoresWrongEventsTest() {
             var queue = new Mock<ISyncEventQueue>();
             var storage = new Mock<IMetaDataStorage>();
-            var handler = new EventManagerInitializer(queue.Object, storage.Object, Mock.Of<IFileTransmissionStorage>(), Mock.Of<IIgnoredEntitiesStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
-
+            var handler = new EventManagerInitializer(
+                queue.Object,
+                storage.Object,
+                Mock.Of<IFileTransmissionStorage>(),
+                Mock.Of<IIgnoredEntitiesStorage>(),
+                CreateRepoInfo(),
+                MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object,
+                this.listener,
+                Mock.Of<ITransmissionFactory>());
             var e = new Mock<ISyncEvent>();
             Assert.False(handler.Handle(e.Object));
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
@@ -159,7 +221,7 @@ namespace TestLibrary.QueueingTests {
 
             manager.Verify(m => m.AddEventHandler(It.IsAny<SelectiveIgnoreFilter>()), Times.Once());
             manager.Verify(m => m.AddEventHandler(It.IsAny<SelectiveIgnoreEventTransformer>()), Times.Once());
-            manager.Verify(m => m.AddEventHandler(It.IsAny<IgnoreFlagChangeDetection>()),Times.Once());
+            manager.Verify(m => m.AddEventHandler(It.IsAny<IgnoreFlagChangeDetection>()), Times.Once());
         }
 
         [Test, Category("Fast")]
@@ -175,7 +237,7 @@ namespace TestLibrary.QueueingTests {
 
             manager.Verify(m => m.AddEventHandler(It.IsAny<SelectiveIgnoreFilter>()), Times.Never());
             manager.Verify(m => m.AddEventHandler(It.IsAny<SelectiveIgnoreEventTransformer>()), Times.Never());
-            manager.Verify(m => m.AddEventHandler(It.IsAny<IgnoreFlagChangeDetection>()),Times.Never());
+            manager.Verify(m => m.AddEventHandler(It.IsAny<IgnoreFlagChangeDetection>()), Times.Never());
         }
 
         [Test, Category("Fast")]
@@ -294,7 +356,15 @@ namespace TestLibrary.QueueingTests {
 
         private EventManagerInitializer CreateStrategyInitializer(IMetaDataStorage storage, ISyncEventManager manager, ActivityListenerAggregator listener) {
             this.queue.Setup(s => s.EventManager).Returns(manager);
-            return new EventManagerInitializer(this.queue.Object, storage, Mock.Of<IFileTransmissionStorage>(), Mock.Of<IIgnoredEntitiesStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, listener);
+            return new EventManagerInitializer(
+                this.queue.Object,
+                storage,
+                Mock.Of<IFileTransmissionStorage>(),
+                Mock.Of<IIgnoredEntitiesStorage>(),
+                CreateRepoInfo(),
+                MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object,
+                listener,
+                Mock.Of<ITransmissionFactory>());
         }
 
         private void RunSuccessfulLoginEvent(IMetaDataStorage storage, ISyncEventManager manager, ActivityListenerAggregator listener, bool changeEventSupported = false, bool supportsSelectiveIgnore = true, string id = "i", string token = "t") {

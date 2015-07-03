@@ -69,7 +69,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="XamMac" />
     <Reference Include="DBreeze">
-      <HintPath>..\..\..\packages\DBreeze.1.71.0\lib\net40\DBreeze.dll</HintPath>
+      <HintPath>..\..\..\packages\DBreeze.1.71.1\lib\net40\DBreeze.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

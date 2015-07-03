@@ -138,10 +138,12 @@ SOURCES =  \
 	FileTransmission/ContentTaskUtils.cs \
 	FileTransmission/IFileDownloader.cs \
 	FileTransmission/IFileUploader.cs \
-	FileTransmission/ITransmissionManager.cs \
+	FileTransmission/ITransmissionAggregator.cs \
+	FileTransmission/ITransmissionFactory.cs \
 	FileTransmission/SimpleFileDownloader.cs \
 	FileTransmission/SimpleFileUploader.cs \
 	FileTransmission/Transmission.cs \
+	FileTransmission/TransmissionFactory.cs \
 	FileTransmission/TransmissionManager.cs \
 	FileTransmission/UploadFailedException.cs \
 	Filter/AbstractFileFilter.cs \
@@ -157,7 +159,7 @@ SOURCES =  \
 	Filter/ReportingFilter.cs \
 	Filter/RepositoryRootDeletedDetection.cs \
 	Filter/SymlinkFilter.cs \
-	HashAlgorithm/HashAlgorithmReuse.cs \
+	HashAlgorithm/IReusableHashAlgorithm.cs \
 	HashAlgorithm/SHA1Reuse.cs \
 	HttpProxyUtils.cs \
 	IActivityListener.cs \

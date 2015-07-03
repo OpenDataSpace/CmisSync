@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Config
-{
+namespace CmisSync.Lib.Config {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -27,8 +26,7 @@ namespace CmisSync.Lib.Config
     /// <summary>
     /// A static class that allows easy access to the configuration of CmisSync.
     /// </summary>
-    public static class ConfigManager
-    {
+    public static class ConfigManager {
         /// <summary>
         /// The CmisSync configuration.
         /// Following the singleton design pattern.
@@ -44,18 +42,13 @@ namespace CmisSync.Lib.Config
         /// Gets the CmisSync configuration.
         /// Following the singleton design pattern.
         /// </summary>
-        public static Config CurrentConfig
-        {
-            get
-            {
-                if (config == null)
-                {
-                    lock (configlock)
-                    {
+        public static Config CurrentConfig {
+            get {
+                if (config == null) {
+                    lock (configlock) {
                         // Load the configuration if it has not been done yet.
                         // If no configuration file exists, it will create a default one.
-                        if (config == null)
-                        {
+                        if (config == null) {
                             config = Config.CreateOrLoadByPath(CurrentConfigFile);
                         }
                     }
@@ -72,10 +65,8 @@ namespace CmisSync.Lib.Config
         /// <returns>
         /// Platform specific absolut path to config file
         /// </returns>
-        public static string CurrentConfigFile
-        {
-            get
-            {
+        public static string CurrentConfigFile {
+            get {
                 return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "dataSpaceSync", "config.xml");
             }
         }

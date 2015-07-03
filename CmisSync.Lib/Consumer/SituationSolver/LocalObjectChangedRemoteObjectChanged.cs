@@ -42,7 +42,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     public class LocalObjectChangedRemoteObjectChanged : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChangedRemoteObjectChanged));
 
-        private ITransmissionManager transmissionManager;
+        private ITransmissionFactory transmissionManager;
         private IFileSystemInfoFactory fsFactory;
 
         /// <summary>
@@ -58,13 +58,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ITransmissionManager transmissionManager,
+            ITransmissionFactory transmissionFactory,
             IFileSystemInfoFactory fsFactory = null) : base(session, storage, transmissionStorage) {
-            if (transmissionManager == null) {
+            if (transmissionFactory == null) {
                 throw new ArgumentNullException("transmissionManager");
             }
 
-            this.transmissionManager = transmissionManager;
+            this.transmissionManager = transmissionFactory;
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
         }
 

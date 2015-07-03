@@ -42,6 +42,8 @@ namespace CmisSync {
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
 
+    using Microsoft.Win32;
+
     /// <summary>
     /// Windows-specific part of the main CmisSync controller.
     /// </summary>
@@ -51,8 +53,21 @@ namespace CmisSync {
         /// </summary>
         public Controller()
             : base() {
+                SystemEvents.PowerModeChanged += delegate(object sender, PowerModeChangedEventArgs args) {
+                    switch (args.Mode) {
+                        case PowerModes.Suspend:
+                            Logger.Debug("Suspend");
+                            this.StopAll();
+                            Logger.Debug("Suspended");
+                        break;
+                        case PowerModes.Resume:
+                            Logger.Debug("Resume");
+                            this.StartAll();
+                            Logger.Debug("Resumed");
+                        break;
+                    }
+                };
         }
-
 
         /// <summary>
         /// Initialize the controller

@@ -5,16 +5,27 @@ namespace CmisSync.Widgets
 	public partial class ProxyWidget
 	{
 		private global::Gtk.VBox vbox3;
+		
 		private global::Gtk.RadioButton noProxyButton;
+		
 		private global::Gtk.RadioButton systemProxyButton;
+		
 		private global::Gtk.RadioButton customProxyButton;
+		
 		private global::Gtk.Label urlLabel;
+		
 		private global::CmisSync.Widgets.UrlWidget urlWidget;
+		
 		private global::Gtk.CheckButton credentialsRequiredButton;
+		
 		private global::Gtk.Table table1;
+		
 		private global::Gtk.Entry passwordEntry;
+		
 		private global::Gtk.Label passwordLabel;
+		
 		private global::Gtk.Entry userEntry;
+		
 		private global::Gtk.Label userLabel;
 
 		protected virtual void Build ()

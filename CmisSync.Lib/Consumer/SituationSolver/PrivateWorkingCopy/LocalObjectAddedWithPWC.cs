@@ -46,7 +46,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     /// </summary>
     public class LocalObjectAddedWithPWC : AbstractEnhancedSolverWithPWC {
         private readonly ISolver folderOrEmptyFileAddedSolver;
-        private readonly ITransmissionManager transmissionManager;
+        private readonly ITransmissionFactory transmissionManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.PWC.LocalObjectAddedWithPWC"/> class.
@@ -60,7 +60,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ITransmissionManager manager,
+            ITransmissionFactory manager,
             ISolver localFolderOrEmptyFileAddedSolver) : base(session, storage, transmissionStorage)
         {
             if (localFolderOrEmptyFileAddedSolver == null) {
@@ -151,6 +151,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
                     throw;
                 }
+
                 watch.Stop();
 
                 mapped.LastContentSize = localFile.Length;

@@ -613,7 +613,7 @@ namespace CmisSync {
                         string pathname = Path.Combine(config.GetConfigPath(), this.BrandConfigFolder, path.Substring(1));
                         Directory.CreateDirectory(Path.GetDirectoryName(pathname));
                         try {
-                            using (FileStream output = File.OpenWrite(pathname)) {
+                            using (FileStream output = File.Open(pathname, FileMode.Truncate, FileAccess.Write)) {
                                 if (!clientBrand.GetFile(path, output)) {
                                     success = false;
                                     break;
@@ -657,7 +657,6 @@ namespace CmisSync {
         private void AddRepository(RepoInfo repositoryInfo) {
             try {
                 Repository repo = new Repository(repositoryInfo, this.activityListenerAggregator);
-                this.transmissionManager.AddPathRepoMapping(repositoryInfo.LocalPath, repositoryInfo.DisplayName);
                 repo.ShowException += (object sender, RepositoryExceptionEventArgs e) => {
                     string msg = string.Empty;
                     switch (e.Type) {
@@ -778,6 +777,8 @@ namespace CmisSync {
                 }
 
                 edit = new Edit(type, credentials, folder.DisplayName, folder.RemotePath, oldIgnores, folder.LocalPath);
+                edit.DownloadLimit = folder.DownloadLimit;
+                edit.UploadLimit = folder.UploadLimit;
                 this.edits.Add(reponame, edit);
 
                 edit.Controller.SaveFolderEvent += delegate {
@@ -788,6 +789,8 @@ namespace CmisSync {
                         }
 
                         folder.SetPassword(edit.Credentials.Password);
+                        folder.DownloadLimit = edit.DownloadLimit;
+                        folder.UploadLimit = edit.UploadLimit;
                         ConfigManager.CurrentConfig.Save();
                         foreach (Repository repo in this.repositories) {
                             if (repo.Name == reponame) {

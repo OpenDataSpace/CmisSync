@@ -21,7 +21,10 @@ namespace TestLibrary.TestUtils {
     using System;
 
     using CmisSync.Lib;
+    using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Config;
     using CmisSync.Lib.FileTransmission;
+    using CmisSync.Lib.Queueing;
 
     using Moq;
 
@@ -29,15 +32,15 @@ namespace TestLibrary.TestUtils {
     using NUnit.Framework.Constraints;
 
     public static class MockOfITransmissionManagerUtil {
-        public static void VerifyThatNoTransmissionIsCreated(this Mock<ITransmissionManager> manager) {
+        public static void VerifyThatNoTransmissionIsCreated(this Mock<ITransmissionFactory> manager) {
             manager.Verify(m => m.CreateTransmission(It.IsAny<TransmissionType>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never());
         }
 
-        public static void VerifyThatTransmissionWasCreatedOnce(this Mock<ITransmissionManager> manager) {
+        public static void VerifyThatTransmissionWasCreatedOnce(this Mock<ITransmissionFactory> manager) {
             manager.Verify(m => m.CreateTransmission(It.IsAny<TransmissionType>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once());
         }
 
-        public static Mock<Transmission> SetupCreateTransmissionOnce(this Mock<ITransmissionManager> manager, TransmissionType type, string path = null, string cachePath = null) {
+        public static Mock<Transmission> SetupCreateTransmissionOnce(this Mock<ITransmissionFactory> manager, TransmissionType type, string path = null, string cachePath = null) {
             var p = path ?? string.Empty;
             var transmission = new Mock<Transmission>(type, p, cachePath) { CallBase = true };
             manager.Setup(m => m.CreateTransmission(type, p, cachePath)).ReturnsInOrder(transmission.Object, null);
@@ -73,6 +76,26 @@ namespace TestLibrary.TestUtils {
 
         public static Transmission AddDefaultConstraints(this Transmission transmission) {
             return transmission.AddLengthConstraint(Is.GreaterThanOrEqualTo(0)).AddPercentConstraint(Is.InRange(0, 100)).AddPositionConstraint(Is.GreaterThanOrEqualTo(0));
+        }
+
+        public static ITransmissionFactory CreateFactory(AbstractNotifyingRepository repo = null, ITransmissionAggregator aggregator = null) {
+            if (repo == null) {
+                repo = new Mock<AbstractNotifyingRepository>(new RepoInfo() { DisplayName = "mockedRepo" }).Object;
+            }
+
+            if (aggregator == null) {
+                aggregator = new TransmissionManager();
+            }
+
+            return new TransmissionFactory(repo, aggregator);
+        }
+
+        public static ITransmissionFactory CreateFactory(this ITransmissionAggregator aggregator, AbstractNotifyingRepository repo = null) {
+            if (repo == null) {
+                repo = new Mock<AbstractNotifyingRepository>(new RepoInfo() { DisplayName = "mockedRepo" }).Object;
+            }
+
+            return new TransmissionFactory(repo, aggregator);
         }
     }
 }

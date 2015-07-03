@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Config
-{
+namespace CmisSync.Lib.Config {
     using System;
     using System.ComponentModel;
     using System.Xml.Serialization;
@@ -27,8 +26,7 @@ namespace CmisSync.Lib.Config
     /// Proxy selection method.
     /// </summary>
     [Serializable]
-    public enum ProxySelection
-    {
+    public enum ProxySelection {
         /// <summary>
         /// Use the system settings.
         /// </summary>
@@ -49,8 +47,7 @@ namespace CmisSync.Lib.Config
     /// Proxy settings struct.
     /// </summary>
     [Serializable]
-    public struct ProxySettings
-    {
+    public struct ProxySettings {
         /// <summary>
         /// Gets or sets the way if and how to use the systems proxy settings.
         /// </summary>

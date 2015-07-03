@@ -749,6 +749,20 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         }
 #endif
 
+#if !__MonoCS__
+        [Test, Category("Medium")]
+        public void CreateWrapperOnNetworkShare([Values("\\\\server\\share\\")]string uncPath) {
+            var wrapper = new DirectoryInfoWrapper(new DirectoryInfo(uncPath));
+            Assert.That(wrapper.FSType, Is.EqualTo(FSType.Unknown));
+        }
+#endif
+
+        [Test, Category("Medium")]
+        public void DetectDriveInfo() {
+            var wrapper = new DirectoryInfoWrapper(new DirectoryInfo(Path.Combine(this.testFolder.FullName, "cat")));
+            Assert.That(wrapper.FSType, Is.Not.EqualTo(FSType.Unknown));
+        }
+
         [Ignore("Windows only and needs second partition as target fs")]
         [Test, Category("Medium")]
         public void ReplaceFile([Values("E:\\\\")]string targetFS) {
