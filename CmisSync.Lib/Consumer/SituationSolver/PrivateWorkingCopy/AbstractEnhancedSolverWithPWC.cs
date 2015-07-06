@@ -188,10 +188,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
                 var properties = new Dictionary<string, object>();
                 properties.Add(PropertyIds.LastModificationDate, localFile.LastWriteTimeUtc);
-                doc = this.Session.GetObject(docPWC.CheckIn(true, properties, null, string.Empty)) as IDocument;
+                try {
+                    doc = this.Session.GetObject(docPWC.CheckIn(true, properties, null, string.Empty)) as IDocument;
 
-                // Refresh is required, or DotCMIS will use cached one only
-                doc.Refresh();
+                    // Refresh is required, or DotCMIS will use cached one only
+                    doc.Refresh();
+                } catch (Exception ex) {
+                    var uploadFailed = new UploadFailedException(ex, doc);
+                    transmission.FailedException = uploadFailed;
+                    throw uploadFailed;
+                }
 
                 transmission.Status = TransmissionStatus.FINISHED;
                 return hash;
