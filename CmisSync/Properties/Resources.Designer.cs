@@ -1060,6 +1060,15 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Details.
+        /// </summary>
+        internal static string TransmissionExceptionDetails {
+            get {
+                return ResourceManager.GetString("TransmissionExceptionDetails", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [{0}] Transmission failed:.
         /// </summary>
         internal static string TransmissionFailedOnRepo {
