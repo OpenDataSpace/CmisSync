@@ -101,11 +101,6 @@ namespace CmisSync {
         private Dictionary<string, Edit> edits = new Dictionary<string, Edit>();
 
         /// <summary>
-        /// All the info about the CmisSync synchronized folder being created.
-        /// </summary>
-        private RepoInfo repoInfo;
-
-        /// <summary>
         /// Is this controller disposed already?
         /// </summary>
         private bool disposed = false;
@@ -739,7 +734,7 @@ namespace CmisSync {
                 repo.Initialize();
             } catch (ExtendedAttributeException extendedAttributeException) {
                 this.ShowException(
-                    string.Format(Properties_Resources.CannotSync, this.repoInfo.DisplayName),
+                    string.Format(Properties_Resources.CannotSync, repositoryInfo.DisplayName),
                     string.Format(Properties_Resources.ProblemWithFS, Environment.NewLine, extendedAttributeException.Message));
             }
         }
