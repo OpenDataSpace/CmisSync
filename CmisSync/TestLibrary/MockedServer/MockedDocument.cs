@@ -62,7 +62,7 @@ namespace TestLibrary.MockedServer {
                 using (var orig = this.Stream.Stream)
                 using (var part = new MemoryStream()) {
                     orig.Seek(offset.GetValueOrDefault(), SeekOrigin.Begin);
-                    orig.CopyTo(part, 8096, (int)length.GetValueOrDefault());
+                    orig.CopyTo(part, 8192, (int)length.GetValueOrDefault());
                     subStream.Content = part.ToArray();
                 }
 
