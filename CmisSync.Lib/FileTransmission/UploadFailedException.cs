@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.FileTransmission
-{
+namespace CmisSync.Lib.FileTransmission {
     using System;
     using System.Runtime.Serialization;
 
@@ -28,8 +27,7 @@ namespace CmisSync.Lib.FileTransmission
     /// Upload failed exception.
     /// </summary>
     [Serializable]
-    public class UploadFailedException : Exception
-    {
+    public class UploadFailedException : Exception {
         private IDocument doc;
 
         /// <summary>
@@ -41,24 +39,21 @@ namespace CmisSync.Lib.FileTransmission
         /// <param name='lastSuccessfulDocumentState'>
         /// Last successful uploaded document state.
         /// </param>
-        public UploadFailedException(Exception inner, IDocument lastSuccessfulDocumentState) : base("Upload Failed", inner)
-        {
+        public UploadFailedException(Exception inner, IDocument lastSuccessfulDocumentState) : base("Upload Failed", inner) {
             this.doc = lastSuccessfulDocumentState;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.UploadFailedException"/> class.
         /// </summary>
-        public UploadFailedException() : this("Upload Failed")
-        {
+        public UploadFailedException() : this("Upload Failed") {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.UploadFailedException"/> class.
         /// </summary>
         /// <param name="message">Upload failing reason message.</param>
-        public UploadFailedException(string message) : base(message)
-        {
+        public UploadFailedException(string message) : base(message) {
             this.doc = null;
         }
 
@@ -67,8 +62,7 @@ namespace CmisSync.Lib.FileTransmission
         /// </summary>
         /// <param name="message">Upload failing reason message.</param>
         /// <param name="innerException">Inner exception.</param>
-        public UploadFailedException(string message, Exception innerException) : base(message, innerException)
-        {
+        public UploadFailedException(string message, Exception innerException) : base(message, innerException) {
             this.doc = null;
         }
 
@@ -77,8 +71,7 @@ namespace CmisSync.Lib.FileTransmission
         /// </summary>
         /// <param name="info">Serialization info.</param>
         /// <param name="context">Streaming context.</param>
-        protected UploadFailedException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
+        protected UploadFailedException(SerializationInfo info, StreamingContext context) : base(info, context) {
             this.doc = null;
         }
 
@@ -88,10 +81,8 @@ namespace CmisSync.Lib.FileTransmission
         /// <value>
         /// The last successful uploaded document state.
         /// </value>
-        public IDocument LastSuccessfulDocument 
-        {
-            get
-            {
+        public IDocument LastSuccessfulDocument  {
+            get {
                 return this.doc;
             }
         }
@@ -100,10 +91,8 @@ namespace CmisSync.Lib.FileTransmission
         /// Gets the message.
         /// </summary>
         /// <value>The message.</value>
-        public override string Message
-        {
-            get
-            {
+        public override string Message {
+            get {
                 return string.Format("{0}: {1}", base.Message, this.InnerException.Message);
             }
         }
@@ -112,8 +101,7 @@ namespace CmisSync.Lib.FileTransmission
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.FileTransmission.UploadFailedException"/>.
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.FileTransmission.UploadFailedException"/>.</returns>
-        public override string ToString()
-        {
+        public override string ToString() {
             return string.Format("{0}: {1}", base.ToString(), this.InnerException.ToString());
         }
     }

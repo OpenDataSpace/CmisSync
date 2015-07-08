@@ -34,7 +34,7 @@ namespace CmisSync.Lib.Queueing {
     /// <summary>
     /// Transmission manager.
     /// </summary>
-    public class TransmissionManager : ITransmissionManager {
+    public class TransmissionManager : ITransmissionAggregator {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(TransmissionManager));
 
         private object collectionLock = new object();
@@ -73,30 +73,10 @@ namespace CmisSync.Lib.Queueing {
         /// <param name="type">Transmission type.</param>
         /// <param name="path">Full path.</param>
         /// <param name="cachePath">Cache path.</param>
-        public Transmission CreateTransmission(TransmissionType type, string path, string cachePath = null) {
-            var transmission = new Transmission(type, path, cachePath);
+        public void Add(Transmission transmission) {
             lock (this.collectionLock) {
-                var entry = this.pathToRepoNameMapping.FirstOrDefault(t => path.StartsWith(t.Key));
-                transmission.Repository = entry.Value ?? string.Empty;
-                if (entry.Key != null) {
-                    transmission.RelativePath = path.Substring(entry.Key.Length).TrimStart(System.IO.Path.DirectorySeparatorChar);
-                }
-
                 transmission.PropertyChanged += this.TransmissionFinished;
                 this.activeTransmissions.Add(transmission);
-            }
-
-            return transmission;
-        }
-
-        /// <summary>
-        /// Adds the path repo mapping entry to internal storage.
-        /// </summary>
-        /// <param name="path">Local path.</param>
-        /// <param name="repoName">Repo name.</param>
-        public void AddPathRepoMapping(string path, string repoName) {
-            lock (this.collectionLock) {
-                this.pathToRepoNameMapping[path] = repoName;
             }
         }
 

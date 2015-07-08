@@ -22,10 +22,12 @@ namespace TestLibrary.ConsumerTests {
     using System.IO;
 
     using CmisSync.Lib;
+    using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Consumer.SituationSolver.PWC;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Producer.Watcher;
     using CmisSync.Lib.Queueing;
@@ -52,6 +54,7 @@ namespace TestLibrary.ConsumerTests {
         private ActivityListenerAggregator listener;
         private Mock<IActivityListener> activityListener;
         private Mock<IFilterAggregator> filters;
+        private ITransmissionFactory transmissionFactory;
 
         [SetUp]
         public void SetUp() {
@@ -61,7 +64,9 @@ namespace TestLibrary.ConsumerTests {
             this.storage = new Mock<IMetaDataStorage>();
             this.fileTransmissionStorage = new Mock<IFileTransmissionStorage>();
             this.activityListener = new Mock<IActivityListener>();
-            this.listener = new ActivityListenerAggregator(this.activityListener.Object, new TransmissionManager());
+            var manager = new TransmissionManager();
+            this.transmissionFactory = manager.CreateFactory();
+            this.listener = new ActivityListenerAggregator(this.activityListener.Object, manager);
             this.filters = new Mock<IFilterAggregator>();
         }
 
@@ -78,20 +83,63 @@ namespace TestLibrary.ConsumerTests {
         [Test, Category("Fast")]
         public void ConstructorFailsWithLocalDetectionNull() {
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            Assert.Throws<ArgumentNullException>(() => new SyncMechanism(null, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object, this.fileTransmissionStorage.Object, this.listener, this.filters.Object));
+            Assert.Throws<ArgumentNullException>(() => new SyncMechanism(
+                null,
+                remoteDetection.Object,
+                this.queue.Object,
+                this.session.Object,
+                this.storage.Object,
+                this.fileTransmissionStorage.Object,
+                this.listener,
+                this.filters.Object,
+                this.transmissionFactory));
         }
 
         [Test, Category("Fast")]
         public void ConstructorFailsWithRemoteDetectionNull() {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            Assert.Throws<ArgumentNullException>(() => new SyncMechanism(localDetection.Object, null, this.queue.Object, this.session.Object, this.storage.Object, this.fileTransmissionStorage.Object, this.listener, this.filters.Object));
+            Assert.Throws<ArgumentNullException>(() => new SyncMechanism(
+                localDetection.Object,
+                null,
+                this.queue.Object,
+                this.session.Object,
+                this.storage.Object,
+                this.fileTransmissionStorage.Object,
+                this.listener,
+                this.filters.Object,
+                this.transmissionFactory));
         }
 
         [Test, Category("Fast")]
         public void ConstructorThrowsExceptionIfFiltersAreNull() {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            Assert.Throws<ArgumentNullException>(() => new SyncMechanism(localDetection.Object, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object, this.fileTransmissionStorage.Object, this.listener, null));
+            Assert.Throws<ArgumentNullException>(() => new SyncMechanism(
+                localDetection.Object,
+                remoteDetection.Object,
+                this.queue.Object,
+                this.session.Object,
+                this.storage.Object,
+                this.fileTransmissionStorage.Object,
+                this.listener,
+                null,
+                this.transmissionFactory));
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorThrowsExceptionIfTransmissionFactoryIsNull() {
+            var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
+            var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
+            Assert.Throws<ArgumentNullException>(() => new SyncMechanism(
+                localDetection.Object,
+                remoteDetection.Object,
+                this.queue.Object,
+                this.session.Object,
+                this.storage.Object,
+                this.fileTransmissionStorage.Object,
+                this.listener,
+                this.filters.Object,
+                null));
         }
 
         [Test, Category("Fast")]
@@ -336,11 +384,34 @@ namespace TestLibrary.ConsumerTests {
             mechanism.Handle(folderEvent);
         }
 
-        private SyncMechanism CreateMechanism(ISituationDetection<AbstractFolderEvent> localDetection, ISituationDetection<AbstractFolderEvent> remoteDetection, ISolver[,] solver = null) {
+        private SyncMechanism CreateMechanism(
+            ISituationDetection<AbstractFolderEvent> localDetection,
+            ISituationDetection<AbstractFolderEvent> remoteDetection,
+            ISolver[,] solver = null)
+        {
             if (solver != null) {
-                return new SyncMechanism(localDetection, remoteDetection, this.queue.Object, this.session.Object, this.storage.Object, this.fileTransmissionStorage.Object, this.listener, this.filters.Object, solver);
+                return new SyncMechanism(
+                    localDetection,
+                    remoteDetection,
+                    this.queue.Object,
+                    this.session.Object,
+                    this.storage.Object,
+                    this.fileTransmissionStorage.Object,
+                    this.listener,
+                    this.filters.Object,
+                    this.transmissionFactory,
+                    solver);
             } else {
-                return new SyncMechanism(localDetection, remoteDetection, this.queue.Object, this.session.Object, this.storage.Object, this.fileTransmissionStorage.Object, this.listener, this.filters.Object);
+                return new SyncMechanism(
+                    localDetection,
+                    remoteDetection,
+                    this.queue.Object,
+                    this.session.Object,
+                    this.storage.Object,
+                    this.fileTransmissionStorage.Object,
+                    this.listener,
+                    this.filters.Object,
+                    this.transmissionFactory);
             }
         }
 

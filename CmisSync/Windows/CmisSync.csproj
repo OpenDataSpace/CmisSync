@@ -118,6 +118,9 @@
     <Compile Include="AboutWPF.xaml.cs">
       <DependentUpon>AboutWPF.xaml</DependentUpon>
     </Compile>
+    <Compile Include="BandwidthLimitWidget.xaml.cs">
+      <DependentUpon>BandwidthLimitWidget.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CertPolicyWindow.cs" />
     <Compile Include="CircularProgressBar.xaml.cs" />
     <Compile Include="ClientBrand.cs" />
@@ -153,6 +156,9 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UIConverter\BitsPerSecondToStringConverter.cs" />
+    <Compile Include="UIConverter\BoolToVisibilityConverter.cs" />
+    <Compile Include="UIConverter\NullToVisibilityConverter.cs" />
+    <Compile Include="UIConverter\TransmissionExceptionToTextConverter.cs" />
     <Compile Include="UIConverter\TransmissionLengthToStringConverter.cs" />
     <Compile Include="UIConverter\TransmissionPositionToStringConverter.cs" />
     <Compile Include="UIConverter\TransmissionStatusToDoneConverter.cs" />
@@ -355,6 +361,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="AboutWPF.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="BandwidthLimitWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

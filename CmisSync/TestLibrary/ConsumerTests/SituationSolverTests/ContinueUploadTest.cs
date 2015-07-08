@@ -23,6 +23,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System.IO;
     using System.Security.Cryptography;
 
+    using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Consumer.SituationSolver.PWC;
     using CmisSync.Lib.Events;
@@ -62,6 +63,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private Mock<IFileTransmissionStorage> transmissionStorage;
 
         private TransmissionManager transmissionManager;
+        private ITransmissionFactory transmissionFactory;
 
         private string parentPath;
         private string localPath;
@@ -95,13 +97,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.transmissionStorage.Setup(f => f.ChunkSize).Returns(this.chunkSize);
 
             this.transmissionManager = new TransmissionManager();
+            this.transmissionFactory = this.transmissionManager.CreateFactory();
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileAdded() {
             this.SetupFile();
 
-            var solverAdded = new LocalObjectAddedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager));
+            var solverAdded = new LocalObjectAddedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory));
             this.RunSolverToAbortUpload(solverAdded);
             this.RunSolverToContinueUpload(solverAdded);
 
@@ -127,7 +130,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.SetupFile();
             this.SetupForLocalFileChanged();
 
-            var solverChanged = new LocalObjectChangedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager));
+            var solverChanged = new LocalObjectChangedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory));
 
             this.RunSolverToAbortUpload(solverChanged);
 
@@ -152,7 +155,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         public void LocalFileAddedWhileChangeLocalBeforeContinue() {
             this.SetupFile();
 
-            var solverAdded = new LocalObjectAddedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager));
+            var solverAdded = new LocalObjectAddedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory));
             this.RunSolverToAbortUpload(solverAdded);
             this.RunSolverToChangeLocalBeforeContinue(solverAdded);
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Once(), true, null, null, this.fileHashChanged, this.fileLength);
@@ -175,7 +178,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.SetupFile();
             this.SetupForLocalFileChanged();
 
-            var solverChanged = new LocalObjectChangedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager));
+            var solverChanged = new LocalObjectChangedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory));
 
             this.RunSolverToAbortUpload(solverChanged);
 
@@ -200,7 +203,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.SetupFile();
             this.SetupForLocalFileChanged();
 
-            var solverChanged = new LocalObjectChangedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager));
+            var solverChanged = new LocalObjectChangedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory));
 
             this.RunSolverToAbortUpload(solverChanged);
 

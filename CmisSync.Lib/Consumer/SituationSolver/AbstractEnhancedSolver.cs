@@ -200,7 +200,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             }
         }
 
-        protected byte[] DownloadChanges(IFileInfo target, IDocument remoteDocument, IMappedObject obj, IFileSystemInfoFactory fsFactory, ITransmissionManager transmissionManager, ILog logger) {
+        protected byte[] DownloadChanges(IFileInfo target, IDocument remoteDocument, IMappedObject obj, IFileSystemInfoFactory fsFactory, ITransmissionFactory transmissionManager, ILog logger) {
             // Download changes
             byte[] hash = null;
 

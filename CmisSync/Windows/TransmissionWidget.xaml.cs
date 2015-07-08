@@ -42,6 +42,7 @@ namespace CmisSync {
     public partial class TransmissionWidget : UserControl {
         public TransmissionWidget() {
             InitializeComponent();
+            this.Expander.Header = Properties_Resources.TransmissionExceptionDetails;
         }
 
         private void openButton_Click(object sender, RoutedEventArgs e) {

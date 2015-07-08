@@ -24,9 +24,11 @@ namespace TestLibrary.IntegrationTests {
 
     using CmisSync.Lib;
     using CmisSync.Lib.Accumulator;
+    using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Producer.ContentChange;
@@ -358,6 +360,7 @@ namespace TestLibrary.IntegrationTests {
             var remoteDetection = new RemoteSituationDetection();
             var transmissionManager = new TransmissionManager();
             var activityAggregator = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), transmissionManager);
+            var transmissionFactory = transmissionManager.CreateFactory();
 
             var ignoreFolderFilter = new IgnoredFoldersFilter();
             var ignoreFolderNameFilter = new IgnoredFolderNameFilter();
@@ -365,7 +368,7 @@ namespace TestLibrary.IntegrationTests {
             var invalidFolderNameFilter = new InvalidFolderNameFilter();
             var filterAggregator = new FilterAggregator(ignoreFileNamesFilter, ignoreFolderNameFilter, invalidFolderNameFilter, ignoreFolderFilter);
 
-            var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage, Mock.Of<IFileTransmissionStorage>(), activityAggregator, filterAggregator);
+            var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage, Mock.Of<IFileTransmissionStorage>(), activityAggregator, filterAggregator, transmissionFactory);
             manager.AddEventHandler(syncMechanism);
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder();

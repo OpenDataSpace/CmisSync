@@ -17,11 +17,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
 
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
@@ -32,15 +32,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Local object renamed or moved and the corresponding remote object is deleted.
     /// </summary>
-    public class LocalObjectRenamedOrMovedRemoteObjectDeleted : AbstractEnhancedSolver
-    {
+    public class LocalObjectRenamedOrMovedRemoteObjectDeleted : AbstractEnhancedSolver {
         private ISolver secondSolver;
 
         public LocalObjectRenamedOrMovedRemoteObjectDeleted(
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            TransmissionManager manager,
+            ITransmissionFactory manager,
             ISolver secondSolver = null) : base(session, storage) {
                 this.secondSolver = secondSolver ?? new LocalObjectAdded(session, storage, transmissionStorage, manager);
         }

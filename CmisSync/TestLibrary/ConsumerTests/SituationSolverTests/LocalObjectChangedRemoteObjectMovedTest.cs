@@ -170,7 +170,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 this.session.Object,
                 this.storage.Object,
                 null,
-                this.manager,
+                this.manager.CreateFactory(),
                 this.fsFactory.Object);
             this.underTest = new LocalObjectChangedRemoteObjectMoved(this.session.Object, this.storage.Object, this.changeSolver.Object);
         }

@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.IO;
     using System.Security.Cryptography;
@@ -40,8 +39,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class LocalObjectMovedRemoteObjectRenamedTest
-    {
+    public class LocalObjectMovedRemoteObjectRenamedTest {
         private readonly string oldName = "oldName";
         private readonly string newName = "newName";
         private readonly string remoteId = "remoteId";
@@ -187,7 +185,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 this.session.Object,
                 this.storage.Object,
                 null,
-                this.manager,
+                this.manager.CreateFactory(),
                 this.fsFactory.Object);
             this.renameSolver = new Mock<LocalObjectRenamedRemoteObjectRenamed>(
                 this.session.Object,

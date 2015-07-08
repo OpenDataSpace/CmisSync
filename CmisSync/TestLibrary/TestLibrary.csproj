@@ -327,6 +327,8 @@
     <Compile Include="CmisTests\AbstractRepositoryTest.cs" />
     <Compile Include="StorageTests\DataBaseTests\GraphOutputTest.cs" />
     <Compile Include="FilterTests\SymlinkFilterTest.cs" />
+    <Compile Include="FileTransmissionTests\TransmissionFactoryTest.cs" />
+    <Compile Include="IntegrationTests\VirusDetectionTests\VirusDetectionTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -385,5 +387,6 @@
     <Folder Include="IntegrationTests\ContentHashTests\" />
     <Folder Include="IntegrationTests\MockedServerTests\" />
     <Folder Include="MockedServer\MockedServices\" />
+    <Folder Include="IntegrationTests\VirusDetectionTests\" />
   </ItemGroup>
 </Project>

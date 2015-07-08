@@ -55,7 +55,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileTransmissionStorage> transmissionStorage;
-        private Mock<ITransmissionManager> manager;
+        private Mock<ITransmissionFactory> manager;
         private Mock<ISolver> folderOrFileContentUnchangedAddedSolver;
 
         private string parentPath;
@@ -195,7 +195,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.storage = new Mock<IMetaDataStorage>();
             this.chunkSize = 4096;
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();
-            this.manager = new Mock<ITransmissionManager>();
+            this.manager = new Mock<ITransmissionFactory>();
             this.transmissionStorage.Setup(f => f.ChunkSize).Returns(this.chunkSize);
             this.folderOrFileContentUnchangedAddedSolver = new Mock<ISolver>(MockBehavior.Strict);
         }

@@ -27,20 +27,17 @@ using CmisSync.CmisTree;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
-namespace CmisSync
-{
+namespace CmisSync {
     /// <summary>
     /// Edit folder diaglog
     /// It allows user to edit the selected and ignored folders
     /// </summary>
-    class Edit : SetupWindow
-    {
+    class Edit : SetupWindow {
         /// <summary>
         /// Controller
         /// </summary>
         public EditController Controller = new EditController();
-
-
+        
         /// <summary>
         /// Synchronized folder name
         /// </summary>
@@ -56,6 +53,26 @@ namespace CmisSync
         /// </summary>
         public CmisRepoCredentials Credentials;
 
+        public long DownloadLimit {
+            get {
+                return this.downloadLimitWidget.Limit;
+            }
+
+            set {
+                this.downloadLimitWidget.Limit = value;
+            }
+        }
+
+        public long UploadLimit {
+            get {
+                return this.uploadLimitWidget.Limit;
+            }
+
+            set {
+                this.uploadLimitWidget.Limit = value;
+            }
+        }
+
         private BackgroundWorker backgroundWorker = new BackgroundWorker();
 
         private string remotePath;
@@ -68,10 +85,19 @@ namespace CmisSync
 
         private EditType type;
 
+        private BandwidthLimitWidget uploadLimitWidget;
+        private BandwidthLimitWidget downloadLimitWidget;
+
         /// <summary>
         /// Constructor
         /// </summary>
-        public Edit(EditType type, CmisRepoCredentials credentials, string name, string remotePath, List<string> ignores, string localPath)
+        public Edit(
+            EditType type,
+            CmisRepoCredentials credentials,
+            string name,
+            string remotePath,
+            List<string> ignores,
+            string localPath)
         {
             FolderName = name;
             this.Credentials = credentials;
@@ -85,8 +111,7 @@ namespace CmisSync
 
             CreateTreeView();
             LoadEdit();
-            switch (type)
-            {
+            switch (type) {
                 case EditType.EditFolder:
                     //  GUI workaround to remove ignore folder {{
                     //tab.SelectedItem = tabItemSelection;
@@ -104,42 +129,35 @@ namespace CmisSync
             this.ShowAll();
 
             // Defines how to show the setup window.
-            Controller.OpenWindowEvent += delegate
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
+            Controller.OpenWindowEvent += delegate {
+                Dispatcher.BeginInvoke((Action)delegate {
                     Show();
                     Activate();
                     BringIntoView();
                 });
             };
 
-            Controller.CloseWindowEvent += delegate
-            {
+            Controller.CloseWindowEvent += delegate {
                 Close();
             };
 
-            finishButton.Click += delegate
-            {
+            finishButton.Click += delegate {
                 Ignores = NodeModelUtils.GetIgnoredFolder(repo);
                 Credentials.Password = passwordBox.Password;
                 Controller.SaveFolder();
                 Controller.CloseWindow();
             };
 
-            cancelButton.Click += delegate
-            {
+            cancelButton.Click += delegate {
                 Controller.CloseWindow();
             };
 
-            Closed += delegate
-            {
+            Closed += delegate {
                 Controller.CleanWindow();
             };
         }
 
-        protected override void Close(object sender, CancelEventArgs args)
-        {
+        protected override void Close(object sender, CancelEventArgs args) {
             asyncLoader.Cancel();
             backgroundWorker.CancelAsync();
             backgroundWorker.Dispose();
@@ -166,21 +184,18 @@ namespace CmisSync
         private Button cancelButton;
 
 
-        private void CheckPassword(object sender, DoWorkEventArgs args)
-        {
+        private void CheckPassword(object sender, DoWorkEventArgs args) {
             if (!passwordChanged) {
                 return;
             }
 
-            Dispatcher.BeginInvoke((Action)delegate
-            {
+            Dispatcher.BeginInvoke((Action)delegate {
                 passwordHelp.Text = Properties_Resources.LoginCheck;
                 passwordBox.IsEnabled = false;
                 passwordProgress.Visibility = Visibility.Visible;
             });
 
-            ServerCredentials cred = new ServerCredentials()
-            {
+            ServerCredentials cred = new ServerCredentials() {
                 Address = Credentials.Address,
                 Binding = Credentials.Binding,
                 UserName = Credentials.UserName,
@@ -190,8 +205,7 @@ namespace CmisSync
             cred.GetRepositories();
         }
 
-        private void PasswordChecked(object sender, RunWorkerCompletedEventArgs args)
-        {
+        private void PasswordChecked(object sender, RunWorkerCompletedEventArgs args) {
             if (args.Cancelled) {
                 return;
             } else if (args.Error != null) {
@@ -205,13 +219,11 @@ namespace CmisSync
             passwordBox.IsEnabled = true;
         }
 
-        private void CreateTreeView()
-        {
+        private void CreateTreeView() {
             System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/FolderTreeMVC/TreeView.xaml", System.UriKind.Relative);
             treeView = Application.LoadComponent(resourceLocater) as TreeView;
 
-            repo = new CmisSync.CmisTree.RootFolder()
-            {
+            repo = new CmisSync.CmisTree.RootFolder() {
                 Name = FolderName,
                 Id = Credentials.RepoId,
                 Address = Credentials.Address.ToString()
@@ -228,20 +240,17 @@ namespace CmisSync
 
             treeView.DataContext = repos;
 
-            treeView.AddHandler(TreeViewItem.ExpandedEvent, new RoutedEventHandler(delegate(object sender, RoutedEventArgs e)
-            {
+            treeView.AddHandler(TreeViewItem.ExpandedEvent, new RoutedEventHandler(delegate(object sender, RoutedEventArgs e) {
                 TreeViewItem expandedItem = e.OriginalSource as TreeViewItem;
                 Node expandedNode = expandedItem.Header as Folder;
-                if (expandedNode != null)
-                {
+                if (expandedNode != null) {
                     asyncLoader.Load(expandedNode);
                 }
             }));
         }
 
 
-        private void LoadEdit()
-        {
+        private void LoadEdit() {
             System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/EditWPF.xaml", System.UriKind.Relative);
             UserControl editWPF = Application.LoadComponent(resourceLocater) as UserControl;
 
@@ -261,7 +270,8 @@ namespace CmisSync
             passwordHelp = editWPF.FindName("passwordHelp") as TextBlock;
             finishButton = editWPF.FindName("finishButton") as Button;
             cancelButton = editWPF.FindName("cancelButton") as Button;
-
+            this.uploadLimitWidget = editWPF.FindName("uploadLimitWidget") as BandwidthLimitWidget;
+            this.downloadLimitWidget = editWPF.FindName("downloadLimitWidget") as BandwidthLimitWidget;
             //  GUI workaround to remove ignore folder {{
             //tabItemSelection.Content = treeView;
             //  GUI workaround to remove ignore folder }}

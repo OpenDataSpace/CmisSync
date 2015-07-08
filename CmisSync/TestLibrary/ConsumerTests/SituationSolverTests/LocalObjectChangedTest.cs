@@ -51,7 +51,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
         private string localPath;
         private string remotePath;
-        private Mock<ITransmissionManager> manager;
+        private Mock<ITransmissionFactory> manager;
         private Mock<IMetaDataStorage> storage;
         private Mock<ISession> session;
         private LocalObjectChanged underTest;
@@ -62,7 +62,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         public void DefaultConstructorTest() {
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
-            new LocalObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null, Mock.Of<ITransmissionManager>());
+            new LocalObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null, Mock.Of<ITransmissionFactory>());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -297,7 +297,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         }
 
         private void SetUpMocks() {
-            this.manager = new Mock<ITransmissionManager>();
+            this.manager = new Mock<ITransmissionFactory>();
             this.storage = new Mock<IMetaDataStorage>();
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();

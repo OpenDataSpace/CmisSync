@@ -130,5 +130,34 @@ namespace TestLibrary.ConfigTests {
             this.info.ReadTimeout = -2134;
             Assert.That(this.info.ReadTimeout, Is.EqualTo(-1));
         }
+
+        [Test, Category("Fast")]
+        public void DownloadLimit() {
+            long limit = 100;
+            Assert.That(this.info.DownloadLimit, Is.EqualTo(0));
+            this.info.DownloadLimit = limit;
+            Assert.That(this.info.DownloadLimit, Is.EqualTo(limit));
+        }
+
+        [Test, Category("Fast")]
+        public void UploadLimit() {
+            long limit = 100;
+            Assert.That(this.info.UploadLimit, Is.EqualTo(0));
+            this.info.UploadLimit = limit;
+            Assert.That(this.info.UploadLimit, Is.EqualTo(limit));
+        }
+
+        [Test, Category("Fast")]
+        public void OnSavedTriggersHandler() {
+            bool isTriggered = false;
+            this.info.Saved += (sender, e) => {
+                Assert.That(sender, Is.EqualTo(this.info));
+                isTriggered = true;
+            };
+
+            this.info.OnSaved();
+
+            Assert.That(isTriggered, Is.True);
+        }
     }
 }

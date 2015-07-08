@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.0</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{2C914413-B31C-4362-93C7-1AE34F09112A}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -302,7 +302,6 @@
     <Compile Include="Consumer\SituationSolver\PrivateWorkingCopy\LocalObjectChangedRemoteObjectChangedWithPWC.cs" />
     <Compile Include="FileTransmission\TransmissionManager.cs" />
     <Compile Include="FileTransmission\Transmission.cs" />
-    <Compile Include="FileTransmission\ITransmissionManager.cs" />
     <Compile Include="Streams\AbortableStream.cs" />
     <Compile Include="Streams\PausableStream.cs" />
     <Compile Include="Streams\BandwidthNotifyingStream.cs" />
@@ -323,23 +322,12 @@
     <Compile Include="Filter\SymlinkFilter.cs" />
     <Compile Include="Cmis\ConvenienceExtenders\CmisRepositoryInfoConvenienceExtenders.cs" />
     <Compile Include="HashAlgorithm\IReusableHashAlgorithm.cs" />
+    <Compile Include="FileTransmission\ITransmissionFactory.cs" />
+    <Compile Include="FileTransmission\TransmissionFactory.cs" />
+    <Compile Include="FileTransmission\ITransmissionAggregator.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\ExceptionConvenienceExtenders.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ProjectExtensions>
-    <MonoDevelop>
-      <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
-          <BuildFilesVar Sync="True" Name="SOURCES" />
-          <DeployFilesVar />
-          <ResourcesVar />
-          <OthersVar />
-          <GacRefVar />
-          <AsmRefVar />
-          <ProjectRefVar />
-        </MonoDevelop.Autotools.MakefileInfo>
-      </Properties>
-    </MonoDevelop>
-  </ProjectExtensions>
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>

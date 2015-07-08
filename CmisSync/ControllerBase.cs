@@ -101,11 +101,6 @@ namespace CmisSync {
         private Dictionary<string, Edit> edits = new Dictionary<string, Edit>();
 
         /// <summary>
-        /// All the info about the CmisSync synchronized folder being created.
-        /// </summary>
-        private RepoInfo repoInfo;
-
-        /// <summary>
         /// Is this controller disposed already?
         /// </summary>
         private bool disposed = false;
@@ -657,12 +652,14 @@ namespace CmisSync {
         private void AddRepository(RepoInfo repositoryInfo) {
             try {
                 Repository repo = new Repository(repositoryInfo, this.activityListenerAggregator);
-                this.transmissionManager.AddPathRepoMapping(repositoryInfo.LocalPath, repositoryInfo.DisplayName);
                 repo.ShowException += (object sender, RepositoryExceptionEventArgs e) => {
                     string msg = string.Empty;
                     switch (e.Type) {
                     case ExceptionType.LocalSyncTargetDeleted:
                         msg = string.Format(Properties_Resources.LocalRootFolderUnavailable, repositoryInfo.LocalPath);
+                        break;
+                    case ExceptionType.FileUploadBlockedDueToVirusDetected:
+                        msg = string.Format("Virus detected! Upload denied: {0}{1}{2}", e.Exception.Message, Environment.NewLine, e.Exception.StackTrace);
                         break;
                     default:
                         msg = e.Exception != null ? e.Exception.Message : Properties_Resources.UnknownExceptionOccured;
@@ -737,7 +734,7 @@ namespace CmisSync {
                 repo.Initialize();
             } catch (ExtendedAttributeException extendedAttributeException) {
                 this.ShowException(
-                    string.Format(Properties_Resources.CannotSync, this.repoInfo.DisplayName),
+                    string.Format(Properties_Resources.CannotSync, repositoryInfo.DisplayName),
                     string.Format(Properties_Resources.ProblemWithFS, Environment.NewLine, extendedAttributeException.Message));
             }
         }
@@ -775,6 +772,8 @@ namespace CmisSync {
                 }
 
                 edit = new Edit(type, credentials, folder.DisplayName, folder.RemotePath, oldIgnores, folder.LocalPath);
+                edit.DownloadLimit = folder.DownloadLimit;
+                edit.UploadLimit = folder.UploadLimit;
                 this.edits.Add(reponame, edit);
 
                 edit.Controller.SaveFolderEvent += delegate {
@@ -785,6 +784,8 @@ namespace CmisSync {
                         }
 
                         folder.SetPassword(edit.Credentials.Password);
+                        folder.DownloadLimit = edit.DownloadLimit;
+                        folder.UploadLimit = edit.UploadLimit;
                         ConfigManager.CurrentConfig.Save();
                         foreach (Repository repo in this.repositories) {
                             if (repo.Name == reponame) {

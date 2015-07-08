@@ -437,6 +437,9 @@ namespace CmisSync.Lib.Config {
             }
 
             HttpProxyUtils.SetDefaultProxy(this.Proxy);
+            foreach (var repo in this.Folders) {
+                repo.OnSaved();
+            }
         }
 
         private static Config Load(string fullPath) {
