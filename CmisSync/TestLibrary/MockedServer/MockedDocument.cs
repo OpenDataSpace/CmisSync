@@ -21,6 +21,7 @@ namespace TestLibrary.MockedServer {
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
 
     using CmisSync.Lib.Streams;
 
@@ -38,6 +39,7 @@ namespace TestLibrary.MockedServer {
         private IDocumentType docType = new MockedDocumentType().Object;
         private IFolder parent;
         private string defaultStreamId = null;
+        private MockedContentStream tempStream = null;
 
         public MockedDocument(
             string name,
@@ -79,6 +81,8 @@ namespace TestLibrary.MockedServer {
             this.Setup(m => m.Delete(It.IsAny<bool>())).Callback<bool>((allVersions) => this.Delete(allVersions));
             this.Setup(m => m.DeleteAllVersions()).Callback(() => this.Delete(true));
             this.Setup(m => m.GetAllVersions()).Returns(() => new List<IDocument>(this.AllVersions));
+            this.Setup(m => m.AppendContentStream(It.Is<IContentStream>(s => s != null), It.IsAny<bool>())).Callback<IContentStream, bool>((stream, last) => this.AppendContent(stream, last)).Returns(() => this.Object);
+            this.Setup(m => m.AppendContentStream(It.Is<IContentStream>(s => s != null), It.IsAny<bool>(), It.IsAny<bool>())).Returns(() => Mock.Of<IObjectId>(oid => oid.Id == this.Object.Id));
             this.AllVersions = new List<IDocument>(new IDocument[]{ this.Object });
         }
 
@@ -122,6 +126,35 @@ namespace TestLibrary.MockedServer {
             this.Stream = newContent.Object;
             this.UpdateChangeToken();
             this.NotifyChanges();
+        }
+
+        private void AppendContent(IContentStream inputStream, bool lastChunk) {
+            using (var stream = inputStream.Stream)
+            using (var memstream = new MemoryStream()) {
+                stream.CopyTo(memstream);
+                byte[] nextChunk = memstream.ToArray();
+                byte[] oldContent = this.tempStream != null ? this.tempStream.Content : new byte[0];
+                string fileName = inputStream.FileName ?? (this.tempStream != null ? this.tempStream.FileName : this.Stream.FileName);
+                string mimeType = inputStream.MimeType ?? (this.tempStream != null ? this.tempStream.MimeType : this.Stream.MimeType);
+                var newStream = new MockedContentStream(fileName, mimeType: mimeType) {
+                    Content = (oldContent.Concat(nextChunk)).ToArray()
+                };
+
+                if (lastChunk) {
+                    using (var oldStream = this.Stream != null ? this.Stream.Stream : new MemoryStream(new byte[0]))
+                    using (var outStream = new MemoryStream()) {
+                        oldStream.CopyTo(outStream);
+                        newStream.Content = (outStream.ToArray().Concat(newStream.Content)).ToArray();
+                    }
+
+                    this.Stream = newStream.Object;
+                    this.tempStream = null;
+                    this.UpdateChangeToken();
+                    this.NotifyChanges();
+                } else {
+                    this.tempStream = newStream;
+                }
+            }
         }
     }
 }
