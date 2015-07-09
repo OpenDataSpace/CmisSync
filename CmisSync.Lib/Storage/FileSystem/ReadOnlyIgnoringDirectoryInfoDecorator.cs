@@ -121,11 +121,12 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <param name="destDirName">Destination directory path.</param>
         public void MoveTo(string destDirName) {
             if (this.Parent.ReadOnly) {
+                var parent = this.Parent;
                 try {
-                    this.Parent.ReadOnly = false;
+                    parent.ReadOnly = false;
                     this.MoveToPossibleReadOnlyTarget(destDirName);
                 } finally {
-                    this.Parent.ReadOnly = true;
+                    parent.ReadOnly = true;
                 }
             } else {
                 this.MoveToPossibleReadOnlyTarget(destDirName);
