@@ -123,7 +123,31 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <param name="ignoreMetadataErrors"><c>true</c> to ignore merge errors (such as attributes and ACLs) from the replaced file to the replacement file; otherwise <c>false</c>.</param>
         /// <returns>A IFileInfo object that encapsulates information about the file described by the destFileName parameter.</returns>
         public IFileInfo Replace(IFileInfo destinationFile, IFileInfo destinationBackupFileName, bool ignoreMetadataErrors) {
-            return this.fileInfo.Replace(destinationFile, destinationBackupFileName, ignoreMetadataErrors);
+            if (destinationFile.ReadOnly) {
+                try {
+                    destinationFile.ReadOnly = false;
+                    bool readOnly = this.ReadOnly;
+                    var result = this.fileInfo.Replace(destinationFile, destinationBackupFileName, ignoreMetadataErrors);
+                    result.ReadOnly = readOnly;
+                    if (destinationBackupFileName != null) {
+                        destinationBackupFileName.ReadOnly = true;
+                    }
+
+                    return result;
+                } catch(Exception) {
+                    destinationFile.ReadOnly = true;
+                    throw;
+                }
+            } else {
+                bool readOnly = this.ReadOnly;
+                var result = this.fileInfo.Replace(destinationFile, destinationBackupFileName, ignoreMetadataErrors);
+                result.ReadOnly = readOnly;
+                if (destinationBackupFileName != null) {
+                    destinationBackupFileName.ReadOnly = false;
+                }
+
+                return result;
+            }
         }
 
         /// <summary>

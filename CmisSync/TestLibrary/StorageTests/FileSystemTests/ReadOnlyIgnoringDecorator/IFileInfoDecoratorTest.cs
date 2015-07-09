@@ -53,6 +53,35 @@ namespace TestLibrary.StorageTests.FileSystemTests.ReadOnlyIgnoringDecorator {
             Assert.That(parentDir.Object.ReadOnly, Is.EqualTo(isParentReadOnly));
         }
 
+        [Test, Category("Fast")]
+        public void Replace(
+            [Values(true, false)]bool isItselfReadOnly,
+            [Values(true, false)]bool isDestinationReadOnly,
+            [Values(true, false)]bool ignoreMetaDataErrors,
+            [Values(true, false)]bool isBackupFileReadOnly,
+            [Values(true, false)]bool isBackupFileNull)
+        {
+            var destinationFile = new Mock<IFileInfo>(MockBehavior.Strict);
+            destinationFile.SetupProperty(f => f.ReadOnly, isDestinationReadOnly);
+            destinationFile.Setup(f => f.Exists).Returns(true);
+            var backupFile = new Mock<IFileInfo>(MockBehavior.Strict);
+            backupFile.SetupProperty(f => f.ReadOnly, isBackupFileReadOnly);
+            var decoratedFile = new Mock<IFileInfo>(MockBehavior.Strict);
+            decoratedFile.SetupProperty(f => f.ReadOnly, isItselfReadOnly);
+            decoratedFile.Setup(f => f.Replace(destinationFile.Object, backupFile.Object, ignoreMetaDataErrors)).Returns(decoratedFile.Object);
+            decoratedFile.Setup(f => f.Replace(destinationFile.Object, null, ignoreMetaDataErrors)).Returns(decoratedFile.Object);
+
+            var underTest = new ReadOnlyIgnoringFileInfoDecorator(decoratedFile.Object);
+            var result = underTest.Replace(destinationFile.Object, isBackupFileNull ? null : backupFile.Object, ignoreMetaDataErrors);
+
+            Assert.That(result.ReadOnly, Is.EqualTo(isItselfReadOnly));
+            Assert.That(underTest.ReadOnly, Is.EqualTo(isItselfReadOnly));
+            Assert.That(destinationFile.Object.ReadOnly, Is.False);
+            if (!isBackupFileNull) {
+                Assert.That(backupFile.Object.ReadOnly, Is.EqualTo(isDestinationReadOnly));
+            }
+        }
+
         [Test, Category("Medium")]
         public void MoveTo(
             [Values(true, false)]bool sourceParentIsReadOnly,
