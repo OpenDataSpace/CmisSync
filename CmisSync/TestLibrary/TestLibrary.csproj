@@ -364,10 +364,7 @@
     <Folder Include="IntegrationTests\ContentHashTests\" />
     <Folder Include="IntegrationTests\MockedServerTests\" />
     <Folder Include="MockedServer\MockedServices\" />
-<<<<<<< HEAD
     <Folder Include="StorageTests\FileSystemTests\ReadOnlyIgnoringDecorator\" />
-=======
     <Folder Include="IntegrationTests\VirusDetectionTests\" />
->>>>>>> rc/2.1.1
   </ItemGroup>
 </Project>
