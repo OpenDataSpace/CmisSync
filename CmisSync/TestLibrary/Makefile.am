@@ -132,6 +132,7 @@ SOURCES =  \
 	IntegrationTests/TestNameAttribute.cs \
 	IntegrationTests/UploadFileIT.cs \
 	IntegrationTests/UploadSlowWrittenFile.cs \
+	IntegrationTests/VirusDetectionTests/VirusDetectionTests.cs \
 	MockedServer/IContentChangeEventNotifier.cs \
 	MockedServer/MockOfIAclCapabilities.cs \
 	MockedServer/MockOfISessionFactory.cs \

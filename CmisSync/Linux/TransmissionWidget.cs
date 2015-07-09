@@ -26,7 +26,8 @@ namespace CmisSync.Widgets {
     using CmisSync.Lib.Events;
     using CmisSync.Lib.FileTransmission;
 
-    [System.ComponentModel.ToolboxItem(true)]
+    [ToolboxItem(true)]
+    [CLSCompliant(false)]
     public partial class TransmissionWidget : Gtk.Bin {
         private Transmission transmission;
 

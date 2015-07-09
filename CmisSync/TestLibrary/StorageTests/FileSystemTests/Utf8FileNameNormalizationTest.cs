@@ -17,16 +17,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.StorageTests.FileSystemTests
-{
+namespace TestLibrary.StorageTests.FileSystemTests {
     using System;
     using System.IO;
 
     using NUnit.Framework;
 
     [TestFixture]
-    public class Utf8FileNameNormalizationTest
-    {
+    public class Utf8FileNameNormalizationTest {
         private string directoryPath;
 
         [SetUp]
@@ -42,8 +40,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
 
         [Ignore]
         [Test, Category("Medium"), Category("IT")]
-        public void CreateFileWithUmlaut()
-        {
+        public void CreateFileWithUmlaut() {
             var filename = "ä";
             FileInfo info = new FileInfo(Path.Combine(this.directoryPath, filename));
             using (info.Create()) {

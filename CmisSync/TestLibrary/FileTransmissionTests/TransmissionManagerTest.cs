@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary {
+namespace TestLibrary.FileTransmissionTests {
     using System;
     using System.Collections.Generic;
     using System.Text;
@@ -41,7 +41,7 @@ namespace TestLibrary {
         public void CreatingASingleTransmissionIncreasesListCountByOne() {
             var underTest = new TransmissionManager();
 
-            underTest.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            underTest.Add(new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path"));
 
             Assert.That(underTest.ActiveTransmissions.Count, Is.EqualTo(1));
         }
@@ -49,7 +49,8 @@ namespace TestLibrary {
         [Test, Category("Fast")]
         public void ListedTransmissionIsEqualToAdded() {
             var underTest = new TransmissionManager();
-            var trans = underTest.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            underTest.Add(trans);
 
             Assert.That(underTest.ActiveTransmissions[0], Is.EqualTo(trans));
             Assert.That(underTest.ActiveTransmissionsAsList()[0], Is.EqualTo(trans));
@@ -58,7 +59,8 @@ namespace TestLibrary {
         [Test, Category("Fast")]
         public void AFinishedTransmissionIsRemovedFromList() {
             var underTest = new TransmissionManager();
-            var trans = underTest.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            underTest.Add(trans);
 
             trans.Status = TransmissionStatus.FINISHED;
 
@@ -68,7 +70,8 @@ namespace TestLibrary {
         [Test, Category("Fast")]
         public void AnAbortedTransmissionIsRemovedFromList() {
             var underTest = new TransmissionManager();
-            var trans = underTest.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            underTest.Add(trans);
 
             trans.Status = TransmissionStatus.ABORTED;
 
@@ -76,16 +79,16 @@ namespace TestLibrary {
         }
 
         [Test, Category("Fast")]
-        public void CreatingTwoTransmissionProducesTwoEntriesInList() {
+        public void AddingTwoTransmissionProducesTwoEntriesInList() {
             var underTest = new TransmissionManager();
-            underTest.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
-            underTest.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, "path2");
+            underTest.Add(new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path"));
+            underTest.Add(new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path2"));
 
             Assert.That(underTest.ActiveTransmissions.Count, Is.EqualTo(2));
         }
 
         [Test, Category("Fast")]
-        public void CreatingATransmissionFiresEvent() {
+        public void AddingTransmissionFiresEvent() {
             var underTest = new TransmissionManager();
 
             int eventCounter = 0;
@@ -97,7 +100,7 @@ namespace TestLibrary {
                 Assert.That((e.NewItems[0] as Transmission).Path, Is.EqualTo(path));
             };
 
-            underTest.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, path);
+            underTest.Add(new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, path));
 
             Assert.That(eventCounter, Is.EqualTo(1));
         }
@@ -105,7 +108,8 @@ namespace TestLibrary {
         [Test, Category("Fast")]
         public void AFinishedTransmissionFiresEvent() {
             var underTest = new TransmissionManager();
-            var trans = underTest.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            underTest.Add(trans);
             int eventCounter = 0;
 
             underTest.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {

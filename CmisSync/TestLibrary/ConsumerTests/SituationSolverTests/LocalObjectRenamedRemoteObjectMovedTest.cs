@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 ﻿
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
 
     using CmisSync.Lib.Consumer.SituationSolver;
@@ -35,8 +34,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestUtils;
 
     [TestFixture]
-    public class LocalObjectRenamedRemoteObjectMovedTest
-    {
+    public class LocalObjectRenamedRemoteObjectMovedTest {
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private TransmissionManager transmissionManager;
@@ -44,29 +42,48 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private Mock<LocalObjectChangedRemoteObjectChanged> changeSolver;
 
         [SetUp]
-        public void SetUp()
-        {
+        public void SetUp() {
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.transmissionManager = new TransmissionManager();
-            this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(this.session.Object, this.storage.Object, null, this.transmissionManager, Mock.Of<IFileSystemInfoFactory>());
-            this.renameSolver = new Mock<LocalObjectRenamedRemoteObjectRenamed>(this.session.Object, this.storage.Object, this.changeSolver.Object);
+            this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(
+                this.session.Object,
+                this.storage.Object,
+                null,
+                this.transmissionManager.CreateFactory(),
+                Mock.Of<IFileSystemInfoFactory>());
+            this.renameSolver = new Mock<LocalObjectRenamedRemoteObjectRenamed>(
+                this.session.Object,
+                this.storage.Object,
+                this.changeSolver.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructor() {
-            new LocalObjectRenamedRemoteObjectMoved(this.session.Object, Mock.Of<IMetaDataStorage>(), this.renameSolver.Object, this.changeSolver.Object);
+            new LocalObjectRenamedRemoteObjectMoved(
+                this.session.Object,
+                Mock.Of<IMetaDataStorage>(),
+                this.renameSolver.Object,
+                this.changeSolver.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorFailsIfNoRenameSolverIsPassed() {
-            Assert.Throws<ArgumentNullException>(() => new LocalObjectRenamedRemoteObjectMoved(this.session.Object, Mock.Of<IMetaDataStorage>(), null, this.changeSolver.Object));
+            Assert.Throws<ArgumentNullException>(() => new LocalObjectRenamedRemoteObjectMoved(
+                this.session.Object,
+                Mock.Of<IMetaDataStorage>(),
+                null,
+                this.changeSolver.Object));
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorFailsIfNoChangeSolverIsPassed() {
-            Assert.Throws<ArgumentNullException>(() => new LocalObjectRenamedRemoteObjectMoved(this.session.Object, Mock.Of<IMetaDataStorage>(), this.renameSolver.Object, null));
+            Assert.Throws<ArgumentNullException>(() => new LocalObjectRenamedRemoteObjectMoved(
+                this.session.Object,
+                Mock.Of<IMetaDataStorage>(),
+                this.renameSolver.Object,
+                null));
         }
     }
 }

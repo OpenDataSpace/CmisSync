@@ -216,7 +216,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             IDocument remoteDocument,
             IMappedObject obj,
             IFileSystemInfoFactory fsFactory,
-            ITransmissionManager transmissionManager,
+            ITransmissionFactory transmissionManager,
             ILog logger)
         {
             // Download changes

@@ -439,4 +439,7 @@ Dies kann bei der Synchronisation zu Konfliktdateien führen.</value>
   <data name="SyncStatusPaused" xml:space="preserve">
     <value>Synchronisation ist pausiert</value>
   </data>
+  <data name="Bandwidth" xml:space="preserve">
+    <value>Bandbreite</value>
+  </data>
 </root>

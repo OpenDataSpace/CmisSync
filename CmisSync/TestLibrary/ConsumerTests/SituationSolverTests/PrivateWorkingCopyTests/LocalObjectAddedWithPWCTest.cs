@@ -23,6 +23,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
     using System.IO;
     using System.Security.Cryptography;
 
+    using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Consumer.SituationSolver.PWC;
@@ -60,6 +61,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         private Mock<IFileTransmissionStorage> transmissionStorage;
         private Mock<TransmissionManager> manager;
         private Mock<ISolver> folderOrEmptyFileAddedSolver;
+        private ITransmissionFactory transmissionFactory;
 
         private string parentPath;
         private string localPath;
@@ -78,26 +80,22 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorFailsIfSessionIsNotAbleToWorkWithPrivateWorkingCopies() {
             this.SetUpMocks(isPwcUpdateable: false);
-            Assert.Throws<ArgumentException>(
-                () =>
-                new LocalObjectAddedWithPWC(
+            Assert.Throws<ArgumentException>(() => new LocalObjectAddedWithPWC(
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager.Object,
+                    this.transmissionFactory,
                 Mock.Of<ISolver>()));
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorFailsIfGivenSolverIsNull() {
             this.SetUpMocks();
-            Assert.Throws<ArgumentNullException>(
-                () =>
-                new LocalObjectAddedWithPWC(
+            Assert.Throws<ArgumentNullException>(() => new LocalObjectAddedWithPWC(
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager.Object,
+                this.transmissionFactory,
                 null));
         }
 
@@ -109,7 +107,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager.Object,
+                this.transmissionFactory,
                 folderSolver.Object);
             var localFolder = new Mock<IDirectoryInfo>();
 
@@ -286,7 +284,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager.Object,
+                this.transmissionFactory,
                 this.folderOrEmptyFileAddedSolver.Object);
         }
 
@@ -302,7 +300,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.transmissionStorage.Setup(f => f.ChunkSize).Returns(this.chunkSize);
 
             this.manager = new Mock<TransmissionManager>() { CallBase = true };
-
+            this.transmissionFactory = this.manager.Object.CreateFactory();
             this.folderOrEmptyFileAddedSolver = new Mock<ISolver>(MockBehavior.Strict);
         }
     }

@@ -86,7 +86,6 @@ namespace CmisSync {
                 (int)Math.Truncate(color.Blue  / 256.00));
         }
 
-        [CLSCompliant(false)]
         private static string FindImagePathname(string folder, string filename) {
             ClientBrand brand = new ClientBrand();
             foreach (string path in brand.PathList) {

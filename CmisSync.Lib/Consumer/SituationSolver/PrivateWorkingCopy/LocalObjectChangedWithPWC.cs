@@ -39,13 +39,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     public class LocalObjectChangedWithPWC : AbstractEnhancedSolverWithPWC {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChangedWithPWC));
         private readonly ISolver folderOrFileContentUnchangedSolver;
-        private ITransmissionManager transmissionManager;
+        private ITransmissionFactory transmissionManager;
 
         public LocalObjectChangedWithPWC(
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ITransmissionManager manager,
+            ITransmissionFactory manager,
             ISolver folderOrFileContentUnchangedSolver) : base(session, storage, transmissionStorage) {
             if (folderOrFileContentUnchangedSolver == null) {
                 throw new ArgumentNullException("folderOrFileContentUnchangedSolver", "Given solver for folder or unchanged file content situations is null");

@@ -16,6 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace CmisSync.Lib {
     using System;
 
@@ -24,6 +25,7 @@ namespace CmisSync.Lib {
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Crawler;
@@ -63,6 +65,7 @@ namespace CmisSync.Lib {
         private SelectiveIgnoreEventTransformer transformer;
         private SelectiveIgnoreFilter selectiveIgnoreFilter;
         private IgnoreFlagChangeDetection ignoreChangeDetector;
+        private ITransmissionFactory transmissionFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventManagerInitializer"/> class.
@@ -74,6 +77,7 @@ namespace CmisSync.Lib {
         /// <param name='repoInfo'>Repo info.</param>
         /// <param name='filter'>Filter aggregation.</param>
         /// <param name='activityListner'>Listener for Sync activities.</param>
+        /// <param name='transmissionFactory'>Transmission factory.</param>
         /// <param name='fsFactory'>File system factory.</param>
         /// <exception cref='ArgumentNullException'>
         /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
@@ -86,6 +90,7 @@ namespace CmisSync.Lib {
             RepoInfo repoInfo,
             IFilterAggregator filter,
             ActivityListenerAggregator activityListener,
+            ITransmissionFactory transmissionFactory,
             IFileSystemInfoFactory fsFactory = null) : base(queue)
         {
             if (storage == null) {
@@ -112,6 +117,10 @@ namespace CmisSync.Lib {
                 throw new ArgumentNullException("ignoredStorage", "Given storage for ignored entries is null");
             }
 
+            if (transmissionFactory == null) {
+                throw new ArgumentNullException("transmissionFactory");
+            }
+
             if (fsFactory == null) {
                 this.fileSystemFactory = new FileSystemInfoFactory();
             } else {
@@ -124,6 +133,7 @@ namespace CmisSync.Lib {
             this.ignoredStorage = ignoredStorage;
             this.fileTransmissionStorage = fileTransmissionStorage;
             this.activityListener = activityListener;
+            this.transmissionFactory = transmissionFactory;
         }
 
         /// <summary>
@@ -230,7 +240,16 @@ namespace CmisSync.Lib {
                 var localDetection = new LocalSituationDetection();
                 var remoteDetection = new RemoteSituationDetection();
 
-                this.mechanism = new SyncMechanism(localDetection, remoteDetection, this.Queue, session, this.storage, this.fileTransmissionStorage, this.activityListener, this.filter);
+                this.mechanism = new SyncMechanism(
+                    localDetection,
+                    remoteDetection,
+                    this.Queue,
+                    session,
+                    this.storage,
+                    this.fileTransmissionStorage,
+                    this.activityListener,
+                    this.filter,
+                    this.transmissionFactory);
                 this.Queue.EventManager.AddEventHandler(this.mechanism);
 
                 var localRootFolder = this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath);

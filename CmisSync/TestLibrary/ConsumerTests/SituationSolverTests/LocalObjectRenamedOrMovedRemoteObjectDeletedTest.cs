@@ -23,6 +23,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -42,7 +43,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private Mock<IFileTransmissionStorage> transmissionStorage;
         private Mock<ISession> session;
         private Mock<ISolver> secondSolver;
-        private Mock<TransmissionManager> manager;
+        private Mock<ITransmissionFactory> transmissionFactory;
         private LocalObjectRenamedOrMovedRemoteObjectDeleted underTest;
 
         [SetUp]
@@ -51,13 +52,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();
-            this.manager = new Mock<TransmissionManager> { CallBase = true };
+            this.transmissionFactory = new Mock<ITransmissionFactory>();
             this.secondSolver = new Mock<ISolver>();
             this.underTest = new LocalObjectRenamedOrMovedRemoteObjectDeleted(
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager.Object,
+                this.transmissionFactory.Object,
                 this.secondSolver.Object);
         }
 
@@ -67,7 +68,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 this.session.Object,
                 Mock.Of<IMetaDataStorage>(),
                 Mock.Of<IFileTransmissionStorage>(),
-                Mock.Of<TransmissionManager>());
+                Mock.Of<ITransmissionFactory>());
         }
 
         [Test, Category("Fast")]
@@ -76,7 +77,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 this.session.Object,
                 Mock.Of<IMetaDataStorage>(),
                 Mock.Of<IFileTransmissionStorage>(),
-                Mock.Of<TransmissionManager>());
+                Mock.Of<ITransmissionFactory>());
         }
 
         [Test, Category("Fast")]

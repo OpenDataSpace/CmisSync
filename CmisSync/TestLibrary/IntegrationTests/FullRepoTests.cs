@@ -355,7 +355,7 @@ namespace TestLibrary.IntegrationTests {
             this.ContentChangesActive = contentChanges;
             this.InitializeAndRunRepo();
             string fileName = "file";
-            var doc = this.remoteRootDir.CreateDocument(fileName, null);
+            var doc = this.remoteRootDir.CreateDocument(fileName, (string)null);
 
             this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();

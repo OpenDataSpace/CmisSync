@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="ITransmissionManager.cs" company="GRAU DATA AG">
+// <copyright file="ITransmissionFactory.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -23,7 +23,7 @@ namespace CmisSync.Lib.FileTransmission {
     /// <summary>
     /// Interface for a transmission manager. It is the main factory for new Transmission objects and the management interface for all running transmissions.
     /// </summary>
-    public interface ITransmissionManager {
+    public interface ITransmissionFactory {
         /// <summary>
         /// Creates a new the transmission object and adds it to the manager. The manager decides when to and how the transmission gets removed from it.
         /// </summary>

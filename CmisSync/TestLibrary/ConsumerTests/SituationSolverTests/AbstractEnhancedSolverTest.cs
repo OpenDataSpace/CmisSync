@@ -132,7 +132,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 return this.TransmissionStorage;
             }
 
-            public byte[] Upload(IFileInfo localFile, IDocument doc, TransmissionManager transmissionManager) {
+            public byte[] Upload(IFileInfo localFile, IDocument doc, ITransmissionFactory transmissionManager) {
                 var transmission = transmissionManager.CreateTransmission(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
                 return this.UploadFile(localFile, doc, transmission);
             }

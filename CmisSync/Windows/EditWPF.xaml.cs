@@ -16,52 +16,52 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
-namespace CmisSync
-{
+namespace CmisSync {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Windows;
+    using System.Windows.Controls;
+    using System.Windows.Data;
+    using System.Windows.Documents;
+    using System.Windows.Input;
+    using System.Windows.Media;
+    using System.Windows.Media.Imaging;
+    using System.Windows.Navigation;
+    using System.Windows.Shapes;
+
     /// <summary>
     /// Interaction logic for EditWPF.xaml
     /// </summary>
-    public partial class EditWPF : UserControl
-    {
-        public EditWPF()
-        {
+    public partial class EditWPF : UserControl {
+        public EditWPF() {
             InitializeComponent();
             ApplyEdit();
         }
 
-        private void ApplyEdit()
-        {
-            addressLabel.Text = Properties_Resources.CmisWebAddress + ":";
-            addressLabel.FontWeight = FontWeights.Bold;
+        private void ApplyEdit() {
+            this.addressLabel.Text = Properties_Resources.CmisWebAddress + ":";
+            this.addressLabel.FontWeight = FontWeights.Bold;
 
-            addressBox.IsEnabled = false;
+            this.addressBox.IsEnabled = false;
 
-            userLabel.Text = Properties_Resources.User + ":";
-            userLabel.FontWeight = FontWeights.Bold;
+            this.userLabel.Text = Properties_Resources.User + ":";
+            this.userLabel.FontWeight = FontWeights.Bold;
 
-            userBox.IsEnabled = false;
+            this.userBox.IsEnabled = false;
 
-            passwordLabel.Text = Properties_Resources.Password + ":";
-            passwordLabel.FontWeight = FontWeights.Bold;
+            this.passwordLabel.Text = Properties_Resources.Password + ":";
+            this.passwordLabel.FontWeight = FontWeights.Bold;
 
-            finishButton.Content = Properties_Resources.SaveChanges;
-            cancelButton.Content = Properties_Resources.DiscardChanges;
+            this.finishButton.Content = Properties_Resources.SaveChanges;
+            this.cancelButton.Content = Properties_Resources.DiscardChanges;
+            this.downloadLimitBox.Header = Properties_Resources.DownloadLimit;
+            this.uploadLimitBox.Header = Properties_Resources.UploadLimit;
+            this.tabItemBandwidth.Header = Properties_Resources.Bandwidth;
 
-            finishButton.Focus();
+            this.finishButton.Focus();
         }
     }
 }

@@ -13,9 +13,13 @@
         <l:TransmissionLengthToStringConverter x:Key="lengthToStringConverter" />
         <l:TranmissionPositionToStringConverter x:Key="posToStringConverter" />
         <l:TransmissionStatusToVisibilityConverter x:Key="statusToVisibilityConverter" />
+        <l:BoolToVisibilityConverter x:Key="boolToVisibilityConverter" />
+        <l:NullToVisibilityConverter x:Key="nullToVisibilityConverter" />
+        <l:TransmissionExceptionToTextConverter x:Key="exceptionToTextConverter" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -84,5 +88,13 @@
                 </Style>
             </Button.Style>
         </Button>
+        <Expander Header="Details" HorizontalAlignment="Left" Grid.Row="3" Grid.ColumnSpan="5" Grid.Column="1" IsExpanded="False" x:Name="Expander">
+            <Expander.Visibility>
+                <Binding Path="FailedException" Mode="OneWay" Converter="{StaticResource nullToVisibilityConverter}" />
+            </Expander.Visibility>
+            <StackPanel Margin="25,0,0,0">
+                <TextBox HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding FailedException, Mode=OneWay, Converter={StaticResource exceptionToTextConverter}}"/>
+            </StackPanel>
+        </Expander>
     </Grid>
 </UserControl>

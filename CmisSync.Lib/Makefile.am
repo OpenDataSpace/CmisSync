@@ -25,6 +25,7 @@ SOURCES =  \
 	Cmis/ConvenienceExtenders/AllowableActionConvenienceExtenders.cs \
 	Cmis/ConvenienceExtenders/CmisConvenienceExtenders.cs \
 	Cmis/ConvenienceExtenders/CmisRepositoryInfoConvenienceExtenders.cs \
+	Cmis/ConvenienceExtenders/ExceptionConvenienceExtenders.cs \
 	Cmis/DotCMISLogListener.cs \
 	Cmis/INotifyRepositoryPropertyChanged.cs \
 	Cmis/MimeType.cs \
@@ -138,10 +139,12 @@ SOURCES =  \
 	FileTransmission/ContentTaskUtils.cs \
 	FileTransmission/IFileDownloader.cs \
 	FileTransmission/IFileUploader.cs \
-	FileTransmission/ITransmissionManager.cs \
+	FileTransmission/ITransmissionAggregator.cs \
+	FileTransmission/ITransmissionFactory.cs \
 	FileTransmission/SimpleFileDownloader.cs \
 	FileTransmission/SimpleFileUploader.cs \
 	FileTransmission/Transmission.cs \
+	FileTransmission/TransmissionFactory.cs \
 	FileTransmission/TransmissionManager.cs \
 	FileTransmission/UploadFailedException.cs \
 	Filter/AbstractFileFilter.cs \

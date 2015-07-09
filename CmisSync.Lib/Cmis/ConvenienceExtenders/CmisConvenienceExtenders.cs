@@ -61,11 +61,23 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="content">If content is not null, a content stream containing the given content will be added.</param>
         /// <param name="checkedOut">If true, the new document will be created in checked out state.</param>
         public static IDocument CreateDocument(this IFolder folder, string name, string content, bool checkedOut = false) {
+            return folder.CreateDocument(name, string.IsNullOrEmpty(content) ? (byte[])null : Encoding.UTF8.GetBytes(content), checkedOut);
+        }
+
+        /// <summary>
+        /// Creates a document.
+        /// </summary>
+        /// <returns>The document.</returns>
+        /// <param name="folder">Parent folder.</param>
+        /// <param name="name">Name of the document.</param>
+        /// <param name="content">If content is not null, a content stream containing the given content will be added.</param>
+        /// <param name="checkedOut">If true, the new document will be created in checked out state.</param>
+        public static IDocument CreateDocument(this IFolder folder, string name, byte[] content, bool checkedOut = false) {
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);
             properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
 
-            if (string.IsNullOrEmpty(content)) {
+            if (content == null) {
                 return folder.CreateDocument(properties, null, checkedOut ? (VersioningState?)VersioningState.CheckedOut : (VersioningState?)null);
             }
 
@@ -74,7 +86,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             contentStream.MimeType = MimeType.GetMIMEType(name);
             contentStream.Length = content.Length;
             IDocument doc = null;
-            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
+            using (var stream = new MemoryStream(content)) {
                 contentStream.Stream = stream;
                 doc = folder.CreateDocument(properties, contentStream, checkedOut ? (VersioningState?)VersioningState.CheckedOut : (VersioningState?)null);
             }
