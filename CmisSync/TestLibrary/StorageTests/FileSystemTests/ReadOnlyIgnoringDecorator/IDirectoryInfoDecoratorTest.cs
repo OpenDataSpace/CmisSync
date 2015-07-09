@@ -94,13 +94,50 @@ namespace TestLibrary.StorageTests.FileSystemTests.ReadOnlyIgnoringDecorator {
             Assert.That(readOnlyParent.Object.ReadOnly, Is.EqualTo(parentIsReadOnly));
         }
 
-        [Test, Category("Fast"), Ignore("TODO")]
+        [Test, Category("Medium")]
         public void MoveDirectory(
             [Values(true, false)]bool sourceParentIsReadOnly,
             [Values(true, false)]bool targetParentIsReadOnly,
-            [Values(true, false)]bool doesNotExists,
-            [Values(true, false)]bool targetExists)
+            [Values(true, false)]bool isItselfReadOnly)
         {
+            string oldName = "oldDir";
+            string newName = "newDir";
+            var sourceParent = new DirectoryInfoWrapper(new DirectoryInfo(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString())));
+            var targetParent = new DirectoryInfoWrapper(new DirectoryInfo(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString())));
+            var decoratedDirInfo = new DirectoryInfoWrapper(new DirectoryInfo(Path.Combine(sourceParent.FullName, oldName)));
+
+            try {
+                sourceParent.Create();
+                targetParent.Create();
+                sourceParent.ReadOnly = sourceParentIsReadOnly;
+                targetParent.ReadOnly = targetParentIsReadOnly;
+
+                var underTest = new ReadOnlyIgnoringDirectoryInfoDecorator(decoratedDirInfo);
+                underTest.Create();
+                underTest.ReadOnly = isItselfReadOnly;
+                underTest.MoveTo(Path.Combine(targetParent.FullName, newName));
+
+                Assert.That(underTest.ReadOnly, Is.EqualTo(isItselfReadOnly));
+                Assert.That(sourceParent.ReadOnly, Is.EqualTo(sourceParentIsReadOnly));
+                Assert.That(targetParent.ReadOnly, Is.EqualTo(targetParentIsReadOnly));
+            } finally {
+                decoratedDirInfo.Refresh();
+                sourceParent.Refresh();
+                targetParent.Refresh();
+                if (decoratedDirInfo.Exists) {
+                    decoratedDirInfo.ReadOnly = false;
+                }
+
+                if (sourceParent.Exists) {
+                    sourceParent.ReadOnly = false;
+                    sourceParent.Delete(true);
+                }
+
+                if (targetParent.Exists) {
+                    targetParent.ReadOnly = false;
+                    targetParent.Delete(true);
+                }
+            }
         }
     }
 }

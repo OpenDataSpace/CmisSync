@@ -19,6 +19,7 @@
 
 namespace CmisSync.Lib.Storage.FileSystem {
     using System;
+    using System.IO;
 
     /// <summary>
     /// Read only ignoring directory info decorator.
@@ -119,7 +120,30 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// </summary>
         /// <param name="destDirName">Destination directory path.</param>
         public void MoveTo(string destDirName) {
-            this.dirInfo.MoveTo(destDirName);
+            if (this.Parent.ReadOnly) {
+                try {
+                    this.Parent.ReadOnly = false;
+                    this.MoveToPossibleReadOnlyTarget(destDirName);
+                } finally {
+                    this.Parent.ReadOnly = true;
+                }
+            } else {
+                this.MoveToPossibleReadOnlyTarget(destDirName);
+            }
+        }
+
+        private void MoveToPossibleReadOnlyTarget(string target) {
+            var targetInfo = new DirectoryInfoWrapper(new DirectoryInfo(target));
+            if (targetInfo.Parent.Exists && targetInfo.Parent.ReadOnly) {
+                try {
+                    targetInfo.Parent.ReadOnly = false;
+                    this.DisableAndEnableReadOnlyForOperation(() => this.dirInfo.MoveTo(target));
+                } finally {
+                    targetInfo.Parent.ReadOnly = true;
+                }
+            } else {
+                this.DisableAndEnableReadOnlyForOperation(() => this.dirInfo.MoveTo(target));
+            }
         }
     }
 }
