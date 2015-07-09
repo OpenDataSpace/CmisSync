@@ -87,7 +87,30 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// </summary>
         /// <param name="target">Target file name.</param>
         public void MoveTo(string target) {
-            this.fileInfo.MoveTo(target);
+            if (this.Directory.ReadOnly) {
+                try {
+                    this.Directory.ReadOnly = false;
+                    this.MoveToPossibleReadOnlyTarget(target);
+                } finally {
+                    this.Directory.ReadOnly = true;
+                }
+            } else {
+                this.MoveToPossibleReadOnlyTarget(target);
+            }
+        }
+
+        private void MoveToPossibleReadOnlyTarget(string target) {
+            var targetInfo = new FileInfoWrapper(new FileInfo(target));
+            if (targetInfo.Directory.Exists && targetInfo.Directory.ReadOnly) {
+                try {
+                    targetInfo.Directory.ReadOnly = false;
+                    this.fileInfo.MoveTo(target);
+                } finally {
+                    targetInfo.Directory.ReadOnly = true;
+                }
+            } else {
+                this.fileInfo.MoveTo(target);
+            }
         }
 
         /// <summary>
@@ -106,7 +129,30 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// Deletes the file on the fs.
         /// </summary>
         public void Delete() {
-            this.fileInfo.Delete();
+            if (this.Directory.ReadOnly) {
+                try {
+                    this.Directory.ReadOnly = false;
+                    this.DeleteFileIfReadOnly();
+                } finally {
+                    this.Directory.ReadOnly = true;
+                }
+            } else {
+                this.DeleteFileIfReadOnly();
+            }
+        }
+
+        private void DeleteFileIfReadOnly() {
+            if (this.ReadOnly) {
+                try {
+                    this.ReadOnly = false;
+                    this.fileInfo.Delete();
+                } catch (Exception) {
+                    this.ReadOnly = true;
+                    throw;
+                }
+            } else {
+                this.fileInfo.Delete();
+            }
         }
     }
 }
