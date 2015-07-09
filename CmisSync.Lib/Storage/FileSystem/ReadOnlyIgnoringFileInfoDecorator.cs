@@ -88,11 +88,12 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <param name="target">Target file name.</param>
         public void MoveTo(string target) {
             if (this.Directory.ReadOnly) {
+                var directory = this.Directory;
                 try {
-                    this.Directory.ReadOnly = false;
+                    directory.ReadOnly = false;
                     this.MoveToPossibleReadOnlyTarget(target);
                 } finally {
-                    this.Directory.ReadOnly = true;
+                    directory.ReadOnly = true;
                 }
             } else {
                 this.MoveToPossibleReadOnlyTarget(target);
