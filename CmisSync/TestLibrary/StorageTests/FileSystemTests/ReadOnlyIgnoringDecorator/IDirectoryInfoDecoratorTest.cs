@@ -117,6 +117,8 @@ namespace TestLibrary.StorageTests.FileSystemTests.ReadOnlyIgnoringDecorator {
                 underTest.ReadOnly = isItselfReadOnly;
                 underTest.MoveTo(Path.Combine(targetParent.FullName, newName));
 
+                sourceParent.Refresh();
+                targetParent.Refresh();
                 Assert.That(underTest.ReadOnly, Is.EqualTo(isItselfReadOnly));
                 Assert.That(sourceParent.ReadOnly, Is.EqualTo(sourceParentIsReadOnly));
                 Assert.That(targetParent.ReadOnly, Is.EqualTo(targetParentIsReadOnly));
