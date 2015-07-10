@@ -93,6 +93,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <value><c>true</c> if server can modify date times; otherwise, <c>false</c>.</value>
         protected bool ServerCanModifyDateTimes { get; private set; }
 
+        /// <summary>
+        /// Gets the transmission storage.
+        /// </summary>
+        /// <value>The transmission storage.</value>
         protected IFileTransmissionStorage TransmissionStorage { get; private set; }
 
         /// <summary>
