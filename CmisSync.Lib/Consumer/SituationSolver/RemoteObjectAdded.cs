@@ -94,10 +94,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 var remoteFolder = remoteId as IFolder;
                 var localFolder = localFile as IDirectoryInfo;
                 localFolder.Create();
-                if (remoteFolder.IsReadOnly()) {
-                    localFolder.ReadOnly = true;
-                }
-
+                localFolder.TryToSetReadOnlyStateIfDiffers(from: remoteFolder);
                 Guid uuid = Guid.Empty;
                 if (localFolder.IsExtendedAttributeAvailable()) {
                     uuid = Guid.NewGuid();
@@ -107,14 +104,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     }
                 }
 
-                if (remoteFolder.LastModificationDate != null) {
-                    try {
-                        localFolder.LastWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
-                    } catch (IOException e) {
-                        Logger.Info("Directory modification date could not be synced", e);
-                    }
-                }
-
+                localFolder.TryToSetLastWriteTimeUtcIfAvailable(from: remoteFolder, andLogErrorsTo: Logger);
                 var mappedObject = new MappedObject(remoteFolder);
                 mappedObject.Guid = uuid;
                 mappedObject.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
