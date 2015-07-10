@@ -75,5 +75,31 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 localState.TryToSetReadOnlyState(from: from, andLogErrorsTo: andLogErrorsTo);
             }
         }
+
+        /// <summary>
+        /// Tries to set last write time UTC from remote object to local file if available.
+        /// </summary>
+        /// <param name="localFile">Local file.</param>
+        /// <param name="from">Remote object.</param>
+        /// <param name="andLogErrorsTo">Logs error to given logger if not null.</param>
+        public static void TryToSetLastWriteTimeUtcIfAvailable(this IFileSystemInfo localFile, ICmisObject from, ILog andLogErrorsTo = null) {
+            if (localFile == null) {
+                throw new ArgumentNullException("localFile");
+            }
+
+            if (from == null) {
+                throw new ArgumentNullException("from");
+            }
+
+            if (from.LastModificationDate != null) {
+                try {
+                    localFile.LastWriteTimeUtc = (DateTime)from.LastModificationDate;
+                } catch (IOException e) {
+                    if (andLogErrorsTo != null) {
+                        andLogErrorsTo.Debug("Couldn't set the server side modification date", e);
+                    }
+                }
+            }
+        }
     }
 }
