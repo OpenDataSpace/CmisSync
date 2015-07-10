@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
 
@@ -33,8 +32,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Remote object has been moved. => Move the corresponding local object.
     /// </summary>
-    public class RemoteObjectMoved : AbstractEnhancedSolver
-    {
+    public class RemoteObjectMoved : AbstractEnhancedSolver {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.RemoteObjectMoved"/> class.
         /// </summary>
@@ -65,7 +63,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 string oldPath = dirInfo.FullName;
                 if (!dirInfo.FullName.Equals(newPath)) {
                     dirInfo.MoveTo(newPath);
-                    dirInfo.LastWriteTimeUtc = (remoteId as IFolder).LastModificationDate != null ? (DateTime)(remoteId as IFolder).LastModificationDate : dirInfo.LastWriteTimeUtc;
                     OperationsLogger.Info(string.Format("Moved local folder {0} to {1}", oldPath, newPath));
                 } else {
                     return;
@@ -74,9 +71,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 IFileInfo fileInfo = localFile as IFileInfo;
                 string oldPath = fileInfo.FullName;
                 fileInfo.MoveTo(newPath);
-                fileInfo.LastWriteTimeUtc = (remoteId as IDocument).LastModificationDate != null ? (DateTime)(remoteId as IDocument).LastModificationDate : fileInfo.LastWriteTimeUtc;
                 OperationsLogger.Info(string.Format("Moved local file {0} to {1}", oldPath, newPath));
             }
+
+            localFile.TryToSetReadOnlyStateIfDiffers(from: remoteId as ICmisObject);
+            localFile.TryToSetLastWriteTimeUtcIfAvailable(from: remoteId as ICmisObject);
 
             savedObject.Name = (remoteId as ICmisObject).Name;
             savedObject.ParentId = remoteId is IFolder ? (remoteId as IFolder).ParentId : (remoteId as IDocument).Parents[0].Id;
@@ -84,6 +83,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             savedObject.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
             savedObject.LastRemoteWriteTimeUtc = (remoteId is IDocument && remoteContent != ContentChangeType.NONE) ? savedObject.LastRemoteWriteTimeUtc : (remoteId as ICmisObject).LastModificationDate;
             savedObject.Ignored = (remoteId as ICmisObject).AreAllChildrenIgnored();
+            savedObject.IsReadOnly = localFile.ReadOnly;
             this.Storage.SaveMappedObject(savedObject);
             if (remoteId is IDocument && remoteContent != ContentChangeType.NONE) {
                 throw new ArgumentException("Remote content has also been changed => force crawl sync.");
