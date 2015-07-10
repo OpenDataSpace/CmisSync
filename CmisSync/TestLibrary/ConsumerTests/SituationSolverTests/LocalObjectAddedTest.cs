@@ -75,7 +75,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void Local1ByteFileAdded([Values(true, false)]bool withExtendedAttributes) {
+        public void Local1ByteFileAdded(
+            [Values(true, false)]bool withExtendedAttributes)
+        {
             this.SetUpMocks(withExtendedAttributes);
             Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(f => f.Length).Returns(1);
