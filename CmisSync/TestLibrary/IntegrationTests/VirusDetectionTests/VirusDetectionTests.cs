@@ -34,7 +34,6 @@ namespace TestLibrary.IntegrationTests.VirusDetectionTests {
 
     using TestUtils;
 
-    [Ignore("Server does not supports virus scanning")]
     [TestFixture, Timeout(180000), TestName("VirusDetection")]
     public class VirusDetectionTests : BaseFullRepoTest {
         private readonly string fileName = "eicar.bin";
