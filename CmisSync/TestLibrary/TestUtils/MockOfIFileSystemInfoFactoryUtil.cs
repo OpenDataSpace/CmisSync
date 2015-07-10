@@ -86,9 +86,55 @@ namespace TestLibrary.TestUtils {
             return downloadFile;
         }
 
-        public static void SetupStream(this Mock<IFileInfo> file, byte[] content) {
+        public static Mock<IFileInfo> SetupStream(this Mock<IFileInfo> file, byte[] content) {
             file.Setup(f => f.Length).Returns(content.Length);
             file.Setup(f => f.Open(FileMode.Open, FileAccess.Read, It.IsAny<FileShare>())).Returns(() => new MemoryStream(content));
+            return file;
+        }
+
+        public static Mock<IFileInfo> SetupReadOnly(this Mock<IFileInfo> file, bool isReadOnly) {
+            file.SetupProperty(f => f.ReadOnly, isReadOnly);
+            return file;
+        }
+
+        public static Mock<IFileSystemInfo> SetupReadOnly(this Mock<IFileSystemInfo> file, bool isReadOnly) {
+            file.SetupProperty(f => f.ReadOnly, isReadOnly);
+            return file;
+        }
+
+        public static Mock<IDirectoryInfo> SetupReadOnly(this Mock<IDirectoryInfo> dir, bool isReadOnly) {
+            dir.SetupProperty(f => f.ReadOnly, isReadOnly);
+            return dir;
+        }
+
+        public static Mock<IFileInfo> SetupName(this Mock<IFileInfo> file, string name) {
+            file.SetupGet(f => f.Name).Returns(name);
+            return file;
+        }
+
+        public static Mock<IFileSystemInfo> SetupName(this Mock<IFileSystemInfo> file, string name) {
+            file.SetupGet(f => f.Name).Returns(name);
+            return file;
+        }
+
+        public static Mock<IDirectoryInfo> SetupName(this Mock<IDirectoryInfo> dir, string name) {
+            dir.SetupGet(f => f.Name).Returns(name);
+            return dir;
+        }
+
+        public static Mock<IFileInfo> SetupFullName(this Mock<IFileInfo> file, string fullName) {
+            file.SetupGet(f => f.FullName).Returns(fullName);
+            return file;
+        }
+
+        public static Mock<IFileSystemInfo> SetupFullName(this Mock<IFileSystemInfo> file, string fullName) {
+            file.SetupGet(f => f.FullName).Returns(fullName);
+            return file;
+        }
+
+        public static Mock<IDirectoryInfo> SetupFullName(this Mock<IDirectoryInfo> dir, string fullName) {
+            dir.SetupGet(f => f.FullName).Returns(fullName);
+            return dir;
         }
 
         public static void SetupFilesAndDirectories(this Mock<IDirectoryInfo> parent, params IFileSystemInfo[] children) {
