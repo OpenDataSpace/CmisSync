@@ -73,14 +73,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     }
                 }
 
-                if (remoteFolder.LastModificationDate != null) {
-                    dirInfo.LastWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
-                }
-
+                dirInfo.TryToSetReadOnlyStateIfDiffers(from: remoteFolder);
+                dirInfo.TryToSetLastWriteTimeUtcIfAvailable(from: remoteFolder);
                 obj.LastChangeToken = remoteFolder.ChangeToken;
                 obj.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
                 obj.LastLocalWriteTimeUtc = dirInfo.LastWriteTimeUtc;
                 obj.Ignored = remoteFolder.AreAllChildrenIgnored();
+                obj.IsReadOnly = dirInfo.ReadOnly;
                 this.Storage.SaveMappedObject(obj);
                 OperationsLogger.Info(string.Format("Renamed local folder {0} to {1}", oldPath, remoteFolder.Name));
             } else if(remoteId is IDocument) {
@@ -89,14 +88,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 IFileInfo fileInfo = localFile as IFileInfo;
                 string oldPath = fileInfo.FullName;
                 fileInfo.MoveTo(Path.Combine(fileInfo.Directory.FullName, remoteDocument.Name));
-                if (remoteDocument.LastModificationDate != null) {
-                    fileInfo.LastWriteTimeUtc = (DateTime)remoteDocument.LastModificationDate;
-                }
-
+                fileInfo.TryToSetReadOnlyStateIfDiffers(from: remoteDocument);
+                fileInfo.TryToSetLastWriteTimeUtcIfAvailable(from: remoteDocument);
                 obj.Name = remoteDocument.Name;
                 obj.LastChangeToken = remoteContent == ContentChangeType.NONE ? remoteDocument.ChangeToken : obj.LastChangeToken;
                 obj.LastRemoteWriteTimeUtc = remoteContent == ContentChangeType.NONE ? remoteDocument.LastModificationDate : obj.LastRemoteWriteTimeUtc;
                 obj.LastLocalWriteTimeUtc = fileInfo.LastWriteTimeUtc;
+                obj.IsReadOnly = fileInfo.ReadOnly;
                 this.Storage.SaveMappedObject(obj);
                 OperationsLogger.Info(string.Format("Renamed local file {0} to {1}", oldPath, remoteDocument.Name));
                 if (remoteContent != ContentChangeType.NONE) {
