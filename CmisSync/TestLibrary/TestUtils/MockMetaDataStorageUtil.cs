@@ -229,7 +229,7 @@ namespace TestLibrary.TestUtils {
             Assert.That(o.LastChangeToken, Is.EqualTo(changeToken), "Object change token is wrong");
             Assert.That(o.Type, Is.EqualTo(type), "Object type is wrong");
             Assert.That(o.Ignored, Is.EqualTo(ignored), "Object ignore flag is wrong");
-            Assert.That(o.IsReadOnly, Is.EqualTo(readOnly));
+            Assert.That(o.IsReadOnly, Is.EqualTo(readOnly), "Object read only flag is wrong");
             if (extendedAttributeAvailable) {
                 Assert.That(o.Guid, Is.Not.EqualTo(Guid.Empty), "Given Guid must not be empty");
             } else {
