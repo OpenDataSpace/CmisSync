@@ -156,11 +156,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     }
                 }
 
+                fileInfo.TryToSetReadOnlyStateIfDiffers(from: doc);
                 if (this.ServerCanModifyDateTimes) {
                     if (updateLocalDate) {
-                        fileInfo.LastWriteTimeUtc = (DateTime)doc.LastModificationDate;
+                        fileInfo.TryToSetLastWriteTimeUtcIfAvailable(from: doc);
                     } else if (updateRemoteDate) {
-                        doc.UpdateLastWriteTimeUtc(fileInfo.LastWriteTimeUtc);
+                        if (doc.CanUpdateProperties() != false) {
+                            doc.UpdateLastWriteTimeUtc(fileInfo.LastWriteTimeUtc);
+                        }
                     } else {
                         throw new ArgumentException();
                     }
@@ -169,6 +172,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 obj.LastChangeToken = doc.ChangeToken;
                 obj.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
                 obj.LastRemoteWriteTimeUtc = doc.LastModificationDate;
+                obj.IsReadOnly = localFileSystemInfo.ReadOnly;
                 this.Storage.SaveMappedObject(obj);
             }
         }
