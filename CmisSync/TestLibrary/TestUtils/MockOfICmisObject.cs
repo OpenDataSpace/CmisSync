@@ -64,6 +64,31 @@ namespace TestLibrary.TestUtils {
             return mock;
         }
 
+        public static Mock<IDocument> SetupName(this Mock<IDocument> obj, string name) {
+            obj.SetupGet(o => o.Name).Returns(name);
+            return obj;
+        }
+
+        public static Mock<IDocument> SetupId(this Mock<IDocument> obj, string id) {
+            obj.SetupGet(o => o.Id).Returns(id);
+            return obj;
+        }
+
+        public static Mock<IFolder> SetupName(this Mock<IFolder> obj, string name) {
+            obj.SetupGet(o => o.Name).Returns(name);
+            return obj;
+        }
+
+        public static Mock<IFolder> SetupId(this Mock<IFolder> obj, string id) {
+            obj.SetupGet(o => o.Id).Returns(id);
+            return obj;
+        }
+
+        public static Mock<IFolder> SetupPath(this Mock<IFolder> obj, string path) {
+            obj.SetupGet(o => o.Path).Returns(path);
+            return obj;
+        }
+
         public static Mock<IDocument> SetupReadOnly(this Mock<IDocument> doc, bool readOnly = true) {
             var actions = new List<string>();
             actions.Add(Actions.CanGetAcl);
