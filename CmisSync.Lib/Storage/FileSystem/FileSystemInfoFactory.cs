@@ -60,7 +60,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
             string suffix = file.Name.Substring(0, file.Name.Length - extension.Length);
             string filename = string.Format("{0}_{1}-version{2}", suffix, user, extension);
 
-            IFileInfo conflictFile = this.CreateFileInfo(Path.Combine(file.Directory.FullName, filename));
+            var conflictFile = this.CreateFileInfo(Path.Combine(file.Directory.FullName, filename));
             if (!conflictFile.Exists) {
                 return conflictFile;
             }
