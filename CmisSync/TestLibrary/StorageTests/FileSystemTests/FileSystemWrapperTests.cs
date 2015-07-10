@@ -636,6 +636,23 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         }
 
         [Test, Category("Medium")]
+        public void ReadOnlyFlagIsNotRecursive() {
+            var dir = Factory.CreateDirectoryInfo(this.testFolder.FullName);
+            Assert.That(dir.ReadOnly, Is.False);
+            var subDir = Factory.CreateDirectoryInfo(Path.Combine(dir.FullName,"bla"));
+            subDir.Create();
+            dir.ReadOnly = true;
+            subDir.Refresh();
+            Assert.That(dir.ReadOnly, Is.True);
+            Assert.That(subDir.ReadOnly, Is.False);
+            subDir.ReadOnly = true;
+            dir.ReadOnly = false;
+            subDir.Refresh();
+            Assert.That(dir.ReadOnly, Is.False);
+            Assert.That(subDir.ReadOnly, Is.True);
+        }
+
+        [Test, Category("Medium")]
         public void RenameOfReadOnlyDirFails() {
             var dir = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "cat"));
             dir.Create();
