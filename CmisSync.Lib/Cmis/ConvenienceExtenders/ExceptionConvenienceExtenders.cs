@@ -24,7 +24,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
 
     public static class ExceptionConvenienceExtenders {
         public static bool IsVirusDetectionException(this CmisConstraintException ex) {
-            if (ex.ErrorContent.Contains("Virus")) {
+            if (ex.ErrorContent.Contains("Infected file")) {
                 return true;
             } else {
                 return false;
