@@ -190,7 +190,11 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         }
 
         public static bool IsReadOnly(this ICmisObject obj) {
-            return obj.CanCreateFolder() == false && obj.CanCreateDocument() == false;
+            if (obj is IDocument) {
+                return obj.CanSetContentStream() == false && obj.CanDeleteObject() == false && obj.CanUpdateProperties() == false;
+            } else {
+                return obj.CanCreateFolder() == false && obj.CanCreateDocument() == false;
+            }
         }
 
         /// <summary>
