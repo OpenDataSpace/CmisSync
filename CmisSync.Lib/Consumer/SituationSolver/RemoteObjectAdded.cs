@@ -215,6 +215,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     }
                 }
 
+                if (remoteDoc.IsReadOnly()) {
+                    try {
+                        file.ReadOnly = true;
+                    } catch (IOException e) {
+                        Logger.Debug("Cannot set read only file mode", e);
+                    }
+                }
+
                 MappedObject mappedObject = new MappedObject(
                     file.Name,
                     remoteDoc.Id,
@@ -227,7 +235,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     LastLocalWriteTimeUtc = file.LastWriteTimeUtc,
                     LastRemoteWriteTimeUtc = remoteDoc.LastModificationDate,
                     LastChecksum = hash,
-                    ChecksumAlgorithmName = "SHA-1"
+                    ChecksumAlgorithmName = "SHA-1",
+                    IsReadOnly = file.ReadOnly
                 };
                 this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local file {0} created and mapped to remote file {1}", file.FullName, remoteId.Id));

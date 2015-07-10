@@ -132,7 +132,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFileAddedAndExtendedAttributesAreAvailable() {
+        public void RemoteFileAddedAndExtendedAttributesAreAvailable(
+            [Values(true, false)]bool readOnly)
+        {
             var fileInfo = new Mock<IFileInfo>();
             var cacheFileInfo = this.fsFactory.SetupDownloadCacheFile();
             var parentDir = Mock.Of<IDirectoryInfo>(d => d.FullName == Path.GetTempPath());
@@ -156,6 +158,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
                 Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.id, this.objectName, this.parentId, content.Length, content, this.lastChangeToken);
                 remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
+                remoteObject.SetupReadOnly(readOnly);
 
                 this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
@@ -163,12 +166,15 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 cacheFileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
                 cacheFileInfo.Verify(f => f.MoveTo(this.path), Times.Once());
                 fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
-                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate, this.creationDate, expectedHash, content.Length);
+                fileInfo.VerifySet(f => f.ReadOnly = true, readOnly ? Times.Once() : Times.Never());
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate, this.creationDate, expectedHash, content.Length, readOnly: readOnly);
             }
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFileAddedAndExceptionOnModificationDateIsThrown() {
+        public void RemoteFileAddedAndExceptionOnModificationDateIsThrown(
+            [Values(true, false)]bool readOnly)
+        {
             var fileInfo = new Mock<IFileInfo>();
             var cacheFileInfo = this.fsFactory.SetupDownloadCacheFile();
             var parentDir = Mock.Of<IDirectoryInfo>(d => d.FullName == Path.GetTempPath());
@@ -195,6 +201,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
                 Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.id, this.objectName, this.parentId, content.Length, content, this.lastChangeToken);
                 remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
+                remoteObject.SetupReadOnly(readOnly);
 
                 this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
@@ -202,7 +209,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 cacheFileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
                 cacheFileInfo.Verify(f => f.MoveTo(this.path), Times.Once());
                 fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
-                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, modification, this.creationDate, expectedHash, content.Length);
+                fileInfo.VerifySet(f => f.ReadOnly = true, readOnly ? Times.Once() : Times.Never());
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, modification, this.creationDate, expectedHash, content.Length, readOnly: readOnly);
             }
         }
 
