@@ -322,6 +322,7 @@
     <Compile Include="FileTransmission\TransmissionFactory.cs" />
     <Compile Include="FileTransmission\ITransmissionAggregator.cs" />
     <Compile Include="Cmis\ConvenienceExtenders\ExceptionConvenienceExtenders.cs" />
+    <Compile Include="Consumer\SituationSolver\FileSystemInfoConvenienceExtenders.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

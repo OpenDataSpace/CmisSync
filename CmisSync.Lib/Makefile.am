@@ -62,6 +62,7 @@ SOURCES =  \
 	Consumer/RemoteSituationDetection.cs \
 	Consumer/RetryException.cs \
 	Consumer/SituationSolver/AbstractEnhancedSolver.cs \
+	Consumer/SituationSolver/FileSystemInfoConvenienceExtenders.cs \
 	Consumer/SituationSolver/ISolver.cs \
 	Consumer/SituationSolver/LocalObjectAdded.cs \
 	Consumer/SituationSolver/LocalObjectChanged.cs \
