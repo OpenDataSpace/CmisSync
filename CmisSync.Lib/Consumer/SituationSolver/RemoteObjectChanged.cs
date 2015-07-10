@@ -86,6 +86,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 var remoteFolder = remoteId as IFolder;
                 DateTime? lastModified = remoteFolder.LastModificationDate;
                 obj.LastChangeToken = remoteFolder.ChangeToken;
+                obj.Ignored = remoteFolder.AreAllChildrenIgnored();
+                if (localFile.ReadOnly != remoteFolder.IsReadOnly()) {
+                    localFile.TryToSetReadOnlyState(from: remoteFolder, andLogErrorsTo: Logger);
+                }
+
+                obj.IsReadOnly = localFile.ReadOnly;
                 if (lastModified != null) {
                     try {
                         localFile.LastWriteTimeUtc = (DateTime)lastModified;
@@ -93,7 +99,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                         Logger.Debug("Couldn't set the server side modification date", e);
                     }
 
-                    obj.Ignored = remoteFolder.AreAllChildrenIgnored();
                     obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
                 }
             } else if (remoteId is IDocument) {
@@ -108,9 +113,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                         obj.LastChecksum = DownloadChanges(localFile as IFileInfo, remoteDocument, obj, this.fsFactory, this.transmissonManager, Logger);
                     }
 
+                    localFile.TryToSetReadOnlyStateIfDiffers(from: remoteDocument, andLogErrorsTo: Logger);
                     obj.LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate;
                     if (remoteDocument.LastModificationDate != null) {
-                        localFile.LastWriteTimeUtc = (DateTime)remoteDocument.LastModificationDate;
+                        try {
+                            localFile.LastWriteTimeUtc = (DateTime)remoteDocument.LastModificationDate;
+                        } catch (IOException e) {
+                            Logger.Debug("Couldn't set the server side modification date", e);
+                        }
                     }
 
                     obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
@@ -119,6 +129,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
                 obj.LastChangeToken = remoteDocument.ChangeToken;
                 obj.LastRemoteWriteTimeUtc = lastModified;
+                obj.IsReadOnly = localFile.ReadOnly;
             }
 
             this.Storage.SaveMappedObject(obj);
