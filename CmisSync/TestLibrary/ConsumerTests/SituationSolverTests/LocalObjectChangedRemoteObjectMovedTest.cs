@@ -186,7 +186,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.underTest.Solve(file.Object, remoteFile.Object, ContentChangeType.CHANGED, ContentChangeType.CHANGED);
 
             this.changeSolver.Verify(s => s.Solve(file.Object, remoteFile.Object, ContentChangeType.CHANGED, ContentChangeType.CHANGED), Times.Once());
-            this.storage.VerifyThatNoObjectIsManipulated();
         }
 
         private void SetUpMocks() {
