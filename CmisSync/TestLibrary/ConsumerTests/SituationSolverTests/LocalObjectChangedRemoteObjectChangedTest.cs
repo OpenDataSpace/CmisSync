@@ -60,13 +60,20 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalAndRemoteFolderAreChanged([Values(true, false)]bool childrenAreIgnored) {
+        public void LocalAndRemoteFolderAreChanged(
+            [Values(true, false)]bool childrenAreIgnored,
+            [Values(true, false)]bool remoteWasReadOnly,
+            [Values(true, false)]bool remoteIsReadOnly,
+            [Values(true, false)]bool localIsReadOnly)
+        {
             this.InitMocks();
             string folderName = "folderName";
             DateTime lastLocalModification = DateTime.UtcNow.AddDays(1);
             DateTime lastRemoteModification = DateTime.UtcNow.AddHours(1);
-            var localFolder = Mock.Of<IDirectoryInfo>(f => f.LastWriteTimeUtc == lastLocalModification);
-            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteId, folderName, "path", this.parentId, this.newChangeToken, childrenAreIgnored);
+            var localFolder = new Mock<IDirectoryInfo>(MockBehavior.Strict);
+            localFolder.SetupProperty(f => f.LastWriteTimeUtc, lastLocalModification);
+            localFolder.SetupProperty(f => f.ReadOnly, localIsReadOnly);
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteId, folderName, "path", this.parentId, this.newChangeToken, childrenAreIgnored, readOnly: remoteIsReadOnly);
             remoteFolder.Setup(f => f.LastModificationDate).Returns(lastRemoteModification);
             var mappedFolder = Mock.Of<IMappedObject>(
                 o =>
@@ -78,12 +85,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 o.ParentId == this.parentId &&
                 o.Type == MappedObjectType.Folder &&
                 o.Guid == Guid.NewGuid() &&
-                o.LastContentSize == -1);
+                o.LastContentSize == -1 &&
+                o.IsReadOnly == remoteWasReadOnly);
             this.storage.AddMappedFolder(mappedFolder);
 
-            this.underTest.Solve(localFolder, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
+            this.underTest.Solve(localFolder.Object, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteId, folderName, this.parentId, this.newChangeToken, lastLocalModification: lastLocalModification, lastRemoteModification: lastRemoteModification, ignored: childrenAreIgnored);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteId, folderName, this.parentId, this.newChangeToken, lastLocalModification: lastLocalModification, lastRemoteModification: lastRemoteModification, ignored: childrenAreIgnored, readOnly: remoteIsReadOnly);
+            localFolder.VerifySet(d => d.ReadOnly = remoteIsReadOnly, remoteIsReadOnly != localIsReadOnly ? Times.Once() : Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
