@@ -27,13 +27,24 @@ namespace CmisSync.Lib.Storage.FileSystem {
     /// Wrapps all interfaced methods and calls the Systems.IO classes
     /// </summary>
     public class FileSystemInfoFactory : IFileSystemInfoFactory {
+        private readonly bool ignoreReadOnly;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.FileSystemInfoFactory"/> class.
+        /// </summary>
+        /// <param name="ignoreReadOnlyByDefault">If set to <c>true</c> ignore read only wrapper are created by this factory. Otherwise normal wrapper are created.</param>
+        public FileSystemInfoFactory(bool ignoreReadOnlyByDefault = true) {
+            this.ignoreReadOnly = ignoreReadOnlyByDefault;
+        }
+
         /// <summary>
         /// Creates the directory info.
         /// </summary>
         /// <returns>The directory info.</returns>
         /// <param name="path">For this path.</param>
         public IDirectoryInfo CreateDirectoryInfo(string path) {
-            return new ReadOnlyIgnoringDirectoryInfoDecorator(new DirectoryInfoWrapper(new DirectoryInfo(path)));
+            IDirectoryInfo dirInfo = new DirectoryInfoWrapper(new DirectoryInfo(path));
+            return this.ignoreReadOnly ? new ReadOnlyIgnoringDirectoryInfoDecorator(dirInfo) : dirInfo;
         }
 
         /// <summary>
@@ -42,7 +53,8 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <returns>The file info.</returns>
         /// <param name="path">For this path.</param>
         public IFileInfo CreateFileInfo(string path) {
-            return new ReadOnlyIgnoringFileInfoDecorator(new FileInfoWrapper(new FileInfo(path)));
+            IFileInfo fileInfo = new FileInfoWrapper(new FileInfo(path));
+            return this.ignoreReadOnly ? new ReadOnlyIgnoringFileInfoDecorator(fileInfo) : fileInfo;
         }
 
         /// <summary>
