@@ -49,7 +49,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="transmissonManager">Transmisson manager.</param>
+        /// <param name="transmissionStorage">Transmission storage.</param>
+        /// <param name="manager">Transmisson manager.</param>
         /// <param name="fsFactory">File System Factory.</param>
         public RemoteObjectChanged(
             ISession session,
@@ -110,7 +111,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                             throw new ArgumentException("The local file has been changed since last write => aborting update");
                         }
 
-                        obj.LastChecksum = DownloadChanges(localFile as IFileInfo, remoteDocument, obj, this.fsFactory, this.transmissonManager, Logger);
+                        obj.LastChecksum = this.DownloadChanges(localFile as IFileInfo, remoteDocument, obj, this.fsFactory, this.transmissonManager, Logger);
                     }
 
                     localFile.TryToSetReadOnlyStateIfDiffers(from: remoteDocument, andLogErrorsTo: Logger);
