@@ -58,85 +58,117 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void MoveLocalFolder([Values(true, false)]bool childrenAreIgnored) {
+        public void MoveLocalFolder(
+            [Values(true, false)]bool childrenAreIgnored,
+            [Values(true, false)]bool localWasReadOnly,
+            [Values(true, false)]bool remoteWasReadOnly,
+            [Values(true, false)]bool remoteIsReadOnly) {
             this.SetUpMocks();
             string oldPath = Path.Combine(Path.GetTempPath(), "old", "name");
             string newPath = Path.Combine(Path.GetTempPath(), "new", "name");
-            var mappedObject = new MappedObject("name", "remoteId", MappedObjectType.Folder, "oldParentId", "changeToken") { Guid = Guid.NewGuid() };
+            var mappedObject = new MappedObject("name", "remoteId", MappedObjectType.Folder, "oldParentId", "changeToken") {
+                Guid = Guid.NewGuid(),
+                IsReadOnly = remoteWasReadOnly
+            };
             this.storage.AddMappedFolder(mappedObject);
-            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("remoteId", "name", "path", "parentId", ignored: childrenAreIgnored);
-            var dir = Mock.Of<IDirectoryInfo>(
-                d =>
-                d.FullName == oldPath);
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("remoteId", "name", "path", "parentId", ignored: childrenAreIgnored, readOnly: remoteIsReadOnly);
+            var dir = new Mock<IDirectoryInfo>();
+            dir.Setup(d => d.FullName).Returns(oldPath);
+            dir.SetupProperty(d => d.ReadOnly, localWasReadOnly);
             this.storage.Setup(s => s.Matcher.CreateLocalPath(remoteFolder.Object)).Returns(newPath);
-            this.underTest.Solve(dir, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
-            Mock.Get(dir).Verify(d => d.MoveTo(newPath), Times.Once());
-            this.changeSolver.Verify(s => s.Solve(dir, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "remoteId", "name", "parentId", "changeToken", ignored: childrenAreIgnored);
+
+            this.underTest.Solve(dir.Object, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
+
+            dir.Verify(d => d.MoveTo(newPath), Times.Once());
+            dir.VerifySet(d => d.ReadOnly = remoteIsReadOnly, remoteIsReadOnly != localWasReadOnly ? Times.Once() : Times.Never());
+            this.changeSolver.Verify(s => s.Solve(dir.Object, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "remoteId", "name", "parentId", "changeToken", ignored: childrenAreIgnored, readOnly: remoteIsReadOnly);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void MoveAndRenameLocalFolder([Values(true, false)]bool childrenAreIgnored) {
+        public void MoveAndRenameLocalFolder(
+            [Values(true, false)]bool childrenAreIgnored,
+            [Values(true, false)]bool localWasReadOnly,
+            [Values(true, false)]bool remoteWasReadOnly,
+            [Values(true, false)]bool remoteIsReadOnly)
+        {
             this.SetUpMocks();
             string oldPath = Path.Combine(Path.GetTempPath(), "old", "oldname");
             string newPath = Path.Combine(Path.GetTempPath(), "new", "newname");
-            var mappedObject = new MappedObject("oldname", "remoteId", MappedObjectType.Folder, "oldParentId", "changeToken") { Guid = Guid.NewGuid() };
+            var mappedObject = new MappedObject("oldname", "remoteId", MappedObjectType.Folder, "oldParentId", "changeToken") {
+                Guid = Guid.NewGuid(),
+                IsReadOnly = remoteWasReadOnly
+            };
             this.storage.AddMappedFolder(mappedObject);
-            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("remoteId", "newname", "path", "parentId", ignored: childrenAreIgnored);
-            var dir = Mock.Of<IDirectoryInfo>(
-                d =>
-                d.FullName == oldPath);
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("remoteId", "newname", "path", "parentId", ignored: childrenAreIgnored, readOnly: remoteIsReadOnly);
+            var dir = new Mock<IDirectoryInfo>();
+            dir.Setup(d => d.FullName).Returns(oldPath);
+            dir.SetupProperty(d => d.ReadOnly, localWasReadOnly);
             this.storage.Setup(s => s.Matcher.CreateLocalPath(remoteFolder.Object)).Returns(newPath);
-            this.underTest.Solve(dir, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
-            Mock.Get(dir).Verify(d => d.MoveTo(newPath), Times.Once());
-            this.changeSolver.Verify(s => s.Solve(dir, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "remoteId", "newname", "parentId", "changeToken", ignored: childrenAreIgnored);
+
+            this.underTest.Solve(dir.Object, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
+
+            dir.Verify(d => d.MoveTo(newPath), Times.Once());
+            dir.VerifySet(d => d.ReadOnly = remoteIsReadOnly, remoteIsReadOnly != localWasReadOnly ? Times.Once() : Times.Never());
+            this.changeSolver.Verify(s => s.Solve(dir.Object, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "remoteId", "newname", "parentId", "changeToken", ignored: childrenAreIgnored, readOnly: remoteIsReadOnly);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void MoveFile() {
+        public void MoveFile(
+            [Values(true, false)]bool localWasReadOnly,
+            [Values(true, false)]bool remoteWasReadOnly,
+            [Values(true, false)]bool remoteIsReadOnly)
+        {
             this.SetUpMocks();
             long fileLength = 100;
             string oldPath = Path.Combine(Path.GetTempPath(), "old", "name");
             string newPath = Path.Combine(Path.GetTempPath(), "new", "name");
             var mappedObject = new MappedObject("name", "remoteId", MappedObjectType.File, "oldParentId", "changeToken", fileLength) { Guid = Guid.NewGuid() };
             this.storage.AddMappedFile(mappedObject);
-            var remoteFile = Mock.Of<IDocument>(
-                f =>
-                f.Id == "remoteId" &&
-                f.Name == "name" &&
-                f.Parents[0].Id == "parentId");
-            var file = Mock.Of<IFileInfo>(
-                f =>
-                f.FullName == oldPath);
-            this.storage.Setup(s => s.Matcher.CreateLocalPath(remoteFile)).Returns(newPath);
-            this.underTest.Solve(file, remoteFile, ContentChangeType.NONE, ContentChangeType.NONE);
-            Mock.Get(file).Verify(d => d.MoveTo(newPath), Times.Once());
-            this.changeSolver.Verify(s => s.Solve(file, remoteFile, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, "remoteId", "name", "parentId", "changeToken", contentSize: fileLength);
+            var remoteFile = new Mock<IDocument>().SetupName("name").SetupId("remoteId").SetupParent(Mock.Of<IFolder>(p => p.Id == "parentId"));
+            remoteFile.SetupReadOnly(remoteIsReadOnly);
+            var file = new Mock<IFileInfo>();
+            file.Setup(f => f.FullName).Returns(oldPath);
+            file.SetupProperty(f => f.ReadOnly, localWasReadOnly);
+            this.storage.Setup(s => s.Matcher.CreateLocalPath(remoteFile.Object)).Returns(newPath);
+
+            this.underTest.Solve(file.Object, remoteFile.Object, ContentChangeType.NONE, ContentChangeType.NONE);
+
+            file.Verify(d => d.MoveTo(newPath), Times.Once());
+            this.changeSolver.Verify(s => s.Solve(file.Object, remoteFile.Object, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
+            file.VerifySet(f => f.ReadOnly = remoteIsReadOnly, remoteIsReadOnly != localWasReadOnly ? Times.Once() : Times.Never());
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, "remoteId", "name", "parentId", "changeToken", contentSize: fileLength, readOnly: remoteIsReadOnly);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void MoveAndRenameFile() {
+        public void MoveAndRenameFile(
+            [Values(true, false)]bool localWasReadOnly,
+            [Values(true, false)]bool remoteWasReadOnly,
+            [Values(true, false)]bool remoteIsReadOnly)
+        {
             this.SetUpMocks();
             long fileLength = 100;
             string oldPath = Path.Combine(Path.GetTempPath(), "old", "oldname");
             string newPath = Path.Combine(Path.GetTempPath(), "new", "newname");
-            var mappedObject = new MappedObject("oldname", "remoteId", MappedObjectType.File, "oldParentId", "changeToken", fileLength) { Guid = Guid.NewGuid() };
+            var mappedObject = new MappedObject("oldname", "remoteId", MappedObjectType.File, "oldParentId", "changeToken", fileLength) {
+                Guid = Guid.NewGuid(),
+                IsReadOnly = remoteWasReadOnly
+            };
             this.storage.AddMappedFile(mappedObject);
-            var remoteFile = Mock.Of<IDocument>(
-                f =>
-                f.Id == "remoteId" &&
-                f.Name == "newname" &&
-                f.Parents[0].Id == "parentId");
-            var file = Mock.Of<IFileInfo>(
-                f =>
-                f.FullName == oldPath);
-            this.storage.Setup(s => s.Matcher.CreateLocalPath(remoteFile)).Returns(newPath);
-            this.underTest.Solve(file, remoteFile, ContentChangeType.NONE, ContentChangeType.NONE);
-            Mock.Get(file).Verify(d => d.MoveTo(newPath), Times.Once());
-            this.changeSolver.Verify(s => s.Solve(file, remoteFile, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, "remoteId", "newname", "parentId", "changeToken", contentSize: fileLength);
+            var remoteFile = new Mock<IDocument>().SetupName("newname").SetupId("remoteId").SetupParent(Mock.Of<IFolder>(f => f.Id == "parentId"));
+            remoteFile.SetupReadOnly(remoteIsReadOnly);
+            var file = new Mock<IFileInfo>().SetupReadOnly(localWasReadOnly);
+            file.Setup(f => f.FullName).Returns(oldPath);
+
+            this.storage.Setup(s => s.Matcher.CreateLocalPath(remoteFile.Object)).Returns(newPath);
+
+            this.underTest.Solve(file.Object, remoteFile.Object, ContentChangeType.NONE, ContentChangeType.NONE);
+
+            file.Verify(d => d.MoveTo(newPath), Times.Once());
+            file.VerifySet(d => d.ReadOnly = remoteIsReadOnly, remoteIsReadOnly != localWasReadOnly ? Times.Once() : Times.Never());
+            this.changeSolver.Verify(s => s.Solve(file.Object, remoteFile.Object, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, "remoteId", "newname", "parentId", "changeToken", contentSize: fileLength, readOnly: remoteIsReadOnly);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -147,17 +179,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             string newPath = Path.Combine(Path.GetTempPath(), "new", "name");
             var mappedObject = new MappedObject("name", "remoteId", MappedObjectType.File, "oldParentId", "changeToken", fileLength) { Guid = Guid.NewGuid() };
             this.storage.AddMappedFile(mappedObject);
-            var remoteFile = Mock.Of<IDocument>(
-                f =>
-                f.Id == "remoteId" &&
-                f.Name == "name" &&
-                f.Parents[0].Id == "parentId");
-            var file = Mock.Of<IFileInfo>(
-                f =>
-                f.FullName == oldPath);
-            this.storage.Setup(s => s.Matcher.CreateLocalPath(remoteFile)).Returns(newPath);
-            this.underTest.Solve(file, remoteFile, ContentChangeType.CHANGED, ContentChangeType.CHANGED);
-            this.changeSolver.Verify(s => s.Solve(file, remoteFile, ContentChangeType.CHANGED, ContentChangeType.CHANGED), Times.Once());
+            var remoteFile = new Mock<IDocument>().SetupId("remoteId").SetupName("name").SetupParent(Mock.Of<IFolder>(f => f.Id == "parentId"));
+            var file = new Mock<IFileInfo>().SetupFullName(oldPath);
+            this.storage.Setup(s => s.Matcher.CreateLocalPath(remoteFile.Object)).Returns(newPath);
+
+            this.underTest.Solve(file.Object, remoteFile.Object, ContentChangeType.CHANGED, ContentChangeType.CHANGED);
+
+            this.changeSolver.Verify(s => s.Solve(file.Object, remoteFile.Object, ContentChangeType.CHANGED, ContentChangeType.CHANGED), Times.Once());
+            this.storage.VerifyThatNoObjectIsManipulated();
         }
 
         private void SetUpMocks() {
