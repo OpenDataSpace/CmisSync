@@ -16,16 +16,15 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Producer.Crawler
-{
+
+namespace CmisSync.Lib.Producer.Crawler {
     using System;
     using System.Collections.Generic;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.FileSystem;
 
-    public struct CrawlEventCollection
-    {
+    public struct CrawlEventCollection {
         public List<AbstractFolderEvent> creationEvents;
         public Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> mergableEvents;
     }
