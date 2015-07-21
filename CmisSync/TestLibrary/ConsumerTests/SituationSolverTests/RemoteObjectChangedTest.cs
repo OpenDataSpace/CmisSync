@@ -153,7 +153,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, newChangeToken, ignored: childrenAreIgnored, readOnly: remoteFolderIsReadOnly);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(creationDate)), Times.Once());
-            dirInfo.VerifySet(d => d.ReadOnly = remoteFolderIsReadOnly, remoteFolderIsReadOnly != remoteFolderWasReadOnly ? Times.Once() : Times.Never());
+            dirInfo.VerifyThatReadOnlyPropertyIsSet(to: remoteFolderIsReadOnly, iff: remoteFolderIsReadOnly != remoteFolderWasReadOnly);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -200,7 +200,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             this.storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, contentSize: 0, checksum: hash, readOnly: remoteDocumentIsReadOnly);
             fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(modificationDate)), Times.Once());
-            fileInfo.VerifySet(d => d.ReadOnly = remoteDocumentIsReadOnly, remoteDocumentIsReadOnly != remoteDocumentWasReadOnly ? Times.Once() : Times.Never());
+            fileInfo.VerifyThatReadOnlyPropertyIsSet(to: remoteDocumentIsReadOnly, iff: remoteDocumentIsReadOnly != remoteDocumentWasReadOnly);
         }
 
         [Test, Category("Fast"), Category("Solver")]

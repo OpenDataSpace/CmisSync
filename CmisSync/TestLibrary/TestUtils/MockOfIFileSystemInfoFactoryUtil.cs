@@ -258,5 +258,15 @@ namespace TestLibrary.TestUtils {
         public static void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(this Mock<IDirectoryInfo> fsInfo) {
             fsInfo.VerifySet(o => o.LastWriteTimeUtc = It.IsAny<DateTime>(), Times.Never());
         }
+
+        public static void VerifyThatReadOnlyPropertyIsSet(this Mock<IDirectoryInfo> fsInfo, bool to, bool iff = true) {
+            fsInfo.VerifySet(d => d.ReadOnly = to, iff ? Times.Once() : Times.Never());
+            fsInfo.VerifySet(d => d.ReadOnly = !to, Times.Never());
+        }
+
+        public static void VerifyThatReadOnlyPropertyIsSet(this Mock<IFileInfo> fsInfo, bool to, bool iff = true) {
+            fsInfo.VerifySet(d => d.ReadOnly = to, iff ? Times.Once() : Times.Never());
+            fsInfo.VerifySet(d => d.ReadOnly = !to, Times.Never());
+        }
     }
 }
