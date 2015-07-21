@@ -211,6 +211,30 @@ namespace TestLibrary.IntegrationTests {
         }
 
         [Test, Category("Slow"), MaxTime(180000)]
+        public void TwoLocalFilesCreatedWithCommonSubnamePart([Values(false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
+            string fileName1 = "gpio.h";
+            string fileName2 = "io.h";
+            string content = "content";
+            var filePath = Path.Combine(this.localRootDir.FullName, fileName1);
+            var fileInfo = new FileInfo(filePath);
+            using (StreamWriter sw = fileInfo.CreateText()) {
+                sw.Write(content);
+            }
+
+            var filePath2 = Path.Combine(this.localRootDir.FullName, fileName2);
+            var fileInfo2 = new FileInfo(filePath2);
+            using (StreamWriter sw = fileInfo2.CreateText()) {
+                sw.Write(content);
+            }
+
+            this.InitializeAndRunRepo();
+            this.remoteRootDir.Refresh();
+            var children = this.remoteRootDir.GetChildren();
+            Assert.That(children.TotalNumItems, Is.EqualTo(2));
+        }
+
+        [Test, Category("Slow"), MaxTime(180000)]
         public void OneLocalFileCreatedAndModificationDateIsSynced() {
             if (!this.session.IsServerAbleToUpdateModificationDate()) {
                 Assert.Ignore("Server does not support the synchronization of modification dates");

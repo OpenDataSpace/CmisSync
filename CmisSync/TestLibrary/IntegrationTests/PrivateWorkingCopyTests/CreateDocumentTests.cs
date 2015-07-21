@@ -112,5 +112,30 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             doc.Refresh();
             Assert.That(doc.LastModificationDate, Is.EqualTo(past).Within(1).Seconds);
         }
+
+        [Test, Category("Slow"), MaxTime(180000)]
+        public void CreateTooDocumentsInTwoFoldersWithTheSameName() {
+            this.EnsureThatPrivateWorkingCopySupportIsAvailable();
+            string fileName = "file.bin";
+            var folder = this.remoteRootDir.CreateFolder("folder1");
+            var doc1 = this.remoteRootDir.CreateDocument(fileName, (string)null, true);
+            var doc2 = folder.CreateDocument(fileName, (string)null, true);
+            doc1.CheckIn(true, null, null, string.Empty);
+            doc2.CheckIn(true, null, null, string.Empty);
+            this.remoteRootDir.Refresh();
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(2));
+        }
+
+        [Test, Category("Slow"), MaxTime(180000)]
+        public void CreateTooDocumentsWithTheSameSubName() {
+            this.EnsureThatPrivateWorkingCopySupportIsAvailable();
+            string fileName1 = "gpio.h";
+            string fileName2 = "io.h";
+            var doc1 = this.remoteRootDir.CreateDocument(fileName1, "content");
+            var doc2 = this.remoteRootDir.CreateDocument(fileName2, "content");
+            this.remoteRootDir.Refresh();
+            doc1.Refresh();
+            doc2.Refresh();
+        }
     }
 }
