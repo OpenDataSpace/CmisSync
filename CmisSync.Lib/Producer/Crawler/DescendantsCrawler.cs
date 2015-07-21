@@ -162,9 +162,11 @@ using CmisSync.Lib.Consumer;
                     Logger.Debug(string.Format("StoredTree: {0} Elements", trees.StoredTree.ToList().Count));
                 }
 
+                Logger.Debug("Create events");
                 CrawlEventCollection events = this.eventGenerator.GenerateEvents(trees);
-
+                Logger.Debug("Events created");
                 this.notifier.MergeEventsAndAddToQueue(events);
+                Logger.Debug("Events merged and added to queue");
             } catch (System.IO.PathTooLongException e) {
                 string msg = "Crawl Sync aborted because a local path is too long. Please take a look into the log to figure out the reason.";
                 throw new InteractionNeededException(msg, e) { Title = "Local path is too long", Description = msg };

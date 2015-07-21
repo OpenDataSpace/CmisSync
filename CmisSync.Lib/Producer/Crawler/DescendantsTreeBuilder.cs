@@ -217,9 +217,13 @@ namespace CmisSync.Lib.Producer.Crawler {
             // Wait until all tasks are finished
             Task.WaitAll(tasks);
             */
+            Logger.Debug("Crawling local fs");
             localTree = GetLocalDirectoryTree(this.localFolder, this.filter);
+            Logger.Debug("Crawling remote fs");
             remoteTree = GetRemoteDirectoryTree(this.remoteFolder, this.remoteFolder.GetDescendants(-1), this.filter, this.ignoredStorage, this.matcher);
+            Logger.Debug("Building stored tree");
             storedTree = this.storage.GetObjectTree();
+            Logger.Debug("Finished building trees");
             return new DescendantsTreeCollection(storedTree, localTree, remoteTree);
         }
     }
