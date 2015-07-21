@@ -95,7 +95,9 @@ namespace CmisSync.Lib.Storage.Database {
 
             if (!disableInitialValidation) {
                 try {
+                    Logger.Debug("Starting DB Validation");
                     this.ValidateObjectStructure();
+                    Logger.Debug("Finished DB Validation");
                 } catch(InvalidDataException e) {
                     Logger.Fatal("Database object structure is invalid", e);
                 }
