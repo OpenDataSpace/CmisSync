@@ -38,6 +38,7 @@ namespace TestLibrary.IntegrationTests.VirusDetectionTests {
     public class VirusDetectionTests : BaseFullRepoTest {
         private readonly string fileName = "eicar.bin";
 
+        [Ignore("https://mantis.dataspace.cc/view.php?id=4671")]
         [Test, Category("Slow"), Category("VirusDetection")]
         public void UploadVirusByCreateDocument(
             [Values(VersioningState.Major, VersioningState.Minor, VersioningState.None, null)]VersioningState? versioningState)
@@ -48,6 +49,7 @@ namespace TestLibrary.IntegrationTests.VirusDetectionTests {
             Assert.That(ex.IsVirusDetectionException(), Is.True);
         }
 
+        [Ignore("https://mantis.dataspace.cc/view.php?id=4671")]
         [Test, Category("Slow"), Category("VirusDetection")]
         public void UploadVirusBySetContentStream(
             [Values("harmlessContent", null)]string initalContent)
@@ -60,6 +62,7 @@ namespace TestLibrary.IntegrationTests.VirusDetectionTests {
             }
         }
 
+        [Ignore("https://mantis.dataspace.cc/view.php?id=4671")]
         [Test, Category("Slow"), Category("VirusDetection")]
         public void UploadVirusBySettingContentViaAppendContentStream(
             [Values("harmlessContent", null)]string initialContent)
@@ -73,6 +76,7 @@ namespace TestLibrary.IntegrationTests.VirusDetectionTests {
             }
         }
 
+        [Ignore("https://mantis.dataspace.cc/view.php?id=4671")]
         [Test, Category("Slow"), Category("VirusDetection")]
         public void UploadVirusByAppendingContentInPieces(
             [Values(true, false)]bool alwaysLastChunk)
