@@ -37,7 +37,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
         private static readonly string ExtendedAttributeKey = "DSS-UUID";
         private static IExtendedAttributeReader reader = null;
 #if !__MonoCS__
-        private static SecurityIdentifier actualUser = null;
+        protected static readonly SecurityIdentifier actualUser;
 #endif
         private FileSystemInfo original;
         private FSType? fsType = null;

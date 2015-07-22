@@ -106,11 +106,19 @@ namespace CmisSync.Lib.Storage.FileSystem {
             if (this.Parent.ReadOnly) {
                 this.Parent.ReadOnly = false;
                 try {
+                    if (recursive) {
+                        this.dirInfo.TryToSetReadWritePermissionRecursively();
+                    }
+
                     this.dirInfo.Delete(recursive);
                 } finally {
                     this.Parent.ReadOnly = true;
                 }
             } else {
+                if (recursive) {
+                    this.dirInfo.TryToSetReadWritePermissionRecursively();
+                }
+
                 this.dirInfo.Delete(recursive);
             }
         }
@@ -131,6 +139,13 @@ namespace CmisSync.Lib.Storage.FileSystem {
             } else {
                 this.MoveToPossibleReadOnlyTarget(destDirName);
             }
+        }
+
+        /// <summary>
+        /// Tries to set permission to read write access to the directory and its children
+        /// </summary>
+        public void TryToSetReadWritePermissionRecursively() {
+            this.dirInfo.TryToSetReadWritePermissionRecursively();
         }
 
         private void MoveToPossibleReadOnlyTarget(string target) {

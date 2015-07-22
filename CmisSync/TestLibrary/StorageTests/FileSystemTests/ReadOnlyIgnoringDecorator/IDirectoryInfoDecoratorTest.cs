@@ -72,9 +72,16 @@ namespace TestLibrary.StorageTests.FileSystemTests.ReadOnlyIgnoringDecorator {
             hiddenDirInfo.Setup(d => d.Parent).Returns(readOnlyParent.Object);
             hiddenDirInfo.SetupProperty(d => d.ReadOnly, folderItselfIsReadOnly);
             if (doesNotExists) {
+                hiddenDirInfo.Setup(d => d.TryToSetReadWritePermissionRecursively());
                 hiddenDirInfo.Setup(d => d.Delete(recursive)).Throws<DirectoryNotFoundException>();
             } else {
-                hiddenDirInfo.Setup(d => d.Delete(recursive));
+                if (recursive) {
+                    hiddenDirInfo.Setup(d => d.TryToSetReadWritePermissionRecursively());
+                }
+
+                hiddenDirInfo.Setup(d => d.Delete(recursive)).Callback<bool>(r => {
+                    hiddenDirInfo.Verify(dir => dir.TryToSetReadWritePermissionRecursively(), r ? Times.Once() : Times.Never());
+                });
             }
 
             var underTest = new ReadOnlyIgnoringDirectoryInfoDecorator(hiddenDirInfo.Object);
