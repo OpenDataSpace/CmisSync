@@ -94,7 +94,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 var remoteFolder = remoteId as IFolder;
                 var localFolder = localFile as IDirectoryInfo;
                 localFolder.Create();
-                localFolder.TryToSetReadOnlyStateIfDiffers(from: remoteFolder);
+                localFolder.TryToSetReadOnlyStateIfDiffers(from: remoteFolder, andLogErrorsTo: Logger);
                 Guid uuid = Guid.Empty;
                 if (localFolder.IsExtendedAttributeAvailable()) {
                     uuid = Guid.NewGuid();
@@ -197,21 +197,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 }
 
                 file.Refresh();
-                if (remoteDoc.LastModificationDate != null) {
-                    try {
-                        file.LastWriteTimeUtc = (DateTime)remoteDoc.LastModificationDate;
-                    } catch(IOException e) {
-                        Logger.Debug("Cannot set last modification date", e);
-                    }
-                }
-
-                if (remoteDoc.IsReadOnly()) {
-                    try {
-                        file.ReadOnly = true;
-                    } catch (IOException e) {
-                        Logger.Debug("Cannot set read only file mode", e);
-                    }
-                }
+                file.TryToSetReadOnlyStateIfDiffers(from: remoteDoc, andLogErrorsTo: Logger);
+                file.TryToSetLastWriteTimeUtcIfAvailable(from: remoteDoc, andLogErrorsTo: Logger);
 
                 MappedObject mappedObject = new MappedObject(
                     file.Name,
