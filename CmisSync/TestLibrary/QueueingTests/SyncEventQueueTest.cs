@@ -45,6 +45,26 @@ namespace TestLibrary.QueueingTests {
         }
 
         [Test, Category("Fast")]
+        public void IfExceptionIsThrownItIsPassedToOnExceptionListener() {
+            var manager = new Mock<ISyncEventManager>();
+            var ex = new Mock<Exception>("Generic Exception").Object;
+            int isNotified = 0;
+            manager.Setup(m => m.Handle(It.IsAny<ISyncEvent>())).Throws(ex);
+            using (var underTest = new SyncEventQueue(manager.Object)) {
+                underTest.OnException += (sender, e) => {
+                    Assert.That(e.Exception, Is.EqualTo(ex));
+                    isNotified++;
+                };
+                underTest.AddEvent(Mock.Of<ISyncEvent>());
+                underTest.StopListener();
+                WaitFor(underTest, (q) => { return q.IsStopped; });
+            }
+
+            manager.Verify(m => m.Handle(It.IsAny<ISyncEvent>()), Times.Once());
+            Assert.That(isNotified, Is.EqualTo(1));
+        }
+
+        [Test, Category("Fast")]
         public void EventlessStartStop() {
             using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object)) {
                 WaitFor(queue, (q) => { return !q.IsStopped; });
@@ -59,13 +79,13 @@ namespace TestLibrary.QueueingTests {
         public void AddEvent() {
             var managerMock = new Mock<ISyncEventManager>();
             var eventMock = new Mock<ISyncEvent>();
-            using (SyncEventQueue queue = new SyncEventQueue(managerMock.Object)) {
-                queue.AddEvent(eventMock.Object);
-                queue.AddEvent(eventMock.Object);
-                queue.StopListener();
-                WaitFor(queue, (q) => { return q.IsStopped; });
-                Assert.True(queue.IsStopped);
-                Assert.True(queue.IsEmpty);
+            using (var underTest = new SyncEventQueue(managerMock.Object)) {
+                underTest.AddEvent(eventMock.Object);
+                underTest.AddEvent(eventMock.Object);
+                underTest.StopListener();
+                WaitFor(underTest, (q) => { return q.IsStopped; });
+                Assert.That(underTest.IsStopped, Is.True);
+                Assert.That(underTest.IsEmpty, Is.True);
             }
 
             managerMock.Verify(foo => foo.Handle(eventMock.Object), Times.Exactly(2));
@@ -73,10 +93,10 @@ namespace TestLibrary.QueueingTests {
 
         [Test, Category("Fast")]
         public void AddEventToStoppedQueueDoesNotRaise() {
-            using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object)) {
-                queue.StopListener();
-                WaitFor(queue, (q) => { return q.IsStopped; });
-                queue.AddEvent(new Mock<ISyncEvent>().Object);
+            using (var underTest = new SyncEventQueue(new Mock<ISyncEventManager>().Object)) {
+                underTest.StopListener();
+                WaitFor(underTest, (q) => { return q.IsStopped; });
+                underTest.AddEvent(new Mock<ISyncEvent>().Object);
             }
         }
 

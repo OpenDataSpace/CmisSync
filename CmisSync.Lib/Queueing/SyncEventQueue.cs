@@ -53,6 +53,11 @@ namespace CmisSync.Lib.Queueing {
         private object subscriberLock = new object();
 
         /// <summary>
+        /// Occurs when an exception is thrown on an ISyncEventManager handling a given ISyncEvent from queue.
+        /// </summary>
+        public event EventHandler<ThreadExceptionEventArgs> OnException;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.SyncEventQueue"/> class.
         /// </summary>
         /// <param name="manager">Manager holding the handler.</param>
@@ -269,8 +274,10 @@ namespace CmisSync.Lib.Queueing {
                         manager.Handle(syncEvent);
                     } catch (CmisConnectionException connectionException) {
                         this.AddEvent(new CmisConnectionExceptionEvent(connectionException));
+                        this.OnExceptionThrown(connectionException);
                     } catch (Exception e) {
                         Logger.Error(string.Format("Exception in EventHandler on Event {0}: ", syncEvent.ToString()), e);
+                        this.OnExceptionThrown(e);
                     }
 
                     if (syncEvent is ICountableEvent) {
@@ -286,6 +293,13 @@ namespace CmisSync.Lib.Queueing {
             }
 
             Logger.Debug("Stopping to listen on SyncEventQueue");
+        }
+
+        private void OnExceptionThrown(Exception e) {
+            var handler = this.OnException;
+            if (handler != null) {
+                handler(this, new ThreadExceptionEventArgs(e));
+            }
         }
     }
 }
