@@ -40,6 +40,11 @@ namespace TestLibrary.QueueingTests {
     [TestFixture]
     public class SyncEventQueueTest : IsTestWithConfiguredLog4Net {
         [Test, Category("Fast")]
+        public void ContructorFailsIfGivenManagerIsNull() {
+            Assert.Throws<ArgumentNullException>(() => new SyncEventQueue(null));
+        }
+
+        [Test, Category("Fast")]
         public void EventlessStartStop() {
             using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object)) {
                 WaitFor(queue, (q) => { return !q.IsStopped; });
