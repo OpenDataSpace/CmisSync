@@ -20,6 +20,7 @@
 namespace TestLibrary {
     using System;
     using System.Collections.Concurrent;
+    using System.Threading;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
@@ -34,6 +35,11 @@ namespace TestLibrary {
         private IEventCounter categoryCounter;
         private SyncEventHandler dropAllFsEventsHandler;
         private bool isDroppingAllFsEvents = false;
+
+        /// <summary>
+        /// Occurs when an exception is thrown on an ISyncEventManager handling a given ISyncEvent from queue.
+        /// </summary>
+        public event EventHandler<ThreadExceptionEventArgs> OnException;
         public ISyncEventManager Manager;
         public ConcurrentQueue<ISyncEvent> Queue = new ConcurrentQueue<ISyncEvent>();
 
@@ -104,6 +110,7 @@ namespace TestLibrary {
                 } catch (System.IO.InvalidDataException) {
                     throw;
                 } catch (Exception exp) {
+                    this.OnExceptionThrown(exp);
                     if (!this.SwallowExceptions) {
                         throw;
                     } else {
@@ -115,6 +122,13 @@ namespace TestLibrary {
                     this.fullCounter.Decrease(e as ICountableEvent);
                     this.categoryCounter.Decrease(e as ICountableEvent);
                 }
+            }
+        }
+
+        private void OnExceptionThrown(Exception e) {
+            var handler = this.OnException;
+            if (handler != null) {
+                handler(this, new ThreadExceptionEventArgs(e));
             }
         }
 
