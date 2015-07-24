@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Queueing
-{
+namespace CmisSync.Lib.Queueing {
     using System;
     using System.Collections.Concurrent;
     using System.Threading.Tasks;
