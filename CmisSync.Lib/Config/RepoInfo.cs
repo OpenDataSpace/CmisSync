@@ -20,6 +20,7 @@
 namespace CmisSync.Lib.Config {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.IO;
     using System.Text;
     using System.Xml.Serialization;
@@ -84,7 +85,7 @@ namespace CmisSync.Lib.Config {
         /// Gets or sets the binding type.
         /// </summary>
         /// <value>The binding type.</value>
-        [XmlElement("binding"), System.ComponentModel.DefaultValue(BindingType.AtomPub)]
+        [XmlElement("binding"), DefaultValue(BindingType.AtomPub)]
         public string Binding {
             get {
                 return this.credentials.Binding;
@@ -168,7 +169,7 @@ namespace CmisSync.Lib.Config {
         /// CmisSync.Lib will sync this remote folder once during this interval of time.
         /// </summary>
         /// <value>The poll interval.</value>
-        [XmlElement("pollinterval"), System.ComponentModel.DefaultValue(Config.DefaultPollInterval)]
+        [XmlElement("pollinterval"), DefaultValue(Config.DefaultPollInterval)]
         public double PollInterval {
             get {
                 return this.pollInterval;
@@ -184,7 +185,7 @@ namespace CmisSync.Lib.Config {
         /// If zero or negative number is passed, it will be converted to -1
         /// </summary>
         /// <value>The connection timeout.</value>
-        [XmlElement("connectionTimeout"), System.ComponentModel.DefaultValue(Config.DefaultConnectionTimeout)]
+        [XmlElement("connectionTimeout"), DefaultValue(Config.DefaultConnectionTimeout)]
         public int ConnectionTimeout {
             get {
                 return this.connectionTimeout;
@@ -200,7 +201,7 @@ namespace CmisSync.Lib.Config {
         /// If zero or negative number is passed, it will be converted to -1
         /// </summary>
         /// <value>The read timeout.</value>
-        [XmlElement("readTimeout"), System.ComponentModel.DefaultValue(Config.DefaultReadTimeout)]
+        [XmlElement("readTimeout"), DefaultValue(Config.DefaultReadTimeout)]
         public int ReadTimeout {
             get {
                 return this.readTimeout;
@@ -236,7 +237,7 @@ namespace CmisSync.Lib.Config {
         /// If none zero, CmisSync will divide the document by chunk size for download/upload.
         /// </summary>
         /// <value>The size of the chunk.</value>
-        [XmlElement("chunkSize"), System.ComponentModel.DefaultValue(Config.DefaultChunkSize)]
+        [XmlElement("chunkSize"), DefaultValue(Config.DefaultChunkSize)]
         public long ChunkSize {
             get {
                 return this.chunkSize;
@@ -311,10 +312,10 @@ namespace CmisSync.Lib.Config {
             }
         }
 
-        [XmlElement("downloadLimit"), System.ComponentModel.DefaultValue(0)]
+        [XmlElement("downloadLimit"), DefaultValue(0)]
         public long DownloadLimit { get; set; }
 
-        [XmlElement("uploadLimit"), System.ComponentModel.DefaultValue(0)]
+        [XmlElement("uploadLimit"), DefaultValue(0)]
         public long UploadLimit { get; set; }
 
         /// <summary>
