@@ -269,7 +269,7 @@ namespace CmisSync.Lib.Queueing {
                         manager.Handle(syncEvent);
                     } catch (CmisConnectionException connectionException) {
                         this.AddEvent(new CmisConnectionExceptionEvent(connectionException));
-                    } catch(Exception e) {
+                    } catch (Exception e) {
                         Logger.Error(string.Format("Exception in EventHandler on Event {0}: ", syncEvent.ToString()), e);
                     }
 

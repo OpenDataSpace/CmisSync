@@ -16,15 +16,13 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Queueing
-{
+namespace CmisSync.Lib.Queueing {
     using CmisSync.Lib.Events;
 
     /// <summary>
     /// Sync event manager which has a list of all Handlers and forwards events to them.
     /// </summary>
-    public interface ISyncEventManager
-    {
+    public interface ISyncEventManager {
         /// <summary>
         /// Adds the event handler to the manager.
         /// </summary>
