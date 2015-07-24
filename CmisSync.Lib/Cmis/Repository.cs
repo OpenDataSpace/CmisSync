@@ -30,6 +30,7 @@ namespace CmisSync.Lib.Cmis {
     using CmisSync.Lib;
     using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
@@ -58,7 +59,6 @@ namespace CmisSync.Lib.Cmis {
     /// Synchronized CMIS repository.
     /// </summary>
     public class Repository : AbstractNotifyingRepository, IDisposable, IObserver<Tuple<EventCategory, int>> {
-
         /// <summary>
         /// The storage.
         /// </summary>
@@ -180,7 +180,7 @@ namespace CmisSync.Lib.Cmis {
             }
 
             this.Queue = queue;
-            this.Queue.EventManager.AddEventHandler(rootFolderMonitor);
+            this.Queue.EventManager.AddEventHandler(this.rootFolderMonitor);
             this.Queue.EventManager.AddEventHandler(new DebugLoggingHandler());
 
             // Create Database connection
@@ -268,6 +268,17 @@ namespace CmisSync.Lib.Cmis {
                 return false;
             }));
             this.unsubscriber = this.Queue.CategoryCounter.Subscribe(this);
+            this.Queue.OnException += (sender, e) => {
+                ExceptionType type = ExceptionType.Unknown;
+                if (e.Exception is UploadFailedException &&
+                    (e.Exception as UploadFailedException).InnerException is CmisConstraintException &&
+                    ((e.Exception as UploadFailedException).InnerException as CmisConstraintException).IsVirusDetectionException())
+                {
+                    type = ExceptionType.FileUploadBlockedDueToVirusDetected;
+                }
+
+                this.PassExceptionToListener(ExceptionLevel.Warning, type, e.Exception);
+            };
         }
 
         /// <summary>
