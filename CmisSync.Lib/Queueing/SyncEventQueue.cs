@@ -58,7 +58,7 @@ namespace CmisSync.Lib.Queueing {
         /// <param name="manager">Manager holding the handler.</param>
         public SyncEventQueue(ISyncEventManager manager) {
             if (manager == null) {
-                throw new ArgumentException("manager may not be null");
+                throw new ArgumentNullException("manager");
             }
 
             this.fullCounter = new QueuedEventsCounter();
