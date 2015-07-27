@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     using System.IO;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;

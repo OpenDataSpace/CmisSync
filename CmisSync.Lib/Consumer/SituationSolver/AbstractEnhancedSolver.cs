@@ -25,6 +25,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.HashAlgorithm;
     using CmisSync.Lib.Queueing;

@@ -56,7 +56,6 @@ SOURCES =  \
 	Config/User.cs \
 	Config/UserCredentials.cs \
 	Config/XmlUri.cs \
-	Consumer/InteractionNeededException.cs \
 	Consumer/ISituationDetection.cs \
 	Consumer/LocalSituationDetection.cs \
 	Consumer/RemoteSituationDetection.cs \
@@ -105,26 +104,26 @@ SOURCES =  \
 	Events/EncapsuledEvent.cs \
 	Events/EventCategory.cs \
 	Events/ExceptionEvent.cs \
+	Events/FSEvent.cs \
+	Events/FSMovedEvent.cs \
 	Events/FileConflictEvent.cs \
 	Events/FileEvent.cs \
 	Events/FileMovedEvent.cs \
 	Events/FileOrFolderEventFactory.cs \
 	Events/FolderEvent.cs \
 	Events/FolderMovedEvent.cs \
-	Events/FSEvent.cs \
-	Events/FSMovedEvent.cs \
 	Events/FullSyncCompletedEvent.cs \
 	Events/ICountableEvent.cs \
+	Events/IFSEvent.cs \
+	Events/IFSMovedEvent.cs \
 	Events/IFilterableEvent.cs \
 	Events/IFilterableLocalPathEvent.cs \
 	Events/IFilterableNameEvent.cs \
 	Events/IFilterableRemoteObjectEvent.cs \
 	Events/IFilterableRemotePathEvent.cs \
-	Events/IFSEvent.cs \
-	Events/IFSMovedEvent.cs \
-	Events/InteractionNeededEvent.cs \
 	Events/IRemoveFromLoggingEvent.cs \
 	Events/ISyncEvent.cs \
+	Events/InteractionNeededEvent.cs \
 	Events/PermissionDeniedEvent.cs \
 	Events/ProxyAuthRequiredEvent.cs \
 	Events/RecentChangedEvent.cs \
@@ -133,6 +132,7 @@ SOURCES =  \
 	Events/RequestIgnoredEvent.cs \
 	Events/StartNextSyncEvent.cs \
 	Events/SuccessfulLoginEvent.cs \
+	Exceptions/InteractionNeededException.cs \
 	FileTransmission/AbortException.cs \
 	FileTransmission/ChunkedDownloader.cs \
 	FileTransmission/ChunkedUploader.cs \

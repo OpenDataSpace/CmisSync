@@ -27,6 +27,7 @@ namespace TestLibrary.ConsumerTests {
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Consumer.SituationSolver.PWC;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Producer.Watcher;
