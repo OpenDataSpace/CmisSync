@@ -49,7 +49,7 @@ namespace CmisSync.Notifications {
 
             lock (notificationLock) {
                 notification.Summary = title;
-                notification.Body = content;
+                notification.Body = content.Substring(0, Math.Min(content.Length, 1024));
                 notification.IconName = string.IsNullOrEmpty(iconPath) ? IconName : iconPath;
                 notification.Show();
             }

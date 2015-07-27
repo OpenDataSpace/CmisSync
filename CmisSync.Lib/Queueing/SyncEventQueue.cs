@@ -298,7 +298,11 @@ namespace CmisSync.Lib.Queueing {
         private void OnExceptionThrown(Exception e) {
             var handler = this.OnException;
             if (handler != null) {
-                handler(this, new ThreadExceptionEventArgs(e));
+                try {
+                    handler(this, new ThreadExceptionEventArgs(e));
+                } catch(Exception ex) {
+                    Logger.Debug("Error on informing exception listener on Queue", ex);
+                }
             }
         }
     }
