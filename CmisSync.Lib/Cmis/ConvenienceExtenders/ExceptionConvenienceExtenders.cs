@@ -32,7 +32,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <returns><c>true</c> if the given exception seems to be a virus dectection exception; otherwise, <c>false</c>.</returns>
         /// <param name="ex">Cmis constraint Exception.</param>
         public static bool IsVirusDetectionException(this CmisConstraintException ex) {
-            if (ex.ErrorContent.Contains("Infected file")) {
+            if (!string.IsNullOrEmpty(ex.ErrorContent) && ex.ErrorContent.ToLower().Contains("infected file")) {
                 return true;
             } else {
                 return false;
