@@ -318,8 +318,9 @@ namespace TestLibrary.ConsumerTests {
             remoteDetection.Setup(d => d.Analyse(this.storage.Object, It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
             var folderEvent = new FolderEvent(Mock.Of<IDirectoryInfo>(), Mock.Of<IFolder>()) { Local = MetaDataChangeType.NONE, Remote = MetaDataChangeType.NONE };
 
-            Assert.That(mechanism.Handle(folderEvent), Is.True);
+            var ex = Assert.Throws<InteractionNeededException>(() => mechanism.Handle(folderEvent));
 
+            Assert.That(ex, Is.EqualTo(exception));
             this.queue.Verify(q => q.AddEvent(It.Is<InteractionNeededEvent>(e => e.Exception == exception)), Times.Once());
             this.queue.VerifyThatNoOtherEventIsAddedThan<InteractionNeededEvent>();
         }
