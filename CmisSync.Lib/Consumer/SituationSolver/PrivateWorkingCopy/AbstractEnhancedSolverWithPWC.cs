@@ -26,6 +26,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.HashAlgorithm;
     using CmisSync.Lib.Storage.Database;
@@ -35,6 +36,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
     using DotCMIS;
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -205,6 +207,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
                     // Refresh is required, or DotCMIS will use cached one only
                     doc.Refresh();
+                } catch (CmisConstraintException constraint) {
+                    var uploadFailed = new UploadFailedException(constraint, doc);
+                    transmission.FailedException = uploadFailed;
+                    if (constraint.IsVirusDetectionException()) {
+                        throw new VirusDetectedException(constraint);
+                    } else {
+                        throw uploadFailed;
+                    }
                 } catch (Exception ex) {
                     var uploadFailed = new UploadFailedException(ex, doc);
                     transmission.FailedException = uploadFailed;
