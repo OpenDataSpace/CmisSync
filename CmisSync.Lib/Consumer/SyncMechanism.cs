@@ -65,6 +65,7 @@ namespace CmisSync.Lib.Consumer {
         /// <param name="transmissionStorage">File transmission storage.</param>
         /// <param name="activityListener">Active sync progress listener.</param>
         /// <param name="filters">Ignore filter.</param>
+        /// <param name="transmissionFactory">Transmission factory.</param>
         /// <param name="solver">Solver for custom solver matrix.</param>
         public SyncMechanism(
             ISituationDetection<AbstractFolderEvent> localSituation,
