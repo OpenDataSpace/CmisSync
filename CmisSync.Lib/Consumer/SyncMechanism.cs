@@ -146,7 +146,7 @@ namespace CmisSync.Lib.Consumer {
                     Logger.Debug(string.Format("RetryException[{0}] thrown for event {1} => enqueue event", retry.Message, folderEvent.ToString()));
                     folderEvent.RetryCount++;
                     this.Queue.AddEvent(folderEvent);
-                } catch (InteractionNeededException interaction) {
+                } catch (AbstractInteractionNeededException interaction) {
                     this.Queue.AddEvent(new InteractionNeededEvent(interaction));
                     throw;
                 } catch (DotCMIS.Exceptions.CmisConnectionException) {
