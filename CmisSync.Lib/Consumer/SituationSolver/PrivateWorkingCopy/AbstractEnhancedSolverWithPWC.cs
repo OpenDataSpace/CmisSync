@@ -211,7 +211,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     var uploadFailed = new UploadFailedException(constraint, doc);
                     transmission.FailedException = uploadFailed;
                     if (constraint.IsVirusDetectionException()) {
-                        throw new VirusDetectedException(constraint);
+                        var virusException = new VirusDetectedException(constraint);
+                        virusException.AffectedFiles.Add(localFile);
+                        throw virusException;
                     } else {
                         throw uploadFailed;
                     }
