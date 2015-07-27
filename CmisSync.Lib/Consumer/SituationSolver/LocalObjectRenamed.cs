@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
     using System.Linq;
@@ -26,6 +25,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -37,8 +37,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Local object has been renamed. => Rename the corresponding object on the server.
     /// </summary>
-    public class LocalObjectRenamed : AbstractEnhancedSolver
-    {
+    public class LocalObjectRenamed : AbstractEnhancedSolver {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectRenamed"/> class.
         /// </summary>

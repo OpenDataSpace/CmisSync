@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Producer.Crawler {
     using System;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.SelectiveIgnore;

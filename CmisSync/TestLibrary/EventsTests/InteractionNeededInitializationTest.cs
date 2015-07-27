@@ -22,6 +22,7 @@ namespace TestLibrary.EventsTests {
 
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
 
     using DotCMIS.Exceptions;
 

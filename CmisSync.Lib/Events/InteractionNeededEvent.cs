@@ -21,7 +21,7 @@ namespace CmisSync.Lib.Events {
     using System;
     using System.Collections.Generic;
 
-    using CmisSync.Lib.Consumer;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Exceptions;

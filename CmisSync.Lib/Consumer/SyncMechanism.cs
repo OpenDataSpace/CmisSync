@@ -26,6 +26,7 @@ namespace CmisSync.Lib.Consumer {
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Consumer.SituationSolver.PWC;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Queueing;
@@ -144,17 +145,9 @@ namespace CmisSync.Lib.Consumer {
                     Logger.Debug(string.Format("RetryException[{0}] thrown for event {1} => enqueue event", retry.Message, folderEvent.ToString()));
                     folderEvent.RetryCount++;
                     this.Queue.AddEvent(folderEvent);
-                } catch (UploadFailedException uploadFailure) {
-                    if (uploadFailure.InnerException is DotCMIS.Exceptions.CmisConstraintException) {
-                        if ((uploadFailure.InnerException as DotCMIS.Exceptions.CmisConstraintException).IsVirusDetectionException()) {
-                            Logger.Warn(string.Format("Virus detected: {0}", uploadFailure.Message), uploadFailure);
-                            return true;
-                        }
-                    }
-
-                    throw;
                 } catch (InteractionNeededException interaction) {
                     this.Queue.AddEvent(new InteractionNeededEvent(interaction));
+                    throw;
                 } catch (DotCMIS.Exceptions.CmisConnectionException) {
                     throw;
                 } catch (Exception ex) {
