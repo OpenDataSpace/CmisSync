@@ -26,9 +26,9 @@ namespace TestLibrary.EventsTests.ExceptionEventsTests {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class PermissionDeniedEventTest {
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorWithValidInput() {
             var exception = new Mock<DotCMIS.Exceptions.CmisPermissionDeniedException>().Object;
             var ev = new PermissionDeniedEvent(exception);

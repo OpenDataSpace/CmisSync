@@ -26,21 +26,21 @@ namespace TestLibrary.EventsTests.ExceptionEventsTests {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class BaseExceptionEventTest {
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorFailsWithNullException() {
             Assert.Throws<ArgumentNullException>(() => new ExceptionEvent(null));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorWithValidInput() {
             var exception = new Mock<Exception>().Object;
             var ev = new ExceptionEvent(exception);
             Assert.AreEqual(exception, ev.Exception);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ToStringIsImplemented() {
             var exception = new Mock<Exception>(string.Empty) { CallBase = true }.Object;
             var ev = new ExceptionEvent(exception);

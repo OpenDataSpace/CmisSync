@@ -29,7 +29,7 @@ namespace TestLibrary.CmisTests.AuthenticationTests {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class AuthProviderFactoryTest : IDisposable {
         private readonly Uri url = new Uri("https://example.com");
         private DBreezeEngine engine;
@@ -52,25 +52,25 @@ namespace TestLibrary.CmisTests.AuthenticationTests {
             this.engine = null;
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CreateBasicAuthProvider() {
             var provider = AuthProviderFactory.CreateAuthProvider(AuthenticationType.BASIC, this.url, this.engine);
             Assert.That(provider, Is.TypeOf<PersistentStandardAuthenticationProvider>());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CreateNtlmAuthProvider() {
             var provider = AuthProviderFactory.CreateAuthProvider(AuthenticationType.NTLM, this.url, this.engine);
             Assert.That(provider, Is.TypeOf<PersistentNtlmAuthenticationProvider>());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CreateKerberosAuthProvider() {
             var provider = AuthProviderFactory.CreateAuthProvider(AuthenticationType.KERBEROS, this.url, this.engine);
             Assert.That(provider, Is.TypeOf<PersistentNtlmAuthenticationProvider>());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CreateUnimplementedAuthTypeReturnDefaultAuthProvider() {
             var provider = AuthProviderFactory.CreateAuthProvider(AuthenticationType.SHIBBOLETH, this.url, this.engine);
             Assert.That(provider, Is.TypeOf<StandardAuthenticationProviderWrapper>());

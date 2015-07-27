@@ -37,15 +37,15 @@ namespace TestLibrary.AccumulatorTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class LocalObjectFetcherTest {
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorTest() {
             var matcher = new Mock<IPathMatcher>();
             new LocalObjectFetcher(matcher.Object);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void IgnoresOtherEvents() {
             var matcher = new Mock<IPathMatcher>();
 
@@ -55,7 +55,7 @@ namespace TestLibrary.AccumulatorTests {
             Assert.That(fetcher.Handle(syncEvent.Object), Is.False);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FetchLocalFolder() {
             var localPath = Path.GetTempPath();
             var remotePath = Path.Combine(Path.GetTempPath(), "a");
@@ -75,7 +75,7 @@ namespace TestLibrary.AccumulatorTests {
             Assert.That(folderEvent.LocalFolder.FullName, Is.EqualTo(localPath));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FetchOnlyIfLocalFolderNull() {
             var matcher = new Mock<IPathMatcher>();
 
@@ -90,7 +90,7 @@ namespace TestLibrary.AccumulatorTests {
             Assert.That(folderEvent.LocalFolder, Is.EqualTo(folder.Object));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FetchLocalFile() {
             var localPath = Path.GetTempPath();
             var remotePath = Path.Combine(Path.GetTempPath(), "a");
@@ -110,7 +110,7 @@ namespace TestLibrary.AccumulatorTests {
             Assert.That(fileEvent.LocalFile.FullName, Is.EqualTo(localPath));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FetchOnlyIfLocalFileNull() {
             var matcher = new Mock<IPathMatcher>();
 
@@ -125,7 +125,7 @@ namespace TestLibrary.AccumulatorTests {
             Assert.That(fileEvent.LocalFile, Is.EqualTo(file.Object));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void DropFileEventIfPathMatcherCannotCreateLocalPath() {
             var remotePath = Path.Combine(Path.GetTempPath(), "a");
 
@@ -142,7 +142,7 @@ namespace TestLibrary.AccumulatorTests {
             Assert.That(fileEvent.LocalFile, Is.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void DropFolderEventIfPathMatcherCannotCreateLocalPath() {
             var remotePath = Path.Combine(Path.GetTempPath(), "a");
 

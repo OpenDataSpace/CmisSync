@@ -26,16 +26,16 @@ namespace TestLibrary.ConfigTests {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class PasswordTest {
-        [Test, Category("Fast")]
+        [Test]
         public void DefaultConstructor() {
             var password = new Password();
             Assert.IsNull(password.ObfuscatedPassword);
             Assert.IsNull(password.ToString());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorTakingAPaintextPassword() {
             string passwd = "Test";
             var password = new Password(passwd);
@@ -43,7 +43,7 @@ namespace TestLibrary.ConfigTests {
             Assert.AreEqual(passwd, password.ToString());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ImplizitConstructorWithString() {
             string passwd = "Test";
             Password password = passwd;
@@ -51,7 +51,7 @@ namespace TestLibrary.ConfigTests {
             Assert.AreEqual(passwd, password.ToString());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SetAndGetObfuscatedPassword() {
             string passwd = "Test";
             string obfuscated = new Password(passwd).ObfuscatedPassword;
@@ -61,7 +61,7 @@ namespace TestLibrary.ConfigTests {
             Assert.AreEqual(passwd, password.ToString());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void EnsureSerializationOnlyContainsObfuscatedPassword() {
             string plaintext = "secret";
             Password pw = new Password(plaintext);
@@ -74,13 +74,13 @@ namespace TestLibrary.ConfigTests {
             Assert.IsFalse(textWriter.ToString().Contains(plaintext));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void OnePasswordEqualsAnotherInstanceWithTheSameStoredPassword() {
             var underTest = new Password("secret");
             Assert.That(underTest, Is.EqualTo(new Password("secret")));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void EqualsOnNullReturnsFalse() {
             Assert.That(new Password("secret").Equals(null), Is.False);
         }

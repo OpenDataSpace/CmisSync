@@ -29,7 +29,7 @@ namespace TestLibrary.CmisTests.AuthenticationTests {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class KerberosAuthenticationProviderTest {
         private HttpWebRequest request;
         private IBindingSession session;
@@ -40,13 +40,13 @@ namespace TestLibrary.CmisTests.AuthenticationTests {
             this.session = new Mock<IBindingSession>().Object;
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorTest() {
             var auth = new NtlmAuthenticationProvider { Session = this.session };
             Assert.AreEqual(this.session, auth.Session);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void AddCredentialsToWebRequest() {
             var auth = new NtlmAuthenticationProvider { Session = this.session };
             Assert.IsNull(this.request.Credentials);
@@ -55,7 +55,7 @@ namespace TestLibrary.CmisTests.AuthenticationTests {
             Assert.AreEqual(CredentialCache.DefaultCredentials, this.request.Credentials);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void EnableCookies() {
             var auth = new NtlmAuthenticationProvider { Session = this.session };
             Assert.IsNull(this.request.CookieContainer);

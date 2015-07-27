@@ -33,9 +33,9 @@ namespace TestLibrary.CmisTests {
 
     using TestLibrary.IntegrationTests;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class RepositoryStatusAggregatorTest {
-        [Test, Category("Fast")]
+        [Test]
         public void Constructor() {
             var underTest = new RepositoryStatusAggregator();
             Assert.That(underTest.Status, Is.EqualTo(SyncStatus.Disconnected));
@@ -43,7 +43,7 @@ namespace TestLibrary.CmisTests {
             Assert.That(underTest.LastFinishedSync, Is.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void AddRepository() {
             var underTest = new RepositoryStatusAggregator();
             var numberOfChanges = 2;
@@ -57,7 +57,7 @@ namespace TestLibrary.CmisTests {
             Assert.That(underTest.Status, Is.EqualTo(status));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void RemoveRepository() {
             var underTest = new RepositoryStatusAggregator();
 
@@ -70,7 +70,7 @@ namespace TestLibrary.CmisTests {
             Assert.That(underTest.Status, Is.EqualTo(SyncStatus.Disconnected));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ThreeRepositoriesAddedAndAggregated() {
             var underTest = new RepositoryStatusAggregator();
 

@@ -37,7 +37,7 @@ namespace TestLibrary.CmisTests {
 
     using TestLibrary.IntegrationTests;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class RepositoryTests : IDisposable {
         private static dynamic config;
         private ActivityListenerAggregator listener;
@@ -56,7 +56,7 @@ namespace TestLibrary.CmisTests {
 #endif
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SyncStatusStartsWithOfflineStatus() {
             this.SetupMocks();
 
@@ -65,7 +65,7 @@ namespace TestLibrary.CmisTests {
             Assert.That(underTest.Status, Is.EqualTo(SyncStatus.Disconnected));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SyncStatusIsDeactivatedIfRootFolderDoesNotExists() {
             this.SetupMocks();
             bool notified = false;
@@ -89,7 +89,7 @@ namespace TestLibrary.CmisTests {
             Assert.That(notified, Is.True);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SyncStatusSwitchesFromOfflineToIdleIfLoginWasSuccessful() {
             this.SetupMocks();
             bool notified = false;
@@ -106,7 +106,7 @@ namespace TestLibrary.CmisTests {
             Assert.That(notified, Is.True);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SyncStatusSwitchesFromOfflineToErrorIfConfigurationIsNeeded() {
             this.SetupMocks();
             bool notified = false;
@@ -122,7 +122,7 @@ namespace TestLibrary.CmisTests {
             Assert.That(notified, Is.True);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SyncDateUpdatesIfSyncIsDoneAndQueueDoesNotContainsChanges() {
             this.SetupMocks();
             bool notified = false;
@@ -141,7 +141,7 @@ namespace TestLibrary.CmisTests {
             Assert.That(notified, Is.True);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void LastFinishedSyncIsNullOnInitializationAndNumberOfChangesIsZero() {
             this.SetupMocks();
 
@@ -151,7 +151,7 @@ namespace TestLibrary.CmisTests {
             Assert.That(underTest.NumberOfChanges, Is.EqualTo(0));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void NumberOfChangesAreUpdatedIfEventIsAddedToQueue() {
             this.SetupMocks();
 
