@@ -322,6 +322,7 @@
     <Compile Include="FileTransmission\ITransmissionAggregator.cs" />
     <Compile Include="Cmis\ConvenienceExtenders\ExceptionConvenienceExtenders.cs" />
     <Compile Include="Exceptions\InteractionNeededException.cs" />
+    <Compile Include="Exceptions\AbstractInteractionNeededException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
