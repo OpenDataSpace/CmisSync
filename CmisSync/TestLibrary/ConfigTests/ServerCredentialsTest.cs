@@ -24,9 +24,9 @@ namespace TestLibrary {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class ServerCredentialsTest {
-        [Test, Category("Fast")]
+        [Test]
         public void DefaultConstructor() {
             var cred = new ServerCredentials();
             Assert.IsNull(cred.Address);
@@ -34,7 +34,7 @@ namespace TestLibrary {
             Assert.IsNull(cred.Password);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SetServerAddress() {
             string url = "http://example.com/";
             var cred = new ServerCredentials {

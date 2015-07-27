@@ -30,36 +30,36 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
 
     using TestUtils;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class AllowableActionExtendersTests {
-        [Test, Category("Fast")]
+        [Test]
         public void CanCreateDocument([Values(true, false)]bool readOnly) {
             var underTest = new Mock<IFolder>();
             underTest.SetupReadOnly(readOnly);
             Assert.That(underTest.Object.CanCreateDocument(), Is.EqualTo(!readOnly));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CanGetChildren([Values(true, false)]bool readOnly) {
             var underTest = new Mock<IFolder>();
             underTest.SetupReadOnly(readOnly);
             Assert.That(underTest.Object.CanGetChildren(), Is.True);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CanGetChildrenIfNoActionIsAvailable() {
             var underTest = new Mock<IFolder>();
             Assert.That(underTest.Object.CanGetChildren(), Is.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CanDeleteObject([Values(true, false)]bool readOnly) {
             var underTest = new Mock<IDocument>();
             underTest.SetupReadOnly(readOnly);
             Assert.That(underTest.Object.CanDeleteObject(), Is.EqualTo(!readOnly));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CanGetFolderTree([Values(true, false)]bool readOnly, [Values(true, false)]bool supportsDescendants) {
             var underTest = new Mock<IFolder>();
             underTest.SetupReadOnly(readOnly, supportsDescendants);
@@ -67,7 +67,7 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
             Assert.That(underTest.Object.CanGetFolderTree(), Is.EqualTo(supportsDescendants));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void AreAllowableActionsAvailable(
             [Values(true, false)]bool includeActions,
             [Values(true, false)]bool includeAcls)
@@ -83,7 +83,7 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
             Assert.That(underTest.Object.AreAllowableActionsAvailable(), Is.EqualTo(includeAcls || includeActions));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ImitateOldGdsCmisGw() {
             var underTest = new Mock<ISession>();
             underTest.SetupRepositoryInfo("GRAU DataSpace CMIS Gateway", "1.5.0", "GRAU DATA AG");
@@ -92,7 +92,7 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
             Assert.That(underTest.Object.AreAllowableActionsAvailable(), Is.False);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ImitateNewGdsCmisGw() {
             var underTest = new Mock<ISession>();
             underTest.SetupRepositoryInfo("GRAU DataSpace CMIS Gateway", "1.5.1120", "GRAU DATA AG");

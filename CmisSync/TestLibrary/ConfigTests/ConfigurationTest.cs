@@ -28,7 +28,7 @@ namespace TestLibrary.ConfigTests {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Medium")]
     public class ConfigurationTest {
         private readonly string configPath = Path.Combine(Path.GetTempPath(), "testconfig.conf");
 
@@ -39,7 +39,7 @@ namespace TestLibrary.ConfigTests {
             }
         }
 
-        [Test, Category("Medium")]
+        [Test]
         public void TestConfig() {
             // Create new config file with default values
             Config config = Config.CreateInitialConfig(this.configPath);
@@ -53,7 +53,7 @@ namespace TestLibrary.ConfigTests {
             config = Config.CreateOrLoadByPath(this.configPath);
         }
 
-        [Test, Category("Medium")]
+        [Test]
         public void IgnoreFoldersAreSavedAndLoadedAgain() {
             // Create new config file with default values
             Config config = Config.CreateInitialConfig(this.configPath);
@@ -65,7 +65,7 @@ namespace TestLibrary.ConfigTests {
             Assert.That(config.IgnoreFolderNames.Contains(ignoreFolderPattern));
         }
 
-        [Test, Category("Medium")]
+        [Test]
         public void IgnoreFileNamesAreSavedAndLoadedAgain() {
             // Create new config file with default values
             Config config = Config.CreateInitialConfig(this.configPath);
@@ -77,7 +77,7 @@ namespace TestLibrary.ConfigTests {
             Assert.That(config.IgnoreFileNames.Contains(ignoreFileNames));
         }
 
-        [Test, Category("Medium")]
+        [Test]
         public void TestBrand() {
             Uri url = new Uri("http://localhost/cmis/atom");
             string path1 = "/brand/1.png";
@@ -112,7 +112,7 @@ namespace TestLibrary.ConfigTests {
             Assert.AreEqual(date2, config.Brand.Files[1].Date);
         }
 
-        [Test, Category("Medium")]
+        [Test]
         public void SavingConfigTriggersSavedEventOnRepoInfo() {
             var underTest = Config.CreateInitialConfig(this.configPath);
             var repo = new RepoInfo() {
@@ -130,7 +130,7 @@ namespace TestLibrary.ConfigTests {
             Assert.That(isTriggered, Is.True);
         }
 
-        [Test, Category("Medium")]
+        [Test]
         public void SavingConfigDoesNotTriggerSavedEventOnAlreadyRemovedRepoInfo() {
             var underTest = Config.CreateInitialConfig(this.configPath);
             var repo = new RepoInfo() {

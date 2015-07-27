@@ -31,28 +31,28 @@ namespace TestLibrary.EventsTests {
 
     using TestUtils;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class FileEventTest {
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorTakesIFileInfoInstance() {
             var file = Mock.Of<IFileInfo>();
             var ev = new FileEvent(file);
             Assert.That(ev.LocalFile, Is.EqualTo(file));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorTakesRemoteFile() {
             var file = Mock.Of<IDocument>();
             var ev = new FileEvent(null, file);
             Assert.That(ev.RemoteFile, Is.EqualTo(file));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorFailsOnNullParameter() {
             Assert.Throws<ArgumentNullException>(() => new FileEvent());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void EqualityNull() {
             var localFile = Mock.Of<IFileInfo>();
             var fe = new FileEvent(localFile);
@@ -60,7 +60,7 @@ namespace TestLibrary.EventsTests {
             Assert.That(fe, Is.Not.EqualTo(null));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void EqualitySame() {
             var remoteFile = Mock.Of<IDocument>();
             var fe = new FileEvent(null, remoteFile);
@@ -68,7 +68,7 @@ namespace TestLibrary.EventsTests {
             Assert.That(fe, Is.EqualTo(fe));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ToStringDoesNotCallPathsBecauseThisIsDamnExpensive() {
             var remoteFile = Mock.Of<IDocument>();
             var fe = new FileEvent(null, remoteFile);
@@ -76,14 +76,14 @@ namespace TestLibrary.EventsTests {
             Mock.Get(remoteFile).VerifyGet(f => f.Paths, Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void AbstractFolderEventHasPathAttribute() {
             var localFile = new Mock<IFileInfo>();
             AbstractFolderEvent fe = new FileEvent(localFile.Object);
             Assert.That(fe.RemotePath, Is.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ReturnedRemotePathIsEqualRemoteObjectPath() {
             string remotePath = "/path";
             var remoteFile = new Mock<IDocument>();
@@ -92,7 +92,7 @@ namespace TestLibrary.EventsTests {
             Assert.That(fileEvent.RemotePath, Is.EqualTo(remotePath));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void RemotePathIsEqualToFirstRemoteObjectPath() {
             string remotePath = "/path";
             var remoteFile = new Mock<IDocument>();
@@ -101,19 +101,19 @@ namespace TestLibrary.EventsTests {
             Assert.That(fileEvent.RemotePath, Is.EqualTo(remotePath));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void RemotePathIsNullIfNoRemoteFileIsSet() {
             var fileEvent = new FileEvent(localFile: Mock.Of<IFileInfo>());
             Assert.That(fileEvent.RemotePath, Is.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void RemotePathIsNullIfRemoteObjectDoesNotContainAPath() {
             var fileEvent = new FileEvent(remoteFile: Mock.Of<IDocument>());
             Assert.That(fileEvent.RemotePath, Is.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void RemotePathRequestFailsReturnsNull() {
             var remoteFile = new Mock<IDocument>();
             remoteFile.Setup(r => r.Paths).Throws(new DotCMIS.Exceptions.CmisRuntimeException());

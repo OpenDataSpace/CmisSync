@@ -28,19 +28,19 @@ namespace TestLibrary.EventsTests {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class ActivityListenerAggregatorTest {
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorThrowsExceptionIfTransmissionManagerIsNull() {
             Assert.Throws<ArgumentNullException>(() => new ActivityListenerAggregator(Mock.Of<IActivityListener>(), null));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorThrowsExceptionIfActivityListenerIsNull() {
             Assert.Throws<ArgumentNullException>(() => new ActivityListenerAggregator(null, new TransmissionManager()));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorTakesTransmissionManager() {
             var manager = new TransmissionManager();
             var agg = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), manager);

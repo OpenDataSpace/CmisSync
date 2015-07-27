@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.EventsTests
-{ 
+namespace TestLibrary.EventsTests {
     using System;
 
     using CmisSync.Lib.Events;
@@ -27,20 +26,17 @@ namespace TestLibrary.EventsTests
 
     using NUnit.Framework;
 
-    [TestFixture]
-    public class FullSyncCompletedEventTest
-    {
-        [Test, Category("Fast")]
-        public void ContructorTest()
-        {
+    [TestFixture, Category("Fast")
+    public class FullSyncCompletedEventTest {
+        [Test]
+        public void ContructorTest() {
             var start = new Mock<StartNextSyncEvent>(false).Object;
             var complete = new FullSyncCompletedEvent(start);
             Assert.AreEqual(start, complete.StartEvent);
         }
 
-        [Test, Category("Fast")]
-        public void ConstructorFailsOnNullParameterTest()
-        {
+        [Test]
+        public void ConstructorFailsOnNullParameterTest() {
             Assert.Throws<ArgumentNullException>(() => new FullSyncCompletedEvent(null));
         }
     }

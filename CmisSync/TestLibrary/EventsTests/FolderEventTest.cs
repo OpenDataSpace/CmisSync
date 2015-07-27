@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.EventsTests
-{
+namespace TestLibrary.EventsTests {
     using System;
 
     using CmisSync.Lib.Events;
@@ -32,15 +31,14 @@ namespace TestLibrary.EventsTests
 
     using TestUtils;
 
-    [TestFixture]
-    public class FolderEventTest
-    {
-        [Test, Category("Fast")]
+    [TestFixture, Category("Fast")]
+    public class FolderEventTest {
+        [Test]
         public void ConstructorFailsIfLocalFolderAndRemoteFolderAreNull() {
             Assert.Throws<ArgumentNullException>(() => new FolderEvent());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorWithLocalFolder() {
             var localFolder = Mock.Of<IDirectoryInfo>();
 
@@ -49,7 +47,7 @@ namespace TestLibrary.EventsTests
             Assert.That(underTest.LocalFolder, Is.EqualTo(localFolder));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorWithRemoteFolder() {
             var remoteFolder = Mock.Of<IFolder>();
 
@@ -58,7 +56,7 @@ namespace TestLibrary.EventsTests
             Assert.That(underTest.RemoteFolder, Is.EqualTo(remoteFolder));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorTakesLocalAndRemoteFolder() {
             var localFolder = Mock.Of<IDirectoryInfo>();
             var remoteFolder = Mock.Of<IFolder>();
@@ -69,7 +67,7 @@ namespace TestLibrary.EventsTests
             Assert.That(underTest.RemoteFolder, Is.EqualTo(remoteFolder));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void LocalPathIsFilterable() {
             var path = "localpath";
             var localFolder = Mock.Of<IDirectoryInfo>(f => f.FullName == path);
@@ -79,7 +77,7 @@ namespace TestLibrary.EventsTests
             Assert.That(underTest.LocalPath, Is.EqualTo(path));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void LocalPathReturnsNullIfLocalFolderIsNotSet() {
             var remoteFolder = Mock.Of<IFolder>();
 
@@ -89,7 +87,7 @@ namespace TestLibrary.EventsTests
             Assert.That(underTest.LocalPath, Is.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void IsIFilterableRemoteObjectEvent() {
             var remoteFolder = Mock.Of<IFolder>();
 

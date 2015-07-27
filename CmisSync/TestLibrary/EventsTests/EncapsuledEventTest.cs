@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.EventsTests
-{
+namespace TestLibrary.EventsTests {
     using System;
 
     using CmisSync.Lib.Events;
@@ -27,20 +26,17 @@ namespace TestLibrary.EventsTests
 
     using NUnit.Framework;
 
-    [TestFixture]
-    public class EncapsuledEventTest
-    {
-        [Test, Category("Fast")]
-        public void ContructorTest()
-        {
+    [TestFixture, Category("Fast")]
+    public class EncapsuledEventTest {
+        [Test]
+        public void ContructorTest() {
             var inner = new Mock<ISyncEvent>().Object;
             var outer = new EncapsuledEvent(inner);
             Assert.That(inner, Is.EqualTo(outer.Event));
         }
 
-        [Test, Category("Fast")]
-        public void ConstructorThrowsExceptionIfEncapsuledEventIsNull()
-        {
+        [Test]
+        public void ConstructorThrowsExceptionIfEncapsuledEventIsNull() {
             Assert.Throws<ArgumentNullException>(() => new EncapsuledEvent(null));
         }
     }

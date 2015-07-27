@@ -31,9 +31,9 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class CmisConvenienceExtendersTest {
-        [Test, Category("Fast")]
+        [Test]
         public void ContentStreamHashReturnNullIfNoHashIsAvailable() {
             var doc = Mock.Of<IDocument>(
                 d =>
@@ -41,13 +41,13 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
             Assert.That(doc.ContentStreamHash(), Is.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ContentStreamHashReturnsNullIfNoPropertiesAreAvailable() {
             var doc = Mock.Of<IDocument>();
             Assert.That(doc.ContentStreamHash(), Is.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ContentStreamHashReturnsByteArrayIfHashIsAvailable() {
             var doc = new Mock<IDocument>();
             byte[] hash = new byte[20];
@@ -55,7 +55,7 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
             Assert.That(doc.Object.ContentStreamHash(), Is.EqualTo(hash));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ContentStreamHashReturnsByteArrayIfHashIsAvailableAndTypeIsGiven() {
             var doc = new Mock<IDocument>();
             byte[] hash = new byte[16];
@@ -63,7 +63,7 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
             Assert.That(doc.Object.ContentStreamHash("MD5"), Is.EqualTo(hash));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ContentStreamHashReturnsNullIfNoValueInPropertyIsAvailable() {
             var properties = new List<IProperty>();
             var property = Mock.Of<IProperty>(
@@ -78,14 +78,14 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
             Assert.That(doc.ContentStreamHash(), Is.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void PrivateWorkingCopyIsUpdateable([Values(true, false)]bool updateable) {
             var session = new Mock<ISession>();
             session.SetupPrivateWorkingCopyCapability(updateable);
             Assert.That(session.Object.ArePrivateWorkingCopySupported(), Is.EqualTo(updateable));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void PrivateWorkingCopyIsUpdateableReturnsFalseOnException() {
             var session = new Mock<ISession>();
             Assert.That(session.Object.ArePrivateWorkingCopySupported(), Is.False);

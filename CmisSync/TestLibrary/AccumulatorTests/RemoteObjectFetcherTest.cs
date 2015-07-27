@@ -38,20 +38,20 @@ namespace TestLibrary.AccumulatorTests {
     using TestLibrary.TestUtils;
     using TestLibrary.UtilsTests;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class RemoteObjectFetcherTest {
         private static readonly string Path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "path");
         private static readonly string Id = "myId";
         private static readonly Guid Uuid = Guid.NewGuid();
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorTest() {
             var session = new Mock<ISession>();
             var storage = new Mock<IMetaDataStorage>();
             new RemoteObjectFetcher(session.Object, storage.Object);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void DoNotGetExtendedAttributeIfFileDoesNotExist() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
@@ -71,7 +71,7 @@ namespace TestLibrary.AccumulatorTests {
             fileInfoMock.Verify(f => f.GetExtendedAttribute(It.IsAny<string>()), Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void DoNotFetchIfExtendedAttributeIsMissing() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
@@ -88,7 +88,7 @@ namespace TestLibrary.AccumulatorTests {
             session.Verify(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>()), Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void DoNotFetchIfDatabaseEntryIsMissing() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
@@ -106,7 +106,7 @@ namespace TestLibrary.AccumulatorTests {
             session.Verify(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>()), Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FileDeletedEventWithoutObjectId() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
@@ -125,7 +125,7 @@ namespace TestLibrary.AccumulatorTests {
             Assert.That(fileEvent.RemoteFile, Is.Not.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FileEventWithoutObjectId() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
@@ -145,7 +145,7 @@ namespace TestLibrary.AccumulatorTests {
             Assert.That(fileEvent.RemoteFile, Is.Not.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FileEventForRemovedFile() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
@@ -163,7 +163,7 @@ namespace TestLibrary.AccumulatorTests {
             Assert.That(fileEvent.RemoteFile, Is.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FileEventWithIDocument() {
             var session = new Mock<ISession>();
             var storage = new Mock<IMetaDataStorage>();
@@ -173,7 +173,7 @@ namespace TestLibrary.AccumulatorTests {
             session.Verify(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>()), Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FileMovedEventWithoutLocalPath() {
             var session = new Mock<ISession>();
             var fetcher = new RemoteObjectFetcher(session.Object, Mock.Of<IMetaDataStorage>());
@@ -182,7 +182,7 @@ namespace TestLibrary.AccumulatorTests {
             session.Verify(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>()), Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FolderEventWithIFolder() {
             var session = new Mock<ISession>();
             var fetcher = new RemoteObjectFetcher(session.Object, Mock.Of<IMetaDataStorage>());
@@ -191,7 +191,7 @@ namespace TestLibrary.AccumulatorTests {
             session.Verify(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>()), Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FolderEventWithoutObjectId() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
@@ -212,7 +212,7 @@ namespace TestLibrary.AccumulatorTests {
             Assert.That(folderEvent.RemoteFolder, Is.Not.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FolderEventWithoutObjectIdAndExtendedAttributeExceptionOnUuidRequest() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
@@ -233,7 +233,7 @@ namespace TestLibrary.AccumulatorTests {
             Assert.That(folderEvent.RemoteFolder, Is.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FolderEventForRemovedFolder() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
@@ -252,7 +252,7 @@ namespace TestLibrary.AccumulatorTests {
             Assert.That(folderEvent.RemoteFolder, Is.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CrawlRequestedEventWithNewRemoteFolder() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
@@ -272,7 +272,7 @@ namespace TestLibrary.AccumulatorTests {
             Assert.That(crawlEvent.RemoteFolder, Is.EqualTo(remote));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void OperationContextDoesNotUsesTheSessionCache() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();

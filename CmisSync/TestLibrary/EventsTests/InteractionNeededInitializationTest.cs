@@ -30,9 +30,9 @@ namespace TestLibrary.EventsTests {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class InteractionNeededInitializationTest {
-        [Test, Category("Fast")]
+        [Test]
         public void InitializeWithException() {
             var ex = new InteractionNeededException();
             var underTest = new InteractionNeededEvent(ex);
@@ -44,12 +44,12 @@ namespace TestLibrary.EventsTests {
             Assert.That(underTest.Details, Is.Not.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void InitializeWithoutExceptionFails() {
             Assert.Throws<ArgumentNullException>(() => new InteractionNeededEvent((InteractionNeededException)null));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void InitializeWithNullString() {
             var underTest = new InteractionNeededEvent((string)null);
             Assert.That(underTest.Title, Is.Not.Null);
@@ -57,7 +57,7 @@ namespace TestLibrary.EventsTests {
             Assert.That(underTest.Details, Is.Not.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void InitializeWithCmisException() {
             string errorContent = "error content";
             string message = "message";
@@ -69,7 +69,7 @@ namespace TestLibrary.EventsTests {
             Assert.That(underTest.Details, Is.EqualTo(errorContent));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void InitializeWithString() {
             string desc = "desc";
             string message = "message";
@@ -80,7 +80,7 @@ namespace TestLibrary.EventsTests {
             Assert.That(underTest.Details, Is.EqualTo(desc));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void InitializeActions() {
             int called = 0;
             var action = new Action(delegate() { called++; });
