@@ -114,7 +114,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             [Values(1024)]long chunkSize)
         {
             byte[] content = new byte[fileLength];
-            byte[] expectedHash = SHA1Managed.Create().ComputeHash(content);
             var underTest = this.InitializeMocksAndCreateSolver(chunkSize: chunkSize);
             var localFile = new Mock<IFileInfo>(MockBehavior.Strict);
             localFile.SetupStream(content);
