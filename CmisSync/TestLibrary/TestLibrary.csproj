@@ -328,6 +328,7 @@
     <Compile Include="StorageTests\FileSystemTests\ReadOnlyIgnoringDecorator\IFileSystemInfoDecoratorTest.cs" />
     <Compile Include="FileTransmissionTests\TransmissionFactoryTest.cs" />
     <Compile Include="IntegrationTests\VirusDetectionTests\VirusDetectionTests.cs" />
+    <Compile Include="ExceptionTests\VirusDetectedExceptionTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -366,5 +367,6 @@
     <Folder Include="MockedServer\MockedServices\" />
     <Folder Include="StorageTests\FileSystemTests\ReadOnlyIgnoringDecorator\" />
     <Folder Include="IntegrationTests\VirusDetectionTests\" />
+    <Folder Include="ExceptionTests\" />
   </ItemGroup>
 </Project>

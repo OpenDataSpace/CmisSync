@@ -133,7 +133,9 @@ SOURCES =  \
 	Events/RequestIgnoredEvent.cs \
 	Events/StartNextSyncEvent.cs \
 	Events/SuccessfulLoginEvent.cs \
+	Exceptions/AbstractInteractionNeededException.cs \
 	Exceptions/InteractionNeededException.cs \
+	Exceptions/VirusDetectedException.cs \
 	FileTransmission/AbortException.cs \
 	FileTransmission/ChunkedDownloader.cs \
 	FileTransmission/ChunkedUploader.cs \
