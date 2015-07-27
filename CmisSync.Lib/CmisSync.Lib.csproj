@@ -323,6 +323,7 @@
     <Compile Include="Cmis\ConvenienceExtenders\ExceptionConvenienceExtenders.cs" />
     <Compile Include="Exceptions\InteractionNeededException.cs" />
     <Compile Include="Exceptions\AbstractInteractionNeededException.cs" />
+    <Compile Include="Exceptions\VirusDetectedException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
