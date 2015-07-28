@@ -24,6 +24,7 @@ namespace TestLibrary.QueueingTests {
 
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.Queueing;
 
     using DotCMIS.Exceptions;
@@ -45,23 +46,32 @@ namespace TestLibrary.QueueingTests {
         }
 
         [Test, Category("Fast")]
-        public void IfExceptionIsThrownItIsPassedToOnExceptionListener() {
+        public void IfExceptionIsThrownNothingHappens() {
             var manager = new Mock<ISyncEventManager>();
-            var ex = new Mock<Exception>("Generic Exception").Object;
-            int isNotified = 0;
-            manager.Setup(m => m.Handle(It.IsAny<ISyncEvent>())).Throws(ex);
+            manager.Setup(m => m.Handle(It.IsAny<ISyncEvent>())).Throws(Mock.Of<Exception>());
             using (var underTest = new SyncEventQueue(manager.Object)) {
-                underTest.OnException += (sender, e) => {
-                    Assert.That(e.Exception, Is.EqualTo(ex));
-                    isNotified++;
-                };
                 underTest.AddEvent(Mock.Of<ISyncEvent>());
                 underTest.StopListener();
                 WaitFor(underTest, (q) => { return q.IsStopped; });
             }
+        }
 
-            manager.Verify(m => m.Handle(It.IsAny<ISyncEvent>()), Times.Once());
-            Assert.That(isNotified, Is.EqualTo(1));
+        [Test, Category("Fast")]
+        public void IfCmisConnectionExceptionIsThrownItIsPassedToQueue() {
+            var connectionException = Mock.Of<CmisConnectionException>();
+            var manager = new Mock<ISyncEventManager>(MockBehavior.Strict);
+            var initialEvent = Mock.Of<ISyncEvent>();
+            manager.Setup(m => m.Handle(initialEvent)).Throws(connectionException);
+            manager.Setup(m => m.Handle(It.IsAny<CmisConnectionExceptionEvent>()));
+            using (var underTest = new SyncEventQueue(manager.Object)) {
+                underTest.AddEvent(initialEvent);
+                Thread.Sleep(100);
+                underTest.StopListener();
+                WaitFor(underTest, (q) => { return q.IsStopped; });
+            }
+
+            manager.Verify(m => m.Handle(It.IsAny<ISyncEvent>()),Times.Exactly(2));
+            manager.Verify(m => m.Handle(It.Is<CmisConnectionExceptionEvent>(e => e.Exception == connectionException)), Times.Once());
         }
 
         [Test, Category("Fast")]
@@ -77,18 +87,18 @@ namespace TestLibrary.QueueingTests {
 
         [Test, Category("Fast")]
         public void AddEvent() {
-            var managerMock = new Mock<ISyncEventManager>();
-            var eventMock = new Mock<ISyncEvent>();
-            using (var underTest = new SyncEventQueue(managerMock.Object)) {
-                underTest.AddEvent(eventMock.Object);
-                underTest.AddEvent(eventMock.Object);
+            var manager = new Mock<ISyncEventManager>();
+            var syncEvent = Mock.Of<ISyncEvent>();
+            using (var underTest = new SyncEventQueue(manager.Object)) {
+                underTest.AddEvent(syncEvent);
+                underTest.AddEvent(syncEvent);
                 underTest.StopListener();
                 WaitFor(underTest, (q) => { return q.IsStopped; });
                 Assert.That(underTest.IsStopped, Is.True);
                 Assert.That(underTest.IsEmpty, Is.True);
             }
 
-            managerMock.Verify(foo => foo.Handle(eventMock.Object), Times.Exactly(2));
+            manager.Verify(foo => foo.Handle(syncEvent), Times.Exactly(2));
         }
 
         [Test, Category("Fast")]
@@ -149,7 +159,7 @@ namespace TestLibrary.QueueingTests {
         [Test, Category("Fast")]
         public void ExceptionsInManagerAreHandled() {
             var managerMock = new Mock<ISyncEventManager>();
-            managerMock.Setup(m => m.Handle(It.IsAny<ISyncEvent>())).Throws(new Exception("Generic Exception Message"));
+            managerMock.Setup(m => m.Handle(It.IsAny<ISyncEvent>())).Throws(new Mock<Exception>("Generic Exception Message").Object);
             var eventMock = new Mock<ISyncEvent>();
             eventMock.Setup(e => e.ToString()).Returns("Mocked Event");
             using (SyncEventQueue queue = new SyncEventQueue(managerMock.Object)) {
@@ -286,7 +296,7 @@ namespace TestLibrary.QueueingTests {
             var category = EventCategory.PeriodicSync;
             int lastCount = -1;
             var manager = new Mock<ISyncEventManager>();
-            manager.Setup(m => m.Handle(It.IsAny<ICountableEvent>())).Callback(() => Thread.Sleep(10)).Throws(new Exception("Generic Exception"));
+            manager.Setup(m => m.Handle(It.IsAny<ICountableEvent>())).Callback(() => Thread.Sleep(10)).Throws(Mock.Of<Exception>());
             var observer = new Mock<IObserver<Tuple<EventCategory, int>>>();
             observer.Setup(o => o.OnNext(It.IsAny<Tuple<EventCategory, int>>())).Callback<Tuple<EventCategory, int>>(t => { lastCount = t.Item2; Assert.That(lastCount, Is.LessThanOrEqualTo(events).And.AtLeast(0));});
             using (SyncEventQueue queue = new SyncEventQueue(manager.Object)) {
@@ -306,26 +316,6 @@ namespace TestLibrary.QueueingTests {
 
             observer.Verify(o => o.OnCompleted(), Times.Once());
             manager.Verify(m => m.Handle(It.Is<ICountableEvent>(e => e.Category == category)), Times.Exactly(events));
-        }
-
-        [Test, Category("Fast")]
-        public void PutConnectionEventToQueueIfConnectionExceptionOccursOnHandling() {
-            var manager = new Mock<ISyncEventManager>();
-            var connectionRequiredEvent = Mock.Of<ISyncEvent>();
-            var connectionException = new CmisConnectionException("unknown host");
-            manager.Setup(m => m.Handle(connectionRequiredEvent)).Throws(connectionException);
-            using (var underTest = new SyncEventQueue(manager.Object)) {
-                var observer = new Mock<IObserver<int>>();
-                observer.Setup(o => o.OnNext(It.Is<int>(i => i == 0))).Callback(() => {
-                    underTest.StopListener();
-                });
-                using (var unsubscriber = underTest.FullCounter.Subscribe(observer.Object)) {
-                    underTest.AddEvent(connectionRequiredEvent);
-                    Assert.That(underTest.WaitForStopped(10000), Is.True);
-                }
-            }
-
-            manager.Verify(m => m.Handle(It.Is<CmisConnectionExceptionEvent>(e => e.Exception == connectionException)), Times.Once());
         }
 
         private static void WaitFor<T>(T obj, Func<T, bool> check, int timeout = 5000) {

@@ -269,7 +269,7 @@ namespace CmisSync.Lib.Cmis {
                 return false;
             }));
             this.unsubscriber = this.Queue.CategoryCounter.Subscribe(this);
-            this.Queue.OnException += (sender, e) => {
+            this.Queue.EventManager.OnException += (sender, e) => {
                 ExceptionType type = ExceptionType.Unknown;
                 if (e.Exception is VirusDetectedException) {
                     type = ExceptionType.FileUploadBlockedDueToVirusDetected;
