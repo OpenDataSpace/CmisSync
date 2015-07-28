@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Cmis {
     using System.ComponentModel;
 
     using CmisSync.Lib.Config;
+    using CmisSync.Lib.Exceptions;
 
     /// <summary>
     /// Abstract repository class with all notifying components for the front end usage.

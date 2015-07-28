@@ -26,6 +26,7 @@ namespace TestLibrary.CmisTests {
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.FileSystem;
 

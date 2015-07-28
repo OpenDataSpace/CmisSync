@@ -30,5 +30,14 @@ namespace TestLibrary.ExceptionTests {
 
             Assert.That(underTest.InnerException, Is.EqualTo(mockedException.Object));
         }
+
+        [Test]
+        public void ExceptionLevelIsWarning() {
+            var mockedException = new Mock<CmisConstraintException>("Conflict", "infected file") { CallBase = true };
+
+            var underTest = new VirusDetectedException(mockedException.Object);
+
+            Assert.That(underTest.Level, Is.EqualTo(ExceptionLevel.Warning));
+        }
     }
 }

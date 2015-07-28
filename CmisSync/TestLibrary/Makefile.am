@@ -83,6 +83,8 @@ SOURCES =  \
 	EventsTests/PermissionDeniedExceptionTest.cs \
 	EventsTests/ProxyAuthRequiredEventTest.cs \
 	EventsTests/StartNextSyncEventTest.cs \
+	ExceptionTests/AbstractInteractionNeededExceptionTest.cs \
+	ExceptionTests/InteractionNeededTest.cs \
 	ExceptionTests/VirusDetectedExceptionTest.cs \
 	FileTransmissionTests/ChunkedDownloaderTest.cs \
 	FileTransmissionTests/ChunkedFileUploaderTest.cs \

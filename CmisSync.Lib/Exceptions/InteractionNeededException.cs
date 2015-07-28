@@ -34,26 +34,34 @@ namespace CmisSync.Lib.Exceptions {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Exceptions.InteractionNeededException"/> class.
         /// </summary>
-        public InteractionNeededException() : base() { }
+        public InteractionNeededException() : base() {
+            this.Level = ExceptionLevel.Info;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Exceptions.InteractionNeededException"/> class.
         /// </summary>
         /// <param name="msg">Exception message.</param>
-        public InteractionNeededException(string msg) : base(msg) { }
+        public InteractionNeededException(string msg) : base(msg) {
+            this.Level = ExceptionLevel.Info;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Exceptions.InteractionNeededException"/> class.
         /// </summary>
         /// <param name="msg">Exception message.</param>
         /// <param name="inner">Inner exception.</param>
-        public InteractionNeededException(string msg, Exception inner) : base(msg, inner) { }
+        public InteractionNeededException(string msg, Exception inner) : base(msg, inner) {
+            this.Level = ExceptionLevel.Info;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Exceptions.InteractionNeededException"/> class.
         /// </summary>
         /// <param name="info">Serialization info.</param>
         /// <param name="context">Streaming context.</param>
-        protected InteractionNeededException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected InteractionNeededException(SerializationInfo info, StreamingContext context) : base(info, context) {
+            this.Level = ExceptionLevel.Info;
+        }
     }
 }

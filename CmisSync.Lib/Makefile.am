@@ -134,6 +134,7 @@ SOURCES =  \
 	Events/StartNextSyncEvent.cs \
 	Events/SuccessfulLoginEvent.cs \
 	Exceptions/AbstractInteractionNeededException.cs \
+	Exceptions/ExceptionLevel.cs \
 	Exceptions/InteractionNeededException.cs \
 	Exceptions/VirusDetectedException.cs \
 	FileTransmission/AbortException.cs \

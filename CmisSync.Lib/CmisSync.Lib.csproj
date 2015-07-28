@@ -325,6 +325,7 @@
     <Compile Include="Exceptions\InteractionNeededException.cs" />
     <Compile Include="Exceptions\AbstractInteractionNeededException.cs" />
     <Compile Include="Exceptions\VirusDetectedException.cs" />
+    <Compile Include="Exceptions\ExceptionLevel.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

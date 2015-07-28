@@ -329,6 +329,8 @@
     <Compile Include="FileTransmissionTests\TransmissionFactoryTest.cs" />
     <Compile Include="IntegrationTests\VirusDetectionTests\VirusDetectionTests.cs" />
     <Compile Include="ExceptionTests\VirusDetectedExceptionTest.cs" />
+    <Compile Include="ExceptionTests\InteractionNeededExceptionTest.cs" />
+    <Compile Include="ExceptionTests\AbstractInteractionNeededExceptionTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
