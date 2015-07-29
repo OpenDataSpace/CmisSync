@@ -103,7 +103,7 @@ namespace TestLibrary.TestUtils {
         }
 
         public static Mock<IDirectoryInfo> SetupReadOnly(this Mock<IDirectoryInfo> dir, bool isReadOnly) {
-            dir.SetupProperty(f => f.ReadOnly, isReadOnly);
+            dir.SetupProperty(d => d.ReadOnly, isReadOnly);
             return dir;
         }
 
@@ -122,6 +122,36 @@ namespace TestLibrary.TestUtils {
             return dir;
         }
 
+        public static Mock<IFileInfo> SetupExists(this Mock<IFileInfo> file, bool exists = true) {
+            file.SetupGet(f => f.Exists).Returns(exists);
+            return file;
+        }
+
+        public static Mock<IFileSystemInfo> SetupExists(this Mock<IFileSystemInfo> file, bool exists = true) {
+            file.SetupGet(f => f.Exists).Returns(exists);
+            return file;
+        }
+
+        public static Mock<IDirectoryInfo> SetupExists(this Mock<IDirectoryInfo> dir, bool exists = true) {
+            dir.SetupGet(d => d.Exists).Returns(exists);
+            return dir;
+        }
+
+        public static Mock<IFileInfo> SetupSymlink(this Mock<IFileInfo> file, bool isSymlink = false) {
+            file.SetupGet(f => f.IsSymlink).Returns(isSymlink);
+            return file;
+        }
+
+        public static Mock<IFileSystemInfo> SetupSymlink(this Mock<IFileSystemInfo> file, bool isSymlink = false) {
+            file.SetupGet(f => f.IsSymlink).Returns(isSymlink);
+            return file;
+        }
+
+        public static Mock<IDirectoryInfo> SetupSymlink(this Mock<IDirectoryInfo> dir, bool isSymlink = false) {
+            dir.SetupGet(d => d.IsSymlink).Returns(isSymlink);
+            return dir;
+        }
+
         public static Mock<IFileInfo> SetupFullName(this Mock<IFileInfo> file, string fullName) {
             file.SetupGet(f => f.FullName).Returns(fullName);
             return file;
@@ -133,11 +163,11 @@ namespace TestLibrary.TestUtils {
         }
 
         public static Mock<IDirectoryInfo> SetupFullName(this Mock<IDirectoryInfo> dir, string fullName) {
-            dir.SetupGet(f => f.FullName).Returns(fullName);
+            dir.SetupGet(d => d.FullName).Returns(fullName);
             return dir;
         }
 
-        public static void SetupFilesAndDirectories(this Mock<IDirectoryInfo> parent, params IFileSystemInfo[] children) {
+        public static Mock<IDirectoryInfo> SetupFilesAndDirectories(this Mock<IDirectoryInfo> parent, params IFileSystemInfo[] children) {
             List<IDirectoryInfo> dirs = new List<IDirectoryInfo>();
             List<IFileInfo> files = new List<IFileInfo>();
             foreach (var child in children) {
@@ -150,6 +180,7 @@ namespace TestLibrary.TestUtils {
 
             parent.SetupFiles(files.ToArray());
             parent.SetupDirectories(dirs.ToArray());
+            return parent;
         }
 
         public static void AddDirectoryWithParents(this Mock<IFileSystemInfoFactory> fsFactory, string path) {
@@ -163,8 +194,7 @@ namespace TestLibrary.TestUtils {
             }
         }
 
-        public static void AddIFileInfo(this Mock<IFileSystemInfoFactory> fsFactory, IFileInfo fileInfo, bool exists = true)
-        {
+        public static void AddIFileInfo(this Mock<IFileSystemInfoFactory> fsFactory, IFileInfo fileInfo, bool exists = true) {
             fsFactory.Setup(f => f.CreateFileInfo(fileInfo.FullName)).Returns(fileInfo);
             if (exists) {
                 fsFactory.Setup(f => f.IsDirectory(fileInfo.FullName)).Returns(false);
@@ -214,37 +244,44 @@ namespace TestLibrary.TestUtils {
             return localFolder;
         }
 
-        public static void SetupLastWriteTimeUtc(this Mock<IFileSystemInfo> fileSystemInfo, DateTime lastWriteTimeUtc) {
+        public static Mock<IFileSystemInfo> SetupLastWriteTimeUtc(this Mock<IFileSystemInfo> fileSystemInfo, DateTime lastWriteTimeUtc) {
             fileSystemInfo.Setup(f => f.LastWriteTimeUtc).Returns(lastWriteTimeUtc);
+            return fileSystemInfo;
         }
 
-        public static void SetupGuid(this Mock<IFileSystemInfo> fileSystemInfo, Guid uuid) {
+        public static Mock<IFileSystemInfo> SetupGuid(this Mock<IFileSystemInfo> fileSystemInfo, Guid uuid) {
             fileSystemInfo.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(uuid.ToString());
             fileSystemInfo.Setup(f => f.Uuid).Returns(uuid);
+            return fileSystemInfo;
         }
 
-        public static void SetupLastWriteTimeUtc(this Mock<IFileInfo> fileInfo, DateTime lastWriteTimeUtc) {
+        public static Mock<IFileInfo> SetupLastWriteTimeUtc(this Mock<IFileInfo> fileInfo, DateTime lastWriteTimeUtc) {
             fileInfo.Setup(f => f.LastWriteTimeUtc).Returns(lastWriteTimeUtc);
+            return fileInfo;
         }
 
-        public static void SetupGuid(this Mock<IFileInfo> fileInfo, Guid uuid) {
+        public static Mock<IFileInfo> SetupGuid(this Mock<IFileInfo> fileInfo, Guid uuid) {
             fileInfo.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(uuid.ToString());
             fileInfo.Setup(f => f.Uuid).Returns(uuid);
+            return fileInfo;
         }
 
-        public static void SetupLastWriteTimeUtc(this Mock<IDirectoryInfo> dirInfo, DateTime lastWriteTimeUtc) {
+        public static Mock<IDirectoryInfo> SetupLastWriteTimeUtc(this Mock<IDirectoryInfo> dirInfo, DateTime lastWriteTimeUtc) {
             dirInfo.Setup(f => f.LastWriteTimeUtc).Returns(lastWriteTimeUtc);
+            return dirInfo;
         }
 
-        public static void SetupGuid(this Mock<IDirectoryInfo> dirInfo, Guid uuid) {
+        public static Mock<IDirectoryInfo> SetupGuid(this Mock<IDirectoryInfo> dirInfo, Guid uuid) {
             dirInfo.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(uuid.ToString());
             dirInfo.Setup(f => f.Uuid).Returns(uuid);
+            return dirInfo;
         }
 
-        public static void SetupOpenThrows<TException>(this Mock<IFileInfo> fileInfo, TException exception = default(TException)) where TException : System.Exception {
+        public static Mock<IFileInfo> SetupOpenThrows<TException>(this Mock<IFileInfo> fileInfo, TException exception = default(TException)) where TException : System.Exception {
             fileInfo.Setup(f => f.Open(It.IsAny<FileMode>())).Throws(exception);
             fileInfo.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Throws(exception);
             fileInfo.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Throws(exception);
+            return fileInfo;
         }
 
         public static void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(this Mock<IFileSystemInfo> fsInfo) {
