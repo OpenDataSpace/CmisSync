@@ -50,7 +50,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
 
     using TestUtils;
 
-    [TestFixture, Category("Slow")]
+    [TestFixture, Category("Slow"), Ignore("Benchmarks only")]
     public class DescendantsCrawlerLargeTests : DescendantsCrawlerTest {
         [Test]
         public void MassiveTreeSizes(
