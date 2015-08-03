@@ -176,7 +176,6 @@
     <Compile Include="Consumer\LocalSituationDetection.cs" />
     <Compile Include="Consumer\RemoteSituationDetection.cs" />
     <Compile Include="Consumer\SyncMechanism.cs" />
-    <Compile Include="Consumer\RetryException.cs" />
     <Compile Include="Producer\Watcher\MacWatcher.cs" />
     <Compile Include="Producer\Watcher\NetWatcher.cs" />
     <Compile Include="Producer\Watcher\IWatcherProducer.cs" />
@@ -326,6 +325,7 @@
     <Compile Include="Exceptions\AbstractInteractionNeededException.cs" />
     <Compile Include="Exceptions\VirusDetectedException.cs" />
     <Compile Include="Exceptions\ExceptionLevel.cs" />
+    <Compile Include="Exceptions\RetryException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
