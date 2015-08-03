@@ -29,7 +29,10 @@ namespace CmisSync.Lib.Producer.Crawler {
 
     using DotCMIS.Client;
 
+    using log4net;
+
     public class CrawlEventGenerator {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(CrawlEventGenerator));
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
         private LocalEventGenerator localEventGenerator;
@@ -52,6 +55,7 @@ namespace CmisSync.Lib.Producer.Crawler {
         }
 
         public CrawlEventCollection GenerateEvents(DescendantsTreeCollection trees) {
+            Logger.Debug("Taking trees");
             IObjectTree<IMappedObject> storedTree = trees.StoredTree;
             IObjectTree<IFileSystemInfo> localTree = trees.LocalTree;
             IObjectTree<IFileableCmisObject> remoteTree = trees.RemoteTree;
@@ -61,11 +65,13 @@ namespace CmisSync.Lib.Producer.Crawler {
             ISet<IMappedObject> handledLocalStoredObjects = new HashSet<IMappedObject>();
             ISet<IMappedObject> handledRemoteStoredObjects = new HashSet<IMappedObject>();
             Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap = new Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>>();
+            Logger.Debug("Remote Create Events");
             createdEvents.creationEvents = this.remoteEventGenerator.CreateEvents(storedObjectsForRemote, remoteTree, eventMap, handledRemoteStoredObjects);
+            Logger.Debug("Local Create Events");
             createdEvents.creationEvents.AddRange(this.localEventGenerator.CreateEvents(storedObjectsForLocal, localTree, eventMap, handledLocalStoredObjects));
-
             createdEvents.mergableEvents = eventMap;
 
+            Logger.Debug("Removing already handled events from list");
             handledLocalStoredObjects.Add(storedTree.Item);
             handledRemoteStoredObjects.Add(storedTree.Item);
 
@@ -77,9 +83,11 @@ namespace CmisSync.Lib.Producer.Crawler {
                 storedObjectsForRemote.Remove(handledObject);
             }
 
+            Logger.Debug("Add deleted objects to Mergable events");
             this.AddDeletedObjectsToMergableEvents(storedObjectsForLocal, eventMap, true);
             this.AddDeletedObjectsToMergableEvents(storedObjectsForRemote, eventMap, false);
 
+            Logger.Debug("Finished with generating events");
             return createdEvents;
         }
 
