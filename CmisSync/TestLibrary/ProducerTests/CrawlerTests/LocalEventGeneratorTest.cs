@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ProducerTests.CrawlerTests
-{
+namespace TestLibrary.ProducerTests.CrawlerTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -36,8 +35,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class LocalEventGeneratorTest
-    {
+    public class LocalEventGeneratorTest {
         private static DateTime zeroDate = new DateTime(0);
 
         [Test, Category("Fast")]
@@ -67,25 +65,26 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             ObjectTree<IFileSystemInfo> subSubFolder = this.CreateTreeFromPathAndGuid(subSubName, subSubPath, subSubFolderGuid);
             subFolder.Children.Add(subSubFolder);
 
-            List<IMappedObject> storedObjectsForLocal = new List<IMappedObject>();
+            IDictionary<Guid, IMappedObject> storedObjectsForLocal = new Dictionary<Guid, IMappedObject>();
             var rootMappedObject = this.CreateStoredObjectMock(rootGuid, rootObjectId, rootName, null);
-            storedObjectsForLocal.Add(rootMappedObject);
+            storedObjectsForLocal.Add(rootGuid, rootMappedObject);
             var subMappedObject = this.CreateStoredObjectMock(subFolderGuid, subFolderId, subName, rootObjectId);
-            storedObjectsForLocal.Add(subMappedObject);
+            storedObjectsForLocal.Add(subFolderGuid, subMappedObject);
             var subSubMappedObject = this.CreateStoredObjectMock(subSubFolderGuid, subSubFolderId, "oldsubsubName", subSubFolderId);
-            storedObjectsForLocal.Add(subSubMappedObject);
+            storedObjectsForLocal.Add(subSubFolderGuid, subSubMappedObject);
 
             storage.Setup(s => s.GetLocalPath(rootMappedObject)).Returns(rootPath);
             storage.Setup(s => s.GetLocalPath(subMappedObject)).Returns(subPath);
             storage.Setup(s => s.GetLocalPath(subSubMappedObject)).Returns(subSubPath);
 
             ISet<IMappedObject> handledLocalStoredObjects = new HashSet<IMappedObject>();
-            List<AbstractFolderEvent> creationEvents = underTest.CreateEvents(storedObjectsForLocal, rootTree, eventMap, handledLocalStoredObjects);
+            IList<AbstractFolderEvent> creationEvents = new List<AbstractFolderEvent>();
+            underTest.CreateEvents(storedObjectsForLocal, rootTree, eventMap, handledLocalStoredObjects, ref creationEvents);
             foreach (var handledObjects in handledLocalStoredObjects) {
-                storedObjectsForLocal.Remove(handledObjects);
+                storedObjectsForLocal.Remove(handledObjects.Guid);
             }
 
-            storedObjectsForLocal.Remove(rootMappedObject);
+            storedObjectsForLocal.Remove(rootMappedObject.Guid);
             Assert.That(creationEvents, Is.Empty);
             Assert.That(storedObjectsForLocal, Is.Empty);
             Assert.That(eventMap.Count, Is.EqualTo(1));

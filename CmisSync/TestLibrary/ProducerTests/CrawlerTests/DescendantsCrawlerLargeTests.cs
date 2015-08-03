@@ -54,9 +54,9 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
     public class DescendantsCrawlerLargeTests : DescendantsCrawlerTest {
         [Test]
         public void MassiveTreeSizes(
-            [Values(4)]int subfolderPerFolder,
-            [Values(2)]int folderDepth,
-            [Values(10)]int filesPerFolder)
+            [Range(1, 3)]int subfolderPerFolder,
+            [Range(1, 3)]int folderDepth,
+            [Range(0, 100, 10)]int filesPerFolder)
         {
             this.remoteFolder.SetupId(remoteRootId);
             var remoteTree = this.CreateRemoteChildren(subfolderPerFolder, folderDepth, filesPerFolder, remoteRootId, "/");

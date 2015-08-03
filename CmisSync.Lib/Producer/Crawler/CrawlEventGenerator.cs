@@ -60,15 +60,21 @@ namespace CmisSync.Lib.Producer.Crawler {
             IObjectTree<IFileSystemInfo> localTree = trees.LocalTree;
             IObjectTree<IFileableCmisObject> remoteTree = trees.RemoteTree;
             CrawlEventCollection createdEvents = new CrawlEventCollection();
-            List<IMappedObject> storedObjectsForRemote = storedTree.ToList();
-            List<IMappedObject> storedObjectsForLocal = new List<IMappedObject>(storedObjectsForRemote);
+            IDictionary<Guid, IMappedObject> storedObjectsForLocal = new Dictionary<Guid, IMappedObject>();
+            IDictionary<string, IMappedObject> storedObjectsForRemote = new Dictionary<string, IMappedObject>();
+            storedTree.ToList().ForEach((obj) => {
+                storedObjectsForRemote.Add(obj.RemoteObjectId, obj);
+                storedObjectsForLocal.Add(obj.Guid, obj);
+            });
+
             ISet<IMappedObject> handledLocalStoredObjects = new HashSet<IMappedObject>();
             ISet<IMappedObject> handledRemoteStoredObjects = new HashSet<IMappedObject>();
             Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap = new Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>>();
             Logger.Debug("Remote Create Events");
             createdEvents.creationEvents = this.remoteEventGenerator.CreateEvents(storedObjectsForRemote, remoteTree, eventMap, handledRemoteStoredObjects);
             Logger.Debug("Local Create Events");
-            createdEvents.creationEvents.AddRange(this.localEventGenerator.CreateEvents(storedObjectsForLocal, localTree, eventMap, handledLocalStoredObjects));
+            IList<AbstractFolderEvent> localCreationEvents = new List<AbstractFolderEvent>();
+            createdEvents.creationEvents.AddRange(this.localEventGenerator.CreateEvents(storedObjectsForLocal, localTree, eventMap, handledLocalStoredObjects, ref localCreationEvents));
             createdEvents.mergableEvents = eventMap;
 
             Logger.Debug("Removing already handled events from list");
@@ -76,16 +82,16 @@ namespace CmisSync.Lib.Producer.Crawler {
             handledRemoteStoredObjects.Add(storedTree.Item);
 
             foreach (var handledObject in handledLocalStoredObjects) {
-                storedObjectsForLocal.Remove(handledObject);
+                storedObjectsForLocal.Remove(handledObject.Guid);
             }
 
             foreach (var handledObject in handledRemoteStoredObjects) {
-                storedObjectsForRemote.Remove(handledObject);
+                storedObjectsForRemote.Remove(handledObject.RemoteObjectId);
             }
 
             Logger.Debug("Add deleted objects to Mergable events");
-            this.AddDeletedObjectsToMergableEvents(storedObjectsForLocal, eventMap, true);
-            this.AddDeletedObjectsToMergableEvents(storedObjectsForRemote, eventMap, false);
+            this.AddDeletedObjectsToMergableEvents(storedObjectsForLocal.Values.ToList(), eventMap, true);
+            this.AddDeletedObjectsToMergableEvents(storedObjectsForRemote.Values.ToList(), eventMap, false);
 
             Logger.Debug("Finished with generating events");
             return createdEvents;

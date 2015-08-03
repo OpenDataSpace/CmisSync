@@ -55,16 +55,18 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// Event map.
         /// </param>
         public List<AbstractFolderEvent> CreateEvents(
-            List<IMappedObject> storedObjects,
+            IDictionary<string, IMappedObject> storedObjects,
             IObjectTree<IFileableCmisObject> remoteTree,
             Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap,
             ISet<IMappedObject> handledStoredObjects)
         {
             List<AbstractFolderEvent> createdEvents = new List<AbstractFolderEvent>();
-            var storedParent = storedObjects.Find(o => o.RemoteObjectId == remoteTree.Item.Id);
+            IMappedObject storedParent = null;
+            storedObjects.TryGetValue(remoteTree.Item.Id, out storedParent);
 
             foreach (var child in remoteTree.Children) {
-                var storedMappedChild = storedObjects.Find(o => o.RemoteObjectId == child.Item.Id);
+                IMappedObject storedMappedChild = null;
+                storedObjects.TryGetValue(child.Item.Id, out storedMappedChild);
                 if (storedMappedChild != null) {
                     AbstractFolderEvent newEvent = this.CreateRemoteEventBasedOnStorage(child.Item, storedParent, storedMappedChild);
                     eventMap[child.Item.Id] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(null, newEvent);
