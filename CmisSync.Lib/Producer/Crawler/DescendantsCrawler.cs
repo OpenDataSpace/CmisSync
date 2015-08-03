@@ -148,6 +148,10 @@ namespace CmisSync.Lib.Producer.Crawler {
                 } catch (InteractionNeededException interaction) {
                     this.Queue.AddEvent(new InteractionNeededEvent(interaction));
                     throw;
+                } catch (Exception retryException) {
+                    Logger.Info("Failed to crawl descendants (trying again):", retryException);
+                    this.Queue.AddEvent(e);
+                    return false;
                 }
             }
 

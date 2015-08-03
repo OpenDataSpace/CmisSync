@@ -158,8 +158,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
         }
 
         [Test]
-        public void IgnoresNonFittingEvents()
-        {
+        public void IgnoresNonFittingEvents() {
             var crawler = this.CreateCrawler();
             Assert.That(crawler.Handle(Mock.Of<ISyncEvent>()), Is.False);
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
@@ -196,6 +195,16 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
             this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.RemoteFile.Equals(newRemoteDocument))), Times.Once());
             this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
             this.VerifyThatListenerHasBeenUsed();
+        }
+
+        [Test]
+        public void FailuresInSubmodulesAreHandledByAddingTheNotYetHandledEventBackToQueue([Values(true, false)]bool forceCrawl) {
+            var crawler = this.CreateCrawler();
+            this.localFolder.Setup(f => f.GetDirectories()).Throws<Exception>();
+            var startEvent = new StartNextSyncEvent(fullSyncRequested: forceCrawl);
+            Assert.That(crawler.Handle(startEvent), Is.False);
+            this.queue.Verify(q => q.AddEvent(startEvent), Times.Once());
+            this.queue.VerifyThatNoOtherEventIsAddedThan<StartNextSyncEvent>();
         }
 
         [Test]
