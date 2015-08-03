@@ -331,6 +331,7 @@
     <Compile Include="ExceptionTests\VirusDetectedExceptionTest.cs" />
     <Compile Include="ExceptionTests\InteractionNeededExceptionTest.cs" />
     <Compile Include="ExceptionTests\AbstractInteractionNeededExceptionTest.cs" />
+    <Compile Include="ProducerTests\CrawlerTests\DescendantsCrawlerLargeTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

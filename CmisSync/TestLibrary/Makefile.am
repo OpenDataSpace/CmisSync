@@ -194,6 +194,7 @@ SOURCES =  \
 	ProducerTests/ContentChangeTests/ContentChangesTest.cs \
 	ProducerTests/CrawlerTests/CrawlEventGeneratorTest.cs \
 	ProducerTests/CrawlerTests/CrawlEventNotifierTest.cs \
+	ProducerTests/CrawlerTests/DescendantsCrawlerLargeTests.cs \
 	ProducerTests/CrawlerTests/DescendantsCrawlerTest.cs \
 	ProducerTests/CrawlerTests/LocalEventGeneratorTest.cs \
 	ProducerTests/CrawlerTests/ObjectTreeTest.cs \

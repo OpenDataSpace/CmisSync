@@ -52,22 +52,22 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
 
     [TestFixture, Category("Fast")]
     public class DescendantsCrawlerTest : IDisposable {
-        private readonly string remoteRootId = "rootId";
-        private readonly string remoteRootPath = "/";
-        private readonly Guid rootGuid = Guid.NewGuid();
-        private Mock<ISyncEventQueue> queue;
-        private IMetaDataStorage storage;
-        private Mock<IFolder> remoteFolder;
-        private Mock<IDirectoryInfo> localFolder;
-        private Mock<IFileSystemInfoFactory> fsFactory;
-        private string localRootPath;
-        private MappedObject mappedRootObject;
-        private IPathMatcher matcher;
-        private DBreezeEngine storageEngine;
-        private DateTime lastLocalWriteTime = DateTime.Now;
-        private IFilterAggregator filter;
-        private Mock<IActivityListener> listener;
-        private Queue<Guid> localGuids;
+        protected readonly string remoteRootId = "rootId";
+        protected readonly string remoteRootPath = "/";
+        protected readonly Guid rootGuid = Guid.NewGuid();
+        protected Mock<ISyncEventQueue> queue;
+        protected IMetaDataStorage storage;
+        protected Mock<IFolder> remoteFolder;
+        protected Mock<IDirectoryInfo> localFolder;
+        protected Mock<IFileSystemInfoFactory> fsFactory;
+        protected string localRootPath;
+        protected MappedObject mappedRootObject;
+        protected IPathMatcher matcher;
+        protected DBreezeEngine storageEngine;
+        protected DateTime lastLocalWriteTime = DateTime.Now;
+        protected IFilterAggregator filter;
+        protected Mock<IActivityListener> listener;
+        protected Queue<Guid> localGuids;
 
         [TestFixtureSetUp]
         public void InitCustomSerializator() {
@@ -582,29 +582,6 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
             Assert.That(exception.InnerException, Is.TypeOf<PathTooLongException>());
         }
 
-        [Test, Ignore("just for development")]
-        public void MassiveTreeSizes(
-            [Values(2)]int subfolderPerFolder,
-            [Values(2)]int folderDepth,
-            [Values(10)]int filesPerFolder)
-        {
-            this.remoteFolder.SetupId("rootId");
-            var remoteTree = this.CreateRemoteChildren(subfolderPerFolder, folderDepth, filesPerFolder, "rootId", "/");
-            var localTree = this.CreateLocalChildren(subfolderPerFolder, folderDepth, filesPerFolder, Path.GetTempPath());
-            this.SaveStoredTree(subfolderPerFolder, folderDepth, filesPerFolder, "rootId", "/");
-            this.remoteFolder.Setup(f => f.GetDescendants(-1)).Returns(remoteTree);
-            this.localFolder.SetupFilesAndDirectories(localTree);
-
-            var underTest = this.CreateCrawler();
-
-            var watch = new Stopwatch();
-            watch.Start();
-            Assert.That(underTest.Handle(new StartNextSyncEvent()), Is.True);
-            watch.Stop();
-            Console.WriteLine("Crawl took " + watch.ElapsedMilliseconds + "msec");
-            this.queue.VerifyThatNoOtherEventIsAddedThan<FullSyncCompletedEvent>();
-        }
-
         #region boilerplatecode
         public void Dispose() {
             if (this.storageEngine != null) {
@@ -614,105 +591,14 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
         }
         #endregion
 
-        private IList<ITree<IFileableCmisObject>> CreateRemoteChildren(int subFolder, int folderDepth, int filesPerFolder, string parentId, string parentPath) {
-            IList<ITree<IFileableCmisObject>> trees = new List<ITree<IFileableCmisObject>>();
-            for (int i = 0; i < filesPerFolder; i++) {
-                var id = string.Format("{0}/{1}.doc", parentPath, i);
-                var doc = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, string.Format("{0}.doc", i), parentId, 0);
-                doc.SetupPath(string.Format("{0}/{1}.doc", parentPath, i));
-                var tree = new Tree<IFileableCmisObject> {
-                    Item = doc.Object,
-                    Children = null
-                };
-                trees.Add(tree);
-            }
-
-            if (folderDepth > 0) {
-                for (int i = 0; i < subFolder; i++) {
-                    var id = string.Format("{0}/{1}/", parentPath, i);
-                    var folder = MockOfIFolderUtil.CreateRemoteFolderMock(id, i.ToString(), parentPath + "/" + i, parentId);
-                    var tree = new Tree<IFileableCmisObject> {
-                        Item = folder.Object,
-                        Children = this.CreateRemoteChildren(subFolder, folderDepth - 1, filesPerFolder, id, folder.Object.Path)
-                    };
-                    trees.Add(tree);
-                }
-            }
-
-            return trees;
-        }
-
-        private IFileSystemInfo[] CreateLocalChildren(int subFolder, int folderDepth, int filesPerFolder, string parentPath) {
-            var children = new List<IFileSystemInfo>();
-            for (int i = 0; i < filesPerFolder; i++) {
-                var name = string.Format("{0}.doc", i);
-                var path = Path.Combine(parentPath, name);
-                var doc = new Mock<IFileInfo>(MockBehavior.Strict).SetupFullName(path).SetupName(name).SetupExists().SetupSymlink();
-                var guid = Guid.NewGuid();
-                doc.SetupGuid(guid).SetupLastWriteTimeUtc(new DateTime(2000, 1, 1)).SetupReadOnly(false);
-                this.localGuids.Enqueue(guid);
-                children.Add(doc.Object);
-            }
-
-            if (folderDepth > 0) {
-                for (int i = 0; i < subFolder; i++) {
-                    var name = string.Format("{0}", i);
-                    var path = Path.Combine(parentPath, name);
-                    var folder = new Mock<IDirectoryInfo>(MockBehavior.Strict).SetupFullName(path).SetupName(name).SetupExists().SetupSymlink();
-                    var guid = Guid.NewGuid();
-                    folder.SetupGuid(guid).SetupLastWriteTimeUtc(new DateTime(2000, 1, 1)).SetupReadOnly(false);
-                    this.localGuids.Enqueue(guid);
-                    folder.SetupFilesAndDirectories(this.CreateLocalChildren(subFolder, folderDepth - 1, filesPerFolder, folder.Object.FullName));
-                    children.Add(folder.Object);
-                }
-            }
-
-            return children.ToArray();
-        }
-
-        private void SaveStoredTree(int subFolder, int folderDepth, int filesPerFolder, string parentId, string parentPath) {
-            for (int i = 0; i < filesPerFolder; i++) {
-                var doc = new MappedObject(
-                    string.Format("{0}.doc", i),
-                    string.Format("{0}/{1}.doc", parentPath, i),
-                    MappedObjectType.File,
-                    parentId,
-                    "changetoken",
-                    0)
-                {
-                    Guid = this.localGuids.Dequeue(),
-                    LastLocalWriteTimeUtc = new DateTime(2000, 1, 1)
-                };
-                this.storage.SaveMappedObject(doc);
-            }
-
-            if (folderDepth > 0) {
-                for (int i = 0; i < subFolder; i++) {
-                    var remoteId = string.Format("{0}/{1}/", parentPath, i);
-                    var folder = new MappedObject(
-                        string.Format("{0}", i),
-                        remoteId,
-                        MappedObjectType.Folder,
-                        parentId,
-                        "changetoken")
-                    {
-                        Guid = this.localGuids.Dequeue(),
-                        LastLocalWriteTimeUtc = new DateTime(2000, 1, 1)
-                    };
-                    this.storage.SaveMappedObject(folder);
-                    this.SaveStoredTree(subFolder, folderDepth - 1, filesPerFolder, remoteId, parentPath + "/" + i);
-                }
-            }
-        }
-
-        private DescendantsCrawler CreateCrawler() {
+        protected DescendantsCrawler CreateCrawler() {
             var generator = new CrawlEventGenerator(this.storage, this.fsFactory.Object);
             var treeBuilder = new DescendantsTreeBuilder(this.storage, this.remoteFolder.Object, this.localFolder.Object, this.filter, Mock.Of<IIgnoredEntitiesStorage>());
             var notifier = new CrawlEventNotifier(this.queue.Object);
             return new DescendantsCrawler(this.queue.Object, treeBuilder, generator, notifier, this.listener.Object);
         }
 
-        private void VerifyThatListenerHasBeenUsed() {
+        protected void VerifyThatListenerHasBeenUsed() {
             this.listener.Verify(l => l.ActivityStarted(), Times.AtLeastOnce());
             this.listener.Verify(l => l.ActivityStopped(), Times.AtLeastOnce());
         }

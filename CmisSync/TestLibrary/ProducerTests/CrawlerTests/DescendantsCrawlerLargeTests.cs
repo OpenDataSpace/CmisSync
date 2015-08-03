@@ -1,0 +1,151 @@
+﻿
+namespace TestLibrary.ProducerTests.CrawlerTests {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.IO;
+
+    using CmisSync.Lib;
+    using CmisSync.Lib.Consumer;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
+    using CmisSync.Lib.Filter;
+    using CmisSync.Lib.PathMatcher;
+    using CmisSync.Lib.Producer.Crawler;
+    using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.SelectiveIgnore;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
+
+    using DBreeze;
+
+    using DotCMIS.Client;
+    using DotCMIS.Client.Impl;
+
+    using Moq;
+
+    using Newtonsoft.Json;
+
+    using NUnit.Framework;
+
+    using TestUtils;
+
+    [TestFixture, Category("Slow")]
+    public class DescendantsCrawlerLargeTests : DescendantsCrawlerTest {
+        [Test]
+        public void MassiveTreeSizes(
+            [Values(4)]int subfolderPerFolder,
+            [Values(2)]int folderDepth,
+            [Values(10)]int filesPerFolder)
+        {
+            this.remoteFolder.SetupId(remoteRootId);
+            var remoteTree = this.CreateRemoteChildren(subfolderPerFolder, folderDepth, filesPerFolder, remoteRootId, "/");
+            var localTree = this.CreateLocalChildren(subfolderPerFolder, folderDepth, filesPerFolder, Path.GetTempPath());
+            this.SaveStoredTree(subfolderPerFolder, folderDepth, filesPerFolder, remoteRootId, "/");
+            this.remoteFolder.Setup(f => f.GetDescendants(-1)).Returns(remoteTree);
+            this.localFolder.SetupFilesAndDirectories(localTree);
+
+            var underTest = this.CreateCrawler();
+
+            var watch = new Stopwatch();
+            watch.Start();
+            Assert.That(underTest.Handle(new StartNextSyncEvent()), Is.True);
+            watch.Stop();
+            Console.WriteLine("Crawl took " + watch.ElapsedMilliseconds + " msec");
+            this.queue.VerifyThatNoOtherEventIsAddedThan<FullSyncCompletedEvent>();
+        }
+
+        private IList<ITree<IFileableCmisObject>> CreateRemoteChildren(int subFolder, int folderDepth, int filesPerFolder, string parentId, string parentPath) {
+            IList<ITree<IFileableCmisObject>> trees = new List<ITree<IFileableCmisObject>>();
+            for (int i = 0; i < filesPerFolder; i++) {
+                var id = string.Format("{0}/{1}.doc", parentPath, i);
+                var doc = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, string.Format("{0}.doc", i), parentId, 0);
+                doc.SetupPath(string.Format("{0}/{1}.doc", parentPath, i));
+                var tree = new Tree<IFileableCmisObject> {
+                    Item = doc.Object,
+                    Children = null
+                };
+                trees.Add(tree);
+            }
+
+            if (folderDepth > 0) {
+                for (int i = 0; i < subFolder; i++) {
+                    var id = string.Format("{0}/{1}/", parentPath, i);
+                    var folder = MockOfIFolderUtil.CreateRemoteFolderMock(id, i.ToString(), parentPath + "/" + i, parentId);
+                    var tree = new Tree<IFileableCmisObject> {
+                        Item = folder.Object,
+                        Children = this.CreateRemoteChildren(subFolder, folderDepth - 1, filesPerFolder, id, folder.Object.Path)
+                    };
+                    trees.Add(tree);
+                }
+            }
+
+            return trees;
+        }
+
+        private IFileSystemInfo[] CreateLocalChildren(int subFolder, int folderDepth, int filesPerFolder, string parentPath) {
+            var children = new List<IFileSystemInfo>();
+            for (int i = 0; i < filesPerFolder; i++) {
+                var name = string.Format("{0}.doc", i);
+                var path = Path.Combine(parentPath, name);
+                var doc = new Mock<IFileInfo>(MockBehavior.Strict).SetupFullName(path).SetupName(name).SetupExists().SetupSymlink();
+                var guid = Guid.NewGuid();
+                doc.SetupGuid(guid).SetupLastWriteTimeUtc(new DateTime(2000, 1, 1)).SetupReadOnly(false);
+                this.localGuids.Enqueue(guid);
+                children.Add(doc.Object);
+            }
+
+            if (folderDepth > 0) {
+                for (int i = 0; i < subFolder; i++) {
+                    var name = string.Format("{0}", i);
+                    var path = Path.Combine(parentPath, name);
+                    var folder = new Mock<IDirectoryInfo>(MockBehavior.Strict).SetupFullName(path).SetupName(name).SetupExists().SetupSymlink();
+                    var guid = Guid.NewGuid();
+                    folder.SetupGuid(guid).SetupLastWriteTimeUtc(new DateTime(2000, 1, 1)).SetupReadOnly(false);
+                    this.localGuids.Enqueue(guid);
+                    folder.SetupFilesAndDirectories(this.CreateLocalChildren(subFolder, folderDepth - 1, filesPerFolder, folder.Object.FullName));
+                    children.Add(folder.Object);
+                }
+            }
+
+            return children.ToArray();
+        }
+
+        private void SaveStoredTree(int subFolder, int folderDepth, int filesPerFolder, string parentId, string parentPath) {
+            for (int i = 0; i < filesPerFolder; i++) {
+                var doc = new MappedObject(
+                    string.Format("{0}.doc", i),
+                    string.Format("{0}/{1}.doc", parentPath, i),
+                    MappedObjectType.File,
+                    parentId,
+                    "changetoken",
+                    0)
+                {
+                    Guid = this.localGuids.Dequeue(),
+                    LastLocalWriteTimeUtc = new DateTime(2000, 1, 1)
+                };
+                this.storage.SaveMappedObject(doc);
+            }
+
+            if (folderDepth > 0) {
+                for (int i = 0; i < subFolder; i++) {
+                    var remoteId = string.Format("{0}/{1}/", parentPath, i);
+                    var folder = new MappedObject(
+                        string.Format("{0}", i),
+                        remoteId,
+                        MappedObjectType.Folder,
+                        parentId,
+                        "changetoken")
+                    {
+                        Guid = this.localGuids.Dequeue(),
+                        LastLocalWriteTimeUtc = new DateTime(2000, 1, 1)
+                    };
+                    this.storage.SaveMappedObject(folder);
+                    this.SaveStoredTree(subFolder, folderDepth - 1, filesPerFolder, remoteId, parentPath + "/" + i);
+                }
+            }
+        }
+    }
+}
