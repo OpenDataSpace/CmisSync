@@ -64,10 +64,12 @@ namespace TestLibrary.IntegrationTests {
         private readonly string localRoot = Path.GetTempPath();
         private readonly string remoteRoot = "remoteroot";
 
+
         private readonly bool isPropertyChangesSupported = false;
         private readonly int maxNumberOfContentChanges = 1000;
 
         private DBreezeEngine engine;
+        private Mock<IFolder> remoteFolder;
 
         [TestFixtureSetUp]
         public void ClassInit() {
@@ -371,8 +373,9 @@ namespace TestLibrary.IntegrationTests {
             var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage, Mock.Of<IFileTransmissionStorage>(), activityAggregator, filterAggregator, transmissionFactory);
             manager.AddEventHandler(syncMechanism);
 
-            var remoteFolder = MockSessionUtil.CreateCmisFolder();
-            remoteFolder.Setup(r => r.Path).Returns(this.remoteRoot);
+            this.remoteFolder = MockSessionUtil.CreateCmisFolder();
+            this.remoteFolder.Setup(r => r.Path).Returns(this.remoteRoot);
+            this.remoteFolder.SetupId("root");
             var localFolder = new Mock<IDirectoryInfo>();
             localFolder.Setup(f => f.FullName).Returns(this.localRoot);
             var generator = new CrawlEventGenerator(storage, fsFactory);
