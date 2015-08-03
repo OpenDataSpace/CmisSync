@@ -20,6 +20,7 @@
 namespace CmisSync.Lib.Producer.Crawler {
     using System;
 
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.Filter;
@@ -32,7 +33,6 @@ namespace CmisSync.Lib.Producer.Crawler {
     using DotCMIS.Client;
 
     using log4net;
-using CmisSync.Lib.Consumer;
 
     /// <summary>
     /// Decendants crawler.
