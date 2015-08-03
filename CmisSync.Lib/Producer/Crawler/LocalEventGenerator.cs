@@ -81,7 +81,7 @@ namespace CmisSync.Lib.Producer.Crawler {
             Guid? guid = parent.Uuid;
 
             if (guid != null) {
-                storedParent = storedObjects[(Guid)guid];
+                storedObjects.TryGetValue((Guid)guid, out storedParent);
             }
 
             foreach (var child in localTree.Children) {
@@ -135,7 +135,11 @@ namespace CmisSync.Lib.Producer.Crawler {
             return FileOrFolderEventFactory.CreateEvent(null, fsInfo, localChange: MetaDataChangeType.CREATED, src: this);
         }
 
-        private AbstractFolderEvent CreateLocalEventBasedOnStorage(IFileSystemInfo fsObject, IMappedObject storedParent, IMappedObject storedMappedChild) {
+        private AbstractFolderEvent CreateLocalEventBasedOnStorage(
+            IFileSystemInfo fsObject,
+            IMappedObject storedParent,
+            IMappedObject storedMappedChild)
+        {
             AbstractFolderEvent createdEvent = null;
             if (storedParent == null) {
                 throw new ArgumentNullException("storedParent", "stored parent is null. Stored child: " + storedMappedChild.ToString() + Environment.NewLine + "local object is: " + fsObject.FullName);
