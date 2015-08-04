@@ -531,13 +531,12 @@ namespace CmisSync.Lib.Storage.Database {
         }
 
         /// <summary>
-        /// Gets the tree of mapped objects.
+        /// Gets a list of all mapped objects.
         /// </summary>
-        /// <returns>The object tree.</returns>
-        public IObjectTree<IMappedObject> GetObjectTree() {
-            MappedObject root = null;
-            List<MappedObject> objects = new List<MappedObject>();
-            using(var tran = this.engine.GetTransaction()) {
+        /// <returns>The object list.</returns>
+        public IList<IMappedObject> GetObjectList() {
+            var objects = new List<IMappedObject>();
+            using (var tran = this.engine.GetTransaction()) {
                 foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable)) {
                     var value = row.Value;
                     if (value == null) {
@@ -549,19 +548,11 @@ namespace CmisSync.Lib.Storage.Database {
                         continue;
                     }
 
-                    if (data.ParentId == null) {
-                        root = data;
-                    } else {
-                        objects.Add(data);
-                    }
+                    objects.Add(data);
                 }
             }
 
-            if (root == null) {
-                return null;
-            }
-
-            return this.GetSubTree(objects, root);
+            return objects.Count > 0 ? objects : null;
         }
 
         private IObjectTree<IMappedObject> GetSubTree(List<MappedObject> nodes, MappedObject parent) {

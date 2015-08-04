@@ -56,30 +56,35 @@ namespace CmisSync.Lib.Producer.Crawler {
 
         public CrawlEventCollection GenerateEvents(DescendantsTreeCollection trees) {
             Logger.Debug("Taking trees");
-            IObjectTree<IMappedObject> storedTree = trees.StoredTree;
+            IList<IMappedObject> storedObjects = trees.StoredObjects;
             IObjectTree<IFileSystemInfo> localTree = trees.LocalTree;
             IObjectTree<IFileableCmisObject> remoteTree = trees.RemoteTree;
             CrawlEventCollection createdEvents = new CrawlEventCollection();
             IDictionary<Guid, IMappedObject> storedObjectsForLocal = new Dictionary<Guid, IMappedObject>();
             IDictionary<string, IMappedObject> storedObjectsForRemote = new Dictionary<string, IMappedObject>();
-            storedTree.ToList().ForEach((obj) => {
+            IMappedObject rootObject = null;
+            storedObjects.ToList().ForEach((obj) => {
                 storedObjectsForRemote.Add(obj.RemoteObjectId, obj);
                 storedObjectsForLocal.Add(obj.Guid, obj);
+                if (obj.ParentId == null) {
+                    rootObject = obj;
+                }
             });
 
             ISet<IMappedObject> handledLocalStoredObjects = new HashSet<IMappedObject>();
             ISet<IMappedObject> handledRemoteStoredObjects = new HashSet<IMappedObject>();
             Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap = new Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>>();
+            List<AbstractFolderEvent> localCreationEvents = new List<AbstractFolderEvent>();
             Logger.Debug("Remote Create Events");
-            createdEvents.creationEvents = this.remoteEventGenerator.CreateEvents(storedObjectsForRemote, remoteTree, eventMap, handledRemoteStoredObjects);
+            this.remoteEventGenerator.CreateEvents(storedObjectsForRemote, remoteTree, eventMap, handledRemoteStoredObjects, ref localCreationEvents);
             Logger.Debug("Local Create Events");
-            IList<AbstractFolderEvent> localCreationEvents = new List<AbstractFolderEvent>();
-            createdEvents.creationEvents.AddRange(this.localEventGenerator.CreateEvents(storedObjectsForLocal, localTree, eventMap, handledLocalStoredObjects, ref localCreationEvents));
+            this.localEventGenerator.CreateEvents(storedObjectsForLocal, localTree, eventMap, handledLocalStoredObjects, ref localCreationEvents);
+            createdEvents.creationEvents = localCreationEvents;
             createdEvents.mergableEvents = eventMap;
 
             Logger.Debug("Removing already handled events from list");
-            handledLocalStoredObjects.Add(storedTree.Item);
-            handledRemoteStoredObjects.Add(storedTree.Item);
+            handledLocalStoredObjects.Add(rootObject);
+            handledRemoteStoredObjects.Add(rootObject);
 
             foreach (var handledObject in handledLocalStoredObjects) {
                 storedObjectsForLocal.Remove(handledObject.Guid);

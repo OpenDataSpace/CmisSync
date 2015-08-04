@@ -164,7 +164,7 @@ namespace CmisSync.Lib.Producer.Crawler {
                 if (Logger.IsDebugEnabled) {
                     Logger.Debug(string.Format("LocalTree:  {0} Elements", trees.LocalTree.ToList().Count));
                     Logger.Debug(string.Format("RemoteTree: {0} Elements", trees.RemoteTree.ToList().Count));
-                    Logger.Debug(string.Format("StoredTree: {0} Elements", trees.StoredTree.ToList().Count));
+                    Logger.Debug(string.Format("StoredTree: {0} Elements", trees.StoredObjects.Count));
                 }
 
                 Logger.Debug("Create events");

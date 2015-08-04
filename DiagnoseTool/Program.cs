@@ -83,7 +83,7 @@ namespace DiagnoseTool {
                             var remoteTree = Path.Combine(Path.GetTempPath(), string.Format("StoredTree-{0}.dot", suffix));
                             var storedTree = Path.Combine(Path.GetTempPath(), string.Format("RemoteTree-{0}.dot", suffix));
                             trees.LocalTree.ToDotFile(localTree);
-                            trees.StoredTree.ToDotFile(remoteTree);
+                            trees.StoredObjects.ObjectListToDotFile(remoteTree);
                             trees.RemoteTree.ToDotFile(storedTree);
                             Console.WriteLine(string.Format("Written to:\n{0}\n{1}\n{2}", localTree, remoteTree, storedTree));
                             CreateDiffs(trees, storage);

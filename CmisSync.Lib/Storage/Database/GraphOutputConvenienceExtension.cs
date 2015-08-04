@@ -27,14 +27,27 @@ namespace CmisSync.Lib.Storage.Database {
 
     using DotCMIS.Client;
 
+    /// <summary>
+    /// Graph output convenience extension.
+    /// </summary>
     public static class GraphOutputConvenienceExtension {
         public static void ToDotFile<T>(this IObjectTree<T> tree, string path) {
             tree.ToDotFile(new FileInfoWrapper(new FileInfo(path)));
         }
 
+        public static void ObjectListToDotFile(this IList<IMappedObject> list, string path) {
+            list.ObjectListToDotFile(new FileInfoWrapper(new FileInfo(path)));
+        }
+
         public static void ToDotFile<T>(this IObjectTree<T> tree, IFileInfo file) {
             using (var stream = file.Open(FileMode.CreateNew)) {
                 tree.ToDotStream(stream);
+            }
+        }
+
+        public static void ObjectListToDotFile(this IList<IMappedObject> list, IFileInfo file) {
+            using (var stream = file.Open(FileMode.CreateNew)) {
+                list.ObjectListToDotStream(stream);
             }
         }
 
@@ -47,8 +60,26 @@ namespace CmisSync.Lib.Storage.Database {
             }
         }
 
+        public static void ObjectListToDotStream(this IList<IMappedObject> list, Stream outputsteam) {
+            using (var writer = new StreamWriter(outputsteam)) {
+                writer.WriteLine("digraph tree {");
+                writer.WriteLine("\tgraph [rankdir = \"LR\"];");
+                list.ObjectListToDotString(writer);
+                writer.WriteLine("}");
+            }
+        }
+
         private static void ToDotString<T>(this IObjectTree<T> tree, StreamWriter writer) {
             DotTreeWriterFactory.CreateWriter<T>().ToDotString(tree, writer);
+        }
+
+        private static void ObjectListToDotString(this IList<IMappedObject> list, StreamWriter writer) {
+            foreach (var entry in list) {
+                writer.WriteLine(string.Format("\t\"{0}\" [label=\"{1}|<id>ObjectId: {2}|<uuid>UUID: {3}\", shape=record] ;", entry.RemoteObjectId, entry.Name, entry.RemoteObjectId, entry.Guid));
+                if (entry.ParentId != null) {
+                    writer.WriteLine(string.Format("\t\"{0}\" -> \"{1}\" ;", entry.ParentId, entry.RemoteObjectId));
+                }
+            }
         }
 
         private class DotTreeWriterFactory {

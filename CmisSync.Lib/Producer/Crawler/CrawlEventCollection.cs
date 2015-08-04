@@ -26,6 +26,6 @@ namespace CmisSync.Lib.Producer.Crawler {
 
     public struct CrawlEventCollection {
         public List<AbstractFolderEvent> creationEvents;
-        public Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> mergableEvents;
+        public IDictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> mergableEvents;
     }
 }

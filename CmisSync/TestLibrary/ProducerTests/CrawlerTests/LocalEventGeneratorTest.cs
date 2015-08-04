@@ -78,7 +78,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
             storage.Setup(s => s.GetLocalPath(subSubMappedObject)).Returns(subSubPath);
 
             ISet<IMappedObject> handledLocalStoredObjects = new HashSet<IMappedObject>();
-            IList<AbstractFolderEvent> creationEvents = new List<AbstractFolderEvent>();
+            List<AbstractFolderEvent> creationEvents = new List<AbstractFolderEvent>();
             underTest.CreateEvents(storedObjectsForLocal, rootTree, eventMap, handledLocalStoredObjects, ref creationEvents);
             foreach (var handledObjects in handledLocalStoredObjects) {
                 storedObjectsForLocal.Remove(handledObjects.Guid);

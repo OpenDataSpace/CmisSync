@@ -69,12 +69,12 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// <param name='eventMap'>
         /// Event map.
         /// </param>
-        public IList<AbstractFolderEvent> CreateEvents(
+        public void CreateEvents(
             IDictionary<Guid, IMappedObject> storedObjects,
             IObjectTree<IFileSystemInfo> localTree,
             Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap,
             ISet<IMappedObject> handledStoredObjects,
-            ref IList<AbstractFolderEvent> creationEvents)
+            ref List<AbstractFolderEvent> creationEvents)
         {
             var parent = localTree.Item;
             IMappedObject storedParent = null;
@@ -114,8 +114,6 @@ namespace CmisSync.Lib.Producer.Crawler {
 
                 this.CreateEvents(storedObjects, child, eventMap, handledStoredObjects, ref creationEvents);
             }
-
-            return creationEvents;
         }
 
         private static AbstractFolderEvent GetCorrespondingRemoteEvent(
