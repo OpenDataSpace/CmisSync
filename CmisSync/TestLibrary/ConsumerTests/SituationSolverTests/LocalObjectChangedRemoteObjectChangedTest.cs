@@ -60,13 +60,20 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalAndRemoteFolderAreChanged([Values(true, false)]bool childrenAreIgnored) {
+        public void LocalAndRemoteFolderAreChanged(
+            [Values(true, false)]bool childrenAreIgnored,
+            [Values(true, false)]bool remoteWasReadOnly,
+            [Values(true, false)]bool remoteIsReadOnly,
+            [Values(true, false)]bool localIsReadOnly)
+        {
             this.InitMocks();
             string folderName = "folderName";
             DateTime lastLocalModification = DateTime.UtcNow.AddDays(1);
             DateTime lastRemoteModification = DateTime.UtcNow.AddHours(1);
-            var localFolder = Mock.Of<IDirectoryInfo>(f => f.LastWriteTimeUtc == lastLocalModification);
-            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteId, folderName, "path", this.parentId, this.newChangeToken, childrenAreIgnored);
+            var localFolder = new Mock<IDirectoryInfo>(MockBehavior.Strict);
+            localFolder.SetupProperty(f => f.LastWriteTimeUtc, lastLocalModification);
+            localFolder.SetupProperty(f => f.ReadOnly, localIsReadOnly);
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteId, folderName, "path", this.parentId, this.newChangeToken, childrenAreIgnored, readOnly: remoteIsReadOnly);
             remoteFolder.Setup(f => f.LastModificationDate).Returns(lastRemoteModification);
             var mappedFolder = Mock.Of<IMappedObject>(
                 o =>
@@ -78,59 +85,72 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 o.ParentId == this.parentId &&
                 o.Type == MappedObjectType.Folder &&
                 o.Guid == Guid.NewGuid() &&
-                o.LastContentSize == -1);
+                o.LastContentSize == -1 &&
+                o.IsReadOnly == remoteWasReadOnly);
             this.storage.AddMappedFolder(mappedFolder);
 
-            this.underTest.Solve(localFolder, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
+            this.underTest.Solve(localFolder.Object, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteId, folderName, this.parentId, this.newChangeToken, lastLocalModification: lastLocalModification, lastRemoteModification: lastRemoteModification, ignored: childrenAreIgnored);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteId, folderName, this.parentId, this.newChangeToken, lastLocalModification: lastLocalModification, lastRemoteModification: lastRemoteModification, ignored: childrenAreIgnored, readOnly: remoteIsReadOnly);
+            localFolder.VerifySet(d => d.ReadOnly = remoteIsReadOnly, remoteIsReadOnly != localIsReadOnly ? Times.Once() : Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalAndRemoteFileDatesAreChangedAndLocalDateIsNewerUpdatesRemoteDate() {
+        public void LocalAndRemoteFileDatesAreChangedAndLocalDateIsNewerUpdatesRemoteDate(
+            [Values(true, false)]bool remoteWasReadOnly,
+            [Values(true, false)]bool remoteIsReadOnly,
+            [Values(true, false)]bool localIsReadOnly)
+        {
             this.InitMocks();
             string fileName = "fileName";
             DateTime lastLocalModification = DateTime.UtcNow.AddDays(1);
             DateTime lastRemoteModification = DateTime.UtcNow.AddHours(1);
             var localFile = new Mock<IFileInfo>();
             byte[] contentHash;
-            using (var stream = this.SetUpFileWithContent(localFile, "content", out contentHash, lastLocalModification)) {
+            using (var stream = this.SetUpFileWithContent(localFile, "content", out contentHash, lastLocalModification, localIsReadOnly)) {
                 long length = stream.Length;
-                var remoteFile = this.CreateRemoteDocument(lastRemoteModification, length, contentHash);
+                var remoteFile = this.CreateRemoteDocument(lastRemoteModification, length, contentHash, readOnly: remoteIsReadOnly);
                 var mappedObject = new MappedObject(fileName, this.remoteId, MappedObjectType.File, this.parentId, this.oldChangeToken, length) {
                     Guid = Guid.NewGuid(),
                     LastChecksum = contentHash,
                     LastLocalWriteTimeUtc = DateTime.UtcNow,
                     LastRemoteWriteTimeUtc = DateTime.UtcNow,
-                    ChecksumAlgorithmName = "SHA-1"
+                    ChecksumAlgorithmName = "SHA-1",
+                    IsReadOnly = remoteWasReadOnly
                 };
                 this.storage.AddMappedFile(mappedObject);
 
                 this.underTest.Solve(localFile.Object, remoteFile.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
-                remoteFile.VerifyUpdateLastModificationDate(lastLocalModification, Times.Once(), true);
+                remoteFile.VerifyUpdateLastModificationDate(lastLocalModification, remoteIsReadOnly ? Times.Never() : Times.Once(), true);
                 localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteId, fileName, this.parentId, this.newChangeToken, lastLocalModification: lastLocalModification, lastRemoteModification: lastRemoteModification, checksum: contentHash, contentSize: length);
+                localFile.VerifySet(f => f.ReadOnly = remoteIsReadOnly, localIsReadOnly != remoteIsReadOnly ? Times.Once() : Times.Never());
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteId, fileName, this.parentId, this.newChangeToken, lastLocalModification: lastLocalModification, lastRemoteModification: lastRemoteModification, checksum: contentHash, contentSize: length, readOnly: remoteIsReadOnly);
             }
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalAndRemoteFileDatesAreChangedAndRemoteDateIsNewerUpdatesLocalDate() {
+        public void LocalAndRemoteFileDatesAreChangedAndRemoteDateIsNewerUpdatesLocalDate(
+            [Values(true, false)]bool remoteWasReadOnly,
+            [Values(true, false)]bool remoteIsReadOnly,
+            [Values(true, false)]bool localIsReadOnly)
+        {
             this.InitMocks();
             string fileName = "fileName";
             DateTime lastLocalModification = DateTime.UtcNow.AddHours(1);
             DateTime lastRemoteModification = DateTime.UtcNow.AddDays(1);
             var localFile = new Mock<IFileInfo>();
             byte[] contentHash;
-            using (var stream = this.SetUpFileWithContent(localFile, "content", out contentHash, lastLocalModification)) {
+            using (var stream = this.SetUpFileWithContent(localFile, "content", out contentHash, lastLocalModification, localIsReadOnly)) {
                 long length = stream.Length;
-                var remoteFile = this.CreateRemoteDocument(lastRemoteModification, length, contentHash);
+                var remoteFile = this.CreateRemoteDocument(lastRemoteModification, length, contentHash, remoteIsReadOnly);
                 var mappedObject = new MappedObject(fileName, this.remoteId, MappedObjectType.File, this.parentId, this.oldChangeToken, length) {
                     Guid = Guid.NewGuid(),
                     LastChecksum = contentHash,
                     LastLocalWriteTimeUtc = DateTime.UtcNow,
                     LastRemoteWriteTimeUtc = DateTime.UtcNow,
-                    ChecksumAlgorithmName = "SHA-1"
+                    ChecksumAlgorithmName = "SHA-1",
+                    IsReadOnly = remoteWasReadOnly
                 };
                 this.storage.AddMappedFile(mappedObject);
 
@@ -138,21 +158,26 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
                 remoteFile.VerifyUpdateLastModificationDate(lastLocalModification, Times.Never(), true);
                 localFile.VerifySet(f => f.LastWriteTimeUtc = lastRemoteModification);
-                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteId, fileName, this.parentId, this.newChangeToken, lastLocalModification: lastLocalModification, lastRemoteModification: lastRemoteModification, checksum: contentHash, contentSize: length);
+                localFile.VerifySet(f => f.ReadOnly = remoteIsReadOnly, localIsReadOnly != remoteIsReadOnly ? Times.Once() : Times.Never());
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteId, fileName, this.parentId, this.newChangeToken, lastLocalModification: lastLocalModification, lastRemoteModification: lastRemoteModification, checksum: contentHash, contentSize: length, readOnly: remoteIsReadOnly);
             }
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalAndRemoteContentIsChangedToTheSameContentAndRemoteDateIsNewerUpdatesLocalDate() {
+        public void LocalAndRemoteContentIsChangedToTheSameContentAndRemoteDateIsNewerUpdatesLocalDate(
+            [Values(true, false)]bool remoteWasReadOnly,
+            [Values(true, false)]bool remoteIsReadOnly,
+            [Values(true, false)]bool localIsReadOnly)
+        {
             this.InitMocks();
             string fileName = "fileName";
             DateTime lastLocalModification = DateTime.UtcNow.AddHours(1);
             DateTime lastRemoteModification = DateTime.UtcNow.AddDays(1);
             var localFile = new Mock<IFileInfo>();
             byte[] contentHash;
-            using (var stream = this.SetUpFileWithContent(localFile, "newcontent", out contentHash, lastLocalModification)) {
+            using (var stream = this.SetUpFileWithContent(localFile, "newcontent", out contentHash, lastLocalModification, localIsReadOnly)) {
                 long length = stream.Length;
-                var remoteFile = this.CreateRemoteDocument(lastRemoteModification, length, contentHash);
+                var remoteFile = this.CreateRemoteDocument(lastRemoteModification, length, contentHash, remoteIsReadOnly);
                 var mappedObject = new MappedObject(fileName, this.remoteId, MappedObjectType.File, this.parentId, this.oldChangeToken, length) {
                     Guid = Guid.NewGuid(),
                     LastChecksum = new byte[20],
@@ -166,21 +191,26 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
                 remoteFile.VerifyUpdateLastModificationDate(lastLocalModification, Times.Never(), true);
                 localFile.VerifySet(f => f.LastWriteTimeUtc = lastRemoteModification);
-                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteId, fileName, this.parentId, this.newChangeToken, lastLocalModification: lastLocalModification, lastRemoteModification: lastRemoteModification, checksum: contentHash, contentSize: length);
+                localFile.VerifySet(f => f.ReadOnly = remoteIsReadOnly, remoteIsReadOnly != localIsReadOnly ? Times.Once() : Times.Never());
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteId, fileName, this.parentId, this.newChangeToken, lastLocalModification: lastLocalModification, lastRemoteModification: lastRemoteModification, checksum: contentHash, contentSize: length, readOnly: remoteIsReadOnly);
             }
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalAndRemoteContentIsChangedToTheSameContentAndLocalDateIsNewerUpdatesRemoteDate() {
+        public void LocalAndRemoteContentIsChangedToTheSameContentAndLocalDateIsNewerUpdatesRemoteDate(
+            [Values(true, false)]bool remoteWasReadOnly,
+            [Values(true, false)]bool remoteIsReadOnly,
+            [Values(true, false)]bool localIsReadOnly)
+        {
             this.InitMocks();
             string fileName = "fileName";
             DateTime lastLocalModification = DateTime.UtcNow.AddDays(1);
             DateTime lastRemoteModification = DateTime.UtcNow.AddHours(1);
             var localFile = new Mock<IFileInfo>();
             byte[] contentHash;
-            using (var stream = this.SetUpFileWithContent(localFile, "newcontent", out contentHash, lastLocalModification)) {
+            using (var stream = this.SetUpFileWithContent(localFile, "newcontent", out contentHash, lastLocalModification, localIsReadOnly)) {
                 long length = stream.Length;
-                var remoteFile = this.CreateRemoteDocument(lastRemoteModification, length, contentHash);
+                var remoteFile = this.CreateRemoteDocument(lastRemoteModification, length, contentHash, remoteIsReadOnly);
                 var mappedObject = new MappedObject(fileName, this.remoteId, MappedObjectType.File, this.parentId, this.oldChangeToken, length) {
                     Guid = Guid.NewGuid(),
                     LastChecksum = new byte[20],
@@ -192,9 +222,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
                 this.underTest.Solve(localFile.Object, remoteFile.Object, ContentChangeType.NONE, ContentChangeType.CHANGED);
 
-                remoteFile.VerifyUpdateLastModificationDate(lastLocalModification, Times.Once(), true);
+                remoteFile.VerifyUpdateLastModificationDate(lastLocalModification, remoteIsReadOnly ? Times.Never() : Times.Once(), true);
                 localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteId, fileName, this.parentId, this.newChangeToken, lastLocalModification: lastLocalModification, lastRemoteModification: lastRemoteModification, checksum: contentHash, contentSize: length);
+                localFile.VerifySet(f => f.ReadOnly = remoteIsReadOnly, localIsReadOnly != remoteIsReadOnly ? Times.Once() : Times.Never());
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteId, fileName, this.parentId, this.newChangeToken, lastLocalModification: lastLocalModification, lastRemoteModification: lastRemoteModification, checksum: contentHash, contentSize: length, readOnly: remoteIsReadOnly);
             }
         }
 
@@ -207,8 +238,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.underTest = new LocalObjectChangedRemoteObjectChanged(this.session.Object, this.storage.Object, null, this.transmissionFactory);
         }
 
-        private Mock<IDocument> CreateRemoteDocument(DateTime lastRemoteModification, long contentLength, byte[] contentHash) {
-            var remoteFile = new Mock<IDocument>();
+        private Mock<IDocument> CreateRemoteDocument(DateTime lastRemoteModification, long contentLength, byte[] contentHash, bool readOnly) {
+            var remoteFile = new Mock<IDocument>().SetupReadOnly(readOnly);
             remoteFile.SetupGet(d => d.LastModificationDate).Returns(lastRemoteModification);
             remoteFile.SetupGet(d => d.Id).Returns(this.remoteId);
             remoteFile.SetupContentStreamHash(contentHash);
@@ -216,7 +247,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             return remoteFile;
         }
 
-        private Stream SetUpFileWithContent(Mock<IFileInfo> file, string content, out byte[] hash, DateTime lastModification) {
+        private Stream SetUpFileWithContent(Mock<IFileInfo> file, string content, out byte[] hash, DateTime lastModification, bool readOnly) {
             byte[] bytes = Encoding.UTF8.GetBytes(content);
             hash = SHA1.Create().ComputeHash(bytes);
             var stream = new MemoryStream(bytes);
@@ -224,6 +255,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             file.Setup(f => f.Exists).Returns(true);
             file.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(stream);
             file.Setup(f => f.LastWriteTimeUtc).Returns(lastModification);
+            file.SetupProperty(f => f.ReadOnly, readOnly);
             return stream;
         }
     }

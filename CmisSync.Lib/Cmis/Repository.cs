@@ -34,6 +34,7 @@ namespace CmisSync.Lib.Cmis {
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.PathMatcher;
@@ -268,12 +269,9 @@ namespace CmisSync.Lib.Cmis {
                 return false;
             }));
             this.unsubscriber = this.Queue.CategoryCounter.Subscribe(this);
-            this.Queue.OnException += (sender, e) => {
+            this.Queue.EventManager.OnException += (sender, e) => {
                 ExceptionType type = ExceptionType.Unknown;
-                if (e.Exception is UploadFailedException &&
-                    (e.Exception as UploadFailedException).InnerException is CmisConstraintException &&
-                    ((e.Exception as UploadFailedException).InnerException as CmisConstraintException).IsVirusDetectionException())
-                {
+                if (e.Exception is VirusDetectedException) {
                     type = ExceptionType.FileUploadBlockedDueToVirusDetected;
                 }
 

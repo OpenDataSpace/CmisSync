@@ -189,6 +189,14 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             return obj.IsActionAllowed(Actions.CanApplyAcl);
         }
 
+        public static bool IsReadOnly(this ICmisObject obj) {
+            if (obj is IDocument) {
+                return obj.CanSetContentStream() == false && obj.CanDeleteObject() == false;
+            } else {
+                return obj.CanCreateFolder() == false && obj.CanCreateDocument() == false;
+            }
+        }
+
         /// <summary>
         /// Determines if the specified action is allowed on the cmis object.
         /// </summary>

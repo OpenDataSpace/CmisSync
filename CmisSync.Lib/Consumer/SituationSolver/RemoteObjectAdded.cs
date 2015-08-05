@@ -92,9 +92,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 }
 
                 var remoteFolder = remoteId as IFolder;
-                IDirectoryInfo localFolder = localFile as IDirectoryInfo;
+                var localFolder = localFile as IDirectoryInfo;
                 localFolder.Create();
-
+                localFolder.TryToSetReadOnlyStateIfDiffers(from: remoteFolder, andLogErrorsTo: Logger);
                 Guid uuid = Guid.Empty;
                 if (localFolder.IsExtendedAttributeAvailable()) {
                     uuid = Guid.NewGuid();
@@ -104,19 +104,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     }
                 }
 
-                if (remoteFolder.LastModificationDate != null) {
-                    try {
-                        localFolder.LastWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
-                    } catch (IOException e) {
-                        Logger.Info("Directory modification date could not be synced", e);
-                    }
-                }
-
+                localFolder.TryToSetLastWriteTimeUtcIfAvailable(from: remoteFolder, andLogErrorsTo: Logger);
                 var mappedObject = new MappedObject(remoteFolder);
                 mappedObject.Guid = uuid;
                 mappedObject.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
                 mappedObject.LastLocalWriteTimeUtc = localFolder.LastWriteTimeUtc;
                 mappedObject.Ignored = remoteFolder.AreAllChildrenIgnored();
+                mappedObject.IsReadOnly = localFolder.ReadOnly;
                 this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local folder {0} created and mapped to remote folder {1}", localFolder.FullName, remoteId.Id));
             } else if (localFile is IFileInfo) {
@@ -203,13 +197,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 }
 
                 file.Refresh();
-                if (remoteDoc.LastModificationDate != null) {
-                    try {
-                        file.LastWriteTimeUtc = (DateTime)remoteDoc.LastModificationDate;
-                    } catch(IOException e) {
-                        Logger.Debug("Cannot set last modification date", e);
-                    }
-                }
+                file.TryToSetReadOnlyStateIfDiffers(from: remoteDoc, andLogErrorsTo: Logger);
+                file.TryToSetLastWriteTimeUtcIfAvailable(from: remoteDoc, andLogErrorsTo: Logger);
 
                 MappedObject mappedObject = new MappedObject(
                     file.Name,
@@ -223,7 +212,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     LastLocalWriteTimeUtc = file.LastWriteTimeUtc,
                     LastRemoteWriteTimeUtc = remoteDoc.LastModificationDate,
                     LastChecksum = hash,
-                    ChecksumAlgorithmName = "SHA-1"
+                    ChecksumAlgorithmName = "SHA-1",
+                    IsReadOnly = file.ReadOnly
                 };
                 this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local file {0} created and mapped to remote file {1}", file.FullName, remoteId.Id));

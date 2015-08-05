@@ -23,14 +23,31 @@ namespace CmisSync.Lib.Storage.FileSystem {
     /// <summary>
     /// Date time to file converter.
     /// </summary>
-    public class DateTimeToFileConverter {
+    public static class DateTimeToFileConverter {
+#if __MonoCS__
+        private static readonly DateTime MinDate = new DateTime(1972, 1, 1);
+        private static readonly DateTime MaxDate = new DateTime(2038, 1, 18);
+#else
+        private static readonly DateTime MinDate = new DateTime(1601, 1, 1);
+        private static readonly DateTime MaxDate = new DateTime(5000, 1, 1);
+#endif
+
+        /// <summary>
+        /// Determines if the given date is perhaps out of valid file system range for modification dates.
+        /// </summary>
+        /// <returns><c>true</c> if is perhaps out of valid file system range for modification dates; otherwise, <c>false</c>.</returns>
+        /// <param name="date">Possible modification date.</param>
+        public static bool IsPerhapsOutOfValidFileSystemRange(this DateTime date) {
+            return date < MinDate || date > MaxDate;
+        }
+
         /// <summary>
         /// Convert the specified originalDate based on fsType to the documented limits of the fs type.
         /// </summary>
         /// <param name="originalDate">Original date.</param>
         /// <param name="fsType">File system type.</param>
         /// <returns>Fitting datetime</returns>
-        public static DateTime Convert(DateTime originalDate, FSType fsType) {
+        public static DateTime Convert(this DateTime originalDate, FSType fsType) {
 #if __MonoCS__
             // https://bugzilla.xamarin.com/show_bug.cgi?id=23933
             originalDate = originalDate < new DateTime(1972, 1, 1) ? new DateTime(1972, 1, 1) : originalDate;

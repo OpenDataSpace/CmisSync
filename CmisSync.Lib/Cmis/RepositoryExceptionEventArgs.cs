@@ -20,25 +20,7 @@
 namespace CmisSync.Lib.Cmis {
     using System;
 
-    /// <summary>
-    /// Exception level.
-    /// </summary>
-    public enum ExceptionLevel {
-        /// <summary>
-        /// Information for the user
-        /// </summary>
-        Info,
-
-        /// <summary>
-        /// Warning about a problem
-        /// </summary>
-        Warning,
-
-        /// <summary>
-        /// Fatal warning
-        /// </summary>
-        Fatal
-    }
+    using CmisSync.Lib.Exceptions;
 
     /// <summary>
     /// Exception type.

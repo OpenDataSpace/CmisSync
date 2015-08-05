@@ -42,25 +42,26 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     public class LocalObjectChanged : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChanged));
 
-        private ITransmissionFactory transmissionManager;
+        private ITransmissionFactory transmissionFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectChanged"/> class.
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="transmissionManager">Transmission manager.</param>
+        /// <param name="transmissionStorage">Transmission storage.</param>
+        /// <param name="transmissionFactory">Transmission factory.</param>
         public LocalObjectChanged(
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ITransmissionFactory transmissionManager) : base(session, storage, transmissionStorage)
+            ITransmissionFactory transmissionFactory) : base(session, storage, transmissionStorage)
         {
-            if (transmissionManager == null) {
-                throw new ArgumentNullException("transmissionManager");
+            if (transmissionFactory == null) {
+                throw new ArgumentNullException("transmissionFactory");
             }
 
-            this.transmissionManager = transmissionManager;
+            this.transmissionFactory = transmissionFactory;
         }
 
         /// <summary>
@@ -83,7 +84,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             }
 
             // Match local changes to remote changes and updated them remotely
-            IMappedObject mappedObject = this.Storage.GetObject(localFileSystemInfo);
+            var mappedObject = this.Storage.GetObject(localFileSystemInfo);
             if (mappedObject == null) {
                 throw new ArgumentException(string.Format("Could not find db entry for {0} => invoke crawl sync", localFileSystemInfo.FullName));
             }
@@ -92,15 +93,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 throw new ArgumentException(string.Format("remote {1} {0} has also been changed since last sync => invoke crawl sync", remoteId.Id, remoteId is IDocument ? "document" : "folder"));
             }
 
-            IFileInfo localFile = localFileSystemInfo as IFileInfo;
+            var localFile = localFileSystemInfo as IFileInfo;
             if (localFile != null && localFile.IsContentChangedTo(mappedObject, scanOnlyIfModificationDateDiffers: true)) {
                 Logger.Debug(string.Format("\"{0}\" is different from {1}", localFile.FullName, mappedObject.ToString()));
                 OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
                 var doc = remoteId as IDocument;
                 try {
-                    var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
-                    mappedObject.LastChecksum = UploadFile(localFile, doc, transmission);
-                } catch(Exception ex) {
+                    var transmission = this.transmissionFactory.CreateTransmission(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                    mappedObject.LastChecksum = this.UploadFile(localFile, doc, transmission);
+                } catch (Exception ex) {
                     if (ex.InnerException is CmisPermissionDeniedException) {
                         OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", localFile.FullName));
                         return;
@@ -118,6 +119,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
                 OperationsLogger.Info(string.Format("Local changed file \"{0}\" has been uploaded", localFile.FullName));
             }
+
+            localFileSystemInfo.TryToSetReadOnlyStateIfDiffers(from: remoteId as ICmisObject);
+            mappedObject.IsReadOnly = localFileSystemInfo.ReadOnly;
 
             if (this.ServerCanModifyDateTimes) {
                 try {

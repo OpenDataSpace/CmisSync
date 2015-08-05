@@ -49,7 +49,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="transmissonManager">Transmisson manager.</param>
+        /// <param name="transmissionStorage">Transmission storage.</param>
+        /// <param name="manager">Transmisson manager.</param>
         /// <param name="fsFactory">File System Factory.</param>
         public RemoteObjectChanged(
             ISession session,
@@ -81,47 +82,43 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
-            IMappedObject obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
+            var storedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
             if (remoteId is IFolder) {
                 var remoteFolder = remoteId as IFolder;
                 DateTime? lastModified = remoteFolder.LastModificationDate;
-                obj.LastChangeToken = remoteFolder.ChangeToken;
-                if (lastModified != null) {
-                    try {
-                        localFile.LastWriteTimeUtc = (DateTime)lastModified;
-                    } catch(IOException e) {
-                        Logger.Debug("Couldn't set the server side modification date", e);
-                    }
+                storedObject.LastChangeToken = remoteFolder.ChangeToken;
+                storedObject.Ignored = remoteFolder.AreAllChildrenIgnored();
+                localFile.TryToSetReadOnlyStateIfDiffers(from: remoteFolder, andLogErrorsTo: Logger);
+                storedObject.IsReadOnly = localFile.ReadOnly;
 
-                    obj.Ignored = remoteFolder.AreAllChildrenIgnored();
-                    obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
-                }
+                localFile.TryToSetLastWriteTimeUtcIfAvailable(from: remoteFolder, andLogErrorsTo: Logger);
+                storedObject.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
+                storedObject.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
             } else if (remoteId is IDocument) {
                 var remoteDocument = remoteId as IDocument;
                 DateTime? lastModified = remoteDocument.LastModificationDate;
-                if ((lastModified != null && lastModified != obj.LastRemoteWriteTimeUtc) || obj.LastChangeToken != remoteDocument.ChangeToken) {
+                if ((lastModified != null && lastModified != storedObject.LastRemoteWriteTimeUtc) || storedObject.LastChangeToken != remoteDocument.ChangeToken) {
                     if (remoteContent != ContentChangeType.NONE) {
-                        if (obj.LastLocalWriteTimeUtc != localFile.LastWriteTimeUtc) {
+                        if (storedObject.LastLocalWriteTimeUtc != localFile.LastWriteTimeUtc) {
                             throw new ArgumentException("The local file has been changed since last write => aborting update");
                         }
 
-                        obj.LastChecksum = DownloadChanges(localFile as IFileInfo, remoteDocument, obj, this.fsFactory, this.transmissonManager, Logger);
+                        storedObject.LastChecksum = this.DownloadChanges(localFile as IFileInfo, remoteDocument, storedObject, this.fsFactory, this.transmissonManager, Logger);
                     }
 
-                    obj.LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate;
-                    if (remoteDocument.LastModificationDate != null) {
-                        localFile.LastWriteTimeUtc = (DateTime)remoteDocument.LastModificationDate;
-                    }
-
-                    obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
-                    obj.LastContentSize = remoteDocument.ContentStreamLength ?? 0;
+                    localFile.TryToSetReadOnlyStateIfDiffers(from: remoteDocument, andLogErrorsTo: Logger);
+                    storedObject.LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate;
+                    localFile.TryToSetLastWriteTimeUtcIfAvailable(from: remoteDocument, andLogErrorsTo: Logger);
+                    storedObject.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
+                    storedObject.LastContentSize = remoteDocument.ContentStreamLength ?? 0;
                 }
 
-                obj.LastChangeToken = remoteDocument.ChangeToken;
-                obj.LastRemoteWriteTimeUtc = lastModified;
+                storedObject.LastChangeToken = remoteDocument.ChangeToken;
+                storedObject.LastRemoteWriteTimeUtc = lastModified;
+                storedObject.IsReadOnly = localFile.ReadOnly;
             }
 
-            this.Storage.SaveMappedObject(obj);
+            this.Storage.SaveMappedObject(storedObject);
         }
     }
 }

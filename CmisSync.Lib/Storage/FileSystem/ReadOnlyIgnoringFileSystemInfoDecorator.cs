@@ -32,7 +32,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <see cref="CmisSync.Lib.Storage.FileSystem.ReadOnlyIgnoringFileSystemInfoDecorator"/> class.
         /// </summary>
         /// <param name="info">Decorated file system info instance.</param>
-        public ReadOnlyIgnoringFileSystemInfoDecorator(IFileSystemInfo info) {
+        protected ReadOnlyIgnoringFileSystemInfoDecorator(IFileSystemInfo info) {
             if (info == null) {
                 throw new ArgumentNullException("info");
             }
@@ -155,17 +155,15 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <param name="writeOperation">Write operation.</param>
         protected void DisableAndEnableReadOnlyForOperation(Action writeOperation) {
             this.Refresh();
-            bool readOnly = this.ReadOnly;
-            if (readOnly) {
+            if (this.ReadOnly) {
                 this.ReadOnly = false;
-            }
-
-            try {
-                writeOperation();
-            } finally {
-                if (readOnly) {
+                try {
+                    writeOperation();
+                } finally {
                     this.ReadOnly = true;
                 }
+            } else {
+                writeOperation();
             }
         }
     }

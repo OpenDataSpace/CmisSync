@@ -59,7 +59,7 @@ namespace CmisSync.Lib.Producer.Crawler {
             events.creationEvents.ForEach(e => this.queue.AddEvent(e));
         }
 
-        private void MergeAndSendEvents(Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap) {
+        private void MergeAndSendEvents(IDictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap) {
             foreach (var entry in eventMap) {
                 if (entry.Value == null) {
                     continue;

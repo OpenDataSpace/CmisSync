@@ -26,7 +26,7 @@ namespace TestLibrary.EventsTests {
 
     using NUnit.Framework;
 
-    [TestFixture, Category("Fast")
+    [TestFixture, Category("Fast")]
     public class FullSyncCompletedEventTest {
         [Test]
         public void ContructorTest() {

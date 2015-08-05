@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="MoqExtensions.cs" company="GRAU DATA AG">
+// <copyright file="InteractionNeededExceptionTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,19 +16,23 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-/**
- * taken from http://haacked.com/archive/2010/11/24/moq-sequences-revisited.aspx/
- *
- * thanks to Phil Haack
- */
-using System.Collections.Generic;
-using Moq.Language.Flow;
+﻿
+namespace TestLibrary.ExceptionTests {
+    using System;
 
-public static class MoqExtensions {
-    public static void ReturnsInOrder<T, TResult>(
-        this ISetup<T, TResult> setup, 
-        params TResult[] results) where T : class
-    {
-        setup.Returns(new Queue<TResult>(results).Dequeue);
+    using CmisSync.Lib.Exceptions;
+
+    using NUnit.Framework;
+
+    using Moq;
+
+    [TestFixture, Category("Fast")]
+    public class InteractionNeededExceptionTest {
+        [Test]
+        public void ExceptionLevelIsInfo() {
+            Assert.That(new InteractionNeededException().Level, Is.EqualTo(ExceptionLevel.Info));
+            Assert.That(new InteractionNeededException("msg").Level, Is.EqualTo(ExceptionLevel.Info));
+            Assert.That(new InteractionNeededException("msg", Mock.Of<Exception>()).Level, Is.EqualTo(ExceptionLevel.Info));
+        }
     }
 }

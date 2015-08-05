@@ -59,8 +59,8 @@ SOURCES =  \
 	Consumer/ISituationDetection.cs \
 	Consumer/LocalSituationDetection.cs \
 	Consumer/RemoteSituationDetection.cs \
-	Consumer/RetryException.cs \
 	Consumer/SituationSolver/AbstractEnhancedSolver.cs \
+	Consumer/SituationSolver/FileSystemInfoConvenienceExtenders.cs \
 	Consumer/SituationSolver/ISolver.cs \
 	Consumer/SituationSolver/LocalObjectAdded.cs \
 	Consumer/SituationSolver/LocalObjectChanged.cs \
@@ -133,7 +133,9 @@ SOURCES =  \
 	Events/StartNextSyncEvent.cs \
 	Events/SuccessfulLoginEvent.cs \
 	Exceptions/AbstractInteractionNeededException.cs \
+	Exceptions/ExceptionLevel.cs \
 	Exceptions/InteractionNeededException.cs \
+	Exceptions/RetryException.cs \
 	Exceptions/VirusDetectedException.cs \
 	FileTransmission/AbortException.cs \
 	FileTransmission/ChunkedDownloader.cs \

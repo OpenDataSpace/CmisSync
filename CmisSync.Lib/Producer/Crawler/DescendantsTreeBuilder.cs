@@ -203,7 +203,7 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// The trees as a struct.
         /// </returns>
         public DescendantsTreeCollection BuildTrees() {
-            IObjectTree<IMappedObject> storedTree = null;
+            IList<IMappedObject> storedObjects = null;
             IObjectTree<IFileSystemInfo> localTree = null;
             IObjectTree<IFileableCmisObject> remoteTree = null;
 
@@ -217,10 +217,14 @@ namespace CmisSync.Lib.Producer.Crawler {
             // Wait until all tasks are finished
             Task.WaitAll(tasks);
             */
+            Logger.Debug("Crawling local fs");
             localTree = GetLocalDirectoryTree(this.localFolder, this.filter);
+            Logger.Debug("Crawling remote fs");
             remoteTree = GetRemoteDirectoryTree(this.remoteFolder, this.remoteFolder.GetDescendants(-1), this.filter, this.ignoredStorage, this.matcher);
-            storedTree = this.storage.GetObjectTree();
-            return new DescendantsTreeCollection(storedTree, localTree, remoteTree);
+            Logger.Debug("Building stored tree");
+            storedObjects = this.storage.GetObjectList();
+            Logger.Debug("Finished building trees");
+            return new DescendantsTreeCollection(storedObjects, localTree, remoteTree);
         }
     }
 }

@@ -83,6 +83,8 @@ SOURCES =  \
 	EventsTests/PermissionDeniedExceptionTest.cs \
 	EventsTests/ProxyAuthRequiredEventTest.cs \
 	EventsTests/StartNextSyncEventTest.cs \
+	ExceptionTests/AbstractInteractionNeededExceptionTest.cs \
+	ExceptionTests/InteractionNeededExceptionTest.cs \
 	ExceptionTests/VirusDetectedExceptionTest.cs \
 	FileTransmissionTests/ChunkedDownloaderTest.cs \
 	FileTransmissionTests/ChunkedFileUploaderTest.cs \
@@ -192,6 +194,7 @@ SOURCES =  \
 	ProducerTests/ContentChangeTests/ContentChangesTest.cs \
 	ProducerTests/CrawlerTests/CrawlEventGeneratorTest.cs \
 	ProducerTests/CrawlerTests/CrawlEventNotifierTest.cs \
+	ProducerTests/CrawlerTests/DescendantsCrawlerLargeTests.cs \
 	ProducerTests/CrawlerTests/DescendantsCrawlerTest.cs \
 	ProducerTests/CrawlerTests/LocalEventGeneratorTest.cs \
 	ProducerTests/CrawlerTests/ObjectTreeTest.cs \
@@ -226,6 +229,9 @@ SOURCES =  \
 	StorageTests/FileSystemTests/ExtendedAttributeReaderUnixTest.cs \
 	StorageTests/FileSystemTests/FileSystemWrapperTests.cs \
 	StorageTests/FileSystemTests/LongFileAndPathNameSupportTest.cs \
+	StorageTests/FileSystemTests/ReadOnlyIgnoringDecorator/IDirectoryInfoDecoratorTest.cs \
+	StorageTests/FileSystemTests/ReadOnlyIgnoringDecorator/IFileInfoDecoratorTest.cs \
+	StorageTests/FileSystemTests/ReadOnlyIgnoringDecorator/IFileSystemInfoDecoratorTest.cs \
 	StorageTests/FileSystemTests/Utf8FileNameNormalizationTest.cs \
 	StreamsTests/AbortableStreamTest.cs \
 	StreamsTests/BandwidthLimitedStreamTest.cs \

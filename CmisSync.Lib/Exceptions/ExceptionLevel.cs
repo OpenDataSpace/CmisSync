@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="MoqExtensions.cs" company="GRAU DATA AG">
+// <copyright file="ExceptionLevel.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,19 +16,32 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-/**
- * taken from http://haacked.com/archive/2010/11/24/moq-sequences-revisited.aspx/
- *
- * thanks to Phil Haack
- */
-using System.Collections.Generic;
-using Moq.Language.Flow;
+﻿
+namespace CmisSync.Lib.Exceptions {
+    using System;
 
-public static class MoqExtensions {
-    public static void ReturnsInOrder<T, TResult>(
-        this ISetup<T, TResult> setup, 
-        params TResult[] results) where T : class
-    {
-        setup.Returns(new Queue<TResult>(results).Dequeue);
+    /// <summary>
+    /// Exception level.
+    /// </summary>
+    public enum ExceptionLevel {
+        /// <summary>
+        /// The undecided. Should not occur.
+        /// </summary>
+        Undecided = 0,
+
+        /// <summary>
+        /// Information for the user
+        /// </summary>
+        Info,
+
+        /// <summary>
+        /// Warning about a problem
+        /// </summary>
+        Warning,
+
+        /// <summary>
+        /// Fatal warning
+        /// </summary>
+        Fatal
     }
 }

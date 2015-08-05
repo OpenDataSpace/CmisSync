@@ -87,7 +87,31 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// </summary>
         /// <param name="target">Target file name.</param>
         public void MoveTo(string target) {
-            this.fileInfo.MoveTo(target);
+            if (this.Directory.ReadOnly) {
+                var directory = this.Directory;
+                try {
+                    directory.ReadOnly = false;
+                    this.MoveToPossibleReadOnlyTarget(target);
+                } finally {
+                    directory.ReadOnly = true;
+                }
+            } else {
+                this.MoveToPossibleReadOnlyTarget(target);
+            }
+        }
+
+        private void MoveToPossibleReadOnlyTarget(string target) {
+            var targetInfo = new FileInfoWrapper(new FileInfo(target));
+            if (targetInfo.Directory.Exists && targetInfo.Directory.ReadOnly) {
+                try {
+                    targetInfo.Directory.ReadOnly = false;
+                    this.fileInfo.MoveTo(target);
+                } finally {
+                    targetInfo.Directory.ReadOnly = true;
+                }
+            } else {
+                this.fileInfo.MoveTo(target);
+            }
         }
 
         /// <summary>
@@ -99,14 +123,61 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <param name="ignoreMetadataErrors"><c>true</c> to ignore merge errors (such as attributes and ACLs) from the replaced file to the replacement file; otherwise <c>false</c>.</param>
         /// <returns>A IFileInfo object that encapsulates information about the file described by the destFileName parameter.</returns>
         public IFileInfo Replace(IFileInfo destinationFile, IFileInfo destinationBackupFileName, bool ignoreMetadataErrors) {
-            return this.fileInfo.Replace(destinationFile, destinationBackupFileName, ignoreMetadataErrors);
+            if (destinationFile.ReadOnly) {
+                try {
+                    destinationFile.ReadOnly = false;
+                    bool readOnly = this.ReadOnly;
+                    var result = this.fileInfo.Replace(destinationFile, destinationBackupFileName, ignoreMetadataErrors);
+                    result.ReadOnly = readOnly;
+                    if (destinationBackupFileName != null) {
+                        destinationBackupFileName.ReadOnly = true;
+                    }
+
+                    return result;
+                } catch(Exception) {
+                    destinationFile.ReadOnly = true;
+                    throw;
+                }
+            } else {
+                bool readOnly = this.ReadOnly;
+                var result = this.fileInfo.Replace(destinationFile, destinationBackupFileName, ignoreMetadataErrors);
+                result.ReadOnly = readOnly;
+                if (destinationBackupFileName != null) {
+                    destinationBackupFileName.ReadOnly = false;
+                }
+
+                return result;
+            }
         }
 
         /// <summary>
         /// Deletes the file on the fs.
         /// </summary>
         public void Delete() {
-            this.fileInfo.Delete();
+            if (this.Directory.ReadOnly) {
+                try {
+                    this.Directory.ReadOnly = false;
+                    this.DeleteFileIfReadOnly();
+                } finally {
+                    this.Directory.ReadOnly = true;
+                }
+            } else {
+                this.DeleteFileIfReadOnly();
+            }
+        }
+
+        private void DeleteFileIfReadOnly() {
+            if (this.ReadOnly) {
+                try {
+                    this.ReadOnly = false;
+                    this.fileInfo.Delete();
+                } catch (Exception) {
+                    this.ReadOnly = true;
+                    throw;
+                }
+            } else {
+                this.fileInfo.Delete();
+            }
         }
     }
 }

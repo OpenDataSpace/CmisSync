@@ -65,6 +65,7 @@ namespace CmisSync.Lib.Consumer {
         /// <param name="transmissionStorage">File transmission storage.</param>
         /// <param name="activityListener">Active sync progress listener.</param>
         /// <param name="filters">Ignore filter.</param>
+        /// <param name="transmissionFactory">Transmission factory.</param>
         /// <param name="solver">Solver for custom solver matrix.</param>
         public SyncMechanism(
             ISituationDetection<AbstractFolderEvent> localSituation,
@@ -145,7 +146,7 @@ namespace CmisSync.Lib.Consumer {
                     Logger.Debug(string.Format("RetryException[{0}] thrown for event {1} => enqueue event", retry.Message, folderEvent.ToString()));
                     folderEvent.RetryCount++;
                     this.Queue.AddEvent(folderEvent);
-                } catch (InteractionNeededException interaction) {
+                } catch (AbstractInteractionNeededException interaction) {
                     this.Queue.AddEvent(new InteractionNeededEvent(interaction));
                     throw;
                 } catch (DotCMIS.Exceptions.CmisConnectionException) {

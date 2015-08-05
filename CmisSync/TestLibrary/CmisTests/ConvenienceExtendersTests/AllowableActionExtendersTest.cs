@@ -47,6 +47,20 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
         }
 
         [Test]
+        public void IsReadOnlyOnFolders([Values(true, false)]bool readOnly) {
+            var underTest = new Mock<IFolder>();
+            underTest.SetupReadOnly(readOnly);
+            Assert.That(underTest.Object.IsReadOnly(), Is.EqualTo(readOnly));
+        }
+
+        [Test]
+        public void IsReadOnlyOnDocuments([Values(true, false)]bool readOnly) {
+            var underTest = new Mock<IDocument>();
+            underTest.SetupReadOnly(readOnly);
+            Assert.That(underTest.Object.IsReadOnly(), Is.EqualTo(readOnly));
+        }
+
+        [Test]
         public void CanGetChildrenIfNoActionIsAvailable() {
             var underTest = new Mock<IFolder>();
             Assert.That(underTest.Object.CanGetChildren(), Is.Null);

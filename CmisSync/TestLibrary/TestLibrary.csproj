@@ -323,9 +323,15 @@
     <Compile Include="CmisTests\AbstractRepositoryTest.cs" />
     <Compile Include="StorageTests\DataBaseTests\GraphOutputTest.cs" />
     <Compile Include="FilterTests\SymlinkFilterTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\ReadOnlyIgnoringDecorator\IDirectoryInfoDecoratorTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\ReadOnlyIgnoringDecorator\IFileInfoDecoratorTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\ReadOnlyIgnoringDecorator\IFileSystemInfoDecoratorTest.cs" />
     <Compile Include="FileTransmissionTests\TransmissionFactoryTest.cs" />
     <Compile Include="IntegrationTests\VirusDetectionTests\VirusDetectionTests.cs" />
     <Compile Include="ExceptionTests\VirusDetectedExceptionTest.cs" />
+    <Compile Include="ExceptionTests\InteractionNeededExceptionTest.cs" />
+    <Compile Include="ExceptionTests\AbstractInteractionNeededExceptionTest.cs" />
+    <Compile Include="ProducerTests\CrawlerTests\DescendantsCrawlerLargeTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -362,6 +368,7 @@
     <Folder Include="IntegrationTests\ContentHashTests\" />
     <Folder Include="IntegrationTests\MockedServerTests\" />
     <Folder Include="MockedServer\MockedServices\" />
+    <Folder Include="StorageTests\FileSystemTests\ReadOnlyIgnoringDecorator\" />
     <Folder Include="IntegrationTests\VirusDetectionTests\" />
     <Folder Include="ExceptionTests\" />
   </ItemGroup>

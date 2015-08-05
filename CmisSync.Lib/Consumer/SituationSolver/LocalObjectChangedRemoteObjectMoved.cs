@@ -77,9 +77,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 OperationsLogger.Info(string.Format("Moved local file {0} to {1}", oldPath, newPath));
             }
 
+            localFileSystemInfo.TryToSetReadOnlyStateIfDiffers(from: remoteId as ICmisObject);
             savedObject.Name = (remoteId as ICmisObject).Name;
             savedObject.Ignored = (remoteId as ICmisObject).AreAllChildrenIgnored();
             savedObject.ParentId = remoteId is IFolder ? (remoteId as IFolder).ParentId : (remoteId as IDocument).Parents[0].Id;
+            savedObject.IsReadOnly = localFileSystemInfo.ReadOnly;
             this.Storage.SaveMappedObject(savedObject);
 
             this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);

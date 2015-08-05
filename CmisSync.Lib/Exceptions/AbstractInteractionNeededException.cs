@@ -82,6 +82,12 @@ namespace CmisSync.Lib.Exceptions {
         public string Details { get; set; }
 
         /// <summary>
+        /// Gets or sets the exception level.
+        /// </summary>
+        /// <value>The level.</value>
+        public ExceptionLevel Level { get; protected set; }
+
+        /// <summary>
         /// Gets the actions, which can be executed to solve the problem.
         /// </summary>
         /// <value>The actions.</value>

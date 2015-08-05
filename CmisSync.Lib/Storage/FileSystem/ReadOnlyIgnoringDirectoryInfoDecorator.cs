@@ -19,6 +19,7 @@
 
 namespace CmisSync.Lib.Storage.FileSystem {
     using System;
+    using System.IO;
 
     /// <summary>
     /// Read only ignoring directory info decorator.
@@ -55,7 +56,16 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// Creates a directory.
         /// </summary>
         public void Create() {
-            this.dirInfo.Create();
+            if (this.Parent.ReadOnly) {
+                this.Parent.ReadOnly = false;
+                try {
+                    this.dirInfo.Create();
+                } finally {
+                    this.Parent.ReadOnly = true;
+                }
+            } else {
+                this.dirInfo.Create();
+            }
         }
 
         /// <summary>
@@ -89,7 +99,28 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// </summary>
         /// <param name="recursive">Deletes recursive if set to <c>true</c>.</param>
         public void Delete(bool recursive) {
-            this.dirInfo.Delete(recursive);
+            if (this.dirInfo.ReadOnly) {
+                this.dirInfo.ReadOnly = false;
+            }
+
+            if (this.Parent.ReadOnly) {
+                this.Parent.ReadOnly = false;
+                try {
+                    if (recursive) {
+                        this.dirInfo.TryToSetReadWritePermissionRecursively();
+                    }
+
+                    this.dirInfo.Delete(recursive);
+                } finally {
+                    this.Parent.ReadOnly = true;
+                }
+            } else {
+                if (recursive) {
+                    this.dirInfo.TryToSetReadWritePermissionRecursively();
+                }
+
+                this.dirInfo.Delete(recursive);
+            }
         }
 
         /// <summary>
@@ -97,7 +128,38 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// </summary>
         /// <param name="destDirName">Destination directory path.</param>
         public void MoveTo(string destDirName) {
-            this.dirInfo.MoveTo(destDirName);
+            if (this.Parent.ReadOnly) {
+                var parent = this.Parent;
+                try {
+                    parent.ReadOnly = false;
+                    this.MoveToPossibleReadOnlyTarget(destDirName);
+                } finally {
+                    parent.ReadOnly = true;
+                }
+            } else {
+                this.MoveToPossibleReadOnlyTarget(destDirName);
+            }
+        }
+
+        /// <summary>
+        /// Tries to set permission to read write access to the directory and its children
+        /// </summary>
+        public void TryToSetReadWritePermissionRecursively() {
+            this.dirInfo.TryToSetReadWritePermissionRecursively();
+        }
+
+        private void MoveToPossibleReadOnlyTarget(string target) {
+            var targetInfo = new DirectoryInfoWrapper(new DirectoryInfo(target));
+            if (targetInfo.Parent.Exists && targetInfo.Parent.ReadOnly) {
+                try {
+                    targetInfo.Parent.ReadOnly = false;
+                    this.DisableAndEnableReadOnlyForOperation(() => this.dirInfo.MoveTo(target));
+                } finally {
+                    targetInfo.Parent.ReadOnly = true;
+                }
+            } else {
+                this.DisableAndEnableReadOnlyForOperation(() => this.dirInfo.MoveTo(target));
+            }
         }
     }
 }

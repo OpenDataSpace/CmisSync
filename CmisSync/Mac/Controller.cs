@@ -196,6 +196,10 @@ namespace CmisSync {
                 InsertAlertNotification(title, message);
             };
 
+            ShowException += (title, msg) => {
+                InsertAlertNotification(title, msg);
+            };
+
             OnTransmissionListChanged += delegate {
                 var count = this.ActiveTransmissions().Count;
                 /*using (var a = new NSAutoreleasePool()) {

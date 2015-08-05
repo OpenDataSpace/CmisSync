@@ -16,8 +16,8 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib
-{
+
+namespace CmisSync.Lib.Producer.Crawler {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -28,12 +28,10 @@ namespace CmisSync.Lib
     using CmisSync.Lib.Storage.Database.Entities;
 
     using DotCMIS.Client;
-    public class RemoteEventGenerator
-    {
+    public class RemoteEventGenerator {
         private IMetaDataStorage storage;
 
-        public RemoteEventGenerator(IMetaDataStorage storage)
-        {
+        public RemoteEventGenerator(IMetaDataStorage storage) {
             if (storage == null) {
                 throw new ArgumentNullException("storage");
             }
@@ -56,17 +54,19 @@ namespace CmisSync.Lib
         /// <param name='eventMap'>
         /// Event map.
         /// </param>
-        public List<AbstractFolderEvent> CreateEvents(
-            List<IMappedObject> storedObjects,
+        public void CreateEvents(
+            IDictionary<string, IMappedObject> storedObjects,
             IObjectTree<IFileableCmisObject> remoteTree,
             Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap,
-            ISet<IMappedObject> handledStoredObjects)
+            ISet<IMappedObject> handledStoredObjects,
+            ref List<AbstractFolderEvent> createdEvents)
         {
-            List<AbstractFolderEvent> createdEvents = new List<AbstractFolderEvent>();
-            var storedParent = storedObjects.Find(o => o.RemoteObjectId == remoteTree.Item.Id);
+            IMappedObject storedParent = null;
+            storedObjects.TryGetValue(remoteTree.Item.Id, out storedParent);
 
             foreach (var child in remoteTree.Children) {
-                var storedMappedChild = storedObjects.Find(o => o.RemoteObjectId == child.Item.Id);
+                IMappedObject storedMappedChild = null;
+                storedObjects.TryGetValue(child.Item.Id, out storedMappedChild);
                 if (storedMappedChild != null) {
                     AbstractFolderEvent newEvent = this.CreateRemoteEventBasedOnStorage(child.Item, storedParent, storedMappedChild);
                     eventMap[child.Item.Id] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(null, newEvent);
@@ -76,23 +76,24 @@ namespace CmisSync.Lib
                     createdEvents.Add(addEvent);
                 }
 
-                createdEvents.AddRange(this.CreateEvents(storedObjects, child, eventMap, handledStoredObjects));
+                this.CreateEvents(storedObjects, child, eventMap, handledStoredObjects, ref createdEvents);
                 if (storedMappedChild != null) {
                     handledStoredObjects.Add(storedMappedChild);
                 }
             }
-
-            return createdEvents;
         }
 
-        private AbstractFolderEvent CreateRemoteEventBasedOnStorage(IFileableCmisObject cmisObject, IMappedObject storedParent, IMappedObject storedMappedChild)
+        private AbstractFolderEvent CreateRemoteEventBasedOnStorage(
+            IFileableCmisObject cmisObject,
+            IMappedObject storedParent,
+            IMappedObject storedMappedChild)
         {
             AbstractFolderEvent newEvent = null;
             if (storedParent != null && storedMappedChild.ParentId == storedParent.RemoteObjectId) {
                 // Renamed or Equal
                 if (storedMappedChild.Name == cmisObject.Name) {
                     // Equal or property update
-                    if (storedMappedChild.LastChangeToken != cmisObject.ChangeToken) {
+                    if (storedMappedChild.LastChangeToken != cmisObject.ChangeToken || storedMappedChild.IsReadOnly != cmisObject.IsReadOnly()) {
                         // Update
                         newEvent = FileOrFolderEventFactory.CreateEvent(cmisObject, null, MetaDataChangeType.CHANGED, src: this);
                         AddRemoteContentChangeTypeToFileEvent(newEvent as FileEvent, storedMappedChild, cmisObject as IDocument);

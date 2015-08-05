@@ -27,6 +27,7 @@ namespace CmisSync.Lib.Exceptions {
     /// <summary>
     /// Virus detected exception.
     /// </summary>
+    [Serializable]
     public class VirusDetectedException : AbstractInteractionNeededException {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Exceptions.VirusDetectedException"/> class.
@@ -40,6 +41,8 @@ namespace CmisSync.Lib.Exceptions {
             if (!cmisException.IsVirusDetectionException()) {
                 throw new ArgumentException("Given exception is not a virus detected exception");
             }
+
+            this.Level = ExceptionLevel.Warning;
         }
     }
 }

@@ -29,11 +29,6 @@ namespace CmisSync.Lib.Queueing {
     /// </summary>
     public interface ICountingQueue : IDisposableSyncEventQueue {
         /// <summary>
-        /// Occurs when an exception is thrown on handling a given ISyncEvent from queue.
-        /// </summary>
-        event EventHandler<ThreadExceptionEventArgs> OnException;
-
-        /// <summary>
         /// Gets the full counter.
         /// </summary>
         /// <value>The full counter.</value>

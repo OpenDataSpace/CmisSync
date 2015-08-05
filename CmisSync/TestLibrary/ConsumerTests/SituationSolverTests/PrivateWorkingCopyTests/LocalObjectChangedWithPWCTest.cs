@@ -219,10 +219,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             var parents = new List<IFolder>();
             parents.Add(Mock.Of<IFolder>(f => f.Id == this.parentId));
 
-            var docId = Mock.Of<IObjectId>(
-                o =>
-                o.Id == this.objectIdOld);
-
             var doc = Mock.Of<IDocument>(
                 d =>
                 d.Name == this.fileName &&
