@@ -91,11 +91,15 @@ namespace CmisSync {
             };
 
             Program.Controller.ShowException += delegate(string title, string message) {
-                this.trayicon.ShowBalloonTip(
-                    30000,
-                    title,
-                    message,
-                    ToolTipIcon.Warning);
+                if (!string.IsNullOrEmpty(message)) {
+                    BeginInvoke((Action)delegate {
+                        this.trayicon.ShowBalloonTip(
+                            30000,
+                            title,
+                            message,
+                            ToolTipIcon.Warning);
+                    });
+                }
             };
 
             Program.Controller.AlertNotificationRaised += delegate(string title, string message) {
