@@ -63,23 +63,23 @@ namespace CmisSync.Lib.Producer.Crawler {
             IDictionary<Guid, IMappedObject> storedObjectsForLocal = new Dictionary<Guid, IMappedObject>();
             IDictionary<string, IMappedObject> storedObjectsForRemote = new Dictionary<string, IMappedObject>();
             IMappedObject rootObject = null;
-            storedObjects.ToList().ForEach((obj) => {
+            foreach (var obj in storedObjects) {
                 storedObjectsForRemote.Add(obj.RemoteObjectId, obj);
                 storedObjectsForLocal.Add(obj.Guid, obj);
                 if (obj.ParentId == null) {
                     rootObject = obj;
                 }
-            });
+            }
 
             ISet<IMappedObject> handledLocalStoredObjects = new HashSet<IMappedObject>();
             ISet<IMappedObject> handledRemoteStoredObjects = new HashSet<IMappedObject>();
             Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap = new Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>>();
-            List<AbstractFolderEvent> localCreationEvents = new List<AbstractFolderEvent>();
+            List<AbstractFolderEvent> createEvents = new List<AbstractFolderEvent>();
             Logger.Debug("Remote Create Events");
-            this.remoteEventGenerator.CreateEvents(storedObjectsForRemote, remoteTree, eventMap, handledRemoteStoredObjects, ref localCreationEvents);
+            this.remoteEventGenerator.CreateEvents(storedObjectsForRemote, remoteTree, eventMap, handledRemoteStoredObjects, ref createEvents);
             Logger.Debug("Local Create Events");
-            this.localEventGenerator.CreateEvents(storedObjectsForLocal, localTree, eventMap, handledLocalStoredObjects, ref localCreationEvents);
-            createdEvents.creationEvents = localCreationEvents;
+            this.localEventGenerator.CreateEvents(storedObjectsForLocal, localTree, eventMap, handledLocalStoredObjects, ref createEvents);
+            createdEvents.creationEvents = createEvents;
             createdEvents.mergableEvents = eventMap;
 
             Logger.Debug("Removing already handled events from list");
