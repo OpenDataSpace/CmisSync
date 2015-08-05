@@ -34,7 +34,7 @@ namespace CmisSync.Lib.Cmis {
 
         private DateTime? lastFinishedSync;
 
-        protected RepositoryStatus RepoStatusFlags = new RepositoryStatus();
+        protected readonly RepositoryStatus RepoStatusFlags = new RepositoryStatus();
 
         private RepoInfo repoInfo;
 
