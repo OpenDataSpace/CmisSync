@@ -16,6 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace CmisSync.Lib.Producer.Crawler {
     using System;
     using System.Collections.Generic;
