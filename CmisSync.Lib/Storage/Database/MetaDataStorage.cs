@@ -457,25 +457,18 @@ namespace CmisSync.Lib.Storage.Database {
         /// Validates the object structure.
         /// </summary>
         public void ValidateObjectStructure() {
-            MappedObject root = null;
-            List<MappedObject> objects = new List<MappedObject>();
-            using(var tran = this.engine.GetTransaction()) {
-                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable)) {
-                    var value = row.Value;
-                    if (value == null) {
-                        continue;
+            var objects = this.GetObjectList() ?? new List<IMappedObject>();
+            var objectsDict = new Dictionary<string, IList<IMappedObject>>();
+            IMappedObject root = null;
+            foreach (var obj in objects) {
+                if (obj.ParentId != null) {
+                    if (!objectsDict.ContainsKey(obj.ParentId)) {
+                        objectsDict[obj.ParentId] = new List<IMappedObject>();
                     }
 
-                    var data = value.Get;
-                    if (data == null) {
-                        continue;
-                    }
-
-                    if (data.ParentId == null) {
-                        root = data;
-                    } else {
-                        objects.Add(data);
-                    }
+                    objectsDict[obj.ParentId].Add(obj);
+                } else {
+                    root = obj;
                 }
             }
 
@@ -490,11 +483,13 @@ namespace CmisSync.Lib.Storage.Database {
                 }
             }
 
-            this.RemoveChildrenRecursively(objects, root);
-            if (objects.Count > 0) {
+            this.RemoveChildrenRecursively(objectsDict, root);
+            if (objectsDict.Count > 0) {
                 var sb = new StringBuilder();
-                foreach(var obj in objects) {
-                    sb.Append(obj).Append(Environment.NewLine);
+                foreach (var objs in objectsDict.Values) {
+                    foreach (var obj in objs) {
+                        sb.Append(obj).Append(Environment.NewLine);
+                    }
                 }
 
                 throw new InvalidDataException(
@@ -570,14 +565,17 @@ namespace CmisSync.Lib.Storage.Database {
             return tree;
         }
 
-        private void RemoveChildrenRecursively(List<MappedObject> objects, MappedObject root) {
-            var children = objects.FindAll(o => o.ParentId == root.RemoteObjectId);
-            foreach (var child in children) {
-                objects.Remove(child);
-                if (child.Type == MappedObjectType.Folder) {
-                    this.RemoveChildrenRecursively(objects, child);
+        private void RemoveChildrenRecursively(IDictionary<string, IList<IMappedObject>> objects, IMappedObject root) {
+            IList<IMappedObject> children;
+            if (objects.TryGetValue(root.RemoteObjectId, out children)) {
+                foreach (var child in children) {
+                    if (child.Type == MappedObjectType.Folder) {
+                        this.RemoveChildrenRecursively(objects, child);
+                    }
                 }
             }
+
+            objects.Remove(root.RemoteObjectId);
         }
 
         private string PrintFindLines(List<MappedObject> objects, MappedObject parent, string prefix) {
