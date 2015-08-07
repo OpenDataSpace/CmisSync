@@ -525,6 +525,12 @@ This could lead to a lot of conflict files!</value>
   <data name="TransmissionExceptionDetails" xml:space="preserve">
     <value>Details</value>
   </data>
+  <data name="ConfigBrokenMessage" xml:space="preserve">
+    <value>Please reconfigure the connection</value>
+  </data>
+  <data name="ConfigBrokenTitle" xml:space="preserve">
+    <value>The configuration of "{0}" is broken</value>
+  </data>
   <data name="VirusDetectedMessage" xml:space="preserve">
     <value>Affected file: "{0}"</value>
   </data>

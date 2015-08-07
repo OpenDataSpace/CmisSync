@@ -205,6 +205,24 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please reconfigure the connection.
+        /// </summary>
+        internal static string ConfigBrokenMessage {
+            get {
+                return ResourceManager.GetString("ConfigBrokenMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The configuration of &quot;{0}&quot; is broken.
+        /// </summary>
+        internal static string ConfigBrokenTitle {
+            get {
+                return ResourceManager.GetString("ConfigBrokenTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Do you really want to sync the existing local folder &quot;{0}&quot;?
         ///This could lead to a lot of conflict files!.
         /// </summary>
