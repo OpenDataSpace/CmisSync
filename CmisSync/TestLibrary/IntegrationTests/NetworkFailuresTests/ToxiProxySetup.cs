@@ -11,7 +11,7 @@ namespace TestLibrary.IntegrationTests.NetworkFailuresTests {
 
     using Toxiproxy.Net;
 
-    [TestFixture, Category("FailureIT"), Ignore("https://github.com/mdevilliers/Toxiproxy.Net/pull/6")]
+    [TestFixture, Category("FailureIT")]
     public class ToxyProxySetup {
         [Test]
         public void SetupConnectionToProxy() {
