@@ -32,8 +32,8 @@ bootstrap:
 	cp packages/log4net.2.0.3/lib/net40-client/log4net.dll bin/
 	cp packages/DBreeze.1.71.1/lib/net40/DBreeze.dll bin/
 	cp packages/Moq.4.2.1409.1722/lib/net40/Moq.dll bin/
-	cp packages/Toxiproxy.Net.1.2.1/lib/net45/Toxiproxy.Net.dll bin/
-	cp packages/Toxiproxy.Net.1.2.1/lib/net45/RestSharp.dll bin/
+	cp packages/Toxiproxy.Net.1.2.11/lib/net45/Toxiproxy.Net.dll bin/
+	cp packages/Toxiproxy.Net.1.2.11/lib/net45/RestSharp.dll bin/
 
 install-exec-local:
 	$(INSTALL) -m 0755 $(JSON_PATH) $(DESTDIR)$(pkglibdir)
