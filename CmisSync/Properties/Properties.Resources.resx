@@ -525,4 +525,10 @@ This could lead to a lot of conflict files!</value>
   <data name="TransmissionExceptionDetails" xml:space="preserve">
     <value>Details</value>
   </data>
+  <data name="VirusDetectedMessage" xml:space="preserve">
+    <value>Affected file: "{0}"</value>
+  </data>
+  <data name="VirusDetectedTitle" xml:space="preserve">
+    <value>Virus detected!</value>
+  </data>
 </root>

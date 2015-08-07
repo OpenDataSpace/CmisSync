@@ -1186,6 +1186,24 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Affected file: &quot;{0}&quot;.
+        /// </summary>
+        internal static string VirusDetectedMessage {
+            get {
+                return ResourceManager.GetString("VirusDetectedMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Virus detected!.
+        /// </summary>
+        internal static string VirusDetectedTitle {
+            get {
+                return ResourceManager.GetString("VirusDetectedTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0}: Error occured.
         /// </summary>
         internal static string WarningExceptionTitle {
