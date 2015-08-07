@@ -660,8 +660,9 @@ namespace CmisSync {
                         msg = string.Format(Properties_Resources.LocalRootFolderUnavailable, repositoryInfo.LocalPath);
                         break;
                     case ExceptionType.FileUploadBlockedDueToVirusDetected:
-                        msg = string.Format("Virus detected! Upload denied: {0}{1}{2}", e.Exception.Message, Environment.NewLine, e.Exception.StackTrace);
-                        break;
+                        var file = (e.Exception as VirusDetectedException).AffectedFiles.First();
+                        this.ShowException(Properties_Resources.VirusDetectedTitle, string.Format(Properties_Resources.VirusDetectedMessage, file.FullName));
+                        return;
                     default:
                         msg = e.Exception != null ? e.Exception.Message : Properties_Resources.UnknownExceptionOccured;
                         break;
