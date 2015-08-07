@@ -8,7 +8,8 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(MONOMAC_LIBS) 
 	$(LIBS_CMISSYNCLIB_DEPS) \
 	$(NUNIT_LIBS) \
 	$(DBREEZE_LIBS) \
-	$(MOQ_LIBS)
+	$(MOQ_LIBS) \
+	$(TOXIPROXY_LIBS)
 
 SOURCES =  \
 	AccumulatorTests/LocalObjectFetcherTest.cs \
@@ -105,6 +106,7 @@ SOURCES =  \
 	FilterTests/RepositoryRootDeletedDetectionTest.cs \
 	FilterTests/SymlinkFilterTest.cs \
 	HashAlgorithmTests/SHA1ReuseTest.cs \
+	IntegrationTests/NetworkFailuresTests/ToxiProxySetup.cs \
 	IntegrationTests/AllHandlersIT.cs \
 	IntegrationTests/AllowableActionsTests/ReadingActionsTests.cs \
 	IntegrationTests/BaseFullRepoTest.cs \

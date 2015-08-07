@@ -12,6 +12,7 @@
     <AssemblyName>TestLibrary</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <UseMSBuildEngine>False</UseMSBuildEngine>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -48,9 +49,6 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DBreeze">
-      <HintPath>..\..\packages\DBreeze.1.71.1\lib\net40\DBreeze.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -65,11 +63,20 @@
     <Reference Include="Moq">
       <HintPath>..\..\packages\Moq.4.2.1409.1722\lib\net40\Moq.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="DBreeze">
+      <HintPath>..\..\packages\DBreeze.1.71.1\lib\net45\DBreeze.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="RestSharp">
+      <HintPath>..\..\packages\Toxiproxy.Net.1.2.1\lib\net45\RestSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Toxiproxy.Net">
+      <HintPath>..\..\packages\Toxiproxy.Net.1.2.1\lib\net45\Toxiproxy.Net.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -332,6 +339,7 @@
     <Compile Include="ExceptionTests\InteractionNeededExceptionTest.cs" />
     <Compile Include="ExceptionTests\AbstractInteractionNeededExceptionTest.cs" />
     <Compile Include="ProducerTests\CrawlerTests\DescendantsCrawlerLargeTests.cs" />
+    <Compile Include="IntegrationTests\NetworkFailuresTests\ToxiProxySetup.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -371,5 +379,6 @@
     <Folder Include="StorageTests\FileSystemTests\ReadOnlyIgnoringDecorator\" />
     <Folder Include="IntegrationTests\VirusDetectionTests\" />
     <Folder Include="ExceptionTests\" />
+    <Folder Include="IntegrationTests\NetworkFailuresTests\" />
   </ItemGroup>
 </Project>
