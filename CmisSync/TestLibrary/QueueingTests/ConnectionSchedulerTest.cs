@@ -37,7 +37,7 @@ namespace TestLibrary.QueueingTests {
 
     using TestUtils;
 
-    [TestFixture, Timeout(10000)]
+    [TestFixture, Timeout(10000), Category("Fast")]
     public class ConnectionSchedulerTest : IsTestWithConfiguredLog4Net {
         private readonly int interval = 100;
         private readonly string username = "user";
@@ -76,7 +76,7 @@ namespace TestLibrary.QueueingTests {
             this.sessionFactory = new Mock<ISessionFactory>();
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorFailsIfRepoInfoIsNull() {
             Assert.Throws<ArgumentNullException>(() => {
                 using (new ConnectionScheduler(null, this.queue.Object, this.sessionFactory.Object, this.authProvider.Object)) {
@@ -84,7 +84,7 @@ namespace TestLibrary.QueueingTests {
             });
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorFailsIfQueueIsNull() {
             Assert.Throws<ArgumentNullException>(() => {
                 using (new ConnectionScheduler(this.repoInfo, null, this.sessionFactory.Object, this.authProvider.Object)) {
@@ -92,7 +92,7 @@ namespace TestLibrary.QueueingTests {
             });
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorFailsIfSessionFactoryIsNull() {
             Assert.Throws<ArgumentNullException>(() => {
                 using (new ConnectionScheduler(this.repoInfo, this.queue.Object, null, this.authProvider.Object)) {
@@ -100,7 +100,7 @@ namespace TestLibrary.QueueingTests {
             });
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorFailsIfAuthProviderIsNull() {
             Assert.Throws<ArgumentNullException>(() => {
                 using (new ConnectionScheduler(this.repoInfo, this.queue.Object, this.sessionFactory.Object, null)) {
@@ -108,34 +108,34 @@ namespace TestLibrary.QueueingTests {
             });
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorSetsDefaultInterval() {
             using (var scheduler = new ConnectionScheduler(this.repoInfo, this.queue.Object, this.sessionFactory.Object, this.authProvider.Object)) {
                 Assert.That(scheduler.Interval, Is.GreaterThan(0));
             }
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorTakesCustomInterval() {
             using (var scheduler = new ConnectionScheduler(this.repoInfo, this.queue.Object, this.sessionFactory.Object, this.authProvider.Object, this.interval)) {
                 Assert.That(scheduler.Interval, Is.EqualTo(this.interval));
             }
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void DisposingWithoutHavingStarted() {
             using (new ConnectionScheduler(this.repoInfo, this.queue.Object, this.sessionFactory.Object, this.authProvider.Object, this.interval)) {
             }
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void DisposingWithoutHavingFinished() {
             using (var scheduler = new ConnectionScheduler(this.repoInfo, this.queue.Object, this.sessionFactory.Object, this.authProvider.Object, this.interval)) {
                 scheduler.Start();
             }
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CreateConnection() {
             var waitHandle = new AutoResetEvent(false);
             this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
@@ -153,7 +153,7 @@ namespace TestLibrary.QueueingTests {
             this.session.VerifySet(s => s.DefaultContext = It.IsNotNull<IOperationContext>(), Times.Once());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CreateConnectionAndNoRetryIsExecuted() {
             var waitHandle = new AutoResetEvent(false);
             this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
@@ -174,7 +174,7 @@ namespace TestLibrary.QueueingTests {
             this.session.VerifySet(s => s.DefaultContext = It.IsNotNull<IOperationContext>(), Times.Once());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void LoginFailsWithInvalidArgumentException() {
             var argumentException = new CmisInvalidArgumentException();
             var waitHandle = new AutoResetEvent(false);
@@ -192,7 +192,7 @@ namespace TestLibrary.QueueingTests {
             this.session.VerifySet(s => s.DefaultContext = It.IsAny<IOperationContext>(), Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void LoginFailsWithPermissionDeniedException() {
             var waitHandle = new AutoResetEvent(false);
             this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
@@ -209,7 +209,7 @@ namespace TestLibrary.QueueingTests {
             this.session.VerifySet(s => s.DefaultContext = It.IsAny<IOperationContext>(), Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void LoginFailsWithProxyAuthRequiredException() {
             var waitHandle = new AutoResetEvent(false);
             this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
@@ -226,7 +226,7 @@ namespace TestLibrary.QueueingTests {
             this.session.VerifySet(s => s.DefaultContext = It.IsAny<IOperationContext>(), Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void LoginRetryOccursIfFirstLoginFailed() {
             var waitHandle = new AutoResetEvent(false);
             this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
@@ -250,7 +250,7 @@ namespace TestLibrary.QueueingTests {
             this.session.VerifySet(s => s.DefaultContext = It.IsNotNull<IOperationContext>(), Times.Once());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void NoLoginRetryAfterPermissionDeniedExceptionOccured() {
             var waitHandle = new AutoResetEvent(false);
             this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
@@ -272,7 +272,7 @@ namespace TestLibrary.QueueingTests {
             this.session.VerifySet(s => s.DefaultContext = It.IsNotNull<IOperationContext>(), Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void LoginRetryAfterPermissionDeniedExceptionOccuredAndConfigHasBeenChanged() {
             var waitHandle = new AutoResetEvent(false);
             this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
@@ -301,7 +301,7 @@ namespace TestLibrary.QueueingTests {
             this.session.VerifySet(s => s.DefaultContext = It.IsNotNull<IOperationContext>(), Times.Once());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void LoginRetryAfterConfigHasBeenChanged() {
             var waitHandle = new AutoResetEvent(false);
             var newSession = new Mock<ISession>();
@@ -339,7 +339,7 @@ namespace TestLibrary.QueueingTests {
             newSession.VerifySet(s => s.DefaultContext = It.IsNotNull<IOperationContext>(), Times.Between(1, 5, Range.Inclusive));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void LoginBlockedWithOldDate() {
             var waitHandle = new AutoResetEvent(false);
             var exception = Mock.Of<CmisPermissionDeniedException>(e => e.Data == EventsTests.PermissionDeniedEventCalculatesBlockingUntilTest.CreateHeader(DateTime.UtcNow.ToString()));
@@ -363,7 +363,7 @@ namespace TestLibrary.QueueingTests {
             this.session.VerifySet(s => s.DefaultContext = It.IsNotNull<IOperationContext>(), Times.Once());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void LoginBlockedWithLockedUntilTimeSpan() {
             var waitHandle = new AutoResetEvent(false);
             var now = DateTime.UtcNow;
@@ -390,7 +390,7 @@ namespace TestLibrary.QueueingTests {
             this.session.VerifySet(s => s.DefaultContext = It.IsNotNull<IOperationContext>(), Times.Once());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void LoginBlockedWithLockedUntilFutureDate() {
             var waitHandle = new AutoResetEvent(false);
             var now = DateTime.UtcNow;
@@ -415,6 +415,23 @@ namespace TestLibrary.QueueingTests {
             }
 
             this.session.VerifySet(s => s.DefaultContext = It.IsNotNull<IOperationContext>(), Times.Once());
+        }
+
+        [Test]
+        public void DisposingBeforeConnectReturns() {
+            var waitHandle = new AutoResetEvent(false);
+            this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null)).Returns(() => {
+                Thread.Sleep(this.interval/2);
+                return this.session.Object;
+            }).Callback(() => waitHandle.Set());
+
+            this.session.Setup(s => s.DefaultContext).Callback(() => {Assert.Fail("Should never happen, because the connection failed");});
+            using (var schedular = new ConnectionScheduler(this.repoInfo, this.queue.Object, this.sessionFactory.Object, this.authProvider.Object, this.interval)) {
+                schedular.Start();
+                waitHandle.WaitOne();
+            }
+
+            this.queue.VerifyThatNoEventIsAdded();
         }
 
         private bool VerifyConnectionProperties(IDictionary<string, string> d) {
