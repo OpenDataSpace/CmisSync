@@ -205,6 +205,24 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please reconfigure the connection.
+        /// </summary>
+        internal static string ConfigBrokenMessage {
+            get {
+                return ResourceManager.GetString("ConfigBrokenMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The configuration of &quot;{0}&quot; is broken.
+        /// </summary>
+        internal static string ConfigBrokenTitle {
+            get {
+                return ResourceManager.GetString("ConfigBrokenTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Do you really want to sync the existing local folder &quot;{0}&quot;?
         ///This could lead to a lot of conflict files!.
         /// </summary>
@@ -1182,6 +1200,24 @@ namespace CmisSync {
         internal static string ViewLog {
             get {
                 return ResourceManager.GetString("ViewLog", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Affected file: &quot;{0}&quot;.
+        /// </summary>
+        internal static string VirusDetectedMessage {
+            get {
+                return ResourceManager.GetString("VirusDetectedMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Virus detected!.
+        /// </summary>
+        internal static string VirusDetectedTitle {
+            get {
+                return ResourceManager.GetString("VirusDetectedTitle", resourceCulture);
             }
         }
         

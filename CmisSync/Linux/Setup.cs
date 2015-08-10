@@ -272,7 +272,7 @@ namespace CmisSync {
                 }
 
                 var result = dlgt.EndInvoke(ar);
-                if (result.Repositories != null) {
+                if (result.Repositories != null && result.Repositories.WithoutHiddenOnce().Count > 0) {
                     this.controller.repositories = result.Repositories.WithoutHiddenOnce();
                     address_entry.Text = result.Credentials.Address.ToString();
                 } else {

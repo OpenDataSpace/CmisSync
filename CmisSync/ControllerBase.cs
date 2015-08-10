@@ -660,8 +660,9 @@ namespace CmisSync {
                         msg = string.Format(Properties_Resources.LocalRootFolderUnavailable, repositoryInfo.LocalPath);
                         break;
                     case ExceptionType.FileUploadBlockedDueToVirusDetected:
-                        msg = string.Format("Virus detected! Upload denied: {0}{1}{2}", e.Exception.Message, Environment.NewLine, e.Exception.StackTrace);
-                        break;
+                        var file = (e.Exception as VirusDetectedException).AffectedFiles.First();
+                        this.ShowException(Properties_Resources.VirusDetectedTitle, string.Format(Properties_Resources.VirusDetectedMessage, file.FullName));
+                        return;
                     default:
                         msg = e.Exception != null ? e.Exception.Message : Properties_Resources.UnknownExceptionOccured;
                         break;
@@ -707,28 +708,30 @@ namespace CmisSync {
                     new GenericSyncEventHandler<SuccessfulLoginEvent>(
                     0,
                     delegate(ISyncEvent e) {
-                    this.SuccessfulLogin(repositoryInfo.DisplayName);
-                    return false;
+                        this.SuccessfulLogin(repositoryInfo.DisplayName);
+                        return false;
                 }));
                 repo.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<ConfigurationNeededEvent>(
                     1,
                     delegate(ISyncEvent e) {
-                    this.ShowException("The configuration of " + repo.Name + " is broken", "Please reconfigure the connection");
-                    return true;
+                        this.ShowException(string.Format(Properties_Resources.ConfigBrokenTitle, repo.Name), Properties_Resources.ConfigBrokenMessage);
+                        return true;
                 }));
                 repo.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<InteractionNeededEvent>(
                     1,
                     delegate(ISyncEvent e) {
-                    var interactionEvent = e as InteractionNeededEvent;
-                    this.ShowException(interactionEvent.Title, interactionEvent.Description);
+                        var interactionEvent = e as InteractionNeededEvent;
+                        if (!(interactionEvent.Exception is VirusDetectedException)) {
+                            this.ShowException(interactionEvent.Title, interactionEvent.Description);
+                        }
                     return true;
                 }));
                 repo.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<ExceptionEvent>(
                     0,
                     delegate(ISyncEvent e) {
-                    var ex = (e as ExceptionEvent).Exception;
-                    this.ShowException("Exception on " + repo.Name, ex.Message);
-                    return false;
+                        var ex = (e as ExceptionEvent).Exception;
+                        this.ShowException("Exception on " + repo.Name, ex.Message);
+                        return false;
                 }));
                 this.repositories.Add(repo);
                 this.statusAggregator.Add(repo);

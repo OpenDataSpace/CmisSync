@@ -254,6 +254,8 @@ namespace CmisSync.Lib.Queueing {
                     Logger.Debug(string.Empty, e);
                 } catch (CmisBaseException e) {
                     Logger.Error("Failed to create session to remote " + this.RepoInfo.Address.ToString() + ": ", e);
+                } catch (OperationCanceledException e) {
+                    Logger.Debug("Connect to server canceled");
                 }
 
                 return false;
