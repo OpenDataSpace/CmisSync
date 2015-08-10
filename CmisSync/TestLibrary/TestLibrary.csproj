@@ -341,7 +341,7 @@
     <Compile Include="ProducerTests\CrawlerTests\DescendantsCrawlerLargeTests.cs" />
     <Compile Include="IntegrationTests\NetworkFailuresTests\ToxiProxySetup.cs" />
     <Compile Include="TestUtils\ToxiproxyUtils\ToxiproxyAuthenticationProviderWrapper.cs" />
-    <Compile Include="UtilsTests\ToxiproxyAuthenticationProviderWrapperTest.cs" />
+    <Compile Include="TestUtils\ToxiproxyUtils\ToxiproxyAuthenticationProviderWrapperTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

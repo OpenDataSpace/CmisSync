@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 ﻿
-namespace TestLibrary.UtilsTests {
+namespace TestLibrary.TestUtils.ToxiproxyUtils {
     using System;
 
     using DotCMIS.Binding;
