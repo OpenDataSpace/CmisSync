@@ -261,11 +261,13 @@ SOURCES =  \
 	TestUtils/ObservableHandlerTest.cs \
 	TestUtils/SingleStepEventQueue.cs \
 	TestUtils/SingleStepEventQueueTest.cs \
+	TestUtils/ToxiproxyUtils/ToxiproxyAuthenticationProviderWrapper.cs \
 	UtilsTests/BackendTest.cs \
 	UtilsTests/EncodingTest.cs \
 	UtilsTests/HttpProxyUtilsTest.cs \
 	UtilsTests/NameOfPropertyTest.cs \
 	UtilsTests/ProcessDiagnosticsTest.cs \
+	UtilsTests/ToxiproxyAuthenticationProviderWrapperTest.cs \
 	UtilsTests/X509StoreTest.cs
 
 EXTRA_DIST = TestLibrary.csproj \

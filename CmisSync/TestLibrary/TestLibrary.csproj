@@ -340,6 +340,8 @@
     <Compile Include="ExceptionTests\AbstractInteractionNeededExceptionTest.cs" />
     <Compile Include="ProducerTests\CrawlerTests\DescendantsCrawlerLargeTests.cs" />
     <Compile Include="IntegrationTests\NetworkFailuresTests\ToxiProxySetup.cs" />
+    <Compile Include="TestUtils\ToxiproxyUtils\ToxiproxyAuthenticationProviderWrapper.cs" />
+    <Compile Include="UtilsTests\ToxiproxyAuthenticationProviderWrapperTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -380,5 +382,6 @@
     <Folder Include="IntegrationTests\VirusDetectionTests\" />
     <Folder Include="ExceptionTests\" />
     <Folder Include="IntegrationTests\NetworkFailuresTests\" />
+    <Folder Include="TestUtils\ToxiproxyUtils\" />
   </ItemGroup>
 </Project>
