@@ -82,6 +82,14 @@ namespace TestLibrary.IntegrationTests {
             }
         }
 
+        protected ISessionFactory SessionFactory { get; set; }
+
+        protected IAuthenticationProvider AuthProvider { get; set; }
+
+        protected string TestName { get; private set; }
+
+        protected Guid TestUuid { get; private set; }
+
         public void Dispose() {
             this.Dispose(true);
             GC.SuppressFinalize(this);
@@ -108,15 +116,17 @@ namespace TestLibrary.IntegrationTests {
 
         [SetUp]
         public void Init() {
-            string testName = this.GetType().Name;
+            this.TestName = this.GetType().Name;
             object[] attributes = this.GetType().GetCustomAttributes(true);
             foreach (var attr in attributes) {
                 if (attr is TestNameAttribute) {
-                    testName = (attr as TestNameAttribute).Name;
+                    this.TestName = (attr as TestNameAttribute).Name;
                 }
             }
 
-            this.subfolder = testName + "_" + Guid.NewGuid().ToString();
+            this.TestUuid = Guid.NewGuid();
+
+            this.subfolder = this.TestName + "_" + this.TestUuid.ToString();
             Console.WriteLine("Working on " + this.subfolder);
 
             // RepoInfo
@@ -167,8 +177,8 @@ namespace TestLibrary.IntegrationTests {
             cmisParameters[SessionParameter.RepositoryId] = this.repoInfo.RepositoryId;
             cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
 
-            SessionFactory factory = SessionFactory.NewInstance();
-            this.session = factory.CreateSession(cmisParameters);
+            ISessionFactory factory = this.SessionFactory ?? DotCMIS.Client.Impl.SessionFactory.NewInstance();
+            this.session = factory.CreateSession(cmisParameters, null, this.AuthProvider, null);
             this.ContentChangesActive = this.session.AreChangeEventsSupported();
             IFolder root = (IFolder)this.session.GetObjectByPath(config[2].ToString());
             this.remoteRootDir = root.CreateFolder(this.subfolder);

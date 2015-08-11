@@ -342,6 +342,9 @@
     <Compile Include="IntegrationTests\NetworkFailuresTests\ToxiProxySetup.cs" />
     <Compile Include="TestUtils\ToxiproxyUtils\ToxiproxyAuthenticationProviderWrapper.cs" />
     <Compile Include="TestUtils\ToxiproxyUtils\ToxiproxyAuthenticationProviderWrapperTest.cs" />
+    <Compile Include="TestUtils\ToxiproxyUtils\ToxiSessionFactory.cs" />
+    <Compile Include="TestUtils\ToxiproxyUtils\ToxiSessionFactoryTest.cs" />
+    <Compile Include="IntegrationTests\NetworkFailuresTests\CreateSessionWithToxiproxy.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

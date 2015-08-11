@@ -106,6 +106,7 @@ SOURCES =  \
 	FilterTests/RepositoryRootDeletedDetectionTest.cs \
 	FilterTests/SymlinkFilterTest.cs \
 	HashAlgorithmTests/SHA1ReuseTest.cs \
+	IntegrationTests/NetworkFailuresTests/CreateSessionWithToxiproxy.cs \
 	IntegrationTests/NetworkFailuresTests/ToxiProxySetup.cs \
 	IntegrationTests/AllHandlersIT.cs \
 	IntegrationTests/AllowableActionsTests/ReadingActionsTests.cs \
@@ -261,6 +262,8 @@ SOURCES =  \
 	TestUtils/ObservableHandlerTest.cs \
 	TestUtils/SingleStepEventQueue.cs \
 	TestUtils/SingleStepEventQueueTest.cs \
+	TestUtils/ToxiproxyUtils/ToxiSessionFactory.cs \
+	TestUtils/ToxiproxyUtils/ToxiSessionFactoryTest.cs \
 	TestUtils/ToxiproxyUtils/ToxiproxyAuthenticationProviderWrapper.cs \
 	TestUtils/ToxiproxyUtils/ToxiproxyAuthenticationProviderWrapperTest.cs \
 	UtilsTests/BackendTest.cs \
