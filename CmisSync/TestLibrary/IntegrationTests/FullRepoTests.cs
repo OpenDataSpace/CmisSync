@@ -1167,6 +1167,7 @@ namespace TestLibrary.IntegrationTests {
             string folderName = "target";
             var remoteDoc = this.remoteRootDir.CreateDocument(fileName, content);
             this.repo.Initialize();
+            this.repo.SingleStepQueue.SwallowExceptions = true;
             if (!withLocalFSEvents) {
                 this.repo.SingleStepQueue.EventManager.AddEventHandler(new GenericSyncEventHandler<IFSEvent>(int.MaxValue, (e) => { return true; }, "FilterOfAllFSEvents"));
             }
