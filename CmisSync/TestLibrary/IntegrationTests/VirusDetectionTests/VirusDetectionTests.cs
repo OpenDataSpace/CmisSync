@@ -62,7 +62,6 @@ namespace TestLibrary.IntegrationTests.VirusDetectionTests {
             }
         }
 
-        [Ignore("https://mantis.dataspace.cc/view.php?id=4671")]
         [Test, Category("Slow"), Category("VirusDetection")]
         public void UploadVirusBySettingContentViaAppendContentStream(
             [Values("harmlessContent", null)]string initialContent)
@@ -76,7 +75,6 @@ namespace TestLibrary.IntegrationTests.VirusDetectionTests {
             }
         }
 
-        [Ignore("https://mantis.dataspace.cc/view.php?id=4671")]
         [Test, Category("Slow"), Category("VirusDetection")]
         public void UploadVirusByAppendingContentInPieces(
             [Values(true, false)]bool alwaysLastChunk)
