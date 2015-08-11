@@ -1185,10 +1185,19 @@ namespace TestLibrary.IntegrationTests {
             this.repo.Run();
             this.AddStartNextSyncEvent(forceCrawl: true);
             this.repo.Run();
-/*            this.remoteRootDir.Refresh();
+            this.remoteRootDir.Refresh();
             var children = this.remoteRootDir.GetChildren();
-            Assert.That(children.Count, Is.EqualTo(1));
-            Assert.That(children.First().Name, Is.EqualTo(folderName));*/
+            Assert.That(children.TotalNumItems, Is.EqualTo(1));
+            foreach (var child in children) {
+                Assert.That(child.Name, Is.EqualTo(folderName));
+                var subChildren = (child as IFolder).GetChildren();
+                Assert.That(subChildren.TotalNumItems, Is.EqualTo(1));
+                foreach (var subChild in subChildren) {
+                    Assert.That(subChild is IDocument);
+                    Assert.That(subChild.Id, Is.EqualTo(remoteDoc.Id));
+                }
+            }
+
             remoteDoc.Refresh();
             Assert.That(remoteDoc.Parents.First().Name, Is.EqualTo(folderName));
         }
