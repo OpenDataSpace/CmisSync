@@ -1262,6 +1262,7 @@ namespace TestLibrary.IntegrationTests {
 
         [Test, Category("Slow"), MaxTime(180000)]
         public void DoNotTransferDataIfLocalAndRemoteFilesAreEqual([Values(true, false)]bool contentChanges) {
+            this.EnsureThatContentHashesAreSupportedByServerTypeSystem();
             this.ContentChangesActive = contentChanges;
             this.InitializeAndRunRepo();
             this.repo.SingleStepQueue.SwallowExceptions = true;
@@ -1269,9 +1270,7 @@ namespace TestLibrary.IntegrationTests {
             string content = "a";
             string fileName = "file.bin";
             var remoteFile = this.remoteRootDir.CreateDocument(fileName, content);
-            if (remoteFile.ContentStreamHash() == null) {
-                Assert.Ignore("Server does not support hash of content stream");
-            }
+            remoteFile.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(content);
 
             var file = new FileInfo(Path.Combine(this.localRootDir.FullName, fileName));
             using (StreamWriter sw = file.CreateText()) {
