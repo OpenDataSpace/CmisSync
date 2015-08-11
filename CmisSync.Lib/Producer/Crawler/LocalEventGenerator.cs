@@ -77,14 +77,6 @@ namespace CmisSync.Lib.Producer.Crawler {
             ISet<IMappedObject> handledStoredObjects,
             ref List<AbstractFolderEvent> creationEvents)
         {
-            var parent = localTree.Item;
-            IMappedObject storedParent = null;
-            Guid? guid = parent.Uuid;
-
-            if (guid != null) {
-                storedObjects.TryGetValue((Guid)guid, out storedParent);
-            }
-
             foreach (var child in localTree.Children) {
                 IMappedObject storedMappedChild = this.FindStoredObjectByFileSystemInfo(storedObjects, child.Item);
                 if (storedMappedChild != null) {
@@ -103,6 +95,14 @@ namespace CmisSync.Lib.Producer.Crawler {
                     } else {
                         // Moved, Renamed, Updated or Equal
                         AbstractFolderEvent correspondingRemoteEvent = GetCorrespondingRemoteEvent(eventMap, storedMappedChild);
+                        var parent = localTree.Item;
+                        IMappedObject storedParent = null;
+                        Guid? guid = parent.Uuid;
+
+                        if (guid != null) {
+                            storedObjects.TryGetValue((Guid)guid, out storedParent);
+                        }
+
                         AbstractFolderEvent createdEvent = this.CreateLocalEventBasedOnStorage(child.Item, storedParent, storedMappedChild);
 
                         eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(createdEvent, correspondingRemoteEvent);
@@ -140,11 +140,12 @@ namespace CmisSync.Lib.Producer.Crawler {
             IMappedObject storedMappedChild)
         {
             AbstractFolderEvent createdEvent = null;
-            if (storedParent == null) {
+/*            if (storedParent == null) {
                 throw new ArgumentNullException("storedParent", "stored parent is null. Stored child: " + storedMappedChild.ToString() + Environment.NewLine + "local object is: " + fsObject.FullName);
             }
+            */
 
-            if (storedMappedChild.ParentId == storedParent.RemoteObjectId) {
+            if (storedParent != null && storedMappedChild.ParentId == storedParent.RemoteObjectId) {
                 // Renamed, Updated or Equal
                 #if __COCOA__
                 if (fsObject.Name.Normalize(NormalizationForm.FormD) == storedMappedChild.Name.Normalize(NormalizationForm.FormD) && fsObject.LastWriteTimeUtc == storedMappedChild.LastLocalWriteTimeUtc) {
