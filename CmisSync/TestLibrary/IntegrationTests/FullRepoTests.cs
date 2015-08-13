@@ -1294,7 +1294,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That((remoteB as IFolder).GetChildren().Count(), Is.EqualTo(0));
         }
 
-        [Test]
+        [Test, Ignore("https://mantis.dataspace.cc/view.php?id=4285")]
         public void ExecutingTheSameFolderMoveTwiceThrowsCmisException() {
             var source = this.remoteRootDir.CreateFolder("source");
             var target = this.remoteRootDir.CreateFolder("target");
