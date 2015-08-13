@@ -46,10 +46,10 @@ namespace TestLibrary.IntegrationTests {
 
     using TestLibrary.TestUtils;
 
-    // Default timeout per test is 2 minutes but test fails if it need more then 1 minute
-    [TestFixture, Timeout(180000), TestName("FullRepo")]
+    // Default timeout per test is 1 minute
+    [TestFixture, Category("Slow"), Timeout(60000), TestName("FullRepo")]
     public class FullRepoTests : BaseFullRepoTest {
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneLocalFolderCreated() {
             this.localRootDir.CreateSubdirectory("Cat");
 
@@ -58,7 +58,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.AreEqual(children.TotalNumItems, 1);
         }
 
-        [Test, Category("Slow"), MaxTime(180000), Category("Erratic")]
+        [Test, Category("Erratic")]
         public void OneLocalFolderRemoved() {
             this.localRootDir.CreateSubdirectory("Cat");
 
@@ -73,7 +73,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneRemoteFolderCreated() {
             this.remoteRootDir.CreateFolder("Cat");
 
@@ -83,7 +83,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("Cat"));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneRemoteFolderIsDeleted() {
             this.remoteRootDir.CreateFolder("Cat");
 
@@ -98,7 +98,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
         }
 
-        [Test, Category("Slow"), MaxTime(180000), Category("Conflict")]
+        [Test, MaxTime(45000), Category("Conflict")]
         public void OneRemoteFolderIsDeletedAndOneUnsyncedFileExistsInTheCorrespondingLocalFolder() {
             string folderName = "Cat";
             string fileName = "localFile.bin";
@@ -126,7 +126,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That((this.remoteRootDir.GetChildren().First() as IFolder).GetChildren().Count(), Is.EqualTo(1));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneRemoteFolderIsRenamedAndOneCrawlSyncShouldDetectIt() {
             var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
 
@@ -143,7 +143,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("Dog"));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneRemoteFolderIsMovedIntoAnotherRemoteFolderAndDetectedByCrawler() {
             var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
             var remoteTargetFolder = this.remoteRootDir.CreateFolder("target");
@@ -162,7 +162,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories()[0].Name, Is.EqualTo("Cat"));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneRemoteFolderIsMovedIntoAnotherRemoteFolderAndDetectedByContentChange() {
             this.EnsureThatContentChangesAreSupported();
             var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
@@ -183,7 +183,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories()[0].Name, Is.EqualTo("Cat"));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneLocalFileCreated([Values(false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string fileName = "file";
@@ -210,7 +210,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void TwoLocalFilesCreatedWithCommonSubnamePart([Values(false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string fileName1 = "gpio.h";
@@ -234,7 +234,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(children.TotalNumItems, Is.EqualTo(2));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneLocalFileCreatedAndModificationDateIsSynced() {
             if (!this.session.IsServerAbleToUpdateModificationDate()) {
                 Assert.Ignore("Server does not support the synchronization of modification dates");
@@ -268,7 +268,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneLocalFileRenamed() {
             string fileName = "file";
             string newFileName = "renamedFile";
@@ -298,7 +298,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneLocalFileRenamedAndMoved() {
             string fileName = "file";
             string newFileName = "renamedFile";
@@ -332,7 +332,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.localRootDir.GetDirectories().First().GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneLocalFileIsRemoved() {
             string fileName = "removingFile.bin";
             string content = string.Empty;
@@ -356,7 +356,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneRemoteFileCreated([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string fileName = "file";
@@ -374,7 +374,7 @@ namespace TestLibrary.IntegrationTests {
             doc.AssertThatIfContentHashExistsItIsEqualTo(content);
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneEmptyRemoteFileCreated([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             this.InitializeAndRunRepo();
@@ -396,7 +396,7 @@ namespace TestLibrary.IntegrationTests {
         }
 
         // Timeout is set to 10 minutes for 10 x 1 MB file
-        [Test, Category("Slow"), Timeout(600000)]
+        [Test, Timeout(600000), MaxTime(600000)]
         public void ManyRemoteFilesCreated([Values(10)]int fileNumber) {
             string content = new string('A', 1024 * 1024);
             for (int i = 0; i < fileNumber; ++i) {
@@ -421,7 +421,7 @@ namespace TestLibrary.IntegrationTests {
             }
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneRemoteFileContentIsDeleted([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
 
@@ -450,7 +450,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(child.Length, Is.EqualTo(0), child.ToString());
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneRemoteFileUpdated([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string fileName = "file.bin";
@@ -474,7 +474,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(file.Length, Is.EqualTo(content.Length));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void RemoteCreatedFileIsDeletedLocally() {
             string fileName = "file.bin";
             string content = "cat";
@@ -494,7 +494,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.localRootDir.GetFiles(), Is.Empty);
         }
 
-        [Test, Category("Slow"), Category("Conflict"), MaxTime(180000)]
+        [Test, Category("Conflict")]
         public void OneLocalFileAndOneRemoteFileIsCreatedAndOneConflictFileIsCreated([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string fileName = "fileConflictTest.bin";
@@ -518,7 +518,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(2));
         }
 
-        [Test, Category("Slow"), Category("Conflict"), MaxTime(180000)]
+        [Test, Category("Conflict")]
         public void OneLocalFileIsChangedAndTheRemoteFileIsRemoved() {
             string fileName = "fileConflictTest.bin";
             string changedLocalContent = "changedContent";
@@ -551,7 +551,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That((long)(this.remoteRootDir.GetChildren().First() as IDocument).ContentStreamLength, Is.EqualTo(expectedLength));
         }
 
-        [Test, Category("Slow"), Category("Conflict"), MaxTime(180000)]
+        [Test, Category("Conflict")]
         public void OneLocalAndTheRemoteFileAreBothRenamed([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string originalName = "original.bin";
@@ -598,7 +598,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.localRootDir.GetFiles().First().Name, Is.EqualTo(remoteName));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void LocalAndRemoteFolderAreMovedIntoTheSameSubfolder([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string oldParentName = "oldParent";
@@ -627,7 +627,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneLocalFileContentIsChanged([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string fileName = "file.bin";
@@ -658,7 +658,7 @@ namespace TestLibrary.IntegrationTests {
         /// <summary>
         /// Creates the hundred files and sync.
         /// </summary>
-        [Test, Category("Slow"), Timeout(1800000), Ignore("Just for benchmarks")]
+        [Test, Timeout(1800000), MaxTime(1800000), Ignore("Just for benchmarks")]
         public void CreateHundredFilesAndSync() {
             DateTime modificationDate = DateTime.UtcNow - TimeSpan.FromDays(1);
             DateTime creationDate = DateTime.UtcNow - TimeSpan.FromDays(2);
@@ -697,7 +697,7 @@ namespace TestLibrary.IntegrationTests {
             }
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneLocalFileIsChangedAndRenamed([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string fileName = "file.bin";
@@ -733,7 +733,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(document.ContentStreamLength, Is.EqualTo(length));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneRemoteFileIsChangedAndRenamed([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string fileName = "file.bin";
@@ -764,7 +764,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(document.ContentStreamLength, Is.EqualTo(length));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneLocalAndTheCorrespondingRemoteFolderAreBothRenamedToTheSameName() {
             string oldFolderName = "oldName";
             string newFolderName = "newName";
@@ -791,7 +791,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That((this.remoteRootDir.GetChildren().First() as IFolder).Name, Is.EqualTo(newFolderName));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void EmptyLocalFileIsCreatedAndChangedRemotely([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string fileName = "file";
@@ -830,7 +830,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void LocalFileRenamedAndDeletedRemotely([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string newName = "newtestfile.bin";
@@ -860,7 +860,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void LocalFileMovedAndDeletedRemotely([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string newName = "newtestfile.bin";
@@ -902,7 +902,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void LocalFilesMovedToEachOthersLocationInLocalFolderTree([Values(false)]bool contentChanges, [Values("a", "Z")]string folderName) {
             this.ContentChangesActive = contentChanges;
             string fileNameA = "testfile.bin";
@@ -950,7 +950,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void LocalFolderWithContentRenamedAndDeletedRemotely([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string newName = "newtestfile.bin";
@@ -981,7 +981,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 
-        [Test, Category("Slow"), Timeout(360000)]
+        [Test, Timeout(360000), MaxTime(300000)]
         public void OneFileIsCopiedAFewTimes([Values(true, false)]bool contentChanges, [Values(1,2,5,10)]int times) {
             this.ContentChangesActive = contentChanges;
             FileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
@@ -1025,7 +1025,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneFileIsCopiedAndTheCopyIsRemoved([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             FileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
@@ -1056,7 +1056,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(child.Name, Is.EqualTo(fileName + ".bin"));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneLocalAndOneRemoteFileAreBothChangedToTheSameContent([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string oldContent = "a";
@@ -1089,7 +1089,7 @@ namespace TestLibrary.IntegrationTests {
             }
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneRemoteFolderIsRenamedToLowerCase([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string oldFolderName = "A";
@@ -1112,7 +1112,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(newFolderName));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void SyncLocalSavedMails() {
             string mailName1 = "mail1.msg";
             var mailPath1 = Path.Combine(this.localRootDir.FullName, mailName1);
@@ -1133,7 +1133,7 @@ namespace TestLibrary.IntegrationTests {
             }
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void OneLocalFileIsRemovedAndChangedRemotely([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string fileName = "file.bin";
@@ -1156,7 +1156,53 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(newContent.Length));
         }
 
-        [Test, Category("Slow"), MaxTime(180000), Ignore("Ignore this until the server does not change the changetoken on move operation")]
+        [Test]
+        public void OneAlreadySyncedFileIsMovedToNewlyCreatedFolder(
+            [Values(true, false)]bool contentChanges,
+            [Values(true, false)]bool withLocalFSEvents)
+        {
+            this.ContentChangesActive = contentChanges;
+            string fileName = "file.bin";
+            string content = "content";
+            string folderName = "target";
+            var remoteDoc = this.remoteRootDir.CreateDocument(fileName, content);
+            this.repo.Initialize();
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            if (!withLocalFSEvents) {
+                this.repo.SingleStepQueue.EventManager.AddEventHandler(new GenericSyncEventHandler<IFSEvent>(int.MaxValue, (e) => { return true; }, "FilterOfAllFSEvents"));
+            }
+
+            this.AddStartNextSyncEvent();
+            this.repo.Run();
+
+            var testDir = this.localRootDir.CreateSubdirectory(folderName);
+            this.localRootDir.GetFiles().First().MoveTo(Path.Combine(testDir.FullName, fileName));
+            if (withLocalFSEvents) {
+                this.WaitUntilQueueIsNotEmpty();
+            }
+
+            this.AddStartNextSyncEvent();
+            this.repo.Run();
+            this.AddStartNextSyncEvent(forceCrawl: true);
+            this.repo.Run();
+            this.remoteRootDir.Refresh();
+            var children = this.remoteRootDir.GetChildren();
+            Assert.That(children.TotalNumItems, Is.EqualTo(1));
+            foreach (var child in children) {
+                Assert.That(child.Name, Is.EqualTo(folderName));
+                var subChildren = (child as IFolder).GetChildren();
+                Assert.That(subChildren.TotalNumItems, Is.EqualTo(1));
+                foreach (var subChild in subChildren) {
+                    Assert.That(subChild is IDocument);
+                    Assert.That(subChild.Id, Is.EqualTo(remoteDoc.Id));
+                }
+            }
+
+            remoteDoc.Refresh();
+            Assert.That(remoteDoc.Parents.First().Name, Is.EqualTo(folderName));
+        }
+
+        [Test, Ignore("Ignore this until the server does not change the changetoken on move operation")]
         public void LocalFileMovedAndRemoteFileMovedToOtherFolder() {
             string fileName = "file.bin";
             string content = "content";
@@ -1196,7 +1242,7 @@ namespace TestLibrary.IntegrationTests {
         }
 
         [Ignore("It is not possible to handle this situation at the moment")]
-        [Test, Category("Slow"), MaxTime(180000), Category("Erratic")]
+        [Test, Category("Erratic")]
         public void CyclicRenaming() {
             string folderName1 = "A";
             string folderName2 = "B";
@@ -1248,7 +1294,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That((remoteB as IFolder).GetChildren().Count(), Is.EqualTo(0));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void ExecutingTheSameFolderMoveTwiceThrowsCmisException() {
             var source = this.remoteRootDir.CreateFolder("source");
             var target = this.remoteRootDir.CreateFolder("target");
@@ -1260,8 +1306,9 @@ namespace TestLibrary.IntegrationTests {
             Assert.Throws<CmisConstraintException>(() => anotherFolderInstance.Move(source, target));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void DoNotTransferDataIfLocalAndRemoteFilesAreEqual([Values(true, false)]bool contentChanges) {
+            this.EnsureThatContentHashesAreSupportedByServerTypeSystem();
             this.ContentChangesActive = contentChanges;
             this.InitializeAndRunRepo();
             this.repo.SingleStepQueue.SwallowExceptions = true;
@@ -1269,9 +1316,7 @@ namespace TestLibrary.IntegrationTests {
             string content = "a";
             string fileName = "file.bin";
             var remoteFile = this.remoteRootDir.CreateDocument(fileName, content);
-            if (remoteFile.ContentStreamHash() == null) {
-                Assert.Ignore("Server does not support hash of content stream");
-            }
+            remoteFile.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(content);
 
             var file = new FileInfo(Path.Combine(this.localRootDir.FullName, fileName));
             using (StreamWriter sw = file.CreateText()) {
@@ -1292,7 +1337,7 @@ namespace TestLibrary.IntegrationTests {
         }
 
         [Ignore("Mantis issue 4285")]
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test]
         public void ExecutingTheSameFolderMoveToDifferentTargetsThrowsCmisException() {
             var source = this.remoteRootDir.CreateFolder("source");
             var target1 = this.remoteRootDir.CreateFolder("target1");
