@@ -31,7 +31,7 @@ bootstrap:
 	cp packages/Newtonsoft.Json.7.0.1/lib/net40/Newtonsoft.Json.dll bin/
 	cp packages/log4net.2.0.3/lib/net40-client/log4net.dll bin/
 	cp packages/DBreeze.1.71.1/lib/net40/DBreeze.dll bin/
-	cp packages/Moq.4.2.1409.1722/lib/net40/Moq.dll bin/
+	cp packages/Moq.4.2.1507.0118/lib/net40/Moq.dll bin/
 
 install-exec-local:
 	$(INSTALL) -m 0755 $(JSON_PATH) $(DESTDIR)$(pkglibdir)
