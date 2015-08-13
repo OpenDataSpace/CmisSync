@@ -56,8 +56,8 @@ AC_SUBST(LOG4NET_PATH,[[\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client
 AC_SUBST(DBREEZE_LIBS,[-r:\$\(top_srcdir\)/packages/DBreeze.1.71.1/lib/net40/DBreeze.dll])
 AC_SUBST(DBREEZE_PATH,[\$\(top_srcdir\)/packages/DBreeze.1.71.1/lib/net40/DBreeze.dll])
 
-AC_SUBST(MOQ_LIBS,[[-r:\$\(top_srcdir\)/packages/Moq.4.2.1409.1722/lib/net40/Moq.dll]])
-AC_SUBST(MOQ_PATH,[[\$\(top_srcdir\)/packages/Moq.4.2.1409.1722/lib/net40/Moq.dll]])
+AC_SUBST(MOQ_LIBS,[[-r:\$\(top_srcdir\)/packages/Moq.4.2.1507.0118/lib/net40/Moq.dll]])
+AC_SUBST(MOQ_PATH,[[\$\(top_srcdir\)/packages/Moq.4.2.1507.0118/lib/net40/Moq.dll]])
 
 AC_SUBST(TOXIPROXY_LIBS,[[-r:\$\(top_srcdir\)/packages/Toxiproxy.Net.1.2.11/lib/net45/Toxiproxy.Net.dll,\$\(top_srcdir\)/packages/Toxiproxy.Net.1.2.11/lib/net45/RestSharp.dll]])
 
