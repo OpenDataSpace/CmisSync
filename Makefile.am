@@ -28,7 +28,7 @@ bootstrap:
 	TEMP=$(shell mktemp -du 2>/dev/null || mktemp -d -u -t 'nuget') nuget restore CmisSync/Linux/CmisSync.sln
 	mkdir -p bin
 	cp packages/NUnit.2.6.4/lib/nunit.framework.dll bin/
-	cp packages/Newtonsoft.Json.6.0.8/lib/net40/Newtonsoft.Json.dll bin/
+	cp packages/Newtonsoft.Json.7.0.1/lib/net40/Newtonsoft.Json.dll bin/
 	cp packages/log4net.2.0.3/lib/net40-client/log4net.dll bin/
 	cp packages/DBreeze.1.71.1/lib/net40/DBreeze.dll bin/
 	cp packages/Moq.4.2.1409.1722/lib/net40/Moq.dll bin/
