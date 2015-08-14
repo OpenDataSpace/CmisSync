@@ -84,7 +84,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(this.remoteRootDir.GetChildren().TotalNumItems, Is.EqualTo(0));
         }
 
-        [Test, MaxTime(2000)]
+        [Test, MaxTime(10000)]
         public void CreateCheckedOutDocumentAndDoNotCheckIn() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             this.remoteRootDir.CreateDocument(this.fileName, (string)null, checkedOut: true);
@@ -92,7 +92,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(this.remoteRootDir.GetChildren().TotalNumItems, Is.EqualTo(0));
         }
 
-        [Test, MaxTime(2000)]
+        [Test, MaxTime(10000)]
         public void CreateCheckedOutDocumentMustFailIfDocumentAlreadyExists() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             string fileName = "file.bin";
@@ -100,7 +100,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.Throws<CmisNameConstraintViolationException>(() => this.remoteRootDir.CreateDocument(fileName, "other content", true));
         }
 
-        [Test, MaxTime(2000)]
+        [Test, MaxTime(8000)]
         public void CreateDocumentViaPwcCheckInWithLastModificationDate() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             string fileName = "file.bin";

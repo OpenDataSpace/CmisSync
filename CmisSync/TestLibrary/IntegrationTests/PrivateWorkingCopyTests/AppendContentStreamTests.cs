@@ -36,7 +36,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
         private readonly string fileName = "fileName.bin";
         private readonly string content = "content";
 
-        [Test, MaxTime(3000)]
+        [Test, MaxTime(15000)]
         public void CheckOutDocumentAppendContentAndCheckIn() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             var doc = this.remoteRootDir.CreateDocument(this.fileName, (string)null);
@@ -60,7 +60,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             this.AssertThatContentHashIsEqualToExceptedIfSupported(newDocument, this.content);
         }
 
-        [Test, MaxTime(3000)]
+        [Test, MaxTime(15000)]
         public void CheckOutDocumentWithContentAndAppendContent() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             var doc = this.remoteRootDir.CreateDocument(this.fileName, this.content);
@@ -72,7 +72,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             this.AssertThatContentHashIsEqualToExceptedIfSupported(doc, this.content + this.content);
         }
 
-        [Test, MaxTime(3000)]
+        [Test, MaxTime(15000)]
         public void CheckOutDocumentWithContentAndAppendContentAndCheckIn() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             var emptyDocHash = IDocumentAssertUtils.ComputeSha1Hash(new byte[0]);
@@ -94,7 +94,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             this.AssertThatContentHashIsEqualToExceptedIfSupported(doc, this.content + this.content);
         }
 
-        [Test, MaxTime(3000)]
+        [Test, MaxTime(15000)]
         public void CheckOutDocumentWithContentAndAppendContentAndCancelCheckout() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             var doc = this.remoteRootDir.CreateDocument(this.fileName, this.content);
@@ -109,7 +109,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             this.AssertThatContentHashIsEqualToExceptedIfSupported(doc, this.content);
         }
 
-        [Test, MaxTime(3000)]
+        [Test, MaxTime(5000)]
         public void AppendingAfterPWCIsCanceledMustFail() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             var doc = this.remoteRootDir.CreateDocument(this.fileName, (string)null);
