@@ -109,7 +109,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             this.AssertThatContentHashIsEqualToExceptedIfSupported(doc, this.content);
         }
 
-        [Test, MaxTime(5000)]
+        [Test, MaxTime(15000)]
         public void AppendingAfterPWCIsCanceledMustFail() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             var doc = this.remoteRootDir.CreateDocument(this.fileName, (string)null);
