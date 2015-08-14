@@ -93,6 +93,14 @@ namespace TestLibrary.StorageTests.FileSystemTests.ReadOnlyIgnoringDecorator {
             Assert.That(underTest.IsExtendedAttributeAvailable(), Is.EqualTo(supportsExtendendAttributes));
             fileSystemInfo.Verify(f => f.IsExtendedAttributeAvailable(), Times.Once());
         }
+
+        [Test, Category("Fast")]
+        public void ToStringReturnsWrappedToString([Values(true, false)]bool isFile) {
+            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            IFileSystemInfo hiddenInfo = isFile ? (IFileSystemInfo)new FileInfoWrapper(new FileInfo(path)) : (IFileSystemInfo)new DirectoryInfoWrapper(new DirectoryInfo(path));
+            var underTest = new ReadOnlyIgnoringFileSystemInfoDecoratorImpl(hiddenInfo);
+            Assert.That(underTest.ToString(), Is.EqualTo(path));
+        }
         #endregion
 
         #region ReadWriteAccess

@@ -106,14 +106,6 @@ namespace CmisSync.Lib.Storage.FileSystem {
         }
 
         /// <summary>
-        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.FileSystem.DirectoryInfoWrapper"/>.
-        /// </summary>
-        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.FileSystem.DirectoryInfoWrapper"/>.</returns>
-        public override string ToString() {
-            return string.Format("[{0}]", this.original.FullName);
-        }
-
-        /// <summary>
         /// Tries to set permission to read write access to the directory and its children
         /// </summary>
         public void TryToSetReadWritePermissionRecursively() {
