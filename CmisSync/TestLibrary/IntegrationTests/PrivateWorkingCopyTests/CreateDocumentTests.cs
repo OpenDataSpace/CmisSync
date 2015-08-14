@@ -39,7 +39,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
         private readonly string fileName = "fileName.bin";
         private readonly string content = "content";
 
-        [Test, MaxTime(2000)]
+        [Test, MaxTime(5000)]
         public void CreateCheckedOutDocument([Values(true, false)]bool withPropertiesOnCheckIn, [Values(true, false)]bool deleteExistingContentStream) {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
 
@@ -69,7 +69,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             }
         }
 
-        [Test, MaxTime(2000)]
+        [Test, MaxTime(5000)]
         public void CreateCheckedOutDocumentAndCancelCheckout([Values(true, false)]bool settingContent) {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
 
@@ -113,7 +113,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(doc.LastModificationDate, Is.EqualTo(past).Within(1).Seconds);
         }
 
-        [Test, MaxTime(4000)]
+        [Test, MaxTime(10000)]
         public void CreateTooDocumentsInTwoFoldersWithTheSameName() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             string fileName = "file.bin";
@@ -126,7 +126,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(2));
         }
 
-        [Test, MaxTime(4000)]
+        [Test, MaxTime(10000)]
         public void CreateTooDocumentsWithTheSameSubName() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             string fileName1 = "gpio.h";
