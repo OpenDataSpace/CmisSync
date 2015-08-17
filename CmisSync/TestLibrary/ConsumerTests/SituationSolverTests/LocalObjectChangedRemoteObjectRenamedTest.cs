@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.IO;
 
@@ -37,9 +36,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
     using TestUtils;
 
-    [TestFixture]
-    public class LocalObjectChangedRemoteObjectRenamedTest
-    {
+    [TestFixture, Category("Fast"), Category("Solver")]
+    public class LocalObjectChangedRemoteObjectRenamedTest {
         private TransmissionManager manager;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
@@ -47,21 +45,20 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private Mock<LocalObjectChangedRemoteObjectChanged> changeSolver;
         private LocalObjectChangedRemoteObjectRenamed underTest;
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void ConstructorThrowsExceptionIfSolverIsNull() {
             Mock<ISession> session = new Mock<ISession>();
             session.SetupTypeSystem();
             Assert.Throws<ArgumentNullException>(() => new LocalObjectChangedRemoteObjectRenamed(session.Object, Mock.Of<IMetaDataStorage>(), null));
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void ConstructorTakesChangeSolver() {
             this.SetUpMocks();
         }
 
-        [Test, Category("Fast"), Category("Solver")]
-        public void RenameFile()
-        {
+        [Test]
+        public void RenameFile() {
             this.SetUpMocks();
             long fileLength = 100;
             string oldPath = Path.Combine(Path.GetTempPath(), "oldname");
@@ -84,9 +81,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.storage.VerifySavedMappedObject(MappedObjectType.File, "remoteId", "newname", "parentId", "changeToken", contentSize: fileLength);
         }
 
-        [Test, Category("Fast"), Category("Solver")]
-        public void PassContentChangesToChangeSolver()
-        {
+        [Test]
+        public void PassContentChangesToChangeSolver() {
             this.SetUpMocks();
             long fileLength = 100;
             string oldPath = Path.Combine(Path.GetTempPath(), "oldname");
@@ -107,7 +103,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.changeSolver.Verify(s => s.Solve(dir, remoteFolder, ContentChangeType.CHANGED, ContentChangeType.CHANGED), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void RenameFolder([Values(true, false)]bool childrenAreIgnored) {
             this.SetUpMocks();
             string oldPath = Path.Combine(Path.GetTempPath(), "oldname");

@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ProducerTests.CrawlerTests
-{
+namespace TestLibrary.ProducerTests.CrawlerTests {
     using System;
     using System.Collections.Generic;
 
@@ -35,16 +34,14 @@ namespace TestLibrary.ProducerTests.CrawlerTests
 
     using TestUtils;
 
-    [TestFixture]
-    public class CrawlEventNotifierTest
-    {
+    [TestFixture, Category("Fast")]
+    public class CrawlEventNotifierTest {
         private CrawlEventNotifier underTest;
         private Mock<ISyncEventQueue> queue;
         private CrawlEventCollection collection;
 
         [SetUp]
-        public void SetUp()
-        {
+        public void SetUp() {
             this.queue = new Mock<ISyncEventQueue>();
             this.underTest = new CrawlEventNotifier(this.queue.Object);
             this.collection = new CrawlEventCollection() {
@@ -53,17 +50,17 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             };
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorTakesQueue() {
             new CrawlEventNotifier(Mock.Of<ISyncEventQueue>());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorFailsIfGivenQueueIsNull() {
             Assert.Throws<ArgumentNullException>(() => new CrawlEventNotifier(null));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void NoNotificationIsCreatedAndCallFailsIfEmptyStructIsPassed() {
             CrawlEventCollection emptyCollection = new CrawlEventCollection();
             Assert.Throws<ArgumentNullException>(() => this.underTest.MergeEventsAndAddToQueue(emptyCollection));
@@ -71,7 +68,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void NoNotificationIsCreatedIfAllEventsAreEmpty() {
             CrawlEventCollection emptyCollection = new CrawlEventCollection() {
                 creationEvents = new List<AbstractFolderEvent>(),
@@ -83,7 +80,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void NotifyOneLocalFileCreatedEventToQueue() {
             var file = Mock.Of<IFileInfo>();
             var fileEvent = new FileEvent(file) {
@@ -98,7 +95,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(1));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void NotifyOneLocalFolderCreatedEventToQueue() {
             var dir = Mock.Of<IDirectoryInfo>();
             var dirEvent = new FolderEvent(dir, null) {
@@ -113,7 +110,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(1));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void NotifyOneRemoteFileCreatedEventToQueue() {
             var doc = Mock.Of<IDocument>();
             var docEvent = new FileEvent(null, doc) {
@@ -128,7 +125,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(1));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void NotifyOneRemoteFolderCreatedEventToQueue() {
             var folder = Mock.Of<IFolder>();
             var folderEvent = new FolderEvent(null, folder) {
@@ -143,7 +140,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(1));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void NotifyAboutMultipleCreatedEvents() {
             var file = Mock.Of<IFileInfo>();
             var fileEvent = new FileEvent(file) {
@@ -176,7 +173,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(4));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void MergeLocalAndRemoteFileDeletionEvents() {
             string remoteId = "remoteId";
             var file = Mock.Of<IFileInfo>();
@@ -195,7 +192,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(1));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void NotifyOneLocalFileChangedEvent() {
             var file = Mock.Of<IFileInfo>();
             var fileEvent = new FileEvent(file) {
@@ -210,7 +207,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(1));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void MergeLocalMovedAndRemoteDeletionEvents() {
             var file = Mock.Of<IFileInfo>();
             var oldfile = Mock.Of<IFileInfo>();
@@ -227,7 +224,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(1));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void NotifyMultipleChangeEvents() {
             var file = Mock.Of<IFileInfo>();
             var oldfile = Mock.Of<IFileInfo>();

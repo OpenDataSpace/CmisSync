@@ -36,7 +36,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture]
+    [TestFixture, Category("Fast"), Category("Solver")]
     public class RemoteObjectDeletedTest {
         private readonly string name = "a";
         private readonly string path = Path.Combine(Path.GetTempPath(), "a");
@@ -47,21 +47,21 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private IgnoredFileNamesFilter fileNameFilter;
         private IgnoredFolderNameFilter folderNameFilter;
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void DefaultConstructorTest() {
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
             new RemoteObjectDeleted(session.Object, Mock.Of<IMetaDataStorage>(), Mock.Of<IFilterAggregator>());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void ConstructorThrowsExceptionIfFiltersAreNull() {
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
             Assert.Throws<ArgumentNullException>(() => new RemoteObjectDeleted(session.Object, Mock.Of<IMetaDataStorage>(), null));
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void RemoteFolderDeleted() {
             this.SetUpTestMocks();
             Mock<IMappedObject> folder = this.storage.AddLocalFolder(this.path, "id");
@@ -74,7 +74,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == folder.Object)), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void RemoteFileDeleted() {
             this.SetUpTestMocks();
             DateTime lastModified = DateTime.UtcNow;
@@ -94,7 +94,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.storage.Verify(s => s.RemoveObject(mappedObject), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void RemoteFileDeletedButLocalFileHasBeenChangedBeforeBeingHandled() {
             this.SetUpTestMocks();
             Mock<IMappedObject> file = this.storage.AddLocalFile(this.path, "id");
@@ -110,7 +110,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == file.Object)), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void RemoteFileDeletedButLocalFileDoesNotExistsInStorage() {
             this.SetUpTestMocks();
             var fileInfo = new Mock<IFileInfo>();
@@ -122,7 +122,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.storage.VerifyThatNoObjectIsManipulated();
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void RemoteFolderDeletedButNotAllContainingFilesAreSyncedYet() {
             this.SetUpTestMocks();
             string fileName = "fileName";
@@ -154,7 +154,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == folder.Object)), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void RemoteFolderDeletedAndOnlyIgnoredFilesAndFoldersAreNotSyncedYet() {
             this.SetUpTestMocks();
             string ignoredFile = "ignoredFile";
@@ -183,7 +183,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == folder.Object)), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver"), Category("SelectiveIgnore")]
+        [Test, Category("SelectiveIgnore")]
         public void RemoteFolderDeletedAndHasBeenFlaggedToBeIgnored() {
             this.SetUpTestMocks();
             var dirInfo = new Mock<IDirectoryInfo>();
@@ -198,7 +198,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.storage.Verify(s => s.RemoveObject(folder.Object), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void RemoteFileDeletedAndAlsoLocalFileDoesNotExistsAnymore() {
             this.SetUpTestMocks();
             DateTime lastModified = DateTime.UtcNow;
