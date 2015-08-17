@@ -272,6 +272,14 @@ namespace CmisSync.Lib.Storage.FileSystem {
             }
         }
 
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the original <see cref="System.IO.FileSystemInfo"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the original <see cref="System.IO.FileSystemInfo"/>.</returns>
+        public override string ToString() {
+            return this.original.ToString();
+        }
+
 #if !__MonoCS__
         private void AddReadOnlyAclsToOriginal() {
             if (this.original is DirectoryInfo) {

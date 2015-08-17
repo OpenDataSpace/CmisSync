@@ -34,12 +34,12 @@ namespace TestLibrary.IntegrationTests.VirusDetectionTests {
 
     using TestUtils;
 
-    [TestFixture, Timeout(180000), TestName("VirusDetection")]
+    [TestFixture, Timeout(60000), TestName("VirusDetection"), Category("Slow"), Category("VirusDetection")]
     public class VirusDetectionTests : BaseFullRepoTest {
         private readonly string fileName = "eicar.bin";
 
         [Ignore("https://mantis.dataspace.cc/view.php?id=4671")]
-        [Test, Category("Slow"), Category("VirusDetection")]
+        [Test]
         public void UploadVirusByCreateDocument(
             [Values(VersioningState.Major, VersioningState.Minor, VersioningState.None, null)]VersioningState? versioningState)
         {
@@ -50,7 +50,7 @@ namespace TestLibrary.IntegrationTests.VirusDetectionTests {
         }
 
         [Ignore("https://mantis.dataspace.cc/view.php?id=4671")]
-        [Test, Category("Slow"), Category("VirusDetection")]
+        [Test]
         public void UploadVirusBySetContentStream(
             [Values("harmlessContent", null)]string initalContent)
         {
@@ -62,7 +62,7 @@ namespace TestLibrary.IntegrationTests.VirusDetectionTests {
             }
         }
 
-        [Test, Category("Slow"), Category("VirusDetection")]
+        [Test]
         public void UploadVirusBySettingContentViaAppendContentStream(
             [Values("harmlessContent", null)]string initialContent)
         {
@@ -75,7 +75,7 @@ namespace TestLibrary.IntegrationTests.VirusDetectionTests {
             }
         }
 
-        [Test, Category("Slow"), Category("VirusDetection")]
+        [Test]
         public void UploadVirusByAppendingContentInPieces(
             [Values(true, false)]bool alwaysLastChunk)
         {
@@ -91,7 +91,7 @@ namespace TestLibrary.IntegrationTests.VirusDetectionTests {
             Assert.That(ex.IsVirusDetectionException(), Is.True);
         }
 
-        [Test, Category("Slow"), Category("VirusDetection")]
+        [Test]
         public void UploadVirusByPWCSetContentStream([Values(true, false)]bool major) {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             var doc = this.remoteRootDir.CreateDocument(this.fileName, (byte[])null, true);
@@ -105,7 +105,7 @@ namespace TestLibrary.IntegrationTests.VirusDetectionTests {
             }
         }
 
-        [Test, Category("Slow"), Category("VirusDetection")]
+        [Test]
         public void UploadVirusByPWCAppendContentStream([Values(true, false)]bool major) {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             var doc = this.remoteRootDir.CreateDocument(this.fileName, (byte[])null, true);

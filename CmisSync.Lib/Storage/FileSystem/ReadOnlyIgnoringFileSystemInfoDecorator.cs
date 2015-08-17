@@ -150,6 +150,14 @@ namespace CmisSync.Lib.Storage.FileSystem {
         }
 
         /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.FileSystem.ReadOnlyIgnoringDirectoryInfoDecorator"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.FileSystem.ReadOnlyIgnoringDirectoryInfoDecorator"/>.</returns>
+        public override string ToString() {
+            return this.fileSystemInfo.ToString();
+        }
+
+        /// <summary>
         /// Disables read only before executing action end reenables read only after it.
         /// </summary>
         /// <param name="writeOperation">Write operation.</param>

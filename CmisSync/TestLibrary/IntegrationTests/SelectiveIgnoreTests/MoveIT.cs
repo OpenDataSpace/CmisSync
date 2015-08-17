@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
-{
+namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests {
     using System;
     using System.IO;
     using System.Threading;
@@ -30,10 +29,9 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
 
     using TestLibrary.TestUtils;
 
-    [TestFixture, Timeout(900000), TestName("MoveIT")]
-    public class MoveIT : BaseFullRepoTest
-    {
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
+    [TestFixture, Timeout(60000), TestName("MoveIT"), Category("Slow"), Category("SelectiveIgnore")]
+    public class MoveIT : BaseFullRepoTest {
+        [Test]
         public void MoveRemoteFolderTreeInsideIgnoredFolder([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
@@ -66,7 +64,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             Assert.That(new FolderTree(this.localRootDir, "."), Is.EqualTo(new FolderTree(localTree)));
         }
 
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        [Test]
         public void MoveLocalFolderTreeInsideIgnoredFolder([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();

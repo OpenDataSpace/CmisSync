@@ -148,5 +148,13 @@ namespace TestLibrary.StorageTests.FileSystemTests.ReadOnlyIgnoringDecorator {
                 }
             }
         }
+
+        [Test, Category("Fast")]
+        public void ToStringReturnsWrappedToString() {
+            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var hiddenDirInfo = new DirectoryInfoWrapper(new DirectoryInfo(path));
+            var underTest = new ReadOnlyIgnoringDirectoryInfoDecorator(hiddenDirInfo);
+            Assert.That(underTest.ToString(), Is.EqualTo(path));
+        }
     }
 }

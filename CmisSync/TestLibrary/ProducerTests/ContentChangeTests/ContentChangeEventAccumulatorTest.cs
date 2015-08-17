@@ -32,103 +32,109 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    using TestUtils;
+
+    [TestFixture, Category("Fast"), Category("ContentChange")]
     public class ContentChangeEventAccumulatorTest {
         private static readonly string Id = "myId";
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void ConstructorTest() {
-            var session = new Mock<ISession>();
-            var accumulator = new ContentChangeEventAccumulator(session.Object, new Mock<ISyncEventQueue>().Object);
-            Assert.That(accumulator.Priority, Is.EqualTo(2000));
+            var session = new Mock<ISession>(MockBehavior.Strict).Object;
+            var queue = new Mock<ISyncEventQueue>(MockBehavior.Strict).Object;
+            var underTest = new ContentChangeEventAccumulator(session, queue);
+            Assert.That(underTest.Priority, Is.EqualTo(2000));
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void DbNullContstructorTest() {
-            Assert.Throws<ArgumentNullException>(() => new ContentChangeEventAccumulator(null, new Mock<ISyncEventQueue>().Object));
+            Assert.Throws<ArgumentNullException>(() => new ContentChangeEventAccumulator(null, Mock.Of<ISyncEventQueue>()));
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void DocumentCreationAccumulated() {
-            var session = new Mock<ISession>();
+            var session = new Mock<ISession>(MockBehavior.Strict).SetupCreateOperationContext();
             var remoteObject = new Mock<ICmisObject>();
             session.Setup(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>())).Returns(remoteObject.Object);
-            var accumulator = new ContentChangeEventAccumulator(session.Object, new Mock<ISyncEventQueue>().Object);
             var contentChange = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Created, Id);
+            var underTest = new ContentChangeEventAccumulator(session.Object, Mock.Of<ISyncEventQueue>());
 
-            Assert.That(accumulator.Handle(contentChange), Is.False);
+            Assert.That(underTest.Handle(contentChange), Is.False);
+
             Assert.That(contentChange.CmisObject, Is.EqualTo(remoteObject.Object));
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void DocumentAlreadyAccumulatedIsNotAccumulatedAgain() {
-            var session = new Mock<ISession>();
+            var session = new Mock<ISession>(MockBehavior.Strict).SetupCreateOperationContext();
             var remoteObject = Mock.Of<ICmisObject>();
             var newRemoteObject = Mock.Of<ICmisObject>();
             session.Setup(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>())).Returns(remoteObject);
-            var accumulator = new ContentChangeEventAccumulator(session.Object, new Mock<ISyncEventQueue>().Object);
             var contentChange = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Created, Id);
             contentChange.UpdateObject(session.Object);
             session.Setup(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>())).Returns(newRemoteObject);
+            var unterTest = new ContentChangeEventAccumulator(session.Object, Mock.Of<ISyncEventQueue>());
 
-            Assert.That(accumulator.Handle(contentChange), Is.False);
+            Assert.That(unterTest.Handle(contentChange), Is.False);
+
             Assert.That(contentChange.CmisObject, Is.EqualTo(remoteObject));
             Assert.That(contentChange.CmisObject, Is.Not.EqualTo(newRemoteObject));
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void DocumentDeletionNotAccumulated() {
-            var session = new Mock<ISession>();
+            var session = new Mock<ISession>(MockBehavior.Strict).Object;
             var contentChange = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Deleted, Id);
-            var accumulator = new ContentChangeEventAccumulator(session.Object, new Mock<ISyncEventQueue>().Object);
+            var underTest = new ContentChangeEventAccumulator(session, Mock.Of<ISyncEventQueue>());
 
-            accumulator.Handle(contentChange);
+            Assert.That(underTest.Handle(contentChange), Is.False);
+
             Assert.That(contentChange.CmisObject, Is.Null);
-            session.Verify(foo => foo.GetObject(It.IsAny<string>()), Times.Never());
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void DoesNotHandleWrongEvents() {
-            var session = new Mock<ISession>();
-            var contentChange = new Mock<ISyncEvent>().Object;
+            var session = new Mock<ISession>(MockBehavior.Strict);
+            var wrongEvent = new Mock<ISyncEvent>(MockBehavior.Strict).Object;
 
-            var accumulator = new ContentChangeEventAccumulator(session.Object, new Mock<ISyncEventQueue>().Object);
-            Assert.That(accumulator.Handle(contentChange), Is.False);
+            var underTest = new ContentChangeEventAccumulator(session.Object, Mock.Of<ISyncEventQueue>());
+
+            Assert.That(underTest.Handle(wrongEvent), Is.False);
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void IgnoreEventsThatHaveBeenDeleted() {
             var queue = new Mock<ISyncEventQueue>();
-            var session = new Mock<ISession>();
-            session.Setup(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>())).Throws(new CmisObjectNotFoundException());
-            var accumulator = new ContentChangeEventAccumulator(session.Object, queue.Object);
+            var session = new Mock<ISession>(MockBehavior.Strict).SetupCreateOperationContext();
+            session.Setup(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>())).Throws<CmisObjectNotFoundException>();
+            var underTest = new ContentChangeEventAccumulator(session.Object, queue.Object);
             var contentChange = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Created, Id);
 
-            Assert.That(accumulator.Handle(contentChange), Is.True);
+            Assert.That(underTest.Handle(contentChange), Is.True);
             queue.Verify(q => q.AddEvent(It.IsAny<StartNextSyncEvent>()), Times.Never());
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void IgnoreEventsThatWeDontHaveAccessTo() {
             var queue = new Mock<ISyncEventQueue>();
-            var session = new Mock<ISession>();
-            session.Setup(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>())).Throws(new CmisPermissionDeniedException());
-            var accumulator = new ContentChangeEventAccumulator(session.Object, queue.Object);
+            var session = new Mock<ISession>(MockBehavior.Strict).SetupCreateOperationContext();
+            session.Setup(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>())).Throws<CmisPermissionDeniedException>();
+            var underTest = new ContentChangeEventAccumulator(session.Object, queue.Object);
             var contentChange = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Created, Id);
 
-            Assert.That(accumulator.Handle(contentChange), Is.True);
+            Assert.That(underTest.Handle(contentChange), Is.True);
             queue.Verify(q => q.AddEvent(It.IsAny<StartNextSyncEvent>()), Times.Never());
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void ExceptionTriggersFullSync() {
             var queue = new Mock<ISyncEventQueue>();
-            var session = new Mock<ISession>();
-            session.Setup(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>())).Throws(new Exception());
-            var accumulator = new ContentChangeEventAccumulator(session.Object, queue.Object);
+            var session = new Mock<ISession>(MockBehavior.Strict);
+            session.Setup(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>())).Throws<Exception>();
+            var underTest = new ContentChangeEventAccumulator(session.Object, queue.Object);
             var contentChange = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Created, Id);
 
-            Assert.That(accumulator.Handle(contentChange), Is.True);
+            Assert.That(underTest.Handle(contentChange), Is.True);
             queue.Verify(q => q.AddEvent(It.IsAny<StartNextSyncEvent>()), Times.Once());
         }
     }
