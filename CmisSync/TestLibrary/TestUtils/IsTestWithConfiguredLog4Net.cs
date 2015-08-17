@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.TestUtils
-{
+namespace TestLibrary.TestUtils {
     using System;
     using System.Diagnostics;
     using System.IO;
@@ -30,8 +29,7 @@ namespace TestLibrary.TestUtils
 
     using TestUtils;
 
-    public class IsTestWithConfiguredLog4Net
-    {
+    public class IsTestWithConfiguredLog4Net {
         private static readonly string FileName = "log4net.config";
 
         static IsTestWithConfiguredLog4Net() {
