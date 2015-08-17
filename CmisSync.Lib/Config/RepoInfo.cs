@@ -319,6 +319,13 @@ namespace CmisSync.Lib.Config {
         public long UploadLimit { get; set; }
 
         /// <summary>
+        /// Gets or sets the maximum http request retries.
+        /// </summary>
+        /// <value>The maximum http retries.</value>
+        [XmlElement("maxHttpRetries"), DefaultValue(2)]
+        public int HttpMaximumRetries { get; set; }
+
+        /// <summary>
         /// Gets the CmisRepoCredentials
         /// </summary>
         public CmisRepoCredentials Credentials {

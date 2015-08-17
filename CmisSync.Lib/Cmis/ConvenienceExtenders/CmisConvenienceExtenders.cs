@@ -509,6 +509,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             parameters[SessionParameter.DeviceIdentifier] = ConfigManager.CurrentConfig.DeviceId.ToString();
             parameters[SessionParameter.UserAgent] = appName != null ? Utils.CreateUserAgent(appName) : Utils.CreateUserAgent();
             parameters[SessionParameter.Compression] = bool.TrueString;
+            parameters[SessionParameter.MaximumRequestRetries] = repoInfo.HttpMaximumRetries.ToString();
             return parameters;
         }
 

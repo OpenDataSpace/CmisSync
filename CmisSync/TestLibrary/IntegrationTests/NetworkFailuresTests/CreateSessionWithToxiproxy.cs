@@ -1,6 +1,7 @@
 ﻿
 namespace TestLibrary.IntegrationTests.NetworkFailuresTests {
     using System;
+    using System.Net;
 
     using NUnit.Framework;
 
@@ -10,32 +11,59 @@ namespace TestLibrary.IntegrationTests.NetworkFailuresTests {
     using Toxiproxy.Net;
 
     [TestFixture, Category("Slow")]
-    public class CreateSessionWithToxiproxy : BaseFullRepoTest {
-        private readonly string ProxyHostName = "127.0.0.1";
-        private readonly int ProxyPort = 8080;
-        public CreateSessionWithToxiproxy() {
-            this.SessionFactory = new ToxiSessionFactory(DotCMIS.Client.Impl.SessionFactory.NewInstance()) {
-                Host = this.ProxyHostName,
-                Port = this.ProxyPort
+    public class CreateSessionWithToxiproxy : BaseFullRepoTest, IsToxiProxyTest {
+        public string ToxiProxyServerName { get; private set; }
+        public int? ToxiProxyServerManagementPort { get; private set; }
+        public int ToxiProxyListeningPort = 8080;
+        public string RemoteUrl { get; private set; }
+        public Proxy Proxy { get; private set; }
+        private Connection connection;
+        public ToxiproxyAuthenticationProviderWrapper AuthProviderWrapper { get; set; }
+
+        [SetUp]
+        public void InitProxy() {
+            this.RemoteUrl = this.repoInfo.Address.ToString();
+            this.connection = this.EnsureThatToxiProxyIsAvailable();
+            var client = connection.Client();
+            client.RemoveAllProxies();
+            this.Proxy = client.CreateAndAddProxy(basedOn: this);
+            this.AuthProviderWrapper = new ToxiproxyAuthenticationProviderWrapper(this.session.Binding.GetAuthenticationProvider());
+            this.repo.AuthProvider = this.AuthProviderWrapper;
+            this.repo.SessionFactory = new ToxiSessionFactory(this.SessionFactory) {
+                Host = this.ToxiProxyServerName ?? "127.0.0.1",
+                Port = this.ToxiProxyListeningPort
             };
+        }
+
+        [TearDown]
+        public void ShutDownProxyConnection() {
+            this.Proxy = null;
+            if (this.connection != null) {
+                this.connection.Dispose();
+                this.connection = null;
+            }
         }
 
         [Test]
         public void Connect() {
-            var remoteHostName = new UriBuilder(this.repoInfo.Address.ToString()).Host;
-            var remoteHostPort = new UriBuilder(this.repoInfo.Address.ToString()).Port;
-            using (var conn = new Connection(ProxyHostName, resetAllToxicsAndProxiesOnClose: true)) {
-                var client = conn.Client();
-                foreach (var proxyName in client.All().Keys) {
-                    client.Delete(proxyName);
-                }
+            this.InitializeAndRunRepo(swallowExceptions: true);
 
-                client.Add(new Proxy() {
-                    Enabled = true,
-                    Name = string.Format("local_to_cmis_{0}", Guid.NewGuid().ToString()),
-                    Upstream = string.Format("{0}:{1}", remoteHostName, remoteHostPort),
-                    Listen = string.Format("{0}:{1}", ProxyHostName, ProxyPort)
-                });
+            int counter = 0;
+            this.AuthProviderWrapper.OnAuthenticate += (object obj) => {
+                counter++;
+                if (counter >= 3 && this.Proxy.Enabled) {
+                    this.Proxy.Enabled = false;
+                    this.Proxy.Update();
+                } else if (counter > 3 + 5) {
+                    this.Proxy.Enabled = true;
+                    this.Proxy.Update();
+                    counter = 0;
+                }
+            };
+
+            for (int i = 0; i < 10; i++ ) {
+                this.AddStartNextSyncEvent();
+                this.repo.Run();
             }
         }
     }

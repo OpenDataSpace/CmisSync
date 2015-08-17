@@ -137,7 +137,8 @@ namespace TestLibrary.IntegrationTests {
                 Address = new XmlUri(new Uri(config[3].ToString())),
                 User = config[4].ToString(),
                 RepositoryId = config[6].ToString(),
-                Binding = config[7] != null ? config[7].ToString() : BindingType.AtomPub
+                Binding = config[7] != null ? config[7].ToString() : BindingType.AtomPub,
+                HttpMaximumRetries = 0
             };
             this.repoInfo.RemotePath = this.repoInfo.RemotePath.Replace("//", "/");
             this.repoInfo.SetPassword(config[5].ToString());
@@ -176,9 +177,10 @@ namespace TestLibrary.IntegrationTests {
             cmisParameters[SessionParameter.Password] = this.repoInfo.GetPassword().ToString();
             cmisParameters[SessionParameter.RepositoryId] = this.repoInfo.RepositoryId;
             cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
+            cmisParameters[SessionParameter.MaximumRequestRetries] = "0";
 
-            ISessionFactory factory = this.SessionFactory ?? DotCMIS.Client.Impl.SessionFactory.NewInstance();
-            this.session = factory.CreateSession(cmisParameters, null, this.AuthProvider, null);
+            this.SessionFactory = this.SessionFactory ?? DotCMIS.Client.Impl.SessionFactory.NewInstance();
+            this.session = this.SessionFactory.CreateSession(cmisParameters, null, null, null);
             this.ContentChangesActive = this.session.AreChangeEventsSupported();
             IFolder root = (IFolder)this.session.GetObjectByPath(config[2].ToString());
             this.remoteRootDir = root.CreateFolder(this.subfolder);
@@ -291,7 +293,14 @@ namespace TestLibrary.IntegrationTests {
         }
 
         protected class BlockingSingleConnectionScheduler : CmisSync.Lib.Queueing.ConnectionScheduler {
-            public BlockingSingleConnectionScheduler(ConnectionScheduler original) : base(original) {
+            public BlockingSingleConnectionScheduler(ConnectionScheduler original, IAuthenticationProvider authProvider = null, ISessionFactory sessionFactory = null) : base(original) {
+                if (authProvider != null) {
+                    this.AuthProvider = authProvider;
+                }
+
+                if (sessionFactory != null) {
+                    this.SessionFactory = sessionFactory;
+                }
             }
 
             public override void Start() {
@@ -303,7 +312,8 @@ namespace TestLibrary.IntegrationTests {
 
         protected class CmisRepoMock : CmisSync.Lib.Cmis.Repository {
             public SingleStepEventQueue SingleStepQueue;
-
+            public IAuthenticationProvider AuthProvider;
+            public ISessionFactory SessionFactory;
             public CmisRepoMock(RepoInfo repoInfo, ActivityListenerAggregator activityListener, SingleStepEventQueue queue) : base(repoInfo, activityListener, true, queue) {
                 this.SingleStepQueue = queue;
             }
@@ -320,7 +330,7 @@ namespace TestLibrary.IntegrationTests {
 
             public override void Initialize() {
                 ConnectionScheduler original = this.connectionScheduler;
-                this.connectionScheduler = new BlockingSingleConnectionScheduler(original);
+                this.connectionScheduler = new BlockingSingleConnectionScheduler(original, this.AuthProvider, this.SessionFactory);
                 original.Dispose();
                 base.Initialize();
                 this.Queue.EventManager.RemoveEventHandler(this.Scheduler);
