@@ -38,7 +38,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture]
+    [TestFixture, Category("Fast"), Category("Solver")]
     public class LocalObjectDeletedTest : IsTestWithConfiguredLog4Net {
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
@@ -52,12 +52,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.underTest = new LocalObjectDeleted(this.session.Object, this.storage.Object);
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void DefaultConstructorTest() {
             new LocalObjectDeleted(this.session.Object, this.storage.Object);
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void LocalFileDeleted() {
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
 
@@ -77,7 +77,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.session.Verify(s => s.Delete(It.Is<IObjectId>((id) => id.Id == remoteDocumentId), true), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void LocalFolderDeleted() {
             string tempFolder = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
 
@@ -96,7 +96,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             folder.Verify(f => f.DeleteTree(false, UnfileObject.DeleteSinglefiled, true), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void LocalFolderDeletedButRemoteFolderIsReadOnly() {
             string tempFolder = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
 
@@ -115,7 +115,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             folder.Verify(f => f.DeleteTree(false, UnfileObject.DeleteSinglefiled, true), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void LocalFileDeletedWhileNetworkError() {
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
             string remoteDocumentId = "DocumentId";
@@ -127,7 +127,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.storage.VerifyThatNoObjectIsManipulated();
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void LocalFileDeletedWhileServerError() {
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
             string remoteDocumentId = "DocumentId";
@@ -139,7 +139,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.storage.VerifyThatNoObjectIsManipulated();
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void LocalFileDeletedWithoutPermissionToDeleteOnServer() {
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
             string remoteDocumentId = "DocumentId";
@@ -152,7 +152,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.storage.VerifyThatNoObjectIsManipulated();
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void AbortDeletionIfRemoteObjectHasBeenChanged() {
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
             string remoteDocumentId = "DocumentId";

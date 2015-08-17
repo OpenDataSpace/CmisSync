@@ -46,7 +46,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture]
+    [TestFixture, Category("Fast"), Category("Solver")]
     public class LocalObjectAddedTest : IsTestWithConfiguredLog4Net {
         private readonly string parentId = "parentId";
         private readonly string localObjectName = "localName";
@@ -63,19 +63,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private bool withExtendedAttributes;
         private byte[] emptyhash = SHA1.Create().ComputeHash(new byte[0]);
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void ConstructorWithGivenQueueAndActivityManager() {
             this.SetUpMocks();
             new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory);
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void ConstructorThrowsExceptionIfTransmissionManagerIsNull() {
             this.SetUpMocks();
             Assert.Throws<ArgumentNullException>(() => new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, null));
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void Local1ByteFileAdded(
             [Values(true, false)]bool withExtendedAttributes)
         {
@@ -105,7 +105,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             }
         }
 
-        [Test, Category("Fast"), Category("Solver"), TestCase(true, true), TestCase(true, false), TestCase(false, false)]
+        [Test, TestCase(true, true), TestCase(true, false), TestCase(false, false)]
         public void LocalEmptyFileAdded(bool withExtendedAttributes, bool withAlreadySetUuid) {
             this.SetUpMocks(withExtendedAttributes);
             Guid uuid = Guid.NewGuid();
@@ -136,7 +136,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void LocalFolderAdded([Values(true, false)]bool withExtendedAttributes) {
             this.SetUpMocks(withExtendedAttributes);
 
@@ -154,7 +154,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             }
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void LocalFolderAddingFailsBecauseOfAConflict() {
             this.SetUpMocks();
             var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory);
@@ -172,7 +172,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             dirInfo.VerifySet(d => d.Uuid = It.IsAny<Guid?>(), Times.Never());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void LocalFolderAddingFailsBecauseUtf8Character() {
             this.SetUpMocks();
             var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory);
@@ -190,7 +190,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             dirInfo.VerifySet(d => d.Uuid = It.IsAny<Guid?>(), Times.Never());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void LocalFolderAddedWithAlreadyExistingGuid() {
             this.SetUpMocks(true);
             Mock<IFolder> futureFolder;
@@ -205,7 +205,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             dirInfo.VerifySet(d => d.Uuid = It.Is<Guid?>(uuid => !uuid.Equals(guid)), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void LocalFileIsUsedByAnotherProcess() {
             this.SetUpMocks(true);
             var exception = new ExtendedAttributeException();
@@ -224,7 +224,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void LocalFileIsUsedByAnotherProcessOnOpenFile() {
             this.SetUpMocks();
             Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
@@ -242,7 +242,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void DoNotWriteLastWriteTimeUtcIfNotNecessary() {
             this.SetUpMocks(true);
 
@@ -256,7 +256,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void PermissionDeniedLeadsToNoOperation() {
             this.SetUpMocks(true);
 
@@ -288,7 +288,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void ParentFolderDoesNotExistsOnServerDueToMissingAllowedActions() {
             this.SetUpMocks(true);
 
@@ -330,7 +330,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.storage.VerifyThatNoObjectIsManipulated();
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void ParentFolderDoesNotExistsOnServerDueToPastErrorThrowsException() {
             this.SetUpMocks(true);
 
@@ -361,7 +361,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.storage.VerifyThatNoObjectIsManipulated();
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void StorageExceptionOnUploadLeadsToSavedEmptyState() {
             this.SetUpMocks();
 
@@ -383,7 +383,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             document.Verify(d => d.UpdateProperties(It.IsAny<IDictionary<string, object>>()), Times.Never());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void SolverFailsIfLocalFileOrFolderDoesNotExistsAnymore() {
             this.SetUpMocks();
             string path = Path.Combine(Path.GetTempPath(), this.localObjectName);

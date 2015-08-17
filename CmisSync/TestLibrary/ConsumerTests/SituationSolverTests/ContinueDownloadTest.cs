@@ -40,7 +40,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture]
+    [TestFixture, Category("Fast"), Category("Solver")]
     public class ContinueDownloadTest : IsTestWithConfiguredLog4Net {
         private readonly DateTime creationDate = DateTime.UtcNow;
         private readonly string objectName = "objectName";
@@ -74,7 +74,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.Setup(4);
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void RemoteFileAdded() {
             var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, this.fsFactory.Object);
 
@@ -89,7 +89,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         /// Abort will occur after two chunk download, and abort will trigger one save
         /// Downloader will save database after 1M bytes download
         /// </summary>
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void RemoteFileAddedWithTwoSave() {
             this.Setup((int)(((1024 * 1024) + this.chunkSize - 1 + (2 * this.chunkSize)) / this.chunkSize));
             var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, this.fsFactory.Object);
@@ -106,7 +106,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         /// Abort will occur after two chunk download, and abort will trigger one save
         /// Downloader will save database after 1M bytes download
         /// </summary>
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void RemoteFileAddedWithThreeSave() {
             this.Setup((int)(((1024 * 1024) + (2 * this.chunkSize) - 1 + (2 * this.chunkSize)) / this.chunkSize));
             var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, this.fsFactory.Object);
@@ -119,7 +119,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void RemoteFileChanged() {
             this.SetupRemoteFileChanged();
 
@@ -132,7 +132,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.backupFile.Verify(b => b.Delete(), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void RemoteFileAddedWhileChangeLocalCacheBeforeContinue() {
             var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, this.fsFactory.Object);
 
@@ -143,7 +143,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void RemoteFileChangedWhileChangeLocalCacheBeforeContinue() {
             this.SetupRemoteFileChanged();
 
@@ -156,7 +156,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.backupFile.Verify(b => b.Delete(), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void RemoteFileAddedWhileChangeRemoteBeforeContinue() {
             var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, this.fsFactory.Object);
 
@@ -167,7 +167,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void RemoteFileChangedWhileChangeRemoteBeforeContinue() {
             this.SetupRemoteFileChanged();
 
@@ -180,7 +180,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.backupFile.Verify(b => b.Delete(), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void RemoteFileAddedWhileDeleteLocalCacheBeforeContinue() {
             var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, this.fsFactory.Object);
 
@@ -190,7 +190,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void RemoteFileChangedWhileDeleteLocalCacheBeforeContinue() {
             this.SetupRemoteFileChanged();
 

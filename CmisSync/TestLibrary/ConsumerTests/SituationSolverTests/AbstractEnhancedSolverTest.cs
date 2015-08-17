@@ -38,19 +38,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture]
+    [TestFixture, Category("Fast"), Category("Solver")]
     public class AbstractEnhancedSolverTest {
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void ConstructorThrowsExceptionIfSessionIsNull() {
             Assert.Throws<ArgumentNullException>(() => new SolverClass(null, Mock.Of<IMetaDataStorage>()));
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void ConstructorThrowsExceptionIfStorageIsNull() {
             Assert.Throws<ArgumentNullException>(() => new SolverClass(Mock.Of<ISession>(), null));
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void ConstructorSetsPropertiesCorrectly([Values(true, false)]bool withGivenTransmissionStorage) {
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
@@ -63,7 +63,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             Assert.That(underTest.GetTransmissionStorage(), Is.EqualTo(transmissionStorage));
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void ConstructorSetsServerPropertyCorrectly([Values(true, false)]bool serverCanModifyLastModificationDate) {
             var session = new Mock<ISession>();
             session.SetupTypeSystem(serverCanModifyLastModificationDate);
@@ -72,7 +72,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             Assert.That(underTest.GetModification(), Is.EqualTo(serverCanModifyLastModificationDate));
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void EnsureLegalCharactersThrowsExceptionIfFilenameContainsUtf8Character() {
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
@@ -83,7 +83,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             Assert.Throws<InteractionNeededException>(() => underTest.CallEnsureThatLocalFileNameContainsLegalCharacters(fileInfo, exception));
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void EnsureLegalCharactersIfFilenameIsValid() {
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
@@ -94,7 +94,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             underTest.CallEnsureThatLocalFileNameContainsLegalCharacters(fileInfo, exception);
         }
 
-        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
+        [Test, Ignore("TODO")]
         public void UploadFileClosesTransmissionOnIOException() {
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
@@ -105,7 +105,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             Assert.Fail("TODO");
         }
 
-        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
+        [Test, Ignore("TODO")]
         public void DownloadChangesClosesTransmissionOnIOExceptionOnOpenCacheFile() {
             Assert.Fail("TODO");
         }

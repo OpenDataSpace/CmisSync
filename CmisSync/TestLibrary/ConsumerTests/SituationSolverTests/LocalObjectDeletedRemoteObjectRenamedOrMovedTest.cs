@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.IO;
 
@@ -35,9 +34,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
     using TestUtils;
 
-    [TestFixture]
-    public class LocalObjectDeletedRemoteObjectRenamedOrMovedTest
-    {
+    [TestFixture, Category("Fast"), Category("Solver")]
+    public class LocalObjectDeletedRemoteObjectRenamedOrMovedTest {
         private static readonly string RemoteId = "remoteId";
         private LocalObjectDeletedRemoteObjectRenamedOrMoved underTest;
         private Mock<ISession> session;
@@ -60,14 +58,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 this.storage.Object);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void DeletesStoredMappedObjectOfDeletedFileAndThrowsException() {
             this.storage.AddMappedFile(this.mappedObject);
             Assert.Throws<IOException>(() => this.underTest.Solve(this.deletedFsObject.Object, this.remoteObject.Object));
             this.storage.Verify(s => s.RemoveObject(this.mappedObject), Times.Once());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void DeletesStoredMappedObjectOfDeletedFolderAndThrowsException() {
             this.storage.AddMappedFolder(this.mappedObject);
             Assert.Throws<IOException>(() => this.underTest.Solve(this.deletedFsObject.Object, this.remoteObject.Object));

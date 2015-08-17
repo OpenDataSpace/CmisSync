@@ -44,7 +44,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture]
+    [TestFixture, Category("Fast"), Category("Solver")]
     public class ContinueUploadTest : IsTestWithConfiguredLog4Net {
         private readonly string parentId = "parentId";
         private readonly string objectName = "objectName";
@@ -100,7 +100,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.transmissionFactory = this.transmissionManager.CreateFactory();
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void LocalFileAdded() {
             this.SetupFile();
 
@@ -125,7 +125,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void LocalFileChanged() {
             this.SetupFile();
             this.SetupForLocalFileChanged();
@@ -151,7 +151,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void LocalFileAddedWhileChangeLocalBeforeContinue() {
             this.SetupFile();
 
@@ -173,7 +173,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void LocalFileChangedWhileChangeLocalBeforeContinue() {
             this.SetupFile();
             this.SetupForLocalFileChanged();
@@ -198,7 +198,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void LocalFileChangedWhileChangeRemoteBeforeContinue() {
             this.SetupFile();
             this.SetupForLocalFileChanged();
