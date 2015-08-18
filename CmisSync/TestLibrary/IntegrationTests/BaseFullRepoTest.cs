@@ -207,6 +207,8 @@ namespace TestLibrary.IntegrationTests {
             if (repoDBException != null) {
                 throw new Exception(repoDBException.Message, repoDBException);
             }
+
+            this.SessionFactory = null;
         }
 
         protected void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue = null, int timeout = 10000) {
