@@ -106,8 +106,6 @@ SOURCES =  \
 	FilterTests/RepositoryRootDeletedDetectionTest.cs \
 	FilterTests/SymlinkFilterTest.cs \
 	HashAlgorithmTests/SHA1ReuseTest.cs \
-	IntegrationTests/NetworkFailuresTests/CreateSessionWithToxiproxy.cs \
-	IntegrationTests/NetworkFailuresTests/ToxiProxySetup.cs \
 	IntegrationTests/AllHandlersIT.cs \
 	IntegrationTests/AllowableActionsTests/ReadingActionsTests.cs \
 	IntegrationTests/BaseFullRepoTest.cs \
@@ -126,6 +124,9 @@ SOURCES =  \
 	IntegrationTests/MockedServerTests/SetupRepositoryTest.cs \
 	IntegrationTests/MockedServerTests/SetupSessionFactoryTest.cs \
 	IntegrationTests/NeedsLocalFileSystemFolder.cs \
+	IntegrationTests/NetworkFailuresTests/CreateSessionWithToxiproxy.cs \
+	IntegrationTests/NetworkFailuresTests/IsFullTestWithToxyProxy.cs \
+	IntegrationTests/NetworkFailuresTests/ToxiProxySetup.cs \
 	IntegrationTests/PrivateWorkingCopyTests/AppendContentStreamTests.cs \
 	IntegrationTests/PrivateWorkingCopyTests/CreateDocumentTests.cs \
 	IntegrationTests/PrivateWorkingCopyTests/UploadChangedContent.cs \
@@ -262,8 +263,6 @@ SOURCES =  \
 	TestUtils/ObservableHandlerTest.cs \
 	TestUtils/SingleStepEventQueue.cs \
 	TestUtils/SingleStepEventQueueTest.cs \
-	TestUtils/ToxiproxyUtils/IsToxiProxyTest.cs \
-	TestUtils/ToxiproxyUtils/ToxiProxyExtensions.cs \
 	TestUtils/ToxiproxyUtils/ToxiSessionFactory.cs \
 	TestUtils/ToxiproxyUtils/ToxiSessionFactoryTest.cs \
 	TestUtils/ToxiproxyUtils/ToxiproxyAuthenticationProviderWrapper.cs \

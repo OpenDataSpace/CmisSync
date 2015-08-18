@@ -11,39 +11,7 @@ namespace TestLibrary.IntegrationTests.NetworkFailuresTests {
     using Toxiproxy.Net;
 
     [TestFixture, Category("Slow")]
-    public class CreateSessionWithToxiproxy : BaseFullRepoTest, IsToxiProxyTest {
-        public string ToxiProxyServerName { get; private set; }
-        public int? ToxiProxyServerManagementPort { get; private set; }
-        public int ToxiProxyListeningPort = 8080;
-        public string RemoteUrl { get; private set; }
-        public Proxy Proxy { get; private set; }
-        private Connection connection;
-        public ToxiproxyAuthenticationProviderWrapper AuthProviderWrapper { get; set; }
-
-        [SetUp]
-        public void InitProxy() {
-            this.RemoteUrl = this.repoInfo.Address.ToString();
-            this.connection = this.EnsureThatToxiProxyIsAvailable();
-            var client = connection.Client();
-            client.RemoveAllProxies();
-            this.Proxy = client.CreateAndAddProxy(basedOn: this);
-            this.AuthProviderWrapper = new ToxiproxyAuthenticationProviderWrapper(this.session.Binding.GetAuthenticationProvider());
-            this.repo.AuthProvider = this.AuthProviderWrapper;
-            this.repo.SessionFactory = new ToxiSessionFactory(this.SessionFactory) {
-                Host = this.ToxiProxyServerName ?? "127.0.0.1",
-                Port = this.ToxiProxyListeningPort
-            };
-        }
-
-        [TearDown]
-        public void ShutDownProxyConnection() {
-            this.Proxy = null;
-            if (this.connection != null) {
-                this.connection.Dispose();
-                this.connection = null;
-            }
-        }
-
+    public class CreateSessionWithToxiproxy : IsFullTestWithToxyProxy {
         [Test]
         public void Connect() {
             this.InitializeAndRunRepo(swallowExceptions: true);
