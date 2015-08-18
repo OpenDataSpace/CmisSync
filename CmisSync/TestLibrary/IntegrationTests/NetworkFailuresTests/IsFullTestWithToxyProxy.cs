@@ -73,5 +73,10 @@ namespace TestLibrary.IntegrationTests.NetworkFailuresTests {
                 Listen = string.Format("{0}:{1}", this.ToxiProxyServerName, this.ToxiProxyListeningPort)
             });
         }
+
+        public void SwitchProxyState() {
+            this.Proxy.Enabled = !this.Proxy.Enabled;
+            this.Proxy.Update();
+        }
     }
 }

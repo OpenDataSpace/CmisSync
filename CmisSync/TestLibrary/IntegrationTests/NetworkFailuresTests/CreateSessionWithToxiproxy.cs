@@ -13,24 +13,15 @@ namespace TestLibrary.IntegrationTests.NetworkFailuresTests {
     [TestFixture, Category("Slow")]
     public class CreateSessionWithToxiproxy : IsFullTestWithToxyProxy {
         [Test]
-        public void Connect() {
-            this.InitializeAndRunRepo(swallowExceptions: true);
+        public void ConnectToRepoAndSimulateConnectionProblems() {
+            this.InitializeAndRunRepo(swallowExceptions: false);
 
-            int counter = 0;
             this.AuthProviderWrapper.OnAuthenticate += (object obj) => {
-                counter++;
-                if (counter >= 3 && this.Proxy.Enabled) {
-                    this.Proxy.Enabled = false;
-                    this.Proxy.Update();
-                } else if (counter > 3 + 5) {
-                    this.Proxy.Enabled = true;
-                    this.Proxy.Update();
-                    counter = 0;
-                }
+                this.SwitchProxyState();
             };
 
             for (int i = 0; i < 10; i++ ) {
-                this.AddStartNextSyncEvent();
+                this.AddStartNextSyncEvent(forceCrawl: i % 2 == 0);
                 this.repo.Run();
             }
         }
