@@ -13,7 +13,9 @@ namespace TestLibrary.TestUtils.ToxiproxyUtils {
             try {
                 string proxyName = test.ToxiProxyServerName ?? "127.0.0.1";
                 int proxyPort = test.ToxiProxyServerManagementPort ?? 8474;
-                return new Connection(proxyName, proxyPort);
+                var connection = new Connection(proxyName, proxyPort);
+                connection.Client().All();
+                return connection;
             } catch (Exception e) {
                 Assert.Ignore(string.Format("Connection to ToxiProxy failed: {0}", e.Message));
                 return null;
