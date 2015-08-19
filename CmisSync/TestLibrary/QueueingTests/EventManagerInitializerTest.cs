@@ -306,12 +306,11 @@ namespace TestLibrary.QueueingTests {
             remoteObject.Setup(r => r.ChangeToken).Returns(token);
             remoteObject.Setup(r => r.Path).Returns("path");
             session.SetupTypeSystem(true, supportsSelectiveIgnore);
-            session.Setup(s => s.GetObjectByPath(It.IsAny<string>())).Returns(remoteObject.Object);
             if (changeEventSupported) {
                 session.Setup(s => s.RepositoryInfo.Capabilities.ChangesCapability).Returns(CapabilityChanges.All);
             }
 
-            return new SuccessfulLoginEvent(new Uri("http://example.com"), session.Object);
+            return new SuccessfulLoginEvent(new Uri("http://example.com"), session.Object, remoteObject.Object);
         }
 
         private static void VerifyNonContenChangeHandlersAdded(Mock<ISyncEventManager> manager, Times times) {

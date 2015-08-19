@@ -48,6 +48,7 @@ namespace TestLibrary.QueueingTests {
         private readonly AuthenticationType authType = AuthenticationType.BASIC;
         private readonly string repoId = "repoId";
         private readonly string displayName = "repoName";
+        private readonly string remotePath = "/test";
 
         private Mock<ISyncEventQueue> queue;
         private Mock<IAuthenticationProvider> authProvider;
@@ -68,11 +69,13 @@ namespace TestLibrary.QueueingTests {
                 ObfuscatedPassword = new Password(this.password).ObfuscatedPassword,
                 Address = new Uri(this.url),
                 RepositoryId = this.repoId,
-                DisplayName = this.displayName
+                DisplayName = this.displayName,
+                RemotePath = this.remotePath
             };
 
             this.session = new Mock<ISession>();
             this.session.SetupCreateOperationContext();
+            this.session.Setup(s => s.GetObjectByPath(this.remotePath)).Returns(Mock.Of<IFolder>());
             this.sessionFactory = new Mock<ISessionFactory>();
         }
 
@@ -305,6 +308,7 @@ namespace TestLibrary.QueueingTests {
         public void LoginRetryAfterConfigHasBeenChanged() {
             var waitHandle = new AutoResetEvent(false);
             var newSession = new Mock<ISession>();
+            newSession.Setup(s => s.GetObjectByPath(this.remotePath)).Returns(Mock.Of<IFolder>());
             newSession.SetupCreateOperationContext();
             this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
                 .Callback<IDictionary<string, string>, object, object, object>(

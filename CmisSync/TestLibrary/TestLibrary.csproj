@@ -348,6 +348,7 @@
     <Compile Include="IntegrationTests\NetworkFailuresTests\IsFullTestWithToxyProxy.cs" />
     <Compile Include="UtilsTests\GetSpecialPathsTest.cs" />
     <Compile Include="TestUtils\ToxiproxyUtils\ToxiProxyExtensions.cs" />
+    <Compile Include="EventsTests\SuccessfulLoginEventTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

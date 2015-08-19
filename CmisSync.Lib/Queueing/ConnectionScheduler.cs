@@ -226,7 +226,8 @@ namespace CmisSync.Lib.Queueing {
                     this.cancelToken.ThrowIfCancellationRequested();
                     session.DefaultContext = OperationContextFactory.CreateDefaultContext(session);
                     this.cancelToken.ThrowIfCancellationRequested();
-                    this.Queue.AddEvent(new SuccessfulLoginEvent(this.RepoInfo.Address, session));
+                    var rootFolder = session.GetObjectByPath(this.RepoInfo.RemotePath) as IFolder;
+                    this.Queue.AddEvent(new SuccessfulLoginEvent(this.RepoInfo.Address, session, rootFolder));
                     this.lastSuccessfulLogin = DateTime.Now;
                     return true;
                 } catch (DotCMIS.Exceptions.CmisPermissionDeniedException e) {

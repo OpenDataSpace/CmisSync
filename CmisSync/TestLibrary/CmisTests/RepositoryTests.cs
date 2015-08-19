@@ -100,7 +100,7 @@ namespace TestLibrary.CmisTests {
                 Assert.That(e.PropertyName, Is.EqualTo("Status"));
             };
 
-            underTest.Queue.AddEvent(new SuccessfulLoginEvent(new Uri("https://demo.deutsche-wolke.de/cmis/browser"), Mock.Of<ISession>()));
+            underTest.Queue.AddEvent(new SuccessfulLoginEvent(new Uri("https://demo.deutsche-wolke.de/cmis/browser"), Mock.Of<ISession>(), Mock.Of<IFolder>()));
             this.queue.Step();
 
             Assert.That(underTest.Status, Is.EqualTo(SyncStatus.Idle));
@@ -133,7 +133,7 @@ namespace TestLibrary.CmisTests {
                     notified = true;
                 }
             };
-            underTest.Queue.AddEvent(new SuccessfulLoginEvent(new Uri("https://demo.deutsche-wolke.de/cmis/browser"), Mock.Of<ISession>()));
+            underTest.Queue.AddEvent(new SuccessfulLoginEvent(new Uri("https://demo.deutsche-wolke.de/cmis/browser"), Mock.Of<ISession>(), Mock.Of<IFolder>()));
             this.queue.Step();
             underTest.Queue.AddEvent(new StartNextSyncEvent(fullSyncRequested: true));
             this.queue.Step();

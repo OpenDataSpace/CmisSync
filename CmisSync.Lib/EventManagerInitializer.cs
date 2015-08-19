@@ -150,7 +150,7 @@ namespace CmisSync.Lib {
                 var successfulLoginEvent = e as SuccessfulLoginEvent;
                 var session = successfulLoginEvent.Session;
 
-                var remoteRoot = successfulLoginEvent.Session.GetObjectByPath(this.repoInfo.RemotePath) as IFolder;
+                var remoteRoot = successfulLoginEvent.RootFolder;
 
                 // Remove former added instances from event Queue.EventManager
                 if (this.ccaccumulator != null) {

@@ -31,7 +31,7 @@ namespace TestLibrary.IntegrationTests.NetworkFailuresTests {
     [TestFixture, Category("Slow"), Timeout(60000)]
     public class CreateSessionWithToxiproxy : IsFullTestWithToxyProxy {
         [Test]
-        public void ConnectToRepoAndSimulateConnectionProblems([Range(-1, 10)]int blockedRequest, [Values(10)]int numberOfSyncEvents) {
+        public void ConnectToRepoAndSimulateConnectionProblems([Range(-1, 20)]int blockedRequest, [Values(10)]int numberOfSyncEvents) {
             this.RetryOnInitialConnection = true;
 
             int reqNumber = 0;
