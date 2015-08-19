@@ -269,6 +269,7 @@ SOURCES =  \
 	TestUtils/ToxiproxyUtils/ToxiproxyAuthenticationProviderWrapperTest.cs \
 	UtilsTests/BackendTest.cs \
 	UtilsTests/EncodingTest.cs \
+	UtilsTests/GetSpecialPathsTest.cs \
 	UtilsTests/HttpProxyUtilsTest.cs \
 	UtilsTests/NameOfPropertyTest.cs \
 	UtilsTests/ProcessDiagnosticsTest.cs \
