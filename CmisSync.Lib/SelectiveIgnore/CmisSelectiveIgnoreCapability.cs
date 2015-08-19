@@ -17,15 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.SelectiveIgnore
-{
+namespace CmisSync.Lib.SelectiveIgnore {
     using System;
 
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
-    public static class CmisSelectiveIgnoreCapability
-    {
+    public static class CmisSelectiveIgnoreCapability {
         /// <summary>
         /// Determines if is server supports selective ignore feature.
         /// </summary>
