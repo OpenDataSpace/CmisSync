@@ -263,6 +263,7 @@ SOURCES =  \
 	TestUtils/ObservableHandlerTest.cs \
 	TestUtils/SingleStepEventQueue.cs \
 	TestUtils/SingleStepEventQueueTest.cs \
+	TestUtils/ToxiproxyUtils/ToxiProxyExtensions.cs \
 	TestUtils/ToxiproxyUtils/ToxiSessionFactory.cs \
 	TestUtils/ToxiproxyUtils/ToxiSessionFactoryTest.cs \
 	TestUtils/ToxiproxyUtils/ToxiproxyAuthenticationProviderWrapper.cs \

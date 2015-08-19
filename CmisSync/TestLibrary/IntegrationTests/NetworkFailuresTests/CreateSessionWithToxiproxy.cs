@@ -28,22 +28,30 @@ namespace TestLibrary.IntegrationTests.NetworkFailuresTests {
 
     using Toxiproxy.Net;
 
-    [TestFixture, Category("Slow")]
+    [TestFixture, Category("Slow"), Timeout(60000)]
     public class CreateSessionWithToxiproxy : IsFullTestWithToxyProxy {
         [Test]
-        public void ConnectToRepoAndSimulateConnectionProblems() {
+        public void ConnectToRepoAndSimulateConnectionProblems([Range(-1, 10)]int blockedRequest, [Values(10)]int numberOfSyncEvents) {
             this.RetryOnInitialConnection = true;
-            this.SwitchProxyState();
 
+            int reqNumber = 0;
             this.AuthProviderWrapper.OnAuthenticate += (object obj) => {
-                this.SwitchProxyState();
+                if (reqNumber == blockedRequest) {
+                    this.Proxy.Disable();
+                } else {
+                    this.Proxy.Enable();
+                }
+
+                reqNumber ++;
             };
 
             this.InitializeAndRunRepo(swallowExceptions: true);
 
-            for (int i = 0; i < 10; i++ ) {
-                this.AddStartNextSyncEvent(forceCrawl: i % 2 == 0);
+            for (int i = 0; i < numberOfSyncEvents; i++ ) {
+                int actualReq = reqNumber;
+                this.AddStartNextSyncEvent();
                 this.repo.Run();
+                Assert.That(reqNumber, Is.GreaterThan(actualReq));
             }
         }
     }
