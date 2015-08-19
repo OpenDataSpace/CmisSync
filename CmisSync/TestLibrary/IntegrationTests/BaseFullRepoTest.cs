@@ -295,6 +295,7 @@ namespace TestLibrary.IntegrationTests {
         }
 
         protected class BlockingSingleConnectionScheduler : CmisSync.Lib.Queueing.ConnectionScheduler {
+            public bool RetryOnFailure { get; set; }
             public BlockingSingleConnectionScheduler(ConnectionScheduler original, IAuthenticationProvider authProvider = null, ISessionFactory sessionFactory = null) : base(original) {
                 if (authProvider != null) {
                     this.AuthProvider = authProvider;
@@ -306,8 +307,10 @@ namespace TestLibrary.IntegrationTests {
             }
 
             public override void Start() {
-                if (!base.Connect()) {
-                    Assert.Fail("Connection failed");
+                while (!base.Connect()) {
+                    if (!this.RetryOnFailure) {
+                        Assert.Fail("Connection failed");
+                    }
                 }
             }
         }
@@ -316,6 +319,7 @@ namespace TestLibrary.IntegrationTests {
             public SingleStepEventQueue SingleStepQueue;
             public IAuthenticationProvider AuthProvider;
             public ISessionFactory SessionFactory;
+            public bool UseRetryingConnectionScheduler { get; set; }
             public CmisRepoMock(RepoInfo repoInfo, ActivityListenerAggregator activityListener, SingleStepEventQueue queue) : base(repoInfo, activityListener, true, queue) {
                 this.SingleStepQueue = queue;
             }
@@ -332,7 +336,8 @@ namespace TestLibrary.IntegrationTests {
 
             public override void Initialize() {
                 ConnectionScheduler original = this.connectionScheduler;
-                this.connectionScheduler = new BlockingSingleConnectionScheduler(original, this.AuthProvider, this.SessionFactory);
+                this.connectionScheduler = new BlockingSingleConnectionScheduler(original, this.AuthProvider, this.SessionFactory) { RetryOnFailure = this.UseRetryingConnectionScheduler};
+
                 original.Dispose();
                 base.Initialize();
                 this.Queue.EventManager.RemoveEventHandler(this.Scheduler);

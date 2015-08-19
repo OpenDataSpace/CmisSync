@@ -17,6 +17,13 @@ namespace TestLibrary.IntegrationTests.NetworkFailuresTests {
         public Proxy Proxy { get; private set; }
         private Connection connection;
         public ToxiproxyAuthenticationProviderWrapper AuthProviderWrapper { get; set; }
+        protected bool RetryOnInitialConnection {
+            get {
+                return this.repo.UseRetryingConnectionScheduler;
+            } set {
+                this.repo.UseRetryingConnectionScheduler = value;
+            }
+        }
 
         [SetUp]
         public void InitProxy() {

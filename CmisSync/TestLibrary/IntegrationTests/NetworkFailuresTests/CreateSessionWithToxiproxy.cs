@@ -14,11 +14,14 @@ namespace TestLibrary.IntegrationTests.NetworkFailuresTests {
     public class CreateSessionWithToxiproxy : IsFullTestWithToxyProxy {
         [Test]
         public void ConnectToRepoAndSimulateConnectionProblems() {
-            this.InitializeAndRunRepo(swallowExceptions: false);
+            this.RetryOnInitialConnection = true;
+            this.SwitchProxyState();
 
             this.AuthProviderWrapper.OnAuthenticate += (object obj) => {
                 this.SwitchProxyState();
             };
+
+            this.InitializeAndRunRepo(swallowExceptions: true);
 
             for (int i = 0; i < 10; i++ ) {
                 this.AddStartNextSyncEvent(forceCrawl: i % 2 == 0);
