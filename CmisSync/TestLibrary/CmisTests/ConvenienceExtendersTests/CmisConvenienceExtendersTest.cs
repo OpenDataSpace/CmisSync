@@ -82,13 +82,13 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
         public void PrivateWorkingCopyIsUpdateable([Values(true, false)]bool updateable) {
             var session = new Mock<ISession>();
             session.SetupPrivateWorkingCopyCapability(updateable);
-            Assert.That(session.Object.ArePrivateWorkingCopySupported(), Is.EqualTo(updateable));
+            Assert.That(session.Object.IsPrivateWorkingCopySupported(), Is.EqualTo(updateable));
         }
 
         [Test]
         public void PrivateWorkingCopyIsUpdateableReturnsFalseOnException() {
             var session = new Mock<ISession>();
-            Assert.That(session.Object.ArePrivateWorkingCopySupported(), Is.False);
+            Assert.That(session.Object.IsPrivateWorkingCopySupported(), Is.False);
         }
     }
 }

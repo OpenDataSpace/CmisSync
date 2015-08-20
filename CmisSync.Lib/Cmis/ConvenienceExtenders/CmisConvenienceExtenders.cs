@@ -425,7 +425,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <returns>
         /// <c>true</c> if this feature is available, otherwise <c>false</c>
         /// </returns>
-        public static bool ArePrivateWorkingCopySupported(this ISession session) {
+        public static bool IsPrivateWorkingCopySupported(this ISession session) {
             try {
                 return session.RepositoryInfo.Capabilities.IsPwcUpdatableSupported.GetValueOrDefault();
             } catch (NullReferenceException) {

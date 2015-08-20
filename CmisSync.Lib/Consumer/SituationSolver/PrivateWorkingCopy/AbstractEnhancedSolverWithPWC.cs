@@ -58,7 +58,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 throw new ArgumentNullException("Given transmission storage is null");
             }
 
-            if (!session.ArePrivateWorkingCopySupported()) {
+            if (!session.IsPrivateWorkingCopySupported()) {
                 throw new ArgumentException("Given session does not support private working copies");
             }
         }

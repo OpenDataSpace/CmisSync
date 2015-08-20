@@ -241,7 +241,7 @@ namespace TestLibrary.IntegrationTests {
         }
 
         protected void EnsureThatPrivateWorkingCopySupportIsAvailable() {
-            if (!this.session.ArePrivateWorkingCopySupported()) {
+            if (!this.session.IsPrivateWorkingCopySupported()) {
                 Assert.Ignore("This session does not support updates on private working copies");
             }
         }
