@@ -67,10 +67,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 throw new ArgumentNullException("localFolderOrEmptyFileAddedSolver", "Given solver for locally added folders is null");
             }
 
-            if (!session.IsPrivateWorkingCopySupported()) {
-                throw new ArgumentException("Given session doesn't support private working copies", "session");
-            }
-
             this.folderOrEmptyFileAddedSolver = localFolderOrEmptyFileAddedSolver;
             this.transmissionManager = manager;
         }

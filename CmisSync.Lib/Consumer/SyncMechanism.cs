@@ -53,6 +53,7 @@ namespace CmisSync.Lib.Consumer {
         private ActivityListenerAggregator activityListener;
         private ITransmissionFactory transmissionFactory;
         private IFilterAggregator filters;
+        private bool pwcIsSupported;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SyncMechanism"/> class.
@@ -66,6 +67,7 @@ namespace CmisSync.Lib.Consumer {
         /// <param name="activityListener">Active sync progress listener.</param>
         /// <param name="filters">Ignore filter.</param>
         /// <param name="transmissionFactory">Transmission factory.</param>
+        /// <param name="pwcIsSupported">Passes info if the session supports private working copies.</param>
         /// <param name="solver">Solver for custom solver matrix.</param>
         public SyncMechanism(
             ISituationDetection<AbstractFolderEvent> localSituation,
@@ -77,6 +79,7 @@ namespace CmisSync.Lib.Consumer {
             ActivityListenerAggregator activityListener,
             IFilterAggregator filters,
             ITransmissionFactory transmissionFactory,
+            bool pwcIsSupported,
             ISolver[,] solver = null) : base(queue)
         {
             if (session == null) {
@@ -119,6 +122,7 @@ namespace CmisSync.Lib.Consumer {
             this.activityListener = activityListener;
             this.filters = filters;
             this.transmissionFactory = transmissionFactory;
+            this.pwcIsSupported = pwcIsSupported;
             this.Solver = solver == null ? this.CreateSolver() : solver;
         }
 
@@ -169,7 +173,7 @@ namespace CmisSync.Lib.Consumer {
             ISolver changeChangeSolver = new LocalObjectChangedRemoteObjectChanged(this.session, this.storage, this.transmissionStorage, this.transmissionFactory);
             ISolver addedNochangeSolver = new LocalObjectAdded(this.session, this.storage, this.transmissionStorage, this.transmissionFactory);
             ISolver changedNoChangeSolver = new LocalObjectChanged(this.session, this.storage, this.transmissionStorage, this.transmissionFactory);
-            if (this.session.ArePrivateWorkingCopySupported()) {
+            if (this.pwcIsSupported) {
                 addedNochangeSolver = new LocalObjectAddedWithPWC(this.session, this.storage, this.transmissionStorage, this.transmissionFactory, addedNochangeSolver);
                 changedNoChangeSolver = new LocalObjectChangedWithPWC(this.session, this.storage, this.transmissionStorage, this.transmissionFactory, changedNoChangeSolver);
                 changeChangeSolver = new LocalObjectChangedRemoteObjectChangedWithPWC(this.session, this.storage, this.transmissionStorage, this.transmissionFactory, changeChangeSolver);

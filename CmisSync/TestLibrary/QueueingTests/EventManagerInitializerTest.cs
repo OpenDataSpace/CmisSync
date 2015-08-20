@@ -299,18 +299,23 @@ namespace TestLibrary.QueueingTests {
             };
         }
 
-        private static SuccessfulLoginEvent CreateNewSessionEvent(bool changeEventSupported, bool supportsSelectiveIgnore = true, string id = "i", string token = "t") {
-            var session = new Mock<ISession>();
+        private static SuccessfulLoginEvent CreateNewSessionEvent(
+            bool changeEventSupported,
+            bool supportsSelectiveIgnore = true,
+            bool pwcIsSupported = true,
+            string id = "i",
+            string token = "t")
+        {
+            var session = new Mock<ISession>(MockBehavior.Strict);
             var remoteObject = new Mock<IFolder>();
             remoteObject.Setup(r => r.Id).Returns(id);
             remoteObject.Setup(r => r.ChangeToken).Returns(token);
             remoteObject.Setup(r => r.Path).Returns("path");
-            session.SetupTypeSystem(true, supportsSelectiveIgnore);
             if (changeEventSupported) {
                 session.Setup(s => s.RepositoryInfo.Capabilities.ChangesCapability).Returns(CapabilityChanges.All);
             }
 
-            return new SuccessfulLoginEvent(new Uri("http://example.com"), session.Object, remoteObject.Object);
+            return new SuccessfulLoginEvent(new Uri("http://example.com"), session.Object, remoteObject.Object, pwcIsSupported);
         }
 
         private static void VerifyNonContenChangeHandlersAdded(Mock<ISyncEventManager> manager, Times times) {
@@ -366,8 +371,17 @@ namespace TestLibrary.QueueingTests {
                 Mock.Of<ITransmissionFactory>());
         }
 
-        private void RunSuccessfulLoginEvent(IMetaDataStorage storage, ISyncEventManager manager, ActivityListenerAggregator listener, bool changeEventSupported = false, bool supportsSelectiveIgnore = true, string id = "i", string token = "t") {
-            var e = CreateNewSessionEvent(changeEventSupported, supportsSelectiveIgnore, id, token);
+        private void RunSuccessfulLoginEvent(
+            IMetaDataStorage storage,
+            ISyncEventManager manager,
+            ActivityListenerAggregator listener,
+            bool changeEventSupported = false,
+            bool supportsSelectiveIgnore = true,
+            bool pwcIsSupported = true,
+            string id = "i",
+            string token = "t")
+        {
+            var e = CreateNewSessionEvent(changeEventSupported, supportsSelectiveIgnore, pwcIsSupported, id, token);
 
             var handler = this.CreateStrategyInitializer(storage, manager, listener);
 

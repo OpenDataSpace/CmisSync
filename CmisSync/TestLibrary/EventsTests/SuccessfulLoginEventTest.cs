@@ -17,26 +17,27 @@ namespace TestLibrary.EventsTests {
         private readonly IFolder rootFolder = new Mock<IFolder>(MockBehavior.Strict).Object;
 
         [Test]
-        public void ConstructorTakesUrlAndSessionAndRootFolder() {
-            var underTest = new SuccessfulLoginEvent(this.url, this.session, this.rootFolder);
+        public void ConstructorTakesUrlAndSessionAndRootFolder([Values]bool pwcIsSupported) {
+            var underTest = new SuccessfulLoginEvent(this.url, this.session, this.rootFolder, pwcIsSupported);
 
             Assert.That(underTest.Session, Is.EqualTo(this.session));
             Assert.That(underTest.RootFolder, Is.EqualTo(this.rootFolder));
+            Assert.That(underTest.PrivateWorkingCopySupported, Is.EqualTo(pwcIsSupported));
         }
 
         [Test]
-        public void ConstructorFailsIfUrlIsNull() {
-            Assert.Throws<ArgumentNullException>(() => new SuccessfulLoginEvent(null, this.session, this.rootFolder));
+        public void ConstructorFailsIfUrlIsNull([Values]bool pwcIsSupported) {
+            Assert.Throws<ArgumentNullException>(() => new SuccessfulLoginEvent(null, this.session, this.rootFolder, pwcIsSupported));
         }
 
         [Test]
-        public void ConstructorFailsIfSessionIsNull() {
-            Assert.Throws<ArgumentNullException>(() => new SuccessfulLoginEvent(this.url, null, this.rootFolder));
+        public void ConstructorFailsIfSessionIsNull([Values]bool pwcIsSupported) {
+            Assert.Throws<ArgumentNullException>(() => new SuccessfulLoginEvent(this.url, null, this.rootFolder, pwcIsSupported));
         }
 
         [Test]
-        public void ConstructorFailsIfRootFolderIsNull() {
-            Assert.Throws<ArgumentNullException>(() => new SuccessfulLoginEvent(this.url, this.session, null));
+        public void ConstructorFailsIfRootFolderIsNull([Values]bool pwcIsSupported) {
+            Assert.Throws<ArgumentNullException>(() => new SuccessfulLoginEvent(this.url, this.session, null, pwcIsSupported));
         }
     }
 }

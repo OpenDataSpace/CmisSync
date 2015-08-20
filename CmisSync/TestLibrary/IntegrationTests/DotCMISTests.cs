@@ -163,7 +163,7 @@ namespace TestLibrary.IntegrationTests {
             string filePath = subFolderPath + "/" + fileName;
 
             ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
-            if (!session.ArePrivateWorkingCopySupported()) {
+            if (!session.IsPrivateWorkingCopySupported()) {
                 Assert.Ignore("PWCs are not supported");
             }
 
@@ -209,7 +209,7 @@ namespace TestLibrary.IntegrationTests {
             string filePath = subFolderPath + "/" + fileName;
 
             ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
-            if (!session.ArePrivateWorkingCopySupported()) {
+            if (!session.IsPrivateWorkingCopySupported()) {
                 Assert.Ignore("PWCs are not supported");
             }
 

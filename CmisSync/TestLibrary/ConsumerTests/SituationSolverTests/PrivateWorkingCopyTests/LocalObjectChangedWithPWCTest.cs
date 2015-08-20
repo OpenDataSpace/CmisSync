@@ -87,16 +87,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorFailsIfSessionIsNotAbleToWorkWithPrivateWorkingCopies() {
-            this.SetUpMocks(isPwcUpdateable: false);
-            Assert.Throws<ArgumentException>(
-                () =>
-                new LocalObjectChangedWithPWC(
-                this.session.Object,
-                this.storage.Object,
-                this.transmissionStorage.Object,
-                this.manager.Object,
-                Mock.Of<ISolver>()));
+        public void ConstructorDoesNotTouchesSession() {
+            this.SetUpMocks();
+            this.session = new Mock<ISession>(MockBehavior.Strict);
+            this.CreateSolver();
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -188,10 +182,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.folderOrFileContentUnchangedAddedSolver.Object);
         }
 
-        private void SetUpMocks(bool isPwcUpdateable = true, bool serverCanModifyLastModificationDate = true) {
+        private void SetUpMocks(bool serverCanModifyLastModificationDate = true) {
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem(serverCanModifyLastModificationDate: serverCanModifyLastModificationDate);
-            this.session.SetupPrivateWorkingCopyCapability(isPwcUpdateable: isPwcUpdateable);
             this.storage = new Mock<IMetaDataStorage>();
             this.chunkSize = 4096;
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();

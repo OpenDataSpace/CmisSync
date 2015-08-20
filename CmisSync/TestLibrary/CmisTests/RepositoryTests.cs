@@ -91,7 +91,7 @@ namespace TestLibrary.CmisTests {
         }
 
         [Test]
-        public void SyncStatusSwitchesFromOfflineToIdleIfLoginWasSuccessful() {
+        public void SyncStatusSwitchesFromOfflineToIdleIfLoginWasSuccessful([Values(true, false)]bool pwcIsSupported) {
             this.SetupMocks();
             bool notified = false;
             var underTest = new TestRepository(this.repoInfo, this.listener, this.queue);
@@ -100,7 +100,7 @@ namespace TestLibrary.CmisTests {
                 Assert.That(e.PropertyName, Is.EqualTo("Status"));
             };
 
-            underTest.Queue.AddEvent(new SuccessfulLoginEvent(new Uri("https://demo.deutsche-wolke.de/cmis/browser"), Mock.Of<ISession>(), Mock.Of<IFolder>()));
+            underTest.Queue.AddEvent(new SuccessfulLoginEvent(new Uri("https://demo.deutsche-wolke.de/cmis/browser"), Mock.Of<ISession>(), Mock.Of<IFolder>(), pwcIsSupported));
             this.queue.Step();
 
             Assert.That(underTest.Status, Is.EqualTo(SyncStatus.Idle));
@@ -124,7 +124,7 @@ namespace TestLibrary.CmisTests {
         }
 
         [Test]
-        public void SyncDateUpdatesIfSyncIsDoneAndQueueDoesNotContainsChanges() {
+        public void SyncDateUpdatesIfSyncIsDoneAndQueueDoesNotContainsChanges([Values(true, false)]bool pwcIsSupported) {
             this.SetupMocks();
             bool notified = false;
             var underTest = new TestRepository(this.repoInfo, this.listener, this.queue);
@@ -133,7 +133,7 @@ namespace TestLibrary.CmisTests {
                     notified = true;
                 }
             };
-            underTest.Queue.AddEvent(new SuccessfulLoginEvent(new Uri("https://demo.deutsche-wolke.de/cmis/browser"), Mock.Of<ISession>(), Mock.Of<IFolder>()));
+            underTest.Queue.AddEvent(new SuccessfulLoginEvent(new Uri("https://demo.deutsche-wolke.de/cmis/browser"), Mock.Of<ISession>(), Mock.Of<IFolder>(), pwcIsSupported));
             this.queue.Step();
             underTest.Queue.AddEvent(new StartNextSyncEvent(fullSyncRequested: true));
             this.queue.Step();

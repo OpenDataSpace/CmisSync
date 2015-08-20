@@ -51,10 +51,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 throw new ArgumentNullException("folderOrFileContentUnchangedSolver", "Given solver for folder or unchanged file content situations is null");
             }
 
-            if (!session.IsPrivateWorkingCopySupported()) {
-                throw new ArgumentException("The given session does not support private working copies", "session");
-            }
-
             this.folderOrFileContentUnchangedSolver = folderOrFileContentUnchangedSolver;
             this.transmissionManager = manager;
         }

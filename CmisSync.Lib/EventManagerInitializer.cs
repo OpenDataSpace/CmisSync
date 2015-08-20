@@ -249,7 +249,8 @@ namespace CmisSync.Lib {
                     this.fileTransmissionStorage,
                     this.activityListener,
                     this.filter,
-                    this.transmissionFactory);
+                    this.transmissionFactory,
+                    successfulLoginEvent.PrivateWorkingCopySupported);
                 this.Queue.EventManager.AddEventHandler(this.mechanism);
 
                 var localRootFolder = this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath);

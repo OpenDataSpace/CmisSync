@@ -57,10 +57,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             if (transmissionStorage == null) {
                 throw new ArgumentNullException("Given transmission storage is null");
             }
-
-            if (!session.IsPrivateWorkingCopySupported()) {
-                throw new ArgumentException("Given session does not support private working copies");
-            }
         }
 
         private IDocument CreateRemotePWCDocument(IDocument remoteDocument) {

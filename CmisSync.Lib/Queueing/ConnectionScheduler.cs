@@ -227,7 +227,8 @@ namespace CmisSync.Lib.Queueing {
                     session.DefaultContext = OperationContextFactory.CreateDefaultContext(session);
                     this.cancelToken.ThrowIfCancellationRequested();
                     var rootFolder = session.GetObjectByPath(this.RepoInfo.RemotePath) as IFolder;
-                    this.Queue.AddEvent(new SuccessfulLoginEvent(this.RepoInfo.Address, session, rootFolder));
+                    bool pwcSupport = session.IsPrivateWorkingCopySupported();
+                    this.Queue.AddEvent(new SuccessfulLoginEvent(this.RepoInfo.Address, session, rootFolder, pwcSupport));
                     this.lastSuccessfulLogin = DateTime.Now;
                     return true;
                 } catch (DotCMIS.Exceptions.CmisPermissionDeniedException e) {

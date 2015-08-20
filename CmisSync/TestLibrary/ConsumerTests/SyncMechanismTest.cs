@@ -59,8 +59,7 @@ namespace TestLibrary.ConsumerTests {
 
         [SetUp]
         public void SetUp() {
-            this.session = new Mock<ISession>();
-            this.session.SetupTypeSystem();
+            this.session = new Mock<ISession>(MockBehavior.Strict);
             this.queue = new Mock<ISyncEventQueue>();
             this.storage = new Mock<IMetaDataStorage>();
             this.fileTransmissionStorage = new Mock<IFileTransmissionStorage>();
@@ -72,17 +71,17 @@ namespace TestLibrary.ConsumerTests {
         }
 
         [Test, Category("Fast")]
-        public void ConstructorWorksWithValidInput() {
+        public void ConstructorWorksWithValidInput([Values(true, false)]bool pwcSupported) {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            var mechanism = this.CreateMechanism(localDetection.Object, remoteDetection.Object);
+            var mechanism = this.CreateMechanism(localDetection.Object, remoteDetection.Object, pwcSupported);
             Assert.AreEqual(localDetection.Object, mechanism.LocalSituation);
             Assert.AreEqual(remoteDetection.Object, mechanism.RemoteSituation);
             Assert.AreEqual(Math.Pow(Enum.GetNames(typeof(SituationType)).Length, 2), mechanism.Solver.Length);
         }
 
         [Test, Category("Fast")]
-        public void ConstructorFailsWithLocalDetectionNull() {
+        public void ConstructorFailsWithLocalDetectionNull([Values(true, false)]bool pwcSupported) {
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             Assert.Throws<ArgumentNullException>(() => new SyncMechanism(
                 null,
@@ -93,11 +92,12 @@ namespace TestLibrary.ConsumerTests {
                 this.fileTransmissionStorage.Object,
                 this.listener,
                 this.filters.Object,
-                this.transmissionFactory));
+                this.transmissionFactory,
+                pwcSupported));
         }
 
         [Test, Category("Fast")]
-        public void ConstructorFailsWithRemoteDetectionNull() {
+        public void ConstructorFailsWithRemoteDetectionNull([Values(true, false)]bool pwcSupported) {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             Assert.Throws<ArgumentNullException>(() => new SyncMechanism(
                 localDetection.Object,
@@ -108,11 +108,12 @@ namespace TestLibrary.ConsumerTests {
                 this.fileTransmissionStorage.Object,
                 this.listener,
                 this.filters.Object,
-                this.transmissionFactory));
+                this.transmissionFactory,
+                pwcSupported));
         }
 
         [Test, Category("Fast")]
-        public void ConstructorThrowsExceptionIfFiltersAreNull() {
+        public void ConstructorThrowsExceptionIfFiltersAreNull([Values(true, false)]bool pwcSupported) {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             Assert.Throws<ArgumentNullException>(() => new SyncMechanism(
@@ -124,11 +125,12 @@ namespace TestLibrary.ConsumerTests {
                 this.fileTransmissionStorage.Object,
                 this.listener,
                 null,
-                this.transmissionFactory));
+                this.transmissionFactory,
+                pwcSupported));
         }
 
         [Test, Category("Fast")]
-        public void ConstructorThrowsExceptionIfTransmissionFactoryIsNull() {
+        public void ConstructorThrowsExceptionIfTransmissionFactoryIsNull([Values(true, false)]bool pwcSupported) {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             Assert.Throws<ArgumentNullException>(() => new SyncMechanism(
@@ -140,16 +142,17 @@ namespace TestLibrary.ConsumerTests {
                 this.fileTransmissionStorage.Object,
                 this.listener,
                 this.filters.Object,
-                null));
+                null,
+                pwcSupported));
         }
 
         [Test, Category("Fast")]
-        public void ConstructorForTestWorksWithValidInput() {
+        public void ConstructorForTestWorksWithValidInput([Values(true, false)]bool pwcSupported) {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
             ISolver[,] solver = new ISolver[numberOfSolver, numberOfSolver];
-            var mechanism = this.CreateMechanism(localDetection.Object, remoteDetection.Object, solver);
+            var mechanism = this.CreateMechanism(localDetection.Object, remoteDetection.Object, pwcSupported, solver);
             Assert.AreEqual(localDetection.Object, mechanism.LocalSituation);
             Assert.AreEqual(remoteDetection.Object, mechanism.RemoteSituation);
             Assert.AreEqual(Math.Pow(Enum.GetNames(typeof(SituationType)).Length, 2), mechanism.Solver.Length);
@@ -157,7 +160,7 @@ namespace TestLibrary.ConsumerTests {
         }
 
         [Test, Category("Fast")]
-        public void ChooseCorrectSolverForNoChange() {
+        public void ChooseCorrectSolverForNoChange([Values(true, false)]bool pwcSupported) {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
@@ -177,7 +180,7 @@ namespace TestLibrary.ConsumerTests {
                 It.Is<IMetaDataStorage>(db => db == this.storage.Object),
                 It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
             solver[(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = noChangeSolver.Object;
-            var mechanism = this.CreateMechanism(localDetection.Object, remoteDetection.Object, solver);
+            var mechanism = this.CreateMechanism(localDetection.Object, remoteDetection.Object, pwcSupported, solver);
             var remoteDoc = new Mock<IDocument>();
             remoteDoc.Setup(doc => doc.Id).Returns(remoteId.Id);
             var noChangeEvent = new Mock<FileEvent>(new FileInfoWrapper(new FileInfo(path)), remoteDoc.Object) { CallBase = true }.Object;
@@ -193,10 +196,10 @@ namespace TestLibrary.ConsumerTests {
         }
 
         [Test, Category("Fast")]
-        public void IgnoreNonFileOrFolderEvents() {
+        public void IgnoreNonFileOrFolderEvents([Values(true, false)]bool pwcSupported) {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            var mechanism = this.CreateMechanism(localDetection.Object, remoteDetection.Object);
+            var mechanism = this.CreateMechanism(localDetection.Object, remoteDetection.Object, pwcSupported);
             var invalidEvent = new Mock<ISyncEvent>().Object;
             Assert.IsFalse(mechanism.Handle(invalidEvent));
             localDetection.Verify(d => d.Analyse(It.IsAny<IMetaDataStorage>(), It.IsAny<AbstractFolderEvent>()), Times.Never());
@@ -204,7 +207,7 @@ namespace TestLibrary.ConsumerTests {
         }
 
         [Test, Category("Fast"), Category("IT")]
-        public void RemoteFolderAddedSituation() {
+        public void RemoteFolderAddedSituation([Values(true, false)]bool pwcSupported) {
             var remoteFolder = Mock.Of<IFolder>(
                 f =>
                 f.Id == "remoteId" &&
@@ -218,7 +221,7 @@ namespace TestLibrary.ConsumerTests {
                 Local = MetaDataChangeType.NONE
             };
 
-            var mechanism = this.CreateMechanism(localDetection, remoteDetection);
+            var mechanism = this.CreateMechanism(localDetection, remoteDetection, pwcSupported);
             mechanism.Solver[(int)SituationType.NOCHANGE, (int)SituationType.ADDED] = remoteFolderAddedSolver.Object;
 
             Assert.IsTrue(mechanism.Handle(folderEvent));
@@ -234,14 +237,14 @@ namespace TestLibrary.ConsumerTests {
         }
 
         [Test, Category("Fast"), Category("IT")]
-        public void LocalFolderAddedSituation() {
+        public void LocalFolderAddedSituation([Values(true, false)]bool pwcSupported) {
             var localFolder = Mock.Of<IDirectoryInfo>();
             var localFolderAddedSolver = new Mock<ISolver>();
             var localDetection = new LocalSituationDetection();
             var remoteDetection = new RemoteSituationDetection();
             var folderEvent = new FolderEvent(localFolder: localFolder) { Local = MetaDataChangeType.CREATED, Remote = MetaDataChangeType.NONE };
 
-            var mechanism = this.CreateMechanism(localDetection, remoteDetection);
+            var mechanism = this.CreateMechanism(localDetection, remoteDetection, pwcSupported);
             mechanism.Solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] = localFolderAddedSolver.Object;
 
             Assert.IsTrue(mechanism.Handle(folderEvent));
@@ -257,14 +260,14 @@ namespace TestLibrary.ConsumerTests {
         }
 
         [Test, Category("Fast")]
-        public void ThrowNotImplementedOnMissingSolver() {
-            Assert.Throws<NotImplementedException>(() => this.TriggerNonExistingSolver());
+        public void ThrowNotImplementedOnMissingSolver([Values(true, false)]bool pwcSupported) {
+            Assert.Throws<NotImplementedException>(() => this.TriggerNonExistingSolver(pwcSupported));
         }
 
         [Test, Category("Fast")]
-        public void RequestFullSyncOnMissingSolver() {
+        public void RequestFullSyncOnMissingSolver([Values(true, false)]bool pwcSupported) {
             try {
-                this.TriggerNonExistingSolver();
+                this.TriggerNonExistingSolver(pwcSupported);
             } catch (Exception) {
                 // Just Swallow
             }
@@ -273,7 +276,7 @@ namespace TestLibrary.ConsumerTests {
         }
 
         [Test, Category("Fast")]
-        public void AddingEventBackToQueueOnRetryExceptionInSolverAndIncrementRetryCounter() {
+        public void AddingEventBackToQueueOnRetryExceptionInSolverAndIncrementRetryCounter([Values(true, false)]bool pwcSupported) {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
@@ -287,7 +290,7 @@ namespace TestLibrary.ConsumerTests {
                 It.IsAny<ContentChangeType>(),
                 It.IsAny<ContentChangeType>())).Throws(new RetryException("reason"));
             solver[(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = retryProducer.Object;
-            var mechanism = this.CreateMechanism(localDetection.Object, remoteDetection.Object, solver);
+            var mechanism = this.CreateMechanism(localDetection.Object, remoteDetection.Object, pwcSupported, solver);
             localDetection.Setup(d => d.Analyse(this.storage.Object, It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
             remoteDetection.Setup(d => d.Analyse(this.storage.Object, It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
             var folderEvent = new FolderEvent(Mock.Of<IDirectoryInfo>(), Mock.Of<IFolder>()) { Local = MetaDataChangeType.NONE, Remote = MetaDataChangeType.NONE };
@@ -299,7 +302,7 @@ namespace TestLibrary.ConsumerTests {
         }
 
         [Test, Category("Fast")]
-        public void AddingInteractionNeededEventToQueueOnInteractionNeededException() {
+        public void AddingInteractionNeededEventToQueueOnInteractionNeededException([Values(true, false)]bool pwcSupported) {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
@@ -314,7 +317,7 @@ namespace TestLibrary.ConsumerTests {
                 It.IsAny<ContentChangeType>(),
                 It.IsAny<ContentChangeType>())).Throws(exception);
             solver[(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = interactionNeededProducer.Object;
-            var mechanism = this.CreateMechanism(localDetection.Object, remoteDetection.Object, solver);
+            var mechanism = this.CreateMechanism(localDetection.Object, remoteDetection.Object, pwcSupported, solver);
             localDetection.Setup(d => d.Analyse(this.storage.Object, It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
             remoteDetection.Setup(d => d.Analyse(this.storage.Object, It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
             var folderEvent = new FolderEvent(Mock.Of<IDirectoryInfo>(), Mock.Of<IFolder>()) { Local = MetaDataChangeType.NONE, Remote = MetaDataChangeType.NONE };
@@ -327,7 +330,7 @@ namespace TestLibrary.ConsumerTests {
         }
 
         [Test, Category("Fast")]
-        public void ThrowExceptionOnCmisConnectionExceptionOccurence() {
+        public void ThrowExceptionOnCmisConnectionExceptionOccurence([Values(true, false)]bool pwcSupported) {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
@@ -342,7 +345,7 @@ namespace TestLibrary.ConsumerTests {
                 It.IsAny<ContentChangeType>(),
                 It.IsAny<ContentChangeType>())).Throws(exception);
             solver[(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = interactionNeededProducer.Object;
-            var mechanism = this.CreateMechanism(localDetection.Object, remoteDetection.Object, solver);
+            var mechanism = this.CreateMechanism(localDetection.Object, remoteDetection.Object, pwcSupported, solver);
             localDetection.Setup(d => d.Analyse(this.storage.Object, It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
             remoteDetection.Setup(d => d.Analyse(this.storage.Object, It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
             var folderEvent = new FolderEvent(Mock.Of<IDirectoryInfo>(), Mock.Of<IFolder>()) { Local = MetaDataChangeType.NONE, Remote = MetaDataChangeType.NONE };
@@ -354,9 +357,7 @@ namespace TestLibrary.ConsumerTests {
 
         [Test, Category("Fast")]
         public void DecorateDefaultSolverBySpecializedPWCSolverIfSessionSupportsPWC([Values(true, false)]bool pwcUpdateable) {
-            this.session.SetupPrivateWorkingCopyCapability(pwcUpdateable);
-
-            var underTest = this.CreateMechanism(Mock.Of<ISituationDetection<AbstractFolderEvent>>(), Mock.Of<ISituationDetection<AbstractFolderEvent>>());
+            var underTest = this.CreateMechanism(Mock.Of<ISituationDetection<AbstractFolderEvent>>(), Mock.Of<ISituationDetection<AbstractFolderEvent>>(), pwcUpdateable);
 
             if (pwcUpdateable) {
                 Assert.That(underTest.Solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] is LocalObjectAddedWithPWC);
@@ -369,7 +370,7 @@ namespace TestLibrary.ConsumerTests {
             }
         }
 
-        private void TriggerNonExistingSolver() {
+        private void TriggerNonExistingSolver(bool pwcSupported) {
             var detection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
             ISolver[,] solver = new ISolver[numberOfSolver, numberOfSolver];
@@ -378,7 +379,7 @@ namespace TestLibrary.ConsumerTests {
                 It.Is<IMetaDataStorage>(db => db == this.storage.Object),
                 It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
 
-            var mechanism = this.CreateMechanism(detection.Object, detection.Object, solver);
+            var mechanism = this.CreateMechanism(detection.Object, detection.Object, pwcSupported, solver);
 
             var localFolder = Mock.Of<IDirectoryInfo>();
             var folderEvent = new FolderEvent(localFolder: localFolder) { Local = MetaDataChangeType.NONE, Remote = MetaDataChangeType.NONE };
@@ -389,6 +390,7 @@ namespace TestLibrary.ConsumerTests {
         private SyncMechanism CreateMechanism(
             ISituationDetection<AbstractFolderEvent> localDetection,
             ISituationDetection<AbstractFolderEvent> remoteDetection,
+            bool pwcSupported,
             ISolver[,] solver = null)
         {
             if (solver != null) {
@@ -402,6 +404,7 @@ namespace TestLibrary.ConsumerTests {
                     this.listener,
                     this.filters.Object,
                     this.transmissionFactory,
+                    pwcSupported,
                     solver);
             } else {
                 return new SyncMechanism(
@@ -413,7 +416,8 @@ namespace TestLibrary.ConsumerTests {
                     this.fileTransmissionStorage.Object,
                     this.listener,
                     this.filters.Object,
-                    this.transmissionFactory);
+                    this.transmissionFactory,
+                    pwcSupported);
             }
         }
 

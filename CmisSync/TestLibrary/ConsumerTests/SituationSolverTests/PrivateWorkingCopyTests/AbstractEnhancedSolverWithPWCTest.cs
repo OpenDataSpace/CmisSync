@@ -50,14 +50,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
         [Test, Category("Fast")]
         public void ConstructorThrowsExceptionIfTransmissionStorageIsNull() {
-            var session = new Mock<ISession>().SetupTypeSystem().SetupPrivateWorkingCopyCapability().Object;
+            var session = new Mock<ISession>(MockBehavior.Strict).Object;
             Assert.Throws<ArgumentNullException>(() => new SolverClass(session, Mock.Of<IMetaDataStorage>(), null));
         }
 
         [Test, Category("Fast")]
-        public void ConstructorThrowsExceptionIfSessionDoesNotSupportPwc() {
-            var session = new Mock<ISession>().SetupTypeSystem().SetupPrivateWorkingCopyCapability(false).Object;
-            Assert.Throws<ArgumentException>(() => new SolverClass(session, Mock.Of<IMetaDataStorage>(), Mock.Of<IFileTransmissionStorage>()));
+        public void ConstructorDoesNotTouchesTheSession() {
+            var session = new Mock<ISession>(MockBehavior.Strict).Object;
+            new SolverClass(session, Mock.Of<IMetaDataStorage>(), Mock.Of<IFileTransmissionStorage>());
         }
 
         [Test, Category("Fast")]

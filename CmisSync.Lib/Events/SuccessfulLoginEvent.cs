@@ -33,7 +33,14 @@ namespace CmisSync.Lib.Events {
         /// </summary>
         /// <param name="url">URL of the successful connection</param>
         /// <param name="session">Session instance.</param>
-        public SuccessfulLoginEvent(Uri url, ISession session, IFolder rootFolder) {
+        /// <param name="rootFolder">Remote sync root folder of the configured sync repository.</param>
+        /// <param name="privateWorkingCopySupported">Value which gives informations if the given session supports private working copies.</param>
+        public SuccessfulLoginEvent(
+            Uri url,
+            ISession session,
+            IFolder rootFolder,
+            bool privateWorkingCopySupported)
+        {
             if (url == null) {
                 throw new ArgumentNullException("url");
             }
@@ -49,6 +56,7 @@ namespace CmisSync.Lib.Events {
             this.url = url;
             this.Session = session;
             this.RootFolder = rootFolder;
+            this.PrivateWorkingCopySupported = privateWorkingCopySupported;
         }
 
         /// <summary>
@@ -62,6 +70,12 @@ namespace CmisSync.Lib.Events {
         /// </summary>
         /// <value>The root folder.</value>
         public IFolder RootFolder { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the session supports private working copy.
+        /// </summary>
+        /// <value><c>true</c> if private working copy supported; otherwise, <c>false</c>.</value>
+        public bool PrivateWorkingCopySupported { get; private set; }
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.SuccessfulLoginEvent"/>.
