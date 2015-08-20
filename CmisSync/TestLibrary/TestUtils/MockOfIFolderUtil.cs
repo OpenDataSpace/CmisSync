@@ -71,8 +71,9 @@ namespace TestLibrary.TestUtils {
             });
         }
 
-        public static void SetupChangeToken(this Mock<IFolder> folder, string changeToken) {
+        public static Mock<IFolder> SetupChangeToken(this Mock<IFolder> folder, string changeToken) {
             folder.Setup(f => f.ChangeToken).Returns(changeToken);
+            return folder;
         }
 
         public static void SetupIgnore(this Mock<IFolder> folder, params string[] devices) {
