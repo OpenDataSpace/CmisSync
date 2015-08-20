@@ -381,7 +381,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="session">Cmis session.</param>
         public static bool IsServerAbleToUpdateModificationDate(this ISession session) {
             bool result = false;
-            var docType = session.Binding.GetRepositoryService().GetTypeDefinition(session.RepositoryInfo.Id, BaseTypeId.CmisDocument.GetCmisValue(), null);
+            var docType = session.GetTypeDefinition(BaseTypeId.CmisDocument.GetCmisValue());
             foreach (var prop in docType.PropertyDefinitions) {
                 if (prop.Id == PropertyIds.LastModificationDate && prop.Updatability == DotCMIS.Enums.Updatability.ReadWrite) {
                     result = true;
@@ -390,7 +390,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             }
 
             if (result) {
-                var folderType = session.Binding.GetRepositoryService().GetTypeDefinition(session.RepositoryInfo.Id, BaseTypeId.CmisFolder.GetCmisValue(), null);
+                var folderType = session.GetTypeDefinition(BaseTypeId.CmisFolder.GetCmisValue());
                 foreach (var prop in folderType.PropertyDefinitions) {
                     if (prop.Id == PropertyIds.LastModificationDate && prop.Updatability != DotCMIS.Enums.Updatability.ReadWrite) {
                         result = false;

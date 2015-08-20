@@ -109,6 +109,8 @@ namespace TestLibrary.TestUtils {
 
             repositoryService.Setup(s => s.GetTypeDefinition(repoId, BaseTypeId.CmisDocument.GetCmisValue(), null)).Returns(docType);
             repositoryService.Setup(s => s.GetTypeDefinition(repoId, BaseTypeId.CmisFolder.GetCmisValue(), null)).Returns(folderType);
+            session.Setup(s => s.GetTypeDefinition(BaseTypeId.CmisDocument.GetCmisValue())).Returns(docType);
+            session.Setup(s => s.GetTypeDefinition(BaseTypeId.CmisFolder.GetCmisValue())).Returns(folderType);
             if (supportsSelectiveIgnore) {
                 IList<IPropertyDefinition> syncProps = new List<IPropertyDefinition>();
                 syncProps.Add(Mock.Of<IPropertyDefinition>(p => p.Id == "gds:ignoreDeviceIds"));
