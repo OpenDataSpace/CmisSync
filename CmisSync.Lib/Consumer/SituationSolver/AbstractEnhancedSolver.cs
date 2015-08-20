@@ -50,6 +50,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
         private static readonly ILog Logger = LogManager.GetLogger(typeof(AbstractEnhancedSolver));
 
+        private bool? serverCanModifyDateTimes = null;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.AbstractEnhancedSolver"/> class.
         /// </summary>
@@ -73,7 +75,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             this.Session = session;
             this.Storage = storage;
             this.TransmissionStorage = transmissionStorage;
-            this.ServerCanModifyDateTimes = this.Session.IsServerAbleToUpdateModificationDate();
         }
 
         /// <summary>
@@ -92,7 +93,19 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// Gets a value indicating whether this cmis server can modify date times.
         /// </summary>
         /// <value><c>true</c> if server can modify date times; otherwise, <c>false</c>.</value>
-        protected bool ServerCanModifyDateTimes { get; private set; }
+        protected bool ServerCanModifyDateTimes {
+            get {
+                if (this.serverCanModifyDateTimes == null) {
+                    try {
+                        this.serverCanModifyDateTimes = this.Session.IsServerAbleToUpdateModificationDate();
+                    } catch (CmisBaseException) {
+                        return false;
+                    }
+                }
+
+                return this.serverCanModifyDateTimes.GetValueOrDefault();
+            }
+        }
 
         /// <summary>
         /// Gets the transmission storage.
