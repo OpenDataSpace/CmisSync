@@ -37,8 +37,7 @@ namespace CmisSync.Lib.Accumulator {
     /// <summary>
     /// Remote object fetcher.
     /// </summary>
-    public class RemoteObjectFetcher : SyncEventHandler
-    {
+    public class RemoteObjectFetcher : SyncEventHandler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectFetcher));
         private IMetaDataStorage storage;
         private ISession session;
