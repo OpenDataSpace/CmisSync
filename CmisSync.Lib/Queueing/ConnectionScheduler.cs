@@ -28,6 +28,7 @@ namespace CmisSync.Lib.Queueing {
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.SelectiveIgnore;
 
     using DotCMIS;
     using DotCMIS.Binding;
@@ -226,9 +227,14 @@ namespace CmisSync.Lib.Queueing {
                     this.cancelToken.ThrowIfCancellationRequested();
                     session.DefaultContext = OperationContextFactory.CreateDefaultContext(session);
                     this.cancelToken.ThrowIfCancellationRequested();
-                    var rootFolder = session.GetObjectByPath(this.RepoInfo.RemotePath) as IFolder;
-                    bool pwcSupport = session.IsPrivateWorkingCopySupported();
-                    this.Queue.AddEvent(new SuccessfulLoginEvent(this.RepoInfo.Address, session, rootFolder, pwcSupport));
+                    var successEvent = new SuccessfulLoginEvent(
+                        this.RepoInfo.Address,
+                        session: session,
+                        rootFolder: session.GetObjectByPath(this.RepoInfo.RemotePath) as IFolder,
+                        privateWorkingCopySupported: session.IsPrivateWorkingCopySupported(),
+                        selectiveSyncSupported: session.SupportsSelectiveIgnore(),
+                        changeEventsSupported: session.AreChangeEventsSupported());
+                    this.Queue.AddEvent(successEvent);
                     this.lastSuccessfulLogin = DateTime.Now;
                     return true;
                 } catch (DotCMIS.Exceptions.CmisPermissionDeniedException e) {

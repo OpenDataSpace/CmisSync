@@ -306,16 +306,9 @@ namespace TestLibrary.QueueingTests {
             string id = "i",
             string token = "t")
         {
-            var session = new Mock<ISession>(MockBehavior.Strict);
-            var remoteObject = new Mock<IFolder>();
-            remoteObject.Setup(r => r.Id).Returns(id);
-            remoteObject.Setup(r => r.ChangeToken).Returns(token);
-            remoteObject.Setup(r => r.Path).Returns("path");
-            if (changeEventSupported) {
-                session.Setup(s => s.RepositoryInfo.Capabilities.ChangesCapability).Returns(CapabilityChanges.All);
-            }
-
-            return new SuccessfulLoginEvent(new Uri("http://example.com"), session.Object, remoteObject.Object, pwcIsSupported);
+            var session = new Mock<ISession>(MockBehavior.Strict).SetupCreateOperationContext().Object;
+            var remoteObject = new Mock<IFolder>().SetupId(id).SetupChangeToken(token).SetupPath("path").Object;
+            return new SuccessfulLoginEvent(new Uri("http://example.com"), session, remoteObject, pwcIsSupported, supportsSelectiveIgnore, changeEventSupported);
         }
 
         private static void VerifyNonContenChangeHandlersAdded(Mock<ISyncEventManager> manager, Times times) {

@@ -177,7 +177,7 @@ namespace CmisSync.Lib {
                     this.Queue.EventManager.RemoveEventHandler(this.ignoreChangeDetector);
                 }
 
-                if (session.AreChangeEventsSupported() &&
+                if (successfulLoginEvent.ChangeEventsSupported &&
                     (this.repoInfo.SupportedFeatures == null || this.repoInfo.SupportedFeatures.GetContentChangesSupport != false)) {
                     Logger.Info("Session supports content changes");
 
@@ -194,7 +194,7 @@ namespace CmisSync.Lib {
                     this.Queue.EventManager.AddEventHandler(this.alreadyHandledFilter);
                 }
 
-                if (session.SupportsSelectiveIgnore()) {
+                if (successfulLoginEvent.SelectiveSyncSupported) {
                     // Transforms events of ignored folders
                     this.transformer = new SelectiveIgnoreEventTransformer(this.ignoredStorage, this.Queue);
                     this.Queue.EventManager.AddEventHandler(this.transformer);
