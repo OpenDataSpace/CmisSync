@@ -190,7 +190,7 @@ namespace CmisSync.Lib {
 
                 return null;
             } catch (CmisObjectNotFoundException) {
-                return false;
+                return null;
             } catch (Exception e) {
                 Logger.Debug(e.Message);
                 return null;
