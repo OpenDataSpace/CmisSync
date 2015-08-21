@@ -80,6 +80,8 @@ namespace CmisSync.Lib {
                         return false;
                     }
                 }
+            } catch (CmisObjectNotFoundException) {
+                return false;
             } catch (Exception e) {
                 Logger.Debug(e.Message, e);
                 return false;
@@ -106,6 +108,8 @@ namespace CmisSync.Lib {
             try {
                 this.session = repo.CreateSession();
                 return true;
+            } catch (CmisObjectNotFoundException) {
+                return false;
             } catch (Exception e) {
                 Logger.Debug(e.Message);
                 return false;
@@ -133,6 +137,8 @@ namespace CmisSync.Lib {
 
                 date = doc.LastModificationDate.GetValueOrDefault();
                 return true;
+            } catch (CmisObjectNotFoundException) {
+                return false;
             } catch (Exception e) {
                 Logger.Debug(e.Message);
                 return false;
@@ -163,6 +169,8 @@ namespace CmisSync.Lib {
 
                 contentStream.Stream.CopyTo(output);
                 return true;
+            } catch (CmisObjectNotFoundException) {
+                return false;
             } catch (Exception e) {
                 Logger.Debug(e.Message);
                 return false;
@@ -181,6 +189,8 @@ namespace CmisSync.Lib {
                 }
 
                 return null;
+            } catch (CmisObjectNotFoundException) {
+                return false;
             } catch (Exception e) {
                 Logger.Debug(e.Message);
                 return null;
