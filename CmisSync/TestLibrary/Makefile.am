@@ -125,6 +125,7 @@ SOURCES =  \
 	IntegrationTests/MockedServerTests/SetupRepositoryTest.cs \
 	IntegrationTests/MockedServerTests/SetupSessionFactoryTest.cs \
 	IntegrationTests/NeedsLocalFileSystemFolder.cs \
+	IntegrationTests/NetworkFailuresTests/CRUDSyncTests.cs \
 	IntegrationTests/NetworkFailuresTests/CreateSessionWithToxiproxy.cs \
 	IntegrationTests/NetworkFailuresTests/IsFullTestWithToxyProxy.cs \
 	IntegrationTests/NetworkFailuresTests/ToxiProxySetup.cs \
