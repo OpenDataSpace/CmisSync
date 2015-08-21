@@ -173,7 +173,7 @@ namespace CmisSync.Lib {
         /// <param name="filename"></param>
         /// <param name="ignoreWildcards"></param>
         /// <returns></returns>
-        public static bool WorthSyncing(string filename, List<string> ignoreWildcards) {
+        public static bool WorthSyncing(string filename, IList<string> ignoreWildcards) {
             if (null == filename) {
                 return false;
             }
@@ -182,7 +182,9 @@ namespace CmisSync.Lib {
                 return false;
             }
 
-            foreach(var wildcard in ignoreWildcards) {
+            ignoreWildcards = ignoreWildcards ?? new List<string>();
+
+            foreach (var wildcard in ignoreWildcards) {
                 var regex = IgnoreLineToRegex(wildcard);
                 if (regex.IsMatch(filename)) {
                     Logger.Debug(string.Format("Unworth syncing: \"{0}\" because it matches \"{1}\"", filename, wildcard));
@@ -342,6 +344,10 @@ namespace CmisSync.Lib {
         /// If set to <c>true</c> fsi.
         /// </param>
         public static bool IsSymlink(FileSystemInfo fsi) {
+            if (fsi == null) {
+                throw new ArgumentNullException("fsi");
+            }
+
             return (fsi.Attributes & FileAttributes.ReparsePoint) == FileAttributes.ReparsePoint;
         }
 
