@@ -198,7 +198,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             }
         }
 
-        protected byte[] DownloadCacheFile(IFileInfo target, IDocument remoteDocument, Transmission transmission, IFileSystemInfoFactory fsFactory) {
+        protected byte[] DownloadCacheFile(
+            IFileInfo target,
+            IDocument remoteDocument,
+            Transmission transmission,
+            IFileSystemInfoFactory fsFactory)
+        {
             if (!this.LoadCacheFile(target, remoteDocument, fsFactory)) {
                 if (target.Exists) {
                     target.Delete();
@@ -237,6 +242,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ITransmissionFactory transmissionManager,
             ILog logger)
         {
+            if (logger == null) {
+                throw new ArgumentNullException("logger");
+            }
+
             // Download changes
             byte[] hash = null;
 
@@ -292,9 +301,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <param name="transmissionManager">Transmission manager.</param>
         /// <param name="transmissionEvent">File Transmission event.</param>
         protected byte[] UploadFile(IFileInfo localFile, IDocument doc, Transmission transmission) {
+            if (transmission == null) {
+                throw new ArgumentNullException("transmission");
+            }
+
             using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
                 byte[] hash = null;
-                IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
+                using (var uploader = FileTransmission.ContentTaskUtils.CreateUploader())
                 using (var hashAlg = new SHA1Managed()) {
                     try {
                         uploader.UploadFile(doc, file, transmission, hashAlg);
@@ -311,6 +324,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         }
 
         protected Guid WriteOrUseUuidIfSupported(IFileSystemInfo info) {
+            if (info == null) {
+                throw new ArgumentNullException("info");
+            }
+
             Guid uuid = Guid.Empty;
             if (info.IsExtendedAttributeAvailable()) {
                 try {
@@ -364,10 +381,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <param name="localFile">Local file which produces a CmisConstraintException on the server.</param>
         /// <param name="e">The returned CmisConstraintException returned by the server.</param>
         protected void EnsureThatLocalFileNameContainsLegalCharacters(IFileSystemInfo localFile, CmisConstraintException e) {
-            if (!Utils.IsValidISO885915(localFile.Name)) {
-                OperationsLogger.Warn(string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFile.Name), e);
-                throw new InteractionNeededException(string.Format("Server denied creation of {0}", localFile.Name), e) {
-                    Title = string.Format("Server denied creation of {0}", localFile.Name),
+            if (localFile == null) {
+                throw new ArgumentNullException("localFile");
+            }
+
+            var name = localFile.Name;
+            if (!Utils.IsValidISO885915(name)) {
+                OperationsLogger.Warn(string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", name), e);
+                throw new InteractionNeededException(string.Format("Server denied creation of {0}", name), e) {
+                    Title = string.Format("Server denied creation of {0}", name),
                     Description = string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFile.FullName)
                 };
             }
