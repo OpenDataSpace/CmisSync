@@ -19,7 +19,6 @@
 ﻿
 namespace TestLibrary.IntegrationTests.NetworkFailuresTests {
     using System;
-    using System.Net;
 
     using NUnit.Framework;
 
