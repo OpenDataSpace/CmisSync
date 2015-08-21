@@ -40,12 +40,20 @@ namespace CmisSync.Lib.Storage.Database {
         }
 
         public static void ToDotFile<T>(this IObjectTree<T> tree, IFileInfo file) {
+            if (file == null) {
+                throw new ArgumentNullException("file");
+            }
+
             using (var stream = file.Open(FileMode.CreateNew)) {
                 tree.ToDotStream(stream);
             }
         }
 
         public static void ObjectListToDotFile(this IList<IMappedObject> list, IFileInfo file) {
+            if (file == null) {
+                throw new ArgumentNullException("file");
+            }
+
             using (var stream = file.Open(FileMode.CreateNew)) {
                 list.ObjectListToDotStream(stream);
             }
@@ -115,10 +123,14 @@ namespace CmisSync.Lib.Storage.Database {
 
         private class LocalTreeDotWriter<T> : IDotTreeWriter<T> {
             public void ToDotString(IObjectTree<T> tree, StreamWriter writer) {
-                IObjectTree<IFileSystemInfo> t = tree as IObjectTree<IFileSystemInfo>;
-                writer.WriteLine(string.Format("\t\"{0}\" [label=\"{1}|<uuid>UUID: {2}\", shape=record] ;", t.Item.FullName, t.Item.Name, t.Item.Uuid.GetValueOrDefault()));
+                var t = tree as IObjectTree<IFileSystemInfo>;
+                var item = t.Item;
+                var fullName = item.FullName;
+                var name = item.Name;
+                var uuid = item.Uuid.GetValueOrDefault();
+                writer.WriteLine(string.Format("\t\"{0}\" [label=\"{1}|<uuid>UUID: {2}\", shape=record] ;", fullName, name, uuid));
                 foreach (var child in t.Children ?? new List<IObjectTree<IFileSystemInfo>>()) {
-                    writer.WriteLine(string.Format("\t\"{0}\" -> \"{1}\" ;", t.Item.FullName, child.Item.FullName));
+                    writer.WriteLine(string.Format("\t\"{0}\" -> \"{1}\" ;", fullName, child.Item.FullName));
                     child.ToDotString(writer);
                 }
             }
@@ -126,10 +138,13 @@ namespace CmisSync.Lib.Storage.Database {
 
         private class RemoteTreeDotWriter<T> : IDotTreeWriter<T> {
             public void ToDotString(IObjectTree<T> tree, StreamWriter writer) {
-                IObjectTree<IFileableCmisObject> t = tree as IObjectTree<IFileableCmisObject>;
-                writer.WriteLine(string.Format("\t\"{0}\" [label=\"{1}|<id>ObjectId: {2}\", shape=record] ;", t.Item.Id, t.Item.Name, t.Item.Id));
+                var t = tree as IObjectTree<IFileableCmisObject>;
+                var item = t.Item;
+                var name = item.Name;
+                var id = item.Id;
+                writer.WriteLine(string.Format("\t\"{0}\" [label=\"{1}|<id>ObjectId: {2}\", shape=record] ;", id, name, id));
                 foreach (var child in t.Children ?? new List<IObjectTree<IFileableCmisObject>>()) {
-                    writer.WriteLine(string.Format("\t\"{0}\" -> \"{1}\" ;", t.Item.Id, child.Item.Id));
+                    writer.WriteLine(string.Format("\t\"{0}\" -> \"{1}\" ;", id, child.Item.Id));
                     child.ToDotString(writer);
                 }
             }
@@ -137,10 +152,14 @@ namespace CmisSync.Lib.Storage.Database {
 
         private class StoredTreeDotWriter<T> : IDotTreeWriter<T> {
             public void ToDotString(IObjectTree<T> tree, StreamWriter writer) {
-                IObjectTree<IMappedObject> t = tree as IObjectTree<IMappedObject>;
-                writer.WriteLine(string.Format("\t\"{0}\" [label=\"{1}|<id>ObjectId: {2}|<uuid>UUID: {3}\", shape=record] ;", t.Item.RemoteObjectId, t.Item.Name, t.Item.RemoteObjectId, t.Item.Guid));
+                var t = tree as IObjectTree<IMappedObject>;
+                var item = t.Item;
+                var uuid = item.Guid;
+                var id = item.RemoteObjectId;
+                var name = item.Name;
+                writer.WriteLine(string.Format("\t\"{0}\" [label=\"{1}|<id>ObjectId: {2}|<uuid>UUID: {3}\", shape=record] ;", id, name, id, uuid));
                 foreach (var child in t.Children ?? new List<IObjectTree<IMappedObject>>()) {
-                    writer.WriteLine(string.Format("\t\"{0}\" -> \"{1}\" ;", t.Item.RemoteObjectId, child.Item.RemoteObjectId));
+                    writer.WriteLine(string.Format("\t\"{0}\" -> \"{1}\" ;", id, child.Item.RemoteObjectId));
                     child.ToDotString(writer);
                 }
             }
