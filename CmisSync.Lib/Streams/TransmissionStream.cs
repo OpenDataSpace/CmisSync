@@ -33,7 +33,7 @@ namespace CmisSync.Lib.Streams {
         private AbortableStream abort;
         private ProgressStream progress;
         private BandwidthLimitedStream bandwidthLimit;
-        private bool disposed = false;
+        private bool disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Streams.TransmissionStream"/> class.
@@ -162,6 +162,10 @@ namespace CmisSync.Lib.Streams {
             }
 
             set {
+                if (this.disposed) {
+                    throw new ObjectDisposedException(this.GetType().Name);
+                }
+
                 this.progress.Position = value;
             }
         }
@@ -170,6 +174,10 @@ namespace CmisSync.Lib.Streams {
         /// Flush the wrapped instance.
         /// </summary>
         public override void Flush() {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             this.progress.Flush();
         }
 
@@ -195,6 +203,10 @@ namespace CmisSync.Lib.Streams {
         /// State passed to the wrapped instance.
         /// </param>
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             return this.progress.BeginRead(buffer, offset, count, callback, state);
         }
 
@@ -211,6 +223,10 @@ namespace CmisSync.Lib.Streams {
         /// The result of the call passed to the wrapped instance.
         /// </returns>
         public override long Seek(long offset, SeekOrigin origin) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             return this.progress.Seek(offset, origin);
         }
 
@@ -230,6 +246,10 @@ namespace CmisSync.Lib.Streams {
         /// The result of the call passed to the wrapped instance.
         /// </returns>
         public override int Read(byte[] buffer, int offset, int count) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             return this.progress.Read(buffer, offset, count);
         }
 
@@ -240,6 +260,10 @@ namespace CmisSync.Lib.Streams {
         /// Value passed to the wrapped instance.
         /// </param>
         public override void SetLength(long value) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             this.progress.SetLength(value);
         }
 
@@ -256,6 +280,10 @@ namespace CmisSync.Lib.Streams {
         /// Count passed to the wrapped instance.
         /// </param>
         public override void Write(byte[] buffer, int offset, int count) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             this.progress.Write(buffer, offset, count);
         }
         #endregion
