@@ -116,7 +116,7 @@ namespace CmisSync.Lib.Cmis {
         /// <summary>
         /// Track whether <c>Dispose</c> has been called.
         /// </summary>
-        private bool disposed = false;
+        private bool disposed;
 
         /// <summary>
         /// The auth provider.
@@ -316,6 +316,10 @@ namespace CmisSync.Lib.Cmis {
         /// Stop syncing momentarily.
         /// </summary>
         public void Suspend() {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             if (!this.RepoStatusFlags.Paused) {
                 this.RepoStatusFlags.Paused = true;
                 this.Status = this.RepoStatusFlags.Status;
@@ -339,6 +343,10 @@ namespace CmisSync.Lib.Cmis {
         /// Restart syncing.
         /// </summary>
         public void Resume() {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             if (this.RepoStatusFlags.Paused) {
                 this.RepoStatusFlags.Paused = false;
                 this.Status = this.RepoStatusFlags.Status;
@@ -370,6 +378,10 @@ namespace CmisSync.Lib.Cmis {
         /// Initialize the scheduled background sync processes.
         /// </summary>
         public virtual void Initialize() {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             this.connectionScheduler.Start();
 
             // Enable FS Watcher events
@@ -385,37 +397,41 @@ namespace CmisSync.Lib.Cmis {
         public void OnError(Exception e) {
         }
 
-        public virtual void OnNext(Tuple<EventCategory, int> changeCounter) {
-            if (changeCounter.Item1 == EventCategory.DetectedChange) {
-                if (changeCounter.Item2 > 0) {
-                    lock(this.counterLock) {
-                        this.NumberOfChanges = changeCounter.Item2;
+        public virtual void OnNext(Tuple<EventCategory, int> value) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
+            if (value.Item1 == EventCategory.DetectedChange) {
+                if (value.Item2 > 0) {
+                    lock (this.counterLock) {
+                        this.NumberOfChanges = value.Item2;
                     }
                 } else {
-                    lock(this.counterLock) {
+                    lock (this.counterLock) {
                         this.NumberOfChanges = 0;
                         this.LastFinishedSync = this.Status == SyncStatus.Idle ? DateTime.Now : this.LastFinishedSync;
                     }
                 }
-            } else if (changeCounter.Item1 == EventCategory.SyncRequested || changeCounter.Item1 == EventCategory.PeriodicSync) {
-                lock(this.counterLock) {
-                    if (changeCounter.Item1 == EventCategory.SyncRequested) {
-                        this.RepoStatusFlags.SyncRequested = changeCounter.Item2 > 0;
+            } else if (value.Item1 == EventCategory.SyncRequested || value.Item1 == EventCategory.PeriodicSync) {
+                lock (this.counterLock) {
+                    if (value.Item1 == EventCategory.SyncRequested) {
+                        this.RepoStatusFlags.SyncRequested = value.Item2 > 0;
                         this.Status = this.RepoStatusFlags.Status;
                     }
 
-                    if (changeCounter.Item2 <= 0 && this.Status == SyncStatus.Idle) {
+                    if (value.Item2 <= 0 && this.Status == SyncStatus.Idle) {
                         this.LastFinishedSync = DateTime.Now;
                     }
                 }
-            } else if (changeCounter.Item1 == EventCategory.ConnectionException) {
-                lock(this.connectionExceptionCounterLock) {
-                    if (changeCounter.Item2 > this.connectionExceptionsFound) {
+            } else if (value.Item1 == EventCategory.ConnectionException) {
+                lock (this.connectionExceptionCounterLock) {
+                    if (value.Item2 > this.connectionExceptionsFound) {
                         this.RepoStatusFlags.Connected = false;
                         this.Status = this.RepoStatusFlags.Status;
                     }
 
-                    this.connectionExceptionsFound = changeCounter.Item2;
+                    this.connectionExceptionsFound = value.Item2;
                 }
             }
         }
