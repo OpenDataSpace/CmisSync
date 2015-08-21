@@ -17,7 +17,6 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-
 namespace CmisSync.Lib.Queueing {
     using System;
     using System.Collections.Generic;
@@ -25,10 +24,17 @@ namespace CmisSync.Lib.Queueing {
 
     using CmisSync.Lib.Events;
 
+    /// <summary>
+    /// Queued categorized events counter.
+    /// </summary>
     public class QueuedCategorizedEventsCounter : IObservable<Tuple<EventCategory, int>>, IEventCounter {
         private List<IObserver<Tuple<EventCategory, int>>> categoryCounterObservers;
         private ConcurrentDictionary<EventCategory, int> categoryCounter;
-        private bool disposed = false;
+        private bool disposed;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.QueuedCategorizedEventsCounter"/> class.
+        /// </summary>
         public QueuedCategorizedEventsCounter() {
             this.categoryCounterObservers = new List<IObserver<Tuple<EventCategory, int>>>();
             this.categoryCounter = new ConcurrentDictionary<EventCategory, int>();
@@ -51,7 +57,19 @@ namespace CmisSync.Lib.Queueing {
             return new Unsubscriber<Tuple<EventCategory, int>>(this.categoryCounterObservers, observer);
         }
 
+        /// <summary>
+        /// Decrease the counter if event fits.
+        /// </summary>
+        /// <param name="e">Countable event.</param>
         public void Decrease(ICountableEvent e) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
+            if (e == null) {
+                throw new ArgumentNullException("e");
+            }
+
             var category = e.Category;
             var value = this.categoryCounter.AddOrUpdate(category, 0, delegate(EventCategory cat, int counter) {
                 return counter - 1;
@@ -61,7 +79,19 @@ namespace CmisSync.Lib.Queueing {
             }
         }
 
+        /// <summary>
+        /// Increase the counter if event fits.
+        /// </summary>
+        /// <param name="e">Countable event.</param>
         public void Increase(ICountableEvent e) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
+            if (e == null) {
+                throw new ArgumentNullException("e");
+            }
+
             var category = e.Category;
             var value = this.categoryCounter.AddOrUpdate(category, 1, delegate(EventCategory cat, int counter) {
                 return counter + 1;
@@ -71,6 +101,15 @@ namespace CmisSync.Lib.Queueing {
             }
         }
 
+        /// <summary>
+        /// Releases all resource used by the <see cref="CmisSync.Lib.Queueing.QueuedCategorizedEventsCounter"/> object.
+        /// </summary>
+        /// <remarks>Call <see cref="Dispose"/> when you are finished using the
+        /// <see cref="CmisSync.Lib.Queueing.QueuedCategorizedEventsCounter"/>. The <see cref="Dispose"/> method leaves
+        /// the <see cref="CmisSync.Lib.Queueing.QueuedCategorizedEventsCounter"/> in an unusable state. After calling
+        /// <see cref="Dispose"/>, you must release all references to the
+        /// <see cref="CmisSync.Lib.Queueing.QueuedCategorizedEventsCounter"/> so the garbage collector can reclaim the
+        /// memory that the <see cref="CmisSync.Lib.Queueing.QueuedCategorizedEventsCounter"/> was occupying.</remarks>
         public void Dispose() {
             if (this.disposed) {
                 return;
