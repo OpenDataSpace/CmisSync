@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer
-{
+namespace CmisSync.Lib.Consumer {
     using System;
     using System.Collections.Generic;
 
@@ -34,16 +33,18 @@ namespace CmisSync.Lib.Consumer
     /// <summary>
     /// Remote situation detection.
     /// </summary>
-    public class RemoteSituationDetection : ISituationDetection<AbstractFolderEvent>
-    {
+    public class RemoteSituationDetection : ISituationDetection<AbstractFolderEvent> {
         /// <summary>
         /// Analyse the specified actual event.
         /// </summary>
         /// <param name="storage">Storage of saved MappedObjects.</param>
         /// <param name="actualEvent">Actual event.</param>
         /// <returns>The detected situation type</returns>
-        public SituationType Analyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
-        {
+        public SituationType Analyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent) {
+            if (actualEvent == null) {
+                throw new ArgumentNullException("actualEvent");
+            }
+
             if (actualEvent.Remote == MetaDataChangeType.NONE && this.IsRemoteObjectDifferentToLastSync(storage, actualEvent)) {
                 actualEvent.Remote = MetaDataChangeType.CHANGED;
             }
@@ -52,10 +53,8 @@ namespace CmisSync.Lib.Consumer
             return type;
         }
 
-        private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
-        {
-            switch (actualEvent.Remote)
-            {
+        private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent) {
+            switch (actualEvent.Remote) {
             case MetaDataChangeType.CREATED:
                 if (this.IsChangeEventAHintForMove(storage, actualEvent)) {
                     return SituationType.MOVED;
@@ -91,8 +90,7 @@ namespace CmisSync.Lib.Consumer
             }
         }
 
-        private bool IsSavedFileEqual(IMetaDataStorage storage, IDocument doc)
-        {
+        private bool IsSavedFileEqual(IMetaDataStorage storage, IDocument doc) {
             var mappedFile = storage.GetObjectByRemoteId(doc.Id) as IMappedObject;
             if (mappedFile != null &&
                mappedFile.Type == MappedObjectType.File &&
@@ -106,10 +104,8 @@ namespace CmisSync.Lib.Consumer
             }
         }
 
-        private bool IsChangeEventAHintForMove(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
-        {
-            if (actualEvent is FolderEvent)
-            {
+        private bool IsChangeEventAHintForMove(IMetaDataStorage storage, AbstractFolderEvent actualEvent) {
+            if (actualEvent is FolderEvent) {
                 var folderEvent = actualEvent as FolderEvent;
                 var storedFolder = storage.GetObjectByRemoteId(folderEvent.RemoteFolder.Id);
                 if (storedFolder != null) {
@@ -132,16 +128,14 @@ namespace CmisSync.Lib.Consumer
             return false;
         }
 
-        private bool IsChangeEventAHintForRename(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
-        {
+        private bool IsChangeEventAHintForRename(IMetaDataStorage storage, AbstractFolderEvent actualEvent) {
             if (actualEvent is FolderEvent) {
                 var folderEvent = actualEvent as FolderEvent;
                 var storedFolder = storage.GetObjectByRemoteId(folderEvent.RemoteFolder.Id);
                 if (storedFolder != null) {
                     return storedFolder.Name != folderEvent.RemoteFolder.Name;
                 }
-            }
-            else if (actualEvent is FileEvent) {
+            } else if (actualEvent is FileEvent) {
                 var fileEvent = actualEvent as FileEvent;
                 var storedFile = storage.GetObjectByRemoteId(fileEvent.RemoteFile.Id);
                 if (storedFile != null) {
@@ -162,6 +156,7 @@ namespace CmisSync.Lib.Consumer
                     return obj != null && obj.LastChangeToken != (actualEvent as FolderEvent).RemoteFolder.ChangeToken;
                 }
             } catch (Exception) {
+                return false;
             }
 
             return false;
