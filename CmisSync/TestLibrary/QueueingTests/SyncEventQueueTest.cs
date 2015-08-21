@@ -42,7 +42,7 @@ namespace TestLibrary.QueueingTests {
     public class SyncEventQueueTest : IsTestWithConfiguredLog4Net {
         [Test, Category("Fast")]
         public void ContructorFailsIfGivenManagerIsNull() {
-            Assert.Throws<ArgumentNullException>(() => new SyncEventQueue(null));
+            Assert.Throws<ArgumentNullException>(() => { using(new SyncEventQueue(null)); });
         }
 
         [Test, Category("Fast")]
