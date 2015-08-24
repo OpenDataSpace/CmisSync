@@ -237,7 +237,7 @@ namespace CmisSync.Lib.Config {
                     File.Delete(fullPath);
                     config = CreateInitialConfig(fullPath);
                 } else {
-                    throw new XmlException(fullPath + " does not contain a valid config XML structure.");
+                    throw new ApplicationException(fullPath + " does not contain a valid config XML structure.");
                 }
             } finally {
                 config = Load(fullPath);
