@@ -31,6 +31,8 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -41,6 +43,7 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <PlatformTarget>x86</PlatformTarget>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>CmisSync.Program</StartupObject>
@@ -58,6 +61,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DocumentationFile>bin\Debug\DataSpaceSync.xml</DocumentationFile>
     <UseVSHostingProcess>true</UseVSHostingProcess>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -334,12 +338,6 @@
     <EmbeddedResource Include="Pixmaps\tutorial-slide-3.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
-      <Project>{2C914413-B31C-4362-93C7-1AE34F09112A}</Project>
-      <Name>CmisSync.Lib</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Pixmaps\Downloading.png" />
     <EmbeddedResource Include="Pixmaps\Updating.png" />
     <EmbeddedResource Include="Pixmaps\Uploading.png" />
@@ -432,6 +430,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
+      <Project>{2c914413-b31c-4362-93c7-1ae34f09112a}</Project>
+      <Name>CmisSync.Lib</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <PreBuildEvent>Mkdir "$(ProjectDir)$(OutDir)x86"
