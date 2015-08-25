@@ -25,6 +25,9 @@ namespace CmisSync.Lib.SelectiveIgnore {
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
+    /// <summary>
+    /// Ignored entities collection implementation.
+    /// </summary>
     public class IgnoredEntitiesCollection : IIgnoredEntitiesCollection {
         private Dictionary<string, IIgnoredEntity> entries = new Dictionary<string, IIgnoredEntity>();
 
@@ -67,8 +70,9 @@ namespace CmisSync.Lib.SelectiveIgnore {
                 return IgnoredState.IGNORED;
             } else {
                 try {
-                    if (folder.FolderParent != null) {
-                        if (this.IsIgnored(folder.FolderParent) != IgnoredState.NOT_IGNORED) {
+                    var parent = folder.FolderParent;
+                    if (parent != null) {
+                        if (this.IsIgnored(parent) != IgnoredState.NOT_IGNORED) {
                             return IgnoredState.INHERITED;
                         }
                     }

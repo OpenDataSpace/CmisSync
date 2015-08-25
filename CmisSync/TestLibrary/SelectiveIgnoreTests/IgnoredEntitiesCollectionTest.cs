@@ -33,7 +33,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture]
+    [TestFixture, Category("Fast"), Category("SelectiveIgnore")]
     public class IgnoredEntitiesCollectionTest {
         private string objectId;
         private string localPath;
@@ -44,7 +44,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             this.localPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void AddElement() {
             var underTest = new IgnoredEntitiesCollection();
 
@@ -53,7 +53,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             Assert.That(underTest.IsIgnoredId(this.objectId), Is.EqualTo(IgnoredState.IGNORED));
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void IgnoreCheckOnLocalPath() {
             var underTest = new IgnoredEntitiesCollection();
 
@@ -62,7 +62,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             Assert.That(underTest.IsIgnoredPath(this.localPath), Is.EqualTo(IgnoredState.IGNORED));
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void IgnoreInheritedCheckOnLocalPath() {
             var underTest = new IgnoredEntitiesCollection();
 
@@ -71,7 +71,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             Assert.That(underTest.IsIgnoredPath(Path.Combine(this.localPath, Guid.NewGuid().ToString())), Is.EqualTo(IgnoredState.INHERITED));
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void DoNotIgnorePathsWithSameBeginningButDifferentEndings() {
             var underTest = new IgnoredEntitiesCollection();
 
@@ -80,7 +80,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             Assert.That(underTest.IsIgnoredPath(this.localPath + "bla"), Is.EqualTo(IgnoredState.NOT_IGNORED));
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void RemoveElement() {
             var underTest = new IgnoredEntitiesCollection();
             Assert.That(underTest.IsIgnoredId(this.objectId), Is.EqualTo(IgnoredState.NOT_IGNORED));
@@ -91,7 +91,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             Assert.That(underTest.IsIgnoredId(this.objectId), Is.EqualTo(IgnoredState.NOT_IGNORED));
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void RemoveElementById() {
             var underTest = new IgnoredEntitiesCollection();
             Assert.That(underTest.IsIgnoredId(this.objectId), Is.EqualTo(IgnoredState.NOT_IGNORED));
@@ -102,7 +102,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             Assert.That(underTest.IsIgnoredId(this.objectId), Is.EqualTo(IgnoredState.NOT_IGNORED));
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void IgnoreCheckOfFolder() {
             var underTest = new IgnoredEntitiesCollection();
 
@@ -111,7 +111,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             Assert.That(underTest.IsIgnored(Mock.Of<IFolder>(f => f.Id == this.objectId)), Is.EqualTo(IgnoredState.IGNORED));
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void IgnoreCheckOfSubFolder() {
             var underTest = new IgnoredEntitiesCollection();
             var folder = new Mock<IFolder>();
@@ -123,7 +123,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             Assert.That(underTest.IsIgnored(folder.Object), Is.EqualTo(IgnoredState.INHERITED));
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void IgnoreCheckOfFolderIfParentIsNull() {
             var underTest = new IgnoredEntitiesCollection();
             var folder = new Mock<IFolder>();
@@ -133,7 +133,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             Assert.That(underTest.IsIgnored(folder.Object), Is.EqualTo(IgnoredState.NOT_IGNORED));
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void IgnoreCheckOfFolderIfParentIsNullAndRequestThrowsOjectNotFoundException() {
             var underTest = new IgnoredEntitiesCollection();
             var folder = new Mock<IFolder>();
@@ -143,7 +143,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             Assert.That(underTest.IsIgnored(folder.Object), Is.EqualTo(IgnoredState.NOT_IGNORED));
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void IgnoreCheckOfDocument() {
             var underTest = new IgnoredEntitiesCollection();
 
@@ -152,7 +152,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             Assert.That(underTest.IsIgnored(Mock.Of<IDocument>(f => f.Id == this.objectId)), Is.EqualTo(IgnoredState.IGNORED));
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void UpdateOfIgnoredDocument() {
             var underTest = new IgnoredEntitiesCollection();
             var oldEntry = Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == "old path");
@@ -162,7 +162,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             Assert.That(underTest.IsIgnored(Mock.Of<IDocument>(f => f.Id == this.objectId)), Is.EqualTo(IgnoredState.IGNORED));
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void IgnoreCheckOfSubDocument() {
             var underTest = new IgnoredEntitiesCollection();
             var doc = new Mock<IDocument>();
@@ -175,7 +175,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             Assert.That(underTest.IsIgnored(doc.Object), Is.EqualTo(IgnoredState.INHERITED));
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void IgnoreCheckOfSubDocumentWithoutParent() {
             var underTest = new IgnoredEntitiesCollection();
             var doc = new Mock<IDocument>();
