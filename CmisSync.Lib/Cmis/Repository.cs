@@ -441,9 +441,9 @@ namespace CmisSync.Lib.Cmis {
         /// </summary>
         /// <param name="disposing">If set to <c>true</c> disposing.</param>
         protected virtual void Dispose(bool disposing) {
-            this.Suspend();
-
             if (!this.disposed) {
+                this.Scheduler.Stop();
+                this.Queue.Suspend();
                 this.connectionScheduler.Dispose();
                 this.Scheduler.Dispose();
                 this.WatcherProducer.Dispose();
