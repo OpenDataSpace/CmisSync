@@ -65,7 +65,7 @@ namespace CmisSync.Lib.SelectiveIgnore {
         /// <returns>true if handled</returns>
         public override bool Handle(ISyncEvent e) {
             var movedEvent = e as FSMovedEvent;
-            if (e != null) {
+            if (movedEvent != null) {
                 if (this.IsInsideIgnoredPath(movedEvent.OldPath) && !this.IsInsideIgnoredPath(movedEvent.LocalPath)) {
                     this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, movedEvent.LocalPath, movedEvent.IsDirectory));
                     return true;
