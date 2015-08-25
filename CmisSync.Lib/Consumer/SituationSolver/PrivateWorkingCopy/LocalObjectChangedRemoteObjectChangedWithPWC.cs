@@ -129,7 +129,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 } else if (updateRemoteDate) {
                     remoteDocument.UpdateLastWriteTimeUtc(localFile.LastWriteTimeUtc);
                 } else {
-                    throw new ArgumentException();
+                    throw new ArgumentException("Algorithm failure");
                 }
             }
 

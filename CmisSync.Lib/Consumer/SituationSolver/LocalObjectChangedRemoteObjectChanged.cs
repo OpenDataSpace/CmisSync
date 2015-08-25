@@ -52,7 +52,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
         /// <param name="transmissionStorage">Transmission storage.</param>
-        /// <param name="transmissionManager">Transmission manager.</param>
+        /// <param name="transmissionFactory">Transmission factory.</param>
         /// <param name="fsFactory">File system factory.</param>
         public LocalObjectChangedRemoteObjectChanged(
             ISession session,
@@ -165,7 +165,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                             doc.UpdateLastWriteTimeUtc(fileInfo.LastWriteTimeUtc);
                         }
                     } else {
-                        throw new ArgumentException();
+                        throw new ArgumentException("Algorithm failure");
                     }
                 }
 

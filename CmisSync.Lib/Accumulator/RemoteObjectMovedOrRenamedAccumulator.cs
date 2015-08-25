@@ -122,7 +122,7 @@ namespace CmisSync.Lib.Accumulator {
             } else if(e is FileEvent) {
                 return (e as FileEvent).RemoteFile.Name;
             } else {
-                throw new ArgumentException();
+                throw new ArgumentException("given event e is not a FileEvent or a FolderEvent");
             }
         }
 
