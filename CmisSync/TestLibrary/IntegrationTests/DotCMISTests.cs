@@ -49,9 +49,9 @@ namespace TestLibrary.IntegrationTests {
     using TestUtils;
 
     /// <summary>
-    /// Dot CMIS integration tests. Each method tests one specific test case. The test got to be finished after 15 mins, otherwise the test will fail.
+    /// Dot CMIS integration tests. Each method tests one specific test case. The test got to be finished after 1 min, otherwise the test will fail.
     /// </summary>
-    [TestFixture, Timeout(900000)]
+    [TestFixture, Timeout(60000), Category("Slow")]
     public class DotCMISTests : IsTestWithConfiguredLog4Net {
         /// <summary>
         /// Disable HTTPS Verification
@@ -96,7 +96,7 @@ namespace TestLibrary.IntegrationTests {
         /// <param name='repositoryId'>
         /// Repository identifier.
         /// </param>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void AppendContentStreamTest(
             string canonical_name,
             string localPath,
@@ -146,7 +146,7 @@ namespace TestLibrary.IntegrationTests {
             doc.DeleteAllVersions();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void CheckoutTest(
             string canonical_name,
             string localPath,
@@ -192,7 +192,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.IsNull(doc.VersionSeriesCheckedOutId);
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void CheckinTest(
             string canonical_name,
             string localPath,
@@ -249,7 +249,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(docCheckin.ContentStreamLength, Is.EqualTo(content.Length * (9 + 2)));
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void RemovingRemoteFolderAndAddingADocumentToItShouldThrowException(
             string canonical_name,
             string localPath,
@@ -302,7 +302,7 @@ namespace TestLibrary.IntegrationTests {
         /// <param name='repositoryId'>
         /// Repository identifier.
         /// </param>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void GetRootFolderOfRepository(
             string canonical_name,
             string localPath,
@@ -342,7 +342,7 @@ namespace TestLibrary.IntegrationTests {
         /// <param name='repositoryId'>
         /// Repository identifier.
         /// </param>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void GetRootFolderAndAllowableActions(
             string canonical_name,
             string localPath,
@@ -383,7 +383,7 @@ namespace TestLibrary.IntegrationTests {
         /// <param name='repositoryId'>
         /// Repository identifier.
         /// </param>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void GetSyncPropertyFromFile(
             string canonical_name,
             string localPath,
@@ -432,7 +432,7 @@ namespace TestLibrary.IntegrationTests {
             emptyDoc.DeleteAllVersions();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void GetContentStreamHash(
             string canonical_name,
             string localPath,
@@ -510,7 +510,7 @@ namespace TestLibrary.IntegrationTests {
         /// <param name='repositoryId'>
         /// Repository identifier.
         /// </param>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void SetContentStreamTest(
             string canonical_name,
             string localPath,
@@ -579,7 +579,7 @@ namespace TestLibrary.IntegrationTests {
             emptyDoc.DeleteAllVersions();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void CreateDocumentWithContentStream(
             string canonical_name,
             string localPath,
@@ -599,7 +599,7 @@ namespace TestLibrary.IntegrationTests {
             doc.DeleteAllVersions();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void CreateDocumentWithCreationAndModificationDate(
             string canonical_name,
             string localPath,
@@ -641,7 +641,7 @@ namespace TestLibrary.IntegrationTests {
             doc.DeleteAllVersions();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void EnsureFileNameStaysEqualWhileUploading(
             string canonical_name,
             string localPath,
@@ -684,7 +684,7 @@ namespace TestLibrary.IntegrationTests {
             }
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void SetJPEGContentStream(
             string canonical_name,
             string localPath,
@@ -735,7 +735,7 @@ namespace TestLibrary.IntegrationTests {
             emptyDoc.DeleteAllVersions();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void RenameFolder(
             string canonical_name,
             string localPath,
@@ -773,7 +773,7 @@ namespace TestLibrary.IntegrationTests {
             newFolder.Delete(true);
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void RenameRemoteFolderChangesChangeLogToken(
             string canonical_name,
             string localPath,
@@ -812,7 +812,7 @@ namespace TestLibrary.IntegrationTests {
             newFolder.DeleteTree(true, null, true);
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Category("Erratic"), Ignore("Doesn't happend anymore")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Erratic"), Ignore("Doesn't happend anymore")]
         public void GetChildrenDoesNotProducesServerProtocolViolationException(
             string canonical_name,
             string localPath,
@@ -830,6 +830,23 @@ namespace TestLibrary.IntegrationTests {
                     Console.WriteLine(child.Name);
                 }
             }
+        }
+
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
+        public void GetFolderParentOfRootFolderIsNull(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId,
+            string binding)
+        {
+            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            IFolder root = session.GetRootFolder();
+            Assert.That(root.ParentId, Is.Null);
+            Assert.That(root.FolderParent, Is.Null);
         }
 
         private class AssertingStream : StreamWrapper {
@@ -954,7 +971,7 @@ namespace TestLibrary.IntegrationTests {
         /// <param name='repositoryId'>
         /// Repository identifier.
         /// </param>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void CreateSession(
             string canonical_name,
             string localPath,
@@ -992,7 +1009,7 @@ namespace TestLibrary.IntegrationTests {
         /// <param name='repositoryId'>
         /// Repository identifier.
         /// </param>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void CreateSessionWithDeviceManagementAndUserAgent(
             string canonical_name,
             string localPath,
@@ -1050,7 +1067,7 @@ namespace TestLibrary.IntegrationTests {
         /// <param name='repositoryId'>
         /// Repository identifier.
         /// </param>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void CreateSessionWithCompressionEnabled(
             string canonical_name,
             string localPath,
