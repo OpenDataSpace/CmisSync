@@ -91,8 +91,8 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <param name="path">Path to the file or folder.</param>
         /// <param name="key">Key of the extended attribute.</param>
         /// <param name="value">Value of the extended attribute.</param>
-        /// <param name="restoreLastModificationDate">If set to <c>true</c> restore last modification date.</param>
-        public void SetExtendedAttribute(string path, string key, string value, bool restoreLastModificationDate = false) {
+        /// <param name="restoreModificationDate">If set to <c>true</c> restore last modification date.</param>
+        public void SetExtendedAttribute(string path, string key, string value, bool restoreModificationDate = false) {
 #if __MonoCS__
             path = Path.GetFullPath(path);
             if (!File.Exists(path) && !Directory.Exists(path)) {
