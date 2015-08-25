@@ -33,48 +33,48 @@ namespace TestLibrary.IntegrationTests {
 
     [TestFixture, Timeout(10000), TestName("DownloadLink"), Ignore("Just for the future")]
     public class DownloadLinkTests : BaseFullRepoTest {
-        [Test, Category("Slow")]
+        [Test]
         public void CreateDownloadLink() {
             this.EnsureThatDownloadLinksAreSupported();
             var doc = this.remoteRootDir.CreateDocument("testfile.bin", "test content");
 
-            var url = CreateDownloadLink(null, null, null, doc.Id);
+            var url = this.CreateDownloadLink(null, null, null, doc.Id);
 
             Assert.That(url, Is.Not.Null, "No download link available");
         }
 
-        [Test, Category("Slow")]
+        [Test]
         public void CreateDownloadLinkWithPassword() {
             this.EnsureThatDownloadLinksAreSupported();
             var doc = this.remoteRootDir.CreateDocument("testfile.bin", "test content");
 
-            var url = CreateDownloadLink(null, "password", null, doc.Id);
+            var url = this.CreateDownloadLink(null, "password", null, doc.Id);
 
             Assert.That(url, Is.Not.Null, "No download link available");
         }
 
-        [Test, Category("Slow")]
+        [Test]
         public void CreatDownloadLinkWithMail() {
             this.EnsureThatDownloadLinksAreSupported();
             var doc = this.remoteRootDir.CreateDocument("testfile.bin", "test content");
 
-            var url = CreateDownloadLink(null, null, "jenkins@dataspace.cc", doc.Id);
+            var url = this.CreateDownloadLink(null, null, "jenkins@dataspace.cc", doc.Id);
 
             Assert.That(url, Is.Not.Null, "No download link available");
         }
 
-        [Test, Category("Slow")]
+        [Test]
         public void CreateDownloadLinkWithExpirationTime() {
             this.EnsureThatDownloadLinksAreSupported();
             var doc = this.remoteRootDir.CreateDocument("testfile.bin", "test content");
 
-            var url = CreateDownloadLink(new TimeSpan(1, 0, 0), null, null, doc.Id);
+            var url = this.CreateDownloadLink(new TimeSpan(1, 0, 0), null, null, doc.Id);
 
             Assert.That(url, Is.Not.Null, "No download link available");
         }
 
         private Uri CreateDownloadLink(TimeSpan? expirationIn = null, string password = null, string mailAddress = null, params string[] objectIds) {
-            IDictionary<string,object> properties = new Dictionary<string,object>();
+            IDictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.ObjectTypeId, "cmis:item");
             List<string> idsSecondary = new List<string>();
             idsSecondary.Add("cmis:rm_clientMgtRetention");
@@ -84,7 +84,7 @@ namespace TestLibrary.IntegrationTests {
             properties.Add("cmis:rm_expirationDate", DateTime.UtcNow + (TimeSpan)(expirationIn ?? new TimeSpan(24, 0, 0)));
 
             List<string> idsObject = new List<string>();
-            foreach(var objectId in objectIds) {
+            foreach (var objectId in objectIds) {
                 idsObject.Add(objectId);
             }
 
