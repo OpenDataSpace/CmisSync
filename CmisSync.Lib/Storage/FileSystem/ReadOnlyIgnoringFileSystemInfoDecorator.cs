@@ -162,6 +162,10 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// </summary>
         /// <param name="writeOperation">Write operation.</param>
         protected void DisableAndEnableReadOnlyForOperation(Action writeOperation) {
+            if (writeOperation == null) {
+                throw new ArgumentNullException("writeOperation");
+            }
+
             this.Refresh();
             if (this.ReadOnly) {
                 this.ReadOnly = false;
