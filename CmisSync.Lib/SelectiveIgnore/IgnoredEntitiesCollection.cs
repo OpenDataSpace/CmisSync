@@ -31,18 +31,36 @@ namespace CmisSync.Lib.SelectiveIgnore {
     public class IgnoredEntitiesCollection : IIgnoredEntitiesCollection {
         private Dictionary<string, IIgnoredEntity> entries = new Dictionary<string, IIgnoredEntity>();
 
+        /// <summary>
+        /// Add the specified ignored entity to collection.
+        /// </summary>
+        /// <param name="ignore">Ignored entity.</param>
         public void Add(IIgnoredEntity ignore) {
             this.entries[ignore.ObjectId] = ignore;
         }
 
+        /// <summary>
+        /// Remove the specified ignored entity from collection.
+        /// </summary>
+        /// <param name="ignore">Ignored entity.</param>
         public void Remove(IIgnoredEntity ignore) {
             this.entries.Remove(ignore.ObjectId);
         }
 
+        /// <summary>
+        /// Remove the specified ignored entity from collection by using remote id.
+        /// </summary>
+        /// <param name="objectId">Object identifier.</param>
         public void Remove(string objectId) {
             this.entries.Remove(objectId);
         }
 
+        /// <summary>
+        /// Determines whether the given Document is ignored.
+        /// </summary>
+        /// <returns>true</returns>
+        /// <c>false</c>
+        /// <param name="doc">Document to be checked.</param>
         public IgnoredState IsIgnored(IDocument doc) {
             if (doc == null) {
                 throw new ArgumentNullException("doc");
@@ -61,6 +79,12 @@ namespace CmisSync.Lib.SelectiveIgnore {
             return IgnoredState.NOT_IGNORED;
         }
 
+        /// <summary>
+        /// Determines whether the given folder is ignored.
+        /// </summary>
+        /// <returns>true</returns>
+        /// <c>false</c>
+        /// <param name="folder">Folder to be checked.</param>
         public IgnoredState IsIgnored(IFolder folder) {
             if (folder == null) {
                 throw new ArgumentNullException("folder");
@@ -84,6 +108,12 @@ namespace CmisSync.Lib.SelectiveIgnore {
             return IgnoredState.NOT_IGNORED;
         }
 
+        /// <summary>
+        /// Determines whether the object with the given objectId is ignored.
+        /// </summary>
+        /// <returns>true</returns>
+        /// <c>false</c>
+        /// <param name="objectId">Object identifier.</param>
         public IgnoredState IsIgnoredId(string objectId) {
             if (this.entries.ContainsKey(objectId)) {
                 return IgnoredState.IGNORED;
@@ -92,6 +122,12 @@ namespace CmisSync.Lib.SelectiveIgnore {
             }
         }
 
+        /// <summary>
+        /// Determines whether this the ignored path is ignored.
+        /// </summary>
+        /// <returns>true</returns>
+        /// <c>false</c>
+        /// <param name="localPath">Local path.</param>
         public IgnoredState IsIgnoredPath(string localPath) {
             foreach (var entry in this.entries.Values) {
                 if (localPath == entry.LocalPath) {
