@@ -29,7 +29,7 @@ namespace TestLibrary.IntegrationTests.NetworkFailuresTests {
 
     using Toxiproxy.Net;
 
-    [TestFixture, Category("FailureIT")]
+    [TestFixture, Category("Slow"), Category("Toxiproxy")]
     public class ToxyProxySetup {
         [Test]
         public void SetupConnectionToProxy() {
