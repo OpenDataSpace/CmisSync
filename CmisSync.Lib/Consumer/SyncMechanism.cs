@@ -33,6 +33,7 @@ namespace CmisSync.Lib.Consumer {
     using CmisSync.Lib.Storage.Database;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -153,7 +154,7 @@ namespace CmisSync.Lib.Consumer {
                 } catch (AbstractInteractionNeededException interaction) {
                     this.Queue.AddEvent(new InteractionNeededEvent(interaction));
                     throw;
-                } catch (DotCMIS.Exceptions.CmisConnectionException) {
+                } catch (CmisConnectionException) {
                     throw;
                 } catch (Exception ex) {
                     Logger.Debug("Exception in SyncMechanism, requesting FullSync and rethrowing", ex);
