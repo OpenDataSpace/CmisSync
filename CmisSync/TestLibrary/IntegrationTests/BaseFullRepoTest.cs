@@ -300,6 +300,7 @@ namespace TestLibrary.IntegrationTests {
 
         protected class BlockingSingleConnectionScheduler : CmisSync.Lib.Queueing.ConnectionScheduler {
             public bool RetryOnFailure { get; set; }
+            private readonly int priority;
             public BlockingSingleConnectionScheduler(ConnectionScheduler original, IAuthenticationProvider authProvider = null, ISessionFactory sessionFactory = null) : base(original) {
                 if (authProvider != null) {
                     this.AuthProvider = authProvider;
@@ -308,6 +309,8 @@ namespace TestLibrary.IntegrationTests {
                 if (sessionFactory != null) {
                     this.SessionFactory = sessionFactory;
                 }
+
+                this.priority = original.Priority;
             }
 
             public override void Start() {
@@ -315,6 +318,12 @@ namespace TestLibrary.IntegrationTests {
                     if (!this.RetryOnFailure) {
                         Assert.Fail("Connection failed");
                     }
+                }
+            }
+
+            public override int Priority {
+                get {
+                    return this.priority;
                 }
             }
         }
@@ -340,8 +349,9 @@ namespace TestLibrary.IntegrationTests {
 
             public override void Initialize() {
                 ConnectionScheduler original = this.connectionScheduler;
+                this.Queue.EventManager.RemoveEventHandler(original);
                 this.connectionScheduler = new BlockingSingleConnectionScheduler(original, this.AuthProvider, this.SessionFactory) { RetryOnFailure = this.UseRetryingConnectionScheduler};
-
+                this.Queue.EventManager.AddEventHandler(this.connectionScheduler);
                 original.Dispose();
                 base.Initialize();
                 this.Queue.EventManager.RemoveEventHandler(this.Scheduler);
