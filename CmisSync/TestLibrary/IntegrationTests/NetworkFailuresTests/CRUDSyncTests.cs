@@ -68,9 +68,9 @@ namespace TestLibrary.IntegrationTests.NetworkFailuresTests {
 
         [Test]
         public void LocalFolderCreated(
-            [Range(-1, 8)]int blockedRequest,
+            [Range(-1, 5)]int blockedRequest,
             [Values(1, 2, 3)]int numberOfBlockedRequests,
-            [Values(true)]bool contentChanges)
+            [Values(true, false)]bool contentChanges)
         {
             this.RetryOnInitialConnection = true;
             this.InitializeAndRunRepo(swallowExceptions: true);
@@ -90,17 +90,17 @@ namespace TestLibrary.IntegrationTests.NetworkFailuresTests {
                 Assert.That(reqNumber, Is.LessThan(100));
             };
 
-            System.Threading.Thread.Sleep(1000);
+            this.WaitUntilQueueIsNotEmpty();
             this.repo.Run();
 
-            for (int i = 0; i <= numberOfBlockedRequests; i++) {
+            for (int i = 0; i <= 3; i++) {
                 this.AddStartNextSyncEvent();
                 this.repo.Run();
             }
 
             this.localRootDir.Refresh();
             this.remoteRootDir.Refresh();
-            Assert.That(new FolderTree(this.localRootDir), Is.EqualTo(new FolderTree(this.remoteRootDir)));
+            Assert.That(new FolderTree(this.remoteRootDir), Is.EqualTo(new FolderTree(this.localRootDir)));
         }
     }
 }
