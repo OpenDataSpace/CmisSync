@@ -152,7 +152,7 @@ namespace TestLibrary.QueueingTests {
         }
 
         [Test]
-        public void ConnectionExceptionsPassedToListenerAndThrown() {
+        public void ConnectionExceptionsPassedToListener() {
             var connectionException = new Mock<CmisConnectionException>().Object;
             var underTest = new SyncEventManager();
             int raised = 0;
@@ -166,8 +166,7 @@ namespace TestLibrary.QueueingTests {
                 throw connectionException;
             }));
 
-            var thrown = Assert.Catch<CmisConnectionException>(() => underTest.Handle(Mock.Of<ISyncEvent>()));
-            Assert.That(thrown, Is.EqualTo(connectionException));
+            underTest.Handle(Mock.Of<ISyncEvent>());
             Assert.That(raised, Is.EqualTo(1));
         }
 

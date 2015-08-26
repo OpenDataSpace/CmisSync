@@ -75,13 +75,12 @@ namespace CmisSync.Lib.Queueing {
                             Logger.Debug(string.Format("Event {0} was handled by {1}", e.ToString(), h.GetType()));
                         }
 
-                    return;
+                        return;
                     }
                 } catch (AbstractInteractionNeededException interactionNeeded) {
                     this.RaiseOnException(interactionNeeded);
                 } catch (CmisConnectionException connectionException) {
                     this.RaiseOnException(connectionException);
-                    throw;
                 }
             }
         }
