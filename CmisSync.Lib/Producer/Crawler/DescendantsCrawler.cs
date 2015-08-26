@@ -136,7 +136,8 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// <param name="e">The event to handle.</param>
         /// <returns>true if handled</returns>
         public override bool Handle(ISyncEvent e) {
-            if (e is StartNextSyncEvent) {
+            var startNextSync = e as StartNextSyncEvent;
+            if (startNextSync != null) {
                 try {
                     Logger.Debug("Starting DecendantsCrawlSync upon " + e);
                     using (var activity = new ActivityListenerResource(this.activityListener)) {
@@ -150,7 +151,9 @@ namespace CmisSync.Lib.Producer.Crawler {
                     throw;
                 } catch (Exception retryException) {
                     Logger.Info("Failed to crawl descendants (trying again):", retryException);
-                    this.Queue.AddEvent(e);
+                    this.Queue.AddEvent(new StartNextSyncEvent(fullSyncRequested: startNextSync.FullSyncRequested) {
+                        LastTokenOnServer = startNextSync.LastTokenOnServer
+                    });
                     return false;
                 }
             }

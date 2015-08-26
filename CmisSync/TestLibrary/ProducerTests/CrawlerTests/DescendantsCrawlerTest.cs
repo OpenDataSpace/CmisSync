@@ -203,7 +203,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
             this.localFolder.Setup(f => f.GetDirectories()).Throws<Exception>();
             var startEvent = new StartNextSyncEvent(fullSyncRequested: forceCrawl);
             Assert.That(crawler.Handle(startEvent), Is.False);
-            this.queue.Verify(q => q.AddEvent(startEvent), Times.Once());
+            this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == forceCrawl && e.LastTokenOnServer == startEvent.LastTokenOnServer)), Times.Once());
             this.queue.VerifyThatNoOtherEventIsAddedThan<StartNextSyncEvent>();
         }
 
