@@ -350,6 +350,7 @@
     <Compile Include="TestUtils\ToxiproxyUtils\ToxiProxyExtensions.cs" />
     <Compile Include="EventsTests\SuccessfulLoginEventTest.cs" />
     <Compile Include="IntegrationTests\NetworkFailuresTests\CRUDSyncTests.cs" />
+    <Compile Include="QueueingTests\ConnectionInterruptedHandlerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

@@ -189,6 +189,7 @@ SOURCES =  \
 	Producer/Watcher/RenamedFileSystemEventHandler.cs \
 	Producer/Watcher/WatcherConsumer.cs \
 	Queueing/AbstractEventProducer.cs \
+	Queueing/ConnectionInterruptedHandler.cs \
 	Queueing/ConnectionScheduler.cs \
 	Queueing/DebugLoggingHandler.cs \
 	Queueing/DelayRetryAndNextSyncEventHandler.cs \

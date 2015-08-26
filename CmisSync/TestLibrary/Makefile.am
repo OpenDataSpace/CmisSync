@@ -210,6 +210,7 @@ SOURCES =  \
 	ProducerTests/WatcherTests/RenamedFileSystemEventHandlerTest.cs \
 	ProducerTests/WatcherTests/WatcherTest.cs \
 	ProducerTests/WatcherTests/WatcherTestUtils.cs \
+	QueueingTests/ConnectionInterruptedHandlerTest.cs \
 	QueueingTests/ConnectionSchedulerTest.cs \
 	QueueingTests/DebugLoggingHandlerTest.cs \
 	QueueingTests/DelayRetryAndNextSyncEventHandlerTest.cs \

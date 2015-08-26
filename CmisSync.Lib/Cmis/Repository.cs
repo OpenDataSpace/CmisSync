@@ -181,6 +181,7 @@ namespace CmisSync.Lib.Cmis {
             }
 
             this.Queue = queue;
+            new ConnectionInterruptedHandler(this.Queue.EventManager, this.Queue);
             this.Queue.EventManager.AddEventHandler(this.rootFolderMonitor);
             this.Queue.EventManager.AddEventHandler(new DebugLoggingHandler());
 
