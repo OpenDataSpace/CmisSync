@@ -62,7 +62,6 @@ namespace TestLibrary.QueueingTests {
             var manager = new Mock<ISyncEventManager>(MockBehavior.Strict);
             var initialEvent = Mock.Of<ISyncEvent>();
             manager.Setup(m => m.Handle(initialEvent)).Throws(connectionException);
-            manager.Setup(m => m.Handle(It.IsAny<CmisConnectionExceptionEvent>()));
             using (var underTest = new SyncEventQueue(manager.Object)) {
                 underTest.AddEvent(initialEvent);
                 Thread.Sleep(100);
@@ -70,8 +69,7 @@ namespace TestLibrary.QueueingTests {
                 WaitFor(underTest, (q) => { return q.IsStopped; });
             }
 
-            manager.Verify(m => m.Handle(It.IsAny<ISyncEvent>()),Times.Exactly(2));
-            manager.Verify(m => m.Handle(It.Is<CmisConnectionExceptionEvent>(e => e.Exception == connectionException)), Times.Once());
+            manager.Verify(m => m.Handle(It.IsAny<ISyncEvent>()),Times.Once);
         }
 
         [Test, Category("Fast")]
