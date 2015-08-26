@@ -65,5 +65,42 @@ namespace TestLibrary.IntegrationTests.NetworkFailuresTests {
             this.remoteRootDir.Refresh();
             Assert.That(new FolderTree(this.localRootDir), Is.EqualTo(new FolderTree(this.remoteRootDir)));
         }
+
+        [Test]
+        public void LocalFolderCreated(
+            [Range(-1, 8)]int blockedRequest,
+            [Values(1, 2, 3)]int numberOfBlockedRequests,
+            [Values(true)]bool contentChanges)
+        {
+            this.RetryOnInitialConnection = true;
+            this.InitializeAndRunRepo(swallowExceptions: true);
+            this.ContentChangesActive = contentChanges;
+
+            string folderName = "testFolder";
+            this.localRootDir.CreateSubdirectory(folderName);
+            int reqNumber = 0;
+            this.AuthProviderWrapper.OnAuthenticate += (object obj) => {
+                if (reqNumber >= blockedRequest && reqNumber < blockedRequest + numberOfBlockedRequests) {
+                    this.Proxy.Disable();
+                } else {
+                    this.Proxy.Enable();
+                }
+
+                reqNumber ++;
+                Assert.That(reqNumber, Is.LessThan(100));
+            };
+
+            System.Threading.Thread.Sleep(1000);
+            this.repo.Run();
+
+            for (int i = 0; i <= numberOfBlockedRequests; i++) {
+                this.AddStartNextSyncEvent();
+                this.repo.Run();
+            }
+
+            this.localRootDir.Refresh();
+            this.remoteRootDir.Refresh();
+            Assert.That(new FolderTree(this.localRootDir), Is.EqualTo(new FolderTree(this.remoteRootDir)));
+        }
     }
 }
