@@ -16,7 +16,7 @@ if "%1"=="installer" (
 	if exist "%wixBinDir%" (
 	  if exist "%~dp0\DataSpaceSync.msi" del "%~dp0\DataSpaceSync.msi"
 		"%wixBinDir%\heat.exe" dir "%~dp0\..\..\bin\plugins" -cg pluginsComponentGroup -gg -scom -sreg -sfrag -srd -dr PLUGINS_DIR -var wix.pluginsdir -o plugins.wxs
-		"%wixBinDir%\candle" "%~dp0\DataSpaceSync.wxs" -ext WixUIExtension -ext WixUtilExtension -ext WiXNetFxExtension
+		"%wixBinDir%\candle" "%~dp0\CmisSync.wxs" -ext WixUIExtension -ext WixUtilExtension -ext WiXNetFxExtension
 		"%wixBinDir%\candle" "%~dp0\plugins.wxs" -ext WixUIExtension -ext WixUtilExtension -ext WiXNetFxExtension
 		"%wixBinDir%\light" -ext WixUIExtension -ext WixUtilExtension -ext WiXNetFxExtension -cultures:en-us CmisSync.wixobj plugins.wixobj -droot="%~dp0\..\.." -dpluginsdir="%~dp0\..\..\bin\plugins"  -o DataSpaceSync.msi 
 		if exist "%~dp0\DataSpaceSync.msi" echo DataSpaceSync.msi created.
