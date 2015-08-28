@@ -812,7 +812,7 @@ namespace TestLibrary.IntegrationTests {
             newFolder.DeleteTree(true, null, true);
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Erratic"), Ignore("Doesn't happend anymore")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void GetChildrenDoesNotProducesServerProtocolViolationException(
             string canonical_name,
             string localPath,

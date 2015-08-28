@@ -58,7 +58,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.AreEqual(children.TotalNumItems, 1);
         }
 
-        [Test, Category("Erratic")]
+        [Test]
         public void OneLocalFolderRemoved() {
             this.localRootDir.CreateSubdirectory("Cat");
 

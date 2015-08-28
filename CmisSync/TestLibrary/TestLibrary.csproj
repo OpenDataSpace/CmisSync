@@ -159,7 +159,6 @@
     <Compile Include="IntegrationTests\ContentChangeIT.cs" />
     <Compile Include="IntegrationTests\DotCMISTests.cs" />
     <Compile Include="IntegrationTests\DownloadLinkTests.cs" />
-    <Compile Include="IntegrationTests\FileSystemEventOrderTest.cs" />
     <Compile Include="IntegrationTests\FullInMemoryRepoTest.cs" />
     <Compile Include="IntegrationTests\FullRepoTests.cs" />
     <Compile Include="IntegrationTests\HttpProxyConnectionTests.cs" />

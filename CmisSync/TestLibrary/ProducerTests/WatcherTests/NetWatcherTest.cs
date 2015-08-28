@@ -92,7 +92,7 @@ namespace TestLibrary.ProducerTests.WatcherTests {
         }
 
         // This test fails on current build slave, retest when these are FC20 or higher
-        [Test, Category("BrokenOnFC18"), Category("Erratic")]
+        [Test, Category("BrokenOnFC18")]
         public void ReportFSFileRenamedEventTest() {
             this.ReportFSFileRenamedEvent();
         }
@@ -134,7 +134,7 @@ namespace TestLibrary.ProducerTests.WatcherTests {
         }
 
         // This test fails on current build slave, retest when these are FC20 or higher
-        [Test, Category("BrokenOnFC18"), Category("Erratic")]
+        [Test, Category("BrokenOnFC18")]
         public void ReportFSFolderRenamedEventTest() {
             this.ReportFSFolderRenamedEvent();
         }
