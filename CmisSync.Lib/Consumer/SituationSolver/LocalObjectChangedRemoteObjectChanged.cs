@@ -103,7 +103,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                             var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UploadModifiedFile, fileInfo.FullName);
                             obj.LastChecksum = this.UploadFile(fileInfo, doc, transmission);
                             obj.LastContentSize = doc.ContentStreamLength ?? fileInfo.Length;
-                        } catch(Exception ex) {
+                        } catch (Exception ex) {
                             if (ex.InnerException is CmisPermissionDeniedException) {
                                 OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", fileInfo.FullName), ex.InnerException);
                                 return;

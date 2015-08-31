@@ -45,7 +45,7 @@ namespace CmisSync.Lib.Events {
                     try {
                         long seconds = Convert.ToInt64(value);
                         dates.Add(DateTime.UtcNow + TimeSpan.FromSeconds(seconds));
-                    } catch(FormatException) {
+                    } catch (FormatException) {
                         DateTime parsed;
                         if (DateTime.TryParse(value, out parsed)) {
                             dates.Add(parsed);

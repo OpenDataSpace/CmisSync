@@ -510,7 +510,7 @@ namespace CmisSync {
             localfolder_entry.Changed += delegate {
                 try {
                     localrepopath_entry.Text = System.IO.Path.Combine(this.controller.DefaultRepoPath, localfolder_entry.Text);
-                } catch(Exception) {
+                } catch (Exception) {
                 }
             };
 

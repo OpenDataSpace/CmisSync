@@ -26,7 +26,9 @@ namespace CmisSync.Lib {
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Security;
+    using System.Security.AccessControl;
     using System.Security.Permissions;
+    using System.Security.Principal;
     using System.Text;
     using System.Text.RegularExpressions;
 
@@ -71,28 +73,28 @@ namespace CmisSync.Lib {
                     return false;
                 }
 
-                var accessRules = accessControlList.GetAccessRules(true, true, typeof(System.Security.Principal.SecurityIdentifier));
+                var accessRules = accessControlList.GetAccessRules(true, true, typeof(SecurityIdentifier));
                 if (accessRules == null) {
                     return false;
                 }
 
-                foreach (System.Security.AccessControl.FileSystemAccessRule rule in accessRules) {
-                    if ((System.Security.AccessControl.FileSystemRights.Write & rule.FileSystemRights)
-                            != System.Security.AccessControl.FileSystemRights.Write) {
+                foreach (FileSystemAccessRule rule in accessRules) {
+                    if ((FileSystemRights.Write & rule.FileSystemRights)
+                        != FileSystemRights.Write) {
                         continue;
                     }
 
-                    if (rule.AccessControlType == System.Security.AccessControl.AccessControlType.Allow) {
+                    if (rule.AccessControlType == AccessControlType.Allow) {
                         writeAllow = true;
-                    } else if (rule.AccessControlType == System.Security.AccessControl.AccessControlType.Deny) {
+                    } else if (rule.AccessControlType == AccessControlType.Deny) {
                         writeDeny = true;
                     }
                 }
-            } catch (System.PlatformNotSupportedException) {
+            } catch (PlatformNotSupportedException) {
 #if __MonoCS__
                 writeAllow = (0 == Syscall.access(path, AccessModes.W_OK));
 #endif
-            } catch(System.UnauthorizedAccessException) {
+            } catch (UnauthorizedAccessException) {
                 var permission = new FileIOPermission(FileIOPermissionAccess.Write, path);
                 var permissionSet = new PermissionSet(PermissionState.None);
                 permissionSet.AddPermission(permission);

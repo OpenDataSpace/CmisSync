@@ -134,7 +134,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
                     }
 
                     return result;
-                } catch(Exception) {
+                } catch (Exception) {
                     destinationFile.ReadOnly = true;
                     throw;
                 }

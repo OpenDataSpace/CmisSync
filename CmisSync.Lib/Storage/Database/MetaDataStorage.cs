@@ -98,7 +98,7 @@ namespace CmisSync.Lib.Storage.Database {
                     Logger.Debug("Starting DB Validation");
                     this.ValidateObjectStructure();
                     Logger.Debug("Finished DB Validation");
-                } catch(InvalidDataException e) {
+                } catch (InvalidDataException e) {
                     Logger.Fatal("Database object structure is invalid", e);
                 }
             }

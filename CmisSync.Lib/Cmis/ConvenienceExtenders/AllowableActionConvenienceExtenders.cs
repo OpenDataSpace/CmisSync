@@ -86,6 +86,11 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             return obj.IsActionAllowed(Actions.CanGetProperties);
         }
 
+        /// <summary>
+        /// Determines if object relationships can be get.
+        /// </summary>
+        /// <returns><c>true</c> if object relationships can be get; otherwise, <c>false</c> or <c>null</c> if no actions are available.</returns>
+        /// <param name="obj">Cmis object.</param>
         public static bool? CanGetObjectRelationships(this ICmisObject obj) {
             return obj.IsActionAllowed(Actions.CanGetObjectRelationships);
         }
@@ -211,7 +216,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         public static bool? IsActionAllowed(this ICmisObject obj, string action) {
             try {
                 return obj.AllowableActions.Actions.Contains(action);
-            } catch(NullReferenceException) {
+            } catch (NullReferenceException) {
                 return null;
             }
         }

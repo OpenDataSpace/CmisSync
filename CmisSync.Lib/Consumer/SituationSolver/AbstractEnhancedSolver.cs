@@ -285,7 +285,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     backupFile.Delete();
                     OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1}", targetFullName, remoteDocument.Id));
                 }
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 transmission.FailedException = ex;
                 throw;
             }

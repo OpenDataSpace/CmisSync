@@ -92,7 +92,7 @@ namespace CmisSync.Lib.FileTransmission {
                 contentStream.Stream = transmissionStream;
                 try {
                     remoteDocument.SetContentStream(contentStream, overwrite, true);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     throw new UploadFailedException(e, remoteDocument);
                 }
             }
@@ -129,7 +129,7 @@ namespace CmisSync.Lib.FileTransmission {
                 contentStream.Stream = hashstream;
                 try {
                     return remoteDocument.AppendContentStream(contentStream, true);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     throw new UploadFailedException(e, remoteDocument);
                 }
             }

@@ -152,7 +152,7 @@ namespace CmisSync.Lib.Queueing {
                 if (!(newEvent is IRemoveFromLoggingEvent)) {
                     Logger.Debug(string.Format("Added Event: {0}", newEvent.ToString()));
                 }
-            } catch(InvalidOperationException) {
+            } catch (InvalidOperationException) {
                 Logger.Info(string.Format("Queue was already Stopped. Dropping Event: {0}", newEvent.ToString()));
             }
         }

@@ -56,7 +56,7 @@ namespace CmisSync.Lib.Cmis {
         public override void Write(string message) {
             try {
                 this.log.Debug(message);
-            } catch(Exception) {
+            } catch (Exception) {
                 Console.Out.Write(message);
             }
         }
@@ -68,7 +68,7 @@ namespace CmisSync.Lib.Cmis {
         public override void WriteLine(string message) {
             try {
                 this.log.Debug(message);
-            } catch(Exception) {
+            } catch (Exception) {
                 Console.Out.WriteLine(message);
             }
         }

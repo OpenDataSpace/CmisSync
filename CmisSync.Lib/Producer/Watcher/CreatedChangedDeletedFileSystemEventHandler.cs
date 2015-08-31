@@ -115,7 +115,7 @@ namespace CmisSync.Lib.Producer.Watcher {
                             if (fsGuid != null) {
                                 uuid = (Guid)fsGuid;
                             }
-                        } catch(Exception) {
+                        } catch (Exception) {
                             uuid = Guid.Empty;
                         }
 

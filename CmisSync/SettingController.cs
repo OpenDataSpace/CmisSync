@@ -96,7 +96,7 @@ namespace CmisSync {
                     try {
                         new Uri(server);
                         return server;
-                    } catch(Exception) {
+                    } catch (Exception) {
                     }
                 }
             }

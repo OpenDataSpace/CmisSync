@@ -146,7 +146,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
                 try {
                     cacheFile.Uuid = guid;
-                } catch(RestoreModificationDateException e) {
+                } catch (RestoreModificationDateException e) {
                     Logger.Debug("Could not retore the last modification date of " + cacheFile.FullName, e);
                 }
 
@@ -168,7 +168,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                             file.Uuid = guid;
                             try {
                                 cacheFile.Delete();
-                            } catch(IOException) {
+                            } catch (IOException) {
                             }
                         } else {
                             IFileInfo conflictFile = this.fsFactory.CreateConflictFileInfo(file);
@@ -186,7 +186,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
                             try {
                                 conflictFile.Uuid = null;
-                            } catch(RestoreModificationDateException restoreException) {
+                            } catch (RestoreModificationDateException restoreException) {
                                 Logger.Debug("Could not retore the last modification date of " + conflictFile.FullName, restoreException);
                             }
                         }
@@ -234,7 +234,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                         if (remoteDoc.LastModificationDate != null) {
                             try {
                                 file.LastWriteTimeUtc = (DateTime)remoteDoc.LastModificationDate;
-                            } catch(IOException e) {
+                            } catch (IOException e) {
                                 Logger.Debug("Cannot set last modification date", e);
                             }
                         }

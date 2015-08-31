@@ -79,14 +79,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
+            var fullName = localFileSystemInfo.FullName;
             if (!localFileSystemInfo.Exists) {
-                throw new ArgumentException("Given local path does not exists: " + localFileSystemInfo.FullName);
+                throw new ArgumentException("Given local path does not exists: " + fullName);
             }
 
             // Match local changes to remote changes and updated them remotely
             var mappedObject = this.Storage.GetObject(localFileSystemInfo);
             if (mappedObject == null) {
-                throw new ArgumentException(string.Format("Could not find db entry for {0} => invoke crawl sync", localFileSystemInfo.FullName));
+                throw new ArgumentException(string.Format("Could not find db entry for {0} => invoke crawl sync", fullName));
             }
 
             if (mappedObject.LastChangeToken != (remoteId as ICmisObjectProperties).ChangeToken) {
@@ -95,18 +96,18 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
             var localFile = localFileSystemInfo as IFileInfo;
             if (localFile != null && localFile.IsContentChangedTo(mappedObject, scanOnlyIfModificationDateDiffers: true)) {
-                Logger.Debug(string.Format("\"{0}\" is different from {1}", localFile.FullName, mappedObject.ToString()));
-                OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
+                Logger.Debug(string.Format("\"{0}\" is different from {1}", fullName, mappedObject.ToString()));
+                OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", fullName));
                 var doc = remoteId as IDocument;
                 try {
-                    var transmission = this.transmissionFactory.CreateTransmission(TransmissionType.UploadModifiedFile, localFile.FullName);
+                    var transmission = this.transmissionFactory.CreateTransmission(TransmissionType.UploadModifiedFile, fullName);
                     mappedObject.LastChecksum = this.UploadFile(localFile, doc, transmission);
                 } catch (Exception ex) {
                     if (ex.InnerException is CmisPermissionDeniedException) {
-                        OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", localFile.FullName));
+                        OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", fullName));
                         return;
                     } else if (ex.InnerException is CmisStorageException) {
-                        OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: StorageException", localFile.FullName), ex);
+                        OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: StorageException", fullName), ex);
                         return;
                     }
 
@@ -117,7 +118,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 mappedObject.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
                 mappedObject.LastContentSize = localFile.Length;
 
-                OperationsLogger.Info(string.Format("Local changed file \"{0}\" has been uploaded", localFile.FullName));
+                OperationsLogger.Info(string.Format("Local changed file \"{0}\" has been uploaded", fullName));
             }
 
             localFileSystemInfo.TryToSetReadOnlyStateIfDiffers(from: remoteId as ICmisObject);
@@ -134,7 +135,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                         folder.UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
                         mappedObject.LastRemoteWriteTimeUtc = folder.LastModificationDate ?? localFileSystemInfo.LastWriteTimeUtc;
                     }
-                } catch(CmisPermissionDeniedException) {
+                } catch (CmisPermissionDeniedException) {
                     Logger.Debug(string.Format("Locally changed modification date \"{0}\"is not uploaded to the server: PermissionDenied", localFileSystemInfo.LastWriteTimeUtc));
                 }
             }

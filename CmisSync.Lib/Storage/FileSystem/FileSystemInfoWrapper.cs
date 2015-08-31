@@ -193,7 +193,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
                     try {
                         this.SetExtendedAttribute(ExtendedAttributeKey, value == null ? null : value.ToString(), true);
                         break;
-                    } catch(ExtendedAttributeException) {
+                    } catch (ExtendedAttributeException) {
                         Thread.Sleep(50);
                         retries--;
                         if (retries <= 0) {
