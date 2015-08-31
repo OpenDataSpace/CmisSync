@@ -45,7 +45,11 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="folder">parent folder.</param>
         /// <param name="name">Name of the new sub folder.</param>
         public static IFolder CreateFolder(this IFolder folder, string name) {
-            Dictionary<string, object> properties = new Dictionary<string, object>();
+            if (folder == null) {
+                throw new ArgumentNullException("folder");
+            }
+
+            var properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);
             properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisFolder.GetCmisValue());
 
@@ -61,6 +65,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="content">If content is not null, a content stream containing the given content will be added.</param>
         /// <param name="checkedOut">If true, the new document will be created in checked out state.</param>
         public static IDocument CreateDocument(this IFolder folder, string name, string content, bool checkedOut = false) {
+            if (folder == null) {
+                throw new ArgumentNullException("folder");
+            }
+
             return folder.CreateDocument(name, string.IsNullOrEmpty(content) ? (byte[])null : Encoding.UTF8.GetBytes(content), checkedOut);
         }
 
@@ -73,7 +81,11 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="content">If content is not null, a content stream containing the given content will be added.</param>
         /// <param name="checkedOut">If true, the new document will be created in checked out state.</param>
         public static IDocument CreateDocument(this IFolder folder, string name, byte[] content, bool checkedOut = false) {
-            Dictionary<string, object> properties = new Dictionary<string, object>();
+            if (folder == null) {
+                throw new ArgumentNullException("folder");
+            }
+
+            var properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);
             properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
 
@@ -81,10 +93,11 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
                 return folder.CreateDocument(properties, null, checkedOut ? (VersioningState?)VersioningState.CheckedOut : (VersioningState?)null);
             }
 
-            ContentStream contentStream = new ContentStream();
-            contentStream.FileName = name;
-            contentStream.MimeType = MimeType.GetMIMEType(name);
-            contentStream.Length = content.Length;
+            var contentStream = new ContentStream() {
+                FileName = name,
+                MimeType = MimeType.GetMIMEType(name),
+                Length = content.Length
+            };
             IDocument doc = null;
             using (var stream = new MemoryStream(content)) {
                 contentStream.Stream = stream;
@@ -101,6 +114,14 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="doc">Document with the content stream.</param>
         /// <param name="type">Type of the requested hash.</param>
         public static byte[] ContentStreamHash(this IDocument doc, string type = "SHA-1") {
+            if (doc == null) {
+                throw new ArgumentNullException("doc");
+            }
+
+            if (type == null) {
+                throw new ArgumentNullException("type");
+            }
+
             if (doc.Properties == null) {
                 return null;
             }
@@ -122,12 +143,15 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         }
 
         /// <summary>
-        /// Returns the hash of the content stream on the server.
+        /// Returns if the server is able to return content hashes.
         /// </summary>
-        /// <returns>The hash.</returns>
-        /// <param name="doc">Document with the content stream.</param>
-        /// <param name="type">Type of the requested hash.</param>
+        /// <returns><c>true</c> if the server type system supports content hashes, otherwise <c>false</c>.</returns>
+        /// <param name="session">Cmis session.</param>
         public static bool IsContentStreamHashSupported(this ISession session) {
+            if (session == null) {
+                throw new ArgumentNullException("session");
+            }
+
             try {
                 var type = session.GetTypeDefinition(BaseTypeId.CmisDocument.GetCmisValue());
                 if (type == null) {
@@ -154,23 +178,40 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="overwrite">If set to <c>true</c> overwrites existing content.</param>
         /// <param name="refresh">If set to <c>true</c> refreshs the original remote doc instance.</param>
         public static IObjectId SetContent(this IDocument doc, string content, bool overwrite = true, bool refresh = true) {
-            ContentStream contentStream = new ContentStream();
-            contentStream.FileName = doc.Name;
-            contentStream.MimeType = MimeType.GetMIMEType(doc.Name);
+            if (doc == null) {
+                throw new ArgumentNullException("doc");
+            }
+
             byte[] c = Encoding.UTF8.GetBytes(content);
-            contentStream.Length = c.LongLength;
+            var contentStream = new ContentStream() {
+                FileName = doc.Name,
+                MimeType = MimeType.GetMIMEType(doc.Name),
+                Length = c.LongLength
+            };
             using (var stream = new MemoryStream(c)) {
                 contentStream.Stream = stream;
                 return doc.SetContentStream(contentStream, overwrite, refresh);
             }
         }
 
+        /// <summary>
+        /// Appends the content to the given doc.
+        /// </summary>
+        /// <returns>The resulting doc.</returns>
+        /// <param name="doc">Cmis Document.</param>
+        /// <param name="content">Content to be appended.</param>
+        /// <param name="lastChunk">If set to <c>true</c>, the flag for the last chunk is set.</param>
         public static IDocument AppendContent(this IDocument doc, string content, bool lastChunk = true) {
-            ContentStream contentStream = new ContentStream();
-            contentStream.FileName = doc.Name;
-            contentStream.MimeType = MimeType.GetMIMEType(doc.Name);
+            if (doc == null) {
+                throw new ArgumentNullException("doc");
+            }
+
             byte[] c = Encoding.UTF8.GetBytes(content);
-            contentStream.Length = c.LongLength;
+            var contentStream = new ContentStream() {
+                FileName = doc.Name,
+                MimeType = MimeType.GetMIMEType(doc.Name),
+                Length = c.LongLength
+            };
             using (var stream = new MemoryStream(c)) {
                 contentStream.Stream = stream;
                 return doc.AppendContentStream(contentStream, lastChunk);
@@ -195,6 +236,11 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             }
         }
 
+        /// <summary>
+        /// Converts cmis fileable object to logable string.
+        /// </summary>
+        /// <returns>The log string.</returns>
+        /// <param name="obj">Cmis fileable object.</param>
         public static string ToLogString(this IFileableCmisObject obj) {
             if (obj == null) {
                 return "null";
@@ -210,6 +256,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             } else {
                 sb.AppendLine(string.Format("LastModified: {0}", obj.LastModificationDate));
             }
+
             sb.AppendLine(string.Format("ObjectType:   {0}", obj.ObjectType));
             sb.AppendLine(string.Format("BaseType:     {0}", obj.BaseType.DisplayName));
             if (obj is IFolder) {
@@ -236,18 +283,22 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="folder">Folder which children should be ignored.</param>
         /// <param name="deviceId">Device Ids which should be ignored.</param>
         public static void IgnoreAllChildren(this IFolder folder, string deviceId = "*") {
-            if (deviceId == null) {
+            if (string.IsNullOrEmpty(deviceId)) {
                 throw new ArgumentException("Given deviceId is null or empty");
             }
 
-            Dictionary<string, object> properties = new Dictionary<string, object>();
-            IList<string> devices = folder.IgnoredDevices();
+            if (folder == null) {
+                throw new ArgumentNullException("folder");
+            }
+
+            var properties = new Dictionary<string, object>();
+            var devices = folder.IgnoredDevices();
             if (!devices.Contains(deviceId.ToLower())) {
                 devices.Add(deviceId.ToLower());
             }
 
             properties.Add("gds:ignoreDeviceIds", devices);
-            IList<string> ids = folder.SecondaryObjectTypeIds();
+            var ids = folder.SecondaryObjectTypeIds();
             if (!ids.Contains("gds:sync")) {
                 ids.Add("gds:sync");
                 properties.Add(PropertyIds.SecondaryObjectTypeIds, ids);
@@ -262,10 +313,16 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="obj">Remote CMIS Object.</param>
         /// <param name="deviceIds">Device identifiers which should be removed from ignore list.</param>
         public static void RemoveSyncIgnore(this ICmisObject obj, params Guid[] deviceIds) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             string[] ids = new string[deviceIds.Length];
             for (int i = 0; i < deviceIds.Length; i++) {
                 ids[i] = deviceIds[i].ToString().ToLower();
             }
+
+            obj.RemoveSyncIgnore(ids);
         }
 
         /// <summary>
@@ -274,6 +331,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="obj">Remote CMIS Object.</param>
         /// <param name="deviceIds">Device identifiers which should be removed from ignore list.</param>
         public static void RemoveSyncIgnore(this ICmisObject obj, params string[] deviceIds) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             var ids = obj.SecondaryObjectTypeIds();
             if (ids.Contains("gds:sync")) {
                 var devices = obj.IgnoredDevices();
@@ -314,7 +375,11 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// </summary>
         /// <param name="obj">Remote CMIS Object.</param>
         public static void RemoveAllSyncIgnores(this ICmisObject obj) {
-            Dictionary<string, object> properties = new Dictionary<string, object>();
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
+            var properties = new Dictionary<string, object>();
             var ids = obj.SecondaryObjectTypeIds();
             if (ids.Remove("gds:sync")) {
                 properties.Add(PropertyIds.SecondaryObjectTypeIds, ids);
@@ -328,6 +393,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <returns>The devices.</returns>
         /// <param name="obj">Cmis object.</param>
         public static IList<string> IgnoredDevices(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             IList<string> result = new List<string>();
             if (obj.Properties != null) {
                 foreach (var ignoredProperty in obj.Properties) {
@@ -350,6 +419,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <returns>The object type identifiers.</returns>
         /// <param name="obj">Cmis object.</param>
         public static IList<string> SecondaryObjectTypeIds(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             IList<string> ids = new List<string>();
             if (obj.SecondaryTypes != null) {
                 foreach (var secondaryType in obj.SecondaryTypes) {
@@ -366,7 +439,11 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <returns><c>true</c>, if all children are ignored, <c>false</c> otherwise.</returns>
         /// <param name="obj">Remote cmis object.</param>
         public static bool AreAllChildrenIgnored(this ICmisObject obj) {
-            IList<string> devices = obj.IgnoredDevices();
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
+            var devices = obj.IgnoredDevices();
             if (devices.Contains("*") || devices.Contains(ConfigManager.CurrentConfig.DeviceId.ToString().ToLower())) {
                 return true;
             } else {
@@ -380,6 +457,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <returns><c>true</c> if is server able to update modification date; otherwise, <c>false</c>.</returns>
         /// <param name="session">Cmis session.</param>
         public static bool IsServerAbleToUpdateModificationDate(this ISession session) {
+            if (session == null) {
+                throw new ArgumentNullException("session");
+            }
+
             bool result = false;
             var docType = session.GetTypeDefinition(BaseTypeId.CmisDocument.GetCmisValue());
             foreach (var prop in docType.PropertyDefinitions) {
@@ -410,6 +491,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <c>true</c> if this feature is available, otherwise <c>false</c>
         /// </returns>
         public static bool AreChangeEventsSupported(this ISession session) {
+            if (session == null) {
+                throw new ArgumentNullException("session");
+            }
+
             try {
                 return session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.All ||
                     session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.ObjectIdsOnly;
@@ -426,6 +511,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <c>true</c> if this feature is available, otherwise <c>false</c>
         /// </returns>
         public static bool IsPrivateWorkingCopySupported(this ISession session) {
+            if (session == null) {
+                throw new ArgumentNullException("session");
+            }
+
             try {
                 return session.RepositoryInfo.Capabilities.IsPwcUpdatableSupported.GetValueOrDefault();
             } catch (NullReferenceException) {
@@ -439,6 +528,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <returns><c>true</c> if multi filing supported with the specified session; otherwise, <c>false</c>.</returns>
         /// <param name="session">Cmis session.</param>
         public static bool IsMultiFilingSupported(this ISession session) {
+            if (session == null) {
+                throw new ArgumentNullException("session");
+            }
+
             try {
                 return session.RepositoryInfo.Capabilities.IsMultifilingSupported == true;
             } catch (NullReferenceException) {
@@ -452,6 +545,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <returns><c>true</c> if is unfiling is supported with the specified session; otherwise, <c>false</c>.</returns>
         /// <param name="session">Cmis session.</param>
         public static bool IsUnFilingSupported(this ISession session) {
+            if (session == null) {
+                throw new ArgumentNullException("session");
+            }
+
             try {
                 return session.RepositoryInfo.Capabilities.IsUnfilingSupported == true;
             } catch (NullReferenceException) {
@@ -465,6 +562,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <returns><c>true</c> if getDescendants calls supported the specified session; otherwise, <c>false</c>.</returns>
         /// <param name="session">Cmis session.</param>
         public static bool IsGetDescendantsSupported(this ISession session) {
+            if (session == null) {
+                throw new ArgumentNullException("session");
+            }
+
             try {
                 return session.RepositoryInfo.Capabilities.IsGetDescendantsSupported == true;
             } catch (NullReferenceException) {
@@ -472,6 +573,16 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             }
         }
 
+        /// <summary>
+        /// Creates a session.
+        /// </summary>
+        /// <returns>The session.</returns>
+        /// <param name="factory">Session factory.</param>
+        /// <param name="repoInfo">Repo informations.</param>
+        /// <param name="objectFactory">Object factory.</param>
+        /// <param name="authenticationProvider">Authentication provider.</param>
+        /// <param name="cache">Object cache.</param>
+        /// <param name="appName">App name.</param>
         public static ISession CreateSession(
             this ISessionFactory factory,
             RepoInfo repoInfo,
@@ -480,19 +591,44 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             ICache cache = null,
             string appName = null)
         {
+            if (factory == null) {
+                throw new ArgumentNullException("factory");
+            }
+
             return factory.CreateSession(repoInfo.AsSessionParameter(appName), objectFactory, authenticationProvider, cache);
         }
 
+        /// <summary>
+        /// Creates a session.
+        /// </summary>
+        /// <returns>The session.</returns>
+        /// <param name="factory">Session factory.</param>
+        /// <param name="repoInfo">Repo informations.</param>
+        /// <param name="appName">App name.</param>
         public static ISession CreateSession(
             this ISessionFactory factory,
             RepoInfo repoInfo,
             string appName = null)
         {
+            if (factory == null) {
+                throw new ArgumentNullException("factory");
+            }
+
             return factory.CreateSession(repoInfo.AsSessionParameter(appName));
         }
 
+        /// <summary>
+        /// Extracts all CMIS session parameter from repository informations.
+        /// </summary>
+        /// <returns>CMIS session parameter based on given repo infos.</returns>
+        /// <param name="repoInfo">Repository informations.</param>
+        /// <param name="appName">App name.</param>
         public static Dictionary<string, string> AsSessionParameter(this RepoInfo repoInfo, string appName = null) {
-            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            if (repoInfo == null) {
+                throw new ArgumentNullException("repoInfo");
+            }
+
+            var parameters = new Dictionary<string, string>();
             if (repoInfo.Binding == DotCMIS.BindingType.AtomPub) {
                 parameters[SessionParameter.BindingType] = BindingType.AtomPub;
                 parameters[SessionParameter.AtomPubUrl] = repoInfo.Address.ToString();
@@ -519,6 +655,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <returns>The byte array.</returns>
         /// <param name="hex">Hex string without leading 0x.</param>
         private static byte[] StringToByteArray(string hex) {
+            if (hex == null) {
+                throw new ArgumentNullException("hex");
+            }
+
             if (hex.Length % 2 == 1) {
                 throw new ArgumentException("The binary key cannot have an odd number of digits");
             }
