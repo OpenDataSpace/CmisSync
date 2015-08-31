@@ -856,7 +856,7 @@ namespace TestLibrary.IntegrationTests {
     /// <summary>
     /// Dot CMIS session tests. Each log in process must be able to be executed in 60 seconds, otherwise the tests will fail.
     /// </summary>
-    [TestFixture, Timeout(60000)]
+    [TestFixture, Timeout(60000), Category("Slow")]
     public class DotCMISSessionTests {
         // HTTP Read and Connection Timeout set to 10 secs
         private static readonly string DefaultHttpTimeOut = "10000";
