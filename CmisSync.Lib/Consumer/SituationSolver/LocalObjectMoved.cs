@@ -41,7 +41,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
         public LocalObjectMoved(
             ISession session,
             IMetaDataStorage storage) : base(session, storage) {
@@ -50,12 +49,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <summary>
         /// Solve the specified situation by using the session, storage, localFile and remoteId.
         /// </summary>
-        /// <param name="localFile">Actual local file.</param>
+        /// <param name="localFileSystemInfo">Actual local file.</param>
         /// <param name="remoteId">Corresponding remote identifier.</param>
         /// <param name="localContent">Hint if the local content has been changed.</param>
         /// <param name="remoteContent">Information if the remote content has been changed.</param>
         public override void Solve(
-            IFileSystemInfo localFile,
+            IFileSystemInfo localFileSystemInfo,
             IObjectId remoteId,
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
@@ -68,7 +67,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 throw new ArgumentException("The remote change token is different to the last synchronization");
             }
 
-            var targetPath = localFile is IDirectoryInfo ? (localFile as IDirectoryInfo).Parent : (localFile as IFileInfo).Directory;
+            var targetPath = localFileSystemInfo is IDirectoryInfo ? (localFileSystemInfo as IDirectoryInfo).Parent : (localFileSystemInfo as IFileInfo).Directory;
             var targetId = this.Storage.GetObjectByLocalPath(targetPath).RemoteObjectId;
             try {
                 if (mappedObject.ParentId != targetId) {
@@ -78,15 +77,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     remoteObject = remoteObject.Move(src, target);
                 }
 
-                if (localFile.Name != remoteObject.Name) {
+                if (localFileSystemInfo.Name != remoteObject.Name) {
                     try {
-                        remoteObject.Rename(localFile.Name, true);
+                        remoteObject.Rename(localFileSystemInfo.Name, true);
                     } catch (CmisConstraintException e) {
-                        if (!Utils.IsValidISO885915(localFile.Name)) {
-                            OperationsLogger.Warn(string.Format("Server denied the rename of {0} to {1}, possibly because it contains UTF-8 charactes", remoteObject.Name, localFile.Name));
+                        if (!Utils.IsValidISO885915(localFileSystemInfo.Name)) {
+                            OperationsLogger.Warn(string.Format("Server denied the rename of {0} to {1}, possibly because it contains UTF-8 charactes", remoteObject.Name, localFileSystemInfo.Name));
                             throw new InteractionNeededException(string.Format("Server denied renaming of {0}", remoteObject.Name), e) {
                                 Title = string.Format("Server denied renaming of {0}", remoteObject.Name),
-                                Description = string.Format("Server denied the rename of {0} to {1}, possibly because it contains UTF-8 charactes", remoteObject.Name, localFile.Name)
+                                Description = string.Format("Server denied the rename of {0} to {1}, possibly because it contains UTF-8 charactes", remoteObject.Name, localFileSystemInfo.Name)
                             };
                         }
 
@@ -94,17 +93,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     }
                 }
             } catch (CmisPermissionDeniedException) {
-                OperationsLogger.Info(string.Format("Moving remote object failed {0}: Permission Denied", localFile.FullName));
+                OperationsLogger.Info(string.Format("Moving remote object failed {0}: Permission Denied", localFileSystemInfo.FullName));
                 return;
             }
 
             if (this.ServerCanModifyDateTimes) {
-                if (mappedObject.LastLocalWriteTimeUtc != localFile.LastWriteTimeUtc) {
-                    remoteObject.UpdateLastWriteTimeUtc(localFile.LastWriteTimeUtc);
+                if (mappedObject.LastLocalWriteTimeUtc != localFileSystemInfo.LastWriteTimeUtc) {
+                    remoteObject.UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
                 }
             }
 
-            bool isContentChanged = localFile is IFileInfo ? (localFile as IFileInfo).IsContentChangedTo(mappedObject) : false;
+            bool isContentChanged = localFileSystemInfo is IFileInfo ? (localFileSystemInfo as IFileInfo).IsContentChangedTo(mappedObject) : false;
 
             mappedObject.ParentId = targetId;
             mappedObject.LastChangeToken = remoteObject.ChangeToken;

@@ -85,6 +85,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
+            if (localFileSystemInfo == null) {
+                throw new ArgumentNullException("localFileSystemInfo");
+            }
+
             Stopwatch completewatch = new Stopwatch();
             completewatch.Start();
             Logger.Debug("Starting LocalObjectAdded");

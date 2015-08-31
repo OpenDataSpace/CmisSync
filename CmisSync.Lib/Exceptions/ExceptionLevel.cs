@@ -23,6 +23,7 @@ namespace CmisSync.Lib.Exceptions {
     /// <summary>
     /// Exception level.
     /// </summary>
+    [Serializable]
     public enum ExceptionLevel {
         /// <summary>
         /// The undecided. Should not occur.

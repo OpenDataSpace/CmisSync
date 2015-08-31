@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Config
-{
+namespace CmisSync.Lib.Config {
     using System;
     using System.Xml;
     using System.Xml.Serialization;
@@ -27,15 +26,13 @@ namespace CmisSync.Lib.Config
     /// Xml Serializable URI.
     /// </summary>
     [Serializable]
-    public class XmlUri : IXmlSerializable
-    {
+    public class XmlUri : IXmlSerializable {
         private Uri uri;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Config.XmlUri"/> class.
         /// </summary>
-        public XmlUri()
-        {
+        public XmlUri() {
         }
 
         /// <summary>
@@ -44,8 +41,7 @@ namespace CmisSync.Lib.Config
         /// <param name='source'>
         /// Source uri.
         /// </param>
-        public XmlUri(Uri source)
-        {
+        public XmlUri(Uri source) {
             this.uri = source;
         }
 
@@ -55,8 +51,7 @@ namespace CmisSync.Lib.Config
         /// <param name='o'>
         /// Given XmlUri.
         /// </param>
-        public static implicit operator Uri(XmlUri o)
-        {
+        public static implicit operator Uri(XmlUri o) {
             return o == null ? null : o.uri;
         }
 
@@ -66,8 +61,7 @@ namespace CmisSync.Lib.Config
         /// <param name='o'>
         /// Given original uri.
         /// </param>
-        public static implicit operator XmlUri(Uri o)
-        {
+        public static implicit operator XmlUri(Uri o) {
             return o == null ? null : new XmlUri(o);
         }
 
@@ -77,8 +71,7 @@ namespace CmisSync.Lib.Config
         /// <returns>
         /// null schema
         /// </returns>
-        public System.Xml.Schema.XmlSchema GetSchema()
-        {
+        public System.Xml.Schema.XmlSchema GetSchema() {
             return null;
         }
 
@@ -88,8 +81,11 @@ namespace CmisSync.Lib.Config
         /// <param name="reader">
         /// Xml Reader.
         /// </param>
-        public void ReadXml(XmlReader reader)
-        {
+        public void ReadXml(XmlReader reader) {
+            if (reader == null) {
+                throw new ArgumentNullException("reader");
+            }
+
             this.uri = new Uri(reader.ReadElementContentAsString());
         }
 
@@ -99,8 +95,11 @@ namespace CmisSync.Lib.Config
         /// <param name='writer'>
         /// Xml Writer.
         /// </param>
-        public void WriteXml(XmlWriter writer)
-        {
+        public void WriteXml(XmlWriter writer) {
+            if (writer == null) {
+                throw new ArgumentNullException("writer");
+            }
+
             writer.WriteValue(this.uri.ToString());
         }
 
@@ -110,8 +109,7 @@ namespace CmisSync.Lib.Config
         /// <returns>
         /// A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Config.XmlUri"/>.
         /// </returns>
-        public override string ToString()
-        {
+        public override string ToString() {
             return this.uri.ToString();
         }
     }

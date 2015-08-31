@@ -312,9 +312,17 @@ namespace CmisSync.Lib.Config {
             }
         }
 
+        /// <summary>
+        /// Gets or sets the download limit. Zero is no limit.
+        /// </summary>
+        /// <value>The download limit.</value>
         [XmlElement("downloadLimit"), DefaultValue(0)]
         public long DownloadLimit { get; set; }
 
+        /// <summary>
+        /// Gets or sets the upload limit. Zero is no limit.
+        /// </summary>
+        /// <value>The upload limit.</value>
         [XmlElement("uploadLimit"), DefaultValue(0)]
         public long UploadLimit { get; set; }
 
@@ -365,8 +373,8 @@ namespace CmisSync.Lib.Config {
         /// Full path
         /// </returns>
         public virtual string GetDatabasePath() {
-            string name = this.DisplayName.Replace("\\", "_");
-            name = name.Replace("/", "_");
+            string name = this.DisplayName.Replace('\\', '_');
+            name = name.Replace('/', '_');
             return Path.Combine(ConfigManager.CurrentConfig.GetConfigPath(), name + "_DB");
         }
 
@@ -383,6 +391,10 @@ namespace CmisSync.Lib.Config {
         /// </summary>
         /// <param name="password">Password instance.</param>
         public virtual void SetPassword(Password password) {
+            if (password == null) {
+                throw new ArgumentNullException("password");
+            }
+
             this.credentials.Password = new Password { ObfuscatedPassword = password.ObfuscatedPassword };
         }
 

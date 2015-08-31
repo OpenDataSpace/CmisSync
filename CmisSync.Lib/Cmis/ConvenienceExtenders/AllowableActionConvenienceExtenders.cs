@@ -65,6 +65,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <returns><c>true</c> if object can be deleted; otherwise, <c>false</c> or <c>null</c> if no actions are available</returns>
         /// <param name="obj">Cmis object.</param>
         public static bool? CanDeleteObject(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanDeleteObject);
         }
 
@@ -74,6 +78,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <returns><c>true</c> if object properties can be updated; otherwise, <c>false</c> or <c>null</c> if no actions are available.</returns>
         /// <param name="obj">Cmis object.</param>
         public static bool? CanUpdateProperties(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanUpdateProperties);
         }
 
@@ -83,6 +91,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <returns><c>true</c> if properties can be get; otherwise, <c>false</c> or <c>null</c> if no actions are available.</returns>
         /// <param name="obj">Cmis object.</param>
         public static bool? CanGetProperties(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanGetProperties);
         }
 
@@ -92,18 +104,34 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <returns><c>true</c> if object relationships can be get; otherwise, <c>false</c> or <c>null</c> if no actions are available.</returns>
         /// <param name="obj">Cmis object.</param>
         public static bool? CanGetObjectRelationships(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanGetObjectRelationships);
         }
 
         public static bool? CanGetObjectParents(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanGetObjectParents);
         }
 
         public static bool? CanGetFolderParent(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanGetFolderParent);
         }
 
         public static bool? CanGetFolderTree(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             if (obj.IsActionAllowed(Actions.CanGetDescendants) == true) {
                 return true;
             } else {
@@ -112,94 +140,186 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         }
 
         public static bool? CanGetDescendants(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanGetDescendants);
         }
 
         public static bool? CanMoveObject(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanMoveObject);
         }
 
         public static bool? CanDeleteContentStream(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanDeleteContentStream);
         }
 
         public static bool? CanCheckOut(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanCheckOut);
         }
 
         public static bool? CanCancelCheckOut(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanCancelCheckOut);
         }
 
         public static bool? CanCheckIn(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanCheckIn);
         }
 
         public static bool? CanSetContentStream(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanSetContentStream);
         }
 
         public static bool? CanGetAllVersions(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanGetAllVersions);
         }
 
         public static bool? CanAddObjectToFolder(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanAddObjectToFolder);
         }
 
         public static bool? CanRemoveObjectFromFolder(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanRemoveObjectFromFolder);
         }
 
         public static bool? CanGetContentStream(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanGetContentStream);
         }
 
         public static bool? CanApplyPolicy(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanApplyPolicy);
         }
 
         public static bool? CanGetAppliedPolicies(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanGetAppliedPolicies);
         }
 
         public static bool? CanRemovePolicy(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanRemovePolicy);
         }
 
         public static bool? CanGetChildren(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanGetChildren);
         }
 
         public static bool? CanCreateDocument(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanCreateDocument);
         }
 
         public static bool? CanCreateFolder(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanCreateFolder);
         }
 
         public static bool? CanCreateRelationship(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanCreateRelationship);
         }
 
         public static bool? CanDeleteTree(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanDeleteTree);
         }
 
         public static bool? CanGetRenditions(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanGetRenditions);
         }
 
         public static bool? CanGetAcl(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanGetAcl);
         }
 
         public static bool? CanApplyAcl(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             return obj.IsActionAllowed(Actions.CanApplyAcl);
         }
 
         public static bool IsReadOnly(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             if (obj is IDocument) {
                 return obj.CanSetContentStream() == false && obj.CanDeleteObject() == false;
             } else {
@@ -214,6 +334,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="obj">Cmis Object.</param>
         /// <param name="action">Action name.</param>
         public static bool? IsActionAllowed(this ICmisObject obj, string action) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             try {
                 return obj.AllowableActions.Actions.Contains(action);
             } catch (NullReferenceException) {

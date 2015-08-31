@@ -50,6 +50,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
+            if (localFileSystemInfo == null) {
+                throw new ArgumentNullException("localFileSystemInfo");
+            }
+
             var mappedObject = this.Storage.GetObjectByGuid((Guid)localFileSystemInfo.Uuid);
             this.Storage.RemoveObject(mappedObject);
             if (localFileSystemInfo is IFileInfo) {

@@ -55,7 +55,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage) : base(session, storage, transmissionStorage) {
             if (transmissionStorage == null) {
-                throw new ArgumentNullException("Given transmission storage is null");
+                throw new ArgumentNullException("transmissionStorage");
             }
         }
 

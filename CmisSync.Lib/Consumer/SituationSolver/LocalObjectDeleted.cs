@@ -45,16 +45,20 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <summary>
         /// Solves the situation by deleting the corresponding remote object.
         /// </summary>
-        /// <param name="localFile">Local file.</param>
+        /// <param name="localFileSystemInfo">Local file.</param>
         /// <param name="remoteId">Remote identifier or object.</param>
         /// <param name="localContent">Hint if the local content has been changed.</param>
         /// <param name="remoteContent">Information if the remote content has been changed.</param>
         public override void Solve(
-            IFileSystemInfo localFile,
+            IFileSystemInfo localFileSystemInfo,
             IObjectId remoteId,
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
+            if (remoteId == null) {
+                throw new ArgumentNullException("remoteId");
+            }
+
             var mappedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
             if (mappedObject.LastChangeToken != (remoteId as ICmisObject).ChangeToken) {
                 throw new ArgumentException("Remote object has been changed since last sync => force crawl sync");

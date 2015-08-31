@@ -220,9 +220,9 @@ namespace CmisSync.Lib.Consumer {
         }
 
         private void DoHandle(AbstractFolderEvent actualEvent) {
-            SituationType localSituation = this.LocalSituation.Analyse(this.storage, actualEvent);
-            SituationType remoteSituation = this.RemoteSituation.Analyse(this.storage, actualEvent);
-            ISolver solver = this.Solver[(int)localSituation, (int)remoteSituation];
+            var localSituation = this.LocalSituation.Analyse(this.storage, actualEvent);
+            var remoteSituation = this.RemoteSituation.Analyse(this.storage, actualEvent);
+            var solver = this.Solver[(int)localSituation, (int)remoteSituation];
 
             if (solver == null) {
                 throw new NotImplementedException(string.Format("Solver for LocalSituation: {0}, and RemoteSituation {1} not implemented", localSituation, remoteSituation));

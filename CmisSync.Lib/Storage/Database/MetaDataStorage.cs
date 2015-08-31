@@ -313,14 +313,10 @@ namespace CmisSync.Lib.Storage.Database {
         /// <summary>
         /// Gets the remote path.
         /// </summary>
-        /// <returns>
-        /// The remote path.
-        /// </returns>
-        /// <param name='obj'>
-        /// The MappedObject instance.
-        /// </param>
-        public string GetRemotePath(IMappedObject obj) {
-            string id = this.GetId(obj);
+        /// <returns>The remote path.</returns>
+        /// <param name='mappedObject'>The MappedObject instance.</param>
+        public string GetRemotePath(IMappedObject mappedObject) {
+            string id = this.GetId(mappedObject);
             using(var tran = this.engine.GetTransaction()) {
                 string[] segments = this.GetRelativePathSegments(tran, id);
                 StringBuilder pathBuilder = new StringBuilder(this.matcher.RemoteTargetRootPath);

@@ -43,7 +43,11 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(CmisUtils));
 
         static public Dictionary<string, string> GetCmisParameters(ServerCredentials credentials) {
-            Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
+            if (credentials == null) {
+                throw new ArgumentNullException("credentials");
+            }
+
+            var cmisParameters = new Dictionary<string, string>();
             cmisParameters[SessionParameter.BindingType] = credentials.Binding;
             if (credentials.Binding == BindingType.AtomPub) {
                 cmisParameters[SessionParameter.AtomPubUrl] = credentials.Address.ToString();
@@ -58,7 +62,11 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         }
 
         static public Dictionary<string, string> GetCmisParameters(CmisRepoCredentials credentials) {
-            Dictionary<string, string> cmisParameters = GetCmisParameters((ServerCredentials)credentials);
+            if (credentials == null) {
+                throw new ArgumentNullException("credentials");
+            }
+
+            var cmisParameters = GetCmisParameters((ServerCredentials)credentials);
             cmisParameters[SessionParameter.RepositoryId] = credentials.RepoId;
             return cmisParameters;
         }
@@ -68,12 +76,12 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         /// </summary>
         /// <returns>Full path of each sub-folder, including leading slash.</returns>
         static public string[] GetSubfolders(CmisRepoCredentials credentials, string path) {
-            List<string> result = new List<string>();
+            var result = new List<string>();
 
             // Connect to the CMIS repository.
-            Dictionary<string, string> cmisParameters = GetCmisParameters(credentials);
-            SessionFactory factory = SessionFactory.NewInstance();
-            ISession session = factory.CreateSession(cmisParameters);
+            var cmisParameters = GetCmisParameters(credentials);
+            var factory = SessionFactory.NewInstance();
+            var session = factory.CreateSession(cmisParameters);
 
             // Get the folder.
             IFolder folder;
@@ -89,11 +97,10 @@ namespace CmisSync.Lib.Cmis.UiUtils {
             Logger.Info("CmisUtils | folder.Properties.Count:" + folder.Properties.Count.ToString());
 
             // Get the folder's sub-folders.
-            IItemEnumerable<ICmisObject> children = folder.GetChildren();
+            var children = folder.GetChildren();
 
             // Return the full path of each of the sub-folders.
-            foreach (var subfolder in children.OfType<IFolder>())
-            {
+            foreach (var subfolder in children.OfType<IFolder>()) {
                 result.Add(subfolder.Path);
             }
 

@@ -56,7 +56,7 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.UiUtils.LoginException"/> class.
         /// </summary>
         /// <param name="inner">Inner Exception.</param>
-        public LoginException(Exception inner) : base(inner.Message, inner) {
+        public LoginException(Exception inner) : base(inner != null ? inner.Message : "LoginException", inner) {
         }
 
         /// <summary>

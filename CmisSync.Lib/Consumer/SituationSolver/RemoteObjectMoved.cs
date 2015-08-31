@@ -45,21 +45,25 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// Solve the specified situation by using the session, storage, localFile and remoteId.
         /// Moves the local file/folder to the new location.
         /// </summary>
-        /// <param name="localFile">Old local file/folder.</param>
+        /// <param name="localFileSystemInfo">Old local file/folder.</param>
         /// <param name="remoteId">Remote identifier.</param>
         /// <param name="localContent">Hint if the local content has been changed.</param>
         /// <param name="remoteContent">Information if the remote content has been changed.</param>
         public override void Solve(
-            IFileSystemInfo localFile,
+            IFileSystemInfo localFileSystemInfo,
             IObjectId remoteId,
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
+            if (remoteId == null) {
+                throw new ArgumentNullException("remoteId");
+            }
+
             // Move local object
             var savedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
             string newPath = remoteId is IFolder ? this.Storage.Matcher.CreateLocalPath(remoteId as IFolder) : this.Storage.Matcher.CreateLocalPath(remoteId as IDocument);
             if (remoteId is IFolder) {
-                IDirectoryInfo dirInfo = localFile as IDirectoryInfo;
+                IDirectoryInfo dirInfo = localFileSystemInfo as IDirectoryInfo;
                 string oldPath = dirInfo.FullName;
                 if (!dirInfo.FullName.Equals(newPath)) {
                     dirInfo.MoveTo(newPath);
@@ -68,22 +72,22 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     return;
                 }
             } else if (remoteId is IDocument) {
-                IFileInfo fileInfo = localFile as IFileInfo;
+                IFileInfo fileInfo = localFileSystemInfo as IFileInfo;
                 string oldPath = fileInfo.FullName;
                 fileInfo.MoveTo(newPath);
                 OperationsLogger.Info(string.Format("Moved local file {0} to {1}", oldPath, newPath));
             }
 
-            localFile.TryToSetReadOnlyStateIfDiffers(from: remoteId as ICmisObject);
-            localFile.TryToSetLastWriteTimeUtcIfAvailable(from: remoteId as ICmisObject);
+            localFileSystemInfo.TryToSetReadOnlyStateIfDiffers(from: remoteId as ICmisObject);
+            localFileSystemInfo.TryToSetLastWriteTimeUtcIfAvailable(from: remoteId as ICmisObject);
 
             savedObject.Name = (remoteId as ICmisObject).Name;
             savedObject.ParentId = remoteId is IFolder ? (remoteId as IFolder).ParentId : (remoteId as IDocument).Parents[0].Id;
             savedObject.LastChangeToken = (remoteId is IDocument && remoteContent != ContentChangeType.NONE) ? savedObject.LastChangeToken : remoteId is ICmisObject ? (remoteId as ICmisObject).ChangeToken : null;
-            savedObject.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
+            savedObject.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
             savedObject.LastRemoteWriteTimeUtc = (remoteId is IDocument && remoteContent != ContentChangeType.NONE) ? savedObject.LastRemoteWriteTimeUtc : (remoteId as ICmisObject).LastModificationDate;
             savedObject.Ignored = (remoteId as ICmisObject).AreAllChildrenIgnored();
-            savedObject.IsReadOnly = localFile.ReadOnly;
+            savedObject.IsReadOnly = localFileSystemInfo.ReadOnly;
             this.Storage.SaveMappedObject(savedObject);
             if (remoteId is IDocument && remoteContent != ContentChangeType.NONE) {
                 throw new ArgumentException("Remote content has also been changed => force crawl sync.");

@@ -36,7 +36,7 @@ namespace CmisSync.Lib.Streams {
         /// </param>
         public OffsetStream(Stream stream, long offset = 0) : base(stream) {
             if (offset < 0) {
-                throw new ArgumentOutOfRangeException("A negative offset is forbidden");
+                throw new ArgumentOutOfRangeException("offset", "A negative offset is forbidden");
             }
 
             this.Offset = offset;

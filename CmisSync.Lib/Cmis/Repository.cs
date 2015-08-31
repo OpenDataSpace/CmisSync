@@ -134,6 +134,8 @@ namespace CmisSync.Lib.Cmis {
 
         private DBreezeEngine db;
 
+        private DBreezeConfiguration dbConfig;
+
         private IFileSystemInfoFactory fileSystemFactory;
 
         private ActivityListenerAggregator activityListener;
@@ -187,10 +189,11 @@ namespace CmisSync.Lib.Cmis {
             eventManager.AddEventHandler(new DebugLoggingHandler());
 
             // Create Database connection
-            this.db = new DBreezeEngine(new DBreezeConfiguration {
+            this.dbConfig = new DBreezeConfiguration {
                 DBreezeDataFolderName = inMemory ? string.Empty : repoInfo.GetDatabasePath(),
                 Storage = inMemory ? DBreezeConfiguration.eStorage.MEMORY : DBreezeConfiguration.eStorage.DISK
-            });
+            };
+            this.db = new DBreezeEngine(this.dbConfig);
 
             // Create session dependencies
             this.sessionFactory = SessionFactory.NewInstance();
@@ -396,12 +399,16 @@ namespace CmisSync.Lib.Cmis {
         public void OnCompleted() {
         }
 
-        public void OnError(Exception e) {
+        public void OnError(Exception error) {
         }
 
         public virtual void OnNext(Tuple<EventCategory, int> value) {
             if (this.disposed) {
                 throw new ObjectDisposedException(this.GetType().Name);
+            }
+
+            if (value == null) {
+                return;
             }
 
             if (value.Item1 == EventCategory.DetectedChange) {
@@ -486,6 +493,10 @@ namespace CmisSync.Lib.Cmis {
                     this.authProvider.Dispose();
                     if (this.db != null) {
                         this.db.Dispose();
+                    }
+
+                    if (this.dbConfig != null) {
+                        this.dbConfig.Dispose();
                     }
 
                     if (this.unsubscriber != null) {

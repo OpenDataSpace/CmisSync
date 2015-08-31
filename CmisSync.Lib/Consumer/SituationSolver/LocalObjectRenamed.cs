@@ -43,7 +43,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
         public LocalObjectRenamed(
             ISession session,
             IMetaDataStorage storage) : base(session, storage) {
@@ -52,16 +51,20 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <summary>
         /// Solve the specified situation by using localFile and remote object.
         /// </summary>
-        /// <param name="localFile">Local file.</param>
+        /// <param name="localFileSystemInfo">Local file.</param>
         /// <param name="remoteId">Remote identifier or object.</param>
         /// <param name="localContent">Hint if the local content has been changed.</param>
         /// <param name="remoteContent">Information if the remote content has been changed.</param>
         public override void Solve(
-            IFileSystemInfo localFile,
+            IFileSystemInfo localFileSystemInfo,
             IObjectId remoteId,
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
+            if (remoteId == null) {
+                throw new ArgumentNullException("remoteId");
+            }
+
             var obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
 
             // Rename remote object
@@ -72,25 +75,25 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
                 string oldName = (remoteId as ICmisObject).Name;
                 try {
-                    (remoteId as ICmisObject).Rename(localFile.Name, true);
+                    (remoteId as ICmisObject).Rename(localFileSystemInfo.Name, true);
                 } catch (CmisNameConstraintViolationException e) {
-                    if (!Utils.IsValidISO885915(localFile.Name)) {
-                        OperationsLogger.Warn(string.Format("The server denies the renaming of {2} from {0} to {1}, perhaps because the new name contains UTF-8 characters", oldName, localFile.Name, localFile.FullName));
+                    if (!Utils.IsValidISO885915(localFileSystemInfo.Name)) {
+                        OperationsLogger.Warn(string.Format("The server denies the renaming of {2} from {0} to {1}, perhaps because the new name contains UTF-8 characters", oldName, localFileSystemInfo.Name, localFileSystemInfo.FullName));
                         throw new InteractionNeededException(string.Format("Server denied renaming of {0}", oldName), e) {
                             Title = string.Format("Server denied renaming of {0}", oldName),
-                            Description = string.Format("The server denies the renaming of {2} from {0} to {1}, perhaps because the new name contains UTF-8 characters", oldName, localFile.Name, localFile.FullName)
+                            Description = string.Format("The server denies the renaming of {2} from {0} to {1}, perhaps because the new name contains UTF-8 characters", oldName, localFileSystemInfo.Name, localFileSystemInfo.FullName)
                         };
                     } else {
                         try {
-                            string wishedRemotePath = this.Storage.Matcher.CreateRemotePath(localFile.FullName);
+                            string wishedRemotePath = this.Storage.Matcher.CreateRemotePath(localFileSystemInfo.FullName);
                             var conflictingRemoteObject = this.Session.GetObjectByPath(wishedRemotePath) as IFileableCmisObject;
                             if (conflictingRemoteObject != null && conflictingRemoteObject.AreAllChildrenIgnored()) {
-                                OperationsLogger.Warn(string.Format("The server denies the renaming of {2} from {0} to {1}, because there is an ignored file/folder with this name already, trying to create conflict file/folder name", oldName, localFile.Name, localFile.FullName), e);
-                                string newName = localFile.Name;
-                                if (localFile is IDirectoryInfo) {
-                                    (localFile as IDirectoryInfo).MoveTo(Path.Combine((localFile as IDirectoryInfo).Parent.FullName, newName + "_Conflict"));
-                                } else if (localFile is IFileInfo) {
-                                    (localFile as IFileInfo).MoveTo(Path.Combine((localFile as IFileInfo).Directory.FullName, newName + "_Conflict"));
+                                OperationsLogger.Warn(string.Format("The server denies the renaming of {2} from {0} to {1}, because there is an ignored file/folder with this name already, trying to create conflict file/folder name", oldName, localFileSystemInfo.Name, localFileSystemInfo.FullName), e);
+                                string newName = localFileSystemInfo.Name;
+                                if (localFileSystemInfo is IDirectoryInfo) {
+                                    (localFileSystemInfo as IDirectoryInfo).MoveTo(Path.Combine((localFileSystemInfo as IDirectoryInfo).Parent.FullName, newName + "_Conflict"));
+                                } else if (localFileSystemInfo is IFileInfo) {
+                                    (localFileSystemInfo as IFileInfo).MoveTo(Path.Combine((localFileSystemInfo as IFileInfo).Directory.FullName, newName + "_Conflict"));
                                 }
 
                                 return;
@@ -98,25 +101,25 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                         } catch (CmisObjectNotFoundException) {
                         }
 
-                        OperationsLogger.Warn(string.Format("The server denies the renaming of {2} from {0} to {1}", oldName, localFile.Name, localFile.FullName), e);
+                        OperationsLogger.Warn(string.Format("The server denies the renaming of {2} from {0} to {1}", oldName, localFileSystemInfo.Name, localFileSystemInfo.FullName), e);
                     }
 
                     throw;
                 } catch (CmisPermissionDeniedException) {
-                    OperationsLogger.Warn(string.Format("Unable to renamed remote object from {0} to {1}: Permission Denied", oldName, localFile.Name));
+                    OperationsLogger.Warn(string.Format("Unable to renamed remote object from {0} to {1}: Permission Denied", oldName, localFileSystemInfo.Name));
                     return;
                 }
 
-                OperationsLogger.Info(string.Format("Renamed remote object {0} from {1} to {2}", remoteId.Id, oldName, localFile.Name));
+                OperationsLogger.Info(string.Format("Renamed remote object {0} from {1} to {2}", remoteId.Id, oldName, localFileSystemInfo.Name));
             } else {
                 throw new ArgumentException("Given remoteId type is unknown: " + remoteId.GetType().Name);
             }
 
-            bool isContentChanged = localFile is IFileInfo ? (localFile as IFileInfo).IsContentChangedTo(obj) : false;
+            bool isContentChanged = localFileSystemInfo is IFileInfo ? (localFileSystemInfo as IFileInfo).IsContentChangedTo(obj) : false;
 
             obj.Name = (remoteId as ICmisObject).Name;
             obj.LastRemoteWriteTimeUtc = (remoteId as ICmisObject).LastModificationDate;
-            obj.LastLocalWriteTimeUtc = isContentChanged ? obj.LastLocalWriteTimeUtc : localFile.LastWriteTimeUtc;
+            obj.LastLocalWriteTimeUtc = isContentChanged ? obj.LastLocalWriteTimeUtc : localFileSystemInfo.LastWriteTimeUtc;
             obj.LastChangeToken = (remoteId as ICmisObject).ChangeToken;
             obj.Ignored = (remoteId as ICmisObject).AreAllChildrenIgnored();
             this.Storage.SaveMappedObject(obj);

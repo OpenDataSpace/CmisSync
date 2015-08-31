@@ -80,7 +80,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 if (file.Exists) {
                     if (mappedFile != null && file.LastWriteTimeUtc.Equals(mappedFile.LastLocalWriteTimeUtc)) {
                         file.Delete();
-                        OperationsLogger.Info(string.Format("Deleted local file {0} because the mapped remote object {0} has been deleted", file.FullName, mappedFile.RemoteObjectId));
+                        OperationsLogger.Info(string.Format("Deleted local file {0} because the mapped remote object {1} has been deleted", file.FullName, mappedFile.RemoteObjectId));
                     } else {
                         file.Uuid = null;
                         if (mappedFile == null) {

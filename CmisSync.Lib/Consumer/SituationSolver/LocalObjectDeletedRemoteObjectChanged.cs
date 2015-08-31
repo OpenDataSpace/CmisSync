@@ -47,6 +47,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
+            if (remoteId == null) {
+                throw new ArgumentNullException("remoteId");
+            }
+
             // User Interaction needed or the content will be downloaded on next sync.
             // Possibilities:
             // - Download new remote content (default, because no user interaction is needed and it is simple to solve)

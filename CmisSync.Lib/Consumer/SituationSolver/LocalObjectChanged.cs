@@ -79,6 +79,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
+            if (localFileSystemInfo == null) {
+                throw new ArgumentNullException("localFileSystemInfo");
+            }
+
             var fullName = localFileSystemInfo.FullName;
             if (!localFileSystemInfo.Exists) {
                 throw new ArgumentException("Given local path does not exists: " + fullName);

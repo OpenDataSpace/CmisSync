@@ -239,11 +239,23 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             IDocument remoteDocument,
             IMappedObject obj,
             IFileSystemInfoFactory fsFactory,
-            ITransmissionFactory transmissionManager,
+            ITransmissionFactory transmissionFactory,
             ILog logger)
         {
             if (logger == null) {
                 throw new ArgumentNullException("logger");
+            }
+
+            if (fsFactory == null) {
+                throw new ArgumentNullException("fsFactory");
+            }
+
+            if (transmissionFactory == null) {
+                throw new ArgumentNullException("transmissionFactory");
+            }
+
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
             }
 
             // Download changes
@@ -251,7 +263,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
             var cacheFile = fsFactory.CreateDownloadCacheFileInfo(target);
             var targetFullName = target.FullName;
-            var transmission = transmissionManager.CreateTransmission(TransmissionType.DownloadModifiedFile, targetFullName, cacheFile.FullName);
+            var transmission = transmissionFactory.CreateTransmission(TransmissionType.DownloadModifiedFile, targetFullName, cacheFile.FullName);
             hash = this.DownloadCacheFile(cacheFile, remoteDocument, transmission, fsFactory);
             obj.ChecksumAlgorithmName = "SHA-1";
 
@@ -305,6 +317,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         protected byte[] UploadFile(IFileInfo localFile, IDocument doc, Transmission transmission) {
             if (transmission == null) {
                 throw new ArgumentNullException("transmission");
+            }
+
+            if (localFile == null) {
+                throw new ArgumentNullException("localFile");
             }
 
             using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {

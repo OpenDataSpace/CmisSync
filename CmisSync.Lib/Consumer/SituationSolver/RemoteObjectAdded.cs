@@ -69,30 +69,26 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <summary>
         /// Adds the Object to Disk and Database
         /// </summary>
-        /// <param name='localFile'>
-        /// Local file.
-        /// </param>
-        /// <param name='remoteId'>
-        /// Remote Object (already fetched).
-        /// </param>
+        /// <param name='localFileSystemInfo'>Local file.</param>
+        /// <param name='remoteId'>Remote Object (already fetched).</param>
         /// <param name="localContent">Hint if the local content has been changed.</param>
         /// <param name="remoteContent">Information if the remote content has been changed.</param>
         /// <exception cref='ArgumentException'>
         /// Is thrown when remoteId is not prefetched.
         /// </exception>
         public override void Solve(
-            IFileSystemInfo localFile,
+            IFileSystemInfo localFileSystemInfo,
             IObjectId remoteId,
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
-            if (localFile is IDirectoryInfo) {
+            if (localFileSystemInfo is IDirectoryInfo) {
                 if (!(remoteId is IFolder)) {
                     throw new ArgumentException("remoteId has to be a prefetched Folder");
                 }
 
                 var remoteFolder = remoteId as IFolder;
-                var localFolder = localFile as IDirectoryInfo;
+                var localFolder = localFileSystemInfo as IDirectoryInfo;
                 localFolder.Create();
                 localFolder.TryToSetReadOnlyStateIfDiffers(from: remoteFolder, andLogErrorsTo: Logger);
                 Guid uuid = Guid.Empty;
@@ -113,7 +109,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 mappedObject.IsReadOnly = localFolder.ReadOnly;
                 this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local folder {0} created and mapped to remote folder {1}", localFolder.FullName, remoteId.Id));
-            } else if (localFile is IFileInfo) {
+            } else if (localFileSystemInfo is IFileInfo) {
                 if (!(remoteId is IDocument)) {
                     throw new ArgumentException("remoteId has to be a prefetched Document");
                 }
@@ -121,7 +117,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 Guid guid = Guid.NewGuid();
                 byte[] localFileHash = null;
                 DateTime? lastLocalFileModificationDate = null;
-                var file = localFile as IFileInfo;
+                var file = localFileSystemInfo as IFileInfo;
                 if (file.Exists) {
                     Guid? uuid = file.Uuid;
                     if (uuid != null) {
@@ -141,7 +137,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 var cacheFile = this.fsFactory.CreateDownloadCacheFileInfo(guid);
 
                 IDocument remoteDoc = remoteId as IDocument;
-                var transmission = this.manager.CreateTransmission(TransmissionType.DownloadNewFile, localFile.FullName, cacheFile.FullName);
+                var transmission = this.manager.CreateTransmission(TransmissionType.DownloadNewFile, localFileSystemInfo.FullName, cacheFile.FullName);
                 byte[] hash = DownloadCacheFile(cacheFile, remoteDoc, transmission, this.fsFactory);
 
                 try {
