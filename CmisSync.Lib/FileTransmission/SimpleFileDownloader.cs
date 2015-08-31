@@ -32,7 +32,7 @@ namespace CmisSync.Lib.FileTransmission {
     /// Simple file downloader.
     /// </summary>
     public class SimpleFileDownloader : IFileDownloader {
-        private bool disposed = false;
+        private bool disposed;
 
         private object disposeLock = new object();
 

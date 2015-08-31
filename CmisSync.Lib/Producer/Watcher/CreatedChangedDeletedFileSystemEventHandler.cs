@@ -48,7 +48,7 @@ namespace CmisSync.Lib.Producer.Watcher {
         private long threshold;
         private object listLock = new object();
         private List<Tuple<FileSystemEventArgs, Guid, DateTime, bool>> events;
-        private bool disposed = false;
+        private bool disposed;
 
         /// <summary>
         /// Initializes a new instance of the

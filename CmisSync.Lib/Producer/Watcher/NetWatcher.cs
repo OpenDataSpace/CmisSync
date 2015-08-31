@@ -40,7 +40,7 @@ namespace CmisSync.Lib.Producer.Watcher {
         /// <summary>
         /// Whether this object has been disposed or not.
         /// </summary>
-        private bool disposed = false;
+        private bool disposed;
 
         private IMetaDataStorage storage;
 

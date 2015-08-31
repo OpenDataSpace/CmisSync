@@ -51,14 +51,14 @@ namespace CmisSync.Lib.Storage.Database {
         /// <summary>
         /// The db engine.
         /// </summary>
-        private DBreezeEngine engine = null;
+        private DBreezeEngine engine;
 
         /// <summary>
         /// The path matcher.
         /// </summary>
-        private IPathMatcher matcher = null;
+        private IPathMatcher matcher;
 
-        private bool fullValidationOnEachManipulation = false;
+        private bool fullValidationOnEachManipulation;
 
         static MetaDataStorage() {
             DBreezeInitializerSingleton.Init();

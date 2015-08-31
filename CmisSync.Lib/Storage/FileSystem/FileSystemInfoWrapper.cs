@@ -35,12 +35,12 @@ namespace CmisSync.Lib.Storage.FileSystem {
     /// </summary>
     public abstract class FileSystemInfoWrapper : IFileSystemInfo {
         private static readonly string ExtendedAttributeKey = "DSS-UUID";
-        private static IExtendedAttributeReader reader = null;
+        private static IExtendedAttributeReader reader;
 #if !__MonoCS__
         protected static readonly SecurityIdentifier actualUser;
 #endif
         private FileSystemInfo original;
-        private FSType? fsType = null;
+        private FSType? fsType;
 
         static FileSystemInfoWrapper() {
             switch (Environment.OSVersion.Platform) {

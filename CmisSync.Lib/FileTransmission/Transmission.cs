@@ -92,12 +92,12 @@ namespace CmisSync.Lib.FileTransmission {
         private string relativePath = string.Empty;
         private string repo = string.Empty;
         private TransmissionStatus status = TransmissionStatus.Transmitting;
-        private long? length = null;
-        private long? position = null;
-        private long? bitsPerSecond = null;
-        private Exception failedException = null;
+        private long? length;
+        private long? position;
+        private long? bitsPerSecond;
+        private Exception failedException;
         private DateTime lastModification = DateTime.Now;
-        private long maxBandwidth = 0;
+        private long maxBandwidth;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.Transmission"/> class.

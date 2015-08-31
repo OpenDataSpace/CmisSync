@@ -54,7 +54,6 @@ namespace CmisSync.Lib.FileTransmission {
         /// </summary>
         /// <param name="message">Upload failing reason message.</param>
         public UploadFailedException(string message) : base(message) {
-            this.doc = null;
         }
 
         /// <summary>
@@ -63,7 +62,6 @@ namespace CmisSync.Lib.FileTransmission {
         /// <param name="message">Upload failing reason message.</param>
         /// <param name="innerException">Inner exception.</param>
         public UploadFailedException(string message, Exception innerException) : base(message, innerException) {
-            this.doc = null;
         }
 
         /// <summary>
@@ -72,7 +70,6 @@ namespace CmisSync.Lib.FileTransmission {
         /// <param name="info">Serialization info.</param>
         /// <param name="context">Streaming context.</param>
         protected UploadFailedException(SerializationInfo info, StreamingContext context) : base(info, context) {
-            this.doc = null;
         }
 
         /// <summary>

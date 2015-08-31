@@ -16,8 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Queueing
-{
+namespace CmisSync.Lib.Queueing {
     using System.Collections.Generic;
 
     using CmisSync.Lib.Events;
@@ -26,10 +25,9 @@ namespace CmisSync.Lib.Queueing
     /// Delay StartNextSyncEvents and AbstractFolderEvents with RetryCounter > 0.
     /// Events are only retried if no full sync is requested as they are obsolete then.
     /// </summary>
-    public class DelayRetryAndNextSyncEventHandler : ReportingSyncEventHandler
-    {
-        private bool syncHasBeenDelayed = false;
-        private bool lastDelayedSyncWasFullSync = false;
+    public class DelayRetryAndNextSyncEventHandler : ReportingSyncEventHandler {
+        private bool syncHasBeenDelayed;
+        private bool lastDelayedSyncWasFullSync;
         private List<AbstractFolderEvent> retryEvents = new List<AbstractFolderEvent>();
 
         /// <summary>

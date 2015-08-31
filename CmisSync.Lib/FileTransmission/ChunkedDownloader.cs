@@ -38,7 +38,7 @@ namespace CmisSync.Lib.FileTransmission {
     /// Chunked downloader.
     /// </summary>
     public class ChunkedDownloader : IFileDownloader {
-        private bool disposed = false;
+        private bool disposed;
         private object disposeLock = new object();
 
         /// <summary>

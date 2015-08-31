@@ -33,7 +33,7 @@ namespace CmisSync.Lib.FileTransmission {
     /// Resuming an Upload is not supported.
     /// </summary>
     public class SimpleFileUploader : IFileUploader {
-        private bool disposed = false;
+        private bool disposed;
 
         private object disposeLock = new object();
 

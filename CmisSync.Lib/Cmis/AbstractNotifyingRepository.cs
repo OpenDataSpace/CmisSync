@@ -30,7 +30,7 @@ namespace CmisSync.Lib.Cmis {
     public abstract class AbstractNotifyingRepository : INotifyRepositoryPropertyChanged {
         private SyncStatus status = SyncStatus.Disconnected;
 
-        private int changesFound = 0;
+        private int changesFound;
 
         private DateTime? lastFinishedSync;
 

@@ -35,14 +35,14 @@ namespace CmisSync.Lib.Streams {
         /// <summary>
         /// The Limit of bytes which could be read per second. The limit is disabled if set to -1.
         /// </summary>
-        private long? readLimit = null;
+        private long? readLimit;
 
         /// <summary>
         /// The Limit of bytes which could be written per second. The limit is disabled if set to -1.
         /// </summary>
-        private long? writeLimit = null;
-        private int readCount = 0;
-        private int writeCount = 0;
+        private long? writeLimit;
+        private int readCount;
+        private int writeCount;
         private DateTime readTimeStamp = DateTime.Now;
         private DateTime writeTimeStamp = DateTime.Now;
 

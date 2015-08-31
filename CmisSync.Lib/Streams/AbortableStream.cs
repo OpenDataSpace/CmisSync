@@ -28,7 +28,7 @@ namespace CmisSync.Lib.Streams {
     /// Abortable stream wraps the given stream and add the possibility to abort the stream read and write by throwing an exception.
     /// </summary>
     public class AbortableStream : NotifyPropertyChangedStream {
-        private bool aborted = false;
+        private bool aborted;
         private AbortException exception;
         private object l = new object();
 

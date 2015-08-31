@@ -138,7 +138,7 @@ namespace CmisSync.Lib.Cmis {
 
         private ActivityListenerAggregator activityListener;
 
-        private int connectionExceptionsFound = 0;
+        private int connectionExceptionsFound;
 
         private IDisposable unsubscriber;
 

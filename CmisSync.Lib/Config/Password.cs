@@ -25,7 +25,7 @@ namespace CmisSync.Lib.Config {
     /// </summary>
     [Serializable]
     public class Password {
-        private string password = null;
+        private string password;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Password"/> class with the given password.

@@ -32,7 +32,7 @@ namespace CmisSync.Lib.Storage.Database {
     public class FileTransmissionStorage : IFileTransmissionStorage {
         private static readonly string FileTransmissionObjectsTable = "FileTransmissionObjects";
 
-        private DBreezeEngine engine = null;
+        private DBreezeEngine engine;
 
         static FileTransmissionStorage() {
             DBreezeInitializerSingleton.Init();

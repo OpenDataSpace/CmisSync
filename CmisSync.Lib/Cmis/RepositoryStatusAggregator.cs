@@ -28,7 +28,7 @@ namespace CmisSync.Lib.Cmis {
     public class RepositoryStatusAggregator : INotifyPropertyChanged {
         private Dictionary<INotifyRepositoryPropertyChanged, PropertyChangedEventHandler> repos = new Dictionary<INotifyRepositoryPropertyChanged, PropertyChangedEventHandler>();
         private SyncStatus status = SyncStatus.Disconnected;
-        private int changesFound = 0;
+        private int changesFound;
         private DateTime? lastFinishedSync = null;
 
         /// <summary>
