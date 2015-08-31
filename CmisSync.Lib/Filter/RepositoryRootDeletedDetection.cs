@@ -42,7 +42,7 @@ namespace CmisSync.Lib.Filter {
         /// <param name="localRootPath">Local root path.</param>
         public RepositoryRootDeletedDetection(IDirectoryInfo localRootPath) {
             if (localRootPath == null) {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException("localRootPath");
             }
 
             this.path = localRootPath;
