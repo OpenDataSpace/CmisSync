@@ -170,9 +170,9 @@ namespace CmisSync.Lib {
         /// Check whether the file is worth syncing or not.
         /// Files that are not worth syncing include temp files, locks, etc.
         /// </summary>
-        /// <param name="filename"></param>
-        /// <param name="ignoreWildcards"></param>
-        /// <returns></returns>
+        /// <param name="filename">File name.</param>
+        /// <param name="ignoreWildcards">ignore wildcards.</param>
+        /// <returns><c>true</c> if this passed file name is syncable, otherwise <c>false</c></returns>
         public static bool WorthSyncing(string filename, IList<string> ignoreWildcards) {
             if (null == filename) {
                 return false;
@@ -198,6 +198,8 @@ namespace CmisSync.Lib {
         /// <summary>
         /// Check whether a file name is valid or not.
         /// </summary>
+        /// <param name="name">File name.</param>
+        /// <returns><c>true</c> if the given name is not valid for syncing, otherwise <c>false</c>.</returns>
         public static bool IsInvalidFileName(string name) {
             bool ret = invalidFileNameRegex.IsMatch(name);
             if (ret) {
@@ -208,6 +210,11 @@ namespace CmisSync.Lib {
             return ret;
         }
 
+        /// <summary>
+        /// Determines if the folder name is valid or not.
+        /// </summary>
+        /// <returns><c>true</c> if is the folder name is valid; otherwise, <c>false</c>.</returns>
+        /// <param name="name">Folder name.</param>
         public static bool IsInvalidFolderName(string name) {
             return IsInvalidFolderName(name, new List<string>());
         }
@@ -215,7 +222,10 @@ namespace CmisSync.Lib {
         /// <summary>
         /// Check whether a folder name is valid or not.
         /// </summary>
-        public static bool IsInvalidFolderName(string name, List<string> ignoreWildcards) {
+        /// <returns><c>true</c> if is the folder name is valid and no wildcard matches; otherwise, <c>false</c>.</returns>
+        /// <param name="name">Folder name.</param>
+        /// <param name="ignoreWildcards">Folder regex list which should be ignored.</param>
+        public static bool IsInvalidFolderName(string name, IList<string> ignoreWildcards) {
             if (ignoreWildcards == null) {
                 throw new ArgumentNullException("ignoreWildcards");
             }
@@ -355,6 +365,7 @@ namespace CmisSync.Lib {
         /// Creates the user agent string for this client.
         /// </summary>
         /// <returns>The user agent.</returns>
+        /// <param name="appName">Modify the user agent with the given app name.</param>
         public static string CreateUserAgent(string appName = "DSS") {
             return string.Format(
                 "{0}/{1} ({2}; {4}; hostname=\"{3}\")",
@@ -405,7 +416,12 @@ namespace CmisSync.Lib {
             return false;
         }
 
-        public static string ToHexString(byte[] data) {
+        /// <summary>
+        /// Tos the hex string.
+        /// </summary>
+        /// <returns>The hex string.</returns>
+        /// <param name="data">byte array.</param>
+        public static string ToHexString(this byte[] data) {
             if (data == null) {
                 return "(null)";
             } else {
@@ -446,7 +462,7 @@ namespace CmisSync.Lib {
         /// Credits to: http://stackoverflow.com/users/295635/peter
         /// </summary>
         /// <returns>The property name as string.</returns>
-        /// <param name="property">Property.</param>
+        /// <param name="property">Property function.</param>
         /// <typeparam name="TModel">The 1st type parameter.</typeparam>
         /// <typeparam name="TProperty">The 2nd type parameter.</typeparam>
         public static string NameOf<TModel, TProperty>(Expression<Func<TModel, TProperty>> property) {
