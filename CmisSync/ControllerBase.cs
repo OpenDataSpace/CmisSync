@@ -104,7 +104,7 @@ namespace CmisSync {
         /// <summary>
         /// Is this controller disposed already?
         /// </summary>
-        private bool disposed = false;
+        private bool disposed;
 
         private RepositoryStatusAggregator statusAggregator = new RepositoryStatusAggregator();
 
