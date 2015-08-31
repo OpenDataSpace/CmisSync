@@ -34,11 +34,15 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <returns><c>true</c>, if allowable actions are available, <c>false</c> otherwise.</returns>
         /// <param name="session">Cmis session with its default context.</param>
         public static bool AreAllowableActionsAvailable(this ISession session) {
+            if (session == null) {
+                throw new ArgumentNullException("session");
+            }
+            var repositoryInfo = session.RepositoryInfo;
 #region Workaround
             // Workaround to detect minimum version of correct responding cmis gw (https://mantis.dataspace.cc/view.php?id=4463)
-            if (session.RepositoryInfo.ProductName == "GRAU DataSpace CMIS Gateway") {
+            if (repositoryInfo.ProductName == "GRAU DataSpace CMIS Gateway") {
                 try {
-                    var version = new Version(session.RepositoryInfo.ProductVersion);
+                    var version = new Version(repositoryInfo.ProductVersion);
                     if (version < new Version(1, 5, 1120)) {
                         return false;
                     }
@@ -46,12 +50,12 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
                 }
             }
 #endregion
-
-            if (session.DefaultContext.IncludeAllowableActions) {
+            var defaultContext = session.DefaultContext;
+            if (defaultContext.IncludeAllowableActions) {
                 return true;
             }
 
-            return session.DefaultContext.IncludeAcls && session.RepositoryInfo.Capabilities.AclCapability != CapabilityAcl.None;
+            return defaultContext.IncludeAcls && repositoryInfo.Capabilities.AclCapability != CapabilityAcl.None;
         }
 
         /// <summary>
