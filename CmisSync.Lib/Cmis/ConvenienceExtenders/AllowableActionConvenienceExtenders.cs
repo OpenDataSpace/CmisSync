@@ -37,6 +37,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             if (session == null) {
                 throw new ArgumentNullException("session");
             }
+
             var repositoryInfo = session.RepositoryInfo;
 #region Workaround
             // Workaround to detect minimum version of correct responding cmis gw (https://mantis.dataspace.cc/view.php?id=4463)
