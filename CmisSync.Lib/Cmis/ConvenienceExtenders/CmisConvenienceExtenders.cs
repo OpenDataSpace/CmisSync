@@ -225,7 +225,11 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="obj">Fileable cmis object.</param>
         /// <param name="modificationDate">Modification date.</param>
         public static IObjectId UpdateLastWriteTimeUtc(this IFileableCmisObject obj, DateTime modificationDate) {
-            Dictionary<string, object> properties = new Dictionary<string, object>();
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
+            var properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.LastModificationDate, modificationDate);
             try {
                 return obj.UpdateProperties(properties, true);
@@ -250,21 +254,21 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             sb.AppendLine(string.Format("ID:           {0}", obj.Id));
             sb.AppendLine(string.Format("Name:         {0}", obj.Name));
             sb.AppendLine(string.Format("ChangeToken:  {0}", obj.ChangeToken));
-            if (obj.LastModificationDate != null) {
-                DateTime date = obj.LastModificationDate.Value;
-                sb.AppendLine(string.Format("LastModified: {0} Ticks", date.Ticks));
+            var date = obj.LastModificationDate;
+            if (date != null) {
+                sb.AppendLine(string.Format("LastModified: {0} Ticks", date.Value.Ticks));
             } else {
-                sb.AppendLine(string.Format("LastModified: {0}", obj.LastModificationDate));
+                sb.AppendLine(string.Format("LastModified: {0}", date));
             }
 
             sb.AppendLine(string.Format("ObjectType:   {0}", obj.ObjectType));
             sb.AppendLine(string.Format("BaseType:     {0}", obj.BaseType.DisplayName));
-            if (obj is IFolder) {
-                var folder = obj as IFolder;
+            var folder = obj as IFolder;
+            var doc = obj as IDocument;
+            if (folder != null) {
                 sb.AppendLine(string.Format("Path:         {0}", folder.Path));
                 sb.AppendLine(string.Format("ParentId:     {0}", folder.ParentId));
-            } else if (obj is IDocument) {
-                var doc = obj as IDocument;
+            } else if (doc != null) {
                 sb.AppendLine(string.Format("StreamLength: {0}", doc.ContentStreamLength));
                 sb.AppendLine(string.Format("MimeType:     {0}", doc.ContentStreamMimeType));
                 sb.AppendLine(string.Format("StreamName:   {0}", doc.ContentStreamFileName));
@@ -659,7 +663,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
                 throw new ArgumentNullException("hex");
             }
 
-            if (hex.Length % 2 == 1) {
+            if ((hex.Length & 1) == 1) {
                 throw new ArgumentException("The binary key cannot have an odd number of digits");
             }
 
