@@ -105,22 +105,24 @@ namespace CmisSync.Lib.Consumer {
         }
 
         private bool IsChangeEventAHintForMove(IMetaDataStorage storage, AbstractFolderEvent actualEvent) {
-            if (actualEvent is FolderEvent) {
-                var folderEvent = actualEvent as FolderEvent;
+            var folderEvent = actualEvent as FolderEvent;
+            var fileEvent = actualEvent as FileEvent;
+            if (folderEvent != null) {
                 var storedFolder = storage.GetObjectByRemoteId(folderEvent.RemoteFolder.Id);
                 if (storedFolder != null) {
                     if (storedFolder.ParentId != folderEvent.RemoteFolder.ParentId) {
                         return true;
                     }
                 }
-            } else if (actualEvent is FileEvent) {
-                var fileEvent = actualEvent as FileEvent;
-                if (fileEvent.RemoteFile.Parents == null || fileEvent.RemoteFile.Parents.Count == 0) {
+            } else if (fileEvent != null) {
+                var remoteFile = fileEvent.RemoteFile;
+                var parents = remoteFile.Parents;
+                if (parents == null || parents.Count == 0) {
                     return false;
                 }
 
-                var storedFile = storage.GetObjectByRemoteId(fileEvent.RemoteFile.Id);
-                if (storedFile != null && storedFile.ParentId != fileEvent.RemoteFile.Parents[0].Id) {
+                var storedFile = storage.GetObjectByRemoteId(remoteFile.Id);
+                if (storedFile != null && storedFile.ParentId != parents[0].Id) {
                     return true;
                 }
             }

@@ -181,9 +181,10 @@ namespace CmisSync.Lib.Cmis {
             }
 
             this.Queue = queue;
-            new ConnectionInterruptedHandler(this.Queue.EventManager, this.Queue);
-            this.Queue.EventManager.AddEventHandler(this.rootFolderMonitor);
-            this.Queue.EventManager.AddEventHandler(new DebugLoggingHandler());
+            var eventManager = this.Queue.EventManager;
+            new ConnectionInterruptedHandler(eventManager, this.Queue);
+            eventManager.AddEventHandler(this.rootFolderMonitor);
+            eventManager.AddEventHandler(new DebugLoggingHandler());
 
             // Create Database connection
             this.db = new DBreezeEngine(new DBreezeConfiguration {
@@ -214,16 +215,16 @@ namespace CmisSync.Lib.Cmis {
                 this.invalidFolderNameFilter,
                 symlinkFilter);
             this.transmissionFactory = new TransmissionFactory(this, activityListener.TransmissionManager);
-            this.Queue.EventManager.AddEventHandler(this.reportingFilter);
+            eventManager.AddEventHandler(this.reportingFilter);
             this.alreadyAddedFilter = new IgnoreAlreadyHandledFsEventsFilter(this.storage, this.fileSystemFactory);
-            this.Queue.EventManager.AddEventHandler(this.alreadyAddedFilter);
+            eventManager.AddEventHandler(this.alreadyAddedFilter);
 
             // Add handler for repo config changes
-            this.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(0, this.RepoInfoChanged));
+            eventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(0, this.RepoInfoChanged));
 
             // Add periodic sync procedures scheduler
             this.Scheduler = new SyncScheduler(this.Queue, repoInfo.PollInterval);
-            this.Queue.EventManager.AddEventHandler(this.Scheduler);
+            eventManager.AddEventHandler(this.Scheduler);
 
             // Add File System Watcher
             #if __COCOA__
@@ -232,26 +233,26 @@ namespace CmisSync.Lib.Cmis {
             this.WatcherProducer = new NetWatcher(new FileSystemWatcher(this.LocalPath), this.Queue, this.storage);
             #endif
             this.WatcherConsumer = new WatcherConsumer(this.Queue);
-            this.Queue.EventManager.AddEventHandler(this.WatcherConsumer);
+            eventManager.AddEventHandler(this.WatcherConsumer);
 
             // Add transformer
             this.transformer = new ContentChangeEventTransformer(this.Queue, this.storage, this.fileSystemFactory);
-            this.Queue.EventManager.AddEventHandler(this.transformer);
+            eventManager.AddEventHandler(this.transformer);
 
             // Add local fetcher
             var localFetcher = new LocalObjectFetcher(this.storage.Matcher, this.fileSystemFactory);
-            this.Queue.EventManager.AddEventHandler(localFetcher);
+            eventManager.AddEventHandler(localFetcher);
 
             this.ignoredStorage = new IgnoredEntitiesStorage(new IgnoredEntitiesCollection(), this.storage);
 
-            this.Queue.EventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.fileTransmissionStorage, this.ignoredStorage, this.RepoInfo, this.filters, activityListener, this.transmissionFactory, this.fileSystemFactory));
+            eventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.fileTransmissionStorage, this.ignoredStorage, this.RepoInfo, this.filters, activityListener, this.transmissionFactory, this.fileSystemFactory));
 
-            this.Queue.EventManager.AddEventHandler(new DelayRetryAndNextSyncEventHandler(this.Queue));
+            eventManager.AddEventHandler(new DelayRetryAndNextSyncEventHandler(this.Queue));
 
             this.connectionScheduler = new ConnectionScheduler(this.RepoInfo, this.Queue, this.sessionFactory, this.authProvider);
 
-            this.Queue.EventManager.AddEventHandler(this.connectionScheduler);
-            this.Queue.EventManager.AddEventHandler(
+            eventManager.AddEventHandler(this.connectionScheduler);
+            eventManager.AddEventHandler(
                 new GenericSyncEventHandler<SuccessfulLoginEvent>(
                 10000,
                 delegate(ISyncEvent e) {
@@ -260,7 +261,7 @@ namespace CmisSync.Lib.Cmis {
 
                 return false;
             }));
-            this.Queue.EventManager.AddEventHandler(
+            eventManager.AddEventHandler(
                 new GenericSyncEventHandler<ConfigurationNeededEvent>(
                 10000,
                 delegate(ISyncEvent e) {
@@ -270,7 +271,7 @@ namespace CmisSync.Lib.Cmis {
                 return false;
             }));
             this.unsubscriber = this.Queue.CategoryCounter.Subscribe(this);
-            this.Queue.EventManager.OnException += (sender, e) => {
+            eventManager.OnException += (sender, e) => {
                 ExceptionType type = ExceptionType.Unknown;
                 if (e.Exception is VirusDetectedException) {
                     type = ExceptionType.FileUploadBlockedDueToVirusDetected;

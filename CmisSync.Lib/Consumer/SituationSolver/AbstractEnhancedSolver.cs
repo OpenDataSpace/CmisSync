@@ -250,12 +250,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             byte[] hash = null;
 
             var cacheFile = fsFactory.CreateDownloadCacheFileInfo(target);
-            var transmission = transmissionManager.CreateTransmission(TransmissionType.DownloadModifiedFile, target.FullName, cacheFile.FullName);
+            var targetFullName = target.FullName;
+            var transmission = transmissionManager.CreateTransmission(TransmissionType.DownloadModifiedFile, targetFullName, cacheFile.FullName);
             hash = this.DownloadCacheFile(cacheFile, remoteDocument, transmission, fsFactory);
             obj.ChecksumAlgorithmName = "SHA-1";
 
             try {
-                var backupFile = fsFactory.CreateFileInfo(target.FullName + ".bak.sync");
+                var backupFile = fsFactory.CreateFileInfo(targetFullName + ".bak.sync");
                 Guid? uuid = target.Uuid;
                 cacheFile.Replace(target, backupFile, true);
                 try {
@@ -277,11 +278,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
                 if (!obj.LastChecksum.SequenceEqual(checksumOfOldFile)) {
                     var conflictFile = fsFactory.CreateConflictFileInfo(target);
-                    backupFile.MoveTo(conflictFile.FullName);
-                    OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1} and created conflict file {2}", target.FullName, remoteDocument.Id, conflictFile.FullName));
+                    var conflictFileName = conflictFile.FullName;
+                    backupFile.MoveTo(conflictFileName);
+                    OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1} and created conflict file {2}", targetFullName, remoteDocument.Id, conflictFileName));
                 } else {
                     backupFile.Delete();
-                    OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1}", target.FullName, remoteDocument.Id));
+                    OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1}", targetFullName, remoteDocument.Id));
                 }
             } catch(Exception ex) {
                 transmission.FailedException = ex;
