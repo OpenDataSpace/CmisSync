@@ -439,7 +439,8 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
             oldLocalFile.SetupLastWriteTimeUtc(modificationDate);
             var storedFile = new MappedObject(oldFileName, fileId, MappedObjectType.File, this.remoteRootId, "changeToken") {
                 Guid = localGuid,
-                LastLocalWriteTimeUtc = modificationDate
+                LastLocalWriteTimeUtc = modificationDate,
+                ChecksumAlgorithmName = "SHA-1"
             };
             this.localFolder.SetupFiles(oldLocalFile.Object);
             this.storage.SaveMappedObject(storedFile);

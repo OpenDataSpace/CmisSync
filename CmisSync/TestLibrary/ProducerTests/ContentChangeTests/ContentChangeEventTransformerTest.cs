@@ -166,7 +166,8 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
                 f =>
                 f.RemoteObjectId == Id &&
                 f.Name == fileName &&
-                f.Type == MappedObjectType.File);
+                f.Type == MappedObjectType.File &&
+                f.ChecksumAlgorithmName == "SHA-1");
             storage.AddMappedFile(file);
             storage.Setup(s => s.GetLocalPath(It.Is<IMappedObject>(o => o.Equals(file)))).Returns("path");
             FileEvent fileEvent = null;
