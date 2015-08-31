@@ -25,6 +25,9 @@ namespace CmisSync.Lib.Cmis.UiUtils {
 
     using Newtonsoft.Json;
 
+    /// <summary>
+    /// Login exception type.
+    /// </summary>
     public enum LoginExceptionType {
         Unkown = int.MaxValue,
         ConnectionBroken = 9,
@@ -38,8 +41,11 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         ServerCouldNotLocateRepository = 1
     }
 
+    /// <summary>
+    /// Login exception.
+    /// </summary>
     [Serializable]
-    public class LoginException : Exception{
+    public class LoginException : Exception {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.UiUtils.LoginException"/> class.
         /// </summary>
@@ -52,15 +58,16 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         /// <param name="inner">Inner Exception.</param>
         public LoginException(Exception inner) : base(inner.Message, inner) {
         }
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisPermissionDeniedException"/> class.
+        /// Initializes a new instance of the <see cref="LoginException"/> class.
         /// </summary>
         /// <param name="message">Message of the exception.</param>
         public LoginException(string message) : base(message) {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisPermissionDeniedException"/> class.
+        /// Initializes a new instance of the <see cref="LoginException"/> class.
         /// </summary>
         /// <param name="message">Message of the exception.</param>
         /// <param name="inner">Inner exception.</param>
@@ -68,7 +75,7 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisPermissionDeniedException"/> class.
+        /// Initializes a new instance of the <see cref="LoginException"/> class.
         /// </summary>
         /// <param name="info">Serialization info.</param>
         /// <param name="context">Streaming context.</param>
@@ -81,7 +88,8 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         /// <value>The type.</value>
         public LoginExceptionType Type {
             get {
-                Exception ex = this.InnerException;
+                var ex = this.InnerException;
+                var msg = ex.Message;
                 if (ex == null) {
                     return LoginExceptionType.Unkown;
                 } else if (ex is CmisPermissionDeniedException) {
@@ -89,18 +97,18 @@ namespace CmisSync.Lib.Cmis.UiUtils {
                 } else if (ex is CmisObjectNotFoundException) {
                     return LoginExceptionType.ServerCouldNotLocateRepository;
                 } else if (ex is CmisRuntimeException) {
-                    if (ex.Message == "Unauthorized") {
+                    if (msg == "Unauthorized") {
                         return LoginExceptionType.Unauthorized;
                     } else {
                         return LoginExceptionType.TargetIsNotACmisServer;
                     }
                 } else if (ex is CmisConnectionException) {
                     return LoginExceptionType.ConnectionBroken;
-                } else if (ex.Message == "SendFailure") {
+                } else if (msg == "SendFailure") {
                     return LoginExceptionType.HttpsSendFailure;
-                } else if (ex.Message == "TrustFailure") {
+                } else if (msg == "TrustFailure") {
                     return LoginExceptionType.HttpsTrustFailure;
-                } else if (ex.Message == "NameResolutionFailure") {
+                } else if (msg == "NameResolutionFailure") {
                     return LoginExceptionType.NameResolutionFailure;
                 } else if (ex is JsonReaderException) {
                     return LoginExceptionType.TargetIsNotACmisServer;
