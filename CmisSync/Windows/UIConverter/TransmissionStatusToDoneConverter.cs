@@ -30,7 +30,7 @@ namespace CmisSync.UIConverter {
     [ValueConversion(typeof(TransmissionStatus), typeof(bool))]
     class TransmissionStatusToDoneConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
-            return ((TransmissionStatus)value == TransmissionStatus.ABORTED || (TransmissionStatus)value == TransmissionStatus.FINISHED);
+            return ((TransmissionStatus)value == TransmissionStatus.Aborted || (TransmissionStatus)value == TransmissionStatus.Finished);
         }
 
         public object ConvertBack(object value, Type targetType,

@@ -32,9 +32,9 @@ namespace CmisSync.UIConverter {
     public class TypeToImageConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
             switch ((TransmissionType)value) {
-                case TransmissionType.UPLOAD_NEW_FILE:
+                case TransmissionType.UploadNewFile:
                     return UIHelpers.GetImageSource("Uploading");
-                case TransmissionType.DOWNLOAD_NEW_FILE:
+                case TransmissionType.DownloadNewFile:
                     return UIHelpers.GetImageSource("Downloading");
                 default:
                     return UIHelpers.GetImageSource("Updating");
