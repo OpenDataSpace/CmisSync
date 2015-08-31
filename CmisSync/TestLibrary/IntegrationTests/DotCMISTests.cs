@@ -813,26 +813,6 @@ namespace TestLibrary.IntegrationTests {
         }
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
-        public void GetChildrenDoesNotProducesServerProtocolViolationException(
-            string canonical_name,
-            string localPath,
-            string remoteFolderPath,
-            string url,
-            string user,
-            string password,
-            string repositoryId,
-            string binding)
-        {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
-            for (int i = 0; i < 1000; i++) {
-                IFolder root = (IFolder)session.GetObjectByPath(remoteFolderPath);
-                foreach (var child in root.GetChildren()) {
-                    Console.WriteLine(child.Name);
-                }
-            }
-        }
-
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void GetFolderParentOfRootFolderIsNull(
             string canonical_name,
             string localPath,
