@@ -95,7 +95,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             if (localFile.IsContentChangedTo(obj, true)) {
                 updateRemoteDate = true;
                 try {
-                    var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                    var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UploadModifiedFile, localFile.FullName);
                     obj.LastChecksum = UploadFileWithPWC(localFile, ref remoteDocument, transmission);
                     obj.ChecksumAlgorithmName = "SHA-1";
                     obj.LastContentSize = remoteDocument.ContentStreamLength ?? localFile.Length;

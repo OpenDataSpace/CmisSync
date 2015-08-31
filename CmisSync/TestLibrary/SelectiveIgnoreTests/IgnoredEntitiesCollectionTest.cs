@@ -50,7 +50,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
 
             underTest.Add(Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath));
 
-            Assert.That(underTest.IsIgnoredId(this.objectId), Is.EqualTo(IgnoredState.IGNORED));
+            Assert.That(underTest.IsIgnoredId(this.objectId), Is.EqualTo(IgnoredState.Ignored));
         }
 
         [Test]
@@ -59,7 +59,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
 
             underTest.Add(Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath));
 
-            Assert.That(underTest.IsIgnoredPath(this.localPath), Is.EqualTo(IgnoredState.IGNORED));
+            Assert.That(underTest.IsIgnoredPath(this.localPath), Is.EqualTo(IgnoredState.Ignored));
         }
 
         [Test]
@@ -68,7 +68,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
 
             underTest.Add(Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath));
 
-            Assert.That(underTest.IsIgnoredPath(Path.Combine(this.localPath, Guid.NewGuid().ToString())), Is.EqualTo(IgnoredState.INHERITED));
+            Assert.That(underTest.IsIgnoredPath(Path.Combine(this.localPath, Guid.NewGuid().ToString())), Is.EqualTo(IgnoredState.Inherited));
         }
 
         [Test]
@@ -77,29 +77,29 @@ namespace TestLibrary.SelectiveIgnoreTests {
 
             underTest.Add(Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath));
 
-            Assert.That(underTest.IsIgnoredPath(this.localPath + "bla"), Is.EqualTo(IgnoredState.NOT_IGNORED));
+            Assert.That(underTest.IsIgnoredPath(this.localPath + "bla"), Is.EqualTo(IgnoredState.NotIgnored));
         }
 
         [Test]
         public void RemoveElement() {
             var underTest = new IgnoredEntitiesCollection();
-            Assert.That(underTest.IsIgnoredId(this.objectId), Is.EqualTo(IgnoredState.NOT_IGNORED));
+            Assert.That(underTest.IsIgnoredId(this.objectId), Is.EqualTo(IgnoredState.NotIgnored));
 
             underTest.Add(Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath));
             underTest.Remove(Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath));
 
-            Assert.That(underTest.IsIgnoredId(this.objectId), Is.EqualTo(IgnoredState.NOT_IGNORED));
+            Assert.That(underTest.IsIgnoredId(this.objectId), Is.EqualTo(IgnoredState.NotIgnored));
         }
 
         [Test]
         public void RemoveElementById() {
             var underTest = new IgnoredEntitiesCollection();
-            Assert.That(underTest.IsIgnoredId(this.objectId), Is.EqualTo(IgnoredState.NOT_IGNORED));
+            Assert.That(underTest.IsIgnoredId(this.objectId), Is.EqualTo(IgnoredState.NotIgnored));
 
             underTest.Add(Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath));
             underTest.Remove(this.objectId);
 
-            Assert.That(underTest.IsIgnoredId(this.objectId), Is.EqualTo(IgnoredState.NOT_IGNORED));
+            Assert.That(underTest.IsIgnoredId(this.objectId), Is.EqualTo(IgnoredState.NotIgnored));
         }
 
         [Test]
@@ -108,7 +108,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
 
             underTest.Add(Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath));
 
-            Assert.That(underTest.IsIgnored(Mock.Of<IFolder>(f => f.Id == this.objectId)), Is.EqualTo(IgnoredState.IGNORED));
+            Assert.That(underTest.IsIgnored(Mock.Of<IFolder>(f => f.Id == this.objectId)), Is.EqualTo(IgnoredState.Ignored));
         }
 
         [Test]
@@ -120,7 +120,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             folder.Setup(f => f.FolderParent).Returns(parent);
             underTest.Add(Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath));
 
-            Assert.That(underTest.IsIgnored(folder.Object), Is.EqualTo(IgnoredState.INHERITED));
+            Assert.That(underTest.IsIgnored(folder.Object), Is.EqualTo(IgnoredState.Inherited));
         }
 
         [Test]
@@ -130,7 +130,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             folder.Setup(f => f.Id).Returns(Guid.NewGuid().ToString());
             folder.Setup(f => f.FolderParent).Returns((IFolder)null);
 
-            Assert.That(underTest.IsIgnored(folder.Object), Is.EqualTo(IgnoredState.NOT_IGNORED));
+            Assert.That(underTest.IsIgnored(folder.Object), Is.EqualTo(IgnoredState.NotIgnored));
         }
 
         [Test]
@@ -140,7 +140,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             folder.Setup(f => f.Id).Returns(Guid.NewGuid().ToString());
             folder.Setup(f => f.FolderParent).Throws(new CmisObjectNotFoundException());
 
-            Assert.That(underTest.IsIgnored(folder.Object), Is.EqualTo(IgnoredState.NOT_IGNORED));
+            Assert.That(underTest.IsIgnored(folder.Object), Is.EqualTo(IgnoredState.NotIgnored));
         }
 
         [Test]
@@ -149,7 +149,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
 
             underTest.Add(Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath));
 
-            Assert.That(underTest.IsIgnored(Mock.Of<IDocument>(f => f.Id == this.objectId)), Is.EqualTo(IgnoredState.IGNORED));
+            Assert.That(underTest.IsIgnored(Mock.Of<IDocument>(f => f.Id == this.objectId)), Is.EqualTo(IgnoredState.Ignored));
         }
 
         [Test]
@@ -159,7 +159,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             var newEntry = Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath);
             underTest.Add(oldEntry);
             underTest.Add(newEntry);
-            Assert.That(underTest.IsIgnored(Mock.Of<IDocument>(f => f.Id == this.objectId)), Is.EqualTo(IgnoredState.IGNORED));
+            Assert.That(underTest.IsIgnored(Mock.Of<IDocument>(f => f.Id == this.objectId)), Is.EqualTo(IgnoredState.Ignored));
         }
 
         [Test]
@@ -172,7 +172,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             doc.Setup(f => f.Parents).Returns(parents);
             underTest.Add(Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath));
 
-            Assert.That(underTest.IsIgnored(doc.Object), Is.EqualTo(IgnoredState.INHERITED));
+            Assert.That(underTest.IsIgnored(doc.Object), Is.EqualTo(IgnoredState.Inherited));
         }
 
         [Test]
@@ -184,7 +184,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             doc.Setup(f => f.Parents).Returns(parents);
             underTest.Add(Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath));
 
-            Assert.That(underTest.IsIgnored(doc.Object), Is.EqualTo(IgnoredState.NOT_IGNORED));
+            Assert.That(underTest.IsIgnored(doc.Object), Is.EqualTo(IgnoredState.NotIgnored));
         }
     }
 }

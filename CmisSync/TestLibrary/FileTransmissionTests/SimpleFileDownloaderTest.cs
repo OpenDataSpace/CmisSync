@@ -59,7 +59,7 @@ namespace TestLibrary.FileTransmissionTests {
         }
 
         private void SetUp(long length) {
-            this.transmission = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "testfile");
+            this.transmission = new Transmission(TransmissionType.DownloadNewFile, "testfile");
             this.transmission.AddDefaultConstraints();
             if (this.localFileStream != null) {
                 this.localFileStream.Dispose();
@@ -200,7 +200,7 @@ namespace TestLibrary.FileTransmissionTests {
         public void AbortWhileDownload() {
             this.mockedMemStream.Setup(memstream => memstream.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback(() => Thread.Sleep(1)).Returns(1);
             this.transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
-                Assert.That((sender as Transmission).Status, Is.Not.EqualTo(TransmissionStatus.FINISHED));
+                Assert.That((sender as Transmission).Status, Is.Not.EqualTo(TransmissionStatus.Finished));
             };
 
             try {
@@ -213,7 +213,7 @@ namespace TestLibrary.FileTransmissionTests {
                 Assert.Fail();
             } catch (AggregateException e) {
                 Assert.IsInstanceOf(typeof(AbortException), e.InnerException);
-                Assert.That(this.transmission.Status, Is.EqualTo(TransmissionStatus.ABORTED));
+                Assert.That(this.transmission.Status, Is.EqualTo(TransmissionStatus.Aborted));
                 return;
             }
 

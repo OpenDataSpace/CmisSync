@@ -250,7 +250,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             byte[] hash = null;
 
             var cacheFile = fsFactory.CreateDownloadCacheFileInfo(target);
-            var transmission = transmissionManager.CreateTransmission(TransmissionType.DOWNLOAD_MODIFIED_FILE, target.FullName, cacheFile.FullName);
+            var transmission = transmissionManager.CreateTransmission(TransmissionType.DownloadModifiedFile, target.FullName, cacheFile.FullName);
             hash = this.DownloadCacheFile(cacheFile, remoteDocument, transmission, fsFactory);
             obj.ChecksumAlgorithmName = "SHA-1";
 
@@ -288,7 +288,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 throw;
             }
 
-            transmission.Status = TransmissionStatus.FINISHED;
+            transmission.Status = TransmissionStatus.Finished;
             return hash;
         }
 
@@ -318,7 +318,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     }
                 }
 
-                transmission.Status = TransmissionStatus.FINISHED;
+                transmission.Status = TransmissionStatus.Finished;
                 return hash;
             }
         }

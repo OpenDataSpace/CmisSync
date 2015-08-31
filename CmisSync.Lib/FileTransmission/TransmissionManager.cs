@@ -103,7 +103,7 @@ namespace CmisSync.Lib.Queueing {
 
             var transmission = sender as Transmission;
             if (transmission != null &&
-                (transmission.Status == TransmissionStatus.ABORTED || transmission.Status == TransmissionStatus.FINISHED)) {
+                (transmission.Status == TransmissionStatus.Aborted || transmission.Status == TransmissionStatus.Finished)) {
                 lock (this.collectionLock) {
                     this.activeTransmissions.Remove(transmission);
                     transmission.PropertyChanged -= this.TransmissionFinished;

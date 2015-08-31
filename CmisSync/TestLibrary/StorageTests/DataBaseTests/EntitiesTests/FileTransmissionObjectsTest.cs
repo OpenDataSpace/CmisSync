@@ -58,8 +58,8 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests {
             remoteFile.Setup(m => m.ChangeToken).Returns("ChangeToken");
             remoteFile.Setup(m => m.LastModificationDate).Returns(LocalFile.Object.LastWriteTimeUtc);
             remoteFile.Setup(m => m.VersionSeriesCheckedOutId).Returns("RemotePWCId");
-            var obj = new FileTransmissionObject(TransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, remoteFile.Object);
-            Assert.AreEqual(TransmissionType.UPLOAD_NEW_FILE, obj.Type);
+            var obj = new FileTransmissionObject(TransmissionType.UploadNewFile, LocalFile.Object, remoteFile.Object);
+            Assert.AreEqual(TransmissionType.UploadNewFile, obj.Type);
             Assert.AreEqual(LocalFile.Object.FullName, obj.LocalPath);
             Assert.AreEqual(LocalFile.Object.Length, obj.LastContentSize);
             Assert.AreEqual(null, obj.LastChecksum);
@@ -69,7 +69,7 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests {
             Assert.AreEqual("ChangeToken", obj.LastChangeToken);
             Assert.AreEqual("RemotePWCId", obj.RemoteObjectPWCId);
             Assert.AreEqual(LocalFile.Object.LastWriteTimeUtc, obj.LastRemoteWriteTimeUtc);
-            var obj2 = new FileTransmissionObject(TransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, remoteFile.Object);
+            var obj2 = new FileTransmissionObject(TransmissionType.UploadNewFile, LocalFile.Object, remoteFile.Object);
             Assert.IsTrue(obj.Equals(obj2));
 
             obj.ChecksumAlgorithmName = "SHA1";
@@ -96,26 +96,26 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests {
         [Test, Category("Fast"), Category("FileTransmissionObjects")]
         public void ConstructorThrowsExceptionIfLocalFileIsInvalid() {
             //Local file is null
-            Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(TransmissionType.UPLOAD_NEW_FILE, null, Mock.Of<IDocument>()));
+            Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(TransmissionType.UploadNewFile, null, Mock.Of<IDocument>()));
 
             //Local file does not exist
             LocalFile.Setup(f => f.Exists).Returns(false);
-            Assert.Throws<ArgumentException>(() => new FileTransmissionObject(TransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, Mock.Of<IDocument>()));
+            Assert.Throws<ArgumentException>(() => new FileTransmissionObject(TransmissionType.UploadNewFile, LocalFile.Object, Mock.Of<IDocument>()));
         }
 
         [Test, Category("Fast"), Category("FileTransmissionObjects")]
         public void ConstructorThrowsExceptionIfRemoteFileIsInvalid()
         {
             //Remote file is null
-            Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(TransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, null));
+            Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(TransmissionType.UploadNewFile, LocalFile.Object, null));
 
             //RemoteObjectId for remote file is null
             var remoteFile = new Mock<IDocument>();
-            Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(TransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, remoteFile.Object));
+            Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(TransmissionType.UploadNewFile, LocalFile.Object, remoteFile.Object));
 
             //RemoteObjectId for remote file is empty
             remoteFile.Setup(m => m.Id).Returns(string.Empty);
-            Assert.Throws<ArgumentException>(() => new FileTransmissionObject(TransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, remoteFile.Object));
+            Assert.Throws<ArgumentException>(() => new FileTransmissionObject(TransmissionType.UploadNewFile, LocalFile.Object, remoteFile.Object));
         }
     }
 }

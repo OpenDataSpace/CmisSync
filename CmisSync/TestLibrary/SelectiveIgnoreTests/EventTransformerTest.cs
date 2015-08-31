@@ -138,7 +138,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             var session = new Mock<ISession>();
             session.Setup(s => s.GetObject(objectId, It.IsAny<IOperationContext>())).Returns(folderObject);
             contentChangeEvent.UpdateObject(session.Object);
-            this.ignores.Setup(i => i.IsIgnored(folderObject)).Returns(IgnoredState.INHERITED);
+            this.ignores.Setup(i => i.IsIgnored(folderObject)).Returns(IgnoredState.Inherited);
 
             Assert.That(this.underTest.Handle(contentChangeEvent), Is.True);
 
@@ -159,10 +159,10 @@ namespace TestLibrary.SelectiveIgnoreTests {
         private void SetupMocks() {
             this.queue = new Mock<ISyncEventQueue>();
             this.ignores = new Mock<IIgnoredEntitiesStorage>();
-            this.ignores.Setup(i => i.IsIgnoredPath(It.Is<string>(s => !s.Contains(this.ignoredLocalPath)))).Returns(IgnoredState.NOT_IGNORED);
-            this.ignores.Setup(i => i.IsIgnoredPath(this.ignoredLocalPath)).Returns(IgnoredState.IGNORED);
-            this.ignores.Setup(i => i.IsIgnoredPath(It.Is<string>(s => s.StartsWith(this.ignoredLocalPath) && s != this.ignoredLocalPath))).Returns(IgnoredState.INHERITED);
-            this.ignores.Setup(i => i.IsIgnoredId(this.ignoredFolderId)).Returns(IgnoredState.IGNORED);
+            this.ignores.Setup(i => i.IsIgnoredPath(It.Is<string>(s => !s.Contains(this.ignoredLocalPath)))).Returns(IgnoredState.NotIgnored);
+            this.ignores.Setup(i => i.IsIgnoredPath(this.ignoredLocalPath)).Returns(IgnoredState.Ignored);
+            this.ignores.Setup(i => i.IsIgnoredPath(It.Is<string>(s => s.StartsWith(this.ignoredLocalPath) && s != this.ignoredLocalPath))).Returns(IgnoredState.Inherited);
+            this.ignores.Setup(i => i.IsIgnoredId(this.ignoredFolderId)).Returns(IgnoredState.Ignored);
             this.underTest = new SelectiveIgnoreEventTransformer(this.ignores.Object, this.queue.Object);
         }
     }

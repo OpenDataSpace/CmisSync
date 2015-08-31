@@ -78,7 +78,7 @@ namespace CmisSync.Lib.SelectiveIgnore {
             var contentChangeEvent = e as ContentChangeEvent;
             if (contentChangeEvent != null) {
                 if (contentChangeEvent.Type != ChangeType.Deleted) {
-                    var state = IgnoredState.NOT_IGNORED;
+                    var state = IgnoredState.NotIgnored;
                     var cmisObject = contentChangeEvent.CmisObject;
                     if (cmisObject is IFolder) {
                         state = this.ignores.IsIgnored(cmisObject as IFolder);
@@ -86,7 +86,7 @@ namespace CmisSync.Lib.SelectiveIgnore {
                         state = this.ignores.IsIgnored(cmisObject as IDocument);
                     }
 
-                    if (state == IgnoredState.INHERITED) {
+                    if (state == IgnoredState.Inherited) {
                         this.queue.AddEvent(new ContentChangeEvent(ChangeType.Deleted, contentChangeEvent.ObjectId));
                         return true;
                     }
@@ -97,7 +97,7 @@ namespace CmisSync.Lib.SelectiveIgnore {
         }
 
         private bool IsInsideIgnoredPath(string path) {
-            return this.ignores.IsIgnoredPath(path) == IgnoredState.INHERITED;
+            return this.ignores.IsIgnoredPath(path) == IgnoredState.Inherited;
         }
     }
 }

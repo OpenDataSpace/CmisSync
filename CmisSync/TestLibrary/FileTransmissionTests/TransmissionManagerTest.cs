@@ -41,7 +41,7 @@ namespace TestLibrary.FileTransmissionTests {
         public void CreatingASingleTransmissionIncreasesListCountByOne() {
             var underTest = new TransmissionManager();
 
-            underTest.Add(new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path"));
+            underTest.Add(new Transmission(TransmissionType.DownloadNewFile, "path"));
 
             Assert.That(underTest.ActiveTransmissions.Count, Is.EqualTo(1));
         }
@@ -49,7 +49,7 @@ namespace TestLibrary.FileTransmissionTests {
         [Test, Category("Fast")]
         public void ListedTransmissionIsEqualToAdded() {
             var underTest = new TransmissionManager();
-            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new Transmission(TransmissionType.DownloadNewFile, "path");
             underTest.Add(trans);
 
             Assert.That(underTest.ActiveTransmissions[0], Is.EqualTo(trans));
@@ -59,10 +59,10 @@ namespace TestLibrary.FileTransmissionTests {
         [Test, Category("Fast")]
         public void AFinishedTransmissionIsRemovedFromList() {
             var underTest = new TransmissionManager();
-            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new Transmission(TransmissionType.DownloadNewFile, "path");
             underTest.Add(trans);
 
-            trans.Status = TransmissionStatus.FINISHED;
+            trans.Status = TransmissionStatus.Finished;
 
             Assert.That(underTest.ActiveTransmissions, Is.Empty);
         }
@@ -70,10 +70,10 @@ namespace TestLibrary.FileTransmissionTests {
         [Test, Category("Fast")]
         public void AnAbortedTransmissionIsRemovedFromList() {
             var underTest = new TransmissionManager();
-            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new Transmission(TransmissionType.DownloadNewFile, "path");
             underTest.Add(trans);
 
-            trans.Status = TransmissionStatus.ABORTED;
+            trans.Status = TransmissionStatus.Aborted;
 
             Assert.That(underTest.ActiveTransmissions, Is.Empty);
         }
@@ -81,8 +81,8 @@ namespace TestLibrary.FileTransmissionTests {
         [Test, Category("Fast")]
         public void AddingTwoTransmissionProducesTwoEntriesInList() {
             var underTest = new TransmissionManager();
-            underTest.Add(new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path"));
-            underTest.Add(new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path2"));
+            underTest.Add(new Transmission(TransmissionType.DownloadNewFile, "path"));
+            underTest.Add(new Transmission(TransmissionType.DownloadNewFile, "path2"));
 
             Assert.That(underTest.ActiveTransmissions.Count, Is.EqualTo(2));
         }
@@ -96,11 +96,11 @@ namespace TestLibrary.FileTransmissionTests {
             underTest.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
                 eventCounter++;
                 Assert.That(e.NewItems.Count, Is.EqualTo(1));
-                Assert.That((e.NewItems[0] as Transmission).Type, Is.EqualTo(TransmissionType.DOWNLOAD_NEW_FILE));
+                Assert.That((e.NewItems[0] as Transmission).Type, Is.EqualTo(TransmissionType.DownloadNewFile));
                 Assert.That((e.NewItems[0] as Transmission).Path, Is.EqualTo(path));
             };
 
-            underTest.Add(new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, path));
+            underTest.Add(new Transmission(TransmissionType.DownloadNewFile, path));
 
             Assert.That(eventCounter, Is.EqualTo(1));
         }
@@ -108,7 +108,7 @@ namespace TestLibrary.FileTransmissionTests {
         [Test, Category("Fast")]
         public void AFinishedTransmissionFiresEvent() {
             var underTest = new TransmissionManager();
-            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new Transmission(TransmissionType.DownloadNewFile, "path");
             underTest.Add(trans);
             int eventCounter = 0;
 
@@ -118,7 +118,7 @@ namespace TestLibrary.FileTransmissionTests {
                 Assert.That(e.OldItems.Count, Is.EqualTo(1));
                 Assert.That(e.OldItems[0], Is.EqualTo(trans));
             };
-            trans.Status = TransmissionStatus.FINISHED;
+            trans.Status = TransmissionStatus.Finished;
 
             Assert.That(eventCounter, Is.EqualTo(1));
         }

@@ -61,7 +61,7 @@ namespace TestLibrary.FileTransmissionTests {
 
             Assert.That(transmission.Repository, Is.EqualTo(repoName));
             Assert.That(transmission.Path, Is.EqualTo(path));
-            if (type == TransmissionType.DOWNLOAD_MODIFIED_FILE || type == TransmissionType.DOWNLOAD_NEW_FILE) {
+            if (type == TransmissionType.DownloadModifiedFile || type == TransmissionType.DownloadNewFile) {
                 Assert.That(transmission.MaxBandwidth, Is.EqualTo(downloadLimit));
             } else {
                 Assert.That(transmission.MaxBandwidth, Is.EqualTo(uploadLimit));
@@ -84,7 +84,7 @@ namespace TestLibrary.FileTransmissionTests {
 
             repo.Update(new RepoInfo { DisplayName = repoName, DownloadLimit = downloadLimit, UploadLimit = uploadLimit });
 
-            if (type == TransmissionType.DOWNLOAD_MODIFIED_FILE || type == TransmissionType.DOWNLOAD_NEW_FILE) {
+            if (type == TransmissionType.DownloadModifiedFile || type == TransmissionType.DownloadNewFile) {
                 Assert.That(transmission.MaxBandwidth, Is.EqualTo(downloadLimit));
             } else {
                 Assert.That(transmission.MaxBandwidth, Is.EqualTo(uploadLimit));
@@ -104,7 +104,7 @@ namespace TestLibrary.FileTransmissionTests {
             var underTest = new TransmissionFactory(repo, aggregator.Object);
 
             var transmission = underTest.CreateTransmission(type, "path");
-            transmission.Status = TransmissionStatus.FINISHED;
+            transmission.Status = TransmissionStatus.Finished;
             repo.Update(new RepoInfo { DisplayName = repoName, DownloadLimit = downloadLimit, UploadLimit = uploadLimit });
 
             Assert.That(transmission.MaxBandwidth, Is.EqualTo(0));

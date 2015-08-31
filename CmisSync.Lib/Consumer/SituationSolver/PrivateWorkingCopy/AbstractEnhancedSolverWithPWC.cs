@@ -219,7 +219,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     throw uploadFailed;
                 }
 
-                transmission.Status = TransmissionStatus.FINISHED;
+                transmission.Status = TransmissionStatus.Finished;
                 return hash;
             }
         }

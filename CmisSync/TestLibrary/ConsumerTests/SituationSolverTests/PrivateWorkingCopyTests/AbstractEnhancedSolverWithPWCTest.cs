@@ -105,7 +105,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
             Assert.That(hash, Is.EqualTo(expectedHash));
             checkedOutDoc.Verify(d => d.CheckIn(true, It.IsAny<IDictionary<string, object>>(), It.IsAny<IContentStream>(), It.IsAny<string>()), Times.Once);
-            Assert.That(transmission.Status, Is.EqualTo(TransmissionStatus.FINISHED));
+            Assert.That(transmission.Status, Is.EqualTo(TransmissionStatus.Finished));
         }
 
         [Test, Category("Fast")]
@@ -153,11 +153,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             var exception = Assert.Throws<UploadFailedException>(() => underTest.CallUploadFileWithPWC(localFile.Object, ref doc, this.transmission, null));
 
             checkedOutDoc.Verify(d => d.CheckIn(true, It.IsAny<IDictionary<string, object>>(), It.IsAny<IContentStream>(), It.IsAny<string>()), Times.Once);
-            Assert.That(transmission.Status, Is.EqualTo(TransmissionStatus.ABORTED));
+            Assert.That(transmission.Status, Is.EqualTo(TransmissionStatus.Aborted));
             Assert.That(exception.InnerException, Is.TypeOf<CmisConstraintException>());
         }
 
-        private SolverClass InitializeMocksAndCreateSolver(TransmissionType type = TransmissionType.UPLOAD_NEW_FILE, long chunkSize = 1024) {
+        private SolverClass InitializeMocksAndCreateSolver(TransmissionType type = TransmissionType.UploadNewFile, long chunkSize = 1024) {
             this.session = new Mock<ISession>().SetupTypeSystem().SetupPrivateWorkingCopyCapability();
             this.storage = new Mock<IMetaDataStorage>();
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();

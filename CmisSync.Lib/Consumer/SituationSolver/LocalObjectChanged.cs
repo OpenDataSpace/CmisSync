@@ -99,7 +99,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
                 var doc = remoteId as IDocument;
                 try {
-                    var transmission = this.transmissionFactory.CreateTransmission(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                    var transmission = this.transmissionFactory.CreateTransmission(TransmissionType.UploadModifiedFile, localFile.FullName);
                     mappedObject.LastChecksum = this.UploadFile(localFile, doc, transmission);
                 } catch (Exception ex) {
                     if (ex.InnerException is CmisPermissionDeniedException) {

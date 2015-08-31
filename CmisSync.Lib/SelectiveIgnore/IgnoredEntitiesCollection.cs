@@ -66,17 +66,17 @@ namespace CmisSync.Lib.SelectiveIgnore {
                 throw new ArgumentNullException("doc");
             }
 
-            if (this.IsIgnoredId(doc.Id) == IgnoredState.IGNORED) {
-                return IgnoredState.IGNORED;
+            if (this.IsIgnoredId(doc.Id) == IgnoredState.Ignored) {
+                return IgnoredState.Ignored;
             } else {
                 if (doc.Parents != null && doc.Parents.Count > 0) {
-                    if (this.IsIgnored(doc.Parents[0]) != IgnoredState.NOT_IGNORED) {
-                        return IgnoredState.INHERITED;
+                    if (this.IsIgnored(doc.Parents[0]) != IgnoredState.NotIgnored) {
+                        return IgnoredState.Inherited;
                     }
                 }
             }
 
-            return IgnoredState.NOT_IGNORED;
+            return IgnoredState.NotIgnored;
         }
 
         /// <summary>
@@ -90,22 +90,22 @@ namespace CmisSync.Lib.SelectiveIgnore {
                 throw new ArgumentNullException("folder");
             }
 
-            if (this.IsIgnoredId(folder.Id) == IgnoredState.IGNORED) {
-                return IgnoredState.IGNORED;
+            if (this.IsIgnoredId(folder.Id) == IgnoredState.Ignored) {
+                return IgnoredState.Ignored;
             } else {
                 try {
                     var parent = folder.FolderParent;
                     if (parent != null) {
-                        if (this.IsIgnored(parent) != IgnoredState.NOT_IGNORED) {
-                            return IgnoredState.INHERITED;
+                        if (this.IsIgnored(parent) != IgnoredState.NotIgnored) {
+                            return IgnoredState.Inherited;
                         }
                     }
                 } catch (CmisObjectNotFoundException) {
-                    return IgnoredState.NOT_IGNORED;
+                    return IgnoredState.NotIgnored;
                 }
             }
 
-            return IgnoredState.NOT_IGNORED;
+            return IgnoredState.NotIgnored;
         }
 
         /// <summary>
@@ -116,9 +116,9 @@ namespace CmisSync.Lib.SelectiveIgnore {
         /// <param name="objectId">Object identifier.</param>
         public IgnoredState IsIgnoredId(string objectId) {
             if (this.entries.ContainsKey(objectId)) {
-                return IgnoredState.IGNORED;
+                return IgnoredState.Ignored;
             } else {
-                return IgnoredState.NOT_IGNORED;
+                return IgnoredState.NotIgnored;
             }
         }
 
@@ -131,13 +131,13 @@ namespace CmisSync.Lib.SelectiveIgnore {
         public IgnoredState IsIgnoredPath(string localPath) {
             foreach (var entry in this.entries.Values) {
                 if (localPath == entry.LocalPath) {
-                    return IgnoredState.IGNORED;
+                    return IgnoredState.Ignored;
                 } else if (localPath.StartsWith(entry.LocalPath.EndsWith(Path.DirectorySeparatorChar.ToString()) ? entry.LocalPath : entry.LocalPath + Path.DirectorySeparatorChar.ToString())) {
-                    return IgnoredState.INHERITED;
+                    return IgnoredState.Inherited;
                 }
             }
 
-            return IgnoredState.NOT_IGNORED;
+            return IgnoredState.NotIgnored;
         }
     }
 }

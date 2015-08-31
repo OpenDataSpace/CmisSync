@@ -56,7 +56,7 @@ namespace TestLibrary.FileTransmissionTests {
 
         [SetUp]
         public void SetUp() {
-            this.transmission = new Transmission(TransmissionType.UPLOAD_NEW_FILE, "testfile");
+            this.transmission = new Transmission(TransmissionType.UploadNewFile, "testfile");
             this.transmission.AddDefaultConstraints();
             this.lastChunk = 0;
             this.localContent = new byte[this.fileLength];

@@ -141,7 +141,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 var cacheFile = this.fsFactory.CreateDownloadCacheFileInfo(guid);
 
                 IDocument remoteDoc = remoteId as IDocument;
-                var transmission = this.manager.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName, cacheFile.FullName);
+                var transmission = this.manager.CreateTransmission(TransmissionType.DownloadNewFile, localFile.FullName, cacheFile.FullName);
                 byte[] hash = DownloadCacheFile(cacheFile, remoteDoc, transmission, this.fsFactory);
 
                 try {
@@ -217,7 +217,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 };
                 this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local file {0} created and mapped to remote file {1}", file.FullName, remoteId.Id));
-                transmission.Status = TransmissionStatus.FINISHED;
+                transmission.Status = TransmissionStatus.Finished;
             }
         }
 

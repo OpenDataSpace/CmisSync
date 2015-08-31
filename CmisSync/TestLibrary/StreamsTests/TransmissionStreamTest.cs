@@ -32,7 +32,7 @@ namespace TestLibrary.StreamsTests {
     public class TransmissionStreamTest {
         [Test, Category("Fast"), Category("Streams")]
         public void ConstructorFailsIfStreamIsNull() {
-            Assert.Throws<ArgumentNullException>(() => {using (new TransmissionStream(null, new Transmission(TransmissionType.DOWNLOAD_MODIFIED_FILE, "path")));});
+            Assert.Throws<ArgumentNullException>(() => {using (new TransmissionStream(null, new Transmission(TransmissionType.DownloadModifiedFile, "path")));});
         }
 
         [Test, Category("Fast"), Category("Streams")]
@@ -45,7 +45,7 @@ namespace TestLibrary.StreamsTests {
 
         [Test, Category("Fast"), Category("Streams")]
         public void ConstructorTakesTransmissionAndStream() {
-            var transmission = new Transmission(TransmissionType.DOWNLOAD_MODIFIED_FILE, "path");
+            var transmission = new Transmission(TransmissionType.DownloadModifiedFile, "path");
             using (var stream = new MemoryStream())
             using (var underTest = new TransmissionStream(stream, transmission)) {
             }
@@ -53,7 +53,7 @@ namespace TestLibrary.StreamsTests {
 
         [Test, Category("Fast"), Category("Streams")]
         public void AbortReadIfAbortIsCalled() {
-            var transmission = new Transmission(TransmissionType.DOWNLOAD_MODIFIED_FILE, "path");
+            var transmission = new Transmission(TransmissionType.DownloadModifiedFile, "path");
             using (var outputStream = new MemoryStream())
             using (var stream = new Mock<MemoryStream>() { CallBase = true }.Object)
             using (var underTest = new TransmissionStream(stream, transmission)) {
@@ -66,7 +66,7 @@ namespace TestLibrary.StreamsTests {
 
         [Test, Category("Fast"), Category("Streams")]
         public void AbortWriteIfAbortIsCalled() {
-            var transmission = new Transmission(TransmissionType.DOWNLOAD_MODIFIED_FILE, "path");
+            var transmission = new Transmission(TransmissionType.DownloadModifiedFile, "path");
             using (var inputStream = new MemoryStream(new byte[1024 * 1024 * 10]))
             using (var stream = new Mock<MemoryStream>() { CallBase = true }.Object)
             using (var underTest = new TransmissionStream(stream, transmission)) {
@@ -85,7 +85,7 @@ namespace TestLibrary.StreamsTests {
             int limit = 1024;
             int contentSize = 2 * limit;
 
-            var transmission = new Transmission(TransmissionType.DOWNLOAD_MODIFIED_FILE, "path");
+            var transmission = new Transmission(TransmissionType.DownloadModifiedFile, "path");
             if (!isBandwidthLimitedAfterInit) {
                 transmission.MaxBandwidth = limit;
             }

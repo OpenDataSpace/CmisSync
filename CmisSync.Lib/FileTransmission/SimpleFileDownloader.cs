@@ -92,7 +92,7 @@ namespace CmisSync.Lib.FileTransmission {
                 while ((len = remoteStream.Read(buffer, 0, buffer.Length)) > 0) {
                     lock (this.disposeLock) {
                         if (this.disposed) {
-                            transmission.Status = TransmissionStatus.ABORTED;
+                            transmission.Status = TransmissionStatus.Aborted;
                             throw new ObjectDisposedException(transmission.Path);
                         }
 

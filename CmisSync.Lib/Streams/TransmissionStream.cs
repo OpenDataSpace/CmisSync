@@ -53,7 +53,7 @@ namespace CmisSync.Lib.Streams {
             this.abort.PropertyChanged += (object sender, PropertyChangedEventArgs e) => {
                 var a = sender as AbortableStream;
                 if (e.PropertyName == Utils.NameOf(() => a.Exception)) {
-                    transmission.Status = TransmissionStatus.ABORTED;
+                    transmission.Status = TransmissionStatus.Aborted;
                     transmission.FailedException = a.Exception;
                 }
             };
@@ -74,12 +74,12 @@ namespace CmisSync.Lib.Streams {
             transmission.PropertyChanged += (object sender, PropertyChangedEventArgs e) => {
                 var t = sender as Transmission;
                 if (e.PropertyName == Utils.NameOf(() => t.Status)) {
-                    if (t.Status == TransmissionStatus.ABORTING) {
+                    if (t.Status == TransmissionStatus.Aborting) {
                         this.abort.Abort();
                         this.pause.Resume();
-                    } else if (t.Status == TransmissionStatus.PAUSED) {
+                    } else if (t.Status == TransmissionStatus.Paused) {
                         this.pause.Pause();
-                    } else if (t.Status == TransmissionStatus.TRANSMITTING) {
+                    } else if (t.Status == TransmissionStatus.Transmitting) {
                         this.pause.Resume();
                     }
                 } else if (e.PropertyName == Utils.NameOf(() => t.MaxBandwidth)) {
@@ -91,7 +91,7 @@ namespace CmisSync.Lib.Streams {
                     }
                 }
             };
-            if (transmission.Status == TransmissionStatus.ABORTING || transmission.Status == TransmissionStatus.ABORTED) {
+            if (transmission.Status == TransmissionStatus.Aborting || transmission.Status == TransmissionStatus.Aborted) {
                 this.abort.Abort();
             }
 

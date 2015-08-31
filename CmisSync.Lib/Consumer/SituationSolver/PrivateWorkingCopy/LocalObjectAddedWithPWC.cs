@@ -115,7 +115,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
                 Guid uuid = this.WriteOrUseUuidIfSupported(localFile);
 
-                var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
+                var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UploadNewFile, localFile.FullName);
 
                 MappedObject mapped = new MappedObject(
                     localFile.Name,

@@ -86,10 +86,10 @@ namespace CmisSync.Widgets {
                     this.UpdateStatus(this.transmission.Status);
                     this.UpdateSizeAndPositionStatus(this.transmission);
                     switch (this.transmission.Type) {
-                    case TransmissionType.DOWNLOAD_NEW_FILE:
+                    case TransmissionType.DownloadNewFile:
                         this.fileTypeImage.Pixbuf = UIHelpers.GetIcon("dataspacesync-downloading", 16);
                         break;
-                    case TransmissionType.UPLOAD_NEW_FILE:
+                    case TransmissionType.UploadNewFile:
                         this.fileTypeImage.Pixbuf = UIHelpers.GetIcon("dataspacesync-uploading", 16);
                         break;
                     default:
@@ -149,13 +149,13 @@ namespace CmisSync.Widgets {
         private void UpdateStatus(TransmissionStatus status) {
             this.animation.Stop();
             switch (status) {
-            case TransmissionStatus.FINISHED:
+            case TransmissionStatus.Finished:
                 this.openFileInFolderButton.Sensitive = true;
                 this.Progress = 1.0;
                 this.bandwidthLabel.Markup = string.Empty;
                 this.midbox.Remove(this.transmissionProgressBar);
                 break;
-            case TransmissionStatus.ABORTING:
+            case TransmissionStatus.Aborting:
                 this.animation.Start();
                 break;
             default:

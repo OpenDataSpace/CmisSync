@@ -100,7 +100,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                         // Upload local content
                         updateRemoteDate = true;
                         try {
-                            var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UPLOAD_MODIFIED_FILE, fileInfo.FullName);
+                            var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UploadModifiedFile, fileInfo.FullName);
                             obj.LastChecksum = this.UploadFile(fileInfo, doc, transmission);
                             obj.LastContentSize = doc.ContentStreamLength ?? fileInfo.Length;
                         } catch(Exception ex) {

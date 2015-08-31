@@ -123,7 +123,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         [Test, Category("Fast"), Category("Solver")]
         public void SolverUploadsFileContentByCreatingNewPWC([Values(1, 1024, 123456)]long fileSize) {
             this.SetUpMocks();
-            this.manager.SetupCreateTransmissionOnce(TransmissionType.UPLOAD_MODIFIED_FILE, this.localPath);
+            this.manager.SetupCreateTransmissionOnce(TransmissionType.UploadModifiedFile, this.localPath);
             this.SetupFile();
             byte[] content = new byte[fileSize];
             var hash = SHA1.Create().ComputeHash(content);

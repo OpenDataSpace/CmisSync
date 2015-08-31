@@ -45,7 +45,7 @@ namespace CmisSync.Lib.FileTransmission {
                 if (e.PropertyName == Utils.NameOf(() => this.repository.DownloadLimit)) {
                     lock (this.collectionLock) {
                         foreach (var transmission in this.transmissions) {
-                            if (transmission.Type == TransmissionType.DOWNLOAD_NEW_FILE || transmission.Type == TransmissionType.DOWNLOAD_MODIFIED_FILE) {
+                            if (transmission.Type == TransmissionType.DownloadNewFile || transmission.Type == TransmissionType.DownloadModifiedFile) {
                                 transmission.MaxBandwidth = this.repository.DownloadLimit;
                             }
                         }
@@ -53,7 +53,7 @@ namespace CmisSync.Lib.FileTransmission {
                 } else if (e.PropertyName == Utils.NameOf(() => this.repository.UploadLimit)) {
                     lock (this.collectionLock) {
                         foreach (var transmission in this.transmissions) {
-                            if (transmission.Type == TransmissionType.UPLOAD_NEW_FILE || transmission.Type == TransmissionType.UPLOAD_MODIFIED_FILE) {
+                            if (transmission.Type == TransmissionType.UploadNewFile || transmission.Type == TransmissionType.UploadModifiedFile) {
                                 transmission.MaxBandwidth = this.repository.UploadLimit;
                             }
                         }
@@ -67,14 +67,14 @@ namespace CmisSync.Lib.FileTransmission {
                 Repository = this.repository.Name
             };
             switch (type) {
-            case TransmissionType.DOWNLOAD_NEW_FILE:
-                goto case TransmissionType.DOWNLOAD_MODIFIED_FILE;
-            case TransmissionType.DOWNLOAD_MODIFIED_FILE:
+            case TransmissionType.DownloadNewFile:
+                goto case TransmissionType.DownloadModifiedFile;
+            case TransmissionType.DownloadModifiedFile:
                 transmission.MaxBandwidth = this.repository.DownloadLimit;
                 break;
-            case TransmissionType.UPLOAD_NEW_FILE:
-                goto case TransmissionType.UPLOAD_MODIFIED_FILE;
-            case TransmissionType.UPLOAD_MODIFIED_FILE:
+            case TransmissionType.UploadNewFile:
+                goto case TransmissionType.UploadModifiedFile;
+            case TransmissionType.UploadModifiedFile:
                 transmission.MaxBandwidth = this.repository.UploadLimit;
                 break;
             }
@@ -91,7 +91,7 @@ namespace CmisSync.Lib.FileTransmission {
         private void TransmissionFinished(object sender, PropertyChangedEventArgs e) {
             var t = sender as Transmission;
             if (e.PropertyName == Utils.NameOf(() => t.Status)) {
-                if (t.Status == TransmissionStatus.ABORTED || t.Status == TransmissionStatus.FINISHED) {
+                if (t.Status == TransmissionStatus.Aborted || t.Status == TransmissionStatus.Finished) {
                     lock (this.collectionLock) {
                         this.transmissions.Remove(t);
                         t.PropertyChanged -= this.TransmissionFinished;

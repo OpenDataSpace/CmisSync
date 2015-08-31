@@ -78,7 +78,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     Logger.Debug(string.Format("\"{0}\" is different from {1}", localFile.FullName, mappedObject.ToString()));
                     OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
                     try {
-                        var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                        var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UploadModifiedFile, localFile.FullName);
                         mappedObject.LastChecksum = this.UploadFileWithPWC(localFile, ref remoteDocument, transmission);
                         mappedObject.ChecksumAlgorithmName = "SHA-1";
                         if (remoteDocument.Id != mappedObject.RemoteObjectId) {

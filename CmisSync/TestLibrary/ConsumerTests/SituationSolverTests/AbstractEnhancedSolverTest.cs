@@ -150,7 +150,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             }
 
             public byte[] Upload(IFileInfo localFile, IDocument doc, ITransmissionFactory transmissionManager) {
-                var transmission = transmissionManager.CreateTransmission(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                var transmission = transmissionManager.CreateTransmission(TransmissionType.UploadModifiedFile, localFile.FullName);
                 return this.UploadFile(localFile, doc, transmission);
             }
 

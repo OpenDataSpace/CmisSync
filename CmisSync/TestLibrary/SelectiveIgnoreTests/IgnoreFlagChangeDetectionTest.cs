@@ -144,7 +144,7 @@ namespace TestLibrary.SelectiveIgnoreTests
             var changedObject = MockOfIFolderUtil.CreateRemoteFolderMock(this.folderId, this.folderName, this.remotePath, Guid.NewGuid().ToString());
             var changeEvent = new ContentChangeEvent(ChangeType.Updated, this.folderId);
             this.session.Setup(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>())).Returns(changedObject.Object);
-            this.ignoreStorage.Setup(i => i.IsIgnoredId(this.folderId)).Returns(IgnoredState.IGNORED);
+            this.ignoreStorage.Setup(i => i.IsIgnoredId(this.folderId)).Returns(IgnoredState.Ignored);
             changeEvent.UpdateObject(this.session.Object);
 
             Assert.That(this.underTest.Handle(changeEvent), Is.False);
@@ -169,7 +169,7 @@ namespace TestLibrary.SelectiveIgnoreTests
         [Test, Category("Fast"), Category("SelectiveIgnore")]
         public void DeleteEventForAFormerIgnoredObject() {
             this.SetUpMocks();
-            this.ignoreStorage.Setup(i => i.IsIgnoredId(this.folderId)).Returns(IgnoredState.IGNORED);
+            this.ignoreStorage.Setup(i => i.IsIgnoredId(this.folderId)).Returns(IgnoredState.Ignored);
             var deleteEvent = new ContentChangeEvent(ChangeType.Deleted, this.folderId);
 
             Assert.That(this.underTest.Handle(deleteEvent), Is.False);

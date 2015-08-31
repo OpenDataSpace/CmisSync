@@ -60,7 +60,7 @@ namespace TestLibrary.FileTransmissionTests {
 
         [SetUp]
         public void SetUp() {
-            this.transmission = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "testfile");
+            this.transmission = new Transmission(TransmissionType.DownloadNewFile, "testfile");
             this.transmission.AddDefaultConstraints();
             if (this.localFileStream != null) {
                 this.localFileStream.Dispose();
@@ -308,7 +308,7 @@ namespace TestLibrary.FileTransmissionTests {
             mock.Setup(m => m.ChangeToken).Returns("ChangeToken");
 
             Mock<IFileTransmissionObject> obj = new Mock<IFileTransmissionObject>();
-            obj.Setup(m => m.Type).Returns(TransmissionType.DOWNLOAD_NEW_FILE);
+            obj.Setup(m => m.Type).Returns(TransmissionType.DownloadNewFile);
             obj.Setup(m => m.LocalPath).Returns(this.localFile);
             byte[] checksum = SHA1Managed.Create().ComputeHash(this.remoteContent, 0, (int)startPos);
             obj.Setup(m => m.LastChecksum).Returns(checksum);
