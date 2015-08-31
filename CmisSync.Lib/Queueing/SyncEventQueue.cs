@@ -35,22 +35,23 @@ namespace CmisSync.Lib.Queueing {
     /// Sync event queue.
     /// </summary>
     public class SyncEventQueue : ICountingQueue {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventQueue));
+
         /// <summary>
         /// The full counter.
         /// </summary>
-        protected IEventCounter fullCounter;
+        private IEventCounter fullCounter;
 
         /// <summary>
         /// The category counter.
         /// </summary>
-        protected IEventCounter categoryCounter;
+        private IEventCounter categoryCounter;
 
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventQueue));
         private BlockingCollection<ISyncEvent> queue = new BlockingCollection<ISyncEvent>();
         private Task consumer;
         private AutoResetEvent suspendHandle = new AutoResetEvent(false);
-        private bool alreadyDisposed = false;
-        private bool suspend = false;
+        private bool alreadyDisposed;
+        private bool suspend;
         private object subscriberLock = new object();
 
         /// <summary>
@@ -131,13 +132,18 @@ namespace CmisSync.Lib.Queueing {
                 return;
             }
 
+            if (newEvent == null) {
+                throw new ArgumentNullException("newEvent");
+            }
+
             try {
-                if (newEvent is ICountableEvent) {
-                    var category = (newEvent as ICountableEvent).Category;
+                var countableEvent = newEvent as ICountableEvent;
+                if (countableEvent != null) {
+                    var category = countableEvent.Category;
                     if (category != EventCategory.NoCategory) {
                         lock (this.subscriberLock) {
-                            this.categoryCounter.Increase(newEvent as ICountableEvent);
-                            this.fullCounter.Increase(newEvent as ICountableEvent);
+                            this.categoryCounter.Increase(countableEvent);
+                            this.fullCounter.Increase(countableEvent);
                         }
                     }
                 }
@@ -182,9 +188,9 @@ namespace CmisSync.Lib.Queueing {
         /// Waits for stopped.
         /// </summary>
         /// <returns><c>true</c>, if stopped in period of timeout, <c>false</c> otherwise.</returns>
-        /// <param name="milisecondsTimeout">Miliseconds timeout.</param>
-        public bool WaitForStopped(int milisecondsTimeout) {
-            return this.consumer.Wait(milisecondsTimeout);
+        /// <param name="timeout">Miliseconds timeout.</param>
+        public bool WaitForStopped(int timeout) {
+            return this.consumer.Wait(timeout);
         }
 
         /// <summary>
@@ -272,12 +278,13 @@ namespace CmisSync.Lib.Queueing {
                         Logger.Error(string.Format("Exception in EventHandler on Event {0}: ", syncEvent.ToString()), e);
                     }
 
-                    if (syncEvent is ICountableEvent) {
-                        var category = (syncEvent as ICountableEvent).Category;
+                    var countableEvent = syncEvent as ICountableEvent;
+                    if (countableEvent != null) {
+                        var category = countableEvent.Category;
                         if (category != EventCategory.NoCategory) {
                             lock (this.subscriberLock) {
-                                this.fullCounter.Decrease(syncEvent as ICountableEvent);
-                                this.categoryCounter.Decrease(syncEvent as ICountableEvent);
+                                this.fullCounter.Decrease(countableEvent);
+                                this.categoryCounter.Decrease(countableEvent);
                             }
                         }
                     }

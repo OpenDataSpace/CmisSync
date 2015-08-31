@@ -100,6 +100,21 @@ namespace TestLibrary.QueueingTests {
         }
 
         [Test, Category("Fast")]
+        public void AddNullAsEventThrowsException() {
+            var manager = new Mock<ISyncEventManager>();
+            var syncEvent = Mock.Of<ISyncEvent>();
+            using (var underTest = new SyncEventQueue(manager.Object)) {
+                Assert.Throws<ArgumentNullException>(() => underTest.AddEvent(null));
+                underTest.StopListener();
+                WaitFor(underTest, (q) => { return q.IsStopped; });
+                Assert.That(underTest.IsStopped, Is.True);
+                Assert.That(underTest.IsEmpty, Is.True);
+            }
+
+            manager.Verify(foo => foo.Handle(syncEvent), Times.Never);
+        }
+
+        [Test, Category("Fast")]
         public void AddEventToStoppedQueueDoesNotRaise() {
             using (var underTest = new SyncEventQueue(new Mock<ISyncEventManager>().Object)) {
                 underTest.StopListener();
