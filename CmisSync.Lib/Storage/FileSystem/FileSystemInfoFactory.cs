@@ -63,6 +63,10 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <returns>The conflict file info.</returns>
         /// <param name="file">File for which a new conflict file should be created.</param>
         public IFileInfo CreateConflictFileInfo(IFileInfo file) {
+            if (file == null) {
+                throw new ArgumentNullException("file");
+            }
+
             if (!file.Exists) {
                 return file;
             }
@@ -109,6 +113,10 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <returns>The download cache file info.</returns>
         /// <param name="file">File which should be updated.</param>
         public IFileInfo CreateDownloadCacheFileInfo(IFileInfo file) {
+            if (file == null) {
+                throw new ArgumentNullException("file");
+            }
+
             if (!file.Exists) {
                 throw new FileNotFoundException(string.Format("Given file {0} does not exists", file.FullName));
             }
