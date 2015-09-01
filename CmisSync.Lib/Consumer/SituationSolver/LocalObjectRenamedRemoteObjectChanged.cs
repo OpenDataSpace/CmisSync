@@ -30,9 +30,19 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
+    /// <summary>
+    /// Local object renamed remote object changed solver.
+    /// </summary>
     public class LocalObjectRenamedRemoteObjectChanged : AbstractEnhancedSolver {
         private readonly ISolver changeChangeSolver;
 
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectRenamedRemoteObjectChanged"/> class.
+        /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="changeSolver">Change solver.</param>
         public LocalObjectRenamedRemoteObjectChanged(
             ISession session,
             IMetaDataStorage storage,
@@ -50,12 +60,21 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
+            if (remoteId == null) {
+                throw new ArgumentNullException("remoteId");
+            }
+
+            if (localFileSystemInfo == null) {
+                throw new ArgumentNullException("localFileSystemInfo");
+            }
+
             var obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
-            string oldName = (remoteId as ICmisObject).Name;
+            var cmisObject = remoteId as ICmisObject;
+            string oldName = cmisObject.Name;
 
             // Rename object
             try {
-                (remoteId as ICmisObject).Rename(localFileSystemInfo.Name, true);
+                cmisObject.Rename(localFileSystemInfo.Name, true);
             } catch (CmisConstraintException e) {
                 if (!Utils.IsValidISO885915(localFileSystemInfo.Name)) {
                     OperationsLogger.Warn(string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, localFileSystemInfo.Name));
@@ -72,7 +91,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             }
 
             obj.Name = localFileSystemInfo.Name;
-            obj.Ignored = (remoteId as ICmisObject).AreAllChildrenIgnored();
+            obj.Ignored = cmisObject.AreAllChildrenIgnored();
             this.Storage.SaveMappedObject(obj);
             this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
         }
