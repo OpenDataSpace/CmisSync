@@ -119,7 +119,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 }
 
                 mappedObject.LastRemoteWriteTimeUtc = doc.LastModificationDate;
-                mappedObject.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
                 mappedObject.LastContentSize = localFile.Length;
 
                 OperationsLogger.Info(string.Format("Local changed file \"{0}\" has been uploaded", fullName));
@@ -127,25 +126,25 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
             localFileSystemInfo.TryToSetReadOnlyStateIfDiffers(from: remoteId as ICmisObject);
             mappedObject.IsReadOnly = localFileSystemInfo.ReadOnly;
-
+            var lastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
             if (this.ServerCanModifyDateTimes) {
                 try {
                     if (remoteId is IDocument) {
                         var doc = remoteId as IDocument;
-                        doc.UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
-                        mappedObject.LastRemoteWriteTimeUtc = doc.LastModificationDate ?? localFileSystemInfo.LastWriteTimeUtc;
+                        doc.UpdateLastWriteTimeUtc(lastLocalWriteTimeUtc);
+                        mappedObject.LastRemoteWriteTimeUtc = doc.LastModificationDate ?? lastLocalWriteTimeUtc;
                     } else if (remoteId is IFolder) {
                         var folder = remoteId as IFolder;
-                        folder.UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
-                        mappedObject.LastRemoteWriteTimeUtc = folder.LastModificationDate ?? localFileSystemInfo.LastWriteTimeUtc;
+                        folder.UpdateLastWriteTimeUtc(lastLocalWriteTimeUtc);
+                        mappedObject.LastRemoteWriteTimeUtc = folder.LastModificationDate ?? lastLocalWriteTimeUtc;
                     }
                 } catch (CmisPermissionDeniedException) {
-                    Logger.Debug(string.Format("Locally changed modification date \"{0}\"is not uploaded to the server: PermissionDenied", localFileSystemInfo.LastWriteTimeUtc));
+                    Logger.Debug(string.Format("Locally changed modification date \"{0}\"is not uploaded to the server: PermissionDenied", lastLocalWriteTimeUtc));
                 }
             }
 
             mappedObject.LastChangeToken = (remoteId as ICmisObjectProperties).ChangeToken;
-            mappedObject.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+            mappedObject.LastLocalWriteTimeUtc = lastLocalWriteTimeUtc;
             this.Storage.SaveMappedObject(mappedObject);
         }
     }
