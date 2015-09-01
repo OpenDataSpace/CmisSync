@@ -104,14 +104,13 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests {
         }
 
         [Test, Category("Fast"), Category("FileTransmissionObjects")]
-        public void ConstructorThrowsExceptionIfRemoteFileIsInvalid()
-        {
+        public void ConstructorThrowsExceptionIfRemoteFileIsInvalid() {
             //Remote file is null
             Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(TransmissionType.UploadNewFile, LocalFile.Object, null));
 
             //RemoteObjectId for remote file is null
             var remoteFile = new Mock<IDocument>();
-            Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(TransmissionType.UploadNewFile, LocalFile.Object, remoteFile.Object));
+            Assert.Throws<ArgumentException>(() => new FileTransmissionObject(TransmissionType.UploadNewFile, LocalFile.Object, remoteFile.Object));
 
             //RemoteObjectId for remote file is empty
             remoteFile.Setup(m => m.Id).Returns(string.Empty);
