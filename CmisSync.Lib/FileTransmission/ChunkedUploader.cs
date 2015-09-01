@@ -88,6 +88,18 @@ namespace CmisSync.Lib.FileTransmission {
             bool overwrite = true,
             UpdateChecksum update = null)
         {
+            if (transmission == null) {
+                throw new ArgumentNullException("transmission");
+            }
+
+            if (localFileStream == null) {
+                throw new ArgumentNullException("localFileStream");
+            }
+
+            if (remoteDocument == null) {
+                throw new ArgumentNullException("remoteDocument");
+            }
+
             var result = remoteDocument;
             for (long offset = localFileStream.Position; offset < localFileStream.Length; offset += this.ChunkSize) {
                 bool isFirstChunk = offset == 0;
