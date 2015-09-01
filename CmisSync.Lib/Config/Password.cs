@@ -88,7 +88,7 @@ namespace CmisSync.Lib.Config {
         /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
         /// hash table.</returns>
         public override int GetHashCode() {
-            return this.password.ToString().GetHashCode();
+            return this.password.GetHashCode();
         }
     }
 }
