@@ -85,6 +85,18 @@ namespace CmisSync.Lib.FileTransmission {
             HashAlgorithm hashAlg,
             UpdateChecksum update = null)
         {
+            if (localFileStream == null) {
+                throw new ArgumentNullException("localFileStream");
+            }
+
+            if (hashAlg == null) {
+                throw new ArgumentNullException("hashAlg");
+            }
+
+            if (remoteDocument == null) {
+                throw new ArgumentNullException("remoteDocument");
+            }
+
             {
                 byte[] buffer = new byte[8 * 1024];
                 int len;
