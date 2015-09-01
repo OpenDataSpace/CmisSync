@@ -87,11 +87,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
             var obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
             if (localFileSystemInfo is IDirectoryInfo) {
+                var remoteFolder = remoteId as IFolder;
                 obj.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
-                obj.LastRemoteWriteTimeUtc = (remoteId as IFolder).LastModificationDate;
-                obj.LastChangeToken = (remoteId as IFolder).ChangeToken;
-                obj.Ignored = (remoteId as IFolder).AreAllChildrenIgnored();
-                localFileSystemInfo.TryToSetReadOnlyStateIfDiffers(from: remoteId as IFolder);
+                obj.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
+                obj.LastChangeToken = remoteFolder.ChangeToken;
+                obj.Ignored = remoteFolder.AreAllChildrenIgnored();
+                localFileSystemInfo.TryToSetReadOnlyStateIfDiffers(from: remoteFolder);
                 obj.IsReadOnly = localFileSystemInfo.ReadOnly;
                 this.Storage.SaveMappedObject(obj);
             } else if (localFileSystemInfo is IFileInfo) {
