@@ -91,7 +91,7 @@ namespace CmisSync.Lib.FileTransmission {
         private readonly TransmissionType type;
         private string relativePath = string.Empty;
         private string repo = string.Empty;
-        private TransmissionStatus status = TransmissionStatus.Transmitting;
+        private TransmissionStatus status;
         private long? length;
         private long? position;
         private long? bitsPerSecond;
@@ -126,7 +126,6 @@ namespace CmisSync.Lib.FileTransmission {
         /// </summary>
         [Obsolete("Should only be used by UI templates", true)]
         public Transmission() {
-            this.type = TransmissionType.UploadNewFile;
             this.Path = "Not Set";
             this.CachePath = null;
         }
