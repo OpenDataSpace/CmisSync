@@ -107,13 +107,45 @@ namespace CmisSync.Lib.Cmis.UiUtils {
             return result.ToArray();
         }
 
+        /// <summary>
+        /// Node tree.
+        /// </summary>
         public class NodeTree {
+            /// <summary>
+            /// The children.
+            /// </summary>
             public List<NodeTree> Children = new List<NodeTree>();
+
+            /// <summary>
+            /// Gets or sets the path.
+            /// </summary>
+            /// <value>The path.</value>
             public string Path { get; set; }
+
+            /// <summary>
+            /// Gets or sets the name.
+            /// </summary>
+            /// <value>The name.</value>
             public string Name { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Cmis.UiUtils.CmisUtils+NodeTree"/>
+            /// is finished.
+            /// </summary>
+            /// <value><c>true</c> if finished; otherwise, <c>false</c>.</value>
             public bool Finished { get; set; }
 
+            /// <summary>
+            /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.UiUtils.CmisUtils+NodeTree"/> class.
+            /// </summary>
+            /// <param name="trees">List of trees.</param>
+            /// <param name="folder">Actual folder.</param>
+            /// <param name="depth">Recursion depth.</param>
             public NodeTree(IList<ITree<IFileableCmisObject>> trees, IFolder folder, int depth) {
+                if (folder == null) {
+                    throw new ArgumentNullException("folder");
+                }
+
                 this.Path = folder.Path;
                 this.Name = folder.Name;
                 this.Finished = !(depth == 0);
@@ -133,7 +165,7 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         /// Get the sub-folders of a particular CMIS folder.
         /// </summary>
         /// <returns>Full path of each sub-folder, including leading slash.</returns>
-        static public NodeTree GetSubfolderTree(CmisRepoCredentials credentials, string path, int depth) {
+        public static NodeTree GetSubfolderTree(CmisRepoCredentials credentials, string path, int depth) {
             // Connect to the CMIS repository.
             Dictionary<string, string> cmisParameters = GetCmisParameters(credentials);
             SessionFactory factory = SessionFactory.NewInstance();
