@@ -104,33 +104,44 @@ namespace CmisSync.Lib.Accumulator {
         }
 
         private ICmisObject GetRemoteObject(ISyncEvent e) {
-            if (e is FileEvent) {
-                return (e as FileEvent).RemoteFile;
+            var fileEvent = e as FileEvent;
+            if (fileEvent != null) {
+                return fileEvent.RemoteFile;
             }
 
-            if (e is CrawlRequestEvent) {
-                return (e as CrawlRequestEvent).RemoteFolder;
+            var crawlEvent = e as CrawlRequestEvent;
+            if (crawlEvent != null) {
+                return crawlEvent.RemoteFolder;
             }
 
             return (e as FolderEvent).RemoteFolder;
         }
 
         private void SetRemoteObject(ISyncEvent e, ICmisObject remote) {
-            if (e is FileEvent) {
-                (e as FileEvent).RemoteFile = remote as IDocument;
-            } else if (e is CrawlRequestEvent) {
-                (e as CrawlRequestEvent).RemoteFolder = remote as IFolder;
+            var fileEvent = e as FileEvent;
+            if (fileEvent != null) {
+                fileEvent.RemoteFile = remote as IDocument;
             } else {
-                (e as FolderEvent).RemoteFolder = remote as IFolder;
+                var crawlEvent = e as CrawlRequestEvent;
+                var remoteFolder = remote as IFolder;
+                if (crawlEvent != null) {
+                    crawlEvent.RemoteFolder = remoteFolder;
+                } else {
+                    (e as FolderEvent).RemoteFolder = remoteFolder;
+                }
             }
         }
 
         private string FetchIdFromStorage(ISyncEvent e) {
             IFileSystemInfo path = null;
-            if (e is FileEvent) {
-                path = (e as FileEvent).LocalFile;
-            } else if (e is FolderEvent) {
-                path = (e as FolderEvent).LocalFolder;
+            var fileEvent = e as FileEvent;
+            if (fileEvent != null) {
+                path = fileEvent.LocalFile;
+            } else {
+                var folderEvent = e as FolderEvent;
+                if (folderEvent != null) {
+                    path = folderEvent.LocalFolder;
+                }
             }
 
             if (path != null) {
@@ -145,12 +156,19 @@ namespace CmisSync.Lib.Accumulator {
 
         private string FetchIdFromExtendedAttribute(ISyncEvent e) {
             IFileSystemInfo path = null;
-            if (e is FileEvent) {
-                path = (e as FileEvent).LocalFile;
-            } else if (e is CrawlRequestEvent) {
-                path = (e as CrawlRequestEvent).LocalFolder;
-            } else if (e is FolderEvent) {
-                path = (e as FolderEvent).LocalFolder;
+            var fileEvent = e as FileEvent;
+            if (fileEvent != null) {
+                path = fileEvent.LocalFile;
+            } else {
+                var crawlEvent = e as CrawlRequestEvent;
+                if (crawlEvent != null) {
+                    path = crawlEvent.LocalFolder;
+                } else {
+                    var folderEvent = e as FolderEvent;
+                    if (folderEvent != null) {
+                        path = folderEvent.LocalFolder;
+                    }
+                }
             }
 
             if (path != null && path.Exists) {
