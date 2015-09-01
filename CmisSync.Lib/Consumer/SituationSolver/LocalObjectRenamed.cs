@@ -65,17 +65,22 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 throw new ArgumentNullException("remoteId");
             }
 
+            if (localFileSystemInfo == null) {
+                throw new ArgumentNullException("localFileSystemInfo");
+            }
+
             var obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
 
             // Rename remote object
-            if (remoteId is ICmisObject) {
-                if ((remoteId as ICmisObject).ChangeToken != obj.LastChangeToken) {
+            var cmisObject = remoteId as ICmisObject;
+            if (cmisObject != null) {
+                if (cmisObject.ChangeToken != obj.LastChangeToken) {
                     throw new ArgumentException("Last changetoken is invalid => force crawl sync");
                 }
 
-                string oldName = (remoteId as ICmisObject).Name;
+                string oldName = cmisObject.Name;
                 try {
-                    (remoteId as ICmisObject).Rename(localFileSystemInfo.Name, true);
+                    cmisObject.Rename(localFileSystemInfo.Name, true);
                 } catch (CmisNameConstraintViolationException e) {
                     if (!Utils.IsValidISO885915(localFileSystemInfo.Name)) {
                         OperationsLogger.Warn(string.Format("The server denies the renaming of {2} from {0} to {1}, perhaps because the new name contains UTF-8 characters", oldName, localFileSystemInfo.Name, localFileSystemInfo.FullName));
@@ -117,11 +122,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
             bool isContentChanged = localFileSystemInfo is IFileInfo ? (localFileSystemInfo as IFileInfo).IsContentChangedTo(obj) : false;
 
-            obj.Name = (remoteId as ICmisObject).Name;
-            obj.LastRemoteWriteTimeUtc = (remoteId as ICmisObject).LastModificationDate;
+            obj.Name = cmisObject.Name;
+            obj.LastRemoteWriteTimeUtc = cmisObject.LastModificationDate;
             obj.LastLocalWriteTimeUtc = isContentChanged ? obj.LastLocalWriteTimeUtc : localFileSystemInfo.LastWriteTimeUtc;
-            obj.LastChangeToken = (remoteId as ICmisObject).ChangeToken;
-            obj.Ignored = (remoteId as ICmisObject).AreAllChildrenIgnored();
+            obj.LastChangeToken = cmisObject.ChangeToken;
+            obj.Ignored = cmisObject.AreAllChildrenIgnored();
             this.Storage.SaveMappedObject(obj);
             if (isContentChanged) {
                 throw new ArgumentException("Local file content is also changed => force crawl sync.");
