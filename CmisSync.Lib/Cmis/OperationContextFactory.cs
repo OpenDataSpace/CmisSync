@@ -76,6 +76,10 @@ namespace CmisSync.Lib.Cmis {
         /// <param name="includePathSegments">If set to <c>true</c> include path segments.</param>
         /// <param name="elements">Requested cmis elements.</param>
         public static IOperationContext CreateContext(ISession session, bool cacheEnabled, bool includePathSegments, params string[] elements) {
+            if (session == null) {
+                throw new ArgumentNullException("session");
+            }
+
             HashSet<string> filter = CreateFilter(elements);
             HashSet<string> renditions = new HashSet<string>();
             renditions.Add("cmis:none");
