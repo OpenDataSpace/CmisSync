@@ -219,12 +219,40 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         }
 
         /// <summary>
+        /// If the allowable actions to not deny the change of last write time UTC, it will be updated based on the given file info.
+        /// </summary>
+        /// <returns>The updated remote object or the original untouched one if the change wasn't allowed.</returns>
+        /// <param name="obj">Cmis object.</param>
+        /// <param name="basedOn">File system info object which will be used to extract the last write time in UTC.</param>
+        public static IObjectId IfAllowedUpdateLastWriteTimeUtc(
+            this IFileableCmisObject obj,
+            CmisSync.Lib.Storage.FileSystem.IFileSystemInfo basedOn)
+        {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
+            if (basedOn == null) {
+                throw new ArgumentNullException("basedOn");
+            }
+
+            if (obj.CanUpdateProperties() != false) {
+                return obj.UpdateLastWriteTimeUtc(basedOn);
+            } else {
+                return obj;
+            }
+        }
+
+        /// <summary>
         /// Updates the last write time in UTC via UpdateProperties
         /// </summary>
         /// <returns>The result of UpdateProperties.</returns>
         /// <param name="obj">Fileable cmis object.</param>
         /// <param name="basedOn">File system info object with its modification date.</param>
-        public static IObjectId UpdateLastWriteTimeUtc(this IFileableCmisObject obj, CmisSync.Lib.Storage.FileSystem.IFileSystemInfo basedOn) {
+        public static IObjectId UpdateLastWriteTimeUtc(
+            this IFileableCmisObject obj,
+            CmisSync.Lib.Storage.FileSystem.IFileSystemInfo basedOn)
+        {
             if (obj == null) {
                 throw new ArgumentNullException("obj");
             }
