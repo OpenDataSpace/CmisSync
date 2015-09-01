@@ -207,8 +207,11 @@ namespace TestLibrary.IntegrationTests {
                 this.localRootDir.Delete(true);
             }
 
-            this.remoteRootDir.Refresh();
-            this.remoteRootDir.DeleteTree(true, null, true);
+            if (this.remoteRootDir != null) {
+                this.remoteRootDir.Refresh();
+                this.remoteRootDir.DeleteTree(true, null, true);
+            }
+
             this.repo.Dispose();
 
             if (repoDBException != null) {
