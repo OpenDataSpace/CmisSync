@@ -649,7 +649,7 @@ namespace TestLibrary.IntegrationTests {
             doc.DeleteAllVersions();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Timeout(180000)]
         public void EnsureFileNameStaysEqualWhileUploading(
             string canonical_name,
             string localPath,
