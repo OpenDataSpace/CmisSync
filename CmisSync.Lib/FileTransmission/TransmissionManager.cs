@@ -39,7 +39,6 @@ namespace CmisSync.Lib.Queueing {
 
         private object collectionLock = new object();
         private ObservableCollection<Transmission> activeTransmissions = new ObservableCollection<Transmission>();
-        private Dictionary<string, string> pathToRepoNameMapping = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets the active transmissions. This Collection can be obsered for changes.
@@ -66,14 +65,14 @@ namespace CmisSync.Lib.Queueing {
         }
 
         /// <summary>
-        /// Creates a new the transmission object and adds it to the manager. The manager decides when to and how the
-        /// transmission gets removed from it.
+        /// Adds the given transmission to the manager.
         /// </summary>
-        /// <returns>The transmission.</returns>
-        /// <param name="type">Transmission type.</param>
-        /// <param name="path">Full path.</param>
-        /// <param name="cachePath">Cache path.</param>
+        /// <param name="transmission">Transmission instance.</param>
         public void Add(Transmission transmission) {
+            if (transmission == null) {
+                throw new ArgumentNullException("transmission");
+            }
+
             lock (this.collectionLock) {
                 transmission.PropertyChanged += this.TransmissionFinished;
                 this.activeTransmissions.Add(transmission);
