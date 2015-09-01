@@ -60,6 +60,10 @@ namespace CmisSync.Lib.Queueing {
         /// The other instance.
         /// </param>
         public int CompareTo(SyncEventHandler other) {
+            if (other == null) {
+                throw new ArgumentNullException("other");
+            }
+
             return this.Priority.CompareTo(other.Priority);
         }
 
