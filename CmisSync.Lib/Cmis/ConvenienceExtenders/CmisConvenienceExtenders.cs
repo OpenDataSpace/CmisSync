@@ -321,7 +321,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
                 throw new ArgumentNullException("obj");
             }
 
-            deviceIds = deviceIds ?? new Guid[0];
+            if (deviceIds == null) {
+                deviceIds = new Guid[0];
+            }
+
             string[] ids = new string[deviceIds.Length];
             for (int i = 0; i < deviceIds.Length; i++) {
                 ids[i] = deviceIds[i].ToString().ToLower();

@@ -33,6 +33,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     /// </summary>
     public class LocalObjectChangedRemoteObjectRenamed : AbstractEnhancedSolver {
         private readonly ISolver changeChangeSolver;
+
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectChangedRemoteObjectRenamed"/> class.
+        /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="changeChangeSolver">Local change remote change solver.</param>
         public LocalObjectChangedRemoteObjectRenamed(
             ISession session,
             IMetaDataStorage storage,
@@ -53,6 +61,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         {
             if (remoteId == null) {
                 throw new ArgumentNullException("remoteId");
+            }
+
+            if (localFileSystemInfo == null) {
+                throw new ArgumentNullException("localFileSystemInfo");
             }
 
             // Rename local object and call change/change solver
