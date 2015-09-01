@@ -92,6 +92,10 @@ namespace CmisSync.Lib.Producer.Watcher {
         /// Reported changes.
         /// </param>
         public virtual void Handle(object source, FileSystemEventArgs e) {
+            if (e == null) {
+                throw new ArgumentNullException("e");
+            }
+
             try {
                 bool isDirectory = false;
                 if (e.ChangeType == WatcherChangeTypes.Deleted) {

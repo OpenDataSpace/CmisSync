@@ -50,6 +50,14 @@ namespace CmisSync.Lib.FileTransmission {
         /// <param name="successfulPart">Successful part.</param>
         /// <param name="hashAlg">Hash algorithm</param>
         public static void PrepareResume(long successfulLength, Stream successfulPart, HashAlgorithm hashAlg) {
+            if (successfulPart == null) {
+                throw new ArgumentNullException("successfulPart");
+            }
+
+            if (hashAlg == null) {
+                throw new ArgumentNullException("hashAlg");
+            }
+
             byte[] buffer = new byte[4096];
             int pos = 0;
             while (pos < successfulLength) {
@@ -68,6 +76,7 @@ namespace CmisSync.Lib.FileTransmission {
         /// </summary>
         /// <returns>The downloader.</returns>
         /// <param name="chunkSize">Chunk size.</param>
+        /// <param name="storage">File transmission storage</param>
         public static IFileDownloader CreateDownloader(long chunkSize = 0, IFileTransmissionStorage storage = null) {
             return chunkSize > 0 ? (IFileDownloader)new ChunkedDownloader(chunkSize, storage) : (IFileDownloader)new SimpleFileDownloader();
         }

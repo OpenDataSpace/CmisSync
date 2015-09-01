@@ -104,23 +104,17 @@ namespace CmisSync.Lib.FileTransmission {
         /// <summary>
         ///  Appends the localFileStream to the remoteDocument.
         /// </summary>
-        /// <returns>
-        ///  The new CMIS document.
-        /// </returns>
-        /// <param name='remoteDocument'>
-        ///  Remote document where the local content should be appended to.
-        /// </param>
-        /// <param name='localFileStream'>
-        ///  Local file stream.
-        /// </param>
-        /// <param name='status'>
-        ///  Transmission status where the uploader should report its appending status.
-        /// </param>
-        /// <param name='hashAlg'>
-        ///  Hash alg which should be used to calculate a checksum over the appended content.
-        /// </param>
+        /// <returns>The new CMIS document.</returns>
+        /// <param name='remoteDocument'>Remote document where the local content should be appended to.</param>
+        /// <param name='localFileStream'>Local file stream.</param>
+        /// <param name='transmission'>Transmission status where the uploader should report its appending status.</param>
+        /// <param name='hashAlg'>Hash alg which should be used to calculate a checksum over the appended content.</param>
         /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">If Upload fails</exception>
         public virtual IDocument AppendFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg) {
+            if (transmission == null) {
+                throw new ArgumentNullException("transmission");
+            }
+
             using (var transmissionStream = transmission.CreateStream(localFileStream))
             using (var hashstream = new CryptoStream(transmissionStream, hashAlg, CryptoStreamMode.Read)) {
                 ContentStream contentStream = new ContentStream();
