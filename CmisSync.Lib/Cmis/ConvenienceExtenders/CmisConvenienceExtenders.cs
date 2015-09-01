@@ -223,6 +223,24 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// </summary>
         /// <returns>The result of UpdateProperties.</returns>
         /// <param name="obj">Fileable cmis object.</param>
+        /// <param name="basedOn">File system info object with its modification date.</param>
+        public static IObjectId UpdateLastWriteTimeUtc(this IFileableCmisObject obj, CmisSync.Lib.Storage.FileSystem.IFileSystemInfo basedOn) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
+            if (basedOn == null) {
+                throw new ArgumentNullException("basedOn");
+            }
+
+            return obj.UpdateLastWriteTimeUtc(basedOn.LastWriteTimeUtc);
+        }
+
+        /// <summary>
+        /// Updates the last write time in UTC via UpdateProperties
+        /// </summary>
+        /// <returns>The result of UpdateProperties.</returns>
+        /// <param name="obj">Fileable cmis object.</param>
         /// <param name="modificationDate">Modification date.</param>
         public static IObjectId UpdateLastWriteTimeUtc(this IFileableCmisObject obj, DateTime modificationDate) {
             if (obj == null) {

@@ -167,7 +167,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                         fileInfo.TryToSetLastWriteTimeUtcIfAvailable(from: doc);
                     } else if (updateRemoteDate) {
                         if (doc.CanUpdateProperties() != false) {
-                            doc.UpdateLastWriteTimeUtc(fileInfo.LastWriteTimeUtc);
+                            doc.UpdateLastWriteTimeUtc(basedOn: fileInfo);
                         }
                     } else {
                         throw new ArgumentException("Algorithm failure");
