@@ -44,7 +44,11 @@ namespace CmisSync.Lib.SelectiveIgnore {
         /// <returns><c>true</c> if the specified <see cref="CmisSync.Lib.SelectiveIgnore.IIgnoredEntity"/> is equal to the
         /// current <see cref="CmisSync.Lib.SelectiveIgnore.IIgnoredEntity"/>; otherwise, <c>false</c>.</returns>
         public bool Equals(IIgnoredEntity other) {
-            return this.ObjectId == other.ObjectId;
+            if (other == null) {
+                return false;
+            } else {
+                return this.ObjectId == other.ObjectId;
+            }
         }
     }
 }
