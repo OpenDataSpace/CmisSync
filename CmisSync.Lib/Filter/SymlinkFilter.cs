@@ -33,12 +33,8 @@ namespace CmisSync.Lib.Filter {
         /// <param name="fsInfo">File system info.</param>
         /// <param name="reason">Reason for the filtering.</param>
         public bool IsSymlink(IFileSystemInfo fsInfo, out string reason) {
-            if (fsInfo == null) {
-                throw new ArgumentNullException("fsInfo");
-            }
-
             reason = string.Empty;
-            if (fsInfo.Exists && fsInfo.IsSymlink) {
+            if (fsInfo != null && fsInfo.Exists && fsInfo.IsSymlink) {
                 reason = string.Format("{0} is a symbolic link", fsInfo.FullName);
                 return true;
             } else {
