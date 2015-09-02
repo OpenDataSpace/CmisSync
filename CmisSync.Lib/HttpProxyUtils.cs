@@ -26,7 +26,7 @@ namespace CmisSync.Lib {
     /// <summary>
     /// Http proxy utils.
     /// </summary>
-    public class HttpProxyUtils {
+    public static class HttpProxyUtils {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(HttpProxyUtils));
 
         /// <summary>
