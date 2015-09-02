@@ -1,18 +1,12 @@
-R: Gendarme.Rules.Design.MarkAssemblyWithAssemblyVersionRule
-A: DataSpaceSync, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-
-R: Gendarme.Rules.Design.MarkAssemblyWithAssemblyVersionRule
-A: CmisSync, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-
 #Configure setting
 R: Gendarme.Rules.BadPractice.AvoidVisibleConstantFieldRule
 T: CmisSync.Defines
 T: CmisSync.Lib.Defines
 T: CmisSync.Lib.Config.Config
 
-#Cross reference between CmisSync.Lib.Sync.CmisRepo and CmisSync.Lib.Sync.CmisRepo/SynchronizedFolder
-R: Gendarme.Rules.Correctness.DisposableFieldsShouldBeDisposedRule
-T: CmisSync.Lib.Sync.CmisRepo/SynchronizedFolder
+#Define
+R: Gendarme.Rules.Naming.AvoidNonAlphanumericIdentifierRule
+T: CmisSync.Lib.Defines
 
 #  http://blogs.msdn.com/b/pfxteam/archive/2012/03/25/10287435.aspx
 R: Gendarme.Rules.Correctness.DisposableFieldsShouldBeDisposedRule
@@ -130,6 +124,18 @@ M: System.Void CmisSync.Lib.Storage.Database.ObjectTree`1::set_Children
 (System.Collections.Generic.IList`1<CmisSync.Lib.Storage.Database.IObjectTree`1<T>>)
 M: CmisSync.Lib.Storage.Database.IObjectTree`1<DotCMIS.Client.IFileableCmisObject> CmisSync.Lib.Producer.Crawler.DescendantsCrawler::GetRemoteDirectoryTree(DotCMIS.Client.IFolder,System.Collections.Generic.IList`1<DotCMIS.Client.ITree`1<DotCMIS.Client.IFileableCmisObject>>,CmisSync.Lib.Filter.IFilterAggregator)
 M: System.IDisposable CmisSync.Lib.Queueing.SyncEventQueue::Subscribe(System.IObserver`1<System.Tuple`2<System.String,System.Int32>>)
+
+#Ignore AvoidRefAndOutParametersRule for filter
+R: Gendarme.Rules.Design.AvoidRefAndOutParametersRule
+N: CmisSync.Lib.Filter
+
+#Ignore AvoidRefAndOutParametersRule for extension
+R: Gendarme.Rules.Design.AvoidRefAndOutParametersRule
+M: System.Boolean CmisSync.Lib.Storage.Database.Entities.IFileConvenienceExtenders::IsContentChangedTo(CmisSync.Lib.Storage.FileSystem.IFileInfo,CmisSync.Lib.Storage.Database.Entities.IMappedObject,System.Byte[]&,System.Boolean)
+
+#Ignore AvoidRefAndOutParametersRule for crawler because it is choosen based on performance reasons
+M: System.Void CmisSync.Lib.Producer.Crawler.LocalEventGenerator::CreateEvents(System.Collections.Generic.IDictionary`2<System.Guid,CmisSync.Lib.Storage.Database.Entities.IMappedObject>,CmisSync.Lib.Storage.Database.IObjectTree`1<CmisSync.Lib.Storage.FileSystem.IFileSystemInfo>,System.Collections.Generic.Dictionary`2<System.String,System.Tuple`2<CmisSync.Lib.Events.AbstractFolderEvent,CmisSync.Lib.Events.AbstractFolderEvent>>,System.Collections.Generic.ISet`1<CmisSync.Lib.Storage.Database.Entities.IMappedObject>,System.Collections.Generic.List`1<CmisSync.Lib.Events.AbstractFolderEvent>&)
+M: System.Void CmisSync.Lib.Producer.Crawler.RemoteEventGenerator::CreateEvents(System.Collections.Generic.IDictionary`2<System.String,CmisSync.Lib.Storage.Database.Entities.IMappedObject>,CmisSync.Lib.Storage.Database.IObjectTree`1<DotCMIS.Client.IFileableCmisObject>,System.Collections.Generic.Dictionary`2<System.String,System.Tuple`2<CmisSync.Lib.Events.AbstractFolderEvent,CmisSync.Lib.Events.AbstractFolderEvent>>,System.Collections.Generic.ISet`1<CmisSync.Lib.Storage.Database.Entities.IMappedObject>,System.Collections.Generic.List`1<CmisSync.Lib.Events.AbstractFolderEvent>&)
 
 # TryParseRule should not give any warning in test library
 R: Gendarme.Rules.BadPractice.PreferTryParseRule
