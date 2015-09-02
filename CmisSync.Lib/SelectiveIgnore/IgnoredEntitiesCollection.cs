@@ -36,6 +36,10 @@ namespace CmisSync.Lib.SelectiveIgnore {
         /// </summary>
         /// <param name="ignore">Ignored entity.</param>
         public void Add(IIgnoredEntity ignore) {
+            if (ignore == null) {
+                throw new ArgumentNullException("ignore");
+            }
+
             this.entries[ignore.ObjectId] = ignore;
         }
 
@@ -44,6 +48,10 @@ namespace CmisSync.Lib.SelectiveIgnore {
         /// </summary>
         /// <param name="ignore">Ignored entity.</param>
         public void Remove(IIgnoredEntity ignore) {
+            if (ignore == null) {
+                throw new ArgumentNullException("ignore");
+            }
+
             this.entries.Remove(ignore.ObjectId);
         }
 

@@ -39,6 +39,10 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// <param name="scanOnlyIfModificationDateDiffers">If set to <c>true</c> content scan runs only if the modification date differs to given one.</param>
         public static bool IsContentChangedTo(this IFileInfo file, IMappedObject obj, out byte[] actualHash, bool scanOnlyIfModificationDateDiffers = false) {
             actualHash = null;
+            if (file == null) {
+                throw new ArgumentNullException("file");
+            }
+
             if (obj == null) {
                 throw new ArgumentNullException("obj");
             }

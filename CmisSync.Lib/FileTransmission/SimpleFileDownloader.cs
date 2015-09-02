@@ -66,6 +66,10 @@ namespace CmisSync.Lib.FileTransmission {
                 throw new ArgumentNullException("transmission");
             }
 
+            if (remoteDocument == null) {
+                throw new ArgumentNullException("remoteDocument");
+            }
+
             byte[] buffer = new byte[8 * 1024];
             int len;
 

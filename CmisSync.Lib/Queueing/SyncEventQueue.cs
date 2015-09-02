@@ -122,6 +122,10 @@ namespace CmisSync.Lib.Queueing {
         /// <param name="newEvent">New event.</param>
         /// <exception cref="InvalidOperationException">When Listener is already stopped</exception>
         public virtual void AddEvent(ISyncEvent newEvent) {
+            if (newEvent == null) {
+                throw new ArgumentNullException("newEvent");
+            }
+
             if (this.alreadyDisposed) {
                 Logger.Info(string.Format("Queue was already Disposed. Dropping Event: {0}", newEvent.ToString()));
                 return;
@@ -130,10 +134,6 @@ namespace CmisSync.Lib.Queueing {
             if (this.IsStopped) {
                 Logger.Info(string.Format("Queue was already Stopped. Dropping Event: {0}", newEvent.ToString()));
                 return;
-            }
-
-            if (newEvent == null) {
-                throw new ArgumentNullException("newEvent");
             }
 
             try {

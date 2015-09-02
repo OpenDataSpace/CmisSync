@@ -162,6 +162,10 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// A IFolder fetched via cmis.
         /// </param>
         public MappedObject(IFolder remoteFolder) {
+            if (remoteFolder == null) {
+                throw new ArgumentNullException("remoteFolder");
+            }
+
             this.RemoteObjectId = remoteFolder.Id;
             this.ParentId = remoteFolder.ParentId;
             this.LastChangeToken = remoteFolder.ChangeToken;

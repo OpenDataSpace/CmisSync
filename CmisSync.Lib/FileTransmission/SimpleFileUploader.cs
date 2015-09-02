@@ -115,6 +115,10 @@ namespace CmisSync.Lib.FileTransmission {
                 throw new ArgumentNullException("transmission");
             }
 
+            if (remoteDocument == null) {
+                throw new ArgumentNullException("remoteDocument");
+            }
+
             using (var transmissionStream = transmission.CreateStream(localFileStream))
             using (var hashstream = new CryptoStream(transmissionStream, hashAlg, CryptoStreamMode.Read)) {
                 ContentStream contentStream = new ContentStream();
