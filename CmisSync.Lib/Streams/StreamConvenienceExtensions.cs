@@ -33,6 +33,10 @@ namespace CmisSync.Lib.Streams {
         /// <param name="bufferSize">Buffer size.</param>
         /// <param name="bytes">Bytes to be copied from input stream to output stream.</param>
         public static void CopyTo(this Stream input, Stream output, int bufferSize, int bytes) {
+            if (input == null) {
+                throw new ArgumentNullException("input");
+            }
+
             if (output == null) {
                 throw new ArgumentNullException("output");
             }
