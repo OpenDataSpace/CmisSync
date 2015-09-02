@@ -138,6 +138,13 @@ M: System.Byte[] CmisSync.Lib.Storage.Database.Entities.IFileTransmissionObject:
 M: System.Byte[] CmisSync.Lib.Storage.Database.Entities.IMappedObject::get_LastChecksum()
 M: System.Byte[] CmisSync.Lib.Storage.Database.Entities.MappedObject::get_LastChecksum()
 
+#Ignore AvoidUnnecessarySpecializationRule because the Type itself is important as information
+R: Gendarme.Rules.Maintainability.AvoidUnnecessarySpecializationRule
+M: System.Boolean CmisSync.Lib.Cmis.ConvenienceExtenders.ExceptionExtenders::IsVirusDetectionException(DotCMIS.Exceptions.CmisConstraintException)
+M: System.Void CmisSync.Lib.Events.FullSyncCompletedEvent::.ctor(CmisSync.Lib.Events.StartNextSyncEvent)
+M: System.String CmisSync.Lib.Utils::NameOf(System.Linq.Expressions.Expression`1<System.Func`1<T>>)
+M: System.String CmisSync.Lib.Utils::NameOf(System.Linq.Expressions.Expression`1<System.Func`2<TModel,TProperty>>)
+
 #Ignore AvoidRefAndOutParametersRule for extension
 R: Gendarme.Rules.Design.AvoidRefAndOutParametersRule
 M: System.Boolean CmisSync.Lib.Storage.Database.Entities.IFileConvenienceExtenders::IsContentChangedTo(CmisSync.Lib.Storage.FileSystem.IFileInfo,CmisSync.Lib.Storage.Database.Entities.IMappedObject,System.Byte[]&,System.Boolean)
@@ -172,6 +179,17 @@ N: CmisSync.Lib.Storage.Database.Entities
 #Ignore AvoidLackOfCohesionOfMethodsRule
 R: Gendarme.Rules.Maintainability.AvoidLackOfCohesionOfMethodsRule
 A: CmisSync.Lib
+
+#Ignore AvoidUnusedParametersRule on code which is not available on every platform
+R: Gendarme.Rules.Performance.AvoidUnusedParametersRule
+M: System.String CmisSync.Lib.Config.Crypto::WindowsObfuscate(System.String)
+M: System.String CmisSync.Lib.Config.Crypto::WindowsDeobfuscate(System.String)
+M: System.Void CmisSync.Lib.Storage.FileSystem.ExtendedAttributeReaderDos::SetExtendedAttributeAndRestoreLastModificationDate(System.String,System.String,System.String)
+
+#Ignore AvoidVisibleFieldsRule which are only visible for test reasons
+R: Gendarme.Rules.Design.AvoidVisibleFieldsRule
+T: CmisSync.Lib.Cmis.Repository
+T: CmisSync.Lib.Consumer.SyncMechanism
 
 # TryParseRule should not give any warning in test library
 R: Gendarme.Rules.BadPractice.PreferTryParseRule
