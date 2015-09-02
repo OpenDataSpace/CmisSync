@@ -21,7 +21,7 @@ namespace CmisSync.Lib.Queueing {
     using System;
     using System.Collections.Generic;
     using System.Text;
-    
+
     using CmisSync.Lib.Events;
 
     /// <summary>
@@ -47,12 +47,8 @@ namespace CmisSync.Lib.Queueing {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.GenericSyncEventHandler"/> class.
         /// </summary>
-        /// <param name='handler'>
-        /// Handler which will be called on incomming event.
-        /// </param>
-        /// <param name="name">
-        /// Name of the instance
-        /// </param>
+        /// <param name="handler">Handler which will be called on incomming event.</param>
+        /// <param name="name">Name of the instance.</param>
         public GenericSyncEventHandler(
             GenericSyncEventDelegate<TSyncEventType> handler,
             string name = null)
@@ -62,15 +58,9 @@ namespace CmisSync.Lib.Queueing {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.GenericSyncEventHandler"/> class.
         /// </summary>
-        /// <param name='priority'>
-        /// The priority for the queue.
-        /// </param>
-        /// <param name='handler'>
-        /// Delegate which should be called if any Event of the given TSyncEventType is passed from the queue.
-        /// </param>
-        /// <param name="name">
-        /// Name of the instance
-        /// </param>
+        /// <param name='priority'>The priority for the queue.</param>
+        /// <param name='handler'>Delegate which should be called if any Event of the given TSyncEventType is passed from the queue.</param>
+        /// <param name="name">Name of the instance.</param>
         public GenericSyncEventHandler(
             int priority,
             GenericSyncEventDelegate<TSyncEventType> handler,
