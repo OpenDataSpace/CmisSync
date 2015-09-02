@@ -191,6 +191,11 @@ R: Gendarme.Rules.Design.AvoidVisibleFieldsRule
 T: CmisSync.Lib.Cmis.Repository
 T: CmisSync.Lib.Consumer.SyncMechanism
 
+#Ignore CheckParametersNullityInVisibleMethodsRule for reflection code
+R: Gendarme.Rules.Correctness.CheckParametersNullityInVisibleMethodsRule
+M: System.String CmisSync.Lib.Utils::NameOf(System.Linq.Expressions.Expression`1<System.Func`1<T>>)
+M: System.String CmisSync.Lib.Utils::NameOf(System.Linq.Expressions.Expression`1<System.Func`2<TModel,TProperty>>)
+
 # TryParseRule should not give any warning in test library
 R: Gendarme.Rules.BadPractice.PreferTryParseRule
 A: TestLibrary, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
