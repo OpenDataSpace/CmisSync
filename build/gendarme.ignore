@@ -129,6 +129,15 @@ M: System.IDisposable CmisSync.Lib.Queueing.SyncEventQueue::Subscribe(System.IOb
 R: Gendarme.Rules.Design.AvoidRefAndOutParametersRule
 N: CmisSync.Lib.Filter
 
+#Ignore AvoidReturningArraysOnPropertiesRule for byte[] containing a cryptographic hash
+R: Gendarme.Rules.Performance.AvoidReturningArraysOnPropertiesRule
+M: System.Byte[] CmisSync.Lib.Storage.Database.Entities.FileTransmissionObject::get_LastChecksum()
+M: System.Byte[] CmisSync.Lib.Storage.Database.Entities.FileTransmissionObject::get_LastChecksumPWC()
+M: System.Byte[] CmisSync.Lib.Storage.Database.Entities.IFileTransmissionObject::get_LastChecksum()
+M: System.Byte[] CmisSync.Lib.Storage.Database.Entities.IFileTransmissionObject::get_LastChecksumPWC()
+M: System.Byte[] CmisSync.Lib.Storage.Database.Entities.IMappedObject::get_LastChecksum()
+M: System.Byte[] CmisSync.Lib.Storage.Database.Entities.MappedObject::get_LastChecksum()
+
 #Ignore AvoidRefAndOutParametersRule for extension
 R: Gendarme.Rules.Design.AvoidRefAndOutParametersRule
 M: System.Boolean CmisSync.Lib.Storage.Database.Entities.IFileConvenienceExtenders::IsContentChangedTo(CmisSync.Lib.Storage.FileSystem.IFileInfo,CmisSync.Lib.Storage.Database.Entities.IMappedObject,System.Byte[]&,System.Boolean)
@@ -136,6 +145,33 @@ M: System.Boolean CmisSync.Lib.Storage.Database.Entities.IFileConvenienceExtende
 #Ignore AvoidRefAndOutParametersRule for crawler because it is choosen based on performance reasons
 M: System.Void CmisSync.Lib.Producer.Crawler.LocalEventGenerator::CreateEvents(System.Collections.Generic.IDictionary`2<System.Guid,CmisSync.Lib.Storage.Database.Entities.IMappedObject>,CmisSync.Lib.Storage.Database.IObjectTree`1<CmisSync.Lib.Storage.FileSystem.IFileSystemInfo>,System.Collections.Generic.Dictionary`2<System.String,System.Tuple`2<CmisSync.Lib.Events.AbstractFolderEvent,CmisSync.Lib.Events.AbstractFolderEvent>>,System.Collections.Generic.ISet`1<CmisSync.Lib.Storage.Database.Entities.IMappedObject>,System.Collections.Generic.List`1<CmisSync.Lib.Events.AbstractFolderEvent>&)
 M: System.Void CmisSync.Lib.Producer.Crawler.RemoteEventGenerator::CreateEvents(System.Collections.Generic.IDictionary`2<System.String,CmisSync.Lib.Storage.Database.Entities.IMappedObject>,CmisSync.Lib.Storage.Database.IObjectTree`1<DotCMIS.Client.IFileableCmisObject>,System.Collections.Generic.Dictionary`2<System.String,System.Tuple`2<CmisSync.Lib.Events.AbstractFolderEvent,CmisSync.Lib.Events.AbstractFolderEvent>>,System.Collections.Generic.ISet`1<CmisSync.Lib.Storage.Database.Entities.IMappedObject>,System.Collections.Generic.List`1<CmisSync.Lib.Events.AbstractFolderEvent>&)
+
+#Ignore AvoidRedundancyInTypeNameRule in the following classes because it is easier to write the full name to get the context
+R: Gendarme.Rules.Naming.AvoidRedundancyInTypeNameRule
+T: CmisSync.Lib.Config.ConfigManager
+T: CmisSync.Lib.Config.ConfigMigration
+T: CmisSync.Lib.Filter.FilterAggregator
+T: CmisSync.Lib.Filter.IFilterAggregator
+T: CmisSync.Lib.Producer.ContentChange.ContentChangeEventAccumulator
+T: CmisSync.Lib.Producer.ContentChange.ContentChangeEventTransformer
+T: CmisSync.Lib.Producer.Watcher.IWatcherProducer
+T: CmisSync.Lib.Producer.Watcher.WatcherConsumer
+T: CmisSync.Lib.SelectiveIgnore.SelectiveIgnoreEventTransformer
+T: CmisSync.Lib.SelectiveIgnore.SelectiveIgnoreFilter
+T: CmisSync.Lib.Storage.FileSystem.FileSystemInfoFactory
+T: CmisSync.Lib.Storage.FileSystem.FileSystemInfoWrapper
+T: CmisSync.Lib.Storage.FileSystem.IFileSystemInfo
+T: CmisSync.Lib.Storage.FileSystem.IFileSystemInfoFactory
+T: CmisSync.Lib.Storage.FileSystem.IFileSystemWatcher
+
+#Ignore AvoidDeepNamespaceHierarchyRule for PWC and Database Entities
+R: Gendarme.Rules.Naming.AvoidDeepNamespaceHierarchyRule
+N: CmisSync.Lib.Consumer.SituationSolver.PWC
+N: CmisSync.Lib.Storage.Database.Entities
+
+#Ignore AvoidLackOfCohesionOfMethodsRule
+R: Gendarme.Rules.Maintainability.AvoidLackOfCohesionOfMethodsRule
+A: CmisSync.Lib
 
 # TryParseRule should not give any warning in test library
 R: Gendarme.Rules.BadPractice.PreferTryParseRule
