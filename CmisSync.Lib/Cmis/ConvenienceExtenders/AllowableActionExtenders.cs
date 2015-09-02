@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="AllowableActionConvenienceExtenders.cs" company="GRAU DATA AG">
+// <copyright file="AllowableActionExtenders.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -27,7 +27,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
     /// <summary>
     /// Allowable action convenience extenders of cmis objects
     /// </summary>
-    public static class AllowableActionConvenienceExtenders {
+    public static class AllowableActionExtenders {
         /// <summary>
         /// Ares the allowable actions available with this session and its default operation context.
         /// </summary>

@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="ExceptionConvenienceExtenders.cs" company="GRAU DATA AG">
+// <copyright file="ExceptionExtenders.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -25,7 +25,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
     /// <summary>
     /// Exception convenience extenders.
     /// </summary>
-    public static class ExceptionConvenienceExtenders {
+    public static class ExceptionExtenders {
         /// <summary>
         /// Determines if a virus detection exception is the reason for the CmisContraintException.
         /// </summary>
