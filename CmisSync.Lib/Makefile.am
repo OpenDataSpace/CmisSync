@@ -22,10 +22,15 @@ SOURCES =  \
 	Cmis/Authentication/PersistentNtlmAuthenticationProvider.cs \
 	Cmis/Authentication/PersistentStandardAuthenticationProvider.cs \
 	Cmis/Authentication/StandardAuthenticationProviderWrapper.cs \
-	Cmis/ConvenienceExtenders/AllowableActionConvenienceExtenders.cs \
-	Cmis/ConvenienceExtenders/CmisConvenienceExtenders.cs \
-	Cmis/ConvenienceExtenders/CmisRepositoryInfoConvenienceExtenders.cs \
-	Cmis/ConvenienceExtenders/ExceptionConvenienceExtenders.cs \
+	Cmis/ConvenienceExtenders/AllowableActionExtenders.cs \
+	Cmis/ConvenienceExtenders/DocumentExtenders.cs \
+	Cmis/ConvenienceExtenders/ExceptionExtenders.cs \
+	Cmis/ConvenienceExtenders/FileableObjectExtenders.cs \
+	Cmis/ConvenienceExtenders/FolderExtenders.cs \
+	Cmis/ConvenienceExtenders/ObjectExtenders.cs \
+	Cmis/ConvenienceExtenders/RepositoryInfoExtenders.cs \
+	Cmis/ConvenienceExtenders/SessionExtenders.cs \
+	Cmis/ConvenienceExtenders/SessionFactoryExtenders.cs \
 	Cmis/DotCMISLogListener.cs \
 	Cmis/INotifyRepositoryPropertyChanged.cs \
 	Cmis/MimeType.cs \

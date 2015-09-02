@@ -222,7 +222,6 @@
     <Compile Include="EventManagerInitializer.cs" />
     <Compile Include="Consumer\SituationSolver\AbstractEnhancedSolver.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectChangedRemoteObjectChanged.cs" />
-    <Compile Include="Cmis\ConvenienceExtenders\CmisConvenienceExtenders.cs" />
     <Compile Include="Storage\Database\Entities\IFileConvenienceExtenders.cs" />
     <Compile Include="Storage\Database\DublicateGuidException.cs" />
     <Compile Include="Queueing\DelayRetryAndNextSyncEventHandler.cs" />
@@ -286,7 +285,6 @@
     <Compile Include="Config\ServerCredentials.cs" />
     <Compile Include="Config\User.cs" />
     <Compile Include="Config\AuthenticationType.cs" />
-    <Compile Include="Cmis\ConvenienceExtenders\AllowableActionConvenienceExtenders.cs" />
     <Compile Include="Storage\FileSystem\ReadOnlyIgnoringFileInfoDecorator.cs" />
     <Compile Include="Storage\FileSystem\ReadOnlyIgnoringFileSystemInfoDecorator.cs" />
     <Compile Include="Storage\FileSystem\ReadOnlyIgnoringDirectoryInfoDecorator.cs" />
@@ -315,12 +313,10 @@
     <Compile Include="Storage\Database\GraphOutputConvenienceExtension.cs" />
     <Compile Include="Storage\Database\IDotTreeWriter.cs" />
     <Compile Include="Filter\SymlinkFilter.cs" />
-    <Compile Include="Cmis\ConvenienceExtenders\CmisRepositoryInfoConvenienceExtenders.cs" />
     <Compile Include="HashAlgorithm\IReusableHashAlgorithm.cs" />
     <Compile Include="FileTransmission\ITransmissionFactory.cs" />
     <Compile Include="FileTransmission\TransmissionFactory.cs" />
     <Compile Include="FileTransmission\ITransmissionAggregator.cs" />
-    <Compile Include="Cmis\ConvenienceExtenders\ExceptionConvenienceExtenders.cs" />
     <Compile Include="Consumer\SituationSolver\FileSystemInfoConvenienceExtenders.cs" />
     <Compile Include="Exceptions\InteractionNeededException.cs" />
     <Compile Include="Exceptions\AbstractInteractionNeededException.cs" />
@@ -328,6 +324,15 @@
     <Compile Include="Exceptions\ExceptionLevel.cs" />
     <Compile Include="Exceptions\RetryException.cs" />
     <Compile Include="Queueing\ConnectionInterruptedHandler.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\RepositoryInfoExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\ExceptionExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\AllowableActionExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\SessionExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\SessionFactoryExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\FolderExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\DocumentExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\ObjectExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\FileableObjectExtenders.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
