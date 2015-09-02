@@ -51,9 +51,9 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// Creates the file info.
         /// </summary>
         /// <returns>The file info.</returns>
-        /// <param name="path">For this path.</param>
-        public IFileInfo CreateFileInfo(string path) {
-            IFileInfo fileInfo = new FileInfoWrapper(new FileInfo(path));
+        /// <param name="fileName">For this path.</param>
+        public IFileInfo CreateFileInfo(string fileName) {
+            IFileInfo fileInfo = new FileInfoWrapper(new FileInfo(fileName));
             return this.ignoreReadOnly ? new ReadOnlyIgnoringFileInfoDecorator(fileInfo) : fileInfo;
         }
 

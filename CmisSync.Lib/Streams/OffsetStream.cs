@@ -99,15 +99,13 @@ namespace CmisSync.Lib.Streams {
         /// <summary>
         /// Sets the length to the given length. It must be greater than the Offset
         /// </summary>
-        /// <param name='length'>
-        /// The new Length
-        /// </param>
-        public override void SetLength(long length) {
-            if (length < this.Offset) {
-                throw new ArgumentOutOfRangeException(string.Format("Given length {0} is smaller than Offset {1}", length, this.Offset));
+        /// <param name='value'>The new length.</param>
+        public override void SetLength(long value) {
+            if (value < this.Offset) {
+                throw new ArgumentOutOfRangeException(string.Format("Given length {0} is smaller than Offset {1}", value, this.Offset));
             }
 
-            this.Stream.SetLength(length - this.Offset);
+            this.Stream.SetLength(value - this.Offset);
         }
         #endregion
     }
