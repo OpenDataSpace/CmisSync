@@ -115,11 +115,11 @@ namespace CmisSync.Lib.Producer.ContentChange {
                 if (obj != null) {
                     if (obj.Type == MappedObjectType.Folder) {
                         var dirInfo = this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(obj));
-                        Queue.AddEvent(new FolderEvent(dirInfo, null, this) { Remote = MetaDataChangeType.DELETED });
+                        this.Queue.AddEvent(new FolderEvent(dirInfo, null, this) { Remote = MetaDataChangeType.DELETED });
                         return;
                     } else {
                         var fileInfo = this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(obj));
-                        Queue.AddEvent(new FileEvent(fileInfo, null) { Remote = MetaDataChangeType.DELETED });
+                        this.Queue.AddEvent(new FileEvent(fileInfo, null) { Remote = MetaDataChangeType.DELETED });
                         return;
                     }
                 }
@@ -135,7 +135,7 @@ namespace CmisSync.Lib.Producer.ContentChange {
             {
                 var fileEvent = new FileEvent(null, doc) { Remote = MetaDataChangeType.CREATED };
                 fileEvent.RemoteContent = doc.ContentStreamId == null ? ContentChangeType.NONE : ContentChangeType.CREATED;
-                Queue.AddEvent(fileEvent);
+                this.Queue.AddEvent(fileEvent);
                 break;
             }
 
@@ -160,7 +160,7 @@ namespace CmisSync.Lib.Producer.ContentChange {
                     }
                 }
 
-                Queue.AddEvent(fileEvent);
+                this.Queue.AddEvent(fileEvent);
                 break;
             }
 
@@ -189,7 +189,7 @@ namespace CmisSync.Lib.Producer.ContentChange {
                     fileEvent.RemoteContent = ContentChangeType.CREATED;
                 }
 
-                Queue.AddEvent(fileEvent);
+                this.Queue.AddEvent(fileEvent);
                 break;
             }
             }
@@ -214,7 +214,7 @@ namespace CmisSync.Lib.Producer.ContentChange {
                 break;
             }
 
-            Queue.AddEvent(folderEvent);
+            this.Queue.AddEvent(folderEvent);
         }
     }
 }
