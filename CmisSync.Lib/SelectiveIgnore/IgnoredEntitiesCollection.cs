@@ -29,13 +29,13 @@ namespace CmisSync.Lib.SelectiveIgnore {
     /// Ignored entities collection implementation.
     /// </summary>
     public class IgnoredEntitiesCollection : IIgnoredEntitiesCollection {
-        private Dictionary<string, IIgnoredEntity> entries = new Dictionary<string, IIgnoredEntity>();
+        private Dictionary<string, AbstractIgnoredEntity> entries = new Dictionary<string, AbstractIgnoredEntity>();
 
         /// <summary>
         /// Add the specified ignored entity to collection.
         /// </summary>
         /// <param name="ignore">Ignored entity.</param>
-        public void Add(IIgnoredEntity ignore) {
+        public void Add(AbstractIgnoredEntity ignore) {
             if (ignore == null) {
                 throw new ArgumentNullException("ignore");
             }
@@ -47,7 +47,7 @@ namespace CmisSync.Lib.SelectiveIgnore {
         /// Remove the specified ignored entity from collection.
         /// </summary>
         /// <param name="ignore">Ignored entity.</param>
-        public void Remove(IIgnoredEntity ignore) {
+        public void Remove(AbstractIgnoredEntity ignore) {
             if (ignore == null) {
                 throw new ArgumentNullException("ignore");
             }

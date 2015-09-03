@@ -222,7 +222,7 @@ SOURCES =  \
 	SelectiveIgnore/IgnoreFlagChangeDetection.cs \
 	SelectiveIgnore/IIgnoredEntitiesCollection.cs \
 	SelectiveIgnore/IIgnoredEntitiesStorage.cs \
-	SelectiveIgnore/IIgnoredEntity.cs \
+	SelectiveIgnore/AbstractIgnoredEntity.cs \
 	SelectiveIgnore/SelectiveIgnoreEventTransformer.cs \
 	SelectiveIgnore/SelectiveIgnoreFilter.cs \
 	Status/ConnectionStatus.cs \

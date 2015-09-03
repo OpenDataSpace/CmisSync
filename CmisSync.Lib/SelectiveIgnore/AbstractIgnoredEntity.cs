@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="IIgnoredEntity.cs" company="GRAU DATA AG">
+// <copyright file="AbstractIgnoredEntity.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -23,7 +23,7 @@ namespace CmisSync.Lib.SelectiveIgnore {
     /// <summary>
     /// IIgnored entity holds the ignored remote object id and the local path.
     /// </summary>
-    public abstract class IIgnoredEntity : IEquatable<IIgnoredEntity> {
+    public abstract class AbstractIgnoredEntity : IEquatable<AbstractIgnoredEntity> {
         /// <summary>
         /// Gets or sets the remote object identifier of an ignored object.
         /// </summary>
@@ -37,13 +37,13 @@ namespace CmisSync.Lib.SelectiveIgnore {
         public string LocalPath { get; protected set; }
 
         /// <summary>
-        /// Determines whether the specified <see cref="CmisSync.Lib.SelectiveIgnore.IIgnoredEntity"/> is equal to the
-        /// current <see cref="CmisSync.Lib.SelectiveIgnore.IIgnoredEntity"/>.
+        /// Determines whether the specified <see cref="CmisSync.Lib.SelectiveIgnore.AbstractIgnoredEntity"/> is equal to the
+        /// current <see cref="CmisSync.Lib.SelectiveIgnore.AbstractIgnoredEntity"/>.
         /// </summary>
-        /// <param name="other">The <see cref="CmisSync.Lib.SelectiveIgnore.IIgnoredEntity"/> to compare with the current <see cref="CmisSync.Lib.SelectiveIgnore.IIgnoredEntity"/>.</param>
-        /// <returns><c>true</c> if the specified <see cref="CmisSync.Lib.SelectiveIgnore.IIgnoredEntity"/> is equal to the
-        /// current <see cref="CmisSync.Lib.SelectiveIgnore.IIgnoredEntity"/>; otherwise, <c>false</c>.</returns>
-        public bool Equals(IIgnoredEntity other) {
+        /// <param name="other">The <see cref="CmisSync.Lib.SelectiveIgnore.AbstractIgnoredEntity"/> to compare with the current <see cref="CmisSync.Lib.SelectiveIgnore.AbstractIgnoredEntity"/>.</param>
+        /// <returns><c>true</c> if the specified <see cref="CmisSync.Lib.SelectiveIgnore.AbstractIgnoredEntity"/> is equal to the
+        /// current <see cref="CmisSync.Lib.SelectiveIgnore.AbstractIgnoredEntity"/>; otherwise, <c>false</c>.</returns>
+        public bool Equals(AbstractIgnoredEntity other) {
             if (other == null) {
                 return false;
             } else {

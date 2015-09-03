@@ -250,7 +250,6 @@
     <Compile Include="SelectiveIgnore\SelectiveIgnoreEventTransformer.cs" />
     <Compile Include="SelectiveIgnore\IgnoredEntitiesCollection.cs" />
     <Compile Include="SelectiveIgnore\IgnoredEntity.cs" />
-    <Compile Include="SelectiveIgnore\IIgnoredEntity.cs" />
     <Compile Include="SelectiveIgnore\IgnoreFlagChangeDetection.cs" />
     <Compile Include="Storage\FileSystem\DateTimeToFileConverter.cs" />
     <Compile Include="Storage\FileSystem\FSType.cs" />
@@ -333,6 +332,7 @@
     <Compile Include="Cmis\ConvenienceExtenders\DocumentExtenders.cs" />
     <Compile Include="Cmis\ConvenienceExtenders\ObjectExtenders.cs" />
     <Compile Include="Cmis\ConvenienceExtenders\FileableObjectExtenders.cs" />
+    <Compile Include="SelectiveIgnore\AbstractIgnoredEntity.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
