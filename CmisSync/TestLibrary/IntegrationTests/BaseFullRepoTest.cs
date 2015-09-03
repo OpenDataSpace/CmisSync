@@ -119,6 +119,7 @@ namespace TestLibrary.IntegrationTests {
 
         [SetUp]
         public void Init() {
+            this.remoteRootDir = null;
             this.TestName = this.GetType().Name;
             object[] attributes = this.GetType().GetCustomAttributes(true);
             foreach (var attr in attributes) {
