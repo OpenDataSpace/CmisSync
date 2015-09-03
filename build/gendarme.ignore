@@ -196,6 +196,16 @@ R: Gendarme.Rules.Correctness.CheckParametersNullityInVisibleMethodsRule
 M: System.String CmisSync.Lib.Utils::NameOf(System.Linq.Expressions.Expression`1<System.Func`1<T>>)
 M: System.String CmisSync.Lib.Utils::NameOf(System.Linq.Expressions.Expression`1<System.Func`2<TModel,TProperty>>)
 
+#Ignore PreferUriOverStringRule where a string is needed to handle user input
+R: Gendarme.Rules.Design.PreferUriOverStringRule
+M: System.String CmisSync.Lib.Config.DefaultEntries::get_Url()
+
+#Ignore PreferXmlAbstractionsRule for log4net configuration
+R: Gendarme.Rules.Design.PreferXmlAbstractionsRule
+M: System.Xml.XmlNode CmisSync.Lib.Config.Config::get_Log4Net()
+M: System.Void CmisSync.Lib.Config.Config::set_Log4Net(System.Xml.XmlNode)
+M: System.Void CmisSync.Lib.Config.Config::SetLog4NetConfig(System.Xml.XmlNode)
+
 # TryParseRule should not give any warning in test library
 R: Gendarme.Rules.BadPractice.PreferTryParseRule
 A: TestLibrary, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null

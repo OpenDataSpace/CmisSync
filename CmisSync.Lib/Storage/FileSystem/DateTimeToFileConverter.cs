@@ -50,7 +50,9 @@ namespace CmisSync.Lib.Storage.FileSystem {
         public static DateTime Convert(this DateTime originalDate, FSType fsType) {
 #if __MonoCS__
             // https://bugzilla.xamarin.com/show_bug.cgi?id=23933
-            originalDate = originalDate < new DateTime(1972, 1, 1) ? new DateTime(1972, 1, 1) : originalDate;
+            if (originalDate < new DateTime(1972, 1, 1)) {
+                originalDate = new DateTime(1972, 1, 1);
+            }
 #endif
             switch(fsType) {
             case FSType.Ntfs:
