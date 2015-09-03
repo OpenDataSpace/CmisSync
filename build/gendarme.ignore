@@ -201,6 +201,11 @@ T: CmisSync.Lib.Cmis.SyncStatus
 T: CmisSync.Lib.FileTransmission.TransmissionStatus
 T: CmisSync.Lib.Status.RepositoryStatus
 
+#Ignore WriteStaticFieldFromInstanceMethodRule on DBreezeInitializerSingleton because it is designed as a singleton already, so it seems to be a false positive
+R: Gendarme.Rules.Concurrency.WriteStaticFieldFromInstanceMethodRule
+M: System.Void CmisSync.Lib.Storage.Database.DBreezeInitializerSingleton::.ctor()
+
+
 #Ignore AvoidVisibleFieldsRule which are only visible for test reasons
 R: Gendarme.Rules.Design.AvoidVisibleFieldsRule
 T: CmisSync.Lib.Cmis.Repository
