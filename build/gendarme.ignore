@@ -190,9 +190,16 @@ M: System.Void CmisSync.Lib.Storage.FileSystem.ExtendedAttributeReaderDos::SetEx
 R: Gendarme.Rules.Naming.UsePreferredTermsRule
 T: CmisSync.Lib.Cmis.UiUtils.LoginCredentials
 T: CmisSync.Lib.Cmis.UiUtils.LoginExceptionType
+T: CmisSync.Lib.Cmis.UiUtils.LoginException
 T: CmisSync.Lib.Events.SuccessfulLoginEvent
 M: System.Boolean CmisSync.Lib.Config.ProxySettings::get_LoginRequired()
 M: System.Void CmisSync.Lib.Config.ProxySettings::set_LoginRequired(System.Boolean)
+
+#Ignore UseSingularNameInEnumsUnlessAreFlagsRule if singular is equal to plural
+R: Gendarme.Rules.Naming.UseSingularNameInEnumsUnlessAreFlagsRule
+T: CmisSync.Lib.Cmis.SyncStatus
+T: CmisSync.Lib.FileTransmission.TransmissionStatus
+T: CmisSync.Lib.Status.RepositoryStatus
 
 #Ignore AvoidVisibleFieldsRule which are only visible for test reasons
 R: Gendarme.Rules.Design.AvoidVisibleFieldsRule
