@@ -101,22 +101,31 @@ namespace CmisSync.Lib.Producer.Watcher {
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Sync.Strategy.NetWatcher"/> enable events.
+        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Producer.Watcher.NetWatcher"/> enable events.
         /// </summary>
         /// <value><c>true</c> if enable events; otherwise, <c>false</c>.</value>
         public bool EnableEvents {
-            get { return this.fileSystemWatcher.EnableRaisingEvents; }
-            set { this.fileSystemWatcher.EnableRaisingEvents = value; }
+            get {
+                return this.fileSystemWatcher.EnableRaisingEvents;
+            }
+
+            set {
+                if (this.disposed) {
+                    throw new ObjectDisposedException(this.GetType().Name);
+                }
+
+                this.fileSystemWatcher.EnableRaisingEvents = value;
+            }
         }
 
         /// <summary>
-        /// Releases all resource used by the <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> object.
+        /// Releases all resource used by the <see cref="CmisSync.Lib.Producer.Watcher.NetWatcher"/> object.
         /// </summary>
-        /// <remarks>Call <see cref="Dispose"/> when you are finished using the <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/>.
-        /// The <see cref="Dispose"/> method leaves the <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> in an unusable
+        /// <remarks>Call <see cref="Dispose"/> when you are finished using the <see cref="CmisSync.Lib.Producer.Watcher.NetWatcher"/>.
+        /// The <see cref="Dispose"/> method leaves the <see cref="CmisSync.Lib.Producer.Watcher.NetWatcher"/> in an unusable
         /// state. After calling <see cref="Dispose"/>, you must release all references to the
-        /// <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> so the garbage collector can reclaim the memory that the
-        /// <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> was occupying.</remarks>
+        /// <see cref="CmisSync.Lib.Producer.Watcher.NetWatcher"/> so the garbage collector can reclaim the memory that the
+        /// <see cref="CmisSync.Lib.Producer.Watcher.NetWatcher"/> was occupying.</remarks>
         public void Dispose() {
             this.Dispose(true);
             GC.SuppressFinalize(this);
