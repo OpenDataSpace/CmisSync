@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
 
@@ -32,8 +31,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// I solver implements a mechanism to resolve one specific sync situation.
     /// </summary>
-    public interface ISolver
-    {
+    public interface ISolver {
         /// <summary>
         /// Solve the specified situation by using localFile and remote object.
         /// </summary>
