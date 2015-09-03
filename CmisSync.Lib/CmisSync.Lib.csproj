@@ -222,7 +222,6 @@
     <Compile Include="EventManagerInitializer.cs" />
     <Compile Include="Consumer\SituationSolver\AbstractEnhancedSolver.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectChangedRemoteObjectChanged.cs" />
-    <Compile Include="Storage\Database\Entities\IFileConvenienceExtenders.cs" />
     <Compile Include="Storage\Database\DublicateGuidException.cs" />
     <Compile Include="Queueing\DelayRetryAndNextSyncEventHandler.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectMovedRemoteObjectMoved.cs" />
@@ -333,6 +332,7 @@
     <Compile Include="Cmis\ConvenienceExtenders\ObjectExtenders.cs" />
     <Compile Include="Cmis\ConvenienceExtenders\FileableObjectExtenders.cs" />
     <Compile Include="SelectiveIgnore\AbstractIgnoredEntity.cs" />
+    <Compile Include="Storage\Database\Entities\FileContentConvenienceExtenders.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

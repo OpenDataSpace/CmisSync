@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="IFileConvenienceExtenders.cs" company="GRAU DATA AG">
+// <copyright file="FileContentConvenienceExtenders.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -26,9 +26,9 @@ namespace CmisSync.Lib.Storage.Database.Entities {
     using CmisSync.Lib.Storage.FileSystem;
 
     /// <summary>
-    /// IFileInfo convenience extenders to check them against IMappedObjects
+    /// File content convenience extenders to check them against IMappedObjects
     /// </summary>
-    public static class IFileConvenienceExtenders {
+    public static class FileContentConvenienceExtenders {
         /// <summary>
         /// Determines if file content is changed to the specified obj.
         /// </summary>

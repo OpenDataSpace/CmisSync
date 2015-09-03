@@ -214,15 +214,15 @@ SOURCES =  \
 	Queueing/SyncEventQueue.cs \
 	Queueing/SyncScheduler.cs \
 	Queueing/Unsubscriber.cs \
+	SelectiveIgnore/AbstractIgnoredEntity.cs \
 	SelectiveIgnore/CmisSelectiveIgnoreCapability.cs \
+	SelectiveIgnore/IIgnoredEntitiesCollection.cs \
+	SelectiveIgnore/IIgnoredEntitiesStorage.cs \
+	SelectiveIgnore/IgnoreFlagChangeDetection.cs \
 	SelectiveIgnore/IgnoredEntitiesCollection.cs \
 	SelectiveIgnore/IgnoredEntitiesStorage.cs \
 	SelectiveIgnore/IgnoredEntity.cs \
 	SelectiveIgnore/IgnoredState.cs \
-	SelectiveIgnore/IgnoreFlagChangeDetection.cs \
-	SelectiveIgnore/IIgnoredEntitiesCollection.cs \
-	SelectiveIgnore/IIgnoredEntitiesStorage.cs \
-	SelectiveIgnore/AbstractIgnoredEntity.cs \
 	SelectiveIgnore/SelectiveIgnoreEventTransformer.cs \
 	SelectiveIgnore/SelectiveIgnoreFilter.cs \
 	Status/ConnectionStatus.cs \
@@ -230,8 +230,8 @@ SOURCES =  \
 	Status/SynchronizationStatus.cs \
 	Storage/Database/DBreezeInitializerSingleton.cs \
 	Storage/Database/DublicateGuidException.cs \
+	Storage/Database/Entities/FileContentConvenienceExtenders.cs \
 	Storage/Database/Entities/FileTransmissionObject.cs \
-	Storage/Database/Entities/IFileConvenienceExtenders.cs \
 	Storage/Database/Entities/IFileTransmissionObject.cs \
 	Storage/Database/Entities/IMappedObject.cs \
 	Storage/Database/Entities/MappedObject.cs \
@@ -252,10 +252,10 @@ SOURCES =  \
 	Storage/FileSystem/ExtendedAttributeException.cs \
 	Storage/FileSystem/ExtendedAttributeReaderDos.cs \
 	Storage/FileSystem/ExtendedAttributeReaderUnix.cs \
+	Storage/FileSystem/FSType.cs \
 	Storage/FileSystem/FileInfoWrapper.cs \
 	Storage/FileSystem/FileSystemInfoFactory.cs \
 	Storage/FileSystem/FileSystemInfoWrapper.cs \
-	Storage/FileSystem/FSType.cs \
 	Storage/FileSystem/IDirectoryInfo.cs \
 	Storage/FileSystem/IExtendedAttributeReader.cs \
 	Storage/FileSystem/IFileInfo.cs \
