@@ -40,25 +40,14 @@ namespace CmisSync.Lib.FileTransmission {
         /// <summary>
         ///  Uploads the localFileStream to remoteDocument.
         /// </summary>
-        /// <returns>
-        ///  The new CMIS document.
-        /// </returns>
-        /// <param name='remoteDocument'>
-        ///  Remote document where the local content should be uploaded to.
-        /// </param>
-        /// <param name='localFileStream'>
-        ///  Local file stream.
-        /// </param>
-        /// <param name='transmission'>
-        ///  Transmission status where the uploader should report its uploading status.
-        /// </param>
-        /// <param name='hashAlg'>
-        ///  Hash alg which should be used to calculate a checksum over the uploaded content.
-        /// </param>
-        /// <param name='overwrite'>
-        ///  If true, the local content will overwrite the existing content.
-        /// </param>
-        /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">If upload fails</exception>
+        /// <returns>The new CMIS document.</returns>
+        /// <param name='remoteDocument'>Remote document where the local content should be uploaded to.</param>
+        /// <param name='localFileStream'>Local file stream.</param>
+        /// <param name='transmission'>Transmission status where the uploader should report its uploading status.</param>
+        /// <param name='hashAlg'>Hash alg which should be used to calculate a checksum over the uploaded content.</param>
+        /// <param name='overwrite'>If true, the local content will overwrite the existing content.</param>
+        /// <param name="update">Is called on every chunk and returns the actual hash from beginning to this last chunk.</param>
+        /// <exception cref="UploadFailedException">If upload fails</exception>
         public virtual IDocument UploadFile(
             IDocument remoteDocument,
             Stream localFileStream,
@@ -109,8 +98,13 @@ namespace CmisSync.Lib.FileTransmission {
         /// <param name='localFileStream'>Local file stream.</param>
         /// <param name='transmission'>Transmission status where the uploader should report its appending status.</param>
         /// <param name='hashAlg'>Hash alg which should be used to calculate a checksum over the appended content.</param>
-        /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">If Upload fails</exception>
-        public virtual IDocument AppendFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg) {
+        /// <exception cref="UploadFailedException">If Upload fails</exception>
+        public virtual IDocument AppendFile(
+            IDocument remoteDocument,
+            Stream localFileStream,
+            Transmission transmission,
+            HashAlgorithm hashAlg)
+        {
             if (transmission == null) {
                 throw new ArgumentNullException("transmission");
             }

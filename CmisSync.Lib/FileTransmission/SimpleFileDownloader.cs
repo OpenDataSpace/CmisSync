@@ -43,10 +43,11 @@ namespace CmisSync.Lib.FileTransmission {
         /// <param name="localFileStream">Local taget file stream.</param>
         /// <param name="transmission">Transmission status.</param>
         /// <param name="hashAlg">Hash algoritm, which should be used to calculate hash of the uploaded stream content</param>
+        /// <param name="update">Is called on every chunk which is downloaded and returns the actual from begin to the actual length.</param>
         /// <exception cref="IOException">On any disc or network io exception</exception>
-        /// <exception cref="DisposeException">If the remote object has been disposed before the dowload is finished</exception>
+        /// <exception cref="ObjectDisposedException">If the remote object has been disposed before the dowload is finished</exception>
         /// <exception cref="AbortException">If download is aborted</exception>
-        /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
+        /// <exception cref="DotCMIS.Exceptions.CmisBaseException">On exceptions thrown by the CMIS Server/Client</exception>
         public void DownloadFile(
             IDocument remoteDocument,
             Stream localFileStream,

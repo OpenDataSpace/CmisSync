@@ -24,6 +24,9 @@ namespace CmisSync.Lib.FileTransmission {
 
     using CmisSync.Lib.Storage.Database;
 
+    /// <summary>
+    /// Update checksum delegate is called by up/downloaders and passes the actual checksum/hash from the given beginning to the actual position.
+    /// </summary>
     public delegate void UpdateChecksum(byte[] checksum, long length = -1);
 
     /// <summary>

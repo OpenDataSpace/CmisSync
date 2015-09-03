@@ -396,9 +396,9 @@ namespace CmisSync.Lib.Storage.Database {
         }
 
         /// <summary>
-        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.FileSystem.MetaDataStorage"/>.
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="MetaDataStorage"/>.
         /// </summary>
-        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.FileSystem.MetaDataStorage"/>.</returns>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="MetaDataStorage"/>.</returns>
         public override string ToString() {
             string list = string.Empty;
             using (var tran = this.engine.GetTransaction()) {

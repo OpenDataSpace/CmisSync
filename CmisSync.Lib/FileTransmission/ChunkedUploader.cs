@@ -58,26 +58,14 @@ namespace CmisSync.Lib.FileTransmission {
         ///  Uploads the file.
         ///  Resumes an upload if the given localFileStream.Position is larger than zero.
         /// </summary>
-        /// <returns>
-        ///  The new CMIS document.
-        /// </returns>
-        /// <param name='remoteDocument'>
-        ///  Remote document where the local content should be uploaded to.
-        /// </param>
-        /// <param name='localFileStream'>
-        ///  Local file stream.
-        /// </param>
-        /// <param name='transmission'>
-        ///  Transmission status where the uploader should report its uploading status.
-        /// </param>
-        /// <param name='hashAlg'>
-        ///  Hash alg which should be used to calculate a checksum over the uploaded content.
-        /// </param>
-        /// <param name='overwrite'>
-        ///  If true, the local content will overwrite the existing content.
-        /// </param>
+        /// <returns>The new CMIS document.</returns>
+        /// <param name='remoteDocument'>Remote document where the local content should be uploaded to.</param>
+        /// <param name='localFileStream'>Local file stream.</param>
+        /// <param name='transmission'>Transmission status where the uploader should report its uploading status.</param>
+        /// <param name='hashAlg'>Hash alg which should be used to calculate a checksum over the uploaded content.</param>
+        /// <param name='overwrite'>If true, the local content will overwrite the existing content.</param>
         /// <param name="update">Is called on every new chunk, if not <c>null</c>.</param>
-        /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">
+        /// <exception cref="UploadFailedException">
         /// Contains the last successful remote document state. This is needed for continue a failed upload.
         /// </exception>
         public override IDocument UploadFile(

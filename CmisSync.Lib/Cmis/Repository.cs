@@ -396,12 +396,23 @@ namespace CmisSync.Lib.Cmis {
             this.Scheduler.Start();
         }
 
+        /// <summary>
+        /// Just ignores on completed events.
+        /// </summary>
         public void OnCompleted() {
         }
 
+        /// <summary>
+        /// Ignores on error events.
+        /// </summary>
+        /// <param name="error">Error.</param>
         public void OnError(Exception error) {
         }
 
+        /// <summary>
+        /// Is called if any EventCategory counter is changed.
+        /// </summary>
+        /// <param name="value">The changed value.</param>
         public virtual void OnNext(Tuple<EventCategory, int> value) {
             if (this.disposed) {
                 throw new ObjectDisposedException(this.GetType().Name);

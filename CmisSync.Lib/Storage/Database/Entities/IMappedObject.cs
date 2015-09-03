@@ -99,7 +99,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         MappedObjectType Type { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Data.IMappedObject"/> is ignored.
+        /// Gets or sets a value indicating whether this <see cref="IMappedObject"/> is ignored.
         /// </summary>
         /// <value><c>true</c> if ignored; otherwise, <c>false</c>.</value>
         bool Ignored { get; set; }
