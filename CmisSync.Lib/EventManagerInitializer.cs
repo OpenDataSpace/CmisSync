@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib {
+namespace CmisSync.Lib.Queueing {
     using System;
 
     using CmisSync.Lib.Accumulator;
@@ -30,7 +30,6 @@ namespace CmisSync.Lib {
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Crawler;
     using CmisSync.Lib.Producer.Watcher;
-    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.SelectiveIgnore;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -149,32 +148,32 @@ namespace CmisSync.Lib {
             if (e is SuccessfulLoginEvent) {
                 var successfulLoginEvent = e as SuccessfulLoginEvent;
                 var session = successfulLoginEvent.Session;
-
                 var remoteRoot = successfulLoginEvent.RootFolder;
+                var eventManager = this.Queue.EventManager;
 
                 // Remove former added instances from event Queue.EventManager
                 if (this.ccaccumulator != null) {
-                    this.Queue.EventManager.RemoveEventHandler(this.ccaccumulator);
+                    eventManager.RemoveEventHandler(this.ccaccumulator);
                 }
 
                 if (this.contentChanges != null) {
-                    this.Queue.EventManager.RemoveEventHandler(this.contentChanges);
+                    eventManager.RemoveEventHandler(this.contentChanges);
                 }
 
                 if (this.alreadyHandledFilter != null) {
-                    this.Queue.EventManager.RemoveEventHandler(this.alreadyHandledFilter);
+                    eventManager.RemoveEventHandler(this.alreadyHandledFilter);
                 }
 
                 if (this.selectiveIgnoreFilter != null) {
-                    this.Queue.EventManager.RemoveEventHandler(this.selectiveIgnoreFilter);
+                    eventManager.RemoveEventHandler(this.selectiveIgnoreFilter);
                 }
 
                 if (this.transformer != null) {
-                    this.Queue.EventManager.RemoveEventHandler(this.transformer);
+                    eventManager.RemoveEventHandler(this.transformer);
                 }
 
                 if (this.ignoreChangeDetector != null) {
-                    this.Queue.EventManager.RemoveEventHandler(this.ignoreChangeDetector);
+                    eventManager.RemoveEventHandler(this.ignoreChangeDetector);
                 }
 
                 if (successfulLoginEvent.ChangeEventsSupported &&
@@ -183,58 +182,58 @@ namespace CmisSync.Lib {
 
                     // Add Accumulator
                     this.ccaccumulator = new ContentChangeEventAccumulator(session, this.Queue);
-                    this.Queue.EventManager.AddEventHandler(this.ccaccumulator);
+                    eventManager.AddEventHandler(this.ccaccumulator);
 
                     // Add Content Change sync algorithm
                     this.contentChanges = new ContentChanges(session, this.storage, this.Queue);
-                    this.Queue.EventManager.AddEventHandler(this.contentChanges);
+                    eventManager.AddEventHandler(this.contentChanges);
 
                     // Add Filter of already handled change events
                     this.alreadyHandledFilter = new IgnoreAlreadyHandledContentChangeEventsFilter(this.storage, session);
-                    this.Queue.EventManager.AddEventHandler(this.alreadyHandledFilter);
+                    eventManager.AddEventHandler(this.alreadyHandledFilter);
                 }
 
                 if (successfulLoginEvent.SelectiveSyncSupported) {
                     // Transforms events of ignored folders
                     this.transformer = new SelectiveIgnoreEventTransformer(this.ignoredStorage, this.Queue);
-                    this.Queue.EventManager.AddEventHandler(this.transformer);
+                    eventManager.AddEventHandler(this.transformer);
 
                     // Filters events of ignored folders
                     this.selectiveIgnoreFilter = new SelectiveIgnoreFilter(this.ignoredStorage);
-                    this.Queue.EventManager.AddEventHandler(this.selectiveIgnoreFilter);
+                    eventManager.AddEventHandler(this.selectiveIgnoreFilter);
 
                     // Detection if any ignored object has changed its state
                     this.ignoreChangeDetector = new IgnoreFlagChangeDetection(this.ignoredStorage, new PathMatcher.PathMatcher(this.repoInfo.LocalPath, this.repoInfo.RemotePath), this.Queue);
-                    this.Queue.EventManager.AddEventHandler(this.ignoreChangeDetector);
+                    eventManager.AddEventHandler(this.ignoreChangeDetector);
                 }
 
                 // Add remote object fetcher
                 if (this.remoteFetcher != null) {
-                    this.Queue.EventManager.RemoveEventHandler(this.remoteFetcher);
+                    eventManager.RemoveEventHandler(this.remoteFetcher);
                 }
 
                 this.remoteFetcher = new RemoteObjectFetcher(session, this.storage);
-                this.Queue.EventManager.AddEventHandler(this.remoteFetcher);
+                eventManager.AddEventHandler(this.remoteFetcher);
 
                 // Add crawler
                 if (this.crawler != null) {
-                    this.Queue.EventManager.RemoveEventHandler(this.crawler);
+                    eventManager.RemoveEventHandler(this.crawler);
                 }
 
                 this.crawler = new DescendantsCrawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath), this.storage, this.filter, this.activityListener, this.ignoredStorage);
-                this.Queue.EventManager.AddEventHandler(this.crawler);
+                eventManager.AddEventHandler(this.crawler);
 
                 // Add remote object moved accumulator
                 if (this.romaccumulator != null) {
-                    this.Queue.EventManager.RemoveEventHandler(this.romaccumulator);
+                    eventManager.RemoveEventHandler(this.romaccumulator);
                 }
 
                 this.romaccumulator = new RemoteObjectMovedOrRenamedAccumulator(this.Queue, this.storage, this.fileSystemFactory);
-                this.Queue.EventManager.AddEventHandler(this.romaccumulator);
+                eventManager.AddEventHandler(this.romaccumulator);
 
                 // Add sync mechanism
                 if (this.mechanism != null) {
-                    this.Queue.EventManager.RemoveEventHandler(this.mechanism);
+                    eventManager.RemoveEventHandler(this.mechanism);
                 }
 
                 var localDetection = new LocalSituationDetection();
@@ -251,7 +250,7 @@ namespace CmisSync.Lib {
                     this.filter,
                     this.transmissionFactory,
                     successfulLoginEvent.PrivateWorkingCopySupported);
-                this.Queue.EventManager.AddEventHandler(this.mechanism);
+                eventManager.AddEventHandler(this.mechanism);
 
                 var localRootFolder = this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath);
                 var rootUuid = localRootFolder.Uuid;
