@@ -139,10 +139,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     using (var hashAlg = new SHA1Managed()) {
                         int bufsize = 8 * 1024;
                         byte[] buffer = new byte[bufsize];
-                        for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault();) {
+                        var remoteContentLength = docPWC.ContentStreamLength.GetValueOrDefault();
+                        long offset = 0;
+                        while (offset < remoteContentLength) {
                             int readsize = bufsize;
-                            if (readsize + offset > docPWC.ContentStreamLength.GetValueOrDefault()) {
-                                readsize = (int)(docPWC.ContentStreamLength.GetValueOrDefault() - offset);
+                            if (readsize + offset > remoteContentLength) {
+                                readsize = (int)(remoteContentLength - offset);
                             }
 
                             readsize = file.Read(buffer, 0, readsize);
@@ -169,10 +171,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                         using (var hashstream = new NonClosingHashStream(file, hashAlg, CryptoStreamMode.Read)) {
                             int bufsize = 8 * 1024;
                             byte[] buffer = new byte[bufsize];
-                            for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault();) {
+                            long offset = 0;
+                            var remoteContentLength = docPWC.ContentStreamLength.GetValueOrDefault();
+                            while ( offset < remoteContentLength) {
                                 int readsize = bufsize;
-                                if (readsize + offset > docPWC.ContentStreamLength.GetValueOrDefault()) {
-                                    readsize = (int)(docPWC.ContentStreamLength.GetValueOrDefault() - offset);
+                                if (readsize + offset > remoteContentLength) {
+                                    readsize = (int)(remoteContentLength - offset);
                                 }
 
                                 readsize = hashstream.Read(buffer, 0, readsize);
