@@ -61,13 +61,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
-            if (localFileSystemInfo is IFileInfo && remoteId is IDocument) {
-                var localFile = localFileSystemInfo as IFileInfo;
-                var remoteDocument = remoteId as IDocument;
+            var localFile = localFileSystemInfo as IFileInfo;
+            var remoteDocument = remoteId as IDocument;
+            if (localFile != null && remoteDocument != null) {
+                var fullName = localFile.FullName;
 
                 var mappedObject = this.Storage.GetObject(localFile);
                 if (mappedObject == null) {
-                    throw new ArgumentException(string.Format("Could not find db entry for {0} => invoke crawl sync", localFileSystemInfo.FullName));
+                    throw new ArgumentException(string.Format("Could not find db entry for {0} => invoke crawl sync", fullName));
                 }
 
                 if (mappedObject.LastChangeToken != (remoteId as ICmisObjectProperties).ChangeToken) {
@@ -75,10 +76,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 }
 
                 if (localFile != null && localFile.IsContentChangedTo(mappedObject, scanOnlyIfModificationDateDiffers: true)) {
-                    Logger.Debug(string.Format("\"{0}\" is different from {1}", localFile.FullName, mappedObject.ToString()));
-                    OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
+                    Logger.Debug(string.Format("\"{0}\" is different from {1}", fullName, mappedObject.ToString()));
+                    OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", fullName));
                     try {
-                        var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UploadModifiedFile, localFile.FullName);
+                        var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UploadModifiedFile, fullName);
                         mappedObject.LastChecksum = this.UploadFileWithPWC(localFile, ref remoteDocument, transmission);
                         mappedObject.ChecksumAlgorithmName = "SHA-1";
                         if (remoteDocument.Id != mappedObject.RemoteObjectId) {
@@ -87,10 +88,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                         }
                     } catch (Exception ex) {
                         if (ex.InnerException is CmisPermissionDeniedException) {
-                            OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", localFile.FullName));
+                            OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", fullName));
                             return;
                         } else if (ex.InnerException is CmisStorageException) {
-                            OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: StorageException", localFile.FullName), ex);
+                            OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: StorageException", fullName), ex);
                             return;
                         }
 
@@ -101,7 +102,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     mappedObject.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
                     mappedObject.LastContentSize = localFile.Length;
 
-                    OperationsLogger.Info(string.Format("Local changed file \"{0}\" has been uploaded", localFile.FullName));
+                    OperationsLogger.Info(string.Format("Local changed file \"{0}\" has been uploaded", fullName));
                 }
 
                 mappedObject.LastChangeToken = remoteDocument.ChangeToken;
