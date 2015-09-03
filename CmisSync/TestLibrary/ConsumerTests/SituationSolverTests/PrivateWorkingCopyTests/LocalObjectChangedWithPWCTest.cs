@@ -138,38 +138,27 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.manager.VerifyThatTransmissionWasCreatedOnce();
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
         public void SolverUploadsFileContentWithNewPWCAndGetsInterrupted() {
-            this.SetUpMocks();
-            var underTest = this.CreateSolver();
-            Assert.Ignore("TODO");
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
         public void SolverContinesUploadFileContentWithStoredInformations() {
-            this.SetUpMocks();
-            var underTest = this.CreateSolver();
             Assert.Ignore("TODO");
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
         public void SolverContinesUploadFileContentWithStoredInformationsAndGetsInterruptedAgain() {
-            this.SetUpMocks();
-            var underTest = this.CreateSolver();
             Assert.Ignore("TODO");
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
         public void SolverUploadsFileContentByCreatingNewPwcIfPwcWasCanceled() {
-            this.SetUpMocks();
-            var underTest = this.CreateSolver();
             Assert.Ignore("TODO");
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
         public void SolverUploadsFileContentByCreatingNewPwcIfObjectNotFoundOnServer() {
-            this.SetUpMocks();
-            var underTest = this.CreateSolver();
             Assert.Ignore("TODO");
         }
 

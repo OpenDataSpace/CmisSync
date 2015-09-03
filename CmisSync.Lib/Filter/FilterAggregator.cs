@@ -31,6 +31,7 @@ namespace CmisSync.Lib.Filter {
         /// <param name="folderNamesFilter">Folder names filter.</param>
         /// <param name="invalidFolderNamesFilter">Invalid folder names filter.</param>
         /// <param name="ignoredFolderFilter">Ignored folder filter.</param>
+        /// <param name="symlinkFilter">Symbolic link filter.</param>
         public FilterAggregator(
             IgnoredFileNamesFilter fileNamesFilter,
             IgnoredFolderNameFilter folderNamesFilter,

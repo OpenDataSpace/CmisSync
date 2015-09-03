@@ -42,6 +42,11 @@ namespace CmisSync.Lib.Cmis.UiUtils {
     public static class CmisUtils {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(CmisUtils));
 
+        /// <summary>
+        /// Gets the cmis parameters to be able to create a session.
+        /// </summary>
+        /// <returns>The cmis parameters.</returns>
+        /// <param name="credentials">Server Credentials.</param>
         static public Dictionary<string, string> GetCmisParameters(ServerCredentials credentials) {
             if (credentials == null) {
                 throw new ArgumentNullException("credentials");
@@ -61,6 +66,11 @@ namespace CmisSync.Lib.Cmis.UiUtils {
             return cmisParameters;
         }
 
+        /// <summary>
+        /// Gets the cmis parameters to be able to create a cmis session to a cmis repository.
+        /// </summary>
+        /// <returns>The cmis parameters.</returns>
+        /// <param name="credentials">Server Credentials.</param>
         static public Dictionary<string, string> GetCmisParameters(CmisRepoCredentials credentials) {
             if (credentials == null) {
                 throw new ArgumentNullException("credentials");

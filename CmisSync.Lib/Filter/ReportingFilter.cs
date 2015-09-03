@@ -63,7 +63,8 @@ namespace CmisSync.Lib.Filter {
         /// <param name="ignoredFoldersFilter">Ignored folders filter.</param>
         /// <param name="ignoredFileNameFilter">Ignored file name filter.</param>
         /// <param name="ignoredFolderNameFilter">Ignored folder name filter.</param>
-        /// <param name="invalidFoderNameFilter">Invalid folder name filter</param> 
+        /// <param name="invalidFoderNameFilter">Invalid folder name filter.</param>
+        /// <param name="symlinkFilter">Symbolic link filter.</param>
         public ReportingFilter(
             ISyncEventQueue queue,
             IgnoredFoldersFilter ignoredFoldersFilter,

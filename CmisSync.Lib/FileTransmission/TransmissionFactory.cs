@@ -24,12 +24,20 @@ namespace CmisSync.Lib.FileTransmission {
 
     using CmisSync.Lib.Cmis;
 
+    /// <summary>
+    /// Transmission factory creates Transmission instances and registers them on the aggregator.
+    /// </summary>
     public class TransmissionFactory : ITransmissionFactory{
         private AbstractNotifyingRepository repository;
         private ITransmissionAggregator aggregator;
         private object collectionLock = new object();
         private HashSet<Transmission> transmissions = new HashSet<Transmission>();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.TransmissionFactory"/> class.
+        /// </summary>
+        /// <param name="repo">Repository to which the transmissions are assigned or caused by.</param>
+        /// <param name="aggregator">Aggregator of all transmissions.</param>
         public TransmissionFactory(AbstractNotifyingRepository repo, ITransmissionAggregator aggregator) {
             if (repo == null) {
                 throw new ArgumentNullException("repo");
@@ -62,6 +70,14 @@ namespace CmisSync.Lib.FileTransmission {
             };
         }
 
+        /// <summary>
+        /// Creates a new the transmission object and adds it to the manager. The manager decides when to and how the
+        /// transmission gets removed from it.
+        /// </summary>
+        /// <returns>The transmission.</returns>
+        /// <param name="type">Transmission type.</param>
+        /// <param name="path">Full path.</param>
+        /// <param name="cachePath">Cache path.</param>
         public Transmission CreateTransmission(TransmissionType type, string path, string cachePath = null) {
             var transmission = new Transmission(type, path, cachePath) {
                 Repository = this.repository.Name

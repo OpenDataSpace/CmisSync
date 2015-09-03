@@ -56,7 +56,7 @@ namespace CmisSync.Lib.Queueing {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.GenericSyncEventHandler"/> class.
+        /// Initializes a new instance of the <see cref="GenericSyncEventHandler"/> class.
         /// </summary>
         /// <param name='priority'>The priority for the queue.</param>
         /// <param name='handler'>Delegate which should be called if any Event of the given TSyncEventType is passed from the queue.</param>
@@ -97,9 +97,9 @@ namespace CmisSync.Lib.Queueing {
         }
 
         /// <summary>
-        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Queueing.GenericSyncEventHandler"/>.
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="GenericSyncEventHandler"/>.
         /// </summary>
-        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Queueing.GenericSyncEventHandler"/>.</returns>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="GenericSyncEventHandler"/>.</returns>
         public override string ToString() {
             return string.Format("[GenericSyncEventHandler {0}: Priority={1} AcceptedType={2}]", this.name != null ? this.name : string.Empty, this.Priority, typeof(TSyncEventType).ToString());
         }

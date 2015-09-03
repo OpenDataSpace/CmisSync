@@ -42,6 +42,11 @@ namespace CmisSync.Lib.Producer.Crawler {
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Producer.Crawler.LocalEventGenerator"/> class.
+        /// </summary>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="fsFactory">File system info factory.</param>
         public LocalEventGenerator(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) {
             if (storage == null) {
                 throw new ArgumentNullException("storage");
@@ -58,18 +63,12 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// <summary>
         /// Creates the local events and returns the creationEvents, the other Events are stored in the eventMap, handled objects are removed from storedObjects
         /// </summary>
-        /// <returns>
-        /// The local events.
-        /// </returns>
-        /// <param name='storedObjects'>
-        /// Stored objects.
-        /// </param>
-        /// <param name='localTree'>
-        /// Local tree.
-        /// </param>
-        /// <param name='eventMap'>
-        /// Event map.
-        /// </param>
+        /// <returns>The local events.</returns>
+        /// <param name='storedObjects'>Stored objects.</param>
+        /// <param name='localTree'>Local tree.</param>
+        /// <param name='eventMap'>Event map.</param>
+        /// <param name="handledStoredObjects">Already handled stored objects.</param>
+        /// <param name="creationEvents">List of all creation events.</param>
         public void CreateEvents(
             IDictionary<Guid, IMappedObject> storedObjects,
             IObjectTree<IFileSystemInfo> localTree,

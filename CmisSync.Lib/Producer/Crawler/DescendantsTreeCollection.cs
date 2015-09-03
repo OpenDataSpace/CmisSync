@@ -38,18 +38,12 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Producer.Crawler.DescendantsTreeCollection"/> struct.
         /// </summary>
-        /// <param name='storedTree'>
-        /// Stored tree.
-        /// </param>
-        /// <param name='localTree'>
-        /// Local tree.
-        /// </param>
-        /// <param name='remoteTree'>
-        /// Remote tree.
-        /// </param>
+        /// <param name='storedObjects'>Stored objects.</param>
+        /// <param name='localTree'>Local tree.</param>
+        /// <param name='remoteTree'>Remote tree.</param>
         /// <exception cref='ArgumentNullException'>
         /// <attribution license="cc4" from="Microsoft" modified="false" /><para>The exception that is thrown when a
-        /// null reference (Nothing in Visual Basic) is passed to a method that does not accept it as a valid argument. </para>
+        /// null reference (Nothing in Visual Basic) is passed to a method that does not accept it as a valid argument.</para>
         /// </exception>
         public DescendantsTreeCollection(IList<IMappedObject> storedObjects, IObjectTree<IFileSystemInfo> localTree, IObjectTree<IFileableCmisObject> remoteTree) : this() {
             if (storedObjects == null) {

@@ -288,6 +288,10 @@ namespace CmisSync.Lib.Streams {
         }
         #endregion
 
+        /// <summary>
+        /// Dispose the transmission stream by disposing all internal streams.
+        /// </summary>
+        /// <param name="disposing">If set to <c>true</c> all stream will be disposed.</param>
         protected override void Dispose(bool disposing) {
             if (!this.disposed) {
                 if (disposing) {

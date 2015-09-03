@@ -312,8 +312,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <returns>The SHA-1 hash of the uploaded file content.</returns>
         /// <param name="localFile">Local file.</param>
         /// <param name="doc">Remote document.</param>
-        /// <param name="transmissionManager">Transmission manager.</param>
-        /// <param name="transmissionEvent">File Transmission event.</param>
+        /// <param name="transmission">File Transmission.</param>
         protected byte[] UploadFile(IFileInfo localFile, IDocument doc, Transmission transmission) {
             if (transmission == null) {
                 throw new ArgumentNullException("transmission");
@@ -341,6 +340,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             }
         }
 
+        /// <summary>
+        /// Writes the or use UUID if supported.
+        /// </summary>
+        /// <returns>The or use UUID if supported.</returns>
+        /// <param name="info">Info.</param>
         protected Guid WriteOrUseUuidIfSupported(IFileSystemInfo info) {
             if (info == null) {
                 throw new ArgumentNullException("info");
@@ -368,10 +372,20 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             return uuid;
         }
 
+        /// <summary>
+        /// Gets the parent of a IFileInfo or a IDirectoryInfo instance.
+        /// </summary>
+        /// <returns>The parent.</returns>
+        /// <param name="fileInfo">File info.</param>
         protected IDirectoryInfo GetParent(IFileSystemInfo fileInfo) {
             return fileInfo is IDirectoryInfo ? (fileInfo as IDirectoryInfo).Parent : (fileInfo as IFileInfo).Directory;
         }
 
+        /// <summary>
+        /// Determines whether one parent of the given instance is read only.
+        /// </summary>
+        /// <returns><c>true</c> if one of the instance's parents is read only; otherwise, <c>false</c>.</returns>
+        /// <param name="localFileSystemInfo">Local file system info.</param>
         protected bool IsParentReadOnly(IFileSystemInfo localFileSystemInfo) {
             var parent = this.GetParent(localFileSystemInfo);
             while (parent != null && parent.Exists) {

@@ -29,15 +29,54 @@ namespace CmisSync.Lib.Cmis.UiUtils {
     /// Login exception type.
     /// </summary>
     public enum LoginExceptionType {
+        /// <summary>
+        /// An unkown exception happend.
+        /// </summary>
         Unkown = int.MaxValue,
+
+        /// <summary>
+        /// The connection is broken.
+        /// </summary>
         ConnectionBroken = 9,
+
+        /// <summary>
+        /// The name could not be resolved.
+        /// </summary>
         NameResolutionFailure = 8,
+
+        /// <summary>
+        /// The server could not be found.
+        /// </summary>
         ServerNotFound = 7,
+
+        /// <summary>
+        /// The https send failure.
+        /// </summary>
         HttpsSendFailure = 6,
+
+        /// <summary>
+        /// The https trust failure.
+        /// </summary>
         HttpsTrustFailure = 5,
+
+        /// <summary>
+        /// The target is not a cmis server.
+        /// </summary>
         TargetIsNotACmisServer = 4,
+
+        /// <summary>
+        /// The permission is denied. Perhaps wrong credentials are passed.
+        /// </summary>
         PermissionDenied = 3,
+
+        /// <summary>
+        /// Unauthorized exception occured.
+        /// </summary>
         Unauthorized = 2,
+
+        /// <summary>
+        /// The server could not locate a repository.
+        /// </summary>
         ServerCouldNotLocateRepository = 1
     }
 

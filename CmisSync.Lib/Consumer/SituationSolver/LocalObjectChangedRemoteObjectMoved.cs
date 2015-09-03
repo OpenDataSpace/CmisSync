@@ -40,7 +40,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="changeSolver">Local object changed and remote object changed situation solver.</param>
+        /// <param name="changeChangeSolver">Local object changed and remote object changed situation solver.</param>
         public LocalObjectChangedRemoteObjectMoved(
             ISession session,
             IMetaDataStorage storage,

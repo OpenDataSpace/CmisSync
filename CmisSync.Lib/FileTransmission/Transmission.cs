@@ -377,7 +377,7 @@ namespace CmisSync.Lib.FileTransmission {
         }
 
         /// <summary>
-        /// Serves as a hash function for a <see cref="CmisSync.Lib.FileTransmission.TransmissionController"/> object.
+        /// Serves as a hash function for a <see cref="CmisSync.Lib.FileTransmission.Transmission"/> object.
         /// </summary>
         /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
         /// hash table.</returns>

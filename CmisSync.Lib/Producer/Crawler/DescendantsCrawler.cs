@@ -53,6 +53,7 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// <param name="storage">Meta data storage.</param>
         /// <param name="filter">Aggregated filter.</param>
         /// <param name="activityListener">Activity listner.</param>
+        /// <param name="ignoredStorage">Ignored entities storage.</param>
         public DescendantsCrawler(
             ISyncEventQueue queue,
             IFolder remoteFolder,

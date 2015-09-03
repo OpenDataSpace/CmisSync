@@ -34,6 +34,9 @@ namespace CmisSync.Lib.Cmis {
 
         private DateTime? lastFinishedSync;
 
+        /// <summary>
+        /// The repo status flags.
+        /// </summary>
         protected readonly RepositoryStatus RepoStatusFlags = new RepositoryStatus();
 
         private RepoInfo repoInfo;

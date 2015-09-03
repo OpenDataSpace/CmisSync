@@ -28,9 +28,17 @@ namespace CmisSync.Lib.Producer.Crawler {
     using CmisSync.Lib.Storage.Database.Entities;
 
     using DotCMIS.Client;
+
+    /// <summary>
+    /// Remote event generator.
+    /// </summary>
     public class RemoteEventGenerator {
         private IMetaDataStorage storage;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Producer.Crawler.RemoteEventGenerator"/> class.
+        /// </summary>
+        /// <param name="storage">Meta data storage.</param>
         public RemoteEventGenerator(IMetaDataStorage storage) {
             if (storage == null) {
                 throw new ArgumentNullException("storage");
@@ -42,18 +50,12 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// <summary>
         /// Creates the local events and returns the creationEvents, the other Events are stored in the eventMap, handled objects are removed from storedObjects.
         /// </summary>
-        /// <returns>
-        /// The remote events.
-        /// </returns>
-        /// <param name='storedObjects'>
-        /// Stored objects.
-        /// </param>
-        /// <param name='remoteTree'>
-        /// Remote tree.
-        /// </param>
-        /// <param name='eventMap'>
-        /// Event map.
-        /// </param>
+        /// <returns>The remote events.</returns>
+        /// <param name='storedObjects'>Stored objects.</param>
+        /// <param name='remoteTree'>Remote tree.</param>
+        /// <param name='eventMap'>Event map.</param>
+        /// <param name="handledStoredObjects">Already handled stored objects.</param>
+        /// <param name="createdEvents">List of all creation events.</param>
         public void CreateEvents(
             IDictionary<string, IMappedObject> storedObjects,
             IObjectTree<IFileableCmisObject> remoteTree,

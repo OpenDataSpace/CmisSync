@@ -105,12 +105,28 @@ namespace CmisSync.Lib.Queueing {
         /// <value>The interval.</value>
         public int Interval { get; private set; }
 
+        /// <summary>
+        /// Gets or sets the queue.
+        /// </summary>
+        /// <value>The queue.</value>
         protected ISyncEventQueue Queue { get; set; }
 
+        /// <summary>
+        /// Gets or sets the repo info.
+        /// </summary>
+        /// <value>The repo info.</value>
         protected RepoInfo RepoInfo { get; set; }
 
+        /// <summary>
+        /// Gets or sets the auth provider.
+        /// </summary>
+        /// <value>The auth provider.</value>
         protected IAuthenticationProvider AuthProvider { get; set; }
 
+        /// <summary>
+        /// Gets or sets the session factory.
+        /// </summary>
+        /// <value>The session factory.</value>
         protected ISessionFactory SessionFactory { get; set; }
 
         /// <summary>
@@ -263,7 +279,7 @@ namespace CmisSync.Lib.Queueing {
                 } catch (CmisBaseException e) {
                     Logger.Error("Failed to create session to remote " + this.RepoInfo.Address.ToString() + ": ", e);
                 } catch (OperationCanceledException e) {
-                    Logger.Debug("Connect to server canceled");
+                    Logger.Debug("Connect to server canceled", e);
                 }
 
                 return false;
