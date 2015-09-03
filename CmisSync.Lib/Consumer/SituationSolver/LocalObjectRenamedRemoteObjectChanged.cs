@@ -71,26 +71,27 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             var obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
             var cmisObject = remoteId as ICmisObject;
             string oldName = cmisObject.Name;
+            string newName = localFileSystemInfo.Name;
 
             // Rename object
             try {
-                cmisObject.Rename(localFileSystemInfo.Name, true);
+                cmisObject.Rename(newName, true);
             } catch (CmisConstraintException e) {
-                if (!Utils.IsValidISO885915(localFileSystemInfo.Name)) {
-                    OperationsLogger.Warn(string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, localFileSystemInfo.Name));
+                if (!Utils.IsValidISO885915(newName)) {
+                    OperationsLogger.Warn(string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, newName));
                     throw new InteractionNeededException(string.Format("Server denied renaming of {0}", oldName), e) {
                         Title = string.Format("Server denied renaming of {0}", oldName),
-                        Description = string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, localFileSystemInfo.Name)
+                        Description = string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, newName)
                     };
                 }
 
                 throw;
             } catch (CmisPermissionDeniedException) {
-                OperationsLogger.Warn(string.Format("Unable to renamed remote object from {0} to {1}: Permission Denied", oldName, localFileSystemInfo.Name));
+                OperationsLogger.Warn(string.Format("Unable to renamed remote object from {0} to {1}: Permission Denied", oldName, newName));
                 return;
             }
 
-            obj.Name = localFileSystemInfo.Name;
+            obj.Name = newName;
             obj.Ignored = cmisObject.AreAllChildrenIgnored();
             this.Storage.SaveMappedObject(obj);
             this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
