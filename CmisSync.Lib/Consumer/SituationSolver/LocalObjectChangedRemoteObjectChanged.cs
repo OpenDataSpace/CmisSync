@@ -118,7 +118,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                         }
                     } else {
                         // Just date sync
-                        if (doc.LastModificationDate != null && fileInfo.LastWriteTimeUtc < (DateTime)doc.LastModificationDate) {
+                        var lastRemoteModificationDate = doc.LastModificationDate;
+                        if (lastRemoteModificationDate != null && fileInfo.LastWriteTimeUtc < (DateTime)lastRemoteModificationDate) {
                             updateLocalDate = true;
                         } else {
                             updateRemoteDate = true;
@@ -141,7 +142,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                             obj.LastContentSize = fileInfo.Length;
 
                             // Sync dates
-                            if (doc.LastModificationDate != null && fileInfo.LastWriteTimeUtc < (DateTime)doc.LastModificationDate) {
+                            var lastRemoteModificationDate = doc.LastModificationDate;
+                            if (lastRemoteModificationDate != null && fileInfo.LastWriteTimeUtc < (DateTime)lastRemoteModificationDate) {
                                 updateLocalDate = true;
                             } else {
                                 updateRemoteDate = true;
