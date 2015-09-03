@@ -186,6 +186,14 @@ M: System.String CmisSync.Lib.Config.Crypto::WindowsObfuscate(System.String)
 M: System.String CmisSync.Lib.Config.Crypto::WindowsDeobfuscate(System.String)
 M: System.Void CmisSync.Lib.Storage.FileSystem.ExtendedAttributeReaderDos::SetExtendedAttributeAndRestoreLastModificationDate(System.String,System.String,System.String)
 
+#Ignore UsePreferredTermsRule for the term Login
+R: Gendarme.Rules.Naming.UsePreferredTermsRule
+T: CmisSync.Lib.Cmis.UiUtils.LoginCredentials
+T: CmisSync.Lib.Cmis.UiUtils.LoginExceptionType
+T: CmisSync.Lib.Events.SuccessfulLoginEvent
+M: System.Boolean CmisSync.Lib.Config.ProxySettings::get_LoginRequired()
+M: System.Void CmisSync.Lib.Config.ProxySettings::set_LoginRequired(System.Boolean)
+
 #Ignore AvoidVisibleFieldsRule which are only visible for test reasons
 R: Gendarme.Rules.Design.AvoidVisibleFieldsRule
 T: CmisSync.Lib.Cmis.Repository
