@@ -26,7 +26,7 @@ namespace TestLibrary.IntegrationTests.NetworkFailuresTests {
 
     using TestLibrary.TestUtils.ToxiproxyUtils;
 
-    [TestFixture, Category("Slow"), Category("ToxiProxy")]
+    [TestFixture, Category("Slow"), Category("Toxiproxy")]
     public abstract class IsFullTestWithToxyProxy : BaseFullRepoTest {
         public string ToxiProxyServerName { get; private set; }
         public int? ToxiProxyServerManagementPort { get; private set; }
