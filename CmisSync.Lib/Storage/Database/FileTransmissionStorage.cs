@@ -30,7 +30,7 @@ namespace CmisSync.Lib.Storage.Database {
     /// File transmission storage.
     /// </summary>
     public class FileTransmissionStorage : IFileTransmissionStorage {
-        private static readonly string FileTransmissionObjectsTable = "FileTransmissionObjects";
+        private const string FileTransmissionObjectsTable = "FileTransmissionObjects";
 
         private DBreezeEngine engine;
 

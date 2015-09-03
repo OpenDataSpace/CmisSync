@@ -27,7 +27,7 @@ namespace CmisSync.Lib.Events {
     /// Permission denied event.
     /// </summary>
     public class PermissionDeniedEvent : ExceptionEvent {
-        private static readonly string HttpHeaderRetryAfter = "Retry-After";
+        private const string HttpHeaderRetryAfter = "Retry-After";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.PermissionDeniedEvent"/> class.

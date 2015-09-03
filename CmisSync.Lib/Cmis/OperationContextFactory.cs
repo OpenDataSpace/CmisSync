@@ -29,7 +29,7 @@ namespace CmisSync.Lib.Cmis {
     /// Operation context factory.
     /// </summary>
     public static class OperationContextFactory {
-        private static readonly int MaximumItemsPerPage = 1000;
+        private const int MaximumItemsPerPage = 1000;
 
         /// <summary>
         /// Creates the content change event context.

@@ -34,7 +34,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
     /// Wrapper for DirectoryInfo
     /// </summary>
     public abstract class FileSystemInfoWrapper : IFileSystemInfo {
-        private static readonly string ExtendedAttributeKey = "DSS-UUID";
+        private const string ExtendedAttributeKey = "DSS-UUID";
         private static IExtendedAttributeReader reader;
 #if !__MonoCS__
         protected static readonly SecurityIdentifier actualUser;

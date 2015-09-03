@@ -39,10 +39,10 @@ namespace CmisSync.Lib.Storage.Database {
     /// Meta data storage.
     /// </summary>
     public class MetaDataStorage : IMetaDataStorage {
-        private static readonly string PropertyTable = "properties";
-        private static readonly string MappedObjectsTable = "objects";
-        private static readonly string MappedObjectsGuidsTable = "guids";
-        private static readonly string ChangeLogTokenKey = "ChangeLogToken";
+        private const string PropertyTable = "properties";
+        private const string MappedObjectsTable = "objects";
+        private const string MappedObjectsGuidsTable = "guids";
+        private const string ChangeLogTokenKey = "ChangeLogToken";
 
         private static readonly ILog Logger = LogManager.GetLogger(typeof(MetaDataStorage));
 

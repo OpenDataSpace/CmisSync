@@ -28,7 +28,7 @@ namespace CmisSync.Lib.Storage.Database {
     /// Persistent cookie storage. Saves the cookie collection into the given dbreeze instance
     /// </summary>
     public class PersistentCookieStorage : ICookieStorage {
-        private static readonly string CookieTable = "cookies";
+        private const string CookieTable = "cookies";
         private DBreezeEngine db;
 
         static PersistentCookieStorage() {
