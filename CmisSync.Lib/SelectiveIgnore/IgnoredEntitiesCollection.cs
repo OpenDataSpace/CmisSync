@@ -77,8 +77,9 @@ namespace CmisSync.Lib.SelectiveIgnore {
             if (this.IsIgnoredId(doc.Id) == IgnoredState.Ignored) {
                 return IgnoredState.Ignored;
             } else {
-                if (doc.Parents != null && doc.Parents.Count > 0) {
-                    if (this.IsIgnored(doc.Parents[0]) != IgnoredState.NotIgnored) {
+                var parents = doc.Parents;
+                if (parents != null && parents.Count > 0) {
+                    if (this.IsIgnored(parents[0]) != IgnoredState.NotIgnored) {
                         return IgnoredState.Inherited;
                     }
                 }

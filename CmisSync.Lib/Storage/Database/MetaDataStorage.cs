@@ -151,12 +151,13 @@ namespace CmisSync.Lib.Storage.Database {
                 throw new ArgumentNullException("path");
             }
 
-            if (!this.matcher.CanCreateRemotePath(path.FullName)) {
-                throw new ArgumentException(string.Format("Given path \"{0}\" is not able to be matched on remote path", path.FullName), "path");
+            var fullName = path.FullName;
+            if (!this.matcher.CanCreateRemotePath(fullName)) {
+                throw new ArgumentException(string.Format("Given path \"{0}\" is not able to be matched on remote path", fullName), "path");
             }
 
             using (var tran = this.engine.GetTransaction()) {
-                string relativePath = this.matcher.GetRelativeLocalPath(path.FullName);
+                string relativePath = this.matcher.GetRelativeLocalPath(fullName);
                 List<string> pathSegments = new List<string>(relativePath.Split(Path.DirectorySeparatorChar));
                 List<MappedObject> objects = new List<MappedObject>();
                 foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable)) {
@@ -240,11 +241,12 @@ namespace CmisSync.Lib.Storage.Database {
         public void SaveMappedObject(IMappedObject obj) {
             string id = this.GetId(obj);
             using(var tran = this.engine.GetTransaction()) {
-                var byteGuid = obj.Guid.ToByteArray();
+                var guid = obj.Guid;
+                var byteGuid = guid.ToByteArray();
                 var row = tran.Select<byte[], string>(MappedObjectsGuidsTable, byteGuid);
                 if (row.Exists && row.Value != id) {
                     tran.Rollback();
-                    throw new DublicateGuidException(string.Format("An entry with Guid {0} already exists", obj.Guid));
+                    throw new DublicateGuidException(string.Format("An entry with Guid {0} already exists", guid));
                 }
 
                 if (this.fullValidationOnEachManipulation && obj.ParentId != null) {
@@ -257,8 +259,8 @@ namespace CmisSync.Lib.Storage.Database {
 
                 obj.LastTimeStoredInStorage = DateTime.UtcNow;
                 tran.Insert<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, id, obj as MappedObject);
-                if (!obj.Guid.Equals(Guid.Empty)) {
-                    tran.Insert<byte[], string>(MappedObjectsGuidsTable, obj.Guid.ToByteArray(), id);
+                if (!guid.Equals(Guid.Empty)) {
+                    tran.Insert<byte[], string>(MappedObjectsGuidsTable, byteGuid, id);
                 }
 
                 tran.Commit();
@@ -457,12 +459,13 @@ namespace CmisSync.Lib.Storage.Database {
             var objectsDict = new Dictionary<string, IList<IMappedObject>>();
             IMappedObject root = null;
             foreach (var obj in objects) {
-                if (obj.ParentId != null) {
-                    if (!objectsDict.ContainsKey(obj.ParentId)) {
-                        objectsDict[obj.ParentId] = new List<IMappedObject>();
+                var parentId = obj.ParentId;
+                if (parentId != null) {
+                    if (!objectsDict.ContainsKey(parentId)) {
+                        objectsDict[parentId] = new List<IMappedObject>();
                     }
 
-                    objectsDict[obj.ParentId].Add(obj);
+                    objectsDict[parentId].Add(obj);
                 } else {
                     root = obj;
                 }

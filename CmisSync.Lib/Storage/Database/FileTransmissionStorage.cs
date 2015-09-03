@@ -106,20 +106,22 @@ namespace CmisSync.Lib.Storage.Database {
                 throw new ArgumentException("empty string", "obj.LocalPath");
             }
 
-            if (obj.RemoteObjectId == null) {
+            var remoteId = obj.RemoteObjectId;
+            if (remoteId == null) {
                 throw new ArgumentNullException("obj.RemoteObjectId");
             }
 
-            if (string.IsNullOrEmpty(obj.RemoteObjectId)) {
+            if (string.IsNullOrEmpty(remoteId)) {
                 throw new ArgumentException("empty string", "obj.RemoteObjectId");
             }
 
-            if (!(obj is FileTransmissionObject)) {
+            var transmissionObject = obj as FileTransmissionObject;
+            if (transmissionObject == null) {
                 throw new ArgumentException("require FileTransmissionObject type", "obj");
             }
 
             using (var tran = this.engine.GetTransaction()) {
-                tran.Insert<string, DbCustomSerializer<FileTransmissionObject>>(FileTransmissionObjectsTable, obj.RemoteObjectId, obj as FileTransmissionObject);
+                tran.Insert<string, DbCustomSerializer<FileTransmissionObject>>(FileTransmissionObjectsTable, remoteId, transmissionObject);
                 tran.Commit();
             }
         }

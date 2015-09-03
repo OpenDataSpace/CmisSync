@@ -130,8 +130,7 @@ namespace CmisSync.Lib.Producer.ContentChange {
 
         private void HandleAsIDocument(ContentChangeEvent contentChangeEvent) {
             IDocument doc = contentChangeEvent.CmisObject as IDocument;
-            switch(contentChangeEvent.Type)
-            {
+            switch(contentChangeEvent.Type) {
             case DotCMIS.Enums.ChangeType.Created:
             {
                 var fileEvent = new FileEvent(null, doc) { Remote = MetaDataChangeType.CREATED };
@@ -174,8 +173,9 @@ namespace CmisSync.Lib.Producer.ContentChange {
                     fileEvent.Remote = MetaDataChangeType.CHANGED;
                     if (file != null) {
                         byte[] hash = doc.ContentStreamHash(file.ChecksumAlgorithmName);
-                        if (hash == null || !hash.SequenceEqual(file.LastChecksum)) {
-                            Logger.Debug(string.Format("SavedChecksum: {0} RemoteChecksum: {1}", Utils.ToHexString(file.LastChecksum), Utils.ToHexString(hash)));
+                        byte[] lastChecksum = file.LastChecksum;
+                        if (hash == null || !hash.SequenceEqual(lastChecksum)) {
+                            Logger.Debug(string.Format("SavedChecksum: {0} RemoteChecksum: {1}", Utils.ToHexString(lastChecksum), Utils.ToHexString(hash)));
                             fileEvent.RemoteContent = ContentChangeType.CHANGED;
                         } else {
                             fileEvent.RemoteContent = ContentChangeType.NONE;

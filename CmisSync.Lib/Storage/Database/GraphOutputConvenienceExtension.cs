@@ -83,9 +83,10 @@ namespace CmisSync.Lib.Storage.Database {
 
         private static void ObjectListToDotString(this IList<IMappedObject> list, StreamWriter writer) {
             foreach (var entry in list) {
-                writer.WriteLine(string.Format("\t\"{0}\" [label=\"{1}|<id>ObjectId: {2}|<uuid>UUID: {3}\", shape=record] ;", entry.RemoteObjectId, entry.Name, entry.RemoteObjectId, entry.Guid));
+                var remoteId = entry.RemoteObjectId;
+                writer.WriteLine(string.Format("\t\"{0}\" [label=\"{1}|<id>ObjectId: {2}|<uuid>UUID: {3}\", shape=record] ;", remoteId, entry.Name, remoteId, entry.Guid));
                 if (entry.ParentId != null) {
-                    writer.WriteLine(string.Format("\t\"{0}\" -> \"{1}\" ;", entry.ParentId, entry.RemoteObjectId));
+                    writer.WriteLine(string.Format("\t\"{0}\" -> \"{1}\" ;", entry.ParentId, remoteId));
                 }
             }
         }
