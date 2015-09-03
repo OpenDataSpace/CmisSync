@@ -242,8 +242,7 @@ namespace TestLibrary.AccumulatorTests {
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFolder(Path, Id);
 
-            var dirMock = new Mock<IDirectoryInfo>();
-            dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Uuid.ToString());
+            var dirMock = new Mock<IDirectoryInfo>().SetupGuid(Uuid);
 
             var folderEvent = new FolderEvent(dirMock.Object);
 
@@ -282,9 +281,7 @@ namespace TestLibrary.AccumulatorTests {
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFolder(Path, Id, Uuid);
 
-            var dirMock = new Mock<IDirectoryInfo>();
-            dirMock.Setup(d => d.Exists).Returns(true);
-            dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Uuid.ToString());
+            var dirMock = new Mock<IDirectoryInfo>().SetupExists().SetupGuid(Uuid);
             var folderEvent = new FolderEvent(dirMock.Object);
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
 
