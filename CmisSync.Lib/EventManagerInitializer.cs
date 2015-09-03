@@ -76,7 +76,7 @@ namespace CmisSync.Lib {
         /// <param name='ignoredStorage'>Storage for ignored entities.</param>
         /// <param name='repoInfo'>Repo info.</param>
         /// <param name='filter'>Filter aggregation.</param>
-        /// <param name='activityListner'>Listener for Sync activities.</param>
+        /// <param name='activityListener'>Listener for Sync activities.</param>
         /// <param name='transmissionFactory'>Transmission factory.</param>
         /// <param name='fsFactory'>File system factory.</param>
         /// <exception cref='ArgumentNullException'>
@@ -254,20 +254,20 @@ namespace CmisSync.Lib {
                 this.Queue.EventManager.AddEventHandler(this.mechanism);
 
                 var localRootFolder = this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath);
-                Guid rootFolderGuid;
-                if (!Guid.TryParse(localRootFolder.GetExtendedAttribute(MappedObject.ExtendedAttributeKey), out rootFolderGuid)) {
+                var rootUuid = localRootFolder.Uuid;
+                if (rootUuid == null) {
                     try {
-                        rootFolderGuid = Guid.NewGuid();
-                        localRootFolder.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, rootFolderGuid.ToString(), false);
+                        localRootFolder.Uuid = Guid.NewGuid();
+                        rootUuid = localRootFolder.Uuid ?? Guid.Empty;
                     } catch (ExtendedAttributeException ex) {
                         Logger.Warn("Problem on setting Guid of the root path", ex);
-                        rootFolderGuid = Guid.Empty;
+                        rootUuid = Guid.Empty;
                     }
                 }
 
                 var rootFolder = new MappedObject("/", remoteRoot.Id, MappedObjectType.Folder, null, remoteRoot.ChangeToken) {
                     LastRemoteWriteTimeUtc = remoteRoot.LastModificationDate,
-                    Guid = rootFolderGuid
+                    Guid = (Guid)rootUuid
                 };
 
                 Logger.Debug("Saving Root Folder to DataBase");
