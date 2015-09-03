@@ -23,6 +23,9 @@ namespace CmisSync.Lib.Streams {
     using System.IO;
     using System.Timers;
 
+    /// <summary>
+    /// Bandwidth notifying stream.
+    /// </summary>
     public class BandwidthNotifyingStream : NotifyPropertyChangedStream {
         /// <summary>
         /// The start time of the usage.
@@ -41,6 +44,10 @@ namespace CmisSync.Lib.Streams {
 
         private long bitsPerSecond = 0;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Streams.BandwidthNotifyingStream"/> class.
+        /// </summary>
+        /// <param name="s">Stream which should be observered.</param>
         public BandwidthNotifyingStream(Stream s) : base(s) {
             this.blockingDetectionTimer = new Timer(2000);
             this.blockingDetectionTimer.Elapsed += delegate(object sender, ElapsedEventArgs args) {

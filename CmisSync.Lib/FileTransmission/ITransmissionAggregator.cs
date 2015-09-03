@@ -20,7 +20,14 @@
 namespace CmisSync.Lib.FileTransmission {
     using System;
 
+    /// <summary>
+    /// Transmission aggregator interface.
+    /// </summary>
     public interface ITransmissionAggregator {
+        /// <summary>
+        /// Adds a transmission to Aggregator.
+        /// </summary>
+        /// <param name="transmission">Transmission which should be aggregated with others.</param>
         void Add(Transmission transmission);
     }
 }

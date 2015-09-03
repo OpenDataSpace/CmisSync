@@ -24,6 +24,7 @@ namespace CmisSync.Lib.Queueing {
     /// <summary>
     /// Unsubscriber can be used to automatically unsubscribe on dispose the observer from a given list of observers.
     /// </summary>
+    /// <typeparam name="T">Type of the class a observer is observing for new events.</typeparam>
     public class Unsubscriber<T> : IDisposable {
         private List<IObserver<T>> observers;
         private IObserver<T> observer;
