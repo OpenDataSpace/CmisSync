@@ -26,6 +26,7 @@ namespace CmisSync.Lib.Cmis {
     /// </summary>
     public class DotCMISLogListener : System.Diagnostics.TraceListener {
         private readonly log4net.ILog log;
+        private bool disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.DotCMISLogListener"/> class.
@@ -54,6 +55,10 @@ namespace CmisSync.Lib.Cmis {
         /// </summary>
         /// <param name="message">Message to be written.</param>
         public override void Write(string message) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             try {
                 this.log.Debug(message);
             } catch (Exception) {
@@ -66,11 +71,27 @@ namespace CmisSync.Lib.Cmis {
         /// </summary>
         /// <param name="message">Message to be written.</param>
         public override void WriteLine(string message) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             try {
                 this.log.Debug(message);
             } catch (Exception) {
                 Console.Out.WriteLine(message);
             }
+        }
+
+        /// <summary>
+        /// Dispose logger.
+        /// </summary>
+        /// <param name="disposing">If set to <c>true</c> disposing the logger.</param>
+        protected override void Dispose(bool disposing) {
+            if (disposing) {
+                this.disposed = true;
+            }
+
+            base.Dispose(disposing);
         }
 
         private void SetLog4NetLevelToTraceLevel() {
