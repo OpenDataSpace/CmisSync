@@ -206,6 +206,10 @@ M: System.Xml.XmlNode CmisSync.Lib.Config.Config::get_Log4Net()
 M: System.Void CmisSync.Lib.Config.Config::set_Log4Net(System.Xml.XmlNode)
 M: System.Void CmisSync.Lib.Config.Config::SetLog4NetConfig(System.Xml.XmlNode)
 
+#Ignore UseFileOpenOnlyWithFileAccessRule because it is needed by a wrapper to wrap interfaces correctly
+R: Gendarme.Rules.BadPractice.UseFileOpenOnlyWithFileAccessRule
+M: System.IO.Stream CmisSync.Lib.Storage.FileSystem.FileInfoWrapper::Open(System.IO.FileMode)
+
 # TryParseRule should not give any warning in test library
 R: Gendarme.Rules.BadPractice.PreferTryParseRule
 A: TestLibrary, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
