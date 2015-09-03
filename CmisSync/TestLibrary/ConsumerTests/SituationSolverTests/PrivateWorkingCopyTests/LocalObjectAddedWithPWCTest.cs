@@ -171,7 +171,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.localFile.Setup(f => f.Directory).Returns(parentDirInfo);
             this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.FullName == this.parentPath))).Returns(() => { return null; });
             this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.FullName == parentParentDirInfo.FullName))).Returns(Mock.Of<IMappedObject>(o => o.RemoteObjectId == parentParentId));
-            var parentParentDir = new Mock<IFolder>();
             this.session.Setup(s => s.GetObject(parentParentId)).Returns(Mock.Of<IFolder>(o => o.AllowableActions.Actions == new HashSet<string>()));
 
             byte[] content = new byte[fileSize];
@@ -184,7 +183,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectIdNew, this.objectName, this.parentId, this.changeTokenNew, checksum: hash, contentSize: fileSize, times: Times.Never());
             this.remoteDocument.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()), Times.Never());
-            int counts = (int)((fileSize + this.chunkSize - 1) / this.chunkSize);
             this.remoteDocumentPWC.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
         }
 

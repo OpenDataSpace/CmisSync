@@ -51,9 +51,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private readonly string parentId = "parentId";
         private readonly string localObjectName = "localName";
         private readonly string remoteObjectId = "remoteId";
-        private readonly string remotePWCObjectId = "remotePWCId";
         private readonly string lastChangeToken = "token";
-        private readonly string lastPWCChangeToken = "tokenPWC";
 
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
@@ -355,7 +353,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             fileInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(this.withExtendedAttributes);
 
             fileInfo.Setup(d => d.Directory).Returns(parentDirInfo.Object);
-            var transmissionManager = new TransmissionManager();
             var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory);
             Assert.Throws<ArgumentException>(() => solver.Solve(fileInfo.Object, null));
             this.storage.VerifyThatNoObjectIsManipulated();
