@@ -26,7 +26,7 @@ namespace CmisSync.UIConverter {
     using System.Windows.Data;
 
     [ValueConversion(typeof(long?), typeof(string))]
-    class TranmissionPositionToStringConverter : IValueConverter {
+    sealed class TranmissionPositionToStringConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
             if (value != null) {
                 if ((long)value == 0) {

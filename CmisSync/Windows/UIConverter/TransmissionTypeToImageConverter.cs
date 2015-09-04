@@ -29,7 +29,7 @@ namespace CmisSync.UIConverter {
     using System.Windows.Media.Imaging;
 
     [ValueConversion(typeof(TransmissionType), typeof(BitmapFrame))]
-    public class TypeToImageConverter : IValueConverter {
+    sealed class TypeToImageConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
             switch ((TransmissionType)value) {
                 case TransmissionType.UploadNewFile:

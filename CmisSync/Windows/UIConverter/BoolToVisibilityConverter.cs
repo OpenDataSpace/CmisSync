@@ -25,7 +25,8 @@ namespace CmisSync.UIConverter {
     using System.Windows;
     using System.Windows.Data;
 
-    class BoolToVisibilityConverter : IValueConverter {
+    [ValueConversion(typeof(bool), typeof(Visibility))]
+    sealed class BoolToVisibilityConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
             return (bool)value == true ? Visibility.Visible : Visibility.Collapsed;
         }

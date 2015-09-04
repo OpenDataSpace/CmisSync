@@ -24,8 +24,9 @@ namespace CmisSync.UIConverter {
     using System.Text;
     using System.Windows;
     using System.Windows.Data;
-    
-    class TransmissionExceptionToTextConverter : IValueConverter {
+
+    [ValueConversion(typeof(Exception), typeof(string))]
+    sealed class TransmissionExceptionToTextConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
             var exception = value as Exception;
             if (exception != null) {
