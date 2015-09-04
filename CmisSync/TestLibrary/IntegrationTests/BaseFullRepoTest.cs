@@ -183,10 +183,10 @@ namespace TestLibrary.IntegrationTests {
             cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
             cmisParameters[SessionParameter.MaximumRequestRetries] = "0";
 
-            // Sets the http connection timeout to 10 sec
-            cmisParameters[SessionParameter.ConnectTimeout] = "10000";
-            // Sets the http read timeout to 30 sec
-            cmisParameters[SessionParameter.ReadTimeout] = "30000";
+            // Sets the http connection timeout to 50 sec
+            cmisParameters[SessionParameter.ConnectTimeout] = "50000";
+            // Sets the http read timeout to 60 sec
+            cmisParameters[SessionParameter.ReadTimeout] = "60000";
 
             this.SessionFactory = this.SessionFactory ?? DotCMIS.Client.Impl.SessionFactory.NewInstance();
             this.session = this.SessionFactory.CreateSession(cmisParameters, null, null, null);
