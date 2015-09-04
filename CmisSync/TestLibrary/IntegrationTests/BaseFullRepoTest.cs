@@ -38,6 +38,7 @@ namespace TestLibrary.IntegrationTests {
     using DotCMIS.Binding;
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -210,11 +211,17 @@ namespace TestLibrary.IntegrationTests {
             }
 
             if (this.remoteRootDir != null) {
-                if (this.session.IsPrivateWorkingCopySupported()) {
+                // https://mantis.dataspace.cc/view.php?id=4706
+                // https://mantis.dataspace.cc/view.php?id=4707
+                /* if (this.session.IsPrivateWorkingCopySupported()) {
                     foreach (var checkedOutDoc in this.remoteRootDir.GetCheckedOutDocs()) {
-                        checkedOutDoc.CancelCheckOut();
+                        try {
+                            checkedOutDoc.CancelCheckOut();
+                        } catch (CmisVersioningException ex) {
+                            Console.WriteLine(ex.ToLogString());
+                        }
                     }
-                }
+                }*/
 
                 this.remoteRootDir.Refresh();
                 this.remoteRootDir.DeleteTree(true, null, true);
