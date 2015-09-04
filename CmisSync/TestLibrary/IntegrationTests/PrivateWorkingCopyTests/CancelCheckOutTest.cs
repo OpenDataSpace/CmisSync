@@ -10,7 +10,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
 
     using TestUtils;
 
-    [TestFixture, TestName("CancelCheckOut")]
+    [TestFixture, TestName("CancelCheckOut"), Ignore("https://mantis.dataspace.cc/view.php?id=4708")]
     public class CancelCheckOutTest : BaseFullRepoTest {
         [Test]
         public void CreateCheckedOutDocInFolderAndCancelCheckOut() {
