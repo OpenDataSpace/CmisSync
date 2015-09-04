@@ -129,6 +129,7 @@ SOURCES =  \
 	IntegrationTests/NetworkFailuresTests/IsFullTestWithToxyProxy.cs \
 	IntegrationTests/NetworkFailuresTests/ToxiProxySetup.cs \
 	IntegrationTests/PrivateWorkingCopyTests/AppendContentStreamTests.cs \
+	IntegrationTests/PrivateWorkingCopyTests/CancelCheckOutTest.cs \
 	IntegrationTests/PrivateWorkingCopyTests/CreateDocumentTests.cs \
 	IntegrationTests/PrivateWorkingCopyTests/UploadChangedContent.cs \
 	IntegrationTests/RepositoryStatusIT.cs \

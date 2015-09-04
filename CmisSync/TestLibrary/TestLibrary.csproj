@@ -350,6 +350,7 @@
     <Compile Include="EventsTests\SuccessfulLoginEventTest.cs" />
     <Compile Include="IntegrationTests\NetworkFailuresTests\CRUDSyncTests.cs" />
     <Compile Include="QueueingTests\ConnectionInterruptedHandlerTest.cs" />
+    <Compile Include="IntegrationTests\PrivateWorkingCopyTests\CancelCheckOutTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
