@@ -210,6 +210,12 @@ namespace TestLibrary.IntegrationTests {
             }
 
             if (this.remoteRootDir != null) {
+                if (this.session.IsPrivateWorkingCopySupported()) {
+                    foreach (var checkedOutDoc in this.remoteRootDir.GetCheckedOutDocs()) {
+                        checkedOutDoc.CancelCheckOut();
+                    }
+                }
+
                 this.remoteRootDir.Refresh();
                 this.remoteRootDir.DeleteTree(true, null, true);
             }
