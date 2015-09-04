@@ -54,7 +54,7 @@ namespace CmisSync.Lib.FileTransmission {
             Transmission transmission,
             HashAlgorithm hashAlg,
             bool overwrite = true,
-            UpdateChecksum update = null)
+            Action<byte[], long> update = null)
         {
             if (remoteDocument == null) {
                 throw new ArgumentException("remoteDocument can not be null");

@@ -47,6 +47,6 @@ namespace CmisSync.Lib.FileTransmission {
             Stream localFileStream,
             Transmission transmission,
             HashAlgorithm hashAlg,
-            UpdateChecksum update = null);
+            Action<byte[], long> update = null);
     }
 }

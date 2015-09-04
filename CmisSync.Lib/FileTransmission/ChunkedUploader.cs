@@ -74,7 +74,7 @@ namespace CmisSync.Lib.FileTransmission {
             Transmission transmission,
             HashAlgorithm hashAlg,
             bool overwrite = true,
-            UpdateChecksum update = null)
+            Action<byte[], long> update = null)
         {
             if (transmission == null) {
                 throw new ArgumentNullException("transmission");
