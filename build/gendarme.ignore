@@ -230,6 +230,10 @@ M: System.Void CmisSync.Lib.Config.Config::SetLog4NetConfig(System.Xml.XmlNode)
 R: Gendarme.Rules.BadPractice.UseFileOpenOnlyWithFileAccessRule
 M: System.IO.Stream CmisSync.Lib.Storage.FileSystem.FileInfoWrapper::Open(System.IO.FileMode)
 
+#Ignore AvoidFloatingPointEqualityRule on uncritical section
+R: Gendarme.Rules.Correctness.AvoidFloatingPointEqualityRule
+M: System.Boolean CmisSync.Lib.Queueing.SyncScheduler::Handle(CmisSync.Lib.Events.ISyncEvent)
+
 # TryParseRule should not give any warning in test library
 R: Gendarme.Rules.BadPractice.PreferTryParseRule
 A: TestLibrary, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
