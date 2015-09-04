@@ -257,10 +257,12 @@ namespace CmisSync.Lib.Queueing {
                 if (rootUuid == null) {
                     try {
                         localRootFolder.Uuid = Guid.NewGuid();
-                        rootUuid = localRootFolder.Uuid ?? Guid.Empty;
+                    } catch (RestoreModificationDateException ex) {
+                        Logger.Debug("Could not restore modification date", ex);
                     } catch (ExtendedAttributeException ex) {
                         Logger.Warn("Problem on setting Guid of the root path", ex);
-                        rootUuid = Guid.Empty;
+                    } finally {
+                        rootUuid = localRootFolder.Uuid ?? Guid.Empty;
                     }
                 }
 
