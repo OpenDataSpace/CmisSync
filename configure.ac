@@ -59,6 +59,10 @@ AC_SUBST(DBREEZE_PATH,[\$\(top_srcdir\)/packages/DBreeze.1.71.1/lib/net40/DBreez
 AC_SUBST(MOQ_LIBS,[[-r:\$\(top_srcdir\)/packages/Moq.4.2.1507.0118/lib/net40/Moq.dll]])
 AC_SUBST(MOQ_PATH,[[\$\(top_srcdir\)/packages/Moq.4.2.1507.0118/lib/net40/Moq.dll]])
 
+AC_SUBST(ALPHA_LIBS,[[-r:\$\(top_srcdir\)/packages/AlphaFS.2.0.1/lib/net45/AlphaFS.dll]])
+AC_SUBST(APHA_PATH,[[\$\(top_srcdir\)/packages/AlphaFS.2.0.1/lib/net45/AlphaFS.dll]])
+
+
 AC_SUBST(TOXIPROXY_LIBS,[[-r:\$\(top_srcdir\)/packages/Toxiproxy.Net.1.2.11/lib/net45/Toxiproxy.Net.dll,\$\(top_srcdir\)/packages/RestSharp.105.2.1/lib/net45/RestSharp.dll]])
 
 AC_SUBST(DOTCMIS_LIBS,[[-r:\$\(top_srcdir\)/Extras/DotCMIS.dll]])

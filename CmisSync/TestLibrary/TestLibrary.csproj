@@ -78,6 +78,10 @@
     <Reference Include="RestSharp">
       <HintPath>..\..\packages\RestSharp.105.2.1\lib\net45\RestSharp.dll</HintPath>
     </Reference>
+    <Reference Include="AlphaFS">
+      <HintPath>..\..\packages\AlphaFS.2.0.1\lib\net45\AlphaFS.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Transactions" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccumulatorTests\LocalObjectFetcherTest.cs" />
@@ -351,6 +355,7 @@
     <Compile Include="IntegrationTests\NetworkFailuresTests\CRUDSyncTests.cs" />
     <Compile Include="QueueingTests\ConnectionInterruptedHandlerTest.cs" />
     <Compile Include="IntegrationTests\PrivateWorkingCopyTests\CancelCheckOutTest.cs" />
+    <Compile Include="StorageTests\AlphaFileSystemTests\FileInfoWithLongPathTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -392,5 +397,6 @@
     <Folder Include="ExceptionTests\" />
     <Folder Include="IntegrationTests\NetworkFailuresTests\" />
     <Folder Include="TestUtils\ToxiproxyUtils\" />
+    <Folder Include="StorageTests\AlphaFileSystemTests\" />
   </ItemGroup>
 </Project>

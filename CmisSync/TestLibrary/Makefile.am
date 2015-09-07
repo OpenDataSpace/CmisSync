@@ -9,7 +9,8 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(MONOMAC_LIBS) 
 	$(NUNIT_LIBS) \
 	$(DBREEZE_LIBS) \
 	$(MOQ_LIBS) \
-	$(TOXIPROXY_LIBS)
+	$(TOXIPROXY_LIBS) \
+	$(ALPHA_LIBS)
 
 SOURCES =  \
 	AccumulatorTests/LocalObjectFetcherTest.cs \
@@ -223,6 +224,7 @@ SOURCES =  \
 	SelectiveIgnoreTests/IgnoredEntitiesCollectionTest.cs \
 	SelectiveIgnoreTests/IgnoredEntitiesStorageTest.cs \
 	SelectiveIgnoreTests/IgnoredEntityTest.cs \
+	StorageTests/AlphaFileSystemTests/FileInfoWithLongPathTest.cs \
 	StorageTests/DataBaseTests/DBreezeTests.cs \
 	StorageTests/DataBaseTests/EntitiesTests/FileTransmissionObjectsTest.cs \
 	StorageTests/DataBaseTests/EntitiesTests/IFileConvenienceExtendersTest.cs \
