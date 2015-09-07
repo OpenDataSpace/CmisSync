@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.StorageTests.FileSystemTests
-{
+namespace TestLibrary.StorageTests.FileSystemTests {
     using System;
     using System.IO;
 
@@ -29,8 +28,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
     using TestLibrary.IntegrationTests;
 
     [TestFixture, Ignore]
-    public class LongFileAndPathNameSupportTest
-    {
+    public class LongFileAndPathNameSupportTest {
         private static readonly IFileSystemInfoFactory Factory = new FileSystemInfoFactory();
 
         // ext2, ext3, ext4, btrfs, zfs and ntfs maximum file name length is 255. reiserfs limits are dynamic and higher.
