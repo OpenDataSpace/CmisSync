@@ -98,6 +98,11 @@ namespace CmisSync.Lib.Producer.Watcher {
             this.fileSystemWatcher.Deleted += new FileSystemEventHandler(this.createChangeDeleteHandler.Handle);
             this.fileSystemWatcher.Changed += new FileSystemEventHandler(this.createChangeDeleteHandler.Handle);
             this.fileSystemWatcher.Renamed += new RenamedEventHandler(this.renamedHandler.Handle);
+            this.fileSystemWatcher.Error += (object sender, ErrorEventArgs e) => {
+                if (e.GetException().GetType() == typeof(InternalBufferOverflowException)) {
+                    this.queue.AddEvent(new StartNextSyncEvent(true));
+                }
+            };
         }
 
         /// <summary>
