@@ -36,9 +36,9 @@ namespace TestLibrary.StorageTests.AlphaFSTests {
         public void WriteADS() {
             var fileName = Guid.NewGuid().ToString();
             var adsName = "DSS-Test";
-            File.WriteAllText(Path.Combine(Path.GetTempPath(), fileName + ":" + adsName, PathFormat.FullPath), fileName);
+            File.WriteAllText(Path.Combine(Path.GetTempPath(), fileName + ":" + adsName), fileName, PathFormat.FullPath);
 
-            var file = new FileInfo(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()) , PathFormat.FullPath);
+            var file = new FileInfo(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()), PathFormat.FullPath);
             Assert.That(file.Exists, Is.True);
             foreach (var stream in file.EnumerateAlternateDataStreams()) {
                 Assert.That(stream.StreamName, Is.EqualTo(string.Empty).Or.EqualTo(adsName));
