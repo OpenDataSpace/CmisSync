@@ -23,7 +23,12 @@ namespace TestLibrary.StorageTests.FileSystemTests {
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
-
+#if !__MonoCS__
+    using FileInfo = Alphaleonis.Win32.Filesystem.FileInfo;
+    using FileSystemInfo = Alphaleonis.Win32.Filesystem.FileSystemInfo;
+    using DirectoryInfo = Alphaleonis.Win32.Filesystem.DirectoryInfo;
+    using Path = Alphaleonis.Win32.Filesystem.Path;
+#endif
     using CmisSync.Lib.Storage.FileSystem;
 
     using Moq;
@@ -845,10 +850,11 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         }
 
         private void RemoveReadOnlyFlagRecursive(FileSystemInfo info) {
-            info.Refresh();
             if (info is FileInfo) {
+                (info as FileInfo).Refresh();
                 new FileInfoWrapper(info as FileInfo).ReadOnly = false;
             } else if (info is DirectoryInfo) {
+                (info as DirectoryInfo).Refresh();
                 new DirectoryInfoWrapper(info as DirectoryInfo).ReadOnly = false;
                 foreach (var child in (info as DirectoryInfo).GetFileSystemInfos()) {
                     this.RemoveReadOnlyFlagRecursive(child);

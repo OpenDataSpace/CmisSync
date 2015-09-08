@@ -19,7 +19,12 @@
 
 namespace CmisSync.Lib.Storage.FileSystem {
     using System;
+#if !__MonoCS__
+    using Alphaleonis.Win32.Filesystem;
+    using FileNotFoundException = System.IO.FileNotFoundException;
+#else
     using System.IO;
+#endif
 
     using CmisSync.Lib.Config;
 

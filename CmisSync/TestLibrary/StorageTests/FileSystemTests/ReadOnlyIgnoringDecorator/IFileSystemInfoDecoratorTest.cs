@@ -21,7 +21,10 @@ namespace TestLibrary.StorageTests.FileSystemTests.ReadOnlyIgnoringDecorator {
     using System;
     using System.IO;
     using System.Security;
-
+#if !__MonoCS__
+    using FileInfo = Alphaleonis.Win32.Filesystem.FileInfo;
+    using DirectoryInfo = Alphaleonis.Win32.Filesystem.DirectoryInfo;
+#endif
     using CmisSync.Lib.Storage.FileSystem;
 
     using Moq;

@@ -20,14 +20,20 @@
 namespace TestLibrary.StorageTests.FileSystemTests {
     using System;
     using System.IO;
-
+#if !__MonoCS__
+    using FileInfo = Alphaleonis.Win32.Filesystem.FileInfo;
+    using FileSystemInfo = Alphaleonis.Win32.Filesystem.FileSystemInfo;
+    using DirectoryInfo = Alphaleonis.Win32.Filesystem.DirectoryInfo;
+    using Directory = Alphaleonis.Win32.Filesystem.Directory;
+    using Path = Alphaleonis.Win32.Filesystem.Path;
+#endif
     using CmisSync.Lib.Storage.FileSystem;
 
     using NUnit.Framework;
 
     using TestLibrary.IntegrationTests;
 
-    [TestFixture, Ignore]
+    [TestFixture]
     public class LongFileAndPathNameSupportTest {
         private static readonly IFileSystemInfoFactory Factory = new FileSystemInfoFactory();
 
@@ -42,15 +48,17 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             var config = ITUtils.GetConfig();
             string localPath = config[1].ToString();
             this.testFolder = Path.Combine(localPath, Guid.NewGuid().ToString());
-            this.longPath = Path.GetFullPath(this.testFolder);
             string shortName = "1234567890";
+            this.longPath = shortName;
             for (int i = 0; i < 30; i++) {
                 this.longPath = Path.Combine(this.longPath, shortName);
             }
 
-            var dir = Factory.CreateDirectoryInfo(this.longPath);
-            Console.WriteLine(dir.FullName);
+            var dir = new DirectoryInfo(this.testFolder);
             dir.Create();
+            this.longPath = dir.CreateSubdirectory(this.longPath).FullName;
+            Console.WriteLine(this.longPath);
+            
             this.longName = string.Empty;
             for (int i = 0; i < MaxFileNameLength; i++) {
                 this.longName += "a";
@@ -67,14 +75,11 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         [Test, Category("Fast")]
         public void OpenFile() {
             var file = Factory.CreateFileInfo(Path.Combine(this.longPath, this.longName));
-            using (file.Open(FileMode.CreateNew)) {
-            }
+            using (file.Open(FileMode.CreateNew));
 
-            using (file.Open(FileMode.Open)) {
-            }
+            using (file.Open(FileMode.Open));
 
-            using (file.Open(FileMode.Truncate)) {
-            }
+            using (file.Open(FileMode.Truncate));
         }
 
         [Test, Category("Fast")]
@@ -118,6 +123,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             }
 
             file.Delete();
+
             Assert.That(file.Exists, Is.False);
         }
 
@@ -164,6 +170,31 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         }
 
         [Test, Category("Fast")]
+        public void GetFileUuid() {
+            this.EnsureExtendedAttributesAreAvailable();
+            var file = Factory.CreateFileInfo(Path.Combine(this.longPath, this.longName));
+            using(file.Open(FileMode.CreateNew));
+
+            Assert.That(file.Uuid, Is.Null);
+        }
+
+        [Test, Category("Fast")]
+        public void TruncateModeToInt() {
+            Assert.That((int)FileMode.Truncate, Is.EqualTo(5));
+        }
+
+        [Test, Category("Fast")]
+        public void SetFileUuid() {
+            this.EnsureExtendedAttributesAreAvailable();
+            var file = Factory.CreateFileInfo(Path.Combine(this.longPath, this.longName));
+            using(file.Open(FileMode.CreateNew));
+            Guid uuid = Guid.NewGuid();
+            file.Uuid = uuid;
+
+            Assert.That(file.Uuid, Is.EqualTo(uuid));
+        }
+
+        [Test, Category("Fast")]
         public void GetLastWriteTimeUtc() {
             var file = Factory.CreateFileInfo(Path.Combine(this.longPath, this.longName));
             using (file.Open(FileMode.CreateNew)) {
@@ -191,8 +222,8 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         }
 
         private void EnsureExtendedAttributesAreAvailable() {
-            var reader = new ExtendedAttributeReaderUnix();
-            if (!reader.IsFeatureAvailable(this.testFolder)) {
+            var dir = new DirectoryInfoWrapper(new DirectoryInfo(this.testFolder));
+            if (!dir.IsExtendedAttributeAvailable()) {
                 Assert.Ignore("Extended Attribute not available on this machine");
             }
         }

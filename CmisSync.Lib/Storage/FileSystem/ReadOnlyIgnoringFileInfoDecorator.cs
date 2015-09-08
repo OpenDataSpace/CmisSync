@@ -20,6 +20,9 @@
 namespace CmisSync.Lib.Storage.FileSystem {
     using System;
     using System.IO;
+#if !__MonoCS__
+    using FileInfo = Alphaleonis.Win32.Filesystem.FileInfo;
+#endif
 
     /// <summary>
     /// Read only ignoring file info decorator decorades the given IFileInfo instance and removes read only flag before executing the operation and adds it back after successful operation.

@@ -19,7 +19,12 @@
 
 namespace CmisSync.Lib.Storage.FileSystem {
     using System;
+#if !__MonoCS__
+    using Alphaleonis.Win32.Filesystem;
+    using FileAttributes = System.IO.FileAttributes;
+#else
     using System.IO;
+#endif
     using System.Security.AccessControl;
 
     /// <summary>
@@ -128,6 +133,10 @@ namespace CmisSync.Lib.Storage.FileSystem {
                 dir.TryToSetReadWritePermissionRecursively();
             }
 #endif
+        }
+
+        public override void Refresh() {
+            this.original.Refresh();
         }
     }
 }

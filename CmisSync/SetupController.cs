@@ -39,6 +39,10 @@ namespace CmisSync {
     using System.IO;
     using System.Text.RegularExpressions;
     using System.Threading;
+#if !__MonoCS__
+    using FileInfo = Alphaleonis.Win32.Filesystem.FileInfo;
+    using DirectoryInfo = Alphaleonis.Win32.Filesystem.DirectoryInfo;
+#endif
 
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Cmis.UiUtils;

@@ -19,10 +19,13 @@
 
 namespace CmisSync.Lib.Storage.FileSystem {
     using System;
-    using System.IO;
 #if !__MonoCS__
     using System.Security.AccessControl;
     using System.Security.Principal;
+    using Alphaleonis.Win32.Filesystem;
+    using FileAttributes = System.IO.FileAttributes;
+#else
+    using System.IO;
 #endif
     using System.Threading;
 
@@ -207,9 +210,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <summary>
         /// Refresh the loaded information of this instance.
         /// </summary>
-        public void Refresh() {
-            this.original.Refresh();
-        }
+        public abstract void Refresh();
 
         /// <summary>
         /// Gets the extended attribute.

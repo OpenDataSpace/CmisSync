@@ -20,7 +20,17 @@
 namespace CmisSync.Lib.Storage.FileSystem {
     using System;
     using System.Collections.Generic;
+#if !__MonoCS__
+    using Alphaleonis.Win32.Filesystem;
+    using FileAttributes = System.IO.FileAttributes;
+    using FileAccess = System.IO.FileAccess;
+    using FileMode = System.IO.FileMode;
+    using Stream = System.IO.Stream;
+    using FileShare = System.IO.FileShare;
+    using IOException = System.IO.IOException;
+#else
     using System.IO;
+#endif
 #if !__MONO_CS__
     using System.Runtime.InteropServices;
 #endif
@@ -102,6 +112,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// </summary>
         public void Delete() {
             this.original.Delete();
+            this.original.Refresh();
         }
 
         /// <summary>
@@ -166,6 +177,10 @@ namespace CmisSync.Lib.Storage.FileSystem {
                 }
             }
 #endif
+        }
+
+        public override void Refresh() {
+            this.original.Refresh();
         }
     }
 }

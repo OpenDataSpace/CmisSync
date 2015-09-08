@@ -22,7 +22,11 @@ namespace TestLibrary.ProducerTests.WatcherTests {
     using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
-
+#if !__MonoCS__
+    using FileInfo = Alphaleonis.Win32.Filesystem.FileInfo;
+    using DirectoryInfo = Alphaleonis.Win32.Filesystem.DirectoryInfo;
+    using Path = Alphaleonis.Win32.Filesystem.Path;
+#endif
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Producer.Watcher;
     using CmisSync.Lib.Queueing;

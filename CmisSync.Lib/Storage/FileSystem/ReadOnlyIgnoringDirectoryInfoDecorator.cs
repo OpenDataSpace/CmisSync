@@ -19,7 +19,11 @@
 
 namespace CmisSync.Lib.Storage.FileSystem {
     using System;
+#if !__MonoCS__
+    using Alphaleonis.Win32.Filesystem;
+#else
     using System.IO;
+#endif
 
     /// <summary>
     /// Read only ignoring directory info decorator.

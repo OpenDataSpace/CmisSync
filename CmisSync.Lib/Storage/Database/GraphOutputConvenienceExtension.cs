@@ -21,6 +21,9 @@ namespace CmisSync.Lib.Storage.Database {
     using System;
     using System.Collections.Generic;
     using System.IO;
+#if !__MonoCS__
+    using FileInfo = Alphaleonis.Win32.Filesystem.FileInfo;
+#endif
 
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;

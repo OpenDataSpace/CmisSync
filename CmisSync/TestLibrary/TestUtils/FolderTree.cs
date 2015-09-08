@@ -23,7 +23,10 @@ namespace TestLibrary.TestUtils {
     using System.IO;
     using System.Linq;
     using System.Text;
-
+#if !__MonoCS__
+    using FileInfo = Alphaleonis.Win32.Filesystem.FileInfo;
+    using DirectoryInfo = Alphaleonis.Win32.Filesystem.DirectoryInfo;
+#endif
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;

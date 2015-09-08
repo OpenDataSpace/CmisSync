@@ -25,6 +25,11 @@ namespace TestLibrary.IntegrationTests {
     using System.Security.Cryptography;
     using System.Text;
     using System.Threading;
+#if !__MonoCS__
+    using FileInfo = Alphaleonis.Win32.Filesystem.FileInfo;
+    using DirectoryInfo = Alphaleonis.Win32.Filesystem.DirectoryInfo;
+    using Path = Alphaleonis.Win32.Filesystem.Path;
+#endif
 
     using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
