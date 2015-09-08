@@ -1,5 +1,5 @@
 ﻿
-namespace TestLibrary {
+namespace TestLibrary.StorageTests.AlphaFSTests {
     using System;
 
     using Alphaleonis.Win32.Filesystem;
