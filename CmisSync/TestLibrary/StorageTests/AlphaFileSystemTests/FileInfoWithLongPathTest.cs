@@ -26,6 +26,14 @@ namespace TestLibrary.StorageTests.AlphaFSTests {
 
     [TestFixture]
     public class FileInfoWithLongPathTest {
+        [SetUp]
+        public void IgnoreOnNonWindowsSystems() {
+            #if __MonoCS__
+            Assert.Ignore("Only on windows systems");
+            #endif
+        }
+
+        #if !__MonoCS__
         [Test, Category("Medium")]
         public void CreateInstance() {
             var file = new FileInfo(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()), PathFormat.FullPath);
@@ -38,9 +46,11 @@ namespace TestLibrary.StorageTests.AlphaFSTests {
             var adsName = "DSS-Test";
             File.WriteAllText(Path.Combine(Path.GetTempPath(), fileName + ":" + adsName), fileName, PathFormat.FullPath);
 
-            var file = new FileInfo(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()), PathFormat.FullPath);
+            var file = new FileInfo(Path.Combine(Path.GetTempPath(), fileName), PathFormat.FullPath);
             Assert.That(file.Exists, Is.True);
+            int i = 0;
             foreach (var stream in file.EnumerateAlternateDataStreams()) {
+                i++;
                 Assert.That(stream.StreamName, Is.EqualTo(string.Empty).Or.EqualTo(adsName));
                 if (stream.StreamName == adsName) {
                     Assert.That(stream.Size, Is.EqualTo(fileName.Length));
@@ -48,6 +58,9 @@ namespace TestLibrary.StorageTests.AlphaFSTests {
                     Assert.That(stream.Size, Is.EqualTo(0));
                 }
             }
+
+            Assert.That(i, Is.EqualTo(2));
         }
+        #endif
     }
 }
