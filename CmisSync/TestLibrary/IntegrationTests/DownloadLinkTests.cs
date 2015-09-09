@@ -38,7 +38,7 @@ namespace TestLibrary.IntegrationTests {
         public void CreateDownloadLink(
             [Values(true, false)]bool withExpiration,
             [Values(null, "password")]string password,
-            [Values(null, "jenkins@dataspace.cc")]string mail,
+            [Values(null, "justDropThis@test.dataspace.cc")]string mail,
             [Values(null, "", "mailSubject")]string subject,
             [Values(null, "", "message")]string message)
         {
@@ -60,6 +60,7 @@ namespace TestLibrary.IntegrationTests {
         public void CreateLinkItem() {
             this.EnsureThatDownloadLinksAreSupported();
             var item = this.CreateLink();
+            Assert.That(item, Is.Not.Null);
         }
 
         private Uri CreateDownloadLink(
@@ -85,7 +86,7 @@ namespace TestLibrary.IntegrationTests {
                 properties.Add("gds:password", password);
             }
 
-            var linkItem = this.session.CreateItem(properties, this.remoteRootDir);
+            var linkItem = this.session.CreateItem(properties, null);
             foreach (var objectId in objectIds) {
                 IDictionary<string, object> relProperties = new Dictionary<string, object>();
                 relProperties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisRelationship.GetCmisValue());
