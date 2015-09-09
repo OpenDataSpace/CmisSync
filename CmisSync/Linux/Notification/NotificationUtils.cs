@@ -16,44 +16,49 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using Notifications;
 
-namespace CmisSync.Notifications
-{
+namespace CmisSync.Notifications {
     using System;
     using System.Diagnostics;
     using System.IO;
 
-    public static class NotificationUtils
-    {
+    /// <summary>
+    /// Desktop Notification utils.
+    /// </summary>
+    public static class NotificationUtils {
         private static readonly string IconName = Path.Combine("dataspacesync-app");
-        private static Notification notification = new Notification();
+        private static global::Notifications.Notification notification;
         private static object notificationLock = new object();
 
         /// <summary>
         /// Creates a Notification by Notificatoin Daemon
         /// </summary>
         /// <param name='title'>
-        /// Title.
+        /// Notification title.
         /// </param>
         /// <param name='content'>
-        /// Content.
+        /// Notification message/content.
         /// </param>
         /// <param name='iconPath'>
         /// Icon path.
         /// </param>
-        public static void NotifyAsync(string title, string content = null, string iconPath = null)
-        {
-            if (content == null) {
-                content = string.Empty;
-            }
+        public static void NotifyAsync(string title, string content = null, string iconPath = null) {
+            content = content ?? string.Empty;
+            Gtk.Application.Invoke(delegate {
+                lock (notificationLock) {
+                    if (notification == null) {
+                        notification = new global::Notifications.Notification();
+                    }
 
-            lock(notificationLock) {
-                notification.Summary = title;
-                notification.Body = content;
-                notification.IconName = string.IsNullOrEmpty(iconPath) ? IconName : iconPath;
-                notification.Show();
-            }
+                    try {
+                        notification.Summary = title;
+                        notification.Body = content.Substring(0, Math.Min(content.Length, 1024));
+                        notification.IconName = string.IsNullOrEmpty(iconPath) ? IconName : iconPath;
+                        notification.Show();
+                    } catch (Exception) {
+                    }
+                }
+            });
         }
     }
 }

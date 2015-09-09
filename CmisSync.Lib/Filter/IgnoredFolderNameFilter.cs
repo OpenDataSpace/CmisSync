@@ -46,7 +46,7 @@ namespace CmisSync.Lib.Filter {
         public List<string> Wildcards {
             set {
                 if (value == null) {
-                    throw new ArgumentNullException("Given wildcards are null");
+                    throw new ArgumentNullException("Wildcards");
                 }
 
                 lock (this.listLock) {

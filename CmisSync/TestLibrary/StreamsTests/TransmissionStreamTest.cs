@@ -32,7 +32,7 @@ namespace TestLibrary.StreamsTests {
     public class TransmissionStreamTest {
         [Test, Category("Fast"), Category("Streams")]
         public void ConstructorFailsIfStreamIsNull() {
-            Assert.Throws<ArgumentNullException>(() => {using (new TransmissionStream(null, new Transmission(TransmissionType.DOWNLOAD_MODIFIED_FILE, "path")));});
+            Assert.Throws<ArgumentNullException>(() => {using (new TransmissionStream(null, new Transmission(TransmissionType.DownloadModifiedFile, "path")));});
         }
 
         [Test, Category("Fast"), Category("Streams")]
@@ -45,7 +45,7 @@ namespace TestLibrary.StreamsTests {
 
         [Test, Category("Fast"), Category("Streams")]
         public void ConstructorTakesTransmissionAndStream() {
-            var transmission = new Transmission(TransmissionType.DOWNLOAD_MODIFIED_FILE, "path");
+            var transmission = new Transmission(TransmissionType.DownloadModifiedFile, "path");
             using (var stream = new MemoryStream())
             using (var underTest = new TransmissionStream(stream, transmission)) {
             }
@@ -53,8 +53,7 @@ namespace TestLibrary.StreamsTests {
 
         [Test, Category("Fast"), Category("Streams")]
         public void AbortReadIfAbortIsCalled() {
-            var transmission = new Transmission(TransmissionType.DOWNLOAD_MODIFIED_FILE, "path");
-            byte[] content = new byte[1024];
+            var transmission = new Transmission(TransmissionType.DownloadModifiedFile, "path");
             using (var outputStream = new MemoryStream())
             using (var stream = new Mock<MemoryStream>() { CallBase = true }.Object)
             using (var underTest = new TransmissionStream(stream, transmission)) {
@@ -67,7 +66,7 @@ namespace TestLibrary.StreamsTests {
 
         [Test, Category("Fast"), Category("Streams")]
         public void AbortWriteIfAbortIsCalled() {
-            var transmission = new Transmission(TransmissionType.DOWNLOAD_MODIFIED_FILE, "path");
+            var transmission = new Transmission(TransmissionType.DownloadModifiedFile, "path");
             using (var inputStream = new MemoryStream(new byte[1024 * 1024 * 10]))
             using (var stream = new Mock<MemoryStream>() { CallBase = true }.Object)
             using (var underTest = new TransmissionStream(stream, transmission)) {
@@ -75,6 +74,39 @@ namespace TestLibrary.StreamsTests {
                 Assert.Throws<AbortException>(() => inputStream.CopyTo(underTest));
                 Mock.Get(stream).Verify(s => s.WriteByte(It.IsAny<byte>()), Times.Never());
                 Mock.Get(stream).Verify(s => s.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>()), Times.Never());
+            }
+        }
+
+        [Test, Category("Medium"), Category("Streams"), Category("IT"), Timeout(2200)]
+        public void BandwidthLimitsArePropagatedAndUsed(
+            [Values(true, false)]bool readFromTransmissionStream,
+            [Values(true, false)]bool isBandwidthLimitedAfterInit)
+        {
+            int limit = 1024;
+            int contentSize = 2 * limit;
+
+            var transmission = new Transmission(TransmissionType.DownloadModifiedFile, "path");
+            if (!isBandwidthLimitedAfterInit) {
+                transmission.MaxBandwidth = limit;
+            }
+
+            using (var inputOrOutputStream = new MemoryStream(new byte[contentSize]))
+            using (var stream = new MemoryStream(new byte[contentSize]))
+            using (var underTest = new TransmissionStream(stream, transmission)) {
+                transmission.PropertyChanged += (sender, e) => {
+                    // limit * 2 is a workaround to handle monitoring of sliding time window
+                    Assert.That(transmission.BitsPerSecond / 8, Is.Null.Or.LessThanOrEqualTo(limit * 2));
+                };
+
+                if (isBandwidthLimitedAfterInit) {
+                    transmission.MaxBandwidth = limit;
+                }
+
+                if (readFromTransmissionStream) {
+                    underTest.CopyTo(inputOrOutputStream);
+                } else {
+                    inputOrOutputStream.CopyTo(underTest);
+                }
             }
         }
     }

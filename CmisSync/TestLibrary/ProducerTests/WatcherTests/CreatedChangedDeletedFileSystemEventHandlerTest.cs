@@ -66,17 +66,13 @@ namespace TestLibrary.ProducerTests.WatcherTests {
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull() {
-            using (new CreatedChangedDeletedFileSystemEventHandler(null, this.storage.Object)) {
-            }
+            Assert.Throws<ArgumentNullException>(() => { using (new CreatedChangedDeletedFileSystemEventHandler(null, this.storage.Object)); });
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfStorageIsNull() {
-            using (new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, null)) {
-            }
+            Assert.Throws<ArgumentNullException>(() => { using (new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, null)); });
         }
 
         [Test, Category("Medium")]

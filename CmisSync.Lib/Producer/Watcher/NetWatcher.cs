@@ -40,7 +40,7 @@ namespace CmisSync.Lib.Producer.Watcher {
         /// <summary>
         /// Whether this object has been disposed or not.
         /// </summary>
-        private bool disposed = false;
+        private bool disposed;
 
         private IMetaDataStorage storage;
 
@@ -65,7 +65,7 @@ namespace CmisSync.Lib.Producer.Watcher {
             FileSystemInfoFactory fsFactory = null)
         {
             if (watcher == null) {
-                throw new ArgumentNullException("The given fs watcher must not be null");
+                throw new ArgumentNullException("watcher");
             }
 
             if (string.IsNullOrEmpty(watcher.Path)) {
@@ -73,11 +73,11 @@ namespace CmisSync.Lib.Producer.Watcher {
             }
 
             if (queue == null) {
-                throw new ArgumentNullException("The given queue must not be null");
+                throw new ArgumentNullException("queue");
             }
 
             if (storage == null) {
-                throw new ArgumentNullException("The given storage must not be null");
+                throw new ArgumentNullException("storage");
             }
 
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
@@ -101,22 +101,31 @@ namespace CmisSync.Lib.Producer.Watcher {
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Sync.Strategy.NetWatcher"/> enable events.
+        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Producer.Watcher.NetWatcher"/> enable events.
         /// </summary>
         /// <value><c>true</c> if enable events; otherwise, <c>false</c>.</value>
         public bool EnableEvents {
-            get { return this.fileSystemWatcher.EnableRaisingEvents; }
-            set { this.fileSystemWatcher.EnableRaisingEvents = value; }
+            get {
+                return this.fileSystemWatcher.EnableRaisingEvents;
+            }
+
+            set {
+                if (this.disposed) {
+                    throw new ObjectDisposedException(this.GetType().Name);
+                }
+
+                this.fileSystemWatcher.EnableRaisingEvents = value;
+            }
         }
 
         /// <summary>
-        /// Releases all resource used by the <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> object.
+        /// Releases all resource used by the <see cref="CmisSync.Lib.Producer.Watcher.NetWatcher"/> object.
         /// </summary>
-        /// <remarks>Call <see cref="Dispose"/> when you are finished using the <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/>.
-        /// The <see cref="Dispose"/> method leaves the <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> in an unusable
-        /// state. After calling <see cref="Dispose"/>, you must release all references to the
-        /// <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> so the garbage collector can reclaim the memory that the
-        /// <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> was occupying.</remarks>
+        /// <remarks>Call <see cref="Dispose()"/> when you are finished using the <see cref="CmisSync.Lib.Producer.Watcher.NetWatcher"/>.
+        /// The <see cref="Dispose()"/> method leaves the <see cref="CmisSync.Lib.Producer.Watcher.NetWatcher"/> in an unusable
+        /// state. After calling <see cref="Dispose()"/>, you must release all references to the
+        /// <see cref="CmisSync.Lib.Producer.Watcher.NetWatcher"/> so the garbage collector can reclaim the memory that the
+        /// <see cref="CmisSync.Lib.Producer.Watcher.NetWatcher"/> was occupying.</remarks>
         public void Dispose() {
             this.Dispose(true);
             GC.SuppressFinalize(this);

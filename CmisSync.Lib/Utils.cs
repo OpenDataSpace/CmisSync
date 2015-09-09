@@ -26,7 +26,9 @@ namespace CmisSync.Lib {
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Security;
+    using System.Security.AccessControl;
     using System.Security.Permissions;
+    using System.Security.Principal;
     using System.Text;
     using System.Text.RegularExpressions;
 
@@ -71,28 +73,28 @@ namespace CmisSync.Lib {
                     return false;
                 }
 
-                var accessRules = accessControlList.GetAccessRules(true, true, typeof(System.Security.Principal.SecurityIdentifier));
+                var accessRules = accessControlList.GetAccessRules(true, true, typeof(SecurityIdentifier));
                 if (accessRules == null) {
                     return false;
                 }
 
-                foreach (System.Security.AccessControl.FileSystemAccessRule rule in accessRules) {
-                    if ((System.Security.AccessControl.FileSystemRights.Write & rule.FileSystemRights)
-                            != System.Security.AccessControl.FileSystemRights.Write) {
+                foreach (FileSystemAccessRule rule in accessRules) {
+                    if ((FileSystemRights.Write & rule.FileSystemRights)
+                        != FileSystemRights.Write) {
                         continue;
                     }
 
-                    if (rule.AccessControlType == System.Security.AccessControl.AccessControlType.Allow) {
+                    if (rule.AccessControlType == AccessControlType.Allow) {
                         writeAllow = true;
-                    } else if (rule.AccessControlType == System.Security.AccessControl.AccessControlType.Deny) {
+                    } else if (rule.AccessControlType == AccessControlType.Deny) {
                         writeDeny = true;
                     }
                 }
-            } catch (System.PlatformNotSupportedException) {
+            } catch (PlatformNotSupportedException) {
 #if __MonoCS__
                 writeAllow = (0 == Syscall.access(path, AccessModes.W_OK));
 #endif
-            } catch(System.UnauthorizedAccessException) {
+            } catch (UnauthorizedAccessException) {
                 var permission = new FileIOPermission(FileIOPermissionAccess.Write, path);
                 var permissionSet = new PermissionSet(PermissionState.None);
                 permissionSet.AddPermission(permission);
@@ -170,10 +172,10 @@ namespace CmisSync.Lib {
         /// Check whether the file is worth syncing or not.
         /// Files that are not worth syncing include temp files, locks, etc.
         /// </summary>
-        /// <param name="filename"></param>
-        /// <param name="ignoreWildcards"></param>
-        /// <returns></returns>
-        public static bool WorthSyncing(string filename, List<string> ignoreWildcards) {
+        /// <param name="filename">File name.</param>
+        /// <param name="ignoreWildcards">ignore wildcards.</param>
+        /// <returns><c>true</c> if this passed file name is syncable, otherwise <c>false</c></returns>
+        public static bool WorthSyncing(string filename, IList<string> ignoreWildcards) {
             if (null == filename) {
                 return false;
             }
@@ -182,7 +184,9 @@ namespace CmisSync.Lib {
                 return false;
             }
 
-            foreach(var wildcard in ignoreWildcards) {
+            ignoreWildcards = ignoreWildcards ?? new List<string>();
+
+            foreach (var wildcard in ignoreWildcards) {
                 var regex = IgnoreLineToRegex(wildcard);
                 if (regex.IsMatch(filename)) {
                     Logger.Debug(string.Format("Unworth syncing: \"{0}\" because it matches \"{1}\"", filename, wildcard));
@@ -196,6 +200,8 @@ namespace CmisSync.Lib {
         /// <summary>
         /// Check whether a file name is valid or not.
         /// </summary>
+        /// <param name="name">File name.</param>
+        /// <returns><c>true</c> if the given name is not valid for syncing, otherwise <c>false</c>.</returns>
         public static bool IsInvalidFileName(string name) {
             bool ret = invalidFileNameRegex.IsMatch(name);
             if (ret) {
@@ -206,6 +212,11 @@ namespace CmisSync.Lib {
             return ret;
         }
 
+        /// <summary>
+        /// Determines if the folder name is valid or not.
+        /// </summary>
+        /// <returns><c>true</c> if is the folder name is valid; otherwise, <c>false</c>.</returns>
+        /// <param name="name">Folder name.</param>
         public static bool IsInvalidFolderName(string name) {
             return IsInvalidFolderName(name, new List<string>());
         }
@@ -213,9 +224,12 @@ namespace CmisSync.Lib {
         /// <summary>
         /// Check whether a folder name is valid or not.
         /// </summary>
-        public static bool IsInvalidFolderName(string name, List<string> ignoreWildcards) {
+        /// <returns><c>true</c> if is the folder name is valid and no wildcard matches; otherwise, <c>false</c>.</returns>
+        /// <param name="name">Folder name.</param>
+        /// <param name="ignoreWildcards">Folder regex list which should be ignored.</param>
+        public static bool IsInvalidFolderName(string name, IList<string> ignoreWildcards) {
             if (ignoreWildcards == null) {
-                throw new ArgumentNullException("Given wildcards are null");
+                throw new ArgumentNullException("ignoreWildcards");
             }
 
             bool ret = invalidFolderNameRegex.IsMatch(name);
@@ -342,6 +356,10 @@ namespace CmisSync.Lib {
         /// If set to <c>true</c> fsi.
         /// </param>
         public static bool IsSymlink(FileSystemInfo fsi) {
+            if (fsi == null) {
+                throw new ArgumentNullException("fsi");
+            }
+
             return (fsi.Attributes & FileAttributes.ReparsePoint) == FileAttributes.ReparsePoint;
         }
 
@@ -349,10 +367,11 @@ namespace CmisSync.Lib {
         /// Creates the user agent string for this client.
         /// </summary>
         /// <returns>The user agent.</returns>
-        public static string CreateUserAgent() {
+        /// <param name="appName">Modify the user agent with the given app name.</param>
+        public static string CreateUserAgent(string appName = "DSS") {
             return string.Format(
                 "{0}/{1} ({2}; {4}; hostname=\"{3}\")",
-                "DSS",
+                appName,
                 Backend.Version,
                 Environment.OSVersion.ToString(),
                 System.Environment.MachineName,
@@ -399,7 +418,12 @@ namespace CmisSync.Lib {
             return false;
         }
 
-        public static string ToHexString(byte[] data) {
+        /// <summary>
+        /// Tos the hex string.
+        /// </summary>
+        /// <returns>The hex string.</returns>
+        /// <param name="data">byte array.</param>
+        public static string ToHexString(this byte[] data) {
             if (data == null) {
                 return "(null)";
             } else {
@@ -440,7 +464,7 @@ namespace CmisSync.Lib {
         /// Credits to: http://stackoverflow.com/users/295635/peter
         /// </summary>
         /// <returns>The property name as string.</returns>
-        /// <param name="property">Property.</param>
+        /// <param name="property">Property function.</param>
         /// <typeparam name="TModel">The 1st type parameter.</typeparam>
         /// <typeparam name="TProperty">The 2nd type parameter.</typeparam>
         public static string NameOf<TModel, TProperty>(Expression<Func<TModel, TProperty>> property) {

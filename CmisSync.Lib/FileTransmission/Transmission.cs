@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="TransmissionController.cs" company="GRAU DATA AG">
+// <copyright file="Transmission.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -34,22 +34,22 @@ namespace CmisSync.Lib.FileTransmission {
         /// <summary>
         /// A new file is uploaded
         /// </summary>
-        UPLOAD_NEW_FILE,
+        UploadNewFile,
 
         /// <summary>
         /// A locally modified file is uploaded
         /// </summary>
-        UPLOAD_MODIFIED_FILE,
+        UploadModifiedFile,
 
         /// <summary>
         /// A new remote file is downloaded
         /// </summary>
-        DOWNLOAD_NEW_FILE,
+        DownloadNewFile,
 
         /// <summary>
         /// A remotely modified file is downloaded
         /// </summary>
-        DOWNLOAD_MODIFIED_FILE
+        DownloadModifiedFile
     }
 
     /// <summary>
@@ -59,27 +59,27 @@ namespace CmisSync.Lib.FileTransmission {
         /// <summary>
         /// Transmission is going on.
         /// </summary>
-        TRANSMITTING,
+        Transmitting,
 
         /// <summary>
         /// Transmission is requested to be aborted.
         /// </summary>
-        ABORTING,
+        Aborting,
 
         /// <summary>
         /// Transmission is aborted.
         /// </summary>
-        ABORTED,
+        Aborted,
 
         /// <summary>
         /// Transmission is paused.
         /// </summary>
-        PAUSED,
+        Paused,
 
         /// <summary>
         /// Transmission is finished successfully
         /// </summary>
-        FINISHED
+        Finished
     }
 
     /// <summary>
@@ -91,15 +91,16 @@ namespace CmisSync.Lib.FileTransmission {
         private readonly TransmissionType type;
         private string relativePath = string.Empty;
         private string repo = string.Empty;
-        private TransmissionStatus status = TransmissionStatus.TRANSMITTING;
-        private long? length = null;
-        private long? position = null;
-        private long? bitsPerSecond = null;
-        private Exception failedException = null;
-        DateTime lastModification = DateTime.Now;
+        private TransmissionStatus status;
+        private long? length;
+        private long? position;
+        private long? bitsPerSecond;
+        private Exception failedException;
+        private DateTime lastModification = DateTime.Now;
+        private long maxBandwidth;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.TransmissionController"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.Transmission"/> class.
         /// </summary>
         /// <param name='type'>
         /// Type of the transmission.
@@ -112,7 +113,7 @@ namespace CmisSync.Lib.FileTransmission {
         /// </param>
         public Transmission(TransmissionType type, string path, string cachePath = null) {
             if (path == null) {
-                throw new ArgumentNullException("Argument null in FSEvent Constructor", "path");
+                throw new ArgumentNullException("path");
             }
 
             this.type = type;
@@ -120,9 +121,11 @@ namespace CmisSync.Lib.FileTransmission {
             this.CachePath = cachePath;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.Transmission"/> class, but should only be used by UI templates in design phase.
+        /// </summary>
         [Obsolete("Should only be used by UI templates", true)]
         public Transmission() {
-            this.type = TransmissionType.UPLOAD_NEW_FILE;
             this.Path = "Not Set";
             this.CachePath = null;
         }
@@ -249,7 +252,7 @@ namespace CmisSync.Lib.FileTransmission {
         }
 
         /// <summary>
-        /// Gets the status of the transmission.
+        /// Gets or sets the status of the transmission.
         /// </summary>
         /// <value>The status.</value>
         public TransmissionStatus Status {
@@ -284,7 +287,7 @@ namespace CmisSync.Lib.FileTransmission {
                 if (this.failedException != value) {
                     this.failedException = value;
                     this.NotifyPropertyChanged(Utils.NameOf(() => this.FailedException));
-                    this.Status = TransmissionStatus.ABORTED;
+                    this.Status = TransmissionStatus.Aborted;
                 }
             }
         }
@@ -338,9 +341,26 @@ namespace CmisSync.Lib.FileTransmission {
             }
 
             set {
-                if (Math.Abs((value - this.lastModification).TotalSeconds) > 1 ) {
+                if (Math.Abs((value - this.lastModification).TotalSeconds) > 1) {
                     this.lastModification = value;
                     this.NotifyPropertyChanged(Utils.NameOf(() => this.LastModification));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum bandwidth. Zero or negative value will disable the limitations.
+        /// </summary>
+        /// <value>The max bandwidth.</value>
+        public long MaxBandwidth {
+            get {
+                return this.maxBandwidth;
+            }
+
+            set {
+                if (this.maxBandwidth != value) {
+                    this.maxBandwidth = value;
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.MaxBandwidth));
                 }
             }
         }
@@ -352,12 +372,12 @@ namespace CmisSync.Lib.FileTransmission {
         /// <value><c>true</c> if done; otherwise, <c>false</c>.</value>
         public bool Done {
             get {
-                return this.Status == TransmissionStatus.ABORTED || this.Status == TransmissionStatus.FINISHED;
+                return this.Status == TransmissionStatus.Aborted || this.Status == TransmissionStatus.Finished;
             }
         }
 
         /// <summary>
-        /// Serves as a hash function for a <see cref="CmisSync.Lib.FileTransmission.TransmissionController"/> object.
+        /// Serves as a hash function for a <see cref="CmisSync.Lib.FileTransmission.Transmission"/> object.
         /// </summary>
         /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
         /// hash table.</returns>
@@ -365,24 +385,38 @@ namespace CmisSync.Lib.FileTransmission {
             return base.GetHashCode();
         }
 
+        /// <summary>
+        /// Pause the transmission async.
+        /// </summary>
         public void Pause() {
-            if (this.Status == TransmissionStatus.TRANSMITTING) {
-                this.Status = TransmissionStatus.PAUSED;
+            if (this.Status == TransmissionStatus.Transmitting) {
+                this.Status = TransmissionStatus.Paused;
             }
         }
 
+        /// <summary>
+        /// Resume the transmission async.
+        /// </summary>
         public void Resume() {
-            if (this.Status == TransmissionStatus.PAUSED) {
-                this.Status = TransmissionStatus.TRANSMITTING;
+            if (this.Status == TransmissionStatus.Paused) {
+                this.Status = TransmissionStatus.Transmitting;
             }
         }
 
+        /// <summary>
+        /// Abort the transmission async.
+        /// </summary>
         public void Abort() {
-            if (this.Status == TransmissionStatus.PAUSED || this.Status == TransmissionStatus.TRANSMITTING) {
-                this.Status = TransmissionStatus.ABORTING;
+            if (this.Status == TransmissionStatus.Paused || this.Status == TransmissionStatus.Transmitting) {
+                this.Status = TransmissionStatus.Aborting;
             }
         }
 
+        /// <summary>
+        /// Creates the stream.
+        /// </summary>
+        /// <returns>The stream.</returns>
+        /// <param name="wrappedStream">Wrapped stream.</param>
         public Stream CreateStream(Stream wrappedStream) {
             return new TransmissionStream(wrappedStream, this);
         }
@@ -393,7 +427,7 @@ namespace CmisSync.Lib.FileTransmission {
         /// <param name="propertyName">Property name.</param>
         private void NotifyPropertyChanged(string propertyName) {
             if (string.IsNullOrEmpty(propertyName)) {
-                throw new ArgumentNullException("Given property name is null");
+                throw new ArgumentNullException("propertyName");
             }
 
             var handler = this.PropertyChanged;

@@ -16,13 +16,13 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Producer.ContentChange
-{
+
+namespace CmisSync.Lib.Producer.ContentChange {
     using System;
- 
+
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
-    
+
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
@@ -40,20 +40,16 @@ namespace CmisSync.Lib.Producer.ContentChange
         private ISession session;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.ContentChangeEventAccumulator"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Producer.ContentChange.ContentChangeEventAccumulator"/> class.
         /// </summary>
-        /// <param name='session'>
-        /// Cmis Session.
-        /// </param>
-        /// <param name='queue'>
-        /// The ISyncEventQueue.
-        /// </param>
+        /// <param name='session'>Cmis Session.</param>
+        /// <param name='queue'>The ISyncEventQueue.</param>
         /// <exception cref='ArgumentNullException'>
         /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
         /// </exception>
         public ContentChangeEventAccumulator(ISession session, ISyncEventQueue queue) : base(queue) {
             if (session == null) {
-                throw new ArgumentNullException("Session instance is needed for the ContentChangeEventAccumulator, but was null");
+                throw new ArgumentNullException("session");
             }
 
             this.session = session;
@@ -78,13 +74,13 @@ namespace CmisSync.Lib.Producer.ContentChange
                 try {
                     contentChangeEvent.UpdateObject(this.session);
                     Logger.Debug("Updated Object in contentChangeEvent" + contentChangeEvent.ToString());
-                } catch(CmisObjectNotFoundException) {
-                    Logger.Debug("Object with id " + contentChangeEvent.ObjectId + " has been deleted - ignore"); 
+                } catch (CmisObjectNotFoundException) {
+                    Logger.Debug("Object with id " + contentChangeEvent.ObjectId + " has been deleted - ignore");
                     return true;
-                } catch(CmisPermissionDeniedException) {
-                    Logger.Debug("Object with id " + contentChangeEvent.ObjectId + " gives Access Denied: ACL changed - ignore"); 
+                } catch (CmisPermissionDeniedException) {
+                    Logger.Debug("Object with id " + contentChangeEvent.ObjectId + " gives Access Denied: ACL changed - ignore");
                     return true;
-                } catch(Exception ex) {
+                } catch (Exception ex) {
                     Logger.Warn("Unable to fetch object " + contentChangeEvent.ObjectId + " starting CrawlSync");
                     Logger.Debug(ex.StackTrace);
                     Queue.AddEvent(new StartNextSyncEvent(true));

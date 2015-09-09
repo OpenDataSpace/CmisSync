@@ -44,11 +44,11 @@ namespace CmisSync.Lib.SelectiveIgnore {
         /// <param name="queue">Sync Event Queue.</param>
         public IgnoreFlagChangeDetection(IIgnoredEntitiesStorage ignores, IPathMatcher matcher, ISyncEventQueue queue) : base(queue) {
             if (ignores == null) {
-                throw new ArgumentNullException("Given ignores are null");
+                throw new ArgumentNullException("ignores");
             }
 
             if (matcher == null) {
-                throw new ArgumentNullException("Given path matcher is null");
+                throw new ArgumentNullException("matcher");
             }
 
             this.ignores = ignores;
@@ -65,7 +65,7 @@ namespace CmisSync.Lib.SelectiveIgnore {
             if (e is ContentChangeEvent) {
                 var change = e as ContentChangeEvent;
                 if (change.Type == DotCMIS.Enums.ChangeType.Deleted) {
-                    if (this.ignores.IsIgnoredId(change.ObjectId) == IgnoredState.IGNORED) {
+                    if (this.ignores.IsIgnoredId(change.ObjectId) == IgnoredState.Ignored) {
                         this.ignores.Remove(change.ObjectId);
                         this.Queue.AddEvent(new StartNextSyncEvent(true));
                     }
@@ -74,16 +74,16 @@ namespace CmisSync.Lib.SelectiveIgnore {
                 }
 
                 switch (this.ignores.IsIgnoredId(change.ObjectId)) {
-                case IgnoredState.IGNORED:
+                case IgnoredState.Ignored:
                     if (!change.CmisObject.AreAllChildrenIgnored()) {
                         this.ignores.Remove(change.ObjectId);
                         this.Queue.AddEvent(new StartNextSyncEvent(true));
                     }
 
                     break;
-                case IgnoredState.INHERITED:
-                    goto case IgnoredState.NOT_IGNORED;
-                case IgnoredState.NOT_IGNORED:
+                case IgnoredState.Inherited:
+                    goto case IgnoredState.NotIgnored;
+                case IgnoredState.NotIgnored:
                     if (change.CmisObject.AreAllChildrenIgnored()) {
                         if (change.CmisObject is IFolder) {
                             this.ignores.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(new IgnoredEntity(change.CmisObject as IFolder, this.matcher));

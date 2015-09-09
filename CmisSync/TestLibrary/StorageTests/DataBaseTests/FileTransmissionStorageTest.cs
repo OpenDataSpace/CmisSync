@@ -138,7 +138,7 @@ namespace TestLibrary.StorageTests.DataBaseTests {
 
             for (int i = 1; i <= 10; ++i) {
                 this.remoteFile.Setup(m => m.Id).Returns("RemoteObjectId" + i.ToString());
-                var obj = new FileTransmissionObject(TransmissionType.UPLOAD_NEW_FILE, this.localFile.Object, this.remoteFile.Object);
+                var obj = new FileTransmissionObject(TransmissionType.UploadNewFile, this.localFile.Object, this.remoteFile.Object);
                 Assert.DoesNotThrow(() => storage.SaveObject(obj));
                 Assert.That(storage.GetObjectList().Count, Is.EqualTo(i));
                 Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == this.localFile.Object.FullName && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()), Is.Not.Null);
@@ -157,7 +157,7 @@ namespace TestLibrary.StorageTests.DataBaseTests {
             this.remoteFile.Setup(m => m.Id).Returns("RemoteObjectId");
 
             for (int i = 1; i <= 10; ++i) {
-                var obj = new FileTransmissionObject(TransmissionType.UPLOAD_NEW_FILE, this.localFile.Object, this.remoteFile.Object);
+                var obj = new FileTransmissionObject(TransmissionType.UploadNewFile, this.localFile.Object, this.remoteFile.Object);
                 Assert.DoesNotThrow(() => storage.SaveObject(obj));
                 Assert.That(storage.GetObjectList().Count, Is.EqualTo(1));
                 Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == this.localFile.Object.FullName && foo.RemoteObjectId == "RemoteObjectId"), Is.Not.Null);
@@ -180,7 +180,7 @@ namespace TestLibrary.StorageTests.DataBaseTests {
 
             for (int i = 1; i <= 10; ++i) {
                 this.remoteFile.Setup(m => m.Id).Returns("RemoteObjectId" + i.ToString());
-                var obj = new FileTransmissionObject(TransmissionType.UPLOAD_NEW_FILE, this.localFile.Object, this.remoteFile.Object);
+                var obj = new FileTransmissionObject(TransmissionType.UploadNewFile, this.localFile.Object, this.remoteFile.Object);
                 Assert.DoesNotThrow(() => storage.SaveObject(obj));
                 Assert.That(storage.GetObjectList().Count, Is.EqualTo(i));
                 Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == this.localFile.Object.FullName && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()), Is.Not.Null);
@@ -198,7 +198,7 @@ namespace TestLibrary.StorageTests.DataBaseTests {
             var storage = new FileTransmissionStorage(this.engine);
 
             this.remoteFile.Setup(m => m.Id).Returns("RemoteObjectId");
-            var obj = new FileTransmissionObject(TransmissionType.UPLOAD_NEW_FILE, this.localFile.Object, this.remoteFile.Object);
+            var obj = new FileTransmissionObject(TransmissionType.UploadNewFile, this.localFile.Object, this.remoteFile.Object);
             Assert.DoesNotThrow(() => storage.SaveObject(obj));
             Assert.That(storage.GetObjectList().Count, Is.EqualTo(1));
 
@@ -214,7 +214,7 @@ namespace TestLibrary.StorageTests.DataBaseTests {
 
             for (int i = 1; i <= 10; ++i) {
                 this.remoteFile.Setup(m => m.Id).Returns("RemoteObjectId" + i.ToString());
-                var obj = new FileTransmissionObject(TransmissionType.UPLOAD_NEW_FILE, this.localFile.Object, this.remoteFile.Object);
+                var obj = new FileTransmissionObject(TransmissionType.UploadNewFile, this.localFile.Object, this.remoteFile.Object);
                 Assert.DoesNotThrow(() => storage.SaveObject(obj));
                 Assert.That(storage.GetObjectList().Count, Is.EqualTo(i));
                 Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == this.localFile.Object.FullName && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()), Is.Not.Null);
@@ -236,7 +236,7 @@ namespace TestLibrary.StorageTests.DataBaseTests {
                 var storage = new FileTransmissionStorage(engine);
                 for (int i = 1; i <= 10; ++i) {
                     this.remoteFile.Setup(m => m.Id).Returns("RemoteObjectId" + i.ToString());
-                    var obj = new FileTransmissionObject(TransmissionType.UPLOAD_NEW_FILE, this.localFile.Object, this.remoteFile.Object);
+                    var obj = new FileTransmissionObject(TransmissionType.UploadNewFile, this.localFile.Object, this.remoteFile.Object);
                     Assert.DoesNotThrow(() => storage.SaveObject(obj));
                     Assert.That(storage.GetObjectList().Count, Is.EqualTo(i));
                     Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == this.localFile.Object.FullName && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()), Is.Not.Null);
@@ -257,7 +257,7 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         public void GetObjectByLocalPath() {
             var storage = new FileTransmissionStorage(this.engine);
             this.remoteFile.Setup(m => m.Id).Returns("RemoteObjectId");
-            var obj = new FileTransmissionObject(TransmissionType.UPLOAD_NEW_FILE, this.localFile.Object, this.remoteFile.Object);
+            var obj = new FileTransmissionObject(TransmissionType.UploadNewFile, this.localFile.Object, this.remoteFile.Object);
             Assert.DoesNotThrow(() => storage.SaveObject(obj));
             Assert.That(storage.GetObjectByLocalPath(this.localFile.Object.FullName).RemoteObjectId, Is.EqualTo("RemoteObjectId"));
             Assert.That(storage.GetObjectByLocalPath(this.localFile.Object.FullName + ".temp"), Is.Null);

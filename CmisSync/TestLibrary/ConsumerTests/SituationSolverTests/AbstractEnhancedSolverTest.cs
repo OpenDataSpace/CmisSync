@@ -23,6 +23,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
@@ -37,23 +38,22 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture]
+    [TestFixture, Category("Fast"), Category("Solver")]
     public class AbstractEnhancedSolverTest {
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void ConstructorThrowsExceptionIfSessionIsNull() {
             Assert.Throws<ArgumentNullException>(() => new SolverClass(null, Mock.Of<IMetaDataStorage>()));
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void ConstructorThrowsExceptionIfStorageIsNull() {
             Assert.Throws<ArgumentNullException>(() => new SolverClass(Mock.Of<ISession>(), null));
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void ConstructorSetsPropertiesCorrectly([Values(true, false)]bool withGivenTransmissionStorage) {
-            var session = new Mock<ISession>();
-            session.SetupTypeSystem();
-            var storage = Mock.Of<IMetaDataStorage>();
+            var session = new Mock<ISession>(MockBehavior.Strict);
+            var storage = new Mock<IMetaDataStorage>(MockBehavior.Strict).Object;
             var transmissionStorage = withGivenTransmissionStorage ? Mock.Of<IFileTransmissionStorage>() : null;
             var underTest = new SolverClass(session.Object, storage, transmissionStorage);
 
@@ -62,19 +62,39 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             Assert.That(underTest.GetTransmissionStorage(), Is.EqualTo(transmissionStorage));
         }
 
-        [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorSetsServerPropertyCorrectly([Values(true, false)]bool serverCanModifyLastModificationDate) {
+        [Test]
+        public void ServerIsAbleToModifyDatesIsImplementedAsLazyLoadingOnRequestProperty(
+            [Values(true, false)]bool serverCanModifyLastModificationDate)
+        {
             var session = new Mock<ISession>();
-            session.SetupTypeSystem(serverCanModifyLastModificationDate);
             var underTest = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>());
 
+            session.SetupTypeSystem(serverCanModifyLastModificationDate: serverCanModifyLastModificationDate);
             Assert.That(underTest.GetModification(), Is.EqualTo(serverCanModifyLastModificationDate));
+            Assert.That(underTest.GetModification(), Is.EqualTo(serverCanModifyLastModificationDate));
+            session.Verify(s => s.GetTypeDefinition(It.IsAny<string>()), Times.Exactly(serverCanModifyLastModificationDate ? 2 : 1));
         }
 
-        [Test, Category("Fast"), Category("Solver")]
-        public void EnsureLegalCharactersThrowsExceptionIfFilenameContainsUtf8Character() {
+        [Test]
+        public void IfRequestingPropertyServerCanModifyDateTimesFailsDueToNetworkProblemsItReturnsFalseAndWillBeExecutedAgain(
+            [Values(true, false)]bool serverCanModifyLastModificationDate)
+        {
             var session = new Mock<ISession>();
-            session.SetupTypeSystem();
+            session.Setup(s => s.GetTypeDefinition(It.IsAny<string>())).Throws<CmisConnectionException>();
+            var underTest = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>());
+
+            Assert.That(underTest.GetModification(), Is.False);
+            Assert.That(underTest.GetModification(), Is.False);
+            session.Verify(s => s.GetTypeDefinition(It.IsAny<string>()), Times.Exactly(2));
+            session.SetupTypeSystem(serverCanModifyLastModificationDate);
+            Assert.That(underTest.GetModification(), Is.EqualTo(serverCanModifyLastModificationDate));
+            Assert.That(underTest.GetModification(), Is.EqualTo(serverCanModifyLastModificationDate));
+            session.Verify(s => s.GetTypeDefinition(It.IsAny<string>()), Times.Exactly(serverCanModifyLastModificationDate ? 4 : 3));
+        }
+
+        [Test]
+        public void EnsureLegalCharactersThrowsExceptionIfFilenameContainsUtf8Character() {
+            var session = new Mock<ISession>(MockBehavior.Strict);
             var underTest = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>());
             var exception = new CmisConstraintException();
             var fileInfo = Mock.Of<IFileSystemInfo>(f => f.Name == @"ä" && f.FullName == @"ä");
@@ -82,10 +102,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             Assert.Throws<InteractionNeededException>(() => underTest.CallEnsureThatLocalFileNameContainsLegalCharacters(fileInfo, exception));
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test]
         public void EnsureLegalCharactersIfFilenameIsValid() {
-            var session = new Mock<ISession>();
-            session.SetupTypeSystem();
+            var session = new Mock<ISession>(MockBehavior.Strict);
             var underTest = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>());
             var exception = new CmisConstraintException();
             var fileInfo = Mock.Of<IFileSystemInfo>(f => f.Name == "foo");
@@ -93,18 +112,16 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             underTest.CallEnsureThatLocalFileNameContainsLegalCharacters(fileInfo, exception);
         }
 
-        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
+        [Test, Ignore("TODO")]
         public void UploadFileClosesTransmissionOnIOException() {
-            var session = new Mock<ISession>();
-            session.SetupTypeSystem();
-
+            var session = new Mock<ISession>(MockBehavior.Strict);
             var underTest = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>());
 
             underTest.Upload(null, null, null);
             Assert.Fail("TODO");
         }
 
-        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
+        [Test, Ignore("TODO")]
         public void DownloadChangesClosesTransmissionOnIOExceptionOnOpenCacheFile() {
             Assert.Fail("TODO");
         }
@@ -132,8 +149,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 return this.TransmissionStorage;
             }
 
-            public byte[] Upload(IFileInfo localFile, IDocument doc, TransmissionManager transmissionManager) {
-                var transmission = transmissionManager.CreateTransmission(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+            public byte[] Upload(IFileInfo localFile, IDocument doc, ITransmissionFactory transmissionManager) {
+                var transmission = transmissionManager.CreateTransmission(TransmissionType.UploadModifiedFile, localFile.FullName);
                 return this.UploadFile(localFile, doc, transmission);
             }
 

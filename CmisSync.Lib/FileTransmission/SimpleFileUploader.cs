@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.FileTransmission
-{
+namespace CmisSync.Lib.FileTransmission {
     using System;
     using System.IO;
     using System.Security.Cryptography;
@@ -33,35 +32,30 @@ namespace CmisSync.Lib.FileTransmission
     /// Simple file uploader. Takes a given stream and uploads it to the server.
     /// Resuming an Upload is not supported.
     /// </summary>
-    public class SimpleFileUploader : IFileUploader
-    {
-        private bool disposed = false;
+    public class SimpleFileUploader : IFileUploader {
+        private bool disposed;
 
         private object disposeLock = new object();
 
         /// <summary>
         ///  Uploads the localFileStream to remoteDocument.
         /// </summary>
-        /// <returns>
-        ///  The new CMIS document.
-        /// </returns>
-        /// <param name='remoteDocument'>
-        ///  Remote document where the local content should be uploaded to.
-        /// </param>
-        /// <param name='localFileStream'>
-        ///  Local file stream.
-        /// </param>
-        /// <param name='status'>
-        ///  Transmission status where the uploader should report its uploading status.
-        /// </param>
-        /// <param name='hashAlg'>
-        ///  Hash alg which should be used to calculate a checksum over the uploaded content.
-        /// </param>
-        /// <param name='overwrite'>
-        ///  If true, the local content will overwrite the existing content.
-        /// </param>
-        /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">If upload fails</exception>
-        public virtual IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg, bool overwrite = true, UpdateChecksum update = null) {
+        /// <returns>The new CMIS document.</returns>
+        /// <param name='remoteDocument'>Remote document where the local content should be uploaded to.</param>
+        /// <param name='localFileStream'>Local file stream.</param>
+        /// <param name='transmission'>Transmission status where the uploader should report its uploading status.</param>
+        /// <param name='hashAlg'>Hash alg which should be used to calculate a checksum over the uploaded content.</param>
+        /// <param name='overwrite'>If true, the local content will overwrite the existing content.</param>
+        /// <param name="update">Is called on every chunk and returns the actual hash from beginning to this last chunk.</param>
+        /// <exception cref="UploadFailedException">If upload fails</exception>
+        public virtual IDocument UploadFile(
+            IDocument remoteDocument,
+            Stream localFileStream,
+            Transmission transmission,
+            HashAlgorithm hashAlg,
+            bool overwrite = true,
+            Action<byte[], long> update = null)
+        {
             if (remoteDocument == null) {
                 throw new ArgumentException("remoteDocument can not be null");
             }
@@ -87,7 +81,7 @@ namespace CmisSync.Lib.FileTransmission
                 contentStream.Stream = transmissionStream;
                 try {
                     remoteDocument.SetContentStream(contentStream, overwrite, true);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     throw new UploadFailedException(e, remoteDocument);
                 }
             }
@@ -99,23 +93,26 @@ namespace CmisSync.Lib.FileTransmission
         /// <summary>
         ///  Appends the localFileStream to the remoteDocument.
         /// </summary>
-        /// <returns>
-        ///  The new CMIS document.
-        /// </returns>
-        /// <param name='remoteDocument'>
-        ///  Remote document where the local content should be appended to.
-        /// </param>
-        /// <param name='localFileStream'>
-        ///  Local file stream.
-        /// </param>
-        /// <param name='status'>
-        ///  Transmission status where the uploader should report its appending status.
-        /// </param>
-        /// <param name='hashAlg'>
-        ///  Hash alg which should be used to calculate a checksum over the appended content.
-        /// </param>
-        /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">If Upload fails</exception>
-        public virtual IDocument AppendFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg) {
+        /// <returns>The new CMIS document.</returns>
+        /// <param name='remoteDocument'>Remote document where the local content should be appended to.</param>
+        /// <param name='localFileStream'>Local file stream.</param>
+        /// <param name='transmission'>Transmission status where the uploader should report its appending status.</param>
+        /// <param name='hashAlg'>Hash alg which should be used to calculate a checksum over the appended content.</param>
+        /// <exception cref="UploadFailedException">If Upload fails</exception>
+        public virtual IDocument AppendFile(
+            IDocument remoteDocument,
+            Stream localFileStream,
+            Transmission transmission,
+            HashAlgorithm hashAlg)
+        {
+            if (transmission == null) {
+                throw new ArgumentNullException("transmission");
+            }
+
+            if (remoteDocument == null) {
+                throw new ArgumentNullException("remoteDocument");
+            }
+
             using (var transmissionStream = transmission.CreateStream(localFileStream))
             using (var hashstream = new CryptoStream(transmissionStream, hashAlg, CryptoStreamMode.Read)) {
                 ContentStream contentStream = new ContentStream();
@@ -124,7 +121,7 @@ namespace CmisSync.Lib.FileTransmission
                 contentStream.Stream = hashstream;
                 try {
                     return remoteDocument.AppendContentStream(contentStream, true);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     throw new UploadFailedException(e, remoteDocument);
                 }
             }
@@ -139,8 +136,7 @@ namespace CmisSync.Lib.FileTransmission
         /// <see cref="Dispose"/>, you must release all references to the
         /// <see cref="CmisSync.Lib.FileTransmission.SimpleFileUploader"/> so the garbage collector can reclaim the memory
         /// that the <see cref="CmisSync.Lib.FileTransmission.SimpleFileUploader"/> was occupying.</remarks>
-        public void Dispose()
-        {
+        public void Dispose() {
             this.Dispose(true);
         }
 
@@ -154,10 +150,8 @@ namespace CmisSync.Lib.FileTransmission
         /// other objects. Only unmanaged resources can be disposed.
         /// </summary>
         /// <param name="disposing">If set to <c>true</c> disposing.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            lock(this.disposeLock)
-            {
+        protected virtual void Dispose(bool disposing) {
+            lock(this.disposeLock) {
                 // Check to see if Dispose has already been called.
                 if(!this.disposed) {
                     // Note disposing has been done.

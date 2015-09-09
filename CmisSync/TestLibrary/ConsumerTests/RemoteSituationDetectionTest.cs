@@ -37,7 +37,7 @@ namespace TestLibrary.ConsumerTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture]
+    [TestFixture, Category("Fast"), Category("SituationDetection")]
     public class RemoteSituationDetectionTest {
         private readonly IObjectId objectId = Mock.Of<IObjectId>(ob => ob.Id == "objectId");
         private readonly string remotePath = "/object/path";
@@ -49,12 +49,12 @@ namespace TestLibrary.ConsumerTests {
             this.storage = new Mock<IMetaDataStorage>();
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void ConstructorWithSession() {
             new RemoteSituationDetection();
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void NoChangeDetectionForFile() {
             var lastModificationDate = DateTime.Now;
             var remoteObject = new Mock<IDocument>();
@@ -66,7 +66,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.AreEqual(SituationType.NOCHANGE, underTest.Analyse(this.storage.Object, fileEvent));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void NoChangeDetectionForFileOnAddedEvent() {
             var lastModificationDate = DateTime.Now;
             var remoteObject = new Mock<IDocument>();
@@ -89,7 +89,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.AreEqual(SituationType.NOCHANGE, underTest.Analyse(this.storage.Object, fileEvent));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void NoChangeDetectedForFolder() {
             var remoteObject = new Mock<IFolder>();
             var folderEvent = new FolderEvent(remoteFolder: remoteObject.Object);
@@ -100,7 +100,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.AreEqual(SituationType.NOCHANGE, underTest.Analyse(this.storage.Object, folderEvent));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FileAddedDetection() {
             var remoteObject = new Mock<IDocument>();
 
@@ -112,7 +112,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.AreEqual(SituationType.ADDED, underTest.Analyse(this.storage.Object, fileEvent));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FolderAddedDetection() {
             var remoteObject = new Mock<IFolder>();
             var folderEvent = new FolderEvent(remoteFolder: remoteObject.Object);
@@ -123,7 +123,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.AreEqual(SituationType.ADDED, underTest.Analyse(this.storage.Object, folderEvent));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FileRemovedDetection() {
             var remoteObject = new Mock<IDocument>();
 
@@ -135,7 +135,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.AreEqual(SituationType.REMOVED, underTest.Analyse(this.storage.Object, fileEvent));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FolderRemovedDetection() {
             var remoteObject = new Mock<IFolder>();
             var folderEvent = new FolderEvent(remoteFolder: remoteObject.Object);
@@ -146,7 +146,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.AreEqual(SituationType.REMOVED, underTest.Analyse(this.storage.Object, folderEvent));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FolderMovedDetectionOnFolderMovedEvent() {
             var remoteObject = new Mock<IFolder>();
             var folderEvent = new FolderMovedEvent(null, null, null, remoteObject.Object) { Remote = MetaDataChangeType.MOVED };
@@ -156,7 +156,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.AreEqual(SituationType.MOVED, underTest.Analyse(this.storage.Object, folderEvent));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FolderMovedDetectionOnChangeEvent() {
             string folderName = "old";
             string oldLocalPath = Path.Combine(Path.GetTempPath(), folderName);
@@ -181,7 +181,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.AreEqual(SituationType.MOVED, underTest.Analyse(this.storage.Object, folderEvent));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FileMovedDetectionOnChangeEvent() {
             string fileName = "old";
             string oldLocalPath = Path.Combine(Path.GetTempPath(), fileName);
@@ -206,7 +206,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.AreEqual(SituationType.MOVED, underTest.Analyse(this.storage.Object, fileEvent));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FolderRenameDetectionOnChangeEvent() {
             string remoteId = "remoteId";
             string oldName = "old";
@@ -226,7 +226,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.AreEqual(SituationType.RENAMED, underTest.Analyse(this.storage.Object, folderEvent));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FileRenameDetectionOnChangeEvent() {
             string remoteId = "remoteId";
             string oldName = "old";
@@ -246,7 +246,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.AreEqual(SituationType.RENAMED, underTest.Analyse(this.storage.Object, folderEvent));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FileEventIsChangedIfSavedObjectHasDifferentChangeToken() {
             var mappedFile = new MappedObject("name", "remoteId", MappedObjectType.File, "parentId", "changeToken");
             this.storage.AddMappedFile(mappedFile);
@@ -260,7 +260,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CHANGED));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FileEventIsNotChangedIfSavedObjectIsEqualChangeToken() {
             var mappedFile = new MappedObject("name", "remoteId", MappedObjectType.File, "parentId", "changeToken");
             this.storage.AddMappedFile(mappedFile);

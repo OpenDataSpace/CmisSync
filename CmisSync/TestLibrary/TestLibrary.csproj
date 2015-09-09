@@ -12,6 +12,7 @@
     <AssemblyName>TestLibrary</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <UseMSBuildEngine>False</UseMSBuildEngine>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -48,9 +49,6 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DBreeze">
-      <HintPath>..\..\packages\DBreeze.1.71.0\lib\net40\DBreeze.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -62,14 +60,23 @@
     <Reference Include="log4net">
       <HintPath>..\..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Moq">
-      <HintPath>..\..\packages\Moq.4.2.1409.1722\lib\net40\Moq.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="DBreeze">
+      <HintPath>..\..\packages\DBreeze.1.71.1\lib\net45\DBreeze.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Toxiproxy.Net">
+      <HintPath>..\..\packages\Toxiproxy.Net.1.2.11\lib\net45\Toxiproxy.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="Moq">
+      <HintPath>..\..\packages\Moq.4.2.1507.0118\lib\net40\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="RestSharp">
+      <HintPath>..\..\packages\RestSharp.105.2.1\lib\net45\RestSharp.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -152,7 +159,6 @@
     <Compile Include="IntegrationTests\ContentChangeIT.cs" />
     <Compile Include="IntegrationTests\DotCMISTests.cs" />
     <Compile Include="IntegrationTests\DownloadLinkTests.cs" />
-    <Compile Include="IntegrationTests\FileSystemEventOrderTest.cs" />
     <Compile Include="IntegrationTests\FullInMemoryRepoTest.cs" />
     <Compile Include="IntegrationTests\FullRepoTests.cs" />
     <Compile Include="IntegrationTests\HttpProxyConnectionTests.cs" />
@@ -323,6 +329,28 @@
     <Compile Include="CmisTests\AbstractRepositoryTest.cs" />
     <Compile Include="StorageTests\DataBaseTests\GraphOutputTest.cs" />
     <Compile Include="FilterTests\SymlinkFilterTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\ReadOnlyIgnoringDecorator\IDirectoryInfoDecoratorTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\ReadOnlyIgnoringDecorator\IFileInfoDecoratorTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\ReadOnlyIgnoringDecorator\IFileSystemInfoDecoratorTest.cs" />
+    <Compile Include="FileTransmissionTests\TransmissionFactoryTest.cs" />
+    <Compile Include="IntegrationTests\VirusDetectionTests\VirusDetectionTests.cs" />
+    <Compile Include="ExceptionTests\VirusDetectedExceptionTest.cs" />
+    <Compile Include="ExceptionTests\InteractionNeededExceptionTest.cs" />
+    <Compile Include="ExceptionTests\AbstractInteractionNeededExceptionTest.cs" />
+    <Compile Include="ProducerTests\CrawlerTests\DescendantsCrawlerLargeTests.cs" />
+    <Compile Include="IntegrationTests\NetworkFailuresTests\ToxiProxySetup.cs" />
+    <Compile Include="TestUtils\ToxiproxyUtils\ToxiproxyAuthenticationProviderWrapper.cs" />
+    <Compile Include="TestUtils\ToxiproxyUtils\ToxiproxyAuthenticationProviderWrapperTest.cs" />
+    <Compile Include="TestUtils\ToxiproxyUtils\ToxiSessionFactory.cs" />
+    <Compile Include="TestUtils\ToxiproxyUtils\ToxiSessionFactoryTest.cs" />
+    <Compile Include="IntegrationTests\NetworkFailuresTests\CreateSessionWithToxiproxy.cs" />
+    <Compile Include="IntegrationTests\NetworkFailuresTests\IsFullTestWithToxyProxy.cs" />
+    <Compile Include="UtilsTests\GetSpecialPathsTest.cs" />
+    <Compile Include="TestUtils\ToxiproxyUtils\ToxiProxyExtensions.cs" />
+    <Compile Include="EventsTests\SuccessfulLoginEventTest.cs" />
+    <Compile Include="IntegrationTests\NetworkFailuresTests\CRUDSyncTests.cs" />
+    <Compile Include="QueueingTests\ConnectionInterruptedHandlerTest.cs" />
+    <Compile Include="IntegrationTests\PrivateWorkingCopyTests\CancelCheckOutTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -359,5 +387,10 @@
     <Folder Include="IntegrationTests\ContentHashTests\" />
     <Folder Include="IntegrationTests\MockedServerTests\" />
     <Folder Include="MockedServer\MockedServices\" />
+    <Folder Include="StorageTests\FileSystemTests\ReadOnlyIgnoringDecorator\" />
+    <Folder Include="IntegrationTests\VirusDetectionTests\" />
+    <Folder Include="ExceptionTests\" />
+    <Folder Include="IntegrationTests\NetworkFailuresTests\" />
+    <Folder Include="TestUtils\ToxiproxyUtils\" />
   </ItemGroup>
 </Project>

@@ -17,15 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync
-{
+namespace CmisSync {
     using System;
 
     /// <summary>
     /// Controller for the Edit diaglog.
     /// </summary>
-    public class EditController
-    {
+    public class EditController {
         // ===== Actions =====
 
         /// <summary>
@@ -51,30 +49,26 @@ namespace CmisSync
         /// <summary>
         /// Show Edit Window
         /// </summary>
-        public void OpenWindow()
-        {
+        public void OpenWindow() {
             this.OpenWindowEvent();
         }
 
         /// <summary>
         /// Save Folder
         /// </summary>
-        public void SaveFolder()
-        {
+        public void SaveFolder() {
             this.SaveFolderEvent();
         }
 
         /// <summary>
         /// Close Edit Window and Cleanup Resource
         /// </summary>
-        public void CloseWindow()
-        {
+        public void CloseWindow() {
             this.CloseWindowEvent();
             this.CleanWindowEvent();
         }
 
-        public void CleanWindow()
-        {
+        public void CleanWindow() {
             this.CleanWindowEvent();
         }
     }

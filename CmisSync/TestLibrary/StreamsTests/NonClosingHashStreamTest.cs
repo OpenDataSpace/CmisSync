@@ -35,29 +35,23 @@ namespace TestLibrary.StreamsTests {
         public void ConstructorTest() {
             var mock = new Mock<Stream>();
             var hashAlg = new Mock<HashAlgorithm>();
-            using (var stream = new NonClosingHashStream(mock.Object, hashAlg.Object, CryptoStreamMode.Read))
-            {
+            using (var stream = new NonClosingHashStream(mock.Object, hashAlg.Object, CryptoStreamMode.Read)) {
                 Assert.AreEqual(CryptoStreamMode.Read, stream.CipherMode);
             }
 
-            using (var stream = new NonClosingHashStream(mock.Object, hashAlg.Object, CryptoStreamMode.Write))
-            {
+            using (var stream = new NonClosingHashStream(mock.Object, hashAlg.Object, CryptoStreamMode.Write)) {
                 Assert.AreEqual(CryptoStreamMode.Write, stream.CipherMode);
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnHashAlgorithmIsNull() {
-            using (var stream = new NonClosingHashStream(new Mock<Stream>().Object, null, CryptoStreamMode.Write)) {
-            }
+            Assert.Throws<ArgumentNullException>(() => { using (var stream = new NonClosingHashStream(new Mock<Stream>().Object, null, CryptoStreamMode.Write)); });
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnStreamIsNull() {
-            using (var stream = new NonClosingHashStream(null, new Mock<HashAlgorithm>().Object, CryptoStreamMode.Write)) {
-            }
+            Assert.Throws<ArgumentNullException>(() => { using (var stream = new NonClosingHashStream(null, new Mock<HashAlgorithm>().Object, CryptoStreamMode.Write)); });
         }
 
         [Test, Category("Fast"), Category("Streams")]

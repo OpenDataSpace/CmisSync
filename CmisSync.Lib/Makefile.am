@@ -22,8 +22,15 @@ SOURCES =  \
 	Cmis/Authentication/PersistentNtlmAuthenticationProvider.cs \
 	Cmis/Authentication/PersistentStandardAuthenticationProvider.cs \
 	Cmis/Authentication/StandardAuthenticationProviderWrapper.cs \
-	Cmis/ConvenienceExtenders/AllowableActionConvenienceExtenders.cs \
-	Cmis/ConvenienceExtenders/CmisConvenienceExtenders.cs \
+	Cmis/ConvenienceExtenders/AllowableActionExtenders.cs \
+	Cmis/ConvenienceExtenders/DocumentExtenders.cs \
+	Cmis/ConvenienceExtenders/ExceptionExtenders.cs \
+	Cmis/ConvenienceExtenders/FileableObjectExtenders.cs \
+	Cmis/ConvenienceExtenders/FolderExtenders.cs \
+	Cmis/ConvenienceExtenders/ObjectExtenders.cs \
+	Cmis/ConvenienceExtenders/RepositoryInfoExtenders.cs \
+	Cmis/ConvenienceExtenders/SessionExtenders.cs \
+	Cmis/ConvenienceExtenders/SessionFactoryExtenders.cs \
 	Cmis/DotCMISLogListener.cs \
 	Cmis/INotifyRepositoryPropertyChanged.cs \
 	Cmis/MimeType.cs \
@@ -54,12 +61,11 @@ SOURCES =  \
 	Config/User.cs \
 	Config/UserCredentials.cs \
 	Config/XmlUri.cs \
-	Consumer/InteractionNeededException.cs \
 	Consumer/ISituationDetection.cs \
 	Consumer/LocalSituationDetection.cs \
 	Consumer/RemoteSituationDetection.cs \
-	Consumer/RetryException.cs \
 	Consumer/SituationSolver/AbstractEnhancedSolver.cs \
+	Consumer/SituationSolver/FileSystemInfoConvenienceExtenders.cs \
 	Consumer/SituationSolver/ISolver.cs \
 	Consumer/SituationSolver/LocalObjectAdded.cs \
 	Consumer/SituationSolver/LocalObjectChanged.cs \
@@ -103,26 +109,26 @@ SOURCES =  \
 	Events/EncapsuledEvent.cs \
 	Events/EventCategory.cs \
 	Events/ExceptionEvent.cs \
+	Events/FSEvent.cs \
+	Events/FSMovedEvent.cs \
 	Events/FileConflictEvent.cs \
 	Events/FileEvent.cs \
 	Events/FileMovedEvent.cs \
 	Events/FileOrFolderEventFactory.cs \
 	Events/FolderEvent.cs \
 	Events/FolderMovedEvent.cs \
-	Events/FSEvent.cs \
-	Events/FSMovedEvent.cs \
 	Events/FullSyncCompletedEvent.cs \
 	Events/ICountableEvent.cs \
+	Events/IFSEvent.cs \
+	Events/IFSMovedEvent.cs \
 	Events/IFilterableEvent.cs \
 	Events/IFilterableLocalPathEvent.cs \
 	Events/IFilterableNameEvent.cs \
 	Events/IFilterableRemoteObjectEvent.cs \
 	Events/IFilterableRemotePathEvent.cs \
-	Events/IFSEvent.cs \
-	Events/IFSMovedEvent.cs \
-	Events/InteractionNeededEvent.cs \
 	Events/IRemoveFromLoggingEvent.cs \
 	Events/ISyncEvent.cs \
+	Events/InteractionNeededEvent.cs \
 	Events/PermissionDeniedEvent.cs \
 	Events/ProxyAuthRequiredEvent.cs \
 	Events/RecentChangedEvent.cs \
@@ -131,16 +137,23 @@ SOURCES =  \
 	Events/RequestIgnoredEvent.cs \
 	Events/StartNextSyncEvent.cs \
 	Events/SuccessfulLoginEvent.cs \
+	Exceptions/AbstractInteractionNeededException.cs \
+	Exceptions/ExceptionLevel.cs \
+	Exceptions/InteractionNeededException.cs \
+	Exceptions/RetryException.cs \
+	Exceptions/VirusDetectedException.cs \
 	FileTransmission/AbortException.cs \
 	FileTransmission/ChunkedDownloader.cs \
 	FileTransmission/ChunkedUploader.cs \
 	FileTransmission/ContentTaskUtils.cs \
 	FileTransmission/IFileDownloader.cs \
 	FileTransmission/IFileUploader.cs \
-	FileTransmission/ITransmissionManager.cs \
+	FileTransmission/ITransmissionAggregator.cs \
+	FileTransmission/ITransmissionFactory.cs \
 	FileTransmission/SimpleFileDownloader.cs \
 	FileTransmission/SimpleFileUploader.cs \
 	FileTransmission/Transmission.cs \
+	FileTransmission/TransmissionFactory.cs \
 	FileTransmission/TransmissionManager.cs \
 	FileTransmission/UploadFailedException.cs \
 	Filter/AbstractFileFilter.cs \
@@ -156,7 +169,7 @@ SOURCES =  \
 	Filter/ReportingFilter.cs \
 	Filter/RepositoryRootDeletedDetection.cs \
 	Filter/SymlinkFilter.cs \
-	HashAlgorithm/HashAlgorithmReuse.cs \
+	HashAlgorithm/IReusableHashAlgorithm.cs \
 	HashAlgorithm/SHA1Reuse.cs \
 	HttpProxyUtils.cs \
 	IActivityListener.cs \
@@ -181,6 +194,7 @@ SOURCES =  \
 	Producer/Watcher/RenamedFileSystemEventHandler.cs \
 	Producer/Watcher/WatcherConsumer.cs \
 	Queueing/AbstractEventProducer.cs \
+	Queueing/ConnectionInterruptedHandler.cs \
 	Queueing/ConnectionScheduler.cs \
 	Queueing/DebugLoggingHandler.cs \
 	Queueing/DelayRetryAndNextSyncEventHandler.cs \
@@ -200,15 +214,15 @@ SOURCES =  \
 	Queueing/SyncEventQueue.cs \
 	Queueing/SyncScheduler.cs \
 	Queueing/Unsubscriber.cs \
+	SelectiveIgnore/AbstractIgnoredEntity.cs \
 	SelectiveIgnore/CmisSelectiveIgnoreCapability.cs \
+	SelectiveIgnore/IIgnoredEntitiesCollection.cs \
+	SelectiveIgnore/IIgnoredEntitiesStorage.cs \
+	SelectiveIgnore/IgnoreFlagChangeDetection.cs \
 	SelectiveIgnore/IgnoredEntitiesCollection.cs \
 	SelectiveIgnore/IgnoredEntitiesStorage.cs \
 	SelectiveIgnore/IgnoredEntity.cs \
 	SelectiveIgnore/IgnoredState.cs \
-	SelectiveIgnore/IgnoreFlagChangeDetection.cs \
-	SelectiveIgnore/IIgnoredEntitiesCollection.cs \
-	SelectiveIgnore/IIgnoredEntitiesStorage.cs \
-	SelectiveIgnore/IIgnoredEntity.cs \
 	SelectiveIgnore/SelectiveIgnoreEventTransformer.cs \
 	SelectiveIgnore/SelectiveIgnoreFilter.cs \
 	Status/ConnectionStatus.cs \
@@ -216,8 +230,8 @@ SOURCES =  \
 	Status/SynchronizationStatus.cs \
 	Storage/Database/DBreezeInitializerSingleton.cs \
 	Storage/Database/DublicateGuidException.cs \
+	Storage/Database/Entities/FileContentConvenienceExtenders.cs \
 	Storage/Database/Entities/FileTransmissionObject.cs \
-	Storage/Database/Entities/IFileConvenienceExtenders.cs \
 	Storage/Database/Entities/IFileTransmissionObject.cs \
 	Storage/Database/Entities/IMappedObject.cs \
 	Storage/Database/Entities/MappedObject.cs \
@@ -238,10 +252,10 @@ SOURCES =  \
 	Storage/FileSystem/ExtendedAttributeException.cs \
 	Storage/FileSystem/ExtendedAttributeReaderDos.cs \
 	Storage/FileSystem/ExtendedAttributeReaderUnix.cs \
+	Storage/FileSystem/FSType.cs \
 	Storage/FileSystem/FileInfoWrapper.cs \
 	Storage/FileSystem/FileSystemInfoFactory.cs \
 	Storage/FileSystem/FileSystemInfoWrapper.cs \
-	Storage/FileSystem/FSType.cs \
 	Storage/FileSystem/IDirectoryInfo.cs \
 	Storage/FileSystem/IExtendedAttributeReader.cs \
 	Storage/FileSystem/IFileInfo.cs \

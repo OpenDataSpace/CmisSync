@@ -5,14 +5,23 @@ namespace CmisSync
 	public partial class CredentialsWidget
 	{
 		private global::Gtk.VBox vbox1;
+		
 		private global::Gtk.Label addressLabel;
+		
 		private global::CmisSync.Widgets.UrlWidget urlWidget;
+		
 		private global::Gtk.HBox hbox3;
+		
 		private global::Gtk.VBox vbox6;
+		
 		private global::Gtk.Label userNameLabel;
+		
 		private global::Gtk.Entry usernameEntry;
+		
 		private global::Gtk.VBox vbox7;
+		
 		private global::Gtk.Label passwordLabel;
+		
 		private global::Gtk.Entry passwordEntry;
 
 		protected virtual void Build ()

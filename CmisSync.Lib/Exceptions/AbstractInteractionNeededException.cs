@@ -1,5 +1,5 @@
-//-----------------------------------------------------------------------
-// <copyright file="InteractionNeededException.cs" company="GRAU DATA AG">
+﻿//-----------------------------------------------------------------------
+// <copyright file="AbstractInteractionNeededException.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer
-{
+namespace CmisSync.Lib.Exceptions {
     using System;
     using System.Collections.Generic;
     using System.Runtime.Serialization;
@@ -28,41 +27,40 @@ namespace CmisSync.Lib.Consumer
     using DotCMIS.Exceptions;
 
     /// <summary>
-    /// Interaction needed exception. This exception should be thrown if a user must be informed about a needed interaction to solve a problem/conflict.
+    /// Abstract Interaction needed exception. This exception should be thrown if a user must be informed about a needed interaction to solve a problem/conflict.
     /// </summary>
     [Serializable]
-    public class InteractionNeededException : Exception
-    {
+    public abstract class AbstractInteractionNeededException : Exception {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.InteractionNeededException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Exceptions.AbstractInteractionNeededException"/> class.
         /// </summary>
-        public InteractionNeededException() : base() {
+        public AbstractInteractionNeededException() : base() {
             this.InitParams();
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.InteractionNeededException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Exceptions.AbstractInteractionNeededException"/> class.
         /// </summary>
         /// <param name="msg">Exception message.</param>
-        public InteractionNeededException(string msg) : base(msg) {
+        public AbstractInteractionNeededException(string msg) : base(msg) {
             this.InitParams();
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.InteractionNeededException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Exceptions.AbstractInteractionNeededException"/> class.
         /// </summary>
         /// <param name="msg">Exception message.</param>
         /// <param name="inner">Inner exception.</param>
-        public InteractionNeededException(string msg, Exception inner) : base(msg, inner) {
+        public AbstractInteractionNeededException(string msg, Exception inner) : base(msg, inner) {
             this.InitParams();
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.InteractionNeededException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Exceptions.AbstractInteractionNeededException"/> class.
         /// </summary>
         /// <param name="info">Serialization info.</param>
         /// <param name="context">Streaming context.</param>
-        protected InteractionNeededException(SerializationInfo info, StreamingContext context) : base(info, context) {
+        protected AbstractInteractionNeededException(SerializationInfo info, StreamingContext context) : base(info, context) {
         }
 
         /// <summary>
@@ -82,6 +80,12 @@ namespace CmisSync.Lib.Consumer
         /// </summary>
         /// <value>The details of the problem.</value>
         public string Details { get; set; }
+
+        /// <summary>
+        /// Gets or sets the exception level.
+        /// </summary>
+        /// <value>The level.</value>
+        public ExceptionLevel Level { get; protected set; }
 
         /// <summary>
         /// Gets the actions, which can be executed to solve the problem.

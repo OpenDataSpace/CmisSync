@@ -71,8 +71,9 @@ namespace TestLibrary.TestUtils {
             });
         }
 
-        public static void SetupChangeToken(this Mock<IFolder> folder, string changeToken) {
+        public static Mock<IFolder> SetupChangeToken(this Mock<IFolder> folder, string changeToken) {
             folder.Setup(f => f.ChangeToken).Returns(changeToken);
+            return folder;
         }
 
         public static void SetupIgnore(this Mock<IFolder> folder, params string[] devices) {
@@ -90,21 +91,33 @@ namespace TestLibrary.TestUtils {
             folder.Setup(f => f.Properties).Returns(props);
         }
 
-        public static Mock<IFolder> CreateRemoteFolderMock(string id, string name, string path, string parentId = null, string changetoken = "changetoken", bool ignored = false) {
-            var newRemoteObject = new Mock<IFolder>();
-            newRemoteObject.Setup(d => d.Id).Returns(id);
-            newRemoteObject.Setup(d => d.Path).Returns(path);
+        public static Mock<IFolder> CreateRemoteFolderMock(
+            string id,
+            string name,
+            string path,
+            string parentId = null,
+            string changetoken = "changetoken",
+            bool ignored = false,
+            bool? readOnly = null)
+        {
+            var newRemoteObject = new Mock<IFolder>()
+                .SetupId(id)
+                .SetupPath(path)
+                .SetupName(name);
             newRemoteObject.Setup(d => d.ParentId).Returns(parentId);
             newRemoteObject.Setup(d => d.Parents).Returns(new List<IFolder>() { Mock.Of<IFolder>(f => f.Id == parentId) });
-            newRemoteObject.Setup(d => d.Name).Returns(name);
             newRemoteObject.Setup(d => d.ChangeToken).Returns(changetoken);
             newRemoteObject.Setup(d => d.GetDescendants(It.IsAny<int>())).Returns(new List<ITree<IFileableCmisObject>>());
             newRemoteObject.Setup(d => d.Move(It.IsAny<IObjectId>(), It.IsAny<IObjectId>())).Returns((IObjectId old, IObjectId current) => CreateRemoteFolderMock(id, name, path, current.Id, changetoken).Object);
             newRemoteObject.SetupIgnoreFlag(ignored);
+            if (readOnly != null) {
+                newRemoteObject.SetupReadOnly((bool)readOnly);
+            }
+
             return newRemoteObject;
         }
 
-        public static void SetupIgnoreFlag(this Mock<IFolder> folder, bool ignored) {
+        public static Mock<IFolder> SetupIgnoreFlag(this Mock<IFolder> folder, bool ignored) {
             var properties = folder.Object.Properties ?? new List<IProperty>();
             if (ignored && !folder.Object.AreAllChildrenIgnored()) {
                 var ignoreEntry = new Mock<IProperty>();
@@ -124,6 +137,7 @@ namespace TestLibrary.TestUtils {
             }
 
             folder.Setup(d => d.Properties).Returns(properties);
+            return folder;
         }
 
         public static void VerifyUpdateLastModificationDate(this Mock<IFolder> folder, DateTime modificationDate, bool refresh = true) {

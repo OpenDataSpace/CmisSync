@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ProducerTests.CrawlerTests
-{
+namespace TestLibrary.ProducerTests.CrawlerTests {
     using System;
 
     using CmisSync.Lib.Producer.Crawler;
@@ -32,8 +31,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
     using TestUtils;
 
     [TestFixture]
-    public class CrawlEventGeneratorTest
-    {
+    public class CrawlEventGeneratorTest {
         private CrawlEventGenerator underTest;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileSystemInfoFactory> fsFactory;

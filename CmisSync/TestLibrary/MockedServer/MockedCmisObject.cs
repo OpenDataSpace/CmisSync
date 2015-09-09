@@ -58,7 +58,7 @@ namespace TestLibrary.MockedServer {
             this.Setup(m => m.GetPropertyValue(It.IsAny<string>())).Returns<string>((propId) => {
                 return this.Properties.First(p => p.Id == propId).Value;
             });
-            this.Setup(m => m.Properties).Returns(() => new List<IProperty>(this.Properties));
+            this.Setup(m => m.Properties).Returns(() => this.Properties != null ? new List<IProperty>(this.Properties) : null);
             this.Setup(m => m[It.IsAny<string>()]).Returns<string>((propId) => {
                 return this.Properties.First(p => p.Id == propId);
             });
@@ -139,8 +139,8 @@ namespace TestLibrary.MockedServer {
         }
 
         protected virtual void SetupRename() {
-            this.Setup(m => m.Rename(It.IsAny<string>())).Callback<string>(s => { this.Name = s; this.UpdateChangeToken(); this.NotifyChanges(); }).Returns(() => this.Object);
-            this.Setup(m => m.Rename(It.IsAny<string>(), It.IsAny<bool>())).Callback<string, bool>((s, b) => { this.Name = s; this.UpdateChangeToken(); this.NotifyChanges(); }).Returns(() => Mock.Of<IObjectId>((o) => o.Id == this.Id));
+            this.Setup(m => m.Rename(It.IsAny<string>())).Callback<string>(s => { this.name = s; this.UpdateChangeToken(); this.NotifyChanges(); }).Returns(() => this.Object);
+            this.Setup(m => m.Rename(It.IsAny<string>(), It.IsAny<bool>())).Callback<string, bool>((s, b) => { this.name = s; this.UpdateChangeToken(); this.NotifyChanges(); }).Returns(() => Mock.Of<IObjectId>((o) => o.Id == this.Id));
         }
 
         protected List<ISecondaryType> SecondaryTypes { get; set; }

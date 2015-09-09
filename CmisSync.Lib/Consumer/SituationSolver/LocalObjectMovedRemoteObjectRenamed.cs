@@ -29,9 +29,21 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
+    /// <summary>
+    /// Local object moved remote object renamed solver.
+    /// </summary>
     public class LocalObjectMovedRemoteObjectRenamed : AbstractEnhancedSolver {
         private readonly ISolver changeChangeSolver;
         private readonly ISolver renameRenameSolver;
+
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectMovedRemoteObjectRenamed"/> class.
+        /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="changeChangeSolver">Local change remote change solver.</param>
+        /// <param name="renameRenameSolver">Local rename remote rename solver.</param>
         public LocalObjectMovedRemoteObjectRenamed(
             ISession session,
             IMetaDataStorage storage,
@@ -39,11 +51,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ISolver renameRenameSolver) : base(session, storage)
         {
             if (changeChangeSolver == null) {
-                throw new ArgumentNullException("Given solver for local and remote change situation is null");
+                throw new ArgumentNullException("changeChangeSolver");
             }
 
             if (renameRenameSolver == null) {
-                throw new ArgumentNullException("Given solver for local and remote rename situation is null");
+                throw new ArgumentNullException("renameRenameSolver");
             }
 
             this.changeChangeSolver = changeChangeSolver;
@@ -56,6 +68,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
+            if (remoteId == null) {
+                throw new ArgumentNullException("remoteId");
+            }
+
             var savedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
             Guid? newParentUuid = localFileSystemInfo is IFileInfo ? (localFileSystemInfo as IFileInfo).Directory.Uuid : (localFileSystemInfo as IDirectoryInfo).Parent.Uuid;
             string newParentId = this.Storage.GetObjectByGuid((Guid)newParentUuid).RemoteObjectId;

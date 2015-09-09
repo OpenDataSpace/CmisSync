@@ -36,7 +36,7 @@ namespace CmisSync.Lib.Cmis {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(PersistentStandardAuthenticationProvider));
 
         private ICookieStorage storage;
-        private bool disposed = false;
+        private bool disposed;
         private Uri url;
 
         /// <summary>
@@ -46,17 +46,17 @@ namespace CmisSync.Lib.Cmis {
         /// <param name="url">corresponding URL of the cookies</param>
         public PersistentStandardAuthenticationProvider(ICookieStorage storage, Uri url) {
             if (storage == null) {
-                throw new ArgumentNullException("Given db is null");
+                throw new ArgumentNullException("storage");
             }
 
             if (url == null) {
-                throw new ArgumentNullException("Given URL is null");
+                throw new ArgumentNullException("url");
             }
 
             this.storage = storage;
             this.url = url;
             if (storage.Cookies != null) {
-                foreach(Cookie c in storage.Cookies) {
+                foreach (Cookie c in storage.Cookies) {
                     this.Cookies.Add(c);
                 }
             }
@@ -105,7 +105,7 @@ namespace CmisSync.Lib.Cmis {
                     // Dispose managed resources.
                     try {
                         this.storage.Cookies = this.Cookies.GetCookies(this.url);
-                    } catch(Exception e) {
+                    } catch (Exception e) {
                         Logger.Debug(string.Format("Failed to save session cookies of \"{0}\" in db", this.url.AbsolutePath), e);
                     }
                 }

@@ -26,6 +26,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;

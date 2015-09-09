@@ -56,12 +56,18 @@ namespace CmisSync.Lib.HashAlgorithm {
     /// <summary>
     /// Cloneable SHA1 implementation based on SHA1Managed
     /// </summary>
-    public class SHA1Reuse : SHA1Managed, HashAlgorithmReuse {
+    public class SHA1Reuse : SHA1Managed, IReusableHashAlgorithm {
+        private bool disposed;
+
         /// <summary>
         /// Clone this instance with its internal states.
         /// </summary>
         /// <returns>A full clone of the actual instance and state.</returns>
         public object Clone() {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             return this.DeepCopy(this);
         }
 
@@ -95,6 +101,18 @@ namespace CmisSync.Lib.HashAlgorithm {
             }
 
             return clone;
+        }
+
+        /// <summary>
+        /// Dispose the hash algorithm
+        /// </summary>
+        /// <param name="disposing">If set to <c>true</c> disposing.</param>
+        protected override void Dispose(bool disposing) {
+            if (disposing) {
+                this.disposed = true;
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

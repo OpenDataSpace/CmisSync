@@ -46,11 +46,11 @@ namespace CmisSync.Lib.Filter {
         /// <param name="session">Session instance.</param>
         public IgnoreAlreadyHandledContentChangeEventsFilter(IMetaDataStorage storage, ISession session) {
             if (storage == null) {
-                throw new ArgumentNullException("Given storage instance is null");
+                throw new ArgumentNullException("storage");
             }
 
             if (session == null) {
-                throw new ArgumentNullException("Given session instance is null");
+                throw new ArgumentNullException("session");
             }
 
             this.storage = storage;

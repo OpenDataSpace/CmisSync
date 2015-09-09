@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
-{
+namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests {
     using System;
     using System.IO;
     using System.Threading;
@@ -34,10 +33,9 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
 
     using TestLibrary.TestUtils;
 
-    [TestFixture, Timeout(900000), TestName("FileCRUD")]
-    public class FileCrud : BaseFullRepoTest
-    {
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
+    [TestFixture, Timeout(60000), TestName("FileCRUD"), Category("Slow"), Category("SelectiveIgnore")]
+    public class FileCrud : BaseFullRepoTest {
+        [Test]
         public void LocalFileIsCreatedInIgnoredFolder([Values(true, false)]bool contentChanges) {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             this.ContentChangesActive = contentChanges;
@@ -66,7 +64,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             Assert.Throws<CmisObjectNotFoundException>(() => this.session.GetObjectByPath(folder.Path + "/file.txt"), "The file shouldn't exist on the server, but it does");
         }
 
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        [Test]
         public void LocalFileIsChangedInIgnoredFolder([Values(true, false)]bool contentChanges) {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             this.ContentChangesActive = contentChanges;
@@ -100,7 +98,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             Assert.That(file.ContentStreamLength, Is.EqualTo(oldRemoteLength));
         }
 
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        [Test]
         public void LocalFileIsRenamedInIgnoredFolder([Values(true, false)]bool contentChanges) {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             this.ContentChangesActive = contentChanges;
@@ -129,7 +127,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             Assert.That(file.Name, Is.EqualTo(oldName));
         }
 
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        [Test]
         public void LocalFileIsDeletedInIgnoredFolder([Values(true, false)]bool contentChanges) {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             this.ContentChangesActive = contentChanges;

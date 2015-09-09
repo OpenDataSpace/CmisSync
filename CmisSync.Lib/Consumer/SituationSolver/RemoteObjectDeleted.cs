@@ -40,9 +40,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        public RemoteObjectDeleted(ISession session, IMetaDataStorage storage, IFilterAggregator filters) : base(session, storage) {
+        /// <param name="filters">Aggregated filter.</param>
+        public RemoteObjectDeleted(
+            ISession session,
+            IMetaDataStorage storage,
+            IFilterAggregator filters) : base(session, storage)
+        {
             if (filters == null) {
-                throw new ArgumentNullException("Given filter aggregator is null");
+                throw new ArgumentNullException("filters");
             }
 
             this.filters = filters;
@@ -51,31 +56,31 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <summary>
         /// Deletes the given localFileInfo on file system and removes the stored object from storage.
         /// </summary>
-        /// <param name="localFileInfo">Local file info.</param>
+        /// <param name="localFileSystemInfo">Local file info.</param>
         /// <param name="remoteId">Remote identifier.</param>
         /// <param name="localContent">Hint if the local content has been changed.</param>
         /// <param name="remoteContent">Information if the remote content has been changed.</param>
         public override void Solve(
-            IFileSystemInfo localFileInfo,
+            IFileSystemInfo localFileSystemInfo,
             IObjectId remoteId,
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
-            if (localFileInfo is IDirectoryInfo) {
-                if (!this.DeleteLocalObjectIfHasBeenSyncedBefore(localFileInfo)) {
-                    this.Storage.RemoveObject(this.Storage.GetObjectByLocalPath(localFileInfo));
-                    throw new IOException(string.Format("Not all local objects under {0} have been synced yet", localFileInfo.FullName));
+            if (localFileSystemInfo is IDirectoryInfo) {
+                if (!this.DeleteLocalObjectIfHasBeenSyncedBefore(localFileSystemInfo)) {
+                    this.Storage.RemoveObject(this.Storage.GetObjectByLocalPath(localFileSystemInfo));
+                    throw new IOException(string.Format("Not all local objects under {0} have been synced yet", localFileSystemInfo.FullName));
                 } else {
-                    this.Storage.RemoveObject(this.Storage.GetObjectByLocalPath(localFileInfo));
+                    this.Storage.RemoveObject(this.Storage.GetObjectByLocalPath(localFileSystemInfo));
                 }
-            } else if (localFileInfo is IFileInfo) {
-                var file = localFileInfo as IFileInfo;
+            } else if (localFileSystemInfo is IFileInfo) {
+                var file = localFileSystemInfo as IFileInfo;
                 file.Refresh();
                 var mappedFile = this.Storage.GetObjectByLocalPath(file);
                 if (file.Exists) {
                     if (mappedFile != null && file.LastWriteTimeUtc.Equals(mappedFile.LastLocalWriteTimeUtc)) {
                         file.Delete();
-                        OperationsLogger.Info(string.Format("Deleted local file {0} because the mapped remote object {0} has been deleted", file.FullName, mappedFile.RemoteObjectId));
+                        OperationsLogger.Info(string.Format("Deleted local file {0} because the mapped remote object {1} has been deleted", file.FullName, mappedFile.RemoteObjectId));
                     } else {
                         file.Uuid = null;
                         if (mappedFile == null) {
@@ -92,10 +97,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     }
                 }
 
-                this.Storage.RemoveObject(this.Storage.GetObjectByLocalPath(localFileInfo));
+                this.Storage.RemoveObject(this.Storage.GetObjectByLocalPath(localFileSystemInfo));
                 file.Refresh();
                 if (file.Exists) {
-                    throw new IOException(string.Format("Deletion of local file {0} skipped because of not yet uploaded changes", localFileInfo.FullName));
+                    throw new IOException(string.Format("Deletion of local file {0} skipped because of not yet uploaded changes", localFileSystemInfo.FullName));
                 }
             }
         }
@@ -114,7 +119,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             if (fsInfo is IFileInfo) {
                 if (obj != null && fsInfo.LastWriteTimeUtc.Equals(obj.LastLocalWriteTimeUtc)) {
                     (fsInfo as IFileInfo).Delete();
-                    OperationsLogger.Info(string.Format("Deleted local file {0} because the mapped remote object {0} has been deleted", fsInfo.FullName, obj.RemoteObjectId));
+                    OperationsLogger.Info(string.Format("Deleted local file {0} because the mapped remote object {1} has been deleted", fsInfo.FullName, obj.RemoteObjectId));
                 } else {
                     fsInfo.Uuid = null;
                     return false;
@@ -140,7 +145,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                             }
                         } else {
                             file.Delete();
-                            OperationsLogger.Info(string.Format("Deleted local ignored file {0} because the mapped remote parent object {0} has been deleted", fsInfo.FullName, obj.RemoteObjectId));
+                            OperationsLogger.Info(string.Format("Deleted local ignored file {0} because the mapped remote parent object {1} has been deleted", fsInfo.FullName, obj.RemoteObjectId));
                         }
                     }
 

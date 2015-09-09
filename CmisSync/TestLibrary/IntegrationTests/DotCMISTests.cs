@@ -49,9 +49,9 @@ namespace TestLibrary.IntegrationTests {
     using TestUtils;
 
     /// <summary>
-    /// Dot CMIS integration tests. Each method tests one specific test case. The test got to be finished after 15 mins, otherwise the test will fail.
+    /// Dot CMIS integration tests. Each method tests one specific test case. The test got to be finished after 1 min, otherwise the test will fail.
     /// </summary>
-    [TestFixture, Timeout(900000)]
+    [TestFixture, Timeout(60000), Category("Slow")]
     public class DotCMISTests : IsTestWithConfiguredLog4Net {
         /// <summary>
         /// Disable HTTPS Verification
@@ -96,7 +96,7 @@ namespace TestLibrary.IntegrationTests {
         /// <param name='repositoryId'>
         /// Repository identifier.
         /// </param>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void AppendContentStreamTest(
             string canonical_name,
             string localPath,
@@ -107,11 +107,11 @@ namespace TestLibrary.IntegrationTests {
             string repositoryId,
             string binding)
         {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
             string filename = "testfile.txt";
-            Dictionary<string, object> properties = new Dictionary<string, object>();
+            var properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
             properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             IDocument doc = null;
@@ -131,7 +131,7 @@ namespace TestLibrary.IntegrationTests {
             for (int i = 0; i < 10; i++) {
                 doc = doc.AppendContent(content, i == 9) ?? doc;
                 expectedContent += content;
-                Assert.AreEqual(expectedContent.Length, doc.ContentStreamLength);
+                Assert.That(doc.ContentStreamLength, Is.EqualTo(expectedContent.Length));
             }
 
             doc.AssertThatIfContentHashExistsItIsEqualTo(expectedContent);
@@ -139,14 +139,14 @@ namespace TestLibrary.IntegrationTests {
             for (int i = 0; i < 10; i++) {
                 doc = doc.AppendContent(content) ?? doc;
                 expectedContent += content;
-                Assert.AreEqual(expectedContent.Length, doc.ContentStreamLength);
+                Assert.That(doc.ContentStreamLength, Is.EqualTo(expectedContent.Length));
                 doc.AssertThatIfContentHashExistsItIsEqualTo(expectedContent);
             }
 
             doc.DeleteAllVersions();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void CheckoutTest(
             string canonical_name,
             string localPath,
@@ -159,11 +159,9 @@ namespace TestLibrary.IntegrationTests {
         {
             string subFolderName = "subFolder";
             string fileName = "testFile.bin";
-            string subFolderPath = remoteFolderPath.TrimEnd('/') + "/" + subFolderName;
-            string filePath = subFolderPath + "/" + fileName;
 
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
-            if (!session.ArePrivateWorkingCopySupported()) {
+            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            if (!session.IsPrivateWorkingCopySupported()) {
                 Assert.Ignore("PWCs are not supported");
             }
 
@@ -181,18 +179,18 @@ namespace TestLibrary.IntegrationTests {
             IDocument doc = subFolder.CreateDocument(fileName, "testContent", checkedOut: true);
             IObjectId checkoutId = doc.CheckOut();
             IDocument docCheckout = (IDocument)session.GetObject(checkoutId);
-            Assert.AreEqual(doc.ContentStreamLength, docCheckout.ContentStreamLength);
+            Assert.That(docCheckout.ContentStreamLength, Is.EqualTo(doc.ContentStreamLength));
             doc.Refresh();
-            Assert.IsTrue(doc.IsVersionSeriesCheckedOut.GetValueOrDefault());
+            Assert.That(doc.IsVersionSeriesCheckedOut.GetValueOrDefault(), Is.True);
             Assert.AreEqual(checkoutId.Id, doc.VersionSeriesCheckedOutId);
 
             docCheckout.CancelCheckOut();
             doc.Refresh();
-            Assert.IsFalse(doc.IsVersionSeriesCheckedOut.GetValueOrDefault());
-            Assert.IsNull(doc.VersionSeriesCheckedOutId);
+            Assert.That(doc.IsVersionSeriesCheckedOut.GetValueOrDefault(), Is.False);
+            Assert.That(doc.VersionSeriesCheckedOutId, Is.Null);
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void CheckinTest(
             string canonical_name,
             string localPath,
@@ -208,8 +206,8 @@ namespace TestLibrary.IntegrationTests {
             string subFolderPath = remoteFolderPath.TrimEnd('/') + "/" + subFolderName;
             string filePath = subFolderPath + "/" + fileName;
 
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
-            if (!session.ArePrivateWorkingCopySupported()) {
+            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            if (!session.IsPrivateWorkingCopySupported()) {
                 Assert.Ignore("PWCs are not supported");
             }
 
@@ -226,20 +224,22 @@ namespace TestLibrary.IntegrationTests {
 
             string content = "testContent";
 
-            IDocument doc = subFolder.CreateDocument(fileName, "testContent", checkedOut: true);
-            IObjectId checkoutId = doc.CheckOut();
-            IDocument docCheckout = session.GetObject(checkoutId) as IDocument;
-            Assert.AreEqual(doc.ContentStreamLength, docCheckout.ContentStreamLength);
+            var doc = subFolder.CreateDocument(fileName, "testContent", checkedOut: true);
+            var checkoutId = doc.CheckOut();
+            var docCheckout = session.GetObject(checkoutId) as IDocument;
+            Assert.That(docCheckout.ContentStreamLength, Is.EqualTo(doc.ContentStreamLength));
 
-            ContentStream contentStream = new ContentStream();
-            contentStream.FileName = fileName;
-            contentStream.MimeType = MimeType.GetMIMEType(fileName);
-            contentStream.Length = content.Length;
+            var contentStream = new ContentStream() {
+                FileName = fileName,
+                MimeType = MimeType.GetMIMEType(fileName),
+                Length = content.Length
+            };
             for (int i = 0; i < 10; ++i) {
                 using (var memstream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
                     contentStream.Stream = memstream;
                     docCheckout.AppendContentStream(contentStream, i == 9);
                 }
+
                 Assert.That(docCheckout.ContentStreamLength, Is.EqualTo(content.Length * (i + 2)));
             }
 
@@ -249,7 +249,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(docCheckin.ContentStreamLength, Is.EqualTo(content.Length * (9 + 2)));
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void RemovingRemoteFolderAndAddingADocumentToItShouldThrowException(
             string canonical_name,
             string localPath,
@@ -261,7 +261,7 @@ namespace TestLibrary.IntegrationTests {
             string binding)
         {
             string subFolderName = "subFolder";
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             try {
                 IFolder dir = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + subFolderName) as IFolder;
                 if (dir != null) {
@@ -302,7 +302,7 @@ namespace TestLibrary.IntegrationTests {
         /// <param name='repositoryId'>
         /// Repository identifier.
         /// </param>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void GetRootFolderOfRepository(
             string canonical_name,
             string localPath,
@@ -313,7 +313,7 @@ namespace TestLibrary.IntegrationTests {
             string repositoryId,
             string binding)
         {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             IFolder remoteFolder = (IFolder)session.GetObject(repositoryId);
             Assert.IsNotNull(remoteFolder);
         }
@@ -342,7 +342,7 @@ namespace TestLibrary.IntegrationTests {
         /// <param name='repositoryId'>
         /// Repository identifier.
         /// </param>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void GetRootFolderAndAllowableActions(
             string canonical_name,
             string localPath,
@@ -353,8 +353,8 @@ namespace TestLibrary.IntegrationTests {
             string repositoryId,
             string binding)
         {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
-            IFolder remoteFolder = (IFolder)session.GetObject(repositoryId);
+            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            var remoteFolder = (IFolder)session.GetObject(repositoryId);
             Assert.That(remoteFolder.AllowableActions, Is.Not.Null);
             Assert.That(remoteFolder.AllowableActions.Actions, Is.Not.Null.Or.Empty);
         }
@@ -383,7 +383,7 @@ namespace TestLibrary.IntegrationTests {
         /// <param name='repositoryId'>
         /// Repository identifier.
         /// </param>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void GetSyncPropertyFromFile(
             string canonical_name,
             string localPath,
@@ -394,19 +394,19 @@ namespace TestLibrary.IntegrationTests {
             string repositoryId,
             string binding)
         {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             session.EnsureSelectiveIgnoreSupportIsAvailable();
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             string filename = "testfile.txt";
             try {
-                IDocument doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
+                var doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
                 if (doc != null) {
                     doc.Delete(true);
                 }
             } catch (CmisObjectNotFoundException) {
             }
 
-            Dictionary<string, object> properties = new Dictionary<string, object>();
+            var properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
             properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             IList<string> devices = new List<string>();
@@ -419,20 +419,20 @@ namespace TestLibrary.IntegrationTests {
             IDocument emptyDoc = folder.CreateDocument(properties, null, null);
             Assert.That(emptyDoc.ContentStreamLength == 0 || emptyDoc.ContentStreamLength == null);
             var context = new OperationContext();
-            IDocument requestedDoc = session.GetObject(emptyDoc, context) as IDocument;
+            var requestedDoc = session.GetObject(emptyDoc, context) as IDocument;
             bool propertyFound = false;
             foreach (var prop in requestedDoc.Properties) {
                 if (prop.Id == "gds:ignoreDeviceIds") {
                     propertyFound = true;
-                    Assert.AreEqual("*", prop.FirstValue as string);
+                    Assert.That(prop.FirstValue as string, Is.EqualTo("*"));
                 }
             }
 
-            Assert.IsTrue(propertyFound);
+            Assert.That(propertyFound, Is.True);
             emptyDoc.DeleteAllVersions();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void GetContentStreamHash(
             string canonical_name,
             string localPath,
@@ -441,20 +441,21 @@ namespace TestLibrary.IntegrationTests {
             string user,
             string password,
             string repositoryId,
-            string binding) {
-            Regex entryRegex = new Regex(@"^\{.+\}[0-9a-fA-F]+$");
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            string binding)
+        {
+            var entryRegex = new Regex(@"^\{.+\}[0-9a-fA-F]+$");
+            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             string filename = "hashedfile.txt";
             try {
-                IDocument doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
+                var doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
                 if (doc != null) {
                     doc.Delete(true);
                 }
             } catch (CmisObjectNotFoundException) {
             }
 
-            Dictionary<string, object> properties = new Dictionary<string, object>();
+            var properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
             properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             using (var oneByteStream = new MemoryStream(new byte[1])) {
@@ -510,7 +511,7 @@ namespace TestLibrary.IntegrationTests {
         /// <param name='repositoryId'>
         /// Repository identifier.
         /// </param>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void SetContentStreamTest(
             string canonical_name,
             string localPath,
@@ -521,12 +522,12 @@ namespace TestLibrary.IntegrationTests {
             string repositoryId,
             string binding)
         {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
 
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
             string filename = "testfile.txt";
-            Dictionary<string, object> properties = new Dictionary<string, object>();
+            var properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
             properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             try {
@@ -537,49 +538,52 @@ namespace TestLibrary.IntegrationTests {
             } catch (CmisObjectNotFoundException) {
             }
 
-            IDocument emptyDoc = folder.CreateDocument(properties, null, null);
+            var emptyDoc = folder.CreateDocument(properties, null, null);
 
             Assert.That(emptyDoc.ContentStreamLength == null || emptyDoc.ContentStreamLength == 0, "returned document shouldn't got any content");
             string content = string.Empty;
             content += "Test ";
-            ContentStream contentStream = new ContentStream();
-            contentStream.FileName = filename;
-            contentStream.MimeType = MimeType.GetMIMEType(filename);
-            contentStream.Length = content.Length;
+            var contentStream = new ContentStream() {
+                FileName = filename,
+                MimeType = MimeType.GetMIMEType(filename),
+                Length = content.Length
+            };
             using (var memstream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
                 contentStream.Stream = memstream;
                 emptyDoc.SetContentStream(contentStream, true, true);
             }
 
-            Assert.AreEqual(content.Length, emptyDoc.ContentStreamLength);
+            Assert.That(emptyDoc.ContentStreamLength, Is.EqualTo(content.Length));
             emptyDoc.DeleteContentStream(true);
             content += "Test ";
-            contentStream = new ContentStream();
-            contentStream.FileName = filename;
-            contentStream.MimeType = MimeType.GetMIMEType(filename);
-            contentStream.Length = content.Length;
+            contentStream = new ContentStream() {
+                FileName = filename,
+                MimeType = MimeType.GetMIMEType(filename),
+                Length = content.Length
+            };
             using (var memstream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
                 contentStream.Stream = memstream;
                 emptyDoc.SetContentStream(contentStream, true, true);
             }
 
-            Assert.AreEqual(content.Length, emptyDoc.ContentStreamLength);
+            Assert.That(emptyDoc.ContentStreamLength, Is.EqualTo(content.Length));
             emptyDoc.DeleteContentStream(true);
             content += "Test ";
-            contentStream = new ContentStream();
-            contentStream.FileName = filename;
-            contentStream.MimeType = MimeType.GetMIMEType(filename);
-            contentStream.Length = content.Length;
+            contentStream = new ContentStream(){
+                FileName = filename,
+                MimeType = MimeType.GetMIMEType(filename),
+                Length = content.Length
+            };
             using (var memstream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
                 contentStream.Stream = memstream;
                 emptyDoc.SetContentStream(contentStream, true, true);
             }
 
-            Assert.AreEqual(content.Length, emptyDoc.ContentStreamLength);
+            Assert.That(emptyDoc.ContentStreamLength, Is.EqualTo(content.Length));
             emptyDoc.DeleteAllVersions();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void CreateDocumentWithContentStream(
             string canonical_name,
             string localPath,
@@ -588,18 +592,19 @@ namespace TestLibrary.IntegrationTests {
             string user,
             string password,
             string repositoryId,
-            string binding) {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            string binding)
+        {
+            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
 
-            IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+            var folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             string content = "content";
-            IDocument doc = folder.CreateDocument("name", content);
+            var doc = folder.CreateDocument("name", content);
 
             Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
             doc.DeleteAllVersions();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void CreateDocumentWithCreationAndModificationDate(
             string canonical_name,
             string localPath,
@@ -608,8 +613,9 @@ namespace TestLibrary.IntegrationTests {
             string user,
             string password,
             string repositoryId,
-            string binding) {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            string binding)
+        {
+            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             if (!session.IsServerAbleToUpdateModificationDate()) {
                 Assert.Ignore("Server is not able to sync modification dates");
             }
@@ -628,7 +634,7 @@ namespace TestLibrary.IntegrationTests {
             DateTime modificationDate = DateTime.UtcNow - TimeSpan.FromHours(1);
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
-            Dictionary<string, object> properties = new Dictionary<string, object>();
+            var properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             properties.Add(PropertyIds.Name, filename);
             properties.Add(PropertyIds.CreationDate, creationDate);
@@ -641,7 +647,7 @@ namespace TestLibrary.IntegrationTests {
             doc.DeleteAllVersions();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Timeout(180000)]
         public void EnsureFileNameStaysEqualWhileUploading(
             string canonical_name,
             string localPath,
@@ -650,13 +656,14 @@ namespace TestLibrary.IntegrationTests {
             string user,
             string password,
             string repositoryId,
-            string binding) {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            string binding)
+        {
+            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
 
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
             string filename = "testfile.txt";
-            Dictionary<string, object> properties = new Dictionary<string, object>();
+            var properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
             properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             try {
@@ -667,13 +674,14 @@ namespace TestLibrary.IntegrationTests {
             } catch (CmisObjectNotFoundException) {
             }
 
-            IDocument emptyDoc = folder.CreateDocument(properties, null, null);
+            var emptyDoc = folder.CreateDocument(properties, null, null);
             int length = 1024 * 1024;
             byte[] content = new byte[length];
-            ContentStream contentStream = new ContentStream();
-            contentStream.FileName = filename;
-            contentStream.MimeType = MimeType.GetMIMEType(filename);
-            contentStream.Length = content.Length;
+            ContentStream contentStream = new ContentStream() {
+                FileName = filename,
+                MimeType = MimeType.GetMIMEType(filename),
+                Length = content.Length
+            };
             Action assert = delegate {
                 Assert.That((session.GetObject(emptyDoc.Id, OperationContextFactory.CreateNonCachingPathIncludingContext(session)) as IDocument).Name, Is.EqualTo(filename));
             };
@@ -684,7 +692,7 @@ namespace TestLibrary.IntegrationTests {
             }
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void SetJPEGContentStream(
             string canonical_name,
             string localPath,
@@ -695,10 +703,10 @@ namespace TestLibrary.IntegrationTests {
             string repositoryId,
             string binding)
         {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             string filename = "testfile.jpg";
-            Dictionary<string, object> properties = new Dictionary<string, object>();
+            var properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
             properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
             try {
@@ -710,11 +718,11 @@ namespace TestLibrary.IntegrationTests {
             catch (CmisObjectNotFoundException) {
             }
 
-            IDocument emptyDoc = folder.CreateDocument(properties, null, null);
+            var emptyDoc = folder.CreateDocument(properties, null, null);
             Assert.That(emptyDoc.ContentStreamLength == null || emptyDoc.ContentStreamLength == 0, "returned document shouldn't got any content");
             int contentLength = 1024;
             byte[] content = new byte[contentLength];
-            using (RandomNumberGenerator random = RandomNumberGenerator.Create()) {
+            using (var random = RandomNumberGenerator.Create()) {
                 random.GetBytes(content);
             }
 
@@ -735,7 +743,7 @@ namespace TestLibrary.IntegrationTests {
             emptyDoc.DeleteAllVersions();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void RenameFolder(
             string canonical_name,
             string localPath,
@@ -746,7 +754,7 @@ namespace TestLibrary.IntegrationTests {
             string repositoryId,
             string binding)
         {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             IFolder rootFolder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             string folderName = "1";
             string newFolderName = "was 1 in past";
@@ -767,13 +775,13 @@ namespace TestLibrary.IntegrationTests {
             catch (CmisObjectNotFoundException) {
             }
 
-            IFolder newFolder = rootFolder.CreateFolder(properties);
+            var newFolder = rootFolder.CreateFolder(properties);
             newFolder.Rename(newFolderName, true);
             Assert.That(newFolder.Name, Is.EqualTo(newFolderName));
             newFolder.Delete(true);
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void RenameRemoteFolderChangesChangeLogToken(
             string canonical_name,
             string localPath,
@@ -784,8 +792,8 @@ namespace TestLibrary.IntegrationTests {
             string repositoryId,
             string binding)
         {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
-            IFolder rootFolder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            var rootFolder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             string folderName = "1";
             string newFolderName = "2";
             try {
@@ -802,7 +810,7 @@ namespace TestLibrary.IntegrationTests {
             catch (CmisObjectNotFoundException) {
             }
 
-            IFolder newFolder = rootFolder.CreateFolder(folderName);
+            var newFolder = rootFolder.CreateFolder(folderName);
             string changeLogToken = session.RepositoryInfo.LatestChangeLogToken;
             string changeToken = newFolder.ChangeToken;
             newFolder.Rename(newFolderName, true);
@@ -812,8 +820,8 @@ namespace TestLibrary.IntegrationTests {
             newFolder.DeleteTree(true, null, true);
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Category("Erratic"), Ignore("Doesn't happend anymore")]
-        public void GetChildrenDoesNotProducesServerProtocolViolationException(
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
+        public void GetFolderParentOfRootFolderIsNull(
             string canonical_name,
             string localPath,
             string remoteFolderPath,
@@ -823,13 +831,10 @@ namespace TestLibrary.IntegrationTests {
             string repositoryId,
             string binding)
         {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
-            for (int i = 0; i < 1000; i++) {
-                IFolder root = (IFolder)session.GetObjectByPath(remoteFolderPath);
-                foreach (var child in root.GetChildren()) {
-                    Console.WriteLine(child.Name);
-                }
-            }
+            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            IFolder root = session.GetRootFolder();
+            Assert.That(root.ParentId, Is.Null);
+            Assert.That(root.FolderParent, Is.Null);
         }
 
         private class AssertingStream : StreamWrapper {
@@ -839,8 +844,7 @@ namespace TestLibrary.IntegrationTests {
                 this.verification = verification;
             }
 
-            public override int Read(byte[] buffer, int offset, int count)
-            {
+            public override int Read(byte[] buffer, int offset, int count) {
                 this.verification();
                 return base.Read(buffer, offset, count);
             }
@@ -850,8 +854,11 @@ namespace TestLibrary.IntegrationTests {
     /// <summary>
     /// Dot CMIS session tests. Each log in process must be able to be executed in 60 seconds, otherwise the tests will fail.
     /// </summary>
-    [TestFixture, Timeout(60000)]
+    [TestFixture, Timeout(60000), Category("Slow")]
     public class DotCMISSessionTests {
+        // HTTP Read and Connection Timeout set to 10 secs
+        private static readonly string DefaultHttpTimeOut = "10000";
+
         /// <summary>
         /// Creates a cmis Atom Pub session with the given credentials.
         /// </summary>
@@ -877,7 +884,7 @@ namespace TestLibrary.IntegrationTests {
             string repoId,
             string binding)
         {
-            Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
+            var cmisParameters = new Dictionary<string, string>();
             if (binding.Equals(BindingType.AtomPub, StringComparison.OrdinalIgnoreCase)) {
                 cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
                 cmisParameters[SessionParameter.AtomPubUrl] = url;
@@ -890,11 +897,12 @@ namespace TestLibrary.IntegrationTests {
             cmisParameters[SessionParameter.Password] = password.ToString();
             cmisParameters[SessionParameter.RepositoryId] = repoId;
 
-            // Sets the Connect Timeout to 60 secs
-            cmisParameters[SessionParameter.ConnectTimeout] = "60000";
+            // Sets the Connect Timeout to 10 secs
+            cmisParameters[SessionParameter.ConnectTimeout] = DefaultHttpTimeOut;
+            cmisParameters[SessionParameter.ReadTimeout] = DefaultHttpTimeOut;
 
-            ISession session = SessionFactory.NewInstance().CreateSession(cmisParameters);
-            HashSet<string> filters = new HashSet<string>();
+            var session = SessionFactory.NewInstance().CreateSession(cmisParameters);
+            var filters = new HashSet<string>();
             filters.Add(PropertyIds.ObjectId);
             filters.Add(PropertyIds.Name);
             filters.Add(PropertyIds.ContentStreamFileName);
@@ -906,7 +914,7 @@ namespace TestLibrary.IntegrationTests {
             filters.Add(PropertyIds.SecondaryObjectTypeIds);
             filters.Add(PropertyIds.IsVersionSeriesCheckedOut);
             filters.Add(PropertyIds.VersionSeriesCheckedOutId);
-            HashSet<string> renditions = new HashSet<string>();
+            var renditions = new HashSet<string>();
             renditions.Add("cmis:none");
             session.DefaultContext = session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, null, true, null, true, 100);
             return session;
@@ -916,8 +924,7 @@ namespace TestLibrary.IntegrationTests {
         /// Accept every SSL Server if an invalid cert is returned
         /// </summary>
         [TestFixtureSetUp]
-        public void ClassInit()
-        {
+        public void ClassInit() {
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
         }
 
@@ -925,8 +932,7 @@ namespace TestLibrary.IntegrationTests {
         /// Revoke the acceptance of invalid SSL certificates.
         /// </summary>
         [TestFixtureTearDown]
-        public void FixtureTearDown()
-        {
+        public void FixtureTearDown() {
             ServicePointManager.ServerCertificateValidationCallback = null;
         }
 
@@ -954,7 +960,7 @@ namespace TestLibrary.IntegrationTests {
         /// <param name='repositoryId'>
         /// Repository identifier.
         /// </param>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void CreateSession(
             string canonical_name,
             string localPath,
@@ -992,7 +998,7 @@ namespace TestLibrary.IntegrationTests {
         /// <param name='repositoryId'>
         /// Repository identifier.
         /// </param>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void CreateSessionWithDeviceManagementAndUserAgent(
             string canonical_name,
             string localPath,
@@ -1003,7 +1009,7 @@ namespace TestLibrary.IntegrationTests {
             string repositoryId,
             string binding)
         {
-            Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
+            var cmisParameters = new Dictionary<string, string>();
             if (binding.Equals(BindingType.AtomPub, StringComparison.OrdinalIgnoreCase)) {
                 cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
                 cmisParameters[SessionParameter.AtomPubUrl] = url;
@@ -1016,11 +1022,11 @@ namespace TestLibrary.IntegrationTests {
             cmisParameters[SessionParameter.Password] = password;
             cmisParameters[SessionParameter.RepositoryId] = repositoryId;
 
-            // Sets the Connect Timeout to 60 secs
-            cmisParameters[SessionParameter.ConnectTimeout] = "60000";
+            // Sets the Connect Timeout to 10 secs
+            cmisParameters[SessionParameter.ConnectTimeout] = DefaultHttpTimeOut;
 
-            // Sets the Read Timeout to 60 secs
-            cmisParameters[SessionParameter.ReadTimeout] = "60000";
+            // Sets the Read Timeout to 10 secs
+            cmisParameters[SessionParameter.ReadTimeout] = DefaultHttpTimeOut;
             cmisParameters[SessionParameter.DeviceIdentifier] = ConfigManager.CurrentConfig.DeviceId.ToString();
             cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
             SessionFactory.NewInstance().CreateSession(cmisParameters);
@@ -1050,7 +1056,7 @@ namespace TestLibrary.IntegrationTests {
         /// <param name='repositoryId'>
         /// Repository identifier.
         /// </param>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void CreateSessionWithCompressionEnabled(
             string canonical_name,
             string localPath,
@@ -1061,7 +1067,7 @@ namespace TestLibrary.IntegrationTests {
             string repositoryId,
             string binding)
         {
-            Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
+            var cmisParameters = new Dictionary<string, string>();
             if (binding.Equals(BindingType.AtomPub, StringComparison.OrdinalIgnoreCase)) {
                 cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
                 cmisParameters[SessionParameter.AtomPubUrl] = url;
@@ -1075,11 +1081,11 @@ namespace TestLibrary.IntegrationTests {
             cmisParameters[SessionParameter.RepositoryId] = repositoryId;
             cmisParameters[SessionParameter.Compression] = bool.TrueString;
 
-            // Sets the Connect Timeout to 60 secs
-            cmisParameters[SessionParameter.ConnectTimeout] = "60000";
+            // Sets the Connect Timeout to 10 secs
+            cmisParameters[SessionParameter.ConnectTimeout] = DefaultHttpTimeOut;
 
-            // Sets the Read Timeout to 60 secs
-            cmisParameters[SessionParameter.ReadTimeout] = "60000";
+            // Sets the Read Timeout to 10 secs
+            cmisParameters[SessionParameter.ReadTimeout] = DefaultHttpTimeOut;
             SessionFactory.NewInstance().CreateSession(cmisParameters);
         }
     }

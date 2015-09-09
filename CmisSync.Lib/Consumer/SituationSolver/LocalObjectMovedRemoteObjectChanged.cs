@@ -38,11 +38,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ISolver renameChangeSolver,
             ISolver changeChangeSolver) : base(session, storage) {
             if (renameChangeSolver == null) {
-                throw new ArgumentNullException("Given sitation solver for local rename and remote change is null");
+                throw new ArgumentNullException("renameChangeSolver", "Given sitation solver for local rename and remote change is null");
             }
 
             if (changeChangeSolver == null) {
-                throw new ArgumentNullException("Given situation solver for local and remote changes is null");
+                throw new ArgumentNullException("changeChangeSolver", "Given situation solver for local and remote changes is null");
             }
 
             this.renameChangeSolver = renameChangeSolver;
@@ -55,6 +55,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
+            if (remoteId == null) {
+                throw new ArgumentNullException("remoteId");
+            }
+
             var obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
             var localParent = localFileSystemInfo is IFileInfo ? (localFileSystemInfo as IFileInfo).Directory : (localFileSystemInfo as IDirectoryInfo).Parent;
             var mappedLocalParent = this.Storage.GetObjectByGuid((Guid)localParent.Uuid);

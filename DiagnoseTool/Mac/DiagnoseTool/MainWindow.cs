@@ -20,13 +20,22 @@
 namespace DiagnoseTool {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Config;
+    using CmisSync.Lib.Filter;
     using CmisSync.Lib.PathMatcher;
+    using CmisSync.Lib.Producer.Crawler;
+    using CmisSync.Lib.SelectiveIgnore;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DBreeze;
+
+    using DotCMIS.Client;
+    using DotCMIS.Client.Impl;
 
     using MonoMac.AppKit;
     using MonoMac.Foundation;
@@ -68,6 +77,41 @@ namespace DiagnoseTool {
                     }
                 }
             };
+            this.DumpTree.Activated += (object sender, EventArgs e) => {
+                this.output.StringValue = string.Empty;
+                var folder = config.Folders.Find(f => f.DisplayName == this.folderSelection.SelectedItem.Title);
+                using (var dbEngine = new DBreezeEngine(folder.GetDatabasePath())) {
+                    var storage = new MetaDataStorage(dbEngine, new PathMatcher(folder.LocalPath, folder.RemotePath), false);
+                    try {
+                        var ignoreStorage = new IgnoredEntitiesStorage(new IgnoredEntitiesCollection(), storage);
+                        var session = SessionFactory.NewInstance().CreateSession(folder, "DSS-DIAGNOSE-TOOL");
+                        var remoteFolder = session.GetObjectByPath(folder.RemotePath) as IFolder;
+                        var filterAggregator = new FilterAggregator(
+                            new IgnoredFileNamesFilter(),
+                            new IgnoredFolderNameFilter(),
+                            new InvalidFolderNameFilter(),
+                            new IgnoredFoldersFilter());
+                        var treeBuilder = new DescendantsTreeBuilder(
+                            storage,
+                            remoteFolder,
+                            new DirectoryInfoWrapper(new DirectoryInfo(folder.LocalPath)),
+                            filterAggregator,
+                            ignoreStorage);
+                        var trees = treeBuilder.BuildTrees();
+                        var suffix = string.Format("{0}-{1}", folder.DisplayName.Replace(Path.DirectorySeparatorChar,'_'), Guid.NewGuid().ToString());
+                        var localTree = Path.Combine(Path.GetTempPath(), string.Format("LocalTree-{0}.dot", suffix));
+                        var remoteTree = Path.Combine(Path.GetTempPath(), string.Format("StoredTree-{0}.dot", suffix));
+                        var storedTree = Path.Combine(Path.GetTempPath(), string.Format("RemoteTree-{0}.dot", suffix));
+                        trees.LocalTree.ToDotFile(localTree);
+                        trees.StoredObjects.ObjectListToDotFile(remoteTree);
+                        trees.RemoteTree.ToDotFile(storedTree);
+                        this.output.StringValue = string.Format("Written to:\n{0}\n{1}\n{2}", localTree, remoteTree, storedTree);
+                    } catch (Exception ex) {
+                        this.output.StringValue = ex.ToString();
+                    }
+                }
+            };
+
             foreach (var folder in config.Folders) {
                 this.folderSelection.AddItem(folder.DisplayName);
             }

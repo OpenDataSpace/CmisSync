@@ -31,6 +31,7 @@ namespace CmisSync.Lib.Filter {
         /// <param name="folderNamesFilter">Folder names filter.</param>
         /// <param name="invalidFolderNamesFilter">Invalid folder names filter.</param>
         /// <param name="ignoredFolderFilter">Ignored folder filter.</param>
+        /// <param name="symlinkFilter">Symbolic link filter.</param>
         public FilterAggregator(
             IgnoredFileNamesFilter fileNamesFilter,
             IgnoredFolderNameFilter folderNamesFilter,
@@ -39,19 +40,19 @@ namespace CmisSync.Lib.Filter {
             SymlinkFilter symlinkFilter = null)
         {
             if (fileNamesFilter == null) {
-                throw new ArgumentNullException("Given file names filter is null");
+                throw new ArgumentNullException("fileNamesFilter");
             }
 
             if (folderNamesFilter == null) {
-                throw new ArgumentNullException("Given folder names filter is null");
+                throw new ArgumentNullException("folderNamesFilter");
             }
 
             if (invalidFolderNamesFilter == null) {
-                throw new ArgumentNullException("Given invalid folder names filter is null");
+                throw new ArgumentNullException("invalidFolderNamesFilter");
             }
 
             if (ignoredFolderFilter == null) {
-                throw new ArgumentNullException("Given ignored folder filter is null");
+                throw new ArgumentNullException("ignoredFolderFilter");
             }
 
             this.FileNamesFilter = fileNamesFilter;

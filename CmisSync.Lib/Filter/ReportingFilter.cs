@@ -63,7 +63,8 @@ namespace CmisSync.Lib.Filter {
         /// <param name="ignoredFoldersFilter">Ignored folders filter.</param>
         /// <param name="ignoredFileNameFilter">Ignored file name filter.</param>
         /// <param name="ignoredFolderNameFilter">Ignored folder name filter.</param>
-        /// <param name="invalidFoderNameFilter">Invalid folder name filter</param> 
+        /// <param name="invalidFoderNameFilter">Invalid folder name filter.</param>
+        /// <param name="symlinkFilter">Symbolic link filter.</param>
         public ReportingFilter(
             ISyncEventQueue queue,
             IgnoredFoldersFilter ignoredFoldersFilter,
@@ -73,23 +74,23 @@ namespace CmisSync.Lib.Filter {
             SymlinkFilter symlinkFilter) : base(queue)
         {
             if (ignoredFoldersFilter == null) {
-                throw new ArgumentNullException("ignoredFoldersFilter", "Given folder filter is null");
+                throw new ArgumentNullException("ignoredFoldersFilter");
             }
 
             if (ignoredFileNameFilter == null) {
-                throw new ArgumentNullException("ignoredFileNameFilter", "Given file name filter is null");
+                throw new ArgumentNullException("ignoredFileNameFilter");
             }
 
             if (ignoredFolderNameFilter == null) {
-                throw new ArgumentNullException("ignoredFolderNameFilter", "Given folder name filter is null");
+                throw new ArgumentNullException("ignoredFolderNameFilter");
             }
 
             if (invalidFoderNameFilter == null) {
-                throw new ArgumentNullException("invalidFoderNameFilter", "Given invalid folder name filter is null");
+                throw new ArgumentNullException("invalidFoderNameFilter");
             }
 
             if (symlinkFilter == null) {
-                throw new ArgumentNullException("symlinkFilter", "Given symlink filter is null");
+                throw new ArgumentNullException("symlinkFilter");
             }
 
             this.ignoredFoldersFilter = ignoredFoldersFilter;

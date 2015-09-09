@@ -27,22 +27,34 @@ namespace CmisSync.Lib.Storage.FileSystem {
     /// Wrapps all interfaced methods and calls the Systems.IO classes
     /// </summary>
     public class FileSystemInfoFactory : IFileSystemInfoFactory {
+        private readonly bool ignoreReadOnly;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.FileSystemInfoFactory"/> class.
+        /// </summary>
+        /// <param name="ignoreReadOnlyByDefault">If set to <c>true</c> ignore read only wrapper are created by this factory. Otherwise normal wrapper are created.</param>
+        public FileSystemInfoFactory(bool ignoreReadOnlyByDefault = true) {
+            this.ignoreReadOnly = ignoreReadOnlyByDefault;
+        }
+
         /// <summary>
         /// Creates the directory info.
         /// </summary>
         /// <returns>The directory info.</returns>
         /// <param name="path">For this path.</param>
         public IDirectoryInfo CreateDirectoryInfo(string path) {
-            return new DirectoryInfoWrapper(new DirectoryInfo(path));
+            IDirectoryInfo dirInfo = new DirectoryInfoWrapper(new DirectoryInfo(path));
+            return this.ignoreReadOnly ? new ReadOnlyIgnoringDirectoryInfoDecorator(dirInfo) : dirInfo;
         }
 
         /// <summary>
         /// Creates the file info.
         /// </summary>
         /// <returns>The file info.</returns>
-        /// <param name="path">For this path.</param>
-        public IFileInfo CreateFileInfo(string path) {
-            return new FileInfoWrapper(new FileInfo(path));
+        /// <param name="fileName">For this path.</param>
+        public IFileInfo CreateFileInfo(string fileName) {
+            IFileInfo fileInfo = new FileInfoWrapper(new FileInfo(fileName));
+            return this.ignoreReadOnly ? new ReadOnlyIgnoringFileInfoDecorator(fileInfo) : fileInfo;
         }
 
         /// <summary>
@@ -51,6 +63,10 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <returns>The conflict file info.</returns>
         /// <param name="file">File for which a new conflict file should be created.</param>
         public IFileInfo CreateConflictFileInfo(IFileInfo file) {
+            if (file == null) {
+                throw new ArgumentNullException("file");
+            }
+
             if (!file.Exists) {
                 return file;
             }
@@ -60,7 +76,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
             string suffix = file.Name.Substring(0, file.Name.Length - extension.Length);
             string filename = string.Format("{0}_{1}-version{2}", suffix, user, extension);
 
-            IFileInfo conflictFile = this.CreateFileInfo(Path.Combine(file.Directory.FullName, filename));
+            var conflictFile = this.CreateFileInfo(Path.Combine(file.Directory.FullName, filename));
             if (!conflictFile.Exists) {
                 return conflictFile;
             }
@@ -97,6 +113,10 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <returns>The download cache file info.</returns>
         /// <param name="file">File which should be updated.</param>
         public IFileInfo CreateDownloadCacheFileInfo(IFileInfo file) {
+            if (file == null) {
+                throw new ArgumentNullException("file");
+            }
+
             if (!file.Exists) {
                 throw new FileNotFoundException(string.Format("Given file {0} does not exists", file.FullName));
             }

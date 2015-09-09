@@ -40,9 +40,9 @@ namespace TestLibrary.IntegrationTests {
     using TestUtils;
 
     /// <summary>
-    /// Client Brand integration tests. Each method tests one specific test case. The test got to be finished after 15 mins, otherwise the test will fail.
+    /// Client Brand integration tests. Each method tests one specific test case. The test got to be finished after 1 min, otherwise the test will fail.
     /// </summary>
-    [TestFixture, Timeout(900000), Category("Branding")]
+    [TestFixture, Timeout(60000), Category("Branding")]
     class ClientBrandTests : IsTestWithConfiguredLog4Net {
         /// <summary>
         /// Disable HTTPS Verification

@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="IFileConvenienceExtenders.cs" company="GRAU DATA AG">
+// <copyright file="FileContentConvenienceExtenders.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.Database.Entities
-{
+namespace CmisSync.Lib.Storage.Database.Entities {
     using System;
     using System.IO;
     using System.Linq;
@@ -27,10 +26,9 @@ namespace CmisSync.Lib.Storage.Database.Entities
     using CmisSync.Lib.Storage.FileSystem;
 
     /// <summary>
-    /// IFileInfo convenience extenders to check them against IMappedObjects
+    /// File content convenience extenders to check them against IMappedObjects
     /// </summary>
-    public static class IFileConvenienceExtenders
-    {
+    public static class FileContentConvenienceExtenders {
         /// <summary>
         /// Determines if file content is changed to the specified obj.
         /// </summary>
@@ -41,12 +39,16 @@ namespace CmisSync.Lib.Storage.Database.Entities
         /// <param name="scanOnlyIfModificationDateDiffers">If set to <c>true</c> content scan runs only if the modification date differs to given one.</param>
         public static bool IsContentChangedTo(this IFileInfo file, IMappedObject obj, out byte[] actualHash, bool scanOnlyIfModificationDateDiffers = false) {
             actualHash = null;
+            if (file == null) {
+                throw new ArgumentNullException("file");
+            }
+
             if (obj == null) {
-                throw new ArgumentNullException("Given obj is null");
+                throw new ArgumentNullException("obj");
             }
 
             if (obj.LastContentSize < 0) {
-                throw new ArgumentOutOfRangeException(string.Format("Given LastContentSize {0} is invalid for files", obj.LastContentSize.ToString()));
+                throw new ArgumentOutOfRangeException("obj", string.Format("Given LastContentSize {0} is invalid for files", obj.LastContentSize.ToString()));
             }
 
             if (!file.Exists) {

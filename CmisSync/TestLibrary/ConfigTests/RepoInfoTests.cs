@@ -28,7 +28,7 @@ namespace TestLibrary.ConfigTests {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class RepoInfoTests {
         private readonly string cmissyncdir = ConfigManager.CurrentConfig.GetFoldersPath();
         private readonly string ignorePath = "/tmp/test";
@@ -49,66 +49,66 @@ namespace TestLibrary.ConfigTests {
             };
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void NonAddedPathResultsInEmptyArray() {
             Assert.That(this.info.GetIgnoredPaths(), Is.Empty);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void AddIgnorePath() {
             this.info.AddIgnorePath(this.ignorePath);
             Assert.AreEqual(1, this.info.GetIgnoredPaths().Count);
             Assert.Contains(this.ignorePath, this.info.GetIgnoredPaths());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ResetIgnorePaths() {
             this.info.AddIgnorePath(this.ignorePath);
             this.info.IgnoredFolders.Clear();
             Assert.AreEqual(0, this.info.GetIgnoredPaths().Count);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void IgnoresExactMatchingPath() {
             this.info.AddIgnorePath(this.ignorePath);
             Assert.IsTrue(this.info.IsPathIgnored(this.ignorePath));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void IgnoreChildOfPath() {
             this.info.AddIgnorePath(this.ignorePath);
             Assert.IsTrue(this.info.IsPathIgnored(this.ignorePath + "/child"), this.ignorePath + "/child");
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void DoNotIgnorePathWithSameBeginningButNoChildOfIgnore() {
             this.info.AddIgnorePath(this.ignorePath);
             Assert.IsFalse(this.info.IsPathIgnored(this.ignorePath + "stuff"), this.ignorePath + "stuff");
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void DefaultAuthTypeIsBasicAuthentication() {
             Assert.That(this.info.AuthenticationType, Is.EqualTo(AuthenticationType.BASIC));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void DefaultConnectionTimeoutIsSet() {
             Assert.That(this.info.ConnectionTimeout, Is.EqualTo(Config.DefaultConnectionTimeout));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void DefaultReadTimeoutIsSet() {
             Assert.That(this.info.ReadTimeout, Is.EqualTo(Config.DefaultReadTimeout));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConnectionTimeoutTakesPositiveNumber() {
             int positiveNumber = 100;
             this.info.ConnectionTimeout = positiveNumber;
             Assert.That(this.info.ConnectionTimeout, Is.EqualTo(positiveNumber));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConnectionTimeoutTakesZeroOrNegativeNumberAndStoresMinusOne() {
             this.info.ConnectionTimeout = 0;
             Assert.That(this.info.ConnectionTimeout, Is.EqualTo(-1));
@@ -116,19 +116,48 @@ namespace TestLibrary.ConfigTests {
             Assert.That(this.info.ConnectionTimeout, Is.EqualTo(-1));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ReadTimeoutTakesPositiveNumber() {
             int positiveNumber = 100;
             this.info.ReadTimeout = positiveNumber;
             Assert.That(this.info.ReadTimeout, Is.EqualTo(positiveNumber));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ReadTimeoutTakesZeroOrNegativeNumberAndStoresMinusOne() {
             this.info.ReadTimeout = 0;
             Assert.That(this.info.ReadTimeout, Is.EqualTo(-1));
             this.info.ReadTimeout = -2134;
             Assert.That(this.info.ReadTimeout, Is.EqualTo(-1));
+        }
+
+        [Test]
+        public void DownloadLimit() {
+            long limit = 100;
+            Assert.That(this.info.DownloadLimit, Is.EqualTo(0));
+            this.info.DownloadLimit = limit;
+            Assert.That(this.info.DownloadLimit, Is.EqualTo(limit));
+        }
+
+        [Test]
+        public void UploadLimit() {
+            long limit = 100;
+            Assert.That(this.info.UploadLimit, Is.EqualTo(0));
+            this.info.UploadLimit = limit;
+            Assert.That(this.info.UploadLimit, Is.EqualTo(limit));
+        }
+
+        [Test]
+        public void OnSavedTriggersHandler() {
+            bool isTriggered = false;
+            this.info.Saved += (sender, e) => {
+                Assert.That(sender, Is.EqualTo(this.info));
+                isTriggered = true;
+            };
+
+            this.info.OnSaved();
+
+            Assert.That(isTriggered, Is.True);
         }
     }
 }

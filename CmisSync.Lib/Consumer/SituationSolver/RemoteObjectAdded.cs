@@ -42,7 +42,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectAdded));
 
         private IFileSystemInfoFactory fsFactory;
-        private TransmissionManager manager;
+        private ITransmissionFactory manager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.RemoteObjectAdded"/> class.
@@ -56,10 +56,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            TransmissionManager transmissionManager,
+            ITransmissionFactory transmissionManager,
             IFileSystemInfoFactory fsFactory = null) : base(session, storage, transmissionStorage) {
             if (transmissionManager == null) {
-                throw new ArgumentNullException("Given transmission manager is null");
+                throw new ArgumentNullException("transmissionManager");
             }
 
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
@@ -69,32 +69,28 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <summary>
         /// Adds the Object to Disk and Database
         /// </summary>
-        /// <param name='localFile'>
-        /// Local file.
-        /// </param>
-        /// <param name='remoteId'>
-        /// Remote Object (already fetched).
-        /// </param>
+        /// <param name='localFileSystemInfo'>Local file.</param>
+        /// <param name='remoteId'>Remote Object (already fetched).</param>
         /// <param name="localContent">Hint if the local content has been changed.</param>
         /// <param name="remoteContent">Information if the remote content has been changed.</param>
         /// <exception cref='ArgumentException'>
         /// Is thrown when remoteId is not prefetched.
         /// </exception>
         public override void Solve(
-            IFileSystemInfo localFile,
+            IFileSystemInfo localFileSystemInfo,
             IObjectId remoteId,
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
-            if(localFile is IDirectoryInfo) {
+            if (localFileSystemInfo is IDirectoryInfo) {
                 if (!(remoteId is IFolder)) {
                     throw new ArgumentException("remoteId has to be a prefetched Folder");
                 }
 
                 var remoteFolder = remoteId as IFolder;
-                IDirectoryInfo localFolder = localFile as IDirectoryInfo;
+                var localFolder = localFileSystemInfo as IDirectoryInfo;
                 localFolder.Create();
-
+                localFolder.TryToSetReadOnlyStateIfDiffers(from: remoteFolder, andLogErrorsTo: Logger);
                 Guid uuid = Guid.Empty;
                 if (localFolder.IsExtendedAttributeAvailable()) {
                     uuid = Guid.NewGuid();
@@ -104,18 +100,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     }
                 }
 
-                if (remoteFolder.LastModificationDate != null) {
-                    localFolder.LastWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
-                }
-
+                localFolder.TryToSetLastWriteTimeUtcIfAvailable(from: remoteFolder, andLogErrorsTo: Logger);
                 var mappedObject = new MappedObject(remoteFolder);
                 mappedObject.Guid = uuid;
                 mappedObject.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
                 mappedObject.LastLocalWriteTimeUtc = localFolder.LastWriteTimeUtc;
                 mappedObject.Ignored = remoteFolder.AreAllChildrenIgnored();
+                mappedObject.IsReadOnly = localFolder.ReadOnly;
                 this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local folder {0} created and mapped to remote folder {1}", localFolder.FullName, remoteId.Id));
-            } else if (localFile is IFileInfo) {
+            } else if (localFileSystemInfo is IFileInfo) {
                 if (!(remoteId is IDocument)) {
                     throw new ArgumentException("remoteId has to be a prefetched Document");
                 }
@@ -123,7 +117,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 Guid guid = Guid.NewGuid();
                 byte[] localFileHash = null;
                 DateTime? lastLocalFileModificationDate = null;
-                var file = localFile as IFileInfo;
+                var file = localFileSystemInfo as IFileInfo;
                 if (file.Exists) {
                     Guid? uuid = file.Uuid;
                     if (uuid != null) {
@@ -143,12 +137,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 var cacheFile = this.fsFactory.CreateDownloadCacheFileInfo(guid);
 
                 IDocument remoteDoc = remoteId as IDocument;
-                var transmission = this.manager.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName, cacheFile.FullName);
+                var transmission = this.manager.CreateTransmission(TransmissionType.DownloadNewFile, localFileSystemInfo.FullName, cacheFile.FullName);
                 byte[] hash = DownloadCacheFile(cacheFile, remoteDoc, transmission, this.fsFactory);
 
                 try {
                     cacheFile.Uuid = guid;
-                } catch(RestoreModificationDateException e) {
+                } catch (RestoreModificationDateException e) {
                     Logger.Debug("Could not retore the last modification date of " + cacheFile.FullName, e);
                 }
 
@@ -170,7 +164,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                             file.Uuid = guid;
                             try {
                                 cacheFile.Delete();
-                            } catch(IOException) {
+                            } catch (IOException) {
                             }
                         } else {
                             IFileInfo conflictFile = this.fsFactory.CreateConflictFileInfo(file);
@@ -188,7 +182,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
                             try {
                                 conflictFile.Uuid = null;
-                            } catch(RestoreModificationDateException restoreException) {
+                            } catch (RestoreModificationDateException restoreException) {
                                 Logger.Debug("Could not retore the last modification date of " + conflictFile.FullName, restoreException);
                             }
                         }
@@ -199,13 +193,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 }
 
                 file.Refresh();
-                if (remoteDoc.LastModificationDate != null) {
-                    try {
-                        file.LastWriteTimeUtc = (DateTime)remoteDoc.LastModificationDate;
-                    } catch(IOException e) {
-                        Logger.Debug("Cannot set last modification date", e);
-                    }
-                }
+                file.TryToSetReadOnlyStateIfDiffers(from: remoteDoc, andLogErrorsTo: Logger);
+                file.TryToSetLastWriteTimeUtcIfAvailable(from: remoteDoc, andLogErrorsTo: Logger);
 
                 MappedObject mappedObject = new MappedObject(
                     file.Name,
@@ -219,11 +208,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     LastLocalWriteTimeUtc = file.LastWriteTimeUtc,
                     LastRemoteWriteTimeUtc = remoteDoc.LastModificationDate,
                     LastChecksum = hash,
-                    ChecksumAlgorithmName = "SHA-1"
+                    ChecksumAlgorithmName = "SHA-1",
+                    IsReadOnly = file.ReadOnly
                 };
                 this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local file {0} created and mapped to remote file {1}", file.FullName, remoteId.Id));
-                transmission.Status = TransmissionStatus.FINISHED;
+                transmission.Status = TransmissionStatus.Finished;
             }
         }
 
@@ -240,7 +230,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                         if (remoteDoc.LastModificationDate != null) {
                             try {
                                 file.LastWriteTimeUtc = (DateTime)remoteDoc.LastModificationDate;
-                            } catch(IOException e) {
+                            } catch (IOException e) {
                                 Logger.Debug("Cannot set last modification date", e);
                             }
                         }

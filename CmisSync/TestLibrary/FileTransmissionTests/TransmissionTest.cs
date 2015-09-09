@@ -42,7 +42,7 @@ namespace TestLibrary.FileTransmissionTests {
             Assert.That(underTest.Type, Is.EqualTo(type));
             Assert.That(underTest.Path, Is.EqualTo(this.path));
             Assert.That(underTest.CachePath, Is.Null);
-            Assert.That(underTest.Status, Is.EqualTo(TransmissionStatus.TRANSMITTING));
+            Assert.That(underTest.Status, Is.EqualTo(TransmissionStatus.Transmitting));
         }
 
         [Test, Category("Fast"), TestCaseSource("GetAllTypes")]
@@ -51,7 +51,7 @@ namespace TestLibrary.FileTransmissionTests {
             Assert.That(underTest.Type, Is.EqualTo(type));
             Assert.That(underTest.Path, Is.EqualTo(this.path));
             Assert.That(underTest.CachePath, Is.EqualTo(this.cache));
-            Assert.That(underTest.Status, Is.EqualTo(TransmissionStatus.TRANSMITTING));
+            Assert.That(underTest.Status, Is.EqualTo(TransmissionStatus.Transmitting));
         }
 
         [Test, Category("Fast"), TestCaseSource("GetAllTypes")]
@@ -108,14 +108,14 @@ namespace TestLibrary.FileTransmissionTests {
 
         [Test, Category("Fast")]
         public void Pause() {
-            var underTest = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, this.path);
+            var underTest = new Transmission(TransmissionType.DownloadNewFile, this.path);
             underTest.Pause();
-            Assert.That(underTest.Status == TransmissionStatus.PAUSED);
+            Assert.That(underTest.Status == TransmissionStatus.Paused);
         }
 
         [Test, Category("Fast")]
-        public void PauseAbortedTransmissionDoesNotChangeTheStatus([Values(TransmissionStatus.ABORTING, TransmissionStatus.ABORTED)]TransmissionStatus status) {
-            var underTest = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, this.path);
+        public void PauseAbortedTransmissionDoesNotChangeTheStatus([Values(TransmissionStatus.Aborting, TransmissionStatus.Aborted)]TransmissionStatus status) {
+            var underTest = new Transmission(TransmissionType.DownloadNewFile, this.path);
             underTest.Status = status;
             underTest.Pause();
             Assert.That(underTest.Status, Is.EqualTo(status));
@@ -123,26 +123,26 @@ namespace TestLibrary.FileTransmissionTests {
 
         [Test, Category("Fast")]
         public void Resume() {
-            var underTest = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, this.path);
+            var underTest = new Transmission(TransmissionType.DownloadNewFile, this.path);
             underTest.Resume();
-            Assert.That(underTest.Status == TransmissionStatus.TRANSMITTING);
+            Assert.That(underTest.Status == TransmissionStatus.Transmitting);
             underTest.Pause();
             underTest.Resume();
-            Assert.That(underTest.Status == TransmissionStatus.TRANSMITTING);
+            Assert.That(underTest.Status == TransmissionStatus.Transmitting);
 
             underTest.Abort();
             underTest.Resume();
-            Assert.That(underTest.Status == TransmissionStatus.ABORTING);
-            underTest.Status = TransmissionStatus.ABORTED;
+            Assert.That(underTest.Status == TransmissionStatus.Aborting);
+            underTest.Status = TransmissionStatus.Aborted;
             underTest.Resume();
-            Assert.That(underTest.Status == TransmissionStatus.ABORTED);
+            Assert.That(underTest.Status == TransmissionStatus.Aborted);
         }
 
         [Test, Category("Fast")]
         public void LastModificationDate() {
             var past = DateTime.Now - TimeSpan.FromDays(1);
             int changed = 0;
-            var underTest = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, this.path);
+            var underTest = new Transmission(TransmissionType.DownloadNewFile, this.path);
             Assert.That(underTest.LastModification, Is.EqualTo(DateTime.Now).Within(1).Seconds);
             underTest.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) => {
                 if (e.PropertyName == Utils.NameOf((Transmission t) => t.LastModification)) {
@@ -157,11 +157,11 @@ namespace TestLibrary.FileTransmissionTests {
 
         [Test, Category("Fast")]
         public void SettingFailedTransmissionExceptionAlsoSetsTheAbortFlag() {
-            var underTest = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, this.path);
+            var underTest = new Transmission(TransmissionType.DownloadNewFile, this.path);
             bool changed = false;
             underTest.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) => {
                 if (e.PropertyName == Utils.NameOf((Transmission t) => t.Status)) {
-                    Assert.That((sender as Transmission).Status, Is.EqualTo(TransmissionStatus.ABORTED));
+                    Assert.That((sender as Transmission).Status, Is.EqualTo(TransmissionStatus.Aborted));
                     changed = true;
                 }
             };
@@ -173,7 +173,7 @@ namespace TestLibrary.FileTransmissionTests {
 
         [Test, Category("Fast")]
         public void CreateStreamReturnsNewTransmissionStreamInstance() {
-            var underTest = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, this.path);
+            var underTest = new Transmission(TransmissionType.DownloadNewFile, this.path);
             using (var stream = new MemoryStream())
             using (var newStream = underTest.CreateStream(stream))
             using (var secondNewStream = underTest.CreateStream(stream)) {

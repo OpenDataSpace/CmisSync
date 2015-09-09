@@ -46,7 +46,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     /// </summary>
     public class LocalObjectAddedWithPWC : AbstractEnhancedSolverWithPWC {
         private readonly ISolver folderOrEmptyFileAddedSolver;
-        private readonly ITransmissionManager transmissionManager;
+        private readonly ITransmissionFactory transmissionManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.PWC.LocalObjectAddedWithPWC"/> class.
@@ -60,15 +60,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ITransmissionManager manager,
+            ITransmissionFactory manager,
             ISolver localFolderOrEmptyFileAddedSolver) : base(session, storage, transmissionStorage)
         {
             if (localFolderOrEmptyFileAddedSolver == null) {
-                throw new ArgumentNullException("Given solver for locally added folders is null");
-            }
-
-            if (!session.ArePrivateWorkingCopySupported()) {
-                throw new ArgumentException("Given session doesn't support private working copies");
+                throw new ArgumentNullException("localFolderOrEmptyFileAddedSolver", "Given solver for locally added folders is null");
             }
 
             this.folderOrEmptyFileAddedSolver = localFolderOrEmptyFileAddedSolver;
@@ -89,10 +85,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             if (localFileSystemInfo is IFileInfo) {
-                IFileInfo localFile = localFileSystemInfo as IFileInfo;
+                var localFile = localFileSystemInfo as IFileInfo;
+                var fullName = localFile.FullName;
                 localFile.Refresh();
                 if (!localFile.Exists) {
-                    throw new FileNotFoundException(string.Format("Local file {0} has been renamed/moved/deleted", localFile.FullName));
+                    throw new FileNotFoundException(string.Format("Local file {0} has been renamed/moved/deleted", fullName));
                 }
 
                 if (localFile.Length == 0) {
@@ -113,13 +110,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 try {
                     remoteDocument = this.CreateOrLoadExistingRemoteDocument(localFile, new ObjectId(parentId));
                 } catch (CmisPermissionDeniedException e) {
-                    OperationsLogger.Warn(string.Format("Permission denied while trying to Create the locally added object {0} on the server ({1}).", localFile.FullName, e.Message));
+                    OperationsLogger.Warn(string.Format("Permission denied while trying to Create the locally added object {0} on the server ({1}).", fullName, e.Message));
                     return;
                 }
 
                 Guid uuid = this.WriteOrUseUuidIfSupported(localFile);
 
-                var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
+                var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UploadNewFile, fullName);
 
                 MappedObject mapped = new MappedObject(
                     localFile.Name,
@@ -130,14 +127,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                         Guid = uuid,
                         LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate,
                         LastLocalWriteTimeUtc = (DateTime?)localFileSystemInfo.LastWriteTimeUtc,
-                        LastChangeToken = remoteDocument.ChangeToken,
                         LastContentSize = 0,
                         ChecksumAlgorithmName = "SHA-1",
                         LastChecksum = SHA1.Create().ComputeHash(new byte[0])
                     };
 
                 Stopwatch watch = new Stopwatch();
-                OperationsLogger.Debug(string.Format("Uploading file content of {0}", localFile.FullName));
+                OperationsLogger.Debug(string.Format("Uploading file content of {0}", fullName));
                 watch.Start();
                 try {
                     mapped.LastChecksum = this.UploadFileWithPWC(localFile, ref remoteDocument, transmission);
@@ -145,12 +141,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     mapped.RemoteObjectId = remoteDocument.Id;
                 } catch (Exception ex) {
                     if (ex is UploadFailedException && (ex as UploadFailedException).InnerException is CmisStorageException) {
-                        OperationsLogger.Warn(string.Format("Could not upload file content of {0}:", localFile.FullName), (ex as UploadFailedException).InnerException);
+                        OperationsLogger.Warn(string.Format("Could not upload file content of {0}:", fullName), (ex as UploadFailedException).InnerException);
                         return;
                     }
 
                     throw;
                 }
+
                 watch.Stop();
 
                 mapped.LastContentSize = localFile.Length;
@@ -159,7 +156,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 mapped.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
 
                 this.Storage.SaveMappedObject(mapped);
-                OperationsLogger.Info(string.Format("Uploaded file content of {0} in [{1} msec]", localFile.FullName, watch.ElapsedMilliseconds));
+                OperationsLogger.Info(string.Format("Uploaded file content of {0} in [{1} msec]", fullName, watch.ElapsedMilliseconds));
             } else {
                 this.folderOrEmptyFileAddedSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
             }

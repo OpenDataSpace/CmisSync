@@ -52,7 +52,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
         public void StorageWrapsCollectionsAdd() {
             var collection = new Mock<IIgnoredEntitiesCollection>();
             var storage = new Mock<IMetaDataStorage>(MockBehavior.Strict);
-            var entry = Mock.Of<IIgnoredEntity>();
+            var entry = Mock.Of<AbstractIgnoredEntity>();
             var underTest = new IgnoredEntitiesStorage(collection.Object, storage.Object);
 
             underTest.Add(entry);
@@ -86,7 +86,7 @@ namespace TestLibrary.SelectiveIgnoreTests {
             storage.Setup(s => s.GetChildren(folder)).Returns(children);
             storage.Setup(s => s.RemoveObject(subFolder));
             storage.AddMappedFolder(subFolder);
-            var entry = Mock.Of<IIgnoredEntity>(e => e.ObjectId == objectId);
+            var entry = Mock.Of<AbstractIgnoredEntity>(e => e.ObjectId == objectId);
             var underTest = new IgnoredEntitiesStorage(collection.Object, storage.Object);
 
             underTest.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(entry);

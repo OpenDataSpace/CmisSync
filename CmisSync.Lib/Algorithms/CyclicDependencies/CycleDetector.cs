@@ -28,7 +28,7 @@ namespace CmisSync.Lib.Algorithms.CyclicDependencies {
     public class CycleDetector : ICycleDetector {
         public CycleDetector(IMetaDataStorage storage) {
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage");
             }
         }
 

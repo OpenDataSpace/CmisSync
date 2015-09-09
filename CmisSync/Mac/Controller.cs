@@ -141,10 +141,6 @@ namespace CmisSync {
         }
 
         public Controller() : base() {
-            using (var a = new NSAutoreleasePool()) {
-                NSApplication.Init ();
-            }
-
             NSWorkspace.SharedWorkspace.NotificationCenter.AddObserver(
                 NSWorkspace.WillSleepNotification,
                 delegate {
@@ -200,6 +196,10 @@ namespace CmisSync {
                 InsertAlertNotification(title, message);
             };
 
+            ShowException += (title, msg) => {
+                InsertAlertNotification(title, msg);
+            };
+
             OnTransmissionListChanged += delegate {
                 var count = this.ActiveTransmissions().Count;
                 /*using (var a = new NSAutoreleasePool()) {
@@ -242,7 +242,7 @@ namespace CmisSync {
                             }
 
                             foreach (var transmission in transmissions) {
-                                if (transmission.Status == TransmissionStatus.ABORTED) {
+                                if (transmission.Status == TransmissionStatus.Aborted) {
                                     continue;
                                 }
 
@@ -274,26 +274,26 @@ namespace CmisSync {
         private string GetTransmissionStatus(Transmission transmission) {
             string type = "Unknown";
             switch (transmission.Type) {
-            case TransmissionType.UPLOAD_NEW_FILE:
+            case TransmissionType.UploadNewFile:
                 type = Properties_Resources.NotificationFileUpload;
                 break;
-            case TransmissionType.UPLOAD_MODIFIED_FILE:
+            case TransmissionType.UploadModifiedFile:
                 type = Properties_Resources.NotificationFileUpdateRemote;
                 break;
-            case TransmissionType.DOWNLOAD_NEW_FILE:
+            case TransmissionType.DownloadNewFile:
                 type = Properties_Resources.NotificationFileDownload;
                 break;
-            case TransmissionType.DOWNLOAD_MODIFIED_FILE:
+            case TransmissionType.DownloadModifiedFile:
                 type = Properties_Resources.NotificationFileUpdateLocal;
                 break;
             }
 
             string status = string.Empty;
             switch (transmission.Status) {
-                case TransmissionStatus.ABORTED:
+                case TransmissionStatus.Aborted:
                     status = transmission.FailedException == null ? Properties_Resources.NotificationFileStatusAborted : Properties_Resources.NotificationFileStatusFailed;
                     break;
-                case TransmissionStatus.FINISHED:
+                case TransmissionStatus.Finished:
                     status = Properties_Resources.NotificationFileStatusCompleted;
                     break;
             }
@@ -332,7 +332,7 @@ namespace CmisSync {
                             }
 
                             bool pathCorrect = notification.InformativeText == transmission.Path;
-                            bool isCompleted = transmission.Status == TransmissionStatus.FINISHED;
+                            bool isCompleted = transmission.Status == TransmissionStatus.Finished;
                             bool isAlreadyStarted = startedTransmissions.Contains(transmission.Path);
                             if (pathCorrect && (!isAlreadyStarted || isCompleted)) {
                                 notificationCenter.RemoveDeliveredNotification(notification);

@@ -38,11 +38,11 @@ namespace CmisSync.Lib.SelectiveIgnore {
         /// <param name="storage">Meta data storage.</param>
         public IgnoredEntitiesStorage(IIgnoredEntitiesCollection collection, IMetaDataStorage storage) {
             if (collection == null) {
-                throw new ArgumentNullException("Given collection is null");
+                throw new ArgumentNullException("collection");
             }
 
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage");
             }
 
             this.collection = collection;
@@ -53,7 +53,7 @@ namespace CmisSync.Lib.SelectiveIgnore {
         /// Adds or update an entry and deletes all children from storage.
         /// </summary>
         /// <param name="e">Ignored Entity.</param>
-        public void AddOrUpdateEntryAndDeleteAllChildrenFromStorage(IIgnoredEntity e) {
+        public void AddOrUpdateEntryAndDeleteAllChildrenFromStorage(AbstractIgnoredEntity e) {
             this.Add(e);
             var mappedEntry = this.storage.GetObjectByRemoteId(e.ObjectId);
             if (mappedEntry != null) {
@@ -70,7 +70,7 @@ namespace CmisSync.Lib.SelectiveIgnore {
         /// Add the specified ignore to the given collection
         /// </summary>
         /// <param name="ignore">Ignored entity.</param>
-        public void Add(IIgnoredEntity ignore) {
+        public void Add(AbstractIgnoredEntity ignore) {
             this.collection.Add(ignore);
         }
 
@@ -78,7 +78,7 @@ namespace CmisSync.Lib.SelectiveIgnore {
         /// Remove the specified ignore form the given collection
         /// </summary>
         /// <param name="ignore">Ignored entity.</param>
-        public void Remove(IIgnoredEntity ignore) {
+        public void Remove(AbstractIgnoredEntity ignore) {
             this.collection.Remove(ignore);
         }
 

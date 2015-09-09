@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
 
@@ -33,15 +32,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Local object moved and remote object moved.
     /// </summary>
-    public class LocalObjectMovedRemoteObjectMoved : AbstractEnhancedSolver
-    {
+    public class LocalObjectMovedRemoteObjectMoved : AbstractEnhancedSolver {
         /// <summary>
         /// Initializes a new instance of the
         /// <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectMovedRemoteObjectMoved"/> class.
         /// </summary>
         /// <param name="session">Cmis Session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="isServerAbleToUpdateModificationDate">If set to <c>true</c> the server is able to update modification date.</param>
         public LocalObjectMovedRemoteObjectMoved(
             ISession session,
             IMetaDataStorage storage) : base(
@@ -75,12 +72,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 } else {
                     OperationsLogger.Warn(
                         string.Format(
-                        "Synchronization Conflict: The local directory {0} has been moved to {1} with id {2},{4}" +
-                        "but the remote folder was moved to {3}{4}You can fix this situation by moving them into the same folder",
-                        localFileSystemInfo.Name,
-                        localFileSystemInfo.FullName,
-                        remoteFolder.Path,
-                        Environment.NewLine));
+                            "Synchronization Conflict: The local directory {0} has been moved to {1} with id {2},{4}" +
+                            "but the remote folder was moved to {3}{4}You can fix this situation by moving them into the same folder",
+                            localFileSystemInfo.Name,
+                            localFileSystemInfo.FullName,
+                            remoteFolder.Id,
+                            remoteFolder.Path,
+                            Environment.NewLine));
                     return;
                 }
             } else if (localFileSystemInfo is IFileInfo) {
@@ -97,12 +95,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 } else {
                     OperationsLogger.Warn(
                         string.Format(
-                        "Synchronization Conflict: The local file {0} has been moved to {1} with id {2},{4}" +
-                        "but the remote file was moved to {3}{4}You can fix this situation by moving them into the same folder",
-                        localFileSystemInfo.Name,
-                        localFileSystemInfo.FullName,
-                        remoteFile.Paths[0],
-                        Environment.NewLine));
+                            "Synchronization Conflict: The local file {0} has been moved to {1} with id {2},{4}" +
+                            "but the remote file was moved to {3}{4}You can fix this situation by moving them into the same folder",
+                            localFileSystemInfo.Name,
+                            localFileSystemInfo.FullName,
+                            remoteFile.Id,
+                            remoteFile.Paths[0],
+                            Environment.NewLine));
                     return;
                 }
             }

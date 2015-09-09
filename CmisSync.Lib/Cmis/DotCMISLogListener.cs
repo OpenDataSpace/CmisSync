@@ -17,34 +17,30 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Cmis
-{
+namespace CmisSync.Lib.Cmis {
     using System;
     using log4net.Core;
 
     /// <summary>
     /// Dot CMIS log listener enables the logging inside of DotCMIS and passes the log messages to log4net.
     /// </summary>
-    public class DotCMISLogListener : System.Diagnostics.TraceListener
-    {
+    public class DotCMISLogListener : System.Diagnostics.TraceListener {
         private readonly log4net.ILog log;
+        private bool disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.DotCMISLogListener"/> class.
         /// </summary>
-        public DotCMISLogListener() : this(log4net.LogManager.GetLogger(typeof(DotCMISLogListener)))
-        {
+        public DotCMISLogListener() : this(log4net.LogManager.GetLogger(typeof(DotCMISLogListener))) {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.DotCMISLogListener"/> class.
         /// </summary>
         /// <param name="log">log4net logger, which should receive the log messages of DotCMIS.</param>
-        public DotCMISLogListener(log4net.ILog log)
-        {
-            if (log == null)
-            {
-                throw new ArgumentNullException("Given logger is null");
+        public DotCMISLogListener(log4net.ILog log) {
+            if (log == null) {
+                throw new ArgumentNullException("log");
             }
 
             this.log = log;
@@ -58,28 +54,50 @@ namespace CmisSync.Lib.Cmis
         /// Write the specified message to log4net logger.
         /// </summary>
         /// <param name="message">Message to be written.</param>
-        public override void Write(string message)
-        {
-            this.log.Debug(message);
+        public override void Write(string message) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
+            try {
+                this.log.Debug(message);
+            } catch (Exception) {
+                Console.Out.Write(message);
+            }
         }
 
         /// <summary>
         /// Writes the line to log4net logger.
         /// </summary>
         /// <param name="message">Message to be written.</param>
-        public override void WriteLine(string message)
-        {
-            this.log.Debug(message);
+        public override void WriteLine(string message) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
+            try {
+                this.log.Debug(message);
+            } catch (Exception) {
+                Console.Out.WriteLine(message);
+            }
         }
 
-        private void SetLog4NetLevelToTraceLevel()
-        {
-            if (this.log.IsDebugEnabled)
-            {
-                DotCMIS.Util.DotCMISDebug.DotCMISTraceLevel = System.Diagnostics.TraceLevel.Info;
+        /// <summary>
+        /// Dispose logger.
+        /// </summary>
+        /// <param name="disposing">If set to <c>true</c> disposing the logger.</param>
+        protected override void Dispose(bool disposing) {
+            if (disposing) {
+                this.disposed = true;
             }
-            else
-            {
+
+            base.Dispose(disposing);
+        }
+
+        private void SetLog4NetLevelToTraceLevel() {
+            if (this.log.IsDebugEnabled) {
+                DotCMIS.Util.DotCMISDebug.DotCMISTraceLevel = System.Diagnostics.TraceLevel.Info;
+            } else {
                 DotCMIS.Util.DotCMISDebug.DotCMISTraceLevel = System.Diagnostics.TraceLevel.Off;
             }
         }

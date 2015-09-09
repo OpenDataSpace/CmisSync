@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
-{
+namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests {
     using System;
     using System.IO;
     using System.Linq;
@@ -31,10 +30,9 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
 
     using TestLibrary.TestUtils;
 
-    [TestFixture, Timeout(900000), TestName("RenameIT")]
-    public class RenameIT : BaseFullRepoTest
-    {
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
+    [TestFixture, Timeout(60000), TestName("RenameIT"), Category("Slow"), Category("SelectiveIgnore")]
+    public class RenameIT : BaseFullRepoTest {
+        [Test]
         public void RenameRemoteIgnoredFolderRenamesAlsoLocalFolder([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
@@ -70,7 +68,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             Assert.That(new FolderTree(this.remoteRootDir, "."), Is.EqualTo(new FolderTree(tree)));
         }
 
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        [Test]
         public void RenameLocalIgnoredFolderRenamesAlsoRemoteFolder([Values(true, false)]bool contentChanges) {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             this.ContentChangesActive = contentChanges;
@@ -97,7 +95,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             Assert.That(ignoredFolder.Name, Is.EqualTo(newFolderName));
         }
 
-        [Test, Category("Slow"), Category("SelectiveIgnore"), Category("Erratic")]
+        [Test, Category("Erratic")]
         public void RenameLocalFolderToIgnoredRemoteFolderName([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();

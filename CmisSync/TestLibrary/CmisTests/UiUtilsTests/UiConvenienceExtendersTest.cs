@@ -35,9 +35,9 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
 
     using TestUtils;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class UiConvenienceExtendersTest {
-        [Test, Category("Fast")]
+        [Test]
         public void FilterHiddenRepos() {
             var listOfRepos = new List<LogonRepositoryInfo>();
             var visibleOne = new LogonRepositoryInfo(Guid.NewGuid().ToString(), "visible");
@@ -50,7 +50,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
             Assert.That(result.First(), Is.EqualTo(visibleOne));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FilterHiddenReposWithoutGivenList() {
             if (ConfigManager.CurrentConfig.HiddenRepoNames.Count == 0) {
                 Assert.Ignore("non repo is hidden by default");
@@ -67,7 +67,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
             Assert.That(result.First(), Is.EqualTo(visibleOne));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FilterHiddenReposWithoutGivenListAnWithNullList() {
             IList<LogonRepositoryInfo> listOfRepos = null;
             var result = listOfRepos.WithoutHiddenOnce();
@@ -75,7 +75,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
             Assert.That(result, Is.Empty);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void GetRepositoriesReturnsListOfReposInOrder() {
             var underTest = new ServerCredentials {
                 Address = new Uri("https://demo.deutsche-wolke.de/cmis/browser"),

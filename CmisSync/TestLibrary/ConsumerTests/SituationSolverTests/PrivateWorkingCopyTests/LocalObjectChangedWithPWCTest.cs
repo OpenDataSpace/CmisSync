@@ -55,7 +55,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileTransmissionStorage> transmissionStorage;
-        private Mock<ITransmissionManager> manager;
+        private Mock<ITransmissionFactory> manager;
         private Mock<ISolver> folderOrFileContentUnchangedAddedSolver;
 
         private string parentPath;
@@ -87,16 +87,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorFailsIfSessionIsNotAbleToWorkWithPrivateWorkingCopies() {
-            this.SetUpMocks(isPwcUpdateable: false);
-            Assert.Throws<ArgumentException>(
-                () =>
-                new LocalObjectChangedWithPWC(
-                this.session.Object,
-                this.storage.Object,
-                this.transmissionStorage.Object,
-                this.manager.Object,
-                Mock.Of<ISolver>()));
+        public void ConstructorDoesNotTouchesSession() {
+            this.SetUpMocks();
+            this.session = new Mock<ISession>(MockBehavior.Strict);
+            this.CreateSolver();
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -129,7 +123,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         [Test, Category("Fast"), Category("Solver")]
         public void SolverUploadsFileContentByCreatingNewPWC([Values(1, 1024, 123456)]long fileSize) {
             this.SetUpMocks();
-            this.manager.SetupCreateTransmissionOnce(TransmissionType.UPLOAD_MODIFIED_FILE, this.localPath);
+            this.manager.SetupCreateTransmissionOnce(TransmissionType.UploadModifiedFile, this.localPath);
             this.SetupFile();
             byte[] content = new byte[fileSize];
             var hash = SHA1.Create().ComputeHash(content);
@@ -144,38 +138,27 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.manager.VerifyThatTransmissionWasCreatedOnce();
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
         public void SolverUploadsFileContentWithNewPWCAndGetsInterrupted() {
-            this.SetUpMocks();
-            var underTest = this.CreateSolver();
-            Assert.Ignore("TODO");
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
         public void SolverContinesUploadFileContentWithStoredInformations() {
-            this.SetUpMocks();
-            var underTest = this.CreateSolver();
             Assert.Ignore("TODO");
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
         public void SolverContinesUploadFileContentWithStoredInformationsAndGetsInterruptedAgain() {
-            this.SetUpMocks();
-            var underTest = this.CreateSolver();
             Assert.Ignore("TODO");
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
         public void SolverUploadsFileContentByCreatingNewPwcIfPwcWasCanceled() {
-            this.SetUpMocks();
-            var underTest = this.CreateSolver();
             Assert.Ignore("TODO");
         }
 
-        [Test, Category("Fast"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
         public void SolverUploadsFileContentByCreatingNewPwcIfObjectNotFoundOnServer() {
-            this.SetUpMocks();
-            var underTest = this.CreateSolver();
             Assert.Ignore("TODO");
         }
 
@@ -188,14 +171,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.folderOrFileContentUnchangedAddedSolver.Object);
         }
 
-        private void SetUpMocks(bool isPwcUpdateable = true, bool serverCanModifyLastModificationDate = true) {
+        private void SetUpMocks(bool serverCanModifyLastModificationDate = true) {
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem(serverCanModifyLastModificationDate: serverCanModifyLastModificationDate);
-            this.session.SetupPrivateWorkingCopyCapability(isPwcUpdateable: isPwcUpdateable);
             this.storage = new Mock<IMetaDataStorage>();
             this.chunkSize = 4096;
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();
-            this.manager = new Mock<ITransmissionManager>();
+            this.manager = new Mock<ITransmissionFactory>();
             this.transmissionStorage.Setup(f => f.ChunkSize).Returns(this.chunkSize);
             this.folderOrFileContentUnchangedAddedSolver = new Mock<ISolver>(MockBehavior.Strict);
         }
@@ -218,10 +200,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
             var parents = new List<IFolder>();
             parents.Add(Mock.Of<IFolder>(f => f.Id == this.parentId));
-
-            var docId = Mock.Of<IObjectId>(
-                o =>
-                o.Id == this.objectIdOld);
 
             var doc = Mock.Of<IDocument>(
                 d =>

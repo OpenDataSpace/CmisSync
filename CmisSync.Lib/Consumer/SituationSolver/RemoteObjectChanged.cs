@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
     using System.Linq;
@@ -39,32 +38,32 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Remote object has been changed. => update the metadata locally.
     /// </summary>
-    public class RemoteObjectChanged : AbstractEnhancedSolver
-    {
+    public class RemoteObjectChanged : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectChanged));
 
         private IFileSystemInfoFactory fsFactory;
-        private TransmissionManager transmissonManager;
+        private ITransmissionFactory transmissionFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.RemoteObjectChanged"/> class.
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="transmissonManager">Transmisson manager.</param>
+        /// <param name="transmissionStorage">Transmission storage.</param>
+        /// <param name="transmissionFactory">Transmisson factory.</param>
         /// <param name="fsFactory">File System Factory.</param>
         public RemoteObjectChanged(
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            TransmissionManager transmissonManager,
+            ITransmissionFactory transmissionFactory,
             IFileSystemInfoFactory fsFactory = null) : base(session, storage, transmissionStorage)
         {
-            if (transmissonManager == null) {
-                throw new ArgumentNullException("Given transmission manager is null");
+            if (transmissionFactory == null) {
+                throw new ArgumentNullException("transmissionFactory");
             }
 
-            this.transmissonManager = transmissonManager;
+            this.transmissionFactory = transmissionFactory;
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
         }
 
@@ -73,57 +72,57 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// If a folder is affected, simply update the local change time of the corresponding local folder.
         /// If it is a file and the changeToken is not equal to the saved, the new content is downloaded.
         /// </summary>
-        /// <param name="localFile">Local file.</param>
+        /// <param name="localFileSystemInfo">Local file.</param>
         /// <param name="remoteId">Remote identifier.</param>
         /// <param name="localContent">Hint if the local content has been changed.</param>
         /// <param name="remoteContent">Information if the remote content has been changed.</param>
         public override void Solve(
-            IFileSystemInfo localFile,
+            IFileSystemInfo localFileSystemInfo,
             IObjectId remoteId,
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
-            IMappedObject obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
+            if (remoteId == null) {
+                throw new ArgumentNullException("remoteId");
+            }
+
+            var storedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
             if (remoteId is IFolder) {
                 var remoteFolder = remoteId as IFolder;
                 DateTime? lastModified = remoteFolder.LastModificationDate;
-                obj.LastChangeToken = remoteFolder.ChangeToken;
-                if (lastModified != null) {
-                    try {
-                        localFile.LastWriteTimeUtc = (DateTime)lastModified;
-                    } catch(IOException e) {
-                        Logger.Debug("Couldn't set the server side modification date", e);
-                    }
+                storedObject.LastChangeToken = remoteFolder.ChangeToken;
+                storedObject.Ignored = remoteFolder.AreAllChildrenIgnored();
+                localFileSystemInfo.TryToSetReadOnlyStateIfDiffers(from: remoteFolder, andLogErrorsTo: Logger);
+                storedObject.IsReadOnly = localFileSystemInfo.ReadOnly;
 
-                    obj.Ignored = remoteFolder.AreAllChildrenIgnored();
-                    obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
-                }
+                localFileSystemInfo.TryToSetLastWriteTimeUtcIfAvailable(from: remoteFolder, andLogErrorsTo: Logger);
+                storedObject.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+                storedObject.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
             } else if (remoteId is IDocument) {
                 var remoteDocument = remoteId as IDocument;
                 DateTime? lastModified = remoteDocument.LastModificationDate;
-                if ((lastModified != null && lastModified != obj.LastRemoteWriteTimeUtc) || obj.LastChangeToken != remoteDocument.ChangeToken) {
+                if ((lastModified != null && lastModified != storedObject.LastRemoteWriteTimeUtc) || storedObject.LastChangeToken != remoteDocument.ChangeToken) {
                     if (remoteContent != ContentChangeType.NONE) {
-                        if (obj.LastLocalWriteTimeUtc != localFile.LastWriteTimeUtc) {
+                        if (storedObject.LastLocalWriteTimeUtc != localFileSystemInfo.LastWriteTimeUtc) {
                             throw new ArgumentException("The local file has been changed since last write => aborting update");
                         }
 
-                        obj.LastChecksum = DownloadChanges(localFile as IFileInfo, remoteDocument, obj, this.fsFactory, this.transmissonManager, Logger);
+                        storedObject.LastChecksum = this.DownloadChanges(localFileSystemInfo as IFileInfo, remoteDocument, storedObject, this.fsFactory, this.transmissionFactory, Logger);
                     }
 
-                    obj.LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate;
-                    if (remoteDocument.LastModificationDate != null) {
-                        localFile.LastWriteTimeUtc = (DateTime)remoteDocument.LastModificationDate;
-                    }
-
-                    obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
-                    obj.LastContentSize = remoteDocument.ContentStreamLength ?? 0;
+                    localFileSystemInfo.TryToSetReadOnlyStateIfDiffers(from: remoteDocument, andLogErrorsTo: Logger);
+                    storedObject.LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate;
+                    localFileSystemInfo.TryToSetLastWriteTimeUtcIfAvailable(from: remoteDocument, andLogErrorsTo: Logger);
+                    storedObject.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+                    storedObject.LastContentSize = remoteDocument.ContentStreamLength ?? 0;
                 }
 
-                obj.LastChangeToken = remoteDocument.ChangeToken;
-                obj.LastRemoteWriteTimeUtc = lastModified;
+                storedObject.LastChangeToken = remoteDocument.ChangeToken;
+                storedObject.LastRemoteWriteTimeUtc = lastModified;
+                storedObject.IsReadOnly = localFileSystemInfo.ReadOnly;
             }
 
-            this.Storage.SaveMappedObject(obj);
+            this.Storage.SaveMappedObject(storedObject);
         }
     }
 }

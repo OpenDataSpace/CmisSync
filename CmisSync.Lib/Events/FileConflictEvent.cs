@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -27,44 +26,42 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// File conflict types.
     /// </summary>
-    public enum FileConflictType
-    {
+    public enum FileConflictType {
         /// <summary>
         /// Remote File Deleted
         /// </summary>
-        DELETED_REMOTE_FILE,
+        DeletedRemoteFile,
 
         /// <summary>
         /// Remote File Moved
         /// </summary>
-        MOVED_REMOTE_FILE,
+        MovedRemoteFile,
 
         /// <summary>
         /// Remote File already existed
         /// </summary>
-        ALREADY_EXISTS_REMOTELY,
+        AlreadyExistsRemotely,
 
         /// <summary>
         /// Content was modified
         /// </summary>
-        CONTENT_MODIFIED,
+        ContentModified,
 
         /// <summary>
         /// Remote Path Deleted
         /// </summary>
-        DELETED_REMOTE_PATH,
+        DeletedRemotePath,
 
         /// <summary>
         /// Remote added path conflicts with local file
         /// </summary>
-        REMOTE_ADDED_PATH_CONFLICTS_LOCAL_FILE
+        RemoteAddedPathConflictsLocalFile
     }
 
     /// <summary>
     /// File conflict event.
     /// </summary>
-    public class FileConflictEvent : ISyncEvent
-    {
+    public class FileConflictEvent : ISyncEvent {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FileConflictEvent"/> class.
         /// </summary>
@@ -77,11 +74,9 @@ namespace CmisSync.Lib.Events
         /// <param name='createdConflictPath'>
         /// Created conflict path.
         /// </param>
-        public FileConflictEvent(FileConflictType type, string affectedPath, string createdConflictPath = null)
-        {
-            if (affectedPath == null)
-            {
-                throw new ArgumentNullException("Argument null in FileConflictEvent Constructor", "path");
+        public FileConflictEvent(FileConflictType type, string affectedPath, string createdConflictPath = null) {
+            if (affectedPath == null) {
+                throw new ArgumentNullException("affectedPath");
             }
 
             this.Type = type;
@@ -119,14 +114,10 @@ namespace CmisSync.Lib.Events
         /// <returns>
         /// A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FileConflictEvent"/>.
         /// </returns>
-        public override string ToString()
-        {
-            if (this.CreatedConflictPath == null)
-            {
+        public override string ToString() {
+            if (this.CreatedConflictPath == null) {
                 return string.Format("FileConflictEvent: \"{0}\" on path \"{1}\"", this.Type, this.AffectedPath);
-            }
-            else
-            {
+            } else {
                 return string.Format("FileConflictEvent: \"{0}\" on path \"{1}\" solved by creating path \"{2}\"", this.Type, this.AffectedPath, this.CreatedConflictPath);
             }
         }

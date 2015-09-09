@@ -19,10 +19,12 @@
 
 namespace CmisSync.Widgets {
     using System;
+    using System.ComponentModel;
 
     using CmisSync.Lib.Config;
 
-    [System.ComponentModel.ToolboxItem(true)]
+    [ToolboxItem(true)]
+    [CLSCompliant(false)]
     public partial class ProxyWidget : Gtk.Bin {
         private ProxySettings settings;
 
@@ -49,7 +51,8 @@ namespace CmisSync.Widgets {
 
         public bool IsValid { get; private set; }
 
-        public ProxySelection Selection { get {
+        public ProxySelection Selection {
+            get {
                 return this.settings.Selection;
             }
 

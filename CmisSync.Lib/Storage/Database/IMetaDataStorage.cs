@@ -141,6 +141,6 @@ namespace CmisSync.Lib.Storage.Database {
         /// Gets the tree of mapped objects.
         /// </summary>
         /// <returns>The object tree.</returns>
-        IObjectTree<IMappedObject> GetObjectTree();
+        IList<IMappedObject> GetObjectList();
     }
 }

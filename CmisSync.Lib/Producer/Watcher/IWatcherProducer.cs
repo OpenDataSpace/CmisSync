@@ -25,7 +25,7 @@ namespace CmisSync.Lib.Producer.Watcher {
     /// </summary>
     public interface IWatcherProducer : IDisposable {
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> enables the FSEvent report
+        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Producer.Watcher.IWatcherProducer"/> enables the FSEvent report.
         /// </summary>
         /// <value>
         /// <c>true</c> if enable events; otherwise, <c>false</c>.

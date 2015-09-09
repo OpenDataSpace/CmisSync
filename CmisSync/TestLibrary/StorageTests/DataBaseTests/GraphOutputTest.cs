@@ -23,7 +23,10 @@ namespace TestLibrary.StorageTests.DataBaseTests {
     using System.IO;
 
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
+
+    using DotCMIS.Client;
 
     using Moq;
 
@@ -52,6 +55,26 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
+        public void WritingStoredTreeToStream() {
+            var underTest = this.CreateStoredTree();
+            using (var stream = new MemoryStream()) {
+                underTest.ToDotStream(stream);
+                var content = System.Text.Encoding.Default.GetString(stream.ToArray());
+                Console.WriteLine(content);
+            }
+        }
+
+        [Test, Category("Fast")]
+        public void WritingRemoteTreeToStream() {
+            var underTest = this.CreateRemoteTree();
+            using (var stream = new MemoryStream()) {
+                underTest.ToDotStream(stream);
+                var content = System.Text.Encoding.Default.GetString(stream.ToArray());
+                Console.WriteLine(content);
+            }
+        }
+
+        [Test, Category("Fast")]
         public void WritingTreeToFileInfo() {
             var underTest = this.CreateStringTree();
             var file = new Mock<IFileInfo>();
@@ -72,10 +95,28 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         private IObjectTree<IFileSystemInfo> CreateFileTree() {
-            var tree = new ObjectTree<IFileSystemInfo>() { Item = Mock.Of<IFileSystemInfo>(m => m.Name == "root") };
+            var tree = new ObjectTree<IFileSystemInfo>() { Item = Mock.Of<IFileSystemInfo>(m => m.Name == "root" && m.FullName == Path.Combine(Path.GetTempPath(), "root")) };
             var children = new List<IObjectTree<IFileSystemInfo>>();
-            children.Add(new ObjectTree<IFileSystemInfo>() { Item = Mock.Of<IFileSystemInfo>(m => m.Name == "A") });
-            children.Add(new ObjectTree<IFileSystemInfo>() { Item = Mock.Of<IFileSystemInfo>(m => m.Name == "B") });
+            children.Add(new ObjectTree<IFileSystemInfo>() { Item = Mock.Of<IFileSystemInfo>(m => m.Name == "A" && m.FullName == Path.Combine(Path.GetTempPath(), "root", "A")) });
+            children.Add(new ObjectTree<IFileSystemInfo>() { Item = Mock.Of<IFileSystemInfo>(m => m.Name == "B" && m.FullName == Path.Combine(Path.GetTempPath(), "root", "B")) });
+            tree.Children = children;
+            return tree;
+        }
+
+        private IObjectTree<IMappedObject> CreateStoredTree() {
+            var tree = new ObjectTree<IMappedObject>() { Item = Mock.Of<IMappedObject>(m => m.Name == "root" && m.RemoteObjectId == Guid.NewGuid().ToString()) };
+            var children = new List<IObjectTree<IMappedObject>>();
+            children.Add(new ObjectTree<IMappedObject>() { Item = Mock.Of<IMappedObject>(m => m.Name == "A" && m.RemoteObjectId == Guid.NewGuid().ToString()) });
+            children.Add(new ObjectTree<IMappedObject>() { Item = Mock.Of<IMappedObject>(m => m.Name == "B" && m.RemoteObjectId == Guid.NewGuid().ToString()) });
+            tree.Children = children;
+            return tree;
+        }
+
+        private IObjectTree<IFileableCmisObject> CreateRemoteTree() {
+            var tree = new ObjectTree<IFileableCmisObject>() { Item = Mock.Of<IFileableCmisObject>(m => m.Name == "root" && m.Id == Guid.NewGuid().ToString()) };
+            var children = new List<IObjectTree<IFileableCmisObject>>();
+            children.Add(new ObjectTree<IFileableCmisObject>() { Item = Mock.Of<IFileableCmisObject>(m => m.Name == "A" && m.Id == Guid.NewGuid().ToString()) });
+            children.Add(new ObjectTree<IFileableCmisObject>() { Item = Mock.Of<IFileableCmisObject>(m => m.Name == "B" && m.Id == Guid.NewGuid().ToString()) });
             tree.Children = children;
             return tree;
         }

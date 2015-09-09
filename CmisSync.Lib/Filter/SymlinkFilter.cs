@@ -22,10 +22,19 @@ namespace CmisSync.Lib.Filter {
 
     using CmisSync.Lib.Storage.FileSystem;
 
+    /// <summary>
+    /// Symlink filter.
+    /// </summary>
     public class SymlinkFilter {
+        /// <summary>
+        /// Determines whether the given fsInfo instance is symlink and if not, the reason is set to an error description.
+        /// </summary>
+        /// <returns><c>true</c> if the given instance is symlink; otherwise, <c>false</c>.</returns>
+        /// <param name="fsInfo">File system info.</param>
+        /// <param name="reason">Reason for the filtering.</param>
         public bool IsSymlink(IFileSystemInfo fsInfo, out string reason) {
             reason = string.Empty;
-            if (fsInfo.Exists && fsInfo.IsSymlink) {
+            if (fsInfo != null && fsInfo.Exists && fsInfo.IsSymlink) {
                 reason = string.Format("{0} is a symbolic link", fsInfo.FullName);
                 return true;
             } else {

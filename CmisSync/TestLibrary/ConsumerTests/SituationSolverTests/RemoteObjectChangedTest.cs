@@ -23,8 +23,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System.Security.Cryptography;
     using System.Text;
 
+    using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -46,15 +48,17 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileSystemInfoFactory> fsFactory;
         private RemoteObjectChanged underTest;
+        private ITransmissionFactory transmissionFactory;
 
         [SetUp]
         public void SetUp() {
             this.manager = new TransmissionManager();
+            this.transmissionFactory = this.manager.CreateFactory();
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.fsFactory = new Mock<IFileSystemInfoFactory>();
-            this.underTest = new RemoteObjectChanged(this.session.Object, this.storage.Object, null, this.manager, this.fsFactory.Object);
+            this.underTest = new RemoteObjectChanged(this.session.Object, this.storage.Object, null, this.transmissionFactory, this.fsFactory.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -64,11 +68,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorTakesQueueAndTransmissionManager() {
-            new RemoteObjectChanged(this.session.Object, this.storage.Object, null, this.manager);
+            new RemoteObjectChanged(this.session.Object, this.storage.Object, null, this.transmissionFactory);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFolderChangedAndModificationDateCouldNotBeSet([Values(true, false)]bool childrenAreIgnored) {
+        public void RemoteFolderChangedAndModificationDateCouldNotBeSet(
+            [Values(true, false)]bool childrenAreIgnored)
+        {
             DateTime creationDate = DateTime.UtcNow;
             string folderName = "a";
             string path = Path.Combine(Path.GetTempPath(), folderName);
@@ -107,7 +113,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFolderChanged([Values(true, false)]bool childrenAreIgnored) {
+        public void RemoteFolderChanged(
+            [Values(true, false)]bool childrenAreIgnored,
+            [Values(true, false)]bool remoteFolderWasReadOnly,
+            [Values(true, false)]bool remoteFolderIsReadOnly)
+        {
             DateTime creationDate = DateTime.UtcNow;
             string folderName = "a";
             string path = Path.Combine(Path.GetTempPath(), folderName);
@@ -120,6 +130,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             dirInfo.Setup(d => d.FullName).Returns(path);
             dirInfo.Setup(d => d.Name).Returns(folderName);
             dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>());
+            dirInfo.SetupProperty(d => d.ReadOnly, remoteFolderWasReadOnly);
 
             var mappedObject = new MappedObject(
                 folderName,
@@ -128,22 +139,28 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 parentId,
                 lastChangeToken)
             {
-                Guid = Guid.NewGuid()
+                Guid = Guid.NewGuid(),
+                IsReadOnly = remoteFolderWasReadOnly
             };
 
             this.storage.AddMappedFolder(mappedObject);
 
             Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, newChangeToken, childrenAreIgnored);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)creationDate);
+            remoteObject.SetupReadOnly(remoteFolderIsReadOnly);
 
             this.underTest.Solve(dirInfo.Object, remoteObject.Object);
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, newChangeToken, ignored: childrenAreIgnored);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, newChangeToken, ignored: childrenAreIgnored, readOnly: remoteFolderIsReadOnly);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(creationDate)), Times.Once());
+            dirInfo.VerifyThatReadOnlyPropertyIsSet(to: remoteFolderIsReadOnly, iff: remoteFolderIsReadOnly != remoteFolderWasReadOnly);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteDocumentsMetaDataChanged() {
+        public void RemoteDocumentsMetaDataChanged(
+            [Values(true, false)]bool remoteDocumentWasReadOnly,
+            [Values(true, false)]bool remoteDocumentIsReadOnly)
+        {
             byte[] hash = new byte[20];
             DateTime modificationDate = DateTime.UtcNow;
             string fileName = "a";
@@ -157,6 +174,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             fileInfo.Setup(d => d.FullName).Returns(path);
             fileInfo.Setup(d => d.Name).Returns(fileName);
             fileInfo.Setup(d => d.Directory).Returns(Mock.Of<IDirectoryInfo>());
+            fileInfo.SetupProperty(d => d.ReadOnly, remoteDocumentWasReadOnly);
 
             var mappedObject = new MappedObject(
                 fileName,
@@ -168,18 +186,21 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 Guid = Guid.NewGuid(),
                 LastContentSize = 0,
                 LastChecksum = hash,
-                ChecksumAlgorithmName = "SHA-1"
+                ChecksumAlgorithmName = "SHA-1",
+                IsReadOnly = remoteDocumentWasReadOnly
             };
 
             this.storage.AddMappedFile(mappedObject);
 
             Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, fileName, parentId, changeToken: newChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)modificationDate);
+            remoteObject.SetupReadOnly(remoteDocumentIsReadOnly);
 
             this.underTest.Solve(fileInfo.Object, remoteObject.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, contentSize: 0, checksum: hash);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, contentSize: 0, checksum: hash, readOnly: remoteDocumentIsReadOnly);
             fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(modificationDate)), Times.Once());
+            fileInfo.VerifyThatReadOnlyPropertyIsSet(to: remoteDocumentIsReadOnly, iff: remoteDocumentIsReadOnly != remoteDocumentWasReadOnly);
         }
 
         [Test, Category("Fast"), Category("Solver")]

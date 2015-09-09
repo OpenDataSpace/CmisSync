@@ -23,8 +23,8 @@ namespace CmisSync.Lib.FileTransmission {
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Streams;
     using CmisSync.Lib.HashAlgorithm;
+    using CmisSync.Lib.Streams;
 
     using DotCMIS.Client;
 
@@ -32,7 +32,7 @@ namespace CmisSync.Lib.FileTransmission {
     /// Simple file downloader.
     /// </summary>
     public class SimpleFileDownloader : IFileDownloader {
-        private bool disposed = false;
+        private bool disposed;
 
         private object disposeLock = new object();
 
@@ -41,13 +41,36 @@ namespace CmisSync.Lib.FileTransmission {
         /// </summary>
         /// <param name="remoteDocument">Remote document.</param>
         /// <param name="localFileStream">Local taget file stream.</param>
-        /// <param name="status">Transmission status.</param>
+        /// <param name="transmission">Transmission status.</param>
         /// <param name="hashAlg">Hash algoritm, which should be used to calculate hash of the uploaded stream content</param>
+        /// <param name="update">Is called on every chunk which is downloaded and returns the actual from begin to the actual length.</param>
         /// <exception cref="IOException">On any disc or network io exception</exception>
-        /// <exception cref="DisposeException">If the remote object has been disposed before the dowload is finished</exception>
+        /// <exception cref="ObjectDisposedException">If the remote object has been disposed before the dowload is finished</exception>
         /// <exception cref="AbortException">If download is aborted</exception>
-        /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
-        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, Transmission transmission, HashAlgorithm hashAlg, UpdateChecksum update = null) {
+        /// <exception cref="DotCMIS.Exceptions.CmisBaseException">On exceptions thrown by the CMIS Server/Client</exception>
+        public void DownloadFile(
+            IDocument remoteDocument,
+            Stream localFileStream,
+            Transmission transmission,
+            HashAlgorithm hashAlg,
+            Action<byte[], long> update = null)
+        {
+            if (localFileStream == null) {
+                throw new ArgumentNullException("localFileStream");
+            }
+
+            if (hashAlg == null) {
+                throw new ArgumentNullException("hashAlg");
+            }
+
+            if (transmission == null) {
+                throw new ArgumentNullException("transmission");
+            }
+
+            if (remoteDocument == null) {
+                throw new ArgumentNullException("remoteDocument");
+            }
+
             byte[] buffer = new byte[8 * 1024];
             int len;
 
@@ -86,7 +109,7 @@ namespace CmisSync.Lib.FileTransmission {
                 while ((len = remoteStream.Read(buffer, 0, buffer.Length)) > 0) {
                     lock (this.disposeLock) {
                         if (this.disposed) {
-                            transmission.Status = TransmissionStatus.ABORTED;
+                            transmission.Status = TransmissionStatus.Aborted;
                             throw new ObjectDisposedException(transmission.Path);
                         }
 
@@ -94,29 +117,20 @@ namespace CmisSync.Lib.FileTransmission {
                             hashstream.Write(buffer, 0, len);
                             hashstream.Flush();
                             written += len;
-                        } catch (Exception ex) {
-                            UpdateHash(hashAlg, localFileStream.Length, update);
+                        } catch (Exception) {
+                            this.UpdateHash(hashAlg, localFileStream.Length, update);
                             throw;
                         }
 
                         if (written >= 1024 * 1024) {
-                            UpdateHash(hashAlg, localFileStream.Length, update);
+                            this.UpdateHash(hashAlg, localFileStream.Length, update);
                             written = 0;
                         }
                     }
                 }
-                if (written > 0) {
-                    UpdateHash(hashAlg, localFileStream.Length, update);
-                }
-            }
-        }
 
-        private void UpdateHash(HashAlgorithm hash, long length, UpdateChecksum update) {
-            HashAlgorithmReuse reuse = hash as HashAlgorithmReuse;
-            if (reuse != null && update != null) {
-                using (HashAlgorithm hashReuse = (HashAlgorithm)reuse.Clone()) {
-                    hashReuse.TransformFinalBlock(new byte[0], 0, 0);
-                    update(hashReuse.Hash, length);
+                if (written > 0) {
+                    this.UpdateHash(hashAlg, localFileStream.Length, update);
                 }
             }
         }
@@ -150,6 +164,16 @@ namespace CmisSync.Lib.FileTransmission {
                 if (!this.disposed) {
                     // Note disposing has been done.
                     this.disposed = true;
+                }
+            }
+        }
+
+        private void UpdateHash(HashAlgorithm hash, long length, Action<byte[], long> update) {
+            IReusableHashAlgorithm reuse = hash as IReusableHashAlgorithm;
+            if (reuse != null && update != null) {
+                using (HashAlgorithm hashReuse = (HashAlgorithm)reuse.Clone()) {
+                    hashReuse.TransformFinalBlock(new byte[0], 0, 0);
+                    update(hashReuse.Hash, length);
                 }
             }
         }

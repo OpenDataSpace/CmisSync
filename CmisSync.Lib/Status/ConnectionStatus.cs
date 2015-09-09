@@ -20,8 +20,16 @@
 namespace CmisSync.Lib.Status {
     using System;
 
+    /// <summary>
+    /// Connection status.
+    /// </summary>
     public class ConnectionStatus {
-        private bool connected = false;
+        private bool connected;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is connected.
+        /// </summary>
+        /// <value><c>true</c> if this instance is connected; otherwise, <c>false</c>.</value>
         public bool IsConnected {
             get {
                 return this.connected;
@@ -41,8 +49,16 @@ namespace CmisSync.Lib.Status {
             }
         }
 
+        /// <summary>
+        /// Gets the date since when the status is connected.
+        /// </summary>
+        /// <value>The connected since.</value>
         public DateTime? ConnectedSince { get; private set; }
 
+        /// <summary>
+        /// Gets the date since when the status is disconnected.
+        /// </summary>
+        /// <value>The disconnected since.</value>
         public DateTime? DisconnectedSince { get; private set; }
     }
 }

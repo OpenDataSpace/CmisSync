@@ -25,9 +25,9 @@ namespace TestLibrary.ConfigTests {
     using Moq;
 
     using NUnit.Framework;
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class CmisRepoCredentialsTest {
-        [Test, Category("Fast")]
+        [Test]
         public void DefaultConstructor() {
             var cred = new CmisRepoCredentials();
             Assert.IsNull(cred.Address);
@@ -36,7 +36,7 @@ namespace TestLibrary.ConfigTests {
             Assert.IsNull(cred.RepoId);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SetRepoId() {
             string repoId = "RepoId";
             var cred = new CmisRepoCredentials() {

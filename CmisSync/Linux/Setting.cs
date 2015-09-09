@@ -21,6 +21,7 @@ namespace CmisSync {
     using System;
     using CmisSync.Lib.Config;
 
+    [CLSCompliant(false)]
     public partial class Setting : Gtk.Window {
         private SettingController Controller = new SettingController();
         public Setting() : base(Gtk.WindowType.Toplevel) {

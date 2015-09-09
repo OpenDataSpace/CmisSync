@@ -50,7 +50,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     /// </summary>
     public class LocalObjectAdded : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAdded));
-        private ITransmissionManager transmissionManager;
+        private ITransmissionFactory transmissionManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectAdded"/> class.
@@ -63,10 +63,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ITransmissionManager manager) : base(session, storage, transmissionStorage)
+            ITransmissionFactory manager) : base(session, storage, transmissionStorage)
         {
             if (manager == null) {
-                throw new ArgumentNullException("Given transmission manager is null");
+                throw new ArgumentNullException("manager");
             }
 
             this.transmissionManager = manager;
@@ -85,12 +85,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
+            if (localFileSystemInfo == null) {
+                throw new ArgumentNullException("localFileSystemInfo");
+            }
+
             Stopwatch completewatch = new Stopwatch();
             completewatch.Start();
             Logger.Debug("Starting LocalObjectAdded");
             localFileSystemInfo.Refresh();
+            var fullName = localFileSystemInfo.FullName;
             if (!localFileSystemInfo.Exists) {
-                throw new FileNotFoundException(string.Format("Local file/folder {0} has been renamed/moved/deleted", localFileSystemInfo.FullName));
+                throw new FileNotFoundException(string.Format("Local file/folder {0} has been renamed/moved/deleted", fullName));
             }
 
             string parentId = Storage.GetRemoteId(this.GetParent(localFileSystemInfo));
@@ -109,13 +114,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 this.EnsureThatLocalFileNameContainsLegalCharacters(localFileSystemInfo, e);
                 throw;
             } catch (CmisPermissionDeniedException e) {
-                OperationsLogger.Warn(string.Format("Permission denied while trying to Create the locally added object {0} on the server ({1}).", localFileSystemInfo.FullName, e.Message));
+                OperationsLogger.Warn(string.Format("Permission denied while trying to Create the locally added object {0} on the server ({1}).", fullName, e.Message));
                 return;
             }
 
             Guid uuid = this.WriteOrUseUuidIfSupported(localFileSystemInfo);
 
-            OperationsLogger.Info(string.Format("Created remote {2} {0} for {1}", addedObject.Id, localFileSystemInfo.FullName, addedObject is IFolder ? "folder" : "document"));
+            OperationsLogger.Info(string.Format("Created remote {2} {0} for {1}", addedObject.Id, fullName, addedObject is IFolder ? "folder" : "document"));
 
             MappedObject mapped = new MappedObject(
                 localFileSystemInfo.Name,
@@ -127,7 +132,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 Guid = uuid,
                 LastRemoteWriteTimeUtc = addedObject.LastModificationDate,
                 LastLocalWriteTimeUtc = localFileSystemInfo is IFileInfo && (localFileSystemInfo as IFileInfo).Length > 0 ? (DateTime?)null : (DateTime?)localFileSystemInfo.LastWriteTimeUtc,
-                LastChangeToken = addedObject.ChangeToken,
                 LastContentSize = localFileSystemInfo is IDirectoryInfo ? -1 : 0,
                 ChecksumAlgorithmName = localFileSystemInfo is IDirectoryInfo ? null : "SHA-1",
                 LastChecksum = localFileSystemInfo is IDirectoryInfo ? null : SHA1.Create().ComputeHash(new byte[0])
@@ -137,17 +141,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             var localFile = localFileSystemInfo as IFileInfo;
 
             if (localFile != null) {
-                var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
+                var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UploadNewFile, fullName);
                 if (localFile.Length > 0) {
                     Stopwatch watch = new Stopwatch();
-                    OperationsLogger.Debug(string.Format("Uploading file content of {0}", localFile.FullName));
+                    OperationsLogger.Debug(string.Format("Uploading file content of {0}", fullName));
                     watch.Start();
                     try {
                         mapped.LastChecksum = this.UploadFile(localFile, addedObject as IDocument, transmission);
                         mapped.ChecksumAlgorithmName = "SHA-1";
                     } catch (Exception ex) {
                         if (ex is UploadFailedException && (ex as UploadFailedException).InnerException is CmisStorageException) {
-                            OperationsLogger.Warn(string.Format("Could not upload file content of {0}:", localFile.FullName), (ex as UploadFailedException).InnerException);
+                            OperationsLogger.Warn(string.Format("Could not upload file content of {0}:", fullName), (ex as UploadFailedException).InnerException);
                             return;
                         }
 
@@ -166,11 +170,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     mapped.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
 
                     this.Storage.SaveMappedObject(mapped);
-                    OperationsLogger.Info(string.Format("Uploaded file content of {0} in [{1} msec]", localFile.FullName, watch.ElapsedMilliseconds));
+                    OperationsLogger.Info(string.Format("Uploaded file content of {0} in [{1} msec]", fullName, watch.ElapsedMilliseconds));
                 } else {
                     transmission.Length = 0;
                     transmission.Position = 0;
-                    transmission.Status = TransmissionStatus.FINISHED;
+                    transmission.Status = TransmissionStatus.Finished;
                 }
             }
 

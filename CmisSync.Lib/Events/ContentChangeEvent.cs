@@ -40,11 +40,11 @@ namespace CmisSync.Lib.Events {
         /// </param>
         public ContentChangeEvent(DotCMIS.Enums.ChangeType? type, string objectId) {
             if (objectId == null) {
-                throw new ArgumentNullException("Argument null in ContenChangeEvent Constructor", "path");
+                throw new ArgumentNullException("objectId");
             }
 
             if (type == null) {
-                throw new ArgumentNullException("Argument null in ContenChangeEvent Constructor", "type");
+                throw new ArgumentNullException("type");
             }
 
             this.Type = (DotCMIS.Enums.ChangeType)type;

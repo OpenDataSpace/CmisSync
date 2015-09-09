@@ -44,8 +44,18 @@ namespace CmisSync.Lib.Storage.Database {
             }
         }
 
+        /// <summary>
+        /// Gets the object based on given file Uuid or by file path.
+        /// </summary>
+        /// <returns>The stored object.</returns>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="info">File system info.</param>
         public static IMappedObject GetObject(this IMetaDataStorage storage, IFileSystemInfo info) {
             IMappedObject mappedObject = null;
+            if (storage == null) {
+                throw new ArgumentNullException("storage");
+            }
+
             try {
                 Guid? guid = info.Uuid;
                 if (guid != null) {

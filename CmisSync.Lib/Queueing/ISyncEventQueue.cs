@@ -16,8 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Queueing
-{
+namespace CmisSync.Lib.Queueing {
     using System;
 
     using CmisSync.Lib.Events;
@@ -25,7 +24,7 @@ namespace CmisSync.Lib.Queueing
     /// <summary>
     /// Interface for all implementations of SyncEventQueues.
     /// This interface is the "usage interface" which does not contain lifecyle related Methods.
-    /// The other interface which in fact contains them is <see cref="IDisposableEventQueue"/>
+    /// The other interface which in fact contains them is <see cref="IDisposableSyncEventQueue"/>
     /// </summary>
     public interface ISyncEventQueue {
         /// <summary>

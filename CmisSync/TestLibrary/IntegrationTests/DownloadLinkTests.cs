@@ -26,65 +26,71 @@ namespace TestLibrary.IntegrationTests {
     using DotCMIS;
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
+    using DotCMIS.Enums;
 
     using NUnit.Framework;
 
     using TestUtils;
 
-    [TestFixture, Timeout(10000), TestName("DownloadLink")]
+    [TestFixture, Timeout(180000), TestName("DownloadLink")]
     public class DownloadLinkTests : BaseFullRepoTest {
-        [Test, Category("Slow")]
-        public void CreateDownloadLinkWithoutSubject() {
+        [Test]
+        public void CreateDownloadLink(
+            [Values(true, false)]bool withExpiration,
+            [Values(null, "password")]string password,
+            [Values(null, "jenkins@dataspace.cc")]string mail,
+            [Values(null, "", "mailSubject")]string subject,
+            [Values(null, "", "message")]string message)
+        {
             this.EnsureThatDownloadLinksAreSupported();
             var doc = this.remoteRootDir.CreateDocument("testfile.bin", "test content");
 
-            var url = this.session.CreateDownloadLink(objectIds: doc.Id);
+            var url = this.CreateDownloadLink(
+                expirationIn: withExpiration ? (TimeSpan?)new TimeSpan(1,0,0) : (TimeSpan?)null,
+                password: password,
+                mailAddress: mail,
+                subject: subject,
+                message: message,
+                objectIds: doc.Id);
 
             Assert.That(url, Is.Not.Null, "No download link available");
         }
 
-        [Test, Category("Slow")]
-        public void CreateDownloadLink() {
-            this.EnsureThatDownloadLinksAreSupported();
-            var doc = this.remoteRootDir.CreateDocument("testfile.bin", "test content");
+        private Uri CreateDownloadLink(
+            TimeSpan? expirationIn = null,
+            string password = null,
+            string mailAddress = null,
+            string subject = null,
+            string message = null,
+            params string[] objectIds)
+        {
+            IDictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisItem.GetCmisValue());
+            List<string> idsSecondary = new List<string>();
+            idsSecondary.Add("gds:link");
+            properties.Add(PropertyIds.SecondaryObjectTypeIds, idsSecondary);
+            properties.Add("gds:linkType", "gds:downloadLink");
+            properties.Add("cmis:rm_expirationDate", DateTime.UtcNow + (TimeSpan)(expirationIn ?? new TimeSpan(24, 0, 0)));
+            properties.Add("gds:subject", subject ?? string.Empty);
+            properties.Add("gds:message", message ?? string.Empty);
+            properties.Add("gds:emailAddress", mailAddress ?? string.Empty);
+            properties.Add("gds:password", password);
+            var linkItem = this.session.CreateItem(properties, this.remoteRootDir);
+            foreach (var objectId in objectIds) {
+                IDictionary<string, object> relProperties = new Dictionary<string, object>();
+                relProperties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisRelationship.GetCmisValue());
+                relProperties.Add(PropertyIds.SourceId, linkItem.Id);
+                relProperties.Add(PropertyIds.TargetId, objectId);
+                this.session.CreateRelationship(relProperties);
+            }
 
-            var url = this.session.CreateDownloadLink(subject: "Download Link", objectIds: doc.Id);
-
-            Assert.That(url, Is.Not.Null, "No download link available");
-        }
-
-        [Test, Category("Slow")]
-        public void CreateDownloadLinkWithPassword() {
-            this.EnsureThatDownloadLinksAreSupported();
-            var doc = this.remoteRootDir.CreateDocument("testfile.bin", "test content");
-
-            var url = this.session.CreateDownloadLink(subject: "Download Link", password: "password", objectIds: doc.Id);
-
-            Assert.That(url, Is.Not.Null, "No download link available");
-        }
-
-        [Test, Category("Slow")]
-        public void CreatDownloadLinkWithMail() {
-            this.EnsureThatDownloadLinksAreSupported();
-            var doc = this.remoteRootDir.CreateDocument("testfile.bin", "test content");
-
-            var url = this.session.CreateDownloadLink(subject: "Download Link", mailAddress: "jenkins@dataspace.cc", objectIds: doc.Id);
-
-            Assert.That(url, Is.Not.Null, "No download link available");
-        }
-
-        [Test, Category("Slow")]
-        public void CreateDownloadLinkWithExpirationTime() {
-            this.EnsureThatDownloadLinksAreSupported();
-            var doc = this.remoteRootDir.CreateDocument("testfile.bin", "test content");
-
-            var url = this.session.CreateDownloadLink(subject: "Download Link", expirationIn: new TimeSpan(1, 0, 0), objectIds: doc.Id);
-
-            Assert.That(url, Is.Not.Null, "No download link available");
+            ICmisObject link = this.session.GetObject(linkItem);
+            var url = link.GetPropertyValue("gds:url") as string;
+            return url == null ? null : new Uri(url);
         }
 
         private void EnsureThatDownloadLinksAreSupported() {
-            if (!session.AreDownloadLinksSupported()) {
+            if (!this.session.AreDownloadLinksSupported()) {
                 Assert.Ignore("Server does not support to create download link");
             }
         }
