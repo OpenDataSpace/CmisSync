@@ -28,8 +28,11 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
     using DotCMIS.Enums;
     using DotCMIS.Exceptions;
 
+    /// <summary>
+    /// Download and Upload Link extenders.
+    /// </summary>
     public static class LinkExtenders {
-        private static ICmisObject CreateDownloadLink(this ISession session,
+        public static ICmisObject CreateDownloadLink(this ISession session,
             TimeSpan? expirationIn = null,
             string password = null,
             string mailAddress = null,
