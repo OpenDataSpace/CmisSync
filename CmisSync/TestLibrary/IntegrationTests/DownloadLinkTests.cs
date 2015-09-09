@@ -45,7 +45,7 @@ namespace TestLibrary.IntegrationTests {
             this.EnsureThatDownloadLinksAreSupported();
             var doc = this.remoteRootDir.CreateDocument("testfile.bin", "test content");
 
-            var url = this.CreateDownloadLink(
+            var link = session.CreateDownloadLink(
                 expirationIn: withExpiration ? (TimeSpan?)new TimeSpan(1,0,0) : (TimeSpan?)null,
                 password: password,
                 mailAddress: mail,
@@ -53,62 +53,8 @@ namespace TestLibrary.IntegrationTests {
                 message: message,
                 objectIds: doc.Id);
 
-            Assert.That(url, Is.Not.Null, "No download link available");
-        }
-
-        [Test]
-        public void CreateLinkItem() {
-            this.EnsureThatDownloadLinksAreSupported();
-            var item = this.CreateLink();
-            Assert.That(item, Is.Not.Null);
-        }
-
-        private Uri CreateDownloadLink(
-            TimeSpan? expirationIn = null,
-            string password = null,
-            string mailAddress = null,
-            string subject = null,
-            string message = null,
-            params string[] objectIds)
-        {
-            IDictionary<string, object> properties = new Dictionary<string, object>();
-            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisItem.GetCmisValue());
-            List<string> idsSecondary = new List<string>();
-            idsSecondary.Add("gds:link");
-            idsSecondary.Add("cmis:rm_clientMgtRetention");
-            properties.Add(PropertyIds.SecondaryObjectTypeIds, idsSecondary);
-            properties.Add("gds:linkType", "gds:downloadLink");
-            properties.Add("cmis:rm_expirationDate", DateTime.UtcNow + (TimeSpan)(expirationIn ?? new TimeSpan(24, 0, 0)));
-            properties.Add("gds:subject", subject ?? string.Empty);
-            properties.Add("gds:message", message ?? string.Empty);
-            properties.Add("gds:emailAddress", mailAddress ?? string.Empty);
-            if (password != null) {
-                properties.Add("gds:password", password);
-            }
-
-            var linkItem = this.session.CreateItem(properties, null);
-            foreach (var objectId in objectIds) {
-                IDictionary<string, object> relProperties = new Dictionary<string, object>();
-                relProperties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisRelationship.GetCmisValue());
-                relProperties.Add(PropertyIds.SourceId, linkItem.Id);
-                relProperties.Add(PropertyIds.TargetId, objectId);
-                this.session.CreateRelationship(relProperties);
-            }
-
-            ICmisObject link = this.session.GetObject(linkItem);
-            var url = link.GetPropertyValue("gds:url") as string;
-            return url == null ? null : new Uri(url);
-        }
-
-        private IObjectId CreateLink() {
-            var properties = new Dictionary<string, object>();
-            properties.Add(PropertyIds.Name, Guid.NewGuid().ToString());
-            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisItem.GetCmisValue());
-            List<string> idsSecondary = new List<string>();
-            idsSecondary.Add("gds:link");
-            properties.Add(PropertyIds.SecondaryObjectTypeIds, idsSecondary);
-            properties.Add("gds:linkType", "gds:downloadLink");
-            return this.session.CreateItem(properties, null);
+            Assert.That(link, Is.Not.Null, "No download link available");
+            Assert.That(link.GetUrl(), Is.Not.Null);
         }
 
         private void EnsureThatDownloadLinksAreSupported() {
