@@ -74,7 +74,10 @@ namespace TestLibrary.IntegrationTests {
             properties.Add("gds:subject", subject ?? string.Empty);
             properties.Add("gds:message", message ?? string.Empty);
             properties.Add("gds:emailAddress", mailAddress ?? string.Empty);
-            properties.Add("gds:password", password);
+            if (password != null) {
+                properties.Add("gds:password", password);
+            }
+
             var linkItem = this.session.CreateItem(properties, this.remoteRootDir);
             foreach (var objectId in objectIds) {
                 IDictionary<string, object> relProperties = new Dictionary<string, object>();
