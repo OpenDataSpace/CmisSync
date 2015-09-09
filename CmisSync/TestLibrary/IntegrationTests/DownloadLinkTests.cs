@@ -56,6 +56,12 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(url, Is.Not.Null, "No download link available");
         }
 
+        [Test]
+        public void CreateLinkItem() {
+            this.EnsureThatDownloadLinksAreSupported();
+            var item = this.CreateLink();
+        }
+
         private Uri CreateDownloadLink(
             TimeSpan? expirationIn = null,
             string password = null,
@@ -68,6 +74,7 @@ namespace TestLibrary.IntegrationTests {
             properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisItem.GetCmisValue());
             List<string> idsSecondary = new List<string>();
             idsSecondary.Add("gds:link");
+            idsSecondary.Add("cmis:rm_clientMgtRetention");
             properties.Add(PropertyIds.SecondaryObjectTypeIds, idsSecondary);
             properties.Add("gds:linkType", "gds:downloadLink");
             properties.Add("cmis:rm_expirationDate", DateTime.UtcNow + (TimeSpan)(expirationIn ?? new TimeSpan(24, 0, 0)));
@@ -90,6 +97,17 @@ namespace TestLibrary.IntegrationTests {
             ICmisObject link = this.session.GetObject(linkItem);
             var url = link.GetPropertyValue("gds:url") as string;
             return url == null ? null : new Uri(url);
+        }
+
+        private IObjectId CreateLink() {
+            var properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.Name, Guid.NewGuid().ToString());
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisItem.GetCmisValue());
+            List<string> idsSecondary = new List<string>();
+            idsSecondary.Add("gds:link");
+            properties.Add(PropertyIds.SecondaryObjectTypeIds, idsSecondary);
+            properties.Add("gds:linkType", "gds:downloadLink");
+            return this.session.CreateItem(properties, null);
         }
 
         private void EnsureThatDownloadLinksAreSupported() {
