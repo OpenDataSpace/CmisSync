@@ -123,31 +123,36 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <param name="ignoreMetadataErrors"><c>true</c> to ignore merge errors (such as attributes and ACLs) from the replaced file to the replacement file; otherwise <c>false</c>.</param>
         /// <returns>A IFileInfo object that encapsulates information about the file described by the destFileName parameter.</returns>
         public IFileInfo Replace(IFileInfo destinationFile, IFileInfo destinationBackupFileName, bool ignoreMetadataErrors) {
-            if (destinationFile.ReadOnly) {
-                try {
-                    destinationFile.ReadOnly = false;
-                    bool readOnly = this.ReadOnly;
-                    var result = this.fileInfo.Replace(destinationFile, destinationBackupFileName, ignoreMetadataErrors);
-                    result.ReadOnly = readOnly;
-                    if (destinationBackupFileName != null) {
-                        destinationBackupFileName.ReadOnly = true;
-                    }
-
-                    return result;
-                } catch (Exception) {
-                    destinationFile.ReadOnly = true;
-                    throw;
-                }
-            } else {
-                bool readOnly = this.ReadOnly;
-                var result = this.fileInfo.Replace(destinationFile, destinationBackupFileName, ignoreMetadataErrors);
-                result.ReadOnly = readOnly;
-                if (destinationBackupFileName != null) {
-                    destinationBackupFileName.ReadOnly = false;
-                }
-
-                return result;
+            if (destinationFile == null) {
+                throw new ArgumentNullException("destinationFile");
             }
+
+            var destParent = new ReadOnlyIgnoringDirectoryInfoDecorator(destinationFile.Directory);
+            var sourceParent = new ReadOnlyIgnoringDirectoryInfoDecorator(this.Directory);
+            IFileInfo result = null;
+            destParent.DisableAndEnableReadOnlyForOperation(() => {
+                sourceParent.DisableAndEnableReadOnlyForOperation(() => {
+                    if (destinationFile.ReadOnly) {
+                        try {
+                            destinationFile.ReadOnly = false;
+                            result = this.fileInfo.Replace(destinationFile, destinationBackupFileName, ignoreMetadataErrors);
+                            result.ReadOnly = true;
+                            if (destinationBackupFileName != null) {
+                                destinationBackupFileName.ReadOnly = true;
+                            }
+                        } catch (Exception) {
+                            destinationFile.ReadOnly = true;
+                            throw;
+                        }
+                    } else {
+                        result = this.fileInfo.Replace(destinationFile, destinationBackupFileName, ignoreMetadataErrors);
+                        if (destinationBackupFileName != null) {
+                            destinationBackupFileName.ReadOnly = false;
+                        }
+                    }
+                });
+            });
+            return result;
         }
 
         /// <summary>
