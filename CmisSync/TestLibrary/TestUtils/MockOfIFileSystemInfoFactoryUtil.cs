@@ -134,6 +134,21 @@ namespace TestLibrary.TestUtils {
             return dir;
         }
 
+        public static Mock<IFileInfo> SetupRefresh(this Mock<IFileInfo> file, bool exists = true) {
+            file.Setup(f => f.Refresh());
+            return file;
+        }
+
+        public static Mock<IFileSystemInfo> SetupRefresh(this Mock<IFileSystemInfo> file, bool exists = true) {
+            file.Setup(f => f.Refresh());
+            return file;
+        }
+
+        public static Mock<IDirectoryInfo> SetupRefresh(this Mock<IDirectoryInfo> dir, bool exists = true) {
+            dir.Setup(d => d.Refresh());
+            return dir;
+        }
+
         public static Mock<IFileInfo> SetupSymlink(this Mock<IFileInfo> file, bool isSymlink = false) {
             file.SetupGet(f => f.IsSymlink).Returns(isSymlink);
             return file;
