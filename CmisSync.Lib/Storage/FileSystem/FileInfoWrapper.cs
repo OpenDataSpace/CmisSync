@@ -130,7 +130,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
 #else
             try {
 #endif
-                var result = new FileInfoWrapper(this.original.Replace(destinationFile.FullName, destinationBackupFileName.FullName, ignoreMetadataErrors));
+                var result = new FileInfoWrapper(this.original.Replace(destinationFile.FullName, destinationBackupFileName != null ? destinationBackupFileName.FullName : null, ignoreMetadataErrors));
 #if __MonoCS__
             foreach (var entry in oldSourceEAs) {
                 result.SetExtendedAttribute(entry.Key, entry.Value, true);
