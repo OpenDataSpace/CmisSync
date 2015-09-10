@@ -145,6 +145,7 @@ namespace TestLibrary.StorageTests.FileSystemTests.ReadOnlyIgnoringDecorator {
 
                 if (targetParent.Exists) {
                     targetParent.ReadOnly = false;
+                    targetParent.TryToSetReadWritePermissionRecursively();
                     targetParent.Delete(true);
                 }
             }
