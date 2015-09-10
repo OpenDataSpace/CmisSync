@@ -41,10 +41,9 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             params string[] objectIds)
         {
             IDictionary<string, object> properties = new Dictionary<string, object>();
-            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisItem.GetCmisValue());
             List<string> idsSecondary = new List<string>();
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisItem.GetCmisValue());
             idsSecondary.Add("gds:link");
-            idsSecondary.Add("cmis:rm_clientMgtRetention");
             properties.Add(PropertyIds.SecondaryObjectTypeIds, idsSecondary);
             properties.Add("gds:linkType", "gds:downloadLink");
             if (expirationIn != null) {
