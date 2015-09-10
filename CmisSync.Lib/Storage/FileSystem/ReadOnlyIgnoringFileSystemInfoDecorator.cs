@@ -161,7 +161,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// Disables read only before executing action end reenables read only after it.
         /// </summary>
         /// <param name="writeOperation">Write operation.</param>
-        protected void DisableAndEnableReadOnlyForOperation(Action writeOperation) {
+        public void DisableAndEnableReadOnlyForOperation(Action writeOperation) {
             if (writeOperation == null) {
                 throw new ArgumentNullException("writeOperation");
             }
