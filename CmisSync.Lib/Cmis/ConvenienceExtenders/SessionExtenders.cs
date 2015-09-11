@@ -177,37 +177,5 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
                 return false;
             }
         }
-
-        /// <summary>
-        /// Ares download links supported.
-        /// </summary>
-        /// <returns><c>true</c>, if download links are supported, <c>false</c> otherwise.</returns>
-        /// <param name="session">Cmis Session.</param>
-        public static bool AreDownloadLinksSupported(this ISession session) {
-            if (session == null) {
-                throw new ArgumentNullException("session");
-            }
-
-            try {
-                var type = session.GetTypeDefinition("gds:link");
-                if (type == null) {
-                    return false;
-                }
-
-                if (session.GetTypeDefinition(BaseTypeId.CmisRelationship.GetCmisValue()) == null) {
-                    return false;
-                }
-
-                foreach (var prop in type.PropertyDefinitions) {
-                    if (prop.Id.Equals("gds:linkType")) {
-                        return true;
-                    }
-                }
-
-            } catch (CmisObjectNotFoundException) {
-            }
-
-            return false;
-        }
     }
 }

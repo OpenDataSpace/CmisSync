@@ -40,7 +40,8 @@ namespace TestLibrary.IntegrationTests {
             [Values(null, "password")]string password,
             [Values(null, "justDropThis@test.dataspace.cc")]string mail,
             [Values(null, "", "mailSubject")]string subject,
-            [Values(null, "", "message")]string message)
+            [Values(null, "", "message")]string message,
+            [Values(true, false)]bool notifyAboutLinkUsage)
         {
             this.EnsureThatDownloadLinksAreSupported();
             var doc = this.remoteRootDir.CreateDocument("testfile.bin", "test content");
@@ -51,6 +52,7 @@ namespace TestLibrary.IntegrationTests {
                 mailAddress: mail,
                 subject: subject,
                 message: message,
+                notifyAboutLinkUsage: notifyAboutLinkUsage,
                 objectIds: doc.Id);
 
             Assert.That(link, Is.Not.Null, "No download link available");
