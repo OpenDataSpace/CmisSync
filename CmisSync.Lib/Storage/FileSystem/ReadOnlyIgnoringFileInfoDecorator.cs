@@ -135,6 +135,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
                     if (destinationFile.ReadOnly) {
                         try {
                             destinationFile.ReadOnly = false;
+                            this.ReadOnly = false;
                             result = this.fileInfo.Replace(destinationFile, destinationBackupFileName, ignoreMetadataErrors);
                             result.ReadOnly = true;
                             if (destinationBackupFileName != null) {
@@ -145,6 +146,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
                             throw;
                         }
                     } else {
+                        this.ReadOnly = false;
                         result = this.fileInfo.Replace(destinationFile, destinationBackupFileName, ignoreMetadataErrors);
                         if (destinationBackupFileName != null) {
                             destinationBackupFileName.ReadOnly = false;
