@@ -220,7 +220,9 @@ namespace CmisSync.Lib.Queueing {
                     eventManager.RemoveEventHandler(this.crawler);
                 }
 
-                this.crawler = new DescendantsCrawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath), this.storage, this.filter, this.activityListener, this.ignoredStorage);
+                var localRootFolder = this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath);
+
+                this.crawler = new DescendantsCrawler(this.Queue, remoteRoot, localRootFolder, this.storage, this.filter, this.activityListener, this.ignoredStorage);
                 eventManager.AddEventHandler(this.crawler);
 
                 // Add remote object moved accumulator
@@ -252,11 +254,17 @@ namespace CmisSync.Lib.Queueing {
                     successfulLoginEvent.PrivateWorkingCopySupported);
                 eventManager.AddEventHandler(this.mechanism);
 
-                var localRootFolder = this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath);
                 var rootUuid = localRootFolder.Uuid;
                 if (rootUuid == null) {
                     try {
-                        localRootFolder.Uuid = Guid.NewGuid();
+                        var storedRootFolder = this.storage.GetObjectByLocalPath(localRootFolder);
+                        if (storedRootFolder != null && storedRootFolder.Guid != Guid.Empty) {
+                            Logger.Info("Restored Guid of the local root folder");
+                            localRootFolder.Uuid = storedRootFolder.Guid;
+                        } else {
+                            Logger.Info("Created and set new Guid for the local root folder");
+                            localRootFolder.Uuid = Guid.NewGuid();
+                        }
                     } catch (RestoreModificationDateException ex) {
                         Logger.Debug("Could not restore modification date", ex);
                     } catch (ExtendedAttributeException ex) {
