@@ -186,8 +186,8 @@ namespace TestLibrary.QueueingTests {
                 changeEventSupported: false);
 
             manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(7));
-            VerifyNonContenChangeHandlersAdded(manager, Times.Once());
-            VerifyContenChangeHandlersAdded(manager, Times.Never());
+            VerifyNonContentChangeHandlersAdded(manager, Times.Once());
+            VerifyContentChangeHandlersAdded(manager, Times.Never());
             this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Once());
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Once());
         }
@@ -203,8 +203,8 @@ namespace TestLibrary.QueueingTests {
                 changeEventSupported: true);
 
             manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(10));
-            VerifyNonContenChangeHandlersAdded(manager, Times.Once());
-            VerifyContenChangeHandlersAdded(manager, Times.Once());
+            VerifyNonContentChangeHandlersAdded(manager, Times.Once());
+            VerifyContentChangeHandlersAdded(manager, Times.Once());
             this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Once());
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Once());
         }
@@ -257,11 +257,11 @@ namespace TestLibrary.QueueingTests {
 
             manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(20));
             this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(s => s.FullSyncRequested == true)), Times.Exactly(2));
-            VerifyNonContenChangeHandlersAdded(manager, Times.Exactly(2));
-            VerifyContenChangeHandlersAdded(manager, Times.Exactly(2));
+            VerifyNonContentChangeHandlersAdded(manager, Times.Exactly(2));
+            VerifyContentChangeHandlersAdded(manager, Times.Exactly(2));
             manager.Verify(m => m.RemoveEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(10));
-            VerifyNonContenChangeHandlersRemoved(manager, Times.Once());
-            VerifyContenChangeHandlersRemoved(manager, Times.Once());
+            VerifyNonContentChangeHandlersRemoved(manager, Times.Once());
+            VerifyContentChangeHandlersRemoved(manager, Times.Once());
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(2));
         }
 
@@ -283,11 +283,11 @@ namespace TestLibrary.QueueingTests {
 
             manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(17));
             this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(s => s.FullSyncRequested == true)), Times.Exactly(2));
-            VerifyNonContenChangeHandlersAdded(manager, Times.Exactly(2));
-            VerifyContenChangeHandlersAdded(manager, Times.Exactly(1));
+            VerifyNonContentChangeHandlersAdded(manager, Times.Exactly(2));
+            VerifyContentChangeHandlersAdded(manager, Times.Exactly(1));
             manager.Verify(m => m.RemoveEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(7));
-            VerifyNonContenChangeHandlersRemoved(manager, Times.Exactly(1));
-            VerifyContenChangeHandlersRemoved(manager, Times.Never());
+            VerifyNonContentChangeHandlersRemoved(manager, Times.Exactly(1));
+            VerifyContentChangeHandlersRemoved(manager, Times.Never());
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(2));
         }
 
@@ -311,27 +311,27 @@ namespace TestLibrary.QueueingTests {
             return new SuccessfulLoginEvent(new Uri("http://example.com"), session, remoteObject, pwcIsSupported, supportsSelectiveIgnore, changeEventSupported);
         }
 
-        private static void VerifyNonContenChangeHandlersAdded(Mock<ISyncEventManager> manager, Times times) {
+        private static void VerifyNonContentChangeHandlersAdded(Mock<ISyncEventManager> manager, Times times) {
             manager.Verify(m => m.AddEventHandler(It.IsAny<DescendantsCrawler>()), times);
             manager.Verify(m => m.AddEventHandler(It.IsAny<RemoteObjectFetcher>()), times);
             manager.Verify(m => m.AddEventHandler(It.IsAny<SyncMechanism>()), times);
             manager.Verify(m => m.AddEventHandler(It.IsAny<RemoteObjectMovedOrRenamedAccumulator>()), times);
         }
 
-        private static void VerifyContenChangeHandlersAdded(Mock<ISyncEventManager> manager, Times times) {
+        private static void VerifyContentChangeHandlersAdded(Mock<ISyncEventManager> manager, Times times) {
             manager.Verify(m => m.AddEventHandler(It.IsAny<ContentChanges>()), times);
             manager.Verify(m => m.AddEventHandler(It.IsAny<ContentChangeEventAccumulator>()), times);
             manager.Verify(m => m.AddEventHandler(It.IsAny<IgnoreAlreadyHandledContentChangeEventsFilter>()), times);
         }
 
-        private static void VerifyNonContenChangeHandlersRemoved(Mock<ISyncEventManager> manager, Times times) {
+        private static void VerifyNonContentChangeHandlersRemoved(Mock<ISyncEventManager> manager, Times times) {
             manager.Verify(m => m.RemoveEventHandler(It.IsAny<DescendantsCrawler>()), times);
             manager.Verify(m => m.RemoveEventHandler(It.IsAny<RemoteObjectFetcher>()), times);
             manager.Verify(m => m.RemoveEventHandler(It.IsAny<SyncMechanism>()), times);
             manager.Verify(m => m.RemoveEventHandler(It.IsAny<RemoteObjectMovedOrRenamedAccumulator>()), times);
         }
 
-        private static void VerifyContenChangeHandlersRemoved(Mock<ISyncEventManager> manager, Times times) {
+        private static void VerifyContentChangeHandlersRemoved(Mock<ISyncEventManager> manager, Times times) {
             manager.Verify(m => m.RemoveEventHandler(It.IsAny<ContentChanges>()), times);
             manager.Verify(m => m.RemoveEventHandler(It.IsAny<ContentChangeEventAccumulator>()), times);
             manager.Verify(m => m.RemoveEventHandler(It.IsAny<IgnoreAlreadyHandledContentChangeEventsFilter>()), times);
