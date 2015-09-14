@@ -53,6 +53,7 @@ namespace TestLibrary.QueueingTests {
         private ActivityListenerAggregator listener;
         private Mock<ISyncEventQueue> queue;
         private Mock<IMetaDataStorage> storage;
+        private Mock<IFileSystemInfoFactory> fsFactory;
 
         [SetUp]
         public void SetUp() {
@@ -61,6 +62,7 @@ namespace TestLibrary.QueueingTests {
             this.listener = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), manager);
             this.storage = new Mock<IMetaDataStorage>(MockBehavior.Strict);
             this.storage.Setup(s => s.SaveMappedObject(It.Is<IMappedObject>(m => m.ParentId == null)));
+            this.fsFactory = new Mock<IFileSystemInfoFactory>(MockBehavior.Strict);
         }
 
         [Test]
@@ -74,6 +76,20 @@ namespace TestLibrary.QueueingTests {
                 MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object,
                 this.listener,
                 Mock.Of<ITransmissionFactory>());
+        }
+
+        [Test]
+        public void ConstructorTakesFileSystemInfoFactory() {
+            new EventManagerInitializer(
+                this.queue.Object,
+                this.storage.Object,
+                Mock.Of<IFileTransmissionStorage>(),
+                Mock.Of<IIgnoredEntitiesStorage>(),
+                CreateRepoInfo(),
+                MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object,
+                this.listener,
+                Mock.Of<ITransmissionFactory>(),
+                this.fsFactory.Object);
         }
 
         [Test]
@@ -152,7 +168,8 @@ namespace TestLibrary.QueueingTests {
                 CreateRepoInfo(),
                 MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object,
                 this.listener,
-                Mock.Of<ITransmissionFactory>());
+                Mock.Of<ITransmissionFactory>(),
+                this.fsFactory.Object);
             var e = new Mock<ISyncEvent>();
             Assert.That(handler.Handle(e.Object), Is.False);
             this.queue.VerifyThatNoEventIsAdded();
@@ -346,17 +363,29 @@ namespace TestLibrary.QueueingTests {
             return true;
         }
 
-        private EventManagerInitializer CreateStrategyInitializer(IMetaDataStorage storage, ISyncEventManager manager, ActivityListenerAggregator listener) {
+        private EventManagerInitializer CreateStrategyInitializer(
+            IMetaDataStorage storage,
+            ISyncEventManager manager,
+            ActivityListenerAggregator listener,
+            bool localRootGuidIsNull = false)
+        {
             this.queue.Setup(s => s.EventManager).Returns(manager);
+            var repoInfo = CreateRepoInfo();
+            var localRootFolder = this.fsFactory.AddDirectory(repoInfo.LocalPath);
+            if (!localRootGuidIsNull) {
+                localRootFolder.SetupGuid(Guid.NewGuid());
+            }
+
             return new EventManagerInitializer(
                 this.queue.Object,
                 storage,
                 Mock.Of<IFileTransmissionStorage>(),
                 Mock.Of<IIgnoredEntitiesStorage>(),
-                CreateRepoInfo(),
+                repoInfo,
                 MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object,
                 listener,
-                Mock.Of<ITransmissionFactory>());
+                Mock.Of<ITransmissionFactory>(),
+                this.fsFactory.Object);
         }
 
         private void RunSuccessfulLoginEvent(
@@ -370,9 +399,7 @@ namespace TestLibrary.QueueingTests {
             string token = "t")
         {
             var e = CreateNewSessionEvent(changeEventSupported, supportsSelectiveIgnore, pwcIsSupported, id, token);
-
             var handler = this.CreateStrategyInitializer(storage, manager, listener);
-
             Assert.That(handler.Handle(e), Is.True);
         }
     }
