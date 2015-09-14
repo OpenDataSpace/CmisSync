@@ -37,7 +37,7 @@ namespace TestLibrary.IntegrationTests.LinkTests {
             Assert.That(link.GetUrl(), Is.Not.Null, "No upload url available");
         }
 
-        [Test]
+        [Test, Ignore("https://mantis.dataspace.cc/view.php?id=4727")]
         public void CreateUploadLinkWithDocumentIdMustFail() {
             var doc = this.remoteRootDir.CreateDocument("testFile.bin", "content");
             Assert.Catch<CmisBaseException>(() =>
@@ -45,7 +45,7 @@ namespace TestLibrary.IntegrationTests.LinkTests {
                     objectId: doc.Id));
         }
 
-        [Test]
+        [Test, Ignore("https://mantis.dataspace.cc/view.php?id=4726")]
         public void CreateLinkWithWrongMailAddressMustFail(
             [Values("wrongMail", "wrong Mail@test.dataspace.cc", "@test.dataspace.cc")]string wrongMail,
             [Values(LinkType.DownloadLink, LinkType.UploadLink)]LinkType type)
