@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.IntegrationTests {
+namespace TestLibrary.IntegrationTests.LinkTests {
     using System;
     using System.Collections.Generic;
 
@@ -33,23 +33,22 @@ namespace TestLibrary.IntegrationTests {
     using TestUtils;
 
     [TestFixture, Timeout(180000), TestName("DownloadLink")]
-    public class DownloadLinkTests : BaseFullRepoTest {
+    public class DownloadLinkTests : BaseLinkTest {
         [Test]
         public void CreateDownloadLink(
             [Values(true, false)]bool withExpiration,
             [Values(null, "password")]string password,
-            [Values(null, "justDropThis@test.dataspace.cc")]string mail,
+            [Values(null, "", "justDropThis@test.dataspace.cc", "justDropThis@test.dataspace.cc,alsoDropThis@test.dataspace.cc")]string mail,
             [Values(null, "", "mailSubject")]string subject,
             [Values(null, "", "message")]string message,
             [Values(true, false)]bool notifyAboutLinkUsage)
         {
-            this.EnsureThatDownloadLinksAreSupported();
             var doc = this.remoteRootDir.CreateDocument("testfile.bin", "test content");
-
+            IList<string> mails = mail == null ? null : new List<string>(mail.Split(','));
             var link = session.CreateDownloadLink(
                 expirationIn: withExpiration ? (TimeSpan?)new TimeSpan(1,0,0) : (TimeSpan?)null,
                 password: password,
-                mailAddress: mail,
+                mailAddresses: mails,
                 subject: subject,
                 message: message,
                 notifyAboutLinkUsage: notifyAboutLinkUsage,
@@ -57,12 +56,6 @@ namespace TestLibrary.IntegrationTests {
 
             Assert.That(link, Is.Not.Null, "No download link available");
             Assert.That(link.GetUrl(), Is.Not.Null);
-        }
-
-        private void EnsureThatDownloadLinksAreSupported() {
-            if (!this.session.AreDownloadLinksSupported()) {
-                Assert.Ignore("Server does not support to create download link");
-            }
         }
     }
 }

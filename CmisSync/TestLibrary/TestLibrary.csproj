@@ -158,7 +158,6 @@
     <Compile Include="IntegrationTests\ClientBrandTests.cs" />
     <Compile Include="IntegrationTests\ContentChangeIT.cs" />
     <Compile Include="IntegrationTests\DotCMISTests.cs" />
-    <Compile Include="IntegrationTests\DownloadLinkTests.cs" />
     <Compile Include="IntegrationTests\FullInMemoryRepoTest.cs" />
     <Compile Include="IntegrationTests\FullRepoTests.cs" />
     <Compile Include="IntegrationTests\HttpProxyConnectionTests.cs" />
@@ -351,6 +350,9 @@
     <Compile Include="IntegrationTests\NetworkFailuresTests\CRUDSyncTests.cs" />
     <Compile Include="QueueingTests\ConnectionInterruptedHandlerTest.cs" />
     <Compile Include="IntegrationTests\PrivateWorkingCopyTests\CancelCheckOutTest.cs" />
+    <Compile Include="IntegrationTests\LinkTests\DownloadLinkTests.cs" />
+    <Compile Include="IntegrationTests\LinkTests\UploadLinkTests.cs" />
+    <Compile Include="IntegrationTests\LinkTests\BaseLinkTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -392,5 +394,6 @@
     <Folder Include="ExceptionTests\" />
     <Folder Include="IntegrationTests\NetworkFailuresTests\" />
     <Folder Include="TestUtils\ToxiproxyUtils\" />
+    <Folder Include="IntegrationTests\LinkTests\" />
   </ItemGroup>
 </Project>
