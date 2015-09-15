@@ -87,12 +87,18 @@ namespace CmisSync.Lib.Accumulator {
                 return false;
             } else if (e.Remote == MetaDataChangeType.DELETED) {
                 return false;
-            } else if (e is FileEvent) {
-                return (e as FileEvent).LocalFile == null;
-            } else if (e is FolderEvent) {
-                return (e as FolderEvent).LocalFolder == null;
             } else {
-                return false;
+                var fileEvent = e as FileEvent;
+                if (fileEvent != null) {
+                    return fileEvent.LocalFile == null;
+                } else {
+                    var folderEvent = e as FolderEvent;
+                    if (folderEvent != null) {
+                        return folderEvent.LocalFolder == null;
+                    } else {
+                        return false;
+                    }
+                }
             }
         }
 
