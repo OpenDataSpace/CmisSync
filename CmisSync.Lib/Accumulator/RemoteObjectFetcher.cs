@@ -81,7 +81,8 @@ namespace CmisSync.Lib.Accumulator {
             }
 
             string id;
-            if (e is AbstractFolderEvent && (e as AbstractFolderEvent).Local == MetaDataChangeType.DELETED) {
+            var folderEvent = e as AbstractFolderEvent;
+            if (folderEvent != null && folderEvent.Local == MetaDataChangeType.DELETED) {
                 id = this.FetchIdFromStorage(e);
             } else {
                 id = this.FetchIdFromExtendedAttribute(e);
