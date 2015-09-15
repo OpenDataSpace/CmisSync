@@ -529,8 +529,9 @@ namespace CmisSync.Lib.Cmis {
         }
 
         private bool RepoInfoChanged(ISyncEvent e) {
-            if (e is RepoConfigChangedEvent) {
-                this.RepoInfo = (e as RepoConfigChangedEvent).RepoInfo;
+            var configChanged = e as RepoConfigChangedEvent;
+            if (configChanged != null) {
+                this.RepoInfo = configChanged.RepoInfo;
                 this.ignoredFoldersFilter.IgnoredPaths = new List<string>(this.RepoInfo.GetIgnoredPaths());
                 this.ignoredFileNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames;
                 this.ignoredFolderNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames;
