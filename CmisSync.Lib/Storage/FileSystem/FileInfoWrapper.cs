@@ -114,6 +114,9 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <param name="ignoreMetadataErrors"><c>true</c> to ignore merge errors (such as attributes and ACLs) from the replaced file to the replacement file; otherwise <c>false</c>.</param>
         /// <returns>A IFileInfo object that encapsulates information about the file described by the destFileName parameter.</returns>
         public IFileInfo Replace(IFileInfo destinationFile, IFileInfo destinationBackupFileName, bool ignoreMetadataErrors) {
+            if (destinationFile == null) {
+                throw new ArgumentNullException("destinationFile");
+            }
 #if __MonoCS__
             var reader = new ExtendedAttributeReaderUnix();
             var oldSourceEAs = new Dictionary<string, string>();

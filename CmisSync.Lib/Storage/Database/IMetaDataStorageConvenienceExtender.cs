@@ -56,6 +56,10 @@ namespace CmisSync.Lib.Storage.Database {
                 throw new ArgumentNullException("storage");
             }
 
+            if (info == null) {
+                throw new ArgumentNullException("info");
+            }
+
             try {
                 Guid? guid = info.Uuid;
                 if (guid != null) {
