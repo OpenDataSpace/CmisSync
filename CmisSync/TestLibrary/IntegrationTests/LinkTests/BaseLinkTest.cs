@@ -10,7 +10,7 @@ namespace TestLibrary.IntegrationTests.LinkTests {
 
     using TestUtils;
 
-    [TestFixture, Category("Links")]
+    [TestFixture, Category("Links"), Category("Slow")]
     public abstract class BaseLinkTest : BaseFullRepoTest {
         [SetUp]
         public void EnsureThatDownloadLinksAreSupported() {
