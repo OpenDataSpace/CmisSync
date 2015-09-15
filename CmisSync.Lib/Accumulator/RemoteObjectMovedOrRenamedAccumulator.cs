@@ -103,43 +103,57 @@ namespace CmisSync.Lib.Accumulator {
         }
 
         private IMappedObject GetStoredObject(AbstractFolderEvent e) {
-            if (e is FolderEvent) {
-                return this.storage.GetObjectByRemoteId((e as FolderEvent).RemoteFolder.Id);
-            } else if (e is FileEvent) {
-                return this.storage.GetObjectByRemoteId((e as FileEvent).RemoteFile.Id);
+            var folderEvent = e as FolderEvent;
+            if (folderEvent != null) {
+                return this.storage.GetObjectByRemoteId(folderEvent.RemoteFolder.Id);
+            } else {
+                var fileEvent = e as FileEvent;
+                if (fileEvent != null) {
+                    return this.storage.GetObjectByRemoteId(fileEvent.RemoteFile.Id);
+                }
             }
 
             return null;
         }
 
         private string GetParentId(AbstractFolderEvent e) {
-            if (e is FolderEvent) {
-                return (e as FolderEvent).RemoteFolder.ParentId;
-            } else if (e is FileEvent) {
-                return (e as FileEvent).RemoteFile.Parents[0].Id;
+            var folderEvent = e as FolderEvent;
+            if (folderEvent != null) {
+                return folderEvent.RemoteFolder.ParentId;
             } else {
-                throw new ArgumentException("e");
+                var fileEvent = e as FileEvent;
+                if (fileEvent != null) {
+                    return fileEvent.RemoteFile.Parents[0].Id;
+                } else {
+                    throw new ArgumentException("e");
+                }
             }
         }
 
         private string GetRemoteObjectName(AbstractFolderEvent e) {
-            if (e is FolderEvent) {
-                return (e as FolderEvent).RemoteFolder.Name;
-            } else if(e is FileEvent) {
-                return (e as FileEvent).RemoteFile.Name;
+            var folderEvent = e as FolderEvent;
+            if (folderEvent != null) {
+                return folderEvent.RemoteFolder.Name;
             } else {
-                throw new ArgumentException("given event e is not a FileEvent or a FolderEvent");
+                var fileEvent = e as FileEvent;
+                if (fileEvent != null) {
+                    return fileEvent.RemoteFile.Name;
+                } else {
+                    throw new ArgumentException("given event e is not a FileEvent or a FolderEvent");
+                }
             }
         }
 
         private void AccumulateEvent(AbstractFolderEvent abstractFolderEvent, IMappedObject storedObject) {
             Logger.Debug("Accumulating: " + this.storage.GetLocalPath(storedObject));
             var folderEvent = abstractFolderEvent as FolderEvent;
-            var fileEvent = abstractFolderEvent as FileEvent;
             if (folderEvent != null) {
                 folderEvent.LocalFolder = this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(storedObject));
-            } else if (fileEvent != null) {
-                fileEvent.LocalFile = this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(storedObject));
+            } else {
+                var fileEvent = abstractFolderEvent as FileEvent;
+                if (fileEvent != null) {
+                    fileEvent.LocalFile = this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(storedObject));
+                }
             }
         }
     }
