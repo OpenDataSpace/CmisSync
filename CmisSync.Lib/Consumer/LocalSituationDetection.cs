@@ -45,8 +45,7 @@ namespace CmisSync.Lib.Consumer {
 
         private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent) {
             IFileSystemInfo localPath = actualEvent is FolderEvent ? (IFileSystemInfo)(actualEvent as FolderEvent).LocalFolder : (IFileSystemInfo)(actualEvent is FileEvent ? (actualEvent as FileEvent).LocalFile : null);
-            switch (actualEvent.Local)
-            {
+            switch (actualEvent.Local) {
             case MetaDataChangeType.CREATED:
                 return SituationType.ADDED;
             case MetaDataChangeType.DELETED:
@@ -74,7 +73,8 @@ namespace CmisSync.Lib.Consumer {
 
                 return SituationType.CHANGED;
             case MetaDataChangeType.NONE:
-                if (actualEvent is FileEvent && (actualEvent as FileEvent).LocalContent != ContentChangeType.NONE) {
+                var fileEvent = actualEvent as FileEvent;
+                if (fileEvent != null && fileEvent.LocalContent != ContentChangeType.NONE) {
                     return SituationType.CHANGED;
                 } else {
                     return SituationType.NOCHANGE;
