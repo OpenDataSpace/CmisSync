@@ -142,7 +142,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
                 subject,
                 message,
                 notifyAboutLinkUsage,
-                targetFolder.Id);
+                targetFolder == null ? null : targetFolder.Id);
         }
 
         /// <summary>
@@ -220,7 +220,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             case LinkType.DownloadLink:
                 break;
             case LinkType.UploadLink:
-                if (objectIds.Length > 1) {
+                if (objectIds != null && objectIds.Length > 1) {
                     throw new ArgumentOutOfRangeException("objectIds", string.Format("Upload links are not able to link to multiple ({0}) target ids", objectIds.Length));
                 }
 
@@ -255,12 +255,14 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             }
 
             var linkItem = session.CreateItem(properties, null);
-            foreach (var objectId in objectIds) {
-                IDictionary<string, object> relProperties = new Dictionary<string, object>();
-                relProperties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisRelationship.GetCmisValue());
-                relProperties.Add(PropertyIds.SourceId, linkItem.Id);
-                relProperties.Add(PropertyIds.TargetId, objectId);
-                session.CreateRelationship(relProperties);
+            if (objectIds != null) {
+                foreach (var objectId in objectIds) {
+                    IDictionary<string, object> relProperties = new Dictionary<string, object>();
+                    relProperties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisRelationship.GetCmisValue());
+                    relProperties.Add(PropertyIds.SourceId, linkItem.Id);
+                    relProperties.Add(PropertyIds.TargetId, objectId);
+                    session.CreateRelationship(relProperties);
+                }
             }
 
             return session.GetObject(linkItem);
