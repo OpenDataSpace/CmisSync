@@ -39,8 +39,7 @@ namespace CmisSync.Lib.Consumer {
         /// <param name="actualEvent">Actual event.</param>
         /// <returns>The detected local situation.</returns>
         public SituationType Analyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent) {
-            SituationType type = this.DoAnalyse(storage, actualEvent);
-            return type;
+            return this.DoAnalyse(storage, actualEvent);
         }
 
         private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent) {
