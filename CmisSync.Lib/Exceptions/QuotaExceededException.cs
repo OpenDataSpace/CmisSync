@@ -27,7 +27,7 @@ namespace CmisSync.Lib.Exceptions {
     public class QuotaExceededException : AbstractInteractionNeededException {
         public long ServerLimit { get; private set; }
         public long ActualUsage { get; private set; }
-        public QuotaExceededException() {
+        public QuotaExceededException() : base("Quota Exceeded") {
         }
     }
 }
