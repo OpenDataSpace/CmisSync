@@ -106,10 +106,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                         obj.RemoteObjectId = remoteDocumentId;
                     }
                 } catch (Exception ex) {
-                    if (ex.InnerException is CmisPermissionDeniedException) {
+                    var inner = ex.InnerException;
+                    if (inner is CmisPermissionDeniedException) {
                         OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", fullName));
                         return;
-                    } else if (ex.InnerException is CmisStorageException) {
+                    } else if (inner is CmisStorageException) {
                         OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: StorageException", fullName), ex);
                         return;
                     }
