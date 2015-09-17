@@ -1336,7 +1336,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 
-        [Ignore("Mantis issue 4285")]
+        [Ignore("https://mantis.dataspace.cc/view.php?id=4285")]
         [Test]
         public void ExecutingTheSameFolderMoveToDifferentTargetsThrowsCmisException() {
             var source = this.remoteRootDir.CreateFolder("source");
