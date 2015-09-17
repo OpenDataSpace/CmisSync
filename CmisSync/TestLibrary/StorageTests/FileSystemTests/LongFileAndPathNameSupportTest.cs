@@ -33,7 +33,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
 
     using TestLibrary.IntegrationTests;
 
-    [TestFixture]
+    [TestFixture, Category("Medium")]
     public class LongFileAndPathNameSupportTest {
         private static readonly IFileSystemInfoFactory Factory = new FileSystemInfoFactory();
 
@@ -72,7 +72,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             }
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void OpenFile() {
             var file = Factory.CreateFileInfo(Path.Combine(this.longPath, this.longName));
             using (file.Open(FileMode.CreateNew));
@@ -82,7 +82,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             using (file.Open(FileMode.Truncate));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FileExists() {
             var file = Factory.CreateFileInfo(Path.Combine(this.longPath, this.longName));
             Assert.That(file.Exists, Is.False);
@@ -93,7 +93,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             Assert.That(file.Exists, Is.True);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void MoveFile() {
             var file = Factory.CreateFileInfo(Path.Combine(this.longPath, "oldName"));
             using (file.Open(FileMode.CreateNew)) {
@@ -102,7 +102,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             file.MoveTo(Path.Combine(this.testFolder, this.longName));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ReplaceFile() {
             var sourceFile = Factory.CreateFileInfo(Path.Combine(this.longPath, "source"));
             var destFile = Factory.CreateFileInfo(Path.Combine(this.longPath, this.longName));
@@ -116,7 +116,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             sourceFile.Replace(destFile, backupFile, true);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void DeleteFile() {
             var file = Factory.CreateFileInfo(Path.Combine(this.longPath, this.longName));
             using (file.Open(FileMode.CreateNew)) {
@@ -127,13 +127,13 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             Assert.That(file.Exists, Is.False);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CreateDirectory() {
             var dir = Factory.CreateDirectoryInfo(Path.Combine(this.longPath, this.longName));
             dir.Create();
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void DirectoryExists() {
             var dir = Factory.CreateDirectoryInfo(Path.Combine(this.longPath, this.longName));
             Assert.That(dir.Exists, Is.False);
@@ -142,14 +142,14 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             Assert.That(dir.Exists, Is.True);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void DeleteDirectory() {
             var dir = Factory.CreateDirectoryInfo(Path.Combine(this.longPath, this.longName));
             dir.Create();
             dir.Delete(false);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void GetUuid() {
             this.EnsureExtendedAttributesAreAvailable();
             var dir = Factory.CreateDirectoryInfo(Path.Combine(this.longPath, this.longName));
@@ -158,7 +158,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             Assert.That(dir.Uuid, Is.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SetUuid() {
             this.EnsureExtendedAttributesAreAvailable();
             var dir = Factory.CreateDirectoryInfo(Path.Combine(this.longPath, this.longName));
@@ -169,7 +169,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             Assert.That(dir.Uuid, Is.EqualTo(uuid));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void GetFileUuid() {
             this.EnsureExtendedAttributesAreAvailable();
             var file = Factory.CreateFileInfo(Path.Combine(this.longPath, this.longName));
@@ -178,12 +178,12 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             Assert.That(file.Uuid, Is.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void TruncateModeToInt() {
             Assert.That((int)FileMode.Truncate, Is.EqualTo(5));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SetFileUuid() {
             this.EnsureExtendedAttributesAreAvailable();
             var file = Factory.CreateFileInfo(Path.Combine(this.longPath, this.longName));
@@ -194,7 +194,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             Assert.That(file.Uuid, Is.EqualTo(uuid));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void GetLastWriteTimeUtc() {
             var file = Factory.CreateFileInfo(Path.Combine(this.longPath, this.longName));
             using (file.Open(FileMode.CreateNew)) {
@@ -203,7 +203,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             Assert.That(file.LastWriteTimeUtc, Is.Not.EqualTo(DateTime.MinValue));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SetLastWriteTimeUtc() {
             var file = Factory.CreateFileInfo(Path.Combine(this.longPath, this.longName));
             using (file.Open(FileMode.CreateNew)) {
@@ -212,7 +212,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             file.LastWriteTimeUtc = DateTime.UtcNow;
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void GetCreationTimeUtc() {
             var file = Factory.CreateFileInfo(Path.Combine(this.longPath, this.longName));
             using (file.Open(FileMode.CreateNew)) {
