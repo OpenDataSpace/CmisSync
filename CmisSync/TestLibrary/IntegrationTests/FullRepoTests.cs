@@ -1202,6 +1202,33 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(remoteDoc.Parents.First().Name, Is.EqualTo(folderName));
         }
 
+        [Test]
+        public void CreateFileWithOldModificationDate() {
+            this.InitializeAndRunRepo();
+            var file = new FileInfo(Path.Combine(this.localRootDir.FullName, "oldFile.bin"));
+            using (var stream = file.CreateText()) {
+                stream.WriteLine("text");
+            };
+            var oldDate = DateTime.UtcNow - TimeSpan.FromHours(2);
+            file.LastWriteTimeUtc = oldDate;
+            this.repo.Run();
+            this.remoteRootDir.Refresh();
+            var remoteFile = this.remoteRootDir.GetChildren().First() as IDocument;
+            Assert.That(remoteFile.LastModificationDate, Is.EqualTo(oldDate).Within(2).Seconds);
+
+            this.AddStartNextSyncEvent();
+
+            using (var stream = file.CreateText()) {
+                stream.WriteLine("blubb");
+            };
+
+            oldDate = DateTime.UtcNow - TimeSpan.FromHours(1);
+            file.LastWriteTimeUtc = oldDate;
+            this.repo.Run();
+            remoteFile.Refresh();
+            Assert.That(remoteFile.LastModificationDate, Is.EqualTo(oldDate).Within(2).Seconds);
+        }
+
         [Test, Ignore("Ignore this until the server does not change the changetoken on move operation")]
         public void LocalFileMovedAndRemoteFileMovedToOtherFolder() {
             string fileName = "file.bin";
