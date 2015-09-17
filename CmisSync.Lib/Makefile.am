@@ -142,6 +142,7 @@ SOURCES =  \
 	Exceptions/AbstractInteractionNeededException.cs \
 	Exceptions/ExceptionLevel.cs \
 	Exceptions/InteractionNeededException.cs \
+	Exceptions/QuotaExceededException.cs \
 	Exceptions/RetryException.cs \
 	Exceptions/VirusDetectedException.cs \
 	FileTransmission/AbortException.cs \
