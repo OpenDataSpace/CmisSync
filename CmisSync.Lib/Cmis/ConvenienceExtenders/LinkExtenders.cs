@@ -296,6 +296,67 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         }
 
         /// <summary>
+        /// Gets the subject of a link item.
+        /// </summary>
+        /// <returns>The link subject.</returns>
+        /// <param name="linkItem">Link item.</param>
+        public static string GetSubject(this ICmisObject linkItem) {
+            if (linkItem == null) {
+                throw new ArgumentNullException("linkItem");
+            }
+
+            return linkItem.GetPropertyValue(GdsLinkSubjectPropertyName) as string;
+        }
+
+        /// <summary>
+        /// Gets the expiration date.
+        /// </summary>
+        /// <returns>The expiration date.</returns>
+        /// <param name="obj">Cmis object.</param>
+        public static DateTime? GetExpirationDate(this ICmisObject obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
+            return obj.GetPropertyValue("cmis:rm_expirationDate") as DateTime?;
+        }
+
+        /// <summary>
+        /// Gets the notification status.
+        /// </summary>
+        /// <returns>The notification status.</returns>
+        /// <param name="linkItem">Link item.</param>
+        public static bool? GetNotificationStatus(this ICmisObject linkItem) {
+            if (linkItem == null) {
+                throw new ArgumentNullException("linkItem");
+            }
+
+            return linkItem.GetPropertyValue(GdsLinkNotificationPropertyName) as bool?;
+        }
+
+        /// <summary>
+        /// Gets the type of the link.
+        /// </summary>
+        /// <returns>The link type.</returns>
+        /// <param name="linkItem">Link item.</param>
+        public static LinkType? GetLinkType(this ICmisObject linkItem) {
+            if (linkItem == null) {
+                throw new ArgumentNullException("linkItem");
+            }
+
+            var type = linkItem.GetPropertyValue(GdsLinkTypePropertyName) as string;
+            if (type == null) {
+                return null;
+            } else if (type.Equals(LinkType.DownloadLink.GetCmisValue())) {
+                return LinkType.DownloadLink;
+            } else if (type.Equals(LinkType.UploadLink.GetCmisValue())) {
+                return LinkType.UploadLink;
+            } else {
+                return LinkType.Unknown;
+            }
+        }
+
+        /// <summary>
         /// Are links supported.
         /// </summary>
         /// <returns><c>true</c>, if links are supported, <c>false</c> otherwise.</returns>
