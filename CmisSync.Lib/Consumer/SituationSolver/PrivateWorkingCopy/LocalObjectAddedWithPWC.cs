@@ -140,9 +140,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     mapped.ChecksumAlgorithmName = "SHA-1";
                     mapped.RemoteObjectId = remoteDocument.Id;
                 } catch (Exception ex) {
-                    if (ex is UploadFailedException && (ex as UploadFailedException).InnerException is CmisStorageException) {
-                        OperationsLogger.Warn(string.Format("Could not upload file content of {0}:", fullName), (ex as UploadFailedException).InnerException);
-                        return;
+                    var uploadException = ex as UploadFailedException;
+                    if (uploadException != null) {
+                        var inner = uploadException.InnerException;
+                        if (inner is CmisStorageException) {
+                            OperationsLogger.Warn(string.Format("Could not upload file content of {0}:", fullName), inner);
+                            return;
+                        } else if (inner is CmisPermissionDeniedException) {
+                            OperationsLogger.Warn(string.Format("Permission denied while trying to CheckIn the locally added object {0} on the server ({1}).", fullName, inner.Message));
+                            return;
+                        }
                     }
 
                     throw;

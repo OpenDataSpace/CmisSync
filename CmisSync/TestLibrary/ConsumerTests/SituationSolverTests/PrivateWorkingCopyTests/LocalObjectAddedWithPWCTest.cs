@@ -38,6 +38,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
     using DotCMIS.Client;
     using DotCMIS.Data;
     using DotCMIS.Enums;
+    using DotCMIS.Exceptions;
 
     using Moq;
 
@@ -198,6 +199,24 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             Assert.Throws<IOException>(() => undertest.Solve(this.localFile.Object, null));
             this.storage.VerifyThatNoObjectIsManipulated();
             this.transmissionStorage.VerifyThatNoObjectIsAddedChangedOrDeleted();
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalFileAddedAndServerDeniesCheckIn() {
+            int fileSize = 1024;
+            this.SetUpMocks();
+
+            this.SetupFile();
+            this.remoteDocumentPWC.Setup(d => d.CheckIn(It.IsAny<bool>(), It.IsAny<IDictionary<string, object>>(), It.IsAny<IContentStream>(), It.IsAny<string>())).Throws<CmisPermissionDeniedException>();
+            byte[] content = new byte[fileSize];
+            this.localFile.SetupStream(content);
+
+            var undertest = this.CreateSolver();
+            undertest.Solve(this.localFile.Object, null);
+
+            this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
+            this.remoteDocument.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()), Times.Never());
+            this.storage.VerifyThatNoObjectIsManipulated();
         }
 
         private void SetupFile() {
