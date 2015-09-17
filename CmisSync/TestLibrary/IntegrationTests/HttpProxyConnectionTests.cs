@@ -60,7 +60,7 @@ namespace TestLibrary.IntegrationTests {
         /// <param name="proxyUrl">Proxy URL.</param>
         /// <param name="proxyUser">Proxy user.</param>
         /// <param name="proxyPassword">Proxy password.</param>
-        [Test, TestCaseSource(typeof(ITUtils), "ProxyServer"), Category("Slow"), Category("IT")]
+        [Test, TestCaseSource(typeof(ITUtils), "ProxyServer"), Category("Slow"), Category("HttpProxy")]
         public void GetRepositoriesTroughProxy(
             string cmisServerUrl,
             string cmisUser,

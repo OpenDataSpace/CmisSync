@@ -115,11 +115,13 @@ SOURCES =  \
 	IntegrationTests/ContentChangeIT.cs \
 	IntegrationTests/ContentHashTests/CRUDTests.cs \
 	IntegrationTests/DotCMISTests.cs \
-	IntegrationTests/DownloadLinkTests.cs \
 	IntegrationTests/FullInMemoryRepoTest.cs \
 	IntegrationTests/FullRepoTests.cs \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
+	IntegrationTests/LinkTests/BaseLinkTest.cs \
+	IntegrationTests/LinkTests/DownloadLinkTests.cs \
+	IntegrationTests/LinkTests/UploadLinkTests.cs \
 	IntegrationTests/MockedServerTests/SetupDocumentTest.cs \
 	IntegrationTests/MockedServerTests/SetupFolderTest.cs \
 	IntegrationTests/MockedServerTests/SetupRepositoryTest.cs \

@@ -177,6 +177,5 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
                 return false;
             }
         }
-
     }
 }

@@ -337,6 +337,8 @@
     <Compile Include="Cmis\ConvenienceExtenders\FileableObjectExtenders.cs" />
     <Compile Include="SelectiveIgnore\AbstractIgnoredEntity.cs" />
     <Compile Include="Storage\Database\Entities\FileContentConvenienceExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\LinkExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\LinkType.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

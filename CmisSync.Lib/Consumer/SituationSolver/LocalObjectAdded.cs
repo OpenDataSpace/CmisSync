@@ -146,13 +146,18 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     Stopwatch watch = new Stopwatch();
                     OperationsLogger.Debug(string.Format("Uploading file content of {0}", fullName));
                     watch.Start();
+                    var addedDoc = addedObject as IDocument;
                     try {
-                        mapped.LastChecksum = this.UploadFile(localFile, addedObject as IDocument, transmission);
+                        mapped.LastChecksum = this.UploadFile(localFile, addedDoc, transmission);
                         mapped.ChecksumAlgorithmName = "SHA-1";
                     } catch (Exception ex) {
-                        if (ex is UploadFailedException && (ex as UploadFailedException).InnerException is CmisStorageException) {
-                            OperationsLogger.Warn(string.Format("Could not upload file content of {0}:", fullName), (ex as UploadFailedException).InnerException);
-                            return;
+                        var uploadException = ex as UploadFailedException;
+                        if (uploadException != null) {
+                            var inner = uploadException.InnerException;
+                            if (inner is CmisStorageException) {
+                                OperationsLogger.Warn(string.Format("Could not upload file content of {0}:", fullName), inner);
+                                return;
+                            }
                         }
 
                         throw;
@@ -161,7 +166,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     watch.Stop();
 
                     if (this.ServerCanModifyDateTimes) {
-                        (addedObject as IDocument).UpdateLastWriteTimeUtc(localFile.LastWriteTimeUtc);
+                        addedDoc.UpdateLastWriteTimeUtc(localFile.LastWriteTimeUtc);
                     }
 
                     mapped.LastContentSize = localFile.Length;

@@ -27,6 +27,8 @@ SOURCES =  \
 	Cmis/ConvenienceExtenders/ExceptionExtenders.cs \
 	Cmis/ConvenienceExtenders/FileableObjectExtenders.cs \
 	Cmis/ConvenienceExtenders/FolderExtenders.cs \
+	Cmis/ConvenienceExtenders/LinkExtenders.cs \
+	Cmis/ConvenienceExtenders/LinkType.cs \
 	Cmis/ConvenienceExtenders/ObjectExtenders.cs \
 	Cmis/ConvenienceExtenders/RepositoryInfoExtenders.cs \
 	Cmis/ConvenienceExtenders/SessionExtenders.cs \
