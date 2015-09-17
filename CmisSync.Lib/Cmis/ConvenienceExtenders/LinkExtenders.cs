@@ -347,12 +347,8 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             var type = linkItem.GetPropertyValue(GdsLinkTypePropertyName) as string;
             if (type == null) {
                 return null;
-            } else if (type.Equals(LinkType.DownloadLink.GetCmisValue())) {
-                return LinkType.DownloadLink;
-            } else if (type.Equals(LinkType.UploadLink.GetCmisValue())) {
-                return LinkType.UploadLink;
             } else {
-                return LinkType.Unknown;
+                return type.GetCmisEnum<LinkType>();
             }
         }
 
