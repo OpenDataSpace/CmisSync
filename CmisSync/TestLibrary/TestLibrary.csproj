@@ -399,10 +399,7 @@
     <Folder Include="ExceptionTests\" />
     <Folder Include="IntegrationTests\NetworkFailuresTests\" />
     <Folder Include="TestUtils\ToxiproxyUtils\" />
-<<<<<<< HEAD
     <Folder Include="StorageTests\AlphaFileSystemTests\" />
-=======
     <Folder Include="IntegrationTests\LinkTests\" />
->>>>>>> rc/2.1.1
   </ItemGroup>
 </Project>
