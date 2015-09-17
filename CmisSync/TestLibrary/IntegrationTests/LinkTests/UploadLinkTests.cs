@@ -33,8 +33,7 @@ namespace TestLibrary.IntegrationTests.LinkTests {
                 notifyAboutLinkUsage: notifyAboutLinkUsage,
                 objectId: folder.Id);
 
-            Assert.That(link, Is.Not.Null, "No upload link available");
-            Assert.That(link.GetUrl(), Is.Not.Null, "No upload url available");
+            VerifyThatLinkIsEqualToGivenParamsAndContainsUrl(link, subject, notifyAboutLinkUsage, withExpiration, LinkType.UploadLink);
         }
 
         [Test, Ignore("https://mantis.dataspace.cc/view.php?id=4727")]

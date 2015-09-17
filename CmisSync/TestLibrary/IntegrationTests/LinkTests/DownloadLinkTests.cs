@@ -54,8 +54,7 @@ namespace TestLibrary.IntegrationTests.LinkTests {
                 notifyAboutLinkUsage: notifyAboutLinkUsage,
                 objectIds: doc.Id);
 
-            Assert.That(link, Is.Not.Null, "No download link available");
-            Assert.That(link.GetUrl(), Is.Not.Null);
+            VerifyThatLinkIsEqualToGivenParamsAndContainsUrl(link, subject, notifyAboutLinkUsage, withExpiration, LinkType.DownloadLink);
         }
     }
 }
