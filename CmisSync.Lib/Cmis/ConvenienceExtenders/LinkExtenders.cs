@@ -250,7 +250,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
 
             if (password != null) {
                 using (var hashAlg = SHA256Managed.Create()) {
-                    properties.Add(GdsLinkPasswordPropertyName, hashAlg.ComputeHash(Encoding.UTF8.GetBytes(password)).ToHexString());
+                    properties.Add(GdsLinkPasswordPropertyName, hashAlg.ComputeHash(Encoding.UTF8.GetBytes(password)).ToHexString().ToLower());
                 }
             }
 
