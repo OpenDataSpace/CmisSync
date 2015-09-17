@@ -122,6 +122,18 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
+        public void SolverDeniesAnyRequestIfRemoteDocumentIsReadOnly() {
+            this.SetUpMocks();
+            this.SetupFile();
+            this.remoteDocument.SetupReadOnly(true);
+            var underTest = this.CreateSolver();
+            underTest.Solve(this.localFile.Object, this.remoteDocument.Object, ContentChangeType.CHANGED);
+            this.storage.VerifyThatNoObjectIsManipulated();
+            this.manager.VerifyThatNoTransmissionIsCreated();
+            this.transmissionStorage.VerifyThatNoObjectIsAddedChangedOrDeleted();
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
         public void SolverUploadsFileContentByCreatingNewPWC([Values(1, 1024, 123456)]long fileSize) {
             this.SetUpMocks();
             this.SetupFile();

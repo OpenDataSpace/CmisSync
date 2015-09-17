@@ -65,6 +65,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             var remoteDocument = remoteId as IDocument;
             if (localFile != null && remoteDocument != null) {
                 var fullName = localFile.FullName;
+                if (remoteDocument.IsReadOnly()) {
+                    OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded, because the remote document is read only", fullName));
+                    return;
+                }
 
                 var mappedObject = this.Storage.GetObject(localFile);
                 if (mappedObject == null) {
