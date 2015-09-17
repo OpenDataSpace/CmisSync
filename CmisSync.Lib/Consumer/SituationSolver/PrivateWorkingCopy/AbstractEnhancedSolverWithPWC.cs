@@ -130,6 +130,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 throw new ArgumentNullException("doc");
             }
 
+            if (transmission == null) {
+                throw new ArgumentNullException("transmission");
+            }
+
             byte[] checksum = null;
             var docPWC = this.LoadRemotePWCDocument(doc, ref checksum);
 

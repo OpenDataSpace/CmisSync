@@ -34,6 +34,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
     using DotCMIS.Client;
     using DotCMIS.Data;
+    using DotCMIS.Exceptions;
 
     using Moq;
 
@@ -123,8 +124,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         [Test, Category("Fast"), Category("Solver")]
         public void SolverUploadsFileContentByCreatingNewPWC([Values(1, 1024, 123456)]long fileSize) {
             this.SetUpMocks();
-            this.manager.SetupCreateTransmissionOnce(TransmissionType.UploadModifiedFile, this.localPath);
             this.SetupFile();
+            this.manager.SetupCreateTransmissionOnce(TransmissionType.UploadModifiedFile, this.localPath);
             byte[] content = new byte[fileSize];
             var hash = SHA1.Create().ComputeHash(content);
             this.localFile.SetupStream(content);
@@ -135,6 +136,25 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             underTest.Solve(this.localFile.Object, this.remoteDocument.Object, ContentChangeType.CHANGED);
 
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectIdNew, this.fileName, this.parentId, this.changeTokenNew, contentSize: fileSize, checksum: hash);
+            this.manager.VerifyThatTransmissionWasCreatedOnce();
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void SolverUploadsFileContentByCreatingNewPWCButCheckInIsDenied() {
+            long fileSize = 1024;
+            this.SetUpMocks();
+            this.SetupFile();
+            this.manager.SetupCreateTransmissionOnce(TransmissionType.UploadModifiedFile, this.localPath);
+            byte[] content = new byte[fileSize];
+            this.localFile.SetupStream(content);
+
+            this.remoteDocument.SetupCheckout(this.remoteDocumentPWC, this.changeTokenNew, this.objectIdNew);
+            this.remoteDocumentPWC.Setup(d => d.CheckIn(It.IsAny<bool>(), It.IsAny<IDictionary<string, object>>(), It.IsAny<IContentStream>(), It.IsAny<string>())).Throws<CmisPermissionDeniedException>();
+
+            var underTest = this.CreateSolver();
+            underTest.Solve(this.localFile.Object, this.remoteDocument.Object, ContentChangeType.CHANGED);
+
+            this.storage.VerifyThatNoObjectIsManipulated();
             this.manager.VerifyThatTransmissionWasCreatedOnce();
         }
 
@@ -177,7 +197,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.storage = new Mock<IMetaDataStorage>();
             this.chunkSize = 4096;
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();
-            this.manager = new Mock<ITransmissionFactory>();
+            this.manager = new Mock<ITransmissionFactory>(MockBehavior.Strict);
             this.transmissionStorage.Setup(f => f.ChunkSize).Returns(this.chunkSize);
             this.folderOrFileContentUnchangedAddedSolver = new Mock<ISolver>(MockBehavior.Strict);
         }
