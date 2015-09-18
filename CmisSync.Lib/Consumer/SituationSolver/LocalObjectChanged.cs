@@ -135,7 +135,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                         mappedObject.LastRemoteWriteTimeUtc = obj.LastModificationDate ?? lastLocalWriteTimeUtc;
                     }
                 } catch (CmisPermissionDeniedException) {
-                    Logger.Debug(string.Format("Locally changed modification date \"{0}\"is not uploaded to the server: PermissionDenied", lastLocalWriteTimeUtc));
+                    Logger.Debug(string.Format("Locally changed modification date \"{0}\" is not uploaded to the server: PermissionDenied", lastLocalWriteTimeUtc));
                 }
             }
 
