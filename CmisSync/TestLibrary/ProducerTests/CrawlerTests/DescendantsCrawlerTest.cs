@@ -79,17 +79,14 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
         [SetUp]
         public void CreateMockObjects() {
             this.storageEngine = new DBreezeEngine(new DBreezeConfiguration { Storage = DBreezeConfiguration.eStorage.MEMORY });
-            this.localRootPath = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
+            this.localRootPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             this.matcher = new PathMatcher(this.localRootPath, this.remoteRootPath);
             this.queue = new Mock<ISyncEventQueue>();
             this.remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteRootId, this.remoteRootPath, this.remoteRootPath);
             this.remoteFolder.SetupDescendants();
-            this.localFolder = new Mock<IDirectoryInfo>();
-            this.localFolder.Setup(f => f.FullName).Returns(this.localRootPath);
-            this.localFolder.Setup(f => f.Exists).Returns(true);
+            this.localFolder = new Mock<IDirectoryInfo>(MockBehavior.Strict).SetupFullName(this.localRootPath).SetupExists(true).SetupGuid(this.rootGuid).SetupLastWriteTimeUtc(this.lastLocalWriteTime);
             this.localFolder.Setup(f => f.IsExtendedAttributeAvailable()).Returns(true);
-            this.localFolder.SetupGuid(this.rootGuid);
-            this.localFolder.Setup(f => f.LastWriteTimeUtc).Returns(this.lastLocalWriteTime);
+            this.localFolder.SetupDirectories().SetupFiles();
             this.fsFactory = new Mock<IFileSystemInfoFactory>();
             this.fsFactory.AddIDirectoryInfo(this.localFolder.Object);
             this.mappedRootObject = new MappedObject(

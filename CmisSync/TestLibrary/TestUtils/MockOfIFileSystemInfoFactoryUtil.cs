@@ -29,11 +29,12 @@ namespace TestLibrary.TestUtils {
 
     public static class MockOfIFileSystemInfoFactoryUtil {
         public static void AddIDirectoryInfo(this Mock<IFileSystemInfoFactory> fsFactory, IDirectoryInfo dirInfo) {
-            fsFactory.Setup(f => f.CreateDirectoryInfo(dirInfo.FullName)).Returns(dirInfo);
+            var path = dirInfo.FullName;
+            fsFactory.Setup(f => f.CreateDirectoryInfo(It.Is<string>(p => p.Equals(path) || p.Equals(path + Path.DirectorySeparatorChar)))).Returns(dirInfo);
         }
 
         public static Mock<IDirectoryInfo> AddDirectory(this Mock<IFileSystemInfoFactory> fsFactory, string path, bool exists = true) {
-            if (path.EndsWith("/")) {
+            if (path.EndsWith(Path.DirectorySeparatorChar.ToString())) {
                 throw new ArgumentException("FileName gives last tuple of path not ending on / so path should not end with /");
             }
 
@@ -49,12 +50,14 @@ namespace TestLibrary.TestUtils {
             return fsFactory.AddDirectory(path, exists).SetupGuid(guid);
         }
 
-        public static void SetupDirectories(this Mock<IDirectoryInfo> parent, params IDirectoryInfo[] dirs) {
+        public static Mock<IDirectoryInfo> SetupDirectories(this Mock<IDirectoryInfo> parent, params IDirectoryInfo[] dirs) {
             parent.Setup(p => p.GetDirectories()).Returns(dirs);
+            return parent;
         }
 
-        public static void SetupFiles(this Mock<IDirectoryInfo> parent, params IFileInfo[] files) {
+        public static Mock<IDirectoryInfo> SetupFiles(this Mock<IDirectoryInfo> parent, params IFileInfo[] files) {
             parent.Setup(p => p.GetFiles()).Returns(files);
+            return parent;
         }
 
         public static void SetupMoveTo(this Mock<IDirectoryInfo> folder, string path = null) {
