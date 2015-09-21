@@ -39,20 +39,29 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     public class LocalObjectChangedWithPWC : AbstractEnhancedSolverWithPWC {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChangedWithPWC));
         private readonly ISolver folderOrFileContentUnchangedSolver;
-        private ITransmissionFactory transmissionManager;
+        private ITransmissionFactory transmissionFactory;
 
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="CmisSync.Lib.Consumer.SituationSolver.PWC.LocalObjectChangedWithPWC"/> class.
+        /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="transmissionStorage">Transmission storage.</param>
+        /// <param name="transmissionFactory">Transmission factory.</param>
+        /// <param name="folderOrFileContentUnchangedSolver">Folder or file content unchanged solver.</param>
         public LocalObjectChangedWithPWC(
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ITransmissionFactory manager,
+            ITransmissionFactory transmissionFactory,
             ISolver folderOrFileContentUnchangedSolver) : base(session, storage, transmissionStorage) {
             if (folderOrFileContentUnchangedSolver == null) {
                 throw new ArgumentNullException("folderOrFileContentUnchangedSolver", "Given solver for folder or unchanged file content situations is null");
             }
 
             this.folderOrFileContentUnchangedSolver = folderOrFileContentUnchangedSolver;
-            this.transmissionManager = manager;
+            this.transmissionFactory = transmissionFactory;
         }
 
         public override void Solve(
@@ -75,7 +84,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     throw new ArgumentException(string.Format("Could not find db entry for {0} => invoke crawl sync", fullName));
                 }
 
-                if (mappedObject.LastChangeToken != (remoteId as ICmisObjectProperties).ChangeToken) {
+                if (mappedObject.LastChangeToken != remoteDocument.ChangeToken) {
                     throw new ArgumentException(string.Format("remote {1} {0} has also been changed since last sync => invoke crawl sync", remoteId.Id, remoteId is IDocument ? "document" : "folder"));
                 }
 
@@ -83,12 +92,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     Logger.Debug(string.Format("\"{0}\" is different from {1}", fullName, mappedObject.ToString()));
                     OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", fullName));
                     try {
-                        var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UploadModifiedFile, fullName);
+                        var transmission = this.transmissionFactory.CreateTransmission(TransmissionType.UploadModifiedFile, fullName);
                         mappedObject.LastChecksum = this.UploadFileWithPWC(localFile, ref remoteDocument, transmission);
                         mappedObject.ChecksumAlgorithmName = "SHA-1";
-                        if (remoteDocument.Id != mappedObject.RemoteObjectId) {
+                        var remoteDocId = remoteDocument.Id;
+                        if (remoteDocId != mappedObject.RemoteObjectId) {
                             this.TransmissionStorage.RemoveObjectByRemoteObjectId(mappedObject.RemoteObjectId);
-                            mappedObject.RemoteObjectId = remoteDocument.Id;
+                            mappedObject.RemoteObjectId = remoteDocId;
                         }
                     } catch (Exception ex) {
                         var inner = ex.InnerException;
