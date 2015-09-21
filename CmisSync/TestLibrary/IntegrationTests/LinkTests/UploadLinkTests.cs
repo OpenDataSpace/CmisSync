@@ -29,7 +29,7 @@ namespace TestLibrary.IntegrationTests.LinkTests {
 
     using TestUtils;
 
-    [TestFixture, Timeout(180000), TestName("UploadLink")]
+    [TestFixture, Timeout(180000), TestName("UploadLink"), Ignore("Only for future features")]
     public class UploadLinkTests : BaseLinkTest {
         [Test]
         public void CreateUploadLink(
