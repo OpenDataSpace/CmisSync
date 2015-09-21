@@ -24,16 +24,16 @@ namespace TestLibrary.ConfigTests {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class UserCredentialsTest {
-        [Test, Category("Fast")]
+        [Test]
         public void DefaultConstructor() {
             var cred = new UserCredentials();
             Assert.IsNull(cred.UserName);
             Assert.IsNull(cred.Password);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SetUsername() {
             string user = "testuser";
             var cred = new UserCredentials {
@@ -42,7 +42,7 @@ namespace TestLibrary.ConfigTests {
             Assert.AreEqual(user, cred.UserName);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SetPasswordObject() {
             var password = new Password("secret");
             var cred = new UserCredentials {
@@ -51,7 +51,7 @@ namespace TestLibrary.ConfigTests {
             Assert.AreEqual(password.ToString(), cred.Password.ToString());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SetPasswordViaPlainTextString() {
             var password = new Password("secret");
             var cred = new UserCredentials {

@@ -25,7 +25,7 @@ namespace CmisSync.Lib.Config {
     /// </summary>
     [Serializable]
     public class Password {
-        private string password = null;
+        private string password;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Password"/> class with the given password.
@@ -88,7 +88,7 @@ namespace CmisSync.Lib.Config {
         /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
         /// hash table.</returns>
         public override int GetHashCode() {
-            return this.password.ToString().GetHashCode();
+            return this.password.GetHashCode();
         }
     }
 }

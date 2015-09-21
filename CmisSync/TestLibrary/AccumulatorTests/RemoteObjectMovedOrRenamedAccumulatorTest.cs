@@ -34,44 +34,44 @@ namespace TestLibrary.AccumulatorTests {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class RemoteObjectMovedOrRenamedAccumulatorTest {
         private readonly string localPath = "localPath";
         private readonly string remoteId = "remoteId";
         private readonly string parentId = "parentId";
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorThrowsExceptionOnNullQueue() {
             Assert.Throws<ArgumentNullException>(() => new RemoteObjectMovedOrRenamedAccumulator(null, Mock.Of<IMetaDataStorage>()));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorThrowsExceptionOnNullStorage() {
             Assert.Throws<ArgumentNullException>(() => new RemoteObjectMovedOrRenamedAccumulator(Mock.Of<ISyncEventQueue>(), null));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorWorksWithoutGivenFsFactory() {
             new RemoteObjectMovedOrRenamedAccumulator(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorWorksIfFsFactoryIsNull() {
             new RemoteObjectMovedOrRenamedAccumulator(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorTakesFsFactoryInstance() {
             new RemoteObjectMovedOrRenamedAccumulator(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), Mock.Of<IFileSystemInfoFactory>());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void PriorityIsEqualToHigherPriority() {
             var acc = new RemoteObjectMovedOrRenamedAccumulator(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>());
             Assert.That(acc.Priority, Is.EqualTo(EventHandlerPriorities.HIGHER));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void AccumulatesRemoteMovedFolderEvents() {
             var storage = new Mock<IMetaDataStorage>();
             var storedObject = Mock.Of<IMappedObject>(
@@ -95,7 +95,7 @@ namespace TestLibrary.AccumulatorTests {
             Assert.That(folderEvent.LocalFolder, Is.EqualTo(localPathInfo));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void AccumulatesRemoteMovedFileEvents() {
             var storage = new Mock<IMetaDataStorage>();
             var storedObject = Mock.Of<IMappedObject>(
@@ -119,7 +119,7 @@ namespace TestLibrary.AccumulatorTests {
             Assert.That(fileEvent.LocalFile, Is.EqualTo(localPathInfo));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void AccumulatesRemoteRenamedFolderEvents() {
             var storage = new Mock<IMetaDataStorage>();
             var storedObject = Mock.Of<IMappedObject>(
@@ -145,7 +145,7 @@ namespace TestLibrary.AccumulatorTests {
             Assert.That(folderEvent.LocalFolder, Is.EqualTo(localPathInfo));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void AccumulatesRemoteRenamedFileEvents() {
             var storage = new Mock<IMetaDataStorage>();
             var storedObject = Mock.Of<IMappedObject>(
@@ -171,7 +171,7 @@ namespace TestLibrary.AccumulatorTests {
             Assert.That(fileEvent.LocalFile, Is.EqualTo(localPathInfo));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void IgnoresNonFileOrFolderEvents() {
             var acc = new RemoteObjectMovedOrRenamedAccumulator(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>());
             var e = new Mock<ISyncEvent>(MockBehavior.Strict);

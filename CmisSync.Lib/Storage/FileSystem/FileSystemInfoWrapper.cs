@@ -34,17 +34,16 @@ namespace CmisSync.Lib.Storage.FileSystem {
     /// Wrapper for DirectoryInfo
     /// </summary>
     public abstract class FileSystemInfoWrapper : IFileSystemInfo {
-        private static readonly string ExtendedAttributeKey = "DSS-UUID";
-        private static IExtendedAttributeReader reader = null;
+        private const string ExtendedAttributeKey = "DSS-UUID";
+        private static IExtendedAttributeReader reader;
 #if !__MonoCS__
-        private static SecurityIdentifier actualUser = null;
+        protected static readonly SecurityIdentifier actualUser;
 #endif
         private FileSystemInfo original;
-        private FSType fsType;
+        private FSType? fsType;
 
         static FileSystemInfoWrapper() {
-            switch (Environment.OSVersion.Platform)
-            {
+            switch (Environment.OSVersion.Platform) {
             case PlatformID.MacOSX:
                 goto case PlatformID.Unix;
             case PlatformID.Unix:
@@ -65,15 +64,6 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <param name="original">original internal instance.</param>
         protected FileSystemInfoWrapper(FileSystemInfo original) {
             this.original = original;
-#if __MonoCS__
-            this.fsType = FSTypeCreator.GetType(new UnixDriveInfo(Path.GetPathRoot(this.original.FullName)).DriveFormat);
-#else
-            try {
-                this.fsType = FSTypeCreator.GetType(new DriveInfo(Path.GetPathRoot(this.original.FullName)).DriveFormat);
-            } catch (ArgumentException) {
-                this.fsType = FSType.Unknown;
-            }
-#endif
         }
 
         /// <summary>
@@ -86,7 +76,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
             }
 
             set {
-                var date = DateTimeToFileConverter.Convert(value, this.fsType);
+                var date = value.IsPerhapsOutOfValidFileSystemRange() ? value.Convert(this.FSType) : value;
                 this.original.LastWriteTimeUtc = date;
             }
         }
@@ -203,7 +193,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
                     try {
                         this.SetExtendedAttribute(ExtendedAttributeKey, value == null ? null : value.ToString(), true);
                         break;
-                    } catch(ExtendedAttributeException) {
+                    } catch (ExtendedAttributeException) {
                         Thread.Sleep(50);
                         retries--;
                         if (retries <= 0) {
@@ -264,7 +254,31 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// Gets the type of the FS.
         /// </summary>
         /// <value>The type of the FS.</value>
-        public FSType FSType { get { return this.fsType; } }
+        public FSType FSType {
+            get {
+                if (this.fsType == null) {
+#if __MonoCS__
+                    this.fsType = FSTypeCreator.GetType(new UnixDriveInfo(Path.GetPathRoot(this.original.FullName)).DriveFormat);
+#else
+                    try {
+                        this.fsType = FSTypeCreator.GetType(new DriveInfo(Path.GetPathRoot(this.original.FullName)).DriveFormat);
+                    } catch (ArgumentException) {
+                        this.fsType = FSType.Unknown;
+                    }
+#endif
+                }
+
+                return this.fsType.GetValueOrDefault(FSType.Unknown);
+            }
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the original <see cref="System.IO.FileSystemInfo"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the original <see cref="System.IO.FileSystemInfo"/>.</returns>
+        public override string ToString() {
+            return this.original.ToString();
+        }
 
 #if !__MonoCS__
         private void AddReadOnlyAclsToOriginal() {

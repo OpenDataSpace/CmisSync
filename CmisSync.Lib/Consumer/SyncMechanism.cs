@@ -26,11 +26,14 @@ namespace CmisSync.Lib.Consumer {
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Consumer.SituationSolver.PWC;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -49,7 +52,9 @@ namespace CmisSync.Lib.Consumer {
         private IMetaDataStorage storage;
         private IFileTransmissionStorage transmissionStorage;
         private ActivityListenerAggregator activityListener;
+        private ITransmissionFactory transmissionFactory;
         private IFilterAggregator filters;
+        private bool pwcIsSupported;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SyncMechanism"/> class.
@@ -62,6 +67,8 @@ namespace CmisSync.Lib.Consumer {
         /// <param name="transmissionStorage">File transmission storage.</param>
         /// <param name="activityListener">Active sync progress listener.</param>
         /// <param name="filters">Ignore filter.</param>
+        /// <param name="transmissionFactory">Transmission factory.</param>
+        /// <param name="pwcIsSupported">Passes info if the session supports private working copies.</param>
         /// <param name="solver">Solver for custom solver matrix.</param>
         public SyncMechanism(
             ISituationDetection<AbstractFolderEvent> localSituation,
@@ -72,6 +79,8 @@ namespace CmisSync.Lib.Consumer {
             IFileTransmissionStorage transmissionStorage,
             ActivityListenerAggregator activityListener,
             IFilterAggregator filters,
+            ITransmissionFactory transmissionFactory,
+            bool pwcIsSupported,
             ISolver[,] solver = null) : base(queue)
         {
             if (session == null) {
@@ -102,6 +111,10 @@ namespace CmisSync.Lib.Consumer {
                 throw new ArgumentNullException("filters");
             }
 
+            if (transmissionFactory == null) {
+                throw new ArgumentNullException("transmissionFactory");
+            }
+
             this.session = session;
             this.storage = storage;
             this.transmissionStorage = transmissionStorage;
@@ -109,6 +122,8 @@ namespace CmisSync.Lib.Consumer {
             this.RemoteSituation = remoteSituation;
             this.activityListener = activityListener;
             this.filters = filters;
+            this.transmissionFactory = transmissionFactory;
+            this.pwcIsSupported = pwcIsSupported;
             this.Solver = solver == null ? this.CreateSolver() : solver;
         }
 
@@ -136,9 +151,10 @@ namespace CmisSync.Lib.Consumer {
                     Logger.Debug(string.Format("RetryException[{0}] thrown for event {1} => enqueue event", retry.Message, folderEvent.ToString()));
                     folderEvent.RetryCount++;
                     this.Queue.AddEvent(folderEvent);
-                } catch (InteractionNeededException interaction) {
+                } catch (AbstractInteractionNeededException interaction) {
                     this.Queue.AddEvent(new InteractionNeededEvent(interaction));
-                } catch (DotCMIS.Exceptions.CmisConnectionException) {
+                    throw;
+                } catch (CmisConnectionException) {
                     throw;
                 } catch (Exception ex) {
                     Logger.Debug("Exception in SyncMechanism, requesting FullSync and rethrowing", ex);
@@ -155,13 +171,13 @@ namespace CmisSync.Lib.Consumer {
         private ISolver[,] CreateSolver() {
             int dim = Enum.GetNames(typeof(SituationType)).Length;
             ISolver[,] solver = new ISolver[dim, dim];
-            ISolver changeChangeSolver = new LocalObjectChangedRemoteObjectChanged(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
-            ISolver addedNochangeSolver = new LocalObjectAdded(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
-            ISolver changedNoChangeSolver = new LocalObjectChanged(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
-            if (this.session.ArePrivateWorkingCopySupported()) {
-                addedNochangeSolver = new LocalObjectAddedWithPWC(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager, addedNochangeSolver);
-                changedNoChangeSolver = new LocalObjectChangedWithPWC(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager, changedNoChangeSolver);
-                changeChangeSolver = new LocalObjectChangedRemoteObjectChangedWithPWC(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager, changeChangeSolver);
+            ISolver changeChangeSolver = new LocalObjectChangedRemoteObjectChanged(this.session, this.storage, this.transmissionStorage, this.transmissionFactory);
+            ISolver addedNochangeSolver = new LocalObjectAdded(this.session, this.storage, this.transmissionStorage, this.transmissionFactory);
+            ISolver changedNoChangeSolver = new LocalObjectChanged(this.session, this.storage, this.transmissionStorage, this.transmissionFactory);
+            if (this.pwcIsSupported) {
+                addedNochangeSolver = new LocalObjectAddedWithPWC(this.session, this.storage, this.transmissionStorage, this.transmissionFactory, addedNochangeSolver);
+                changedNoChangeSolver = new LocalObjectChangedWithPWC(this.session, this.storage, this.transmissionStorage, this.transmissionFactory, changedNoChangeSolver);
+                changeChangeSolver = new LocalObjectChangedRemoteObjectChangedWithPWC(this.session, this.storage, this.transmissionStorage, this.transmissionFactory, changeChangeSolver);
             }
 
             ISolver renameRenameSolver = new LocalObjectRenamedRemoteObjectRenamed(this.session, this.storage, changeChangeSolver);
@@ -174,9 +190,9 @@ namespace CmisSync.Lib.Consumer {
             solver[(int)SituationType.RENAMED, (int)SituationType.NOCHANGE] = new LocalObjectRenamed(this.session, this.storage);
             solver[(int)SituationType.REMOVED, (int)SituationType.NOCHANGE] = new LocalObjectDeleted(this.session, this.storage);
 
-            solver[(int)SituationType.NOCHANGE, (int)SituationType.ADDED] = new RemoteObjectAdded(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
+            solver[(int)SituationType.NOCHANGE, (int)SituationType.ADDED] = new RemoteObjectAdded(this.session, this.storage, this.transmissionStorage, this.transmissionFactory);
 
-            solver[(int)SituationType.NOCHANGE, (int)SituationType.CHANGED] = new RemoteObjectChanged(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
+            solver[(int)SituationType.NOCHANGE, (int)SituationType.CHANGED] = new RemoteObjectChanged(this.session, this.storage, this.transmissionStorage, this.transmissionFactory);
             solver[(int)SituationType.CHANGED, (int)SituationType.CHANGED] = changeChangeSolver;
             solver[(int)SituationType.MOVED, (int)SituationType.CHANGED] = new LocalObjectMovedRemoteObjectChanged(this.session, this.storage, renameChangeSolver, changeChangeSolver);
             solver[(int)SituationType.RENAMED, (int)SituationType.CHANGED] = renameChangeSolver;
@@ -196,17 +212,17 @@ namespace CmisSync.Lib.Consumer {
 
             solver[(int)SituationType.NOCHANGE, (int)SituationType.REMOVED] = new RemoteObjectDeleted(this.session, this.storage, this.filters);
             solver[(int)SituationType.CHANGED, (int)SituationType.REMOVED] = new RemoteObjectDeleted(this.session, this.storage, this.filters);
-            solver[(int)SituationType.MOVED, (int)SituationType.REMOVED] = new LocalObjectRenamedOrMovedRemoteObjectDeleted(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
-            solver[(int)SituationType.RENAMED, (int)SituationType.REMOVED] = new LocalObjectRenamedOrMovedRemoteObjectDeleted(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
+            solver[(int)SituationType.MOVED, (int)SituationType.REMOVED] = new LocalObjectRenamedOrMovedRemoteObjectDeleted(this.session, this.storage, this.transmissionStorage, this.transmissionFactory);
+            solver[(int)SituationType.RENAMED, (int)SituationType.REMOVED] = new LocalObjectRenamedOrMovedRemoteObjectDeleted(this.session, this.storage, this.transmissionStorage, this.transmissionFactory);
             solver[(int)SituationType.REMOVED, (int)SituationType.REMOVED] = new LocalObjectDeletedRemoteObjectDeleted(this.session, this.storage);
 
             return solver;
         }
 
         private void DoHandle(AbstractFolderEvent actualEvent) {
-            SituationType localSituation = this.LocalSituation.Analyse(this.storage, actualEvent);
-            SituationType remoteSituation = this.RemoteSituation.Analyse(this.storage, actualEvent);
-            ISolver solver = this.Solver[(int)localSituation, (int)remoteSituation];
+            var localSituation = this.LocalSituation.Analyse(this.storage, actualEvent);
+            var remoteSituation = this.RemoteSituation.Analyse(this.storage, actualEvent);
+            var solver = this.Solver[(int)localSituation, (int)remoteSituation];
 
             if (solver == null) {
                 throw new NotImplementedException(string.Format("Solver for LocalSituation: {0}, and RemoteSituation {1} not implemented", localSituation, remoteSituation));

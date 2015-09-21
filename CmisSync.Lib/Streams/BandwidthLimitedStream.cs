@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Streams {
     using System;
     using System.Diagnostics;
     using System.IO;
+    using System.Threading;
 
     /// <summary>
     /// Bandwidth limited stream.
@@ -34,14 +35,16 @@ namespace CmisSync.Lib.Streams {
         /// <summary>
         /// The Limit of bytes which could be read per second. The limit is disabled if set to -1.
         /// </summary>
-        private long? readLimit = null;
+        private long? readLimit;
 
         /// <summary>
         /// The Limit of bytes which could be written per second. The limit is disabled if set to -1.
         /// </summary>
-        private long? writeLimit = null;
-        private Stopwatch readWatch;
-        private Stopwatch writeWatch;
+        private long? writeLimit;
+        private int readCount;
+        private int writeCount;
+        private DateTime readTimeStamp = DateTime.Now;
+        private DateTime writeTimeStamp = DateTime.Now;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Streams.BandwidthLimitedStream"/> class.
@@ -50,7 +53,6 @@ namespace CmisSync.Lib.Streams {
         /// The stream instance, which should be limited.
         /// </param>
         public BandwidthLimitedStream(Stream s) : base(s) {
-            this.Init();
         }
 
         /// <summary>
@@ -62,8 +64,7 @@ namespace CmisSync.Lib.Streams {
         /// <param name='limit'>
         /// Up and download limit.
         /// </param>
-        public BandwidthLimitedStream(Stream s, long limit) : base(s) {
-            this.Init();
+        public BandwidthLimitedStream(Stream s, long limit) : this(s) {
             this.ReadLimit = limit;
             this.WriteLimit = limit;
         }
@@ -152,12 +153,16 @@ namespace CmisSync.Lib.Streams {
         /// <param name='count'>
         /// Count of bytes.
         /// </param>
+        /// <returns>The count of read bytes.</returns>
         public override int Read(byte[] buffer, int offset, int count) {
             if (this.ReadLimit == null) {
                 return Stream.Read(buffer, offset, count);
             } else {
-                // TODO Sleep must be implemented
-                return Stream.Read(buffer, offset, count);
+                var maxBytes = GetCountLimit(ref this.readTimeStamp, ref this.readCount, (long)this.readLimit);
+                count = Math.Min(count, maxBytes);
+                int result = Stream.Read(buffer, offset, count);
+                this.readCount += result;
+                return result;
             }
         }
 
@@ -177,17 +182,50 @@ namespace CmisSync.Lib.Streams {
             if (this.WriteLimit == null) {
                 this.Stream.Write(buffer, offset, count);
             } else {
-                // TODO Sleep must be implemented
-                this.Stream.Write(buffer, offset, count);
+                int localOffset = 0;
+                var maxBytes = GetCountLimit(ref this.writeTimeStamp, ref this.writeCount, (long)this.writeLimit);
+                while (maxBytes < count) {
+                    this.Stream.Write(buffer, offset + localOffset, maxBytes);
+                    count -= maxBytes;
+                    localOffset += maxBytes;
+                    this.writeCount += maxBytes;
+                    maxBytes = GetCountLimit(ref this.writeTimeStamp, ref this.writeCount, (long)this.writeLimit);
+                }
+
+                this.Stream.Write(buffer, offset + localOffset, count);
+                this.writeCount += count;
             }
         }
 
-        /// <summary>
-        /// Init this instance.
-        /// </summary>
-        private void Init() {
-            this.writeWatch = new Stopwatch();
-            this.readWatch = new Stopwatch();
+        private static int GetCountLimit(ref DateTime timestamp, ref int oldCount, long hardLimit) {
+            var now = DateTime.Now;
+            var difference = now - timestamp;
+            if (difference.TotalMilliseconds <= 1000) {
+                if (oldCount < hardLimit) {
+                    return (int)hardLimit - oldCount;
+                } else {
+                    Thread.Sleep(1000 - difference.Milliseconds);
+                    oldCount = 0;
+                    timestamp = DateTime.Now;
+                    return (int)hardLimit;
+                }
+            } else {
+                return (int)hardLimit - oldCount;
+            }
+
+/*            if (oldCount < hardLimit) {
+                Console.WriteLine("A");
+                return (int)(hardLimit - oldCount);
+            } else {
+                Console.WriteLine("B");
+                try {
+                    Thread.Sleep((int)(1000 - watch.ElapsedMilliseconds));
+                } catch (ThreadAbortException) {
+                }
+
+                oldCount = 0;
+                return (int)hardLimit;
+            }*/
         }
     }
 }

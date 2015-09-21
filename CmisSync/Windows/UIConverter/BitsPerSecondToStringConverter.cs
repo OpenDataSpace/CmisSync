@@ -26,7 +26,7 @@ namespace CmisSync.UIConverter {
     using System.Windows.Data;
 
     [ValueConversion(typeof(long?), typeof(string))]
-    class BitsPerSecondToStringConverter : IValueConverter {
+    sealed class BitsPerSecondToStringConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
             if (value == null) {
                 return string.Empty;

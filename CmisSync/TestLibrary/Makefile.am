@@ -8,7 +8,8 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(MONOMAC_LIBS) 
 	$(LIBS_CMISSYNCLIB_DEPS) \
 	$(NUNIT_LIBS) \
 	$(DBREEZE_LIBS) \
-	$(MOQ_LIBS)
+	$(MOQ_LIBS) \
+	$(TOXIPROXY_LIBS)
 
 SOURCES =  \
 	AccumulatorTests/LocalObjectFetcherTest.cs \
@@ -83,6 +84,10 @@ SOURCES =  \
 	EventsTests/PermissionDeniedExceptionTest.cs \
 	EventsTests/ProxyAuthRequiredEventTest.cs \
 	EventsTests/StartNextSyncEventTest.cs \
+	EventsTests/SuccessfulLoginEventTest.cs \
+	ExceptionTests/AbstractInteractionNeededExceptionTest.cs \
+	ExceptionTests/InteractionNeededExceptionTest.cs \
+	ExceptionTests/VirusDetectedExceptionTest.cs \
 	FileTransmissionTests/ChunkedDownloaderTest.cs \
 	FileTransmissionTests/ChunkedFileUploaderTest.cs \
 	FileTransmissionTests/ContentTaskUtilsTest.cs \
@@ -109,18 +114,24 @@ SOURCES =  \
 	IntegrationTests/ContentChangeIT.cs \
 	IntegrationTests/ContentHashTests/CRUDTests.cs \
 	IntegrationTests/DotCMISTests.cs \
-	IntegrationTests/DownloadLinkTests.cs \
-	IntegrationTests/FileSystemEventOrderTest.cs \
 	IntegrationTests/FullInMemoryRepoTest.cs \
 	IntegrationTests/FullRepoTests.cs \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
+	IntegrationTests/LinkTests/BaseLinkTest.cs \
+	IntegrationTests/LinkTests/DownloadLinkTests.cs \
+	IntegrationTests/LinkTests/UploadLinkTests.cs \
 	IntegrationTests/MockedServerTests/SetupDocumentTest.cs \
 	IntegrationTests/MockedServerTests/SetupFolderTest.cs \
 	IntegrationTests/MockedServerTests/SetupRepositoryTest.cs \
 	IntegrationTests/MockedServerTests/SetupSessionFactoryTest.cs \
 	IntegrationTests/NeedsLocalFileSystemFolder.cs \
+	IntegrationTests/NetworkFailuresTests/CRUDSyncTests.cs \
+	IntegrationTests/NetworkFailuresTests/CreateSessionWithToxiproxy.cs \
+	IntegrationTests/NetworkFailuresTests/IsFullTestWithToxyProxy.cs \
+	IntegrationTests/NetworkFailuresTests/ToxiProxySetup.cs \
 	IntegrationTests/PrivateWorkingCopyTests/AppendContentStreamTests.cs \
+	IntegrationTests/PrivateWorkingCopyTests/CancelCheckOutTest.cs \
 	IntegrationTests/PrivateWorkingCopyTests/CreateDocumentTests.cs \
 	IntegrationTests/PrivateWorkingCopyTests/UploadChangedContent.cs \
 	IntegrationTests/RepositoryStatusIT.cs \
@@ -132,6 +143,7 @@ SOURCES =  \
 	IntegrationTests/TestNameAttribute.cs \
 	IntegrationTests/UploadFileIT.cs \
 	IntegrationTests/UploadSlowWrittenFile.cs \
+	IntegrationTests/VirusDetectionTests/VirusDetectionTests.cs \
 	MockedServer/IContentChangeEventNotifier.cs \
 	MockedServer/MockOfIAclCapabilities.cs \
 	MockedServer/MockOfISessionFactory.cs \
@@ -190,6 +202,7 @@ SOURCES =  \
 	ProducerTests/ContentChangeTests/ContentChangesTest.cs \
 	ProducerTests/CrawlerTests/CrawlEventGeneratorTest.cs \
 	ProducerTests/CrawlerTests/CrawlEventNotifierTest.cs \
+	ProducerTests/CrawlerTests/DescendantsCrawlerLargeTests.cs \
 	ProducerTests/CrawlerTests/DescendantsCrawlerTest.cs \
 	ProducerTests/CrawlerTests/LocalEventGeneratorTest.cs \
 	ProducerTests/CrawlerTests/ObjectTreeTest.cs \
@@ -199,6 +212,7 @@ SOURCES =  \
 	ProducerTests/WatcherTests/RenamedFileSystemEventHandlerTest.cs \
 	ProducerTests/WatcherTests/WatcherTest.cs \
 	ProducerTests/WatcherTests/WatcherTestUtils.cs \
+	QueueingTests/ConnectionInterruptedHandlerTest.cs \
 	QueueingTests/ConnectionSchedulerTest.cs \
 	QueueingTests/DebugLoggingHandlerTest.cs \
 	QueueingTests/DelayRetryAndNextSyncEventHandlerTest.cs \
@@ -224,6 +238,9 @@ SOURCES =  \
 	StorageTests/FileSystemTests/ExtendedAttributeReaderUnixTest.cs \
 	StorageTests/FileSystemTests/FileSystemWrapperTests.cs \
 	StorageTests/FileSystemTests/LongFileAndPathNameSupportTest.cs \
+	StorageTests/FileSystemTests/ReadOnlyIgnoringDecorator/IDirectoryInfoDecoratorTest.cs \
+	StorageTests/FileSystemTests/ReadOnlyIgnoringDecorator/IFileInfoDecoratorTest.cs \
+	StorageTests/FileSystemTests/ReadOnlyIgnoringDecorator/IFileSystemInfoDecoratorTest.cs \
 	StorageTests/FileSystemTests/Utf8FileNameNormalizationTest.cs \
 	StreamsTests/AbortableStreamTest.cs \
 	StreamsTests/BandwidthLimitedStreamTest.cs \
@@ -251,8 +268,14 @@ SOURCES =  \
 	TestUtils/ObservableHandlerTest.cs \
 	TestUtils/SingleStepEventQueue.cs \
 	TestUtils/SingleStepEventQueueTest.cs \
+	TestUtils/ToxiproxyUtils/ToxiProxyExtensions.cs \
+	TestUtils/ToxiproxyUtils/ToxiSessionFactory.cs \
+	TestUtils/ToxiproxyUtils/ToxiSessionFactoryTest.cs \
+	TestUtils/ToxiproxyUtils/ToxiproxyAuthenticationProviderWrapper.cs \
+	TestUtils/ToxiproxyUtils/ToxiproxyAuthenticationProviderWrapperTest.cs \
 	UtilsTests/BackendTest.cs \
 	UtilsTests/EncodingTest.cs \
+	UtilsTests/GetSpecialPathsTest.cs \
 	UtilsTests/HttpProxyUtilsTest.cs \
 	UtilsTests/IconLoaderAggregationTest.cs \
 	UtilsTests/IconsTest.cs \

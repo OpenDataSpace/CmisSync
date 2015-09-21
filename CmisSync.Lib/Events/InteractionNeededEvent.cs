@@ -21,7 +21,7 @@ namespace CmisSync.Lib.Events {
     using System;
     using System.Collections.Generic;
 
-    using CmisSync.Lib.Consumer;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Exceptions;
@@ -34,7 +34,7 @@ namespace CmisSync.Lib.Events {
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.InteractionNeededEvent"/> class.
         /// </summary>
         /// <param name="e">Exception which invokes a need for a user interaction.</param>
-        public InteractionNeededEvent(InteractionNeededException e) : base(e) {
+        public InteractionNeededEvent(AbstractInteractionNeededException e) : base(e) {
             if (e == null) {
                 throw new ArgumentNullException("e");
             }

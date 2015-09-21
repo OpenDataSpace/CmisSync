@@ -28,13 +28,13 @@ namespace TestLibrary.CmisTests {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class AbstractRepositoryTest {
         private readonly string localPath = "path";
         private readonly string name = "my";
         private readonly Uri remoteUrl = new Uri("https://demo.deutsche-wolke.de/cmis/browser");
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorTakesRepoInfo() {
             var underTest = this.CreateRepo();
 
@@ -45,12 +45,12 @@ namespace TestLibrary.CmisTests {
             Assert.That(underTest.NumberOfChanges, Is.EqualTo(0));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorThrowsExceptionIfRepoInfoIsNull() {
             Assert.Throws<ArgumentNullException>(() => new TestRepository(null));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void NotificationsOnNumberChanges() {
             var underTest = this.CreateRepo();
             var expectedNumber = 2;
@@ -66,7 +66,7 @@ namespace TestLibrary.CmisTests {
             Assert.That(propertyName, Is.EqualTo(Utils.NameOf((TestRepository t) => t.NumberOfChanges)));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void NotificationsOnDateChanges() {
             var underTest = this.CreateRepo();
             var expectedDate = DateTime.UtcNow;

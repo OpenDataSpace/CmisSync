@@ -43,9 +43,6 @@ namespace CmisSync.Lib.Streams {
         /// <param name='stream'>
         /// Stream which progress should be monitored.
         /// </param>
-        /// <param name='e'>
-        /// Transmission event where the progress should be reported to.
-        /// </param>
         public ProgressStream(Stream stream) : base(stream) {
             try {
                 this.length = stream.Length;

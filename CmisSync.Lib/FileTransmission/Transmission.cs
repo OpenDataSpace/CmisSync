@@ -34,22 +34,22 @@ namespace CmisSync.Lib.FileTransmission {
         /// <summary>
         /// A new file is uploaded
         /// </summary>
-        UPLOAD_NEW_FILE,
+        UploadNewFile,
 
         /// <summary>
         /// A locally modified file is uploaded
         /// </summary>
-        UPLOAD_MODIFIED_FILE,
+        UploadModifiedFile,
 
         /// <summary>
         /// A new remote file is downloaded
         /// </summary>
-        DOWNLOAD_NEW_FILE,
+        DownloadNewFile,
 
         /// <summary>
         /// A remotely modified file is downloaded
         /// </summary>
-        DOWNLOAD_MODIFIED_FILE
+        DownloadModifiedFile
     }
 
     /// <summary>
@@ -59,27 +59,27 @@ namespace CmisSync.Lib.FileTransmission {
         /// <summary>
         /// Transmission is going on.
         /// </summary>
-        TRANSMITTING,
+        Transmitting,
 
         /// <summary>
         /// Transmission is requested to be aborted.
         /// </summary>
-        ABORTING,
+        Aborting,
 
         /// <summary>
         /// Transmission is aborted.
         /// </summary>
-        ABORTED,
+        Aborted,
 
         /// <summary>
         /// Transmission is paused.
         /// </summary>
-        PAUSED,
+        Paused,
 
         /// <summary>
         /// Transmission is finished successfully
         /// </summary>
-        FINISHED
+        Finished
     }
 
     /// <summary>
@@ -91,12 +91,13 @@ namespace CmisSync.Lib.FileTransmission {
         private readonly TransmissionType type;
         private string relativePath = string.Empty;
         private string repo = string.Empty;
-        private TransmissionStatus status = TransmissionStatus.TRANSMITTING;
-        private long? length = null;
-        private long? position = null;
-        private long? bitsPerSecond = null;
-        private Exception failedException = null;
+        private TransmissionStatus status;
+        private long? length;
+        private long? position;
+        private long? bitsPerSecond;
+        private Exception failedException;
         private DateTime lastModification = DateTime.Now;
+        private long maxBandwidth;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.Transmission"/> class.
@@ -125,7 +126,6 @@ namespace CmisSync.Lib.FileTransmission {
         /// </summary>
         [Obsolete("Should only be used by UI templates", true)]
         public Transmission() {
-            this.type = TransmissionType.UPLOAD_NEW_FILE;
             this.Path = "Not Set";
             this.CachePath = null;
         }
@@ -287,7 +287,7 @@ namespace CmisSync.Lib.FileTransmission {
                 if (this.failedException != value) {
                     this.failedException = value;
                     this.NotifyPropertyChanged(Utils.NameOf(() => this.FailedException));
-                    this.Status = TransmissionStatus.ABORTED;
+                    this.Status = TransmissionStatus.Aborted;
                 }
             }
         }
@@ -349,18 +349,35 @@ namespace CmisSync.Lib.FileTransmission {
         }
 
         /// <summary>
+        /// Gets or sets the maximum bandwidth. Zero or negative value will disable the limitations.
+        /// </summary>
+        /// <value>The max bandwidth.</value>
+        public long MaxBandwidth {
+            get {
+                return this.maxBandwidth;
+            }
+
+            set {
+                if (this.maxBandwidth != value) {
+                    this.maxBandwidth = value;
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.MaxBandwidth));
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets a value indicating whether this <see cref="CmisSync.Lib.FileTransmission.Transmission"/> is done.
         /// It is true if the transmission is aborted or finished, otherwise false.
         /// </summary>
         /// <value><c>true</c> if done; otherwise, <c>false</c>.</value>
         public bool Done {
             get {
-                return this.Status == TransmissionStatus.ABORTED || this.Status == TransmissionStatus.FINISHED;
+                return this.Status == TransmissionStatus.Aborted || this.Status == TransmissionStatus.Finished;
             }
         }
 
         /// <summary>
-        /// Serves as a hash function for a <see cref="CmisSync.Lib.FileTransmission.TransmissionController"/> object.
+        /// Serves as a hash function for a <see cref="CmisSync.Lib.FileTransmission.Transmission"/> object.
         /// </summary>
         /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
         /// hash table.</returns>
@@ -372,8 +389,8 @@ namespace CmisSync.Lib.FileTransmission {
         /// Pause the transmission async.
         /// </summary>
         public void Pause() {
-            if (this.Status == TransmissionStatus.TRANSMITTING) {
-                this.Status = TransmissionStatus.PAUSED;
+            if (this.Status == TransmissionStatus.Transmitting) {
+                this.Status = TransmissionStatus.Paused;
             }
         }
 
@@ -381,8 +398,8 @@ namespace CmisSync.Lib.FileTransmission {
         /// Resume the transmission async.
         /// </summary>
         public void Resume() {
-            if (this.Status == TransmissionStatus.PAUSED) {
-                this.Status = TransmissionStatus.TRANSMITTING;
+            if (this.Status == TransmissionStatus.Paused) {
+                this.Status = TransmissionStatus.Transmitting;
             }
         }
 
@@ -390,8 +407,8 @@ namespace CmisSync.Lib.FileTransmission {
         /// Abort the transmission async.
         /// </summary>
         public void Abort() {
-            if (this.Status == TransmissionStatus.PAUSED || this.Status == TransmissionStatus.TRANSMITTING) {
-                this.Status = TransmissionStatus.ABORTING;
+            if (this.Status == TransmissionStatus.Paused || this.Status == TransmissionStatus.Transmitting) {
+                this.Status = TransmissionStatus.Aborting;
             }
         }
 

@@ -47,17 +47,19 @@ SHAMROCK_CHECK_MONO_4_0_GAC_ASSEMBLIES([
 AC_SUBST(NUNIT_LIBS,[[-r:\$\(top_srcdir\)/packages/NUnit.2.6.4/lib/nunit.framework.dll]])
 AC_SUBST(NUNIT_PATH,[[\$\(top_srcdir\)/packages/NUnit.2.6.4/lib/nunit.framework.dll]])
 
-AC_SUBST(JSON_LIBS,[[-r:\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.8/lib/net40/Newtonsoft.Json.dll]])
-AC_SUBST(JSON_PATH,[[\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.8/lib/net40/Newtonsoft.Json.dll]])
+AC_SUBST(JSON_LIBS,[[-r:\$\(top_srcdir\)/packages/Newtonsoft.Json.7.0.1/lib/net40/Newtonsoft.Json.dll]])
+AC_SUBST(JSON_PATH,[[\$\(top_srcdir\)/packages/Newtonsoft.Json.7.0.1/lib/net40/Newtonsoft.Json.dll]])
 
 AC_SUBST(LOG4NET_LIBS,[[-r:\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client/log4net.dll]])
 AC_SUBST(LOG4NET_PATH,[[\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client/log4net.dll]])
 
-AC_SUBST(DBREEZE_LIBS,[-r:\$\(top_srcdir\)/packages/DBreeze.1.71.0/lib/net40/DBreeze.dll])
-AC_SUBST(DBREEZE_PATH,[\$\(top_srcdir\)/packages/DBreeze.1.71.0/lib/net40/DBreeze.dll])
+AC_SUBST(DBREEZE_LIBS,[-r:\$\(top_srcdir\)/packages/DBreeze.1.71.1/lib/net40/DBreeze.dll])
+AC_SUBST(DBREEZE_PATH,[\$\(top_srcdir\)/packages/DBreeze.1.71.1/lib/net40/DBreeze.dll])
 
-AC_SUBST(MOQ_LIBS,[[-r:\$\(top_srcdir\)/packages/Moq.4.2.1409.1722/lib/net40/Moq.dll]])
-AC_SUBST(MOQ_PATH,[[\$\(top_srcdir\)/packages/Moq.4.2.1409.1722/lib/net40/Moq.dll]])
+AC_SUBST(MOQ_LIBS,[[-r:\$\(top_srcdir\)/packages/Moq.4.2.1507.0118/lib/net40/Moq.dll]])
+AC_SUBST(MOQ_PATH,[[\$\(top_srcdir\)/packages/Moq.4.2.1507.0118/lib/net40/Moq.dll]])
+
+AC_SUBST(TOXIPROXY_LIBS,[[-r:\$\(top_srcdir\)/packages/Toxiproxy.Net.1.2.11/lib/net45/Toxiproxy.Net.dll,\$\(top_srcdir\)/packages/RestSharp.105.2.1/lib/net45/RestSharp.dll]])
 
 AC_SUBST(DOTCMIS_LIBS,[[-r:\$\(top_srcdir\)/Extras/DotCMIS.dll]])
 AC_SUBST(DOTCMIS_PATH,[[\$\(top_srcdir\)/Extras/DotCMIS.dll]])

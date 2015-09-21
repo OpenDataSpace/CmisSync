@@ -83,9 +83,10 @@ namespace DiagnoseTool {
                             var remoteTree = Path.Combine(Path.GetTempPath(), string.Format("StoredTree-{0}.dot", suffix));
                             var storedTree = Path.Combine(Path.GetTempPath(), string.Format("RemoteTree-{0}.dot", suffix));
                             trees.LocalTree.ToDotFile(localTree);
-                            trees.StoredTree.ToDotFile(remoteTree);
+                            trees.StoredObjects.ObjectListToDotFile(remoteTree);
                             trees.RemoteTree.ToDotFile(storedTree);
                             Console.WriteLine(string.Format("Written to:\n{0}\n{1}\n{2}", localTree, remoteTree, storedTree));
+                            CreateDiffs(trees, storage);
                         }
                     } catch (Exception ex) {
                         Console.Error.WriteLine(ex.Message);
@@ -94,6 +95,30 @@ namespace DiagnoseTool {
             } catch (Exception e) {
                 Console.Error.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
             }
+        }
+
+        private static void CreateDiffs(DescendantsTreeCollection trees, IMetaDataStorage storage) {
+            Console.WriteLine("==== Creating Diff Events ====");
+            var crawlEventGenerator = new CrawlEventGenerator(storage, new FileSystemInfoFactory(ignoreReadOnlyByDefault: false));
+            var eventsCollection = crawlEventGenerator.GenerateEvents(trees);
+            Console.WriteLine("====   Creation Events:   ====");
+            foreach (var createEvent in eventsCollection.creationEvents) {
+                Console.WriteLine(createEvent);
+            }
+
+            Console.WriteLine("====  Mergeable Events:   ====");
+            foreach (var mergeable in eventsCollection.mergableEvents) {
+                var value = mergeable.Value;
+                if (value.Item1 != null) {
+                    Console.WriteLine(value.Item1);
+                }
+
+                if (value.Item2 != null) {
+                    Console.WriteLine(value.Item2);
+                }
+            }
+
+            Console.WriteLine("==== Finished Diff Events ====");
         }
     }
 }

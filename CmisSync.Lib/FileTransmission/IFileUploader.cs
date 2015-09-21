@@ -58,7 +58,7 @@ namespace CmisSync.Lib.FileTransmission {
             Transmission transmission,
             HashAlgorithm hashAlg,
             bool overwrite = true,
-            UpdateChecksum update = null);
+            Action<byte[], long> update = null);
 
         /// <summary>
         /// Appends the localFileStream to the remoteDocument.

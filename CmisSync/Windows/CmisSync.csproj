@@ -31,6 +31,8 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -41,6 +43,7 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <PlatformTarget>x86</PlatformTarget>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>CmisSync.Program</StartupObject>
@@ -58,6 +61,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DocumentationFile>bin\Debug\DataSpaceSync.xml</DocumentationFile>
     <UseVSHostingProcess>true</UseVSHostingProcess>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -118,6 +122,9 @@
     <Compile Include="AboutWPF.xaml.cs">
       <DependentUpon>AboutWPF.xaml</DependentUpon>
     </Compile>
+    <Compile Include="BandwidthLimitWidget.xaml.cs">
+      <DependentUpon>BandwidthLimitWidget.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CertPolicyWindow.cs" />
     <Compile Include="CircularProgressBar.xaml.cs" />
     <Compile Include="ClientBrand.cs" />
@@ -153,6 +160,9 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UIConverter\BitsPerSecondToStringConverter.cs" />
+    <Compile Include="UIConverter\BoolToVisibilityConverter.cs" />
+    <Compile Include="UIConverter\NullToVisibilityConverter.cs" />
+    <Compile Include="UIConverter\TransmissionExceptionToTextConverter.cs" />
     <Compile Include="UIConverter\TransmissionLengthToStringConverter.cs" />
     <Compile Include="UIConverter\TransmissionPositionToStringConverter.cs" />
     <Compile Include="UIConverter\TransmissionStatusToDoneConverter.cs" />
@@ -328,12 +338,6 @@
     <EmbeddedResource Include="Pixmaps\tutorial-slide-3.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
-      <Project>{2C914413-B31C-4362-93C7-1AE34F09112A}</Project>
-      <Name>CmisSync.Lib</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Pixmaps\Downloading.png" />
     <EmbeddedResource Include="Pixmaps\Updating.png" />
     <EmbeddedResource Include="Pixmaps\Uploading.png" />
@@ -355,6 +359,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="AboutWPF.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="BandwidthLimitWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -422,6 +430,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
+      <Project>{2c914413-b31c-4362-93c7-1ae34f09112a}</Project>
+      <Name>CmisSync.Lib</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <PreBuildEvent>Mkdir "$(ProjectDir)$(OutDir)x86"

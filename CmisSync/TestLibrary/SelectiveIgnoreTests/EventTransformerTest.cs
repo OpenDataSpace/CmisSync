@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.SelectiveIgnoreTests
-{
+namespace TestLibrary.SelectiveIgnoreTests {
     using System;
     using System.Collections.ObjectModel;
     using System.IO;
@@ -36,33 +35,32 @@ namespace TestLibrary.SelectiveIgnoreTests
 
     using TestLibrary.TestUtils;
 
-    [TestFixture]
-    public class EventTransformerTest
-    {
+    [TestFixture, Category("Fast"), Category("SelectiveIgnore")]
+    public class EventTransformerTest {
         private readonly string ignoredFolderId = "ignoredId";
         private readonly string ignoredLocalPath = Path.Combine(Path.GetTempPath(), "ignoredlocalpath");
         private Mock<ISyncEventQueue> queue;
         private SelectiveIgnoreEventTransformer underTest;
         private Mock<IIgnoredEntitiesStorage> ignores;
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void ContructorFailsIfQueueIsNull() {
             var ignores = Mock.Of<IIgnoredEntitiesStorage>();
             Assert.Throws<ArgumentNullException>(() => new SelectiveIgnoreEventTransformer(ignores, null));
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void ConstructorFailsIfIgnoresAreNull() {
             Assert.Throws<ArgumentNullException>(() => new SelectiveIgnoreEventTransformer(null,  Mock.Of<ISyncEventQueue>()));
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void ContructorTakesIgnoresAndQueue() {
             var ignores = Mock.Of<IIgnoredEntitiesStorage>();
             new SelectiveIgnoreEventTransformer(ignores, Mock.Of<ISyncEventQueue>());
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void TransformFileMovedEventToAddedEvent() {
             this.SetupMocks();
             string fileName = "file.txt";
@@ -76,7 +74,7 @@ namespace TestLibrary.SelectiveIgnoreTests
             this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void TransformFSMovedEventToDeletedEvent() {
             this.SetupMocks();
             string fileName = "file.txt";
@@ -90,7 +88,7 @@ namespace TestLibrary.SelectiveIgnoreTests
             this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void TransformFSFolderMovedEventToAddedEvent() {
             this.SetupMocks();
             string fileName = "folder";
@@ -104,7 +102,7 @@ namespace TestLibrary.SelectiveIgnoreTests
             this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void TransformFSFolderMovedEventToDeletedEvent() {
             this.SetupMocks();
             string fileName = "folder";
@@ -118,7 +116,7 @@ namespace TestLibrary.SelectiveIgnoreTests
             this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void DoNotTransformFSIgnoredFolderMovedEventToAddedEvent() {
             this.SetupMocks();
             string fileName = "folder";
@@ -131,7 +129,7 @@ namespace TestLibrary.SelectiveIgnoreTests
             this.queue.VerifyThatNoEventIsAdded();
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void TransformContentChangeEventFromChangeToDeleteIfTargetIsInsideAnIgnoredFolder() {
             this.SetupMocks();
             var objectId = Guid.NewGuid().ToString();
@@ -140,7 +138,7 @@ namespace TestLibrary.SelectiveIgnoreTests
             var session = new Mock<ISession>();
             session.Setup(s => s.GetObject(objectId, It.IsAny<IOperationContext>())).Returns(folderObject);
             contentChangeEvent.UpdateObject(session.Object);
-            this.ignores.Setup(i => i.IsIgnored(folderObject)).Returns(IgnoredState.INHERITED);
+            this.ignores.Setup(i => i.IsIgnored(folderObject)).Returns(IgnoredState.Inherited);
 
             Assert.That(this.underTest.Handle(contentChangeEvent), Is.True);
 
@@ -148,7 +146,7 @@ namespace TestLibrary.SelectiveIgnoreTests
             this.queue.Verify(q => q.AddEvent(It.Is<ContentChangeEvent>(e => e.ObjectId == objectId && e.Type == DotCMIS.Enums.ChangeType.Deleted)));
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        [Test]
         public void DoNotTouchDeletedContentChangeEvents() {
             this.SetupMocks();
             var contentChangeEvent = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Deleted, Guid.NewGuid().ToString());
@@ -161,10 +159,10 @@ namespace TestLibrary.SelectiveIgnoreTests
         private void SetupMocks() {
             this.queue = new Mock<ISyncEventQueue>();
             this.ignores = new Mock<IIgnoredEntitiesStorage>();
-            this.ignores.Setup(i => i.IsIgnoredPath(It.Is<string>(s => !s.Contains(this.ignoredLocalPath)))).Returns(IgnoredState.NOT_IGNORED);
-            this.ignores.Setup(i => i.IsIgnoredPath(this.ignoredLocalPath)).Returns(IgnoredState.IGNORED);
-            this.ignores.Setup(i => i.IsIgnoredPath(It.Is<string>(s => s.StartsWith(this.ignoredLocalPath) && s != this.ignoredLocalPath))).Returns(IgnoredState.INHERITED);
-            this.ignores.Setup(i => i.IsIgnoredId(this.ignoredFolderId)).Returns(IgnoredState.IGNORED);
+            this.ignores.Setup(i => i.IsIgnoredPath(It.Is<string>(s => !s.Contains(this.ignoredLocalPath)))).Returns(IgnoredState.NotIgnored);
+            this.ignores.Setup(i => i.IsIgnoredPath(this.ignoredLocalPath)).Returns(IgnoredState.Ignored);
+            this.ignores.Setup(i => i.IsIgnoredPath(It.Is<string>(s => s.StartsWith(this.ignoredLocalPath) && s != this.ignoredLocalPath))).Returns(IgnoredState.Inherited);
+            this.ignores.Setup(i => i.IsIgnoredId(this.ignoredFolderId)).Returns(IgnoredState.Ignored);
             this.underTest = new SelectiveIgnoreEventTransformer(this.ignores.Object, this.queue.Object);
         }
     }

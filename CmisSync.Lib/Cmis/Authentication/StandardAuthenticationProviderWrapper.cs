@@ -28,15 +28,15 @@ namespace CmisSync.Lib.Cmis {
     /// </summary>
     public class StandardAuthenticationProviderWrapper : DotCMIS.Binding.StandardAuthenticationProvider, IDisposableAuthProvider {
         /// <summary>
-        /// Releases all resource used by the <see cref="CmisSync.Lib.Cmis.StandardAuthtenticationProvider"/> object.
+        /// Releases all resource used by the <see cref="StandardAuthenticationProviderWrapper"/> object.
         /// </summary>
         /// <remarks>
         /// Call <see cref="Dispose"/> when you are finished using the
-        /// <see cref="CmisSync.Lib.Cmis.StandardAuthtenticationProvider"/>. The <see cref="Dispose"/> method leaves the
-        /// <see cref="CmisSync.Lib.Cmis.StandardAuthtenticationProvider"/> in an unusable state. After calling
-        /// <see cref="Dispose"/>, you must release all references to the
-        /// <see cref="CmisSync.Lib.Cmis.StandardAuthtenticationProvider"/> so the garbage collector can reclaim the
-        /// memory that the <see cref="CmisSync.Lib.Cmis.StandardAuthtenticationProvider"/> was occupying.
+        /// <see cref="StandardAuthenticationProviderWrapper"/>. The <see cref="Dispose"/> method leaves the
+        /// <see cref="StandardAuthenticationProviderWrapper"/> in an unusable state. After calling
+        /// <see cref="Dispose()"/>, you must release all references to the
+        /// <see cref="StandardAuthenticationProviderWrapper"/> so the garbage collector can reclaim the
+        /// memory that the <see cref="StandardAuthenticationProviderWrapper"/> was occupying.
         /// </remarks>
         public void Dispose() {
         }

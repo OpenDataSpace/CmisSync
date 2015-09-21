@@ -101,7 +101,12 @@ namespace TestLibrary.TestUtils {
             return folder;
         }
 
-        public static void AddMappedFile(this Mock<IMetaDataStorage> db, IMappedObject file, string localPath = null, string remotePath = null) {
+        public static void AddMappedFile(
+            this Mock<IMetaDataStorage> db,
+            IMappedObject file,
+            string localPath = null,
+            string remotePath = null)
+        {
             db.Setup(foo => foo.GetObjectByLocalPath(It.Is<IFileInfo>(f => f.FullName == localPath))).Returns(file);
             db.Setup(foo => foo.GetObjectByRemoteId(It.Is<string>(s => s == file.RemoteObjectId))).Returns(file);
             db.Setup(foo => foo.GetLocalPath(It.Is<IMappedObject>(o => o.Equals(file)))).Returns(localPath);
@@ -112,7 +117,12 @@ namespace TestLibrary.TestUtils {
         }
 
         // Don't use this method twice per test
-        public static void AddMappedFolder(this Mock<IMetaDataStorage> db, IMappedObject folder, string localPath = null, string remotePath = null) {
+        public static void AddMappedFolder(
+            this Mock<IMetaDataStorage> db,
+            IMappedObject folder,
+            string localPath = null,
+            string remotePath = null)
+        {
             db.Setup(foo => foo.GetObjectByLocalPath(It.Is<IFileSystemInfo>(d => d.FullName == localPath))).Returns(folder);
             db.Setup(foo => foo.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.FullName == localPath))).Returns(folder);
             db.Setup(foo => foo.GetObjectByLocalPath(It.Is<IFileInfo>(d => d.FullName == localPath))).Returns(folder);
@@ -140,7 +150,9 @@ namespace TestLibrary.TestUtils {
             DateTime? lastLocalModification = null,
             DateTime? lastRemoteModification = null,
             byte[] checksum = null,
-            long contentSize = -1, bool ignored = false)
+            long contentSize = -1,
+            bool ignored = false,
+            bool readOnly = false)
         {
             VerifySavedMappedObject(
                 db,
@@ -155,7 +167,8 @@ namespace TestLibrary.TestUtils {
                 lastRemoteModification,
                 checksum,
                 contentSize,
-                ignored);
+                ignored,
+                readOnly);
         }
 
         public static void VerifySavedMappedObject(
@@ -171,11 +184,27 @@ namespace TestLibrary.TestUtils {
             DateTime? lastRemoteModification = null,
             byte[] checksum = null,
             long contentSize = -1,
-            bool ignored = false)
+            bool ignored = false,
+            bool readOnly = false)
         {
             db.Verify(
                 s =>
-                s.SaveMappedObject(It.Is<IMappedObject>(o => VerifyMappedObject(o, type, remoteId, name, parentId, changeToken, extendedAttributeAvailable, lastLocalModification, lastRemoteModification, checksum, contentSize, ignored))),
+                s.SaveMappedObject(
+                    It.Is<IMappedObject>(
+                        o => VerifyMappedObject(
+                            o,
+                            type,
+                            remoteId,
+                            name,
+                            parentId,
+                            changeToken,
+                            extendedAttributeAvailable,
+                            lastLocalModification,
+                            lastRemoteModification,
+                            checksum,
+                            contentSize,
+                            ignored,
+                            readOnly))),
                 times);
         }
 
@@ -191,7 +220,8 @@ namespace TestLibrary.TestUtils {
             DateTime? lastRemoteModification,
             byte[] checksum,
             long contentSize,
-            bool ignored)
+            bool ignored,
+            bool readOnly)
         {
             Assert.That(o.RemoteObjectId, Is.EqualTo(remoteId), "Object remote Id is wrong");
             Assert.That(o.Name, Is.EqualTo(name), "Object name is wrong");
@@ -199,6 +229,7 @@ namespace TestLibrary.TestUtils {
             Assert.That(o.LastChangeToken, Is.EqualTo(changeToken), "Object change token is wrong");
             Assert.That(o.Type, Is.EqualTo(type), "Object type is wrong");
             Assert.That(o.Ignored, Is.EqualTo(ignored), "Object ignore flag is wrong");
+            Assert.That(o.IsReadOnly, Is.EqualTo(readOnly), "Object read only flag is wrong");
             if (extendedAttributeAvailable) {
                 Assert.That(o.Guid, Is.Not.EqualTo(Guid.Empty), "Given Guid must not be empty");
             } else {

@@ -30,13 +30,13 @@ namespace CmisSync.Lib.SelectiveIgnore {
         /// Add the specified ignored entity to collection.
         /// </summary>
         /// <param name="ignore">Ignored entity.</param>
-        void Add(IIgnoredEntity ignore);
+        void Add(AbstractIgnoredEntity ignore);
 
         /// <summary>
         /// Remove the specified ignored entity from collection.
         /// </summary>
         /// <param name="ignore">Ignored entity.</param>
-        void Remove(IIgnoredEntity ignore);
+        void Remove(AbstractIgnoredEntity ignore);
 
         /// <summary>
         /// Remove the specified ignored entity with the given objectId from collection.

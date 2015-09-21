@@ -26,6 +26,9 @@ namespace CmisSync.Lib.Filter {
 
     using log4net;
 
+    /// <summary>
+    /// Repository root deleted detection.
+    /// </summary>
     public class RepositoryRootDeletedDetection : SyncEventHandler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RepositoryRootDeletedDetection));
 
@@ -33,17 +36,24 @@ namespace CmisSync.Lib.Filter {
         private readonly string absolutePath;
         private bool isRootFolderAvailable = true;
 
-        public event EventHandler<RootExistsEventArgs> RepoRootDeleted;
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Filter.RepositoryRootDeletedDetection"/> class.
+        /// </summary>
+        /// <param name="localRootPath">Local root path.</param>
         public RepositoryRootDeletedDetection(IDirectoryInfo localRootPath) {
             if (localRootPath == null) {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException("localRootPath");
             }
 
             this.path = localRootPath;
             this.absolutePath = this.path.FullName;
             this.isRootFolderAvailable = this.IsRootFolderAvailable();
         }
+
+        /// <summary>
+        /// Occurs when repo root is deleted.
+        /// </summary>
+        public event EventHandler<RootExistsEventArgs> RepoRootDeleted;
 
         /// <summary>
         /// Priority is CRITICAL
@@ -84,14 +94,6 @@ namespace CmisSync.Lib.Filter {
             }
         }
 
-        public class RootExistsEventArgs : EventArgs {
-            public RootExistsEventArgs(bool exits) {
-                this.RootExists = exits;
-            }
-
-            public bool RootExists { get; private set; }
-        }
-
         private bool IsRootFolderAvailable() {
             this.path.Refresh();
             if (!this.path.Exists || this.path.FullName != this.absolutePath) {
@@ -101,6 +103,26 @@ namespace CmisSync.Lib.Filter {
             }
 
             return this.isRootFolderAvailable;
+        }
+
+        /// <summary>
+        /// Root exists event arguments.
+        /// </summary>
+        public class RootExistsEventArgs : EventArgs {
+            /// <summary>
+            /// Initializes a new instance of the
+            /// <see cref="CmisSync.Lib.Filter.RepositoryRootDeletedDetection+RootExistsEventArgs"/> class.
+            /// </summary>
+            /// <param name="exists">The root exists if set to <c>true</c>.</param>
+            public RootExistsEventArgs(bool exists) {
+                this.RootExists = exists;
+            }
+
+            /// <summary>
+            /// Gets a value indicating whether root exists.
+            /// </summary>
+            /// <value><c>true</c> if root exists; otherwise, <c>false</c>.</value>
+            public bool RootExists { get; private set; }
         }
     }
 }

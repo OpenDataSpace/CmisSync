@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.QueueingTests
-{
+namespace TestLibrary.QueueingTests {
     using System;
     using System.IO;
 
@@ -33,22 +32,19 @@ namespace TestLibrary.QueueingTests
 
     using TestLibrary.TestUtils;
 
-    [TestFixture]
-    public class DebugLoggingHandlerTest : IsTestWithConfiguredLog4Net
-    {
-        [Test, Category("Fast")]
-        public void ToStringTest()
-        {
+    [TestFixture, Category("Fast")]
+    public class DebugLoggingHandlerTest : IsTestWithConfiguredLog4Net {
+        [Test]
+        public void ToStringTest() {
             var handler = new DebugLoggingHandler();
             Assert.That(handler.ToString().Contains(handler.Priority.ToString()));
             Assert.That(handler.ToString().Contains(handler.GetType().Name));
         }
-        
-        [Test, Category("Fast")]
-        public void PriorityTest()
-        {
+
+        [Test]
+        public void PriorityTest() {
             var handler = new DebugLoggingHandler();
-            Assert.That(handler.Priority, Is.EqualTo(100000));
+            Assert.That(handler.Priority, Is.EqualTo(EventHandlerPriorities.DEBUG));
         }
     }
 }

@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.EventsTests
-{
+namespace TestLibrary.EventsTests {
     using System;
 
     using CmisSync.Lib.Events;
@@ -29,18 +28,15 @@ namespace TestLibrary.EventsTests
 
     using NUnit.Framework;
 
-    [TestFixture]
-    public class ProxyAuthRequiredEventTest
-    {
-        [Test, Category("Fast")]
-        public void ConstructorWorksWithExceptionAsParameter()
-        {
+    [TestFixture, Category("Fast")]
+    public class ProxyAuthRequiredEventTest {
+        [Test]
+        public void ConstructorWorksWithExceptionAsParameter() {
             new ProxyAuthRequiredEvent(new Mock<CmisRuntimeException>().Object);
         }
 
-        [Test, Category("Fast")]
-        public void ReturnsStringOnToString()
-        {
+        [Test]
+        public void ReturnsStringOnToString() {
             var exception = new Mock<CmisRuntimeException>();
             string message = "AuthRequiredException";
             exception.Setup(e => e.ToString()).Returns(message);

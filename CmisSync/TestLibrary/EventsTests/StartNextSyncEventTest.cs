@@ -25,21 +25,21 @@ namespace TestLibrary.EventsTests {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class StartNextSyncEventTest {
-        [Test, Category("Fast")]
+        [Test]
         public void ContructorWithoutParamSetsFullSyncRequestedFlagToFalse() {
             var start = new StartNextSyncEvent();
             Assert.IsFalse(start.FullSyncRequested);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorWithFalseParamSetsFullSyncRequestedFlagToFalse() {
             var start = new StartNextSyncEvent(false);
             Assert.IsFalse(start.FullSyncRequested);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorWithTrueParamSetsFullSyncRequestedFlagToTrue() {
             var start = new StartNextSyncEvent(true);
             Assert.IsTrue(start.FullSyncRequested);

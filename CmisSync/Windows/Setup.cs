@@ -456,7 +456,7 @@ namespace CmisSync {
                 System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
                 password_progress.Visibility = Visibility.Hidden;
 
-                if (Controller.repositories == null) {
+                if (Controller.repositories == null || Controller.repositories.Count == 0) {
                     // Could not retrieve repositories list from server, show warning.
                     string warning = Controller.GetConnectionsProblemWarning(result.FailedException);
                     address_error_label.Text = warning;

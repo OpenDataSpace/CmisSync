@@ -42,8 +42,17 @@ namespace CmisSync.Lib.Cmis.UiUtils {
     public static class CmisUtils {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(CmisUtils));
 
+        /// <summary>
+        /// Gets the cmis parameters to be able to create a session.
+        /// </summary>
+        /// <returns>The cmis parameters.</returns>
+        /// <param name="credentials">Server Credentials.</param>
         static public Dictionary<string, string> GetCmisParameters(ServerCredentials credentials) {
-            Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
+            if (credentials == null) {
+                throw new ArgumentNullException("credentials");
+            }
+
+            var cmisParameters = new Dictionary<string, string>();
             cmisParameters[SessionParameter.BindingType] = credentials.Binding;
             if (credentials.Binding == BindingType.AtomPub) {
                 cmisParameters[SessionParameter.AtomPubUrl] = credentials.Address.ToString();
@@ -57,8 +66,17 @@ namespace CmisSync.Lib.Cmis.UiUtils {
             return cmisParameters;
         }
 
+        /// <summary>
+        /// Gets the cmis parameters to be able to create a cmis session to a cmis repository.
+        /// </summary>
+        /// <returns>The cmis parameters.</returns>
+        /// <param name="credentials">Server Credentials.</param>
         static public Dictionary<string, string> GetCmisParameters(CmisRepoCredentials credentials) {
-            Dictionary<string, string> cmisParameters = GetCmisParameters((ServerCredentials)credentials);
+            if (credentials == null) {
+                throw new ArgumentNullException("credentials");
+            }
+
+            var cmisParameters = GetCmisParameters((ServerCredentials)credentials);
             cmisParameters[SessionParameter.RepositoryId] = credentials.RepoId;
             return cmisParameters;
         }
@@ -68,12 +86,12 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         /// </summary>
         /// <returns>Full path of each sub-folder, including leading slash.</returns>
         static public string[] GetSubfolders(CmisRepoCredentials credentials, string path) {
-            List<string> result = new List<string>();
+            var result = new List<string>();
 
             // Connect to the CMIS repository.
-            Dictionary<string, string> cmisParameters = GetCmisParameters(credentials);
-            SessionFactory factory = SessionFactory.NewInstance();
-            ISession session = factory.CreateSession(cmisParameters);
+            var cmisParameters = GetCmisParameters(credentials);
+            var factory = SessionFactory.NewInstance();
+            var session = factory.CreateSession(cmisParameters);
 
             // Get the folder.
             IFolder folder;
@@ -89,24 +107,55 @@ namespace CmisSync.Lib.Cmis.UiUtils {
             Logger.Info("CmisUtils | folder.Properties.Count:" + folder.Properties.Count.ToString());
 
             // Get the folder's sub-folders.
-            IItemEnumerable<ICmisObject> children = folder.GetChildren();
+            var children = folder.GetChildren();
 
             // Return the full path of each of the sub-folders.
-            foreach (var subfolder in children.OfType<IFolder>())
-            {
+            foreach (var subfolder in children.OfType<IFolder>()) {
                 result.Add(subfolder.Path);
             }
 
             return result.ToArray();
         }
 
+        /// <summary>
+        /// Node tree.
+        /// </summary>
         public class NodeTree {
+            /// <summary>
+            /// The children.
+            /// </summary>
             public List<NodeTree> Children = new List<NodeTree>();
+
+            /// <summary>
+            /// Gets or sets the path.
+            /// </summary>
+            /// <value>The path.</value>
             public string Path { get; set; }
+
+            /// <summary>
+            /// Gets or sets the name.
+            /// </summary>
+            /// <value>The name.</value>
             public string Name { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Cmis.UiUtils.CmisUtils+NodeTree"/>
+            /// is finished.
+            /// </summary>
+            /// <value><c>true</c> if finished; otherwise, <c>false</c>.</value>
             public bool Finished { get; set; }
 
+            /// <summary>
+            /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.UiUtils.CmisUtils+NodeTree"/> class.
+            /// </summary>
+            /// <param name="trees">List of trees.</param>
+            /// <param name="folder">Actual folder.</param>
+            /// <param name="depth">Recursion depth.</param>
             public NodeTree(IList<ITree<IFileableCmisObject>> trees, IFolder folder, int depth) {
+                if (folder == null) {
+                    throw new ArgumentNullException("folder");
+                }
+
                 this.Path = folder.Path;
                 this.Name = folder.Name;
                 this.Finished = !(depth == 0);
@@ -126,7 +175,7 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         /// Get the sub-folders of a particular CMIS folder.
         /// </summary>
         /// <returns>Full path of each sub-folder, including leading slash.</returns>
-        static public NodeTree GetSubfolderTree(CmisRepoCredentials credentials, string path, int depth) {
+        public static NodeTree GetSubfolderTree(CmisRepoCredentials credentials, string path, int depth) {
             // Connect to the CMIS repository.
             Dictionary<string, string> cmisParameters = GetCmisParameters(credentials);
             SessionFactory factory = SessionFactory.NewInstance();

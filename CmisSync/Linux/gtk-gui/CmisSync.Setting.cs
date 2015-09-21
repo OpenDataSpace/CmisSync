@@ -5,16 +5,26 @@ namespace CmisSync
 	public partial class Setting
 	{
 		private global::Gtk.VBox vbox5;
+		
 		private global::Gtk.Notebook tabs;
+		
 		private global::CmisSync.Widgets.ProxyWidget proxyWidget;
+		
 		private global::Gtk.Label label1;
+		
 		private global::Gtk.VBox vbox1;
+		
 		private global::Gtk.CheckButton notificationToggleButton;
+		
 		private global::Gtk.Label label2;
+		
 		private global::Gtk.HBox hbox2;
+		
 		private global::Gtk.Label label3;
-		private global::Gtk.Button saveButton;
+		
 		private global::Gtk.Button cancelButton;
+		
+		private global::Gtk.Button saveButton;
 
 		protected virtual void Build ()
 		{
@@ -32,7 +42,7 @@ namespace CmisSync
 			this.tabs = new global::Gtk.Notebook ();
 			this.tabs.CanFocus = true;
 			this.tabs.Name = "tabs";
-			this.tabs.CurrentPage = 1;
+			this.tabs.CurrentPage = 0;
 			// Container child tabs.Gtk.Notebook+NotebookChild
 			this.proxyWidget = new global::CmisSync.Widgets.ProxyWidget ();
 			this.proxyWidget.Events = ((global::Gdk.EventMask)(256));
@@ -83,25 +93,26 @@ namespace CmisSync
 			w5.Position = 0;
 			w5.Fill = false;
 			// Container child hbox2.Gtk.Box+BoxChild
-			this.saveButton = new global::Gtk.Button ();
-			this.saveButton.CanFocus = true;
-			this.saveButton.Name = "saveButton";
-			this.saveButton.UseUnderline = true;
-			this.saveButton.Label = global::Mono.Unix.Catalog.GetString ("Save changes");
-			this.hbox2.Add (this.saveButton);
-			global::Gtk.Box.BoxChild w6 = ((global::Gtk.Box.BoxChild)(this.hbox2 [this.saveButton]));
-			w6.Position = 1;
-			w6.Expand = false;
-			// Container child hbox2.Gtk.Box+BoxChild
 			this.cancelButton = new global::Gtk.Button ();
 			this.cancelButton.CanFocus = true;
 			this.cancelButton.Name = "cancelButton";
 			this.cancelButton.UseUnderline = true;
 			this.cancelButton.Label = global::Mono.Unix.Catalog.GetString ("Discard Changes");
 			this.hbox2.Add (this.cancelButton);
-			global::Gtk.Box.BoxChild w7 = ((global::Gtk.Box.BoxChild)(this.hbox2 [this.cancelButton]));
+			global::Gtk.Box.BoxChild w6 = ((global::Gtk.Box.BoxChild)(this.hbox2 [this.cancelButton]));
+			w6.Position = 1;
+			w6.Expand = false;
+			// Container child hbox2.Gtk.Box+BoxChild
+			this.saveButton = new global::Gtk.Button ();
+			this.saveButton.CanFocus = true;
+			this.saveButton.Name = "saveButton";
+			this.saveButton.UseUnderline = true;
+			this.saveButton.Label = global::Mono.Unix.Catalog.GetString ("Save changes");
+			this.hbox2.Add (this.saveButton);
+			global::Gtk.Box.BoxChild w7 = ((global::Gtk.Box.BoxChild)(this.hbox2 [this.saveButton]));
 			w7.Position = 2;
 			w7.Expand = false;
+			w7.Fill = false;
 			this.vbox5.Add (this.hbox2);
 			global::Gtk.Box.BoxChild w8 = ((global::Gtk.Box.BoxChild)(this.vbox5 [this.hbox2]));
 			w8.PackType = ((global::Gtk.PackType)(1));

@@ -3,13 +3,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.0</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{2C914413-B31C-4362-93C7-1AE34F09112A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>CmisSync.Lib</RootNamespace>
     <AssemblyName>CmisSync.Lib</AssemblyName>
     <UseMSBuildEngine>False</UseMSBuildEngine>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -34,9 +35,6 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DBreeze">
-      <HintPath>..\packages\DBreeze.1.71.0\lib\net40\DBreeze.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Security" />
     <Reference Include="System.Web" />
@@ -53,8 +51,11 @@
     <Reference Include="System.Net" />
     <Reference Include="System.Core" />
     <Reference Include="System.Configuration" />
+    <Reference Include="DBreeze">
+      <HintPath>..\packages\DBreeze.1.71.1\lib\net45\DBreeze.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -176,7 +177,6 @@
     <Compile Include="Consumer\LocalSituationDetection.cs" />
     <Compile Include="Consumer\RemoteSituationDetection.cs" />
     <Compile Include="Consumer\SyncMechanism.cs" />
-    <Compile Include="Consumer\RetryException.cs" />
     <Compile Include="Producer\Watcher\MacWatcher.cs" />
     <Compile Include="Producer\Watcher\NetWatcher.cs" />
     <Compile Include="Producer\Watcher\IWatcherProducer.cs" />
@@ -222,8 +222,6 @@
     <Compile Include="EventManagerInitializer.cs" />
     <Compile Include="Consumer\SituationSolver\AbstractEnhancedSolver.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectChangedRemoteObjectChanged.cs" />
-    <Compile Include="Cmis\ConvenienceExtenders\CmisConvenienceExtenders.cs" />
-    <Compile Include="Storage\Database\Entities\IFileConvenienceExtenders.cs" />
     <Compile Include="Storage\Database\DublicateGuidException.cs" />
     <Compile Include="Queueing\DelayRetryAndNextSyncEventHandler.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectMovedRemoteObjectMoved.cs" />
@@ -251,7 +249,6 @@
     <Compile Include="SelectiveIgnore\SelectiveIgnoreEventTransformer.cs" />
     <Compile Include="SelectiveIgnore\IgnoredEntitiesCollection.cs" />
     <Compile Include="SelectiveIgnore\IgnoredEntity.cs" />
-    <Compile Include="SelectiveIgnore\IIgnoredEntity.cs" />
     <Compile Include="SelectiveIgnore\IgnoreFlagChangeDetection.cs" />
     <Compile Include="Storage\FileSystem\DateTimeToFileConverter.cs" />
     <Compile Include="Storage\FileSystem\FSType.cs" />
@@ -262,7 +259,6 @@
     <Compile Include="SelectiveIgnore\IgnoredState.cs" />
     <Compile Include="Config\DefaultEntries.cs" />
     <Compile Include="Events\InteractionNeededEvent.cs" />
-    <Compile Include="Consumer\InteractionNeededException.cs" />
     <Compile Include="SelectiveIgnore\CmisSelectiveIgnoreCapability.cs" />
     <Compile Include="SelectiveIgnore\IIgnoredEntitiesCollection.cs" />
     <Compile Include="SelectiveIgnore\IIgnoredEntitiesStorage.cs" />
@@ -287,7 +283,6 @@
     <Compile Include="Config\ServerCredentials.cs" />
     <Compile Include="Config\User.cs" />
     <Compile Include="Config\AuthenticationType.cs" />
-    <Compile Include="Cmis\ConvenienceExtenders\AllowableActionConvenienceExtenders.cs" />
     <Compile Include="Storage\FileSystem\ReadOnlyIgnoringFileInfoDecorator.cs" />
     <Compile Include="Storage\FileSystem\ReadOnlyIgnoringFileSystemInfoDecorator.cs" />
     <Compile Include="Storage\FileSystem\ReadOnlyIgnoringDirectoryInfoDecorator.cs" />
@@ -298,7 +293,6 @@
     <Compile Include="Consumer\SituationSolver\PrivateWorkingCopy\LocalObjectChangedRemoteObjectChangedWithPWC.cs" />
     <Compile Include="FileTransmission\TransmissionManager.cs" />
     <Compile Include="FileTransmission\Transmission.cs" />
-    <Compile Include="FileTransmission\ITransmissionManager.cs" />
     <Compile Include="Streams\AbortableStream.cs" />
     <Compile Include="Streams\PausableStream.cs" />
     <Compile Include="Streams\BandwidthNotifyingStream.cs" />
@@ -320,25 +314,33 @@
     <Compile Include="Storage\Database\GraphOutputConvenienceExtension.cs" />
     <Compile Include="Storage\Database\IDotTreeWriter.cs" />
     <Compile Include="Filter\SymlinkFilter.cs" />
-    <Compile Include="Cmis\ConvenienceExtenders\CmisRepositoryInfoConvenienceExtenders.cs" />
     <Compile Include="HashAlgorithm\IReusableHashAlgorithm.cs" />
+    <Compile Include="FileTransmission\ITransmissionFactory.cs" />
+    <Compile Include="FileTransmission\TransmissionFactory.cs" />
+    <Compile Include="FileTransmission\ITransmissionAggregator.cs" />
+    <Compile Include="Consumer\SituationSolver\FileSystemInfoConvenienceExtenders.cs" />
+    <Compile Include="Exceptions\InteractionNeededException.cs" />
+    <Compile Include="Exceptions\AbstractInteractionNeededException.cs" />
+    <Compile Include="Exceptions\VirusDetectedException.cs" />
+    <Compile Include="Exceptions\ExceptionLevel.cs" />
+    <Compile Include="Exceptions\RetryException.cs" />
+    <Compile Include="Queueing\ConnectionInterruptedHandler.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\RepositoryInfoExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\ExceptionExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\AllowableActionExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\SessionExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\SessionFactoryExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\FolderExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\DocumentExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\ObjectExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\FileableObjectExtenders.cs" />
+    <Compile Include="SelectiveIgnore\AbstractIgnoredEntity.cs" />
+    <Compile Include="Storage\Database\Entities\FileContentConvenienceExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\LinkExtenders.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\LinkType.cs" />
+    <Compile Include="Exceptions\QuotaExceededException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ProjectExtensions>
-    <MonoDevelop>
-      <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
-          <BuildFilesVar Sync="True" Name="SOURCES" />
-          <DeployFilesVar />
-          <ResourcesVar />
-          <OthersVar />
-          <GacRefVar />
-          <AsmRefVar />
-          <ProjectRefVar />
-        </MonoDevelop.Autotools.MakefileInfo>
-      </Properties>
-    </MonoDevelop>
-  </ProjectExtensions>
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
@@ -378,5 +380,6 @@
   <ItemGroup />
   <ItemGroup>
     <Folder Include="UiUtils\" />
+    <Folder Include="Exceptions\" />
   </ItemGroup>
 </Project>

@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Cmis
-{
+namespace CmisSync.Lib.Cmis {
     using System;
 
     using DotCMIS.Binding;
@@ -26,8 +25,7 @@ namespace CmisSync.Lib.Cmis
     /// <summary>
     /// Interface of a disposable auth provider.
     /// </summary>
-    public interface IDisposableAuthProvider : IAuthenticationProvider, IDisposable
-    {
+    public interface IDisposableAuthProvider : IAuthenticationProvider, IDisposable {
         /// <summary>
         /// Deletes all cookies.
         /// </summary>

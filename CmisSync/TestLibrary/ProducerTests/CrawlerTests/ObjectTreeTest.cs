@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ProducerTests.CrawlerTests
-{
+namespace TestLibrary.ProducerTests.CrawlerTests {
     using System;
     using System.Collections.Generic;
 
@@ -26,20 +25,17 @@ namespace TestLibrary.ProducerTests.CrawlerTests
 
     using NUnit.Framework;
 
-    [TestFixture]
-    public class ObjectTreeTest
-    {
-        [Test, Category("Fast")]
-        public void ConstructorSetsPropertiesToDefaultValuesAndNull()
-        {
+    [TestFixture, Category("Fast")]
+    public class ObjectTreeTest {
+        [Test]
+        public void ConstructorSetsPropertiesToDefaultValuesAndNull() {
             var tree = new ObjectTree<object>();
             Assert.That(tree.Children, Is.Null);
             Assert.That(tree.Item, Is.Null);
         }
 
-        [Test, Category("Fast")]
-        public void ItemProperty()
-        {
+        [Test]
+        public void ItemProperty() {
             var tree = new ObjectTree<object>();
             var obj = new object();
             tree.Item = obj;
@@ -47,9 +43,8 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             Assert.That(tree.Item, Is.EqualTo(obj));
         }
 
-        [Test, Category("Fast")]
-        public void ChildrenProperty()
-        {
+        [Test]
+        public void ChildrenProperty() {
             var tree = new ObjectTree<object>();
             var obj = new object();
             IList<IObjectTree<object>> children = new List<IObjectTree<object>>();
@@ -62,16 +57,14 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             Assert.That(tree.Children[0].Item, Is.EqualTo(obj));
         }
 
-        [Test, Category("Fast")]
-        public void ToListOfEmptyTreeReturnsEmptyList()
-        {
+        [Test]
+        public void ToListOfEmptyTreeReturnsEmptyList() {
             var tree = new ObjectTree<object>();
             Assert.That(tree.ToList(), Is.Empty);
         }
 
-        [Test, Category("Fast")]
-        public void ToListReturnsRootItemAsEntryInList()
-        {
+        [Test]
+        public void ToListReturnsRootItemAsEntryInList() {
             var obj = new object();
             var tree = new ObjectTree<object> {
                 Item = obj
@@ -80,9 +73,8 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             Assert.That(tree.ToList(), Contains.Item(obj));
         }
 
-        [Test, Category("Fast")]
-        public void ToListReturnsChildrenAsEntryInList()
-        {
+        [Test]
+        public void ToListReturnsChildrenAsEntryInList() {
             var obj = new object();
             IList<IObjectTree<object>> list = new List<IObjectTree<object>>();
             list.Add(new ObjectTree<object> {

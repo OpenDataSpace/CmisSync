@@ -27,7 +27,7 @@ namespace CmisSync.Notifications {
     /// </summary>
     public static class NotificationUtils {
         private static readonly string IconName = Path.Combine("dataspacesync-app");
-        private static global::Notifications.Notification notification = new global::Notifications.Notification();
+        private static global::Notifications.Notification notification;
         private static object notificationLock = new object();
 
         /// <summary>
@@ -43,16 +43,22 @@ namespace CmisSync.Notifications {
         /// Icon path.
         /// </param>
         public static void NotifyAsync(string title, string content = null, string iconPath = null) {
-            if (content == null) {
-                content = string.Empty;
-            }
+            content = content ?? string.Empty;
+            Gtk.Application.Invoke(delegate {
+                lock (notificationLock) {
+                    if (notification == null) {
+                        notification = new global::Notifications.Notification();
+                    }
 
-            lock (notificationLock) {
-                notification.Summary = title;
-                notification.Body = content;
-                notification.IconName = string.IsNullOrEmpty(iconPath) ? IconName : iconPath;
-                notification.Show();
-            }
+                    try {
+                        notification.Summary = title;
+                        notification.Body = content.Substring(0, Math.Min(content.Length, 1024));
+                        notification.IconName = string.IsNullOrEmpty(iconPath) ? IconName : iconPath;
+                        notification.Show();
+                    } catch (Exception) {
+                    }
+                }
+            });
         }
     }
 }

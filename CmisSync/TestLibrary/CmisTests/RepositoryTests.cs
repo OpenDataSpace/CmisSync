@@ -26,6 +26,7 @@ namespace TestLibrary.CmisTests {
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.FileSystem;
 
@@ -37,7 +38,7 @@ namespace TestLibrary.CmisTests {
 
     using TestLibrary.IntegrationTests;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class RepositoryTests : IDisposable {
         private static dynamic config;
         private ActivityListenerAggregator listener;
@@ -56,7 +57,7 @@ namespace TestLibrary.CmisTests {
 #endif
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SyncStatusStartsWithOfflineStatus() {
             this.SetupMocks();
 
@@ -65,7 +66,7 @@ namespace TestLibrary.CmisTests {
             Assert.That(underTest.Status, Is.EqualTo(SyncStatus.Disconnected));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SyncStatusIsDeactivatedIfRootFolderDoesNotExists() {
             this.SetupMocks();
             bool notified = false;
@@ -89,8 +90,11 @@ namespace TestLibrary.CmisTests {
             Assert.That(notified, Is.True);
         }
 
-        [Test, Category("Fast")]
-        public void SyncStatusSwitchesFromOfflineToIdleIfLoginWasSuccessful() {
+        [Test]
+        public void SyncStatusSwitchesFromOfflineToIdleIfLoginWasSuccessful(
+            [Values(true, false)]bool pwcIsSupported,
+            [Values(true, false)]bool selectiveSyncSupported)
+        {
             this.SetupMocks();
             bool notified = false;
             var underTest = new TestRepository(this.repoInfo, this.listener, this.queue);
@@ -99,14 +103,14 @@ namespace TestLibrary.CmisTests {
                 Assert.That(e.PropertyName, Is.EqualTo("Status"));
             };
 
-            underTest.Queue.AddEvent(new SuccessfulLoginEvent(new Uri("https://demo.deutsche-wolke.de/cmis/browser"), Mock.Of<ISession>()));
+            underTest.Queue.AddEvent(this.CreateSuccessfulLogin(pwcIsSupported, selectiveSyncSupported));
             this.queue.Step();
 
             Assert.That(underTest.Status, Is.EqualTo(SyncStatus.Idle));
             Assert.That(notified, Is.True);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SyncStatusSwitchesFromOfflineToErrorIfConfigurationIsNeeded() {
             this.SetupMocks();
             bool notified = false;
@@ -122,8 +126,11 @@ namespace TestLibrary.CmisTests {
             Assert.That(notified, Is.True);
         }
 
-        [Test, Category("Fast")]
-        public void SyncDateUpdatesIfSyncIsDoneAndQueueDoesNotContainsChanges() {
+        [Test]
+        public void SyncDateUpdatesIfSyncIsDoneAndQueueDoesNotContainsChanges(
+            [Values(true, false)]bool pwcIsSupported,
+            [Values(true, false)]bool selectiveSync)
+        {
             this.SetupMocks();
             bool notified = false;
             var underTest = new TestRepository(this.repoInfo, this.listener, this.queue);
@@ -132,7 +139,7 @@ namespace TestLibrary.CmisTests {
                     notified = true;
                 }
             };
-            underTest.Queue.AddEvent(new SuccessfulLoginEvent(new Uri("https://demo.deutsche-wolke.de/cmis/browser"), Mock.Of<ISession>()));
+            underTest.Queue.AddEvent(this.CreateSuccessfulLogin(pwcIsSupported, selectiveSync));
             this.queue.Step();
             underTest.Queue.AddEvent(new StartNextSyncEvent(fullSyncRequested: true));
             this.queue.Step();
@@ -141,7 +148,7 @@ namespace TestLibrary.CmisTests {
             Assert.That(notified, Is.True);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void LastFinishedSyncIsNullOnInitializationAndNumberOfChangesIsZero() {
             this.SetupMocks();
 
@@ -151,7 +158,7 @@ namespace TestLibrary.CmisTests {
             Assert.That(underTest.NumberOfChanges, Is.EqualTo(0));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void NumberOfChangesAreUpdatedIfEventIsAddedToQueue() {
             this.SetupMocks();
 
@@ -161,6 +168,11 @@ namespace TestLibrary.CmisTests {
             Assert.That(underTest.NumberOfChanges, Is.EqualTo(1));
             this.queue.Step();
             Assert.That(underTest.NumberOfChanges, Is.EqualTo(0));
+        }
+
+        private SuccessfulLoginEvent CreateSuccessfulLogin(bool pwcSupport = false, bool selectiveSync = false, bool changeEvents = false) {
+            var url = new Uri("https://demo.deutsche-wolke.de/cmis/browser");
+            return new SuccessfulLoginEvent(url, Mock.Of<ISession>(), Mock.Of<IFolder>(), pwcSupport, selectiveSync, changeEvents);
         }
 
         private void SetupMocks() {

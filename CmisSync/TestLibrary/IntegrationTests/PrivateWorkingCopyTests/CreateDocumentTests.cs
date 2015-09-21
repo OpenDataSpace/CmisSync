@@ -34,12 +34,12 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
 
     using TestUtils;
 
-    [TestFixture, Timeout(180000), TestName("PWC")]
+    [TestFixture, Category("Slow"), Timeout(30000), TestName("PWC")]
     public class CreateDocumentTests : BaseFullRepoTest {
         private readonly string fileName = "fileName.bin";
         private readonly string content = "content";
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test, MaxTime(5000)]
         public void CreateCheckedOutDocument([Values(true, false)]bool withPropertiesOnCheckIn, [Values(true, false)]bool deleteExistingContentStream) {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
 
@@ -69,7 +69,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             }
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test, MaxTime(5000)]
         public void CreateCheckedOutDocumentAndCancelCheckout([Values(true, false)]bool settingContent) {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
 
@@ -84,7 +84,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(this.remoteRootDir.GetChildren().TotalNumItems, Is.EqualTo(0));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test, MaxTime(10000)]
         public void CreateCheckedOutDocumentAndDoNotCheckIn() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             this.remoteRootDir.CreateDocument(this.fileName, (string)null, checkedOut: true);
@@ -92,7 +92,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(this.remoteRootDir.GetChildren().TotalNumItems, Is.EqualTo(0));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test, MaxTime(10000)]
         public void CreateCheckedOutDocumentMustFailIfDocumentAlreadyExists() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             string fileName = "file.bin";
@@ -100,7 +100,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.Throws<CmisNameConstraintViolationException>(() => this.remoteRootDir.CreateDocument(fileName, "other content", true));
         }
 
-        [Test, Category("Slow"), MaxTime(180000)]
+        [Test, MaxTime(8000)]
         public void CreateDocumentViaPwcCheckInWithLastModificationDate() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             string fileName = "file.bin";
@@ -111,6 +111,31 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             doc = this.session.GetObject(doc.CheckIn(true, properties, null, string.Empty)) as IDocument;
             doc.Refresh();
             Assert.That(doc.LastModificationDate, Is.EqualTo(past).Within(1).Seconds);
+        }
+
+        [Test, MaxTime(10000)]
+        public void CreateTooDocumentsInTwoFoldersWithTheSameName() {
+            this.EnsureThatPrivateWorkingCopySupportIsAvailable();
+            string fileName = "file.bin";
+            var folder = this.remoteRootDir.CreateFolder("folder1");
+            var doc1 = this.remoteRootDir.CreateDocument(fileName, (string)null, true);
+            var doc2 = folder.CreateDocument(fileName, (string)null, true);
+            doc1.CheckIn(true, null, null, string.Empty);
+            doc2.CheckIn(true, null, null, string.Empty);
+            this.remoteRootDir.Refresh();
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(2));
+        }
+
+        [Test, MaxTime(10000)]
+        public void CreateTooDocumentsWithTheSameSubName() {
+            this.EnsureThatPrivateWorkingCopySupportIsAvailable();
+            string fileName1 = "gpio.h";
+            string fileName2 = "io.h";
+            var doc1 = this.remoteRootDir.CreateDocument(fileName1, "content");
+            var doc2 = this.remoteRootDir.CreateDocument(fileName2, "content");
+            this.remoteRootDir.Refresh();
+            doc1.Refresh();
+            doc2.Refresh();
         }
     }
 }

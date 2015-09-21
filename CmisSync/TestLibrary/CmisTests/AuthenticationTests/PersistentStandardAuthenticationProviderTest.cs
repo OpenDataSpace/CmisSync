@@ -28,7 +28,7 @@ namespace TestLibrary.CmisTests.AuthenticationTests {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class PersistentStandardAuthenticationProviderTest {
         private Mock<ICookieStorage> storage;
         private Uri url;
@@ -39,42 +39,42 @@ namespace TestLibrary.CmisTests.AuthenticationTests {
             this.storage = new Mock<ICookieStorage>();
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorWithValidInput() {
             using (new PersistentStandardAuthenticationProvider(this.storage.Object, this.url));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void NtlmConstructorWithValidInput() {
             using (new PersistentNtlmAuthenticationProvider(this.storage.Object, this.url));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorFailsOnNullStorage() {
             Assert.Throws<ArgumentNullException>(() => { using (new PersistentStandardAuthenticationProvider(null, this.url)); });
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void NtlmConstructorFailsOnNullStorage() {
             Assert.Throws<ArgumentNullException>(() => { using (new PersistentNtlmAuthenticationProvider(null, this.url)); });
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorFailsOnNullUrl() {
             Assert.Throws<ArgumentNullException>(() => { using (new PersistentStandardAuthenticationProvider(this.storage.Object, null)); });
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void NtlmConstructorFailsOnNullUrl() {
             Assert.Throws<ArgumentNullException>(() => { using (new PersistentNtlmAuthenticationProvider(this.storage.Object, null)); });
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SetCookieCollectionOnDispose() {
             using (new PersistentStandardAuthenticationProvider(this.storage.Object, this.url));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void SetCookieCollectionFilledWithCookiesOnDispose() {
             var cookie = new Cookie("name", "value", this.url.AbsolutePath, this.url.Host);
             using (var auth = new PersistentStandardAuthenticationProvider(this.storage.Object, this.url)) {
@@ -84,14 +84,14 @@ namespace TestLibrary.CmisTests.AuthenticationTests {
             this.storage.VerifySet(s => s.Cookies = It.Is<CookieCollection>(cc => cc.Count == 1 && cookie.Equals(cc[0])));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void DoNotFailOnNonHTTPResponse() {
             using (var auth = new PersistentStandardAuthenticationProvider(this.storage.Object, this.url)) {
                 auth.HandleResponse(new Mock<WebResponse>().Object);
             }
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void DeleteAllCookies() {
             using (var auth = new PersistentStandardAuthenticationProvider(this.storage.Object, this.url)) {
                 auth.Cookies.Add(this.url, new Cookie("test", "value"));

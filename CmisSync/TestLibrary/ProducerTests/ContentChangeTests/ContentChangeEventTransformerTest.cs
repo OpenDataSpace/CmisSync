@@ -36,11 +36,11 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture]
+    [TestFixture, Category("Fast"), Category("ContentChange")]
     public class ContentChangeEventTransformerTest {
         private static readonly string Id = "myId";
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void ConstructorTest() {
             var storage = new Mock<IMetaDataStorage>();
             var queue  = new Mock<ISyncEventQueue>();
@@ -48,13 +48,13 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
             Assert.That(transformer.Priority, Is.EqualTo(1000));
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void DbNullContstructorTest() {
             var queue  = new Mock<ISyncEventQueue>();
             Assert.Throws<ArgumentNullException>(() => new ContentChangeEventTransformer(queue.Object, null));
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void IgnoreDifferentEvent() {
             var storage = new Mock<IMetaDataStorage>();
             var queue = new Mock<ISyncEventQueue>();
@@ -63,7 +63,7 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
             Assert.That(transformer.Handle(e.Object), Is.False);
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void IgnoreNotAccumulatedNonDeleteEvent() {
             var storage = new Mock<IMetaDataStorage>();
             var queue = new Mock<ISyncEventQueue>();
@@ -72,7 +72,7 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
             Assert.Throws<InvalidOperationException>(() => transformer.Handle(e));
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void DocumentCreationWithContent() {
             var storage = new Mock<IMetaDataStorage>();
             FileEvent fileEvent = null;
@@ -89,7 +89,7 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CREATED));
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void DocumentCreationWithOutContent() {
             var storage = new Mock<IMetaDataStorage>();
             FileEvent fileEvent = null;
@@ -106,7 +106,7 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.NONE));
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void RemoteSecurityChangeOfExistingFile() {
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFile("path", Id);
@@ -124,7 +124,7 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.NONE));
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void RemoteSecurityChangeOfNonExistingFile() {
             var storage = new Mock<IMetaDataStorage>();
             FileEvent fileEvent = null;
@@ -141,7 +141,7 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CREATED));
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void LocallyNotExistingRemoteDocumentUpdated() {
             var storage = new Mock<IMetaDataStorage>();
             FileEvent fileEvent = null;
@@ -158,7 +158,7 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CREATED));
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void LocallyExistingRemoteDocumentUpdated() {
             string fileName = "file.bin";
             var storage = new Mock<IMetaDataStorage>();
@@ -166,7 +166,8 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
                 f =>
                 f.RemoteObjectId == Id &&
                 f.Name == fileName &&
-                f.Type == MappedObjectType.File);
+                f.Type == MappedObjectType.File &&
+                f.ChecksumAlgorithmName == "SHA-1");
             storage.AddMappedFile(file);
             storage.Setup(s => s.GetLocalPath(It.Is<IMappedObject>(o => o.Equals(file)))).Returns("path");
             FileEvent fileEvent = null;
@@ -185,7 +186,7 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CHANGED));
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void LocallyExistingRemoteDocumentUpdatedButContentStaysEqual() {
             byte[] hash = new byte[20];
             string type = "SHA-1";
@@ -216,7 +217,7 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.NONE));
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void RemoteDeletionChangeWithoutLocalFile() {
             var storage = new Mock<IMetaDataStorage>();
             var queue = new Mock<ISyncEventQueue>();
@@ -228,7 +229,7 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void RemoteDeletionChangeTest() {
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFile("path", Id);
@@ -246,7 +247,7 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.NONE));
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void RemoteFolderDeletionWithoutLocalFolder() {
             var storage = new Mock<IMetaDataStorage>();
             var queue = new Mock<ISyncEventQueue>();
@@ -258,7 +259,7 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void RemoteFolderDeletion() {
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFolder("path", Id);
@@ -275,7 +276,7 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
             Assert.That(folderEvent.Remote, Is.EqualTo(MetaDataChangeType.DELETED));
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void RemoteFolderCreation() {
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFolder("path", Id);
@@ -292,7 +293,7 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
             Assert.That(folderEvent.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void RemoteFolderUpdate() {
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFolder("path", Id);
@@ -309,7 +310,7 @@ namespace TestLibrary.ProducerTests.ContentChangeTests {
             Assert.That(folderEvent.Remote, Is.EqualTo(MetaDataChangeType.CHANGED));
         }
 
-        [Test, Category("Fast"), Category("ContentChange")]
+        [Test]
         public void RemoteFolderSecurity() {
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFolder("path", Id);

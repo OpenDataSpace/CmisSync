@@ -20,6 +20,7 @@
 namespace CmisSync.Lib.Config {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.IO;
     using System.Text;
     using System.Xml.Serialization;
@@ -44,6 +45,11 @@ namespace CmisSync.Lib.Config {
         private int downloadRetries = 2;
         private int deletionRetries = 2;
         private List<IgnoredFolder> ignoredFolders;
+
+        /// <summary>
+        /// Occurs when saved.
+        /// </summary>
+        public event EventHandler Saved;
 
         /// <summary>
         /// Gets or sets the display name.
@@ -79,7 +85,7 @@ namespace CmisSync.Lib.Config {
         /// Gets or sets the binding type.
         /// </summary>
         /// <value>The binding type.</value>
-        [XmlElement("binding"), System.ComponentModel.DefaultValue(BindingType.AtomPub)]
+        [XmlElement("binding"), DefaultValue(BindingType.AtomPub)]
         public string Binding {
             get {
                 return this.credentials.Binding;
@@ -163,7 +169,7 @@ namespace CmisSync.Lib.Config {
         /// CmisSync.Lib will sync this remote folder once during this interval of time.
         /// </summary>
         /// <value>The poll interval.</value>
-        [XmlElement("pollinterval"), System.ComponentModel.DefaultValue(Config.DefaultPollInterval)]
+        [XmlElement("pollinterval"), DefaultValue(Config.DefaultPollInterval)]
         public double PollInterval {
             get {
                 return this.pollInterval;
@@ -179,7 +185,7 @@ namespace CmisSync.Lib.Config {
         /// If zero or negative number is passed, it will be converted to -1
         /// </summary>
         /// <value>The connection timeout.</value>
-        [XmlElement("connectionTimeout"), System.ComponentModel.DefaultValue(Config.DefaultConnectionTimeout)]
+        [XmlElement("connectionTimeout"), DefaultValue(Config.DefaultConnectionTimeout)]
         public int ConnectionTimeout {
             get {
                 return this.connectionTimeout;
@@ -195,7 +201,7 @@ namespace CmisSync.Lib.Config {
         /// If zero or negative number is passed, it will be converted to -1
         /// </summary>
         /// <value>The read timeout.</value>
-        [XmlElement("readTimeout"), System.ComponentModel.DefaultValue(Config.DefaultReadTimeout)]
+        [XmlElement("readTimeout"), DefaultValue(Config.DefaultReadTimeout)]
         public int ReadTimeout {
             get {
                 return this.readTimeout;
@@ -231,7 +237,7 @@ namespace CmisSync.Lib.Config {
         /// If none zero, CmisSync will divide the document by chunk size for download/upload.
         /// </summary>
         /// <value>The size of the chunk.</value>
-        [XmlElement("chunkSize"), System.ComponentModel.DefaultValue(Config.DefaultChunkSize)]
+        [XmlElement("chunkSize"), DefaultValue(Config.DefaultChunkSize)]
         public long ChunkSize {
             get {
                 return this.chunkSize;
@@ -307,6 +313,27 @@ namespace CmisSync.Lib.Config {
         }
 
         /// <summary>
+        /// Gets or sets the download limit. Zero is no limit.
+        /// </summary>
+        /// <value>The download limit.</value>
+        [XmlElement("downloadLimit"), DefaultValue(0)]
+        public long DownloadLimit { get; set; }
+
+        /// <summary>
+        /// Gets or sets the upload limit. Zero is no limit.
+        /// </summary>
+        /// <value>The upload limit.</value>
+        [XmlElement("uploadLimit"), DefaultValue(0)]
+        public long UploadLimit { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum http request retries.
+        /// </summary>
+        /// <value>The maximum http retries.</value>
+        [XmlElement("maxHttpRetries"), DefaultValue(2)]
+        public int HttpMaximumRetries { get; set; }
+
+        /// <summary>
         /// Gets the CmisRepoCredentials
         /// </summary>
         public CmisRepoCredentials Credentials {
@@ -346,8 +373,8 @@ namespace CmisSync.Lib.Config {
         /// Full path
         /// </returns>
         public virtual string GetDatabasePath() {
-            string name = this.DisplayName.Replace("\\", "_");
-            name = name.Replace("/", "_");
+            string name = this.DisplayName.Replace('\\', '_');
+            name = name.Replace('/', '_');
             return Path.Combine(ConfigManager.CurrentConfig.GetConfigPath(), name + "_DB");
         }
 
@@ -364,6 +391,10 @@ namespace CmisSync.Lib.Config {
         /// </summary>
         /// <param name="password">Password instance.</param>
         public virtual void SetPassword(Password password) {
+            if (password == null) {
+                throw new ArgumentNullException("password");
+            }
+
             this.credentials.Password = new Password { ObfuscatedPassword = password.ObfuscatedPassword };
         }
 
@@ -396,6 +427,16 @@ namespace CmisSync.Lib.Config {
 
                 return path.StartsWith(ignore) && path[ignore.Length] == '/';
             }));
+        }
+
+        /// <summary>
+        /// Raises the saved event.
+        /// </summary>
+        public void OnSaved() {
+            var handler = this.Saved;
+            if (handler != null) {
+                handler(this, new EventArgs());
+            }
         }
 
         /// <summary>

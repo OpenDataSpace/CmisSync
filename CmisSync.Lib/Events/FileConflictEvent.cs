@@ -30,32 +30,32 @@ namespace CmisSync.Lib.Events {
         /// <summary>
         /// Remote File Deleted
         /// </summary>
-        DELETED_REMOTE_FILE,
+        DeletedRemoteFile,
 
         /// <summary>
         /// Remote File Moved
         /// </summary>
-        MOVED_REMOTE_FILE,
+        MovedRemoteFile,
 
         /// <summary>
         /// Remote File already existed
         /// </summary>
-        ALREADY_EXISTS_REMOTELY,
+        AlreadyExistsRemotely,
 
         /// <summary>
         /// Content was modified
         /// </summary>
-        CONTENT_MODIFIED,
+        ContentModified,
 
         /// <summary>
         /// Remote Path Deleted
         /// </summary>
-        DELETED_REMOTE_PATH,
+        DeletedRemotePath,
 
         /// <summary>
         /// Remote added path conflicts with local file
         /// </summary>
-        REMOTE_ADDED_PATH_CONFLICTS_LOCAL_FILE
+        RemoteAddedPathConflictsLocalFile
     }
 
     /// <summary>

@@ -103,18 +103,7 @@ namespace TestLibrary.TestUtils {
             this.children.Sort((FolderTree x, FolderTree y) => x.Name.CompareTo(y.Name));
         }
 
-        public FolderTree(DirectoryInfo dir, string name = null) {
-            this.Name = name ?? dir.Name;
-            this.IsFile = false;
-            foreach (var child in dir.GetFileSystemInfos()) {
-                if (child is FileInfo) {
-                    this.children.Add(new FolderTree(child as FileInfo));
-                } else if (child is DirectoryInfo) {
-                    this.children.Add(new FolderTree(child as DirectoryInfo));
-                }
-            }
-
-            this.children.Sort((FolderTree x, FolderTree y) => x.Name.CompareTo(y.Name));
+        public FolderTree(DirectoryInfo dir, string name = null) : this(new DirectoryInfoWrapper(dir), name) {
         }
 
         private FolderTree(IDocument doc) {
@@ -129,9 +118,7 @@ namespace TestLibrary.TestUtils {
             this.LocalId = file.Uuid == null ? null : file.Uuid.GetValueOrDefault().ToString();
         }
 
-        private FolderTree(FileInfo file) {
-            this.Name = file.Name;
-            this.IsFile = true;
+        private FolderTree(FileInfo file) : this(new FileInfoWrapper(file)) {
         }
 
         public string Name { get; private set; }

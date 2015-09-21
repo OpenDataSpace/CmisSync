@@ -20,7 +20,9 @@
 namespace CmisSync.Lib.Producer.Crawler {
     using System;
 
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.SelectiveIgnore;
@@ -31,7 +33,6 @@ namespace CmisSync.Lib.Producer.Crawler {
     using DotCMIS.Client;
 
     using log4net;
-using CmisSync.Lib.Consumer;
 
     /// <summary>
     /// Decendants crawler.
@@ -52,6 +53,7 @@ using CmisSync.Lib.Consumer;
         /// <param name="storage">Meta data storage.</param>
         /// <param name="filter">Aggregated filter.</param>
         /// <param name="activityListener">Activity listner.</param>
+        /// <param name="ignoredStorage">Ignored entities storage.</param>
         public DescendantsCrawler(
             ISyncEventQueue queue,
             IFolder remoteFolder,
@@ -135,7 +137,8 @@ using CmisSync.Lib.Consumer;
         /// <param name="e">The event to handle.</param>
         /// <returns>true if handled</returns>
         public override bool Handle(ISyncEvent e) {
-            if (e is StartNextSyncEvent) {
+            var startNextSync = e as StartNextSyncEvent;
+            if (startNextSync != null) {
                 try {
                     Logger.Debug("Starting DecendantsCrawlSync upon " + e);
                     using (var activity = new ActivityListenerResource(this.activityListener)) {
@@ -147,6 +150,12 @@ using CmisSync.Lib.Consumer;
                 } catch (InteractionNeededException interaction) {
                     this.Queue.AddEvent(new InteractionNeededEvent(interaction));
                     throw;
+                } catch (Exception retryException) {
+                    Logger.Info("Failed to crawl descendants (trying again):", retryException);
+                    this.Queue.AddEvent(new StartNextSyncEvent(fullSyncRequested: startNextSync.FullSyncRequested) {
+                        LastTokenOnServer = startNextSync.LastTokenOnServer
+                    });
+                    return false;
                 }
             }
 
@@ -159,12 +168,14 @@ using CmisSync.Lib.Consumer;
                 if (Logger.IsDebugEnabled) {
                     Logger.Debug(string.Format("LocalTree:  {0} Elements", trees.LocalTree.ToList().Count));
                     Logger.Debug(string.Format("RemoteTree: {0} Elements", trees.RemoteTree.ToList().Count));
-                    Logger.Debug(string.Format("StoredTree: {0} Elements", trees.StoredTree.ToList().Count));
+                    Logger.Debug(string.Format("StoredTree: {0} Elements", trees.StoredObjects.Count));
                 }
 
+                Logger.Debug("Create events");
                 CrawlEventCollection events = this.eventGenerator.GenerateEvents(trees);
-
+                Logger.Debug("Events created");
                 this.notifier.MergeEventsAndAddToQueue(events);
+                Logger.Debug("Events merged and added to queue");
             } catch (System.IO.PathTooLongException e) {
                 string msg = "Crawl Sync aborted because a local path is too long. Please take a look into the log to figure out the reason.";
                 throw new InteractionNeededException(msg, e) { Title = "Local path is too long", Description = msg };

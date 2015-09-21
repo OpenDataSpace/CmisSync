@@ -31,7 +31,7 @@ namespace TestLibrary.StreamsTests {
 
     [TestFixture]
     public class BandwidthLimitedStreamTest {
-        private readonly int length = 1024 * 10;
+        private readonly int length = 1024 * 10 + 5;
         private byte[] buffer;
         private long limit = 1024;
 
@@ -63,8 +63,8 @@ namespace TestLibrary.StreamsTests {
 
         [Test, Category("Fast"), Category("Streams")]
         public void ConstructorWithLimits() {
-            using (var memory = new MemoryStream(this.buffer))
-            using (var underTest = new BandwidthLimitedStream(memory, this.limit)) {
+            using (var wrappedStream = Mock.Of<Stream>())
+            using (var underTest = new BandwidthLimitedStream(wrappedStream, this.limit)) {
                 Assert.That(underTest.ReadLimit, Is.EqualTo(this.limit));
                 Assert.That(underTest.WriteLimit, Is.EqualTo(this.limit));
             }
@@ -72,45 +72,63 @@ namespace TestLibrary.StreamsTests {
 
         [Test, Category("Fast"), Category("Streams")]
         public void ConstructorWithoutLimits() {
-            using (var memory = new MemoryStream(this.buffer))
-            using (var underTest = new BandwidthLimitedStream(memory)) {
+            using (var wrappedStream = Mock.Of<Stream>())
+            using (var underTest = new BandwidthLimitedStream(wrappedStream)) {
                 Assert.That(underTest.ReadLimit, Is.Null);
                 Assert.That(underTest.WriteLimit, Is.Null);
             }
         }
 
-        [Test, Category("Slow"), Category("Streams"), Ignore("TODO")]
-        public void ReadOrWriteOneByteMoreThanLimitTakesAtMinimumOneSecond([Values(true, false)]bool read) {
-            byte[] buf = new byte[this.length];
-            using (var memstream = new MemoryStream(this.buffer))
-            using (var underTest = new BandwidthLimitedStream(memstream, limit: this.limit)) {
-                var start = DateTime.Now;
+        [Test, Category("Slow"), Category("Streams"), MaxTime(10200)]
+        public void LimitReadOrWriteStream([Values(true, false)]bool read) {
+            byte[] otherBuffer = new byte[this.length];
+            new Random().NextBytes(this.buffer);
+            new Random().NextBytes(otherBuffer);
+            using (var sourceOrTargetStream  = new MemoryStream(otherBuffer))
+            using (var wrappedStream = new MemoryStream(this.buffer))
+            using (var monitorStream = new BandwidthNotifyingStream(wrappedStream))
+            using (var underTest = new BandwidthLimitedStream(monitorStream, limit: this.limit)) {
+                monitorStream.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) => {
+                    if (e.PropertyName == Utils.NameOf(() => monitorStream.BitsPerSecond)) {
+                        // limit * 2 is a workaround to handle monitoring of sliding time window
+                        Assert.That(monitorStream.BitsPerSecond / 8, Is.Null.Or.LessThanOrEqualTo(this.limit * 2));
+                    }
+                };
+
                 if (read) {
-                    underTest.Read(buf, 0, (int)this.limit + 1);
+                    underTest.CopyTo(sourceOrTargetStream);
                 } else {
-                    underTest.Write(buf, 0, (int)this.limit + 1);
+                    sourceOrTargetStream.CopyTo(underTest);
                 }
 
-                TimeSpan duration = DateTime.Now - start;
-                Assert.That(duration.TotalMilliseconds, Is.AtLeast(1000));
+                Assert.That(wrappedStream.ToArray(), Is.EqualTo(sourceOrTargetStream.ToArray()));
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void SetAndGetReadAndWriteLimits([Values(true, false)]bool limitRead, [Values(true, false)]bool limitWrite) {
-            using (var memory = new MemoryStream(this.buffer))
-            using (var underTest = new BandwidthLimitedStream(memory)) {
-                Assert.That(underTest.ReadLimit, Is.Null);
-                Assert.That(underTest.WriteLimit, Is.Null);
+        public void SetAndGetReadAndWriteLimits(
+            [Values(true, false)]bool limitRead,
+            [Values(true, false)]bool limitWrite)
+        {
+            using (var wrappedStream = Mock.Of<Stream>())
+            using (var underTest = new BandwidthLimitedStream(wrappedStream)) {
                 underTest.ReadLimit = limitRead ? this.limit : (long?)null;
-                Assert.That(underTest.ReadLimit, Is.EqualTo(limitRead ? this.limit : (long?)null));
-                Assert.That(underTest.WriteLimit, Is.Null);
                 underTest.WriteLimit = limitWrite ? this.limit : (long?)null;
                 Assert.That(underTest.ReadLimit, Is.EqualTo(limitRead ? this.limit : (long?)null));
                 Assert.That(underTest.WriteLimit, Is.EqualTo(limitWrite ? this.limit : (long?)null));
+            }
+        }
+
+        [Test, Category("Fast"), Category("Streams")]
+        public void DisableLimits(
+            [Values(true, false)]bool limitRead,
+            [Values(true, false)]bool limitWrite)
+        {
+            using (var wrappedStream = Mock.Of<Stream>())
+            using (var underTest = new BandwidthLimitedStream(wrappedStream)) {
+                underTest.ReadLimit = limitRead ? this.limit : (long?)null;
+                underTest.WriteLimit = limitWrite ? this.limit : (long?)null;
                 underTest.DisableReadLimit();
-                Assert.That(underTest.ReadLimit, Is.Null);
-                Assert.That(underTest.WriteLimit, Is.EqualTo(limitWrite ? this.limit : (long?)null));
                 underTest.DisableWriteLimit();
                 Assert.That(underTest.ReadLimit, Is.Null);
                 Assert.That(underTest.WriteLimit, Is.Null);
@@ -119,8 +137,8 @@ namespace TestLibrary.StreamsTests {
 
         [Test, Category("Fast"), Category("Streams")]
         public void ChangingLimitsNotifiesListener() {
-            using (var memory = new MemoryStream(this.buffer))
-            using (var underTest = new BandwidthLimitedStream(memory)) {
+            using (var wrappedStream = Mock.Of<Stream>())
+            using (var underTest = new BandwidthLimitedStream(wrappedStream)) {
                 int readLimitNotified = 0;
                 int writeLimitNotified = 0;
                 long? expectedReadLimit = this.limit;

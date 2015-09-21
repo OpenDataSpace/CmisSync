@@ -96,7 +96,6 @@ namespace CmisSync {
                             this.status_item.Image.Size          = new SizeF(16, 16);
                             this.status_item.AlternateImage      = this.animation_frames_active[icon_frame];
                             this.status_item.AlternateImage.Size = new SizeF(16, 16);
-
                         } else {
                             this.status_item.Image               = this.error_image;
                             this.status_item.AlternateImage      = this.error_image_active;

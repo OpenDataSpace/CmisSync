@@ -88,15 +88,15 @@ namespace CmisSync {
 
         public string GetServer(string server) {
             try {
-                Uri uri = new Uri(server);
+                new Uri(server);
                 return server;
             } catch (Exception) {
                 if (!server.StartsWith("http://")) {
                     server = "http://" + server;
                     try {
-                        Uri uri = new Uri(server);
+                        new Uri(server);
                         return server;
-                    } catch(Exception) {
+                    } catch (Exception) {
                     }
                 }
             }

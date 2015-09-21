@@ -36,17 +36,17 @@ namespace TestLibrary.ConsumerTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture]
+    [TestFixture, Category("Fast"), Category("SituationDetection")]
     public class LocalSituationDetectionTest {
         private LocalSituationDetection underTest = new LocalSituationDetection();
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void NoChangeOnFile() {
             var fileEvent = new FileEvent(Mock.Of<IFileInfo>()) { Local = MetaDataChangeType.NONE };
             Assert.That(this.underTest.Analyse(Mock.Of<IMetaDataStorage>(), fileEvent), Is.EqualTo(SituationType.NOCHANGE));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FileAddedDetection() {
             var fileInfo = Mock.Of<IFileInfo>(f => f.Exists == true);
             var fileEvent = new FileEvent(fileInfo) { Local = MetaDataChangeType.CREATED };
@@ -54,7 +54,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.That(this.underTest.Analyse(Mock.Of<IMetaDataStorage>(), fileEvent), Is.EqualTo(SituationType.ADDED));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FileContentChanged() {
             var fileInfo = Mock.Of<IFileInfo>(f => f.Exists == true);
             var fileEvent = new FileEvent(fileInfo) { Local = MetaDataChangeType.NONE, LocalContent = ContentChangeType.CHANGED };
@@ -62,7 +62,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.That(this.underTest.Analyse(Mock.Of<IMetaDataStorage>(), fileEvent), Is.EqualTo(SituationType.CHANGED));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FileRemoved() {
             var fileInfo = Mock.Of<IFileInfo>(f => f.Exists == false);
             var fileEvent = new FileEvent(fileInfo) { Local = MetaDataChangeType.DELETED };
@@ -70,7 +70,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.That(this.underTest.Analyse(Mock.Of<IMetaDataStorage>(), fileEvent), Is.EqualTo(SituationType.REMOVED));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FileRenamed() {
             string parentId = "parentId";
             var storage = new Mock<IMetaDataStorage>();
@@ -87,7 +87,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.That(this.underTest.Analyse(storage.Object, fileEvent), Is.EqualTo(SituationType.RENAMED));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FileMovedWithoutStorageEntry() {
             var fileInfo = Mock.Of<IFileInfo>(f => f.Exists == true);
             var fileEvent = new FileEvent(fileInfo) { Local = MetaDataChangeType.MOVED };
@@ -95,7 +95,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.That(this.underTest.Analyse(Mock.Of<IMetaDataStorage>(), fileEvent), Is.EqualTo(SituationType.MOVED));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FileMovedWithStorageEntry() {
             string parentId = "parentId";
             var storage = new Mock<IMetaDataStorage>();
@@ -113,21 +113,21 @@ namespace TestLibrary.ConsumerTests {
             Assert.That(this.underTest.Analyse(Mock.Of<IMetaDataStorage>(), fileEvent), Is.EqualTo(SituationType.MOVED));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FolderAdded() {
             var folderEvent = new FolderEvent(Mock.Of<IDirectoryInfo>()) { Local = MetaDataChangeType.CREATED };
 
             Assert.That(this.underTest.Analyse(Mock.Of<IMetaDataStorage>(), folderEvent), Is.EqualTo(SituationType.ADDED));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FolderRemoved() {
             var folderEvent = new FolderEvent(Mock.Of<IDirectoryInfo>()) { Local = MetaDataChangeType.DELETED };
 
             Assert.That(this.underTest.Analyse(Mock.Of<IMetaDataStorage>(), folderEvent), Is.EqualTo(SituationType.REMOVED));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FolderRenamed() {
             var storage = new Mock<IMetaDataStorage>();
             Guid guid = Guid.NewGuid();
@@ -142,7 +142,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.That(this.underTest.Analyse(storage.Object, folderEvent), Is.EqualTo(SituationType.RENAMED));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FolderChanged() {
             var storage = new Mock<IMetaDataStorage>();
             Guid guid = Guid.NewGuid();
@@ -157,7 +157,7 @@ namespace TestLibrary.ConsumerTests {
             Assert.That(this.underTest.Analyse(storage.Object, folderEvent), Is.EqualTo(SituationType.CHANGED));
         }
 
-        [Test, Category("Fast"), Category("SituationDetection")]
+        [Test]
         public void FolderMoved() {
             var folderEvent = new FolderMovedEvent(Mock.Of<IDirectoryInfo>(), Mock.Of<IDirectoryInfo>(), null, null) { Local = MetaDataChangeType.MOVED };
 

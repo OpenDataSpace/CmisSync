@@ -19,13 +19,14 @@
 
 namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests {
     using System;
-    using System.Security.Cryptography;
     using System.IO;
+    using System.Security.Cryptography;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Consumer.SituationSolver.PWC;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -42,12 +43,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
     [TestFixture]
     public class LocalObjectChangedRemoteObjectChangedWithPWCTest {
-        private Mock<ISession> session;
-        private Mock<IMetaDataStorage> storage;
-        private Mock<IFileTransmissionStorage> transmissionStorage;
-        private Mock<TransmissionManager> manager;
-        private Mock<ISolver> fallbackSolver;
-
         private readonly string parentId = "parentId";
         private readonly string fileName = "file.bin";
         private readonly string objectIdOld = "objectIdOld";
@@ -56,6 +51,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         private readonly string changeTokenOld = "changeTokenOld";
         private readonly string changeTokenPWC = "changeTokenPWC";
         private readonly string changeTokenNew = "changeTokenNew";
+
+        private Mock<ISession> session;
+        private Mock<IMetaDataStorage> storage;
+        private Mock<IFileTransmissionStorage> transmissionStorage;
+        private Mock<TransmissionManager> manager;
+        private ITransmissionFactory transmissionFactory;
+        private Mock<ISolver> fallbackSolver;
 
         private Mock<IFileInfo> localFile;
         private Mock<IDocument> remoteDocument;
@@ -73,28 +75,20 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorFailsIfSessionIsNotAbleToWorkWithPrivateWorkingCopies() {
-            this.SetUpMocks(isPwcUpdateable: false);
-            Assert.Throws<ArgumentException>(
-                () =>
-                new LocalObjectChangedRemoteObjectChangedWithPWC(
-                this.session.Object,
-                this.storage.Object,
-                this.transmissionStorage.Object,
-                this.manager.Object,
-                Mock.Of<ISolver>()));
+        public void ConstructorDoesNotTouchTheSession() {
+            this.SetUpMocks();
+            this.session = new Mock<ISession>(MockBehavior.Strict);
+            this.CreateSolver();
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorFailsIfGivenSolverIsNull() {
             this.SetUpMocks();
-            Assert.Throws<ArgumentNullException>(
-                () =>
-                new LocalObjectChangedRemoteObjectChangedWithPWC(
+            Assert.Throws<ArgumentNullException>(() => new LocalObjectChangedRemoteObjectChangedWithPWC(
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager.Object,
+                this.transmissionFactory,
                 null));
         }
 
@@ -162,7 +156,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager.Object,
+                this.transmissionFactory,
                 this.fallbackSolver.Object);
         }
 
@@ -213,10 +207,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.mappedObject.Object.Guid = Guid.NewGuid();
         }
 
-        private void SetUpMocks(bool isPwcUpdateable = true, bool serverCanModifyLastModificationDate = true) {
+        private void SetUpMocks(bool serverCanModifyLastModificationDate = true) {
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem(serverCanModifyLastModificationDate: serverCanModifyLastModificationDate);
-            this.session.SetupPrivateWorkingCopyCapability(isPwcUpdateable: isPwcUpdateable);
 
             this.storage = new Mock<IMetaDataStorage>();
 
@@ -225,6 +218,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.transmissionStorage.Setup(f => f.ChunkSize).Returns(this.chunkSize);
 
             this.manager = new Mock<TransmissionManager>();
+            this.transmissionFactory = this.manager.Object.CreateFactory();
 
             this.fallbackSolver = new Mock<ISolver>(MockBehavior.Strict);
         }

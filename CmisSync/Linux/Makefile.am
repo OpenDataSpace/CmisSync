@@ -25,6 +25,8 @@ SOURCES =  \
 	../Windows/FolderTreeMVC/NodeModel.cs \
 	../Windows/FolderTreeMVC/NodeModelUtils.cs \
 	About.cs \
+	BandwidthLimitWidget.cs \
+	BandwidthSettingsWidget.cs \
 	CertPolicyWindow.cs \
 	ClientBrand.cs \
 	CmisTree/CmisTreeStore.cs \
@@ -32,13 +34,6 @@ SOURCES =  \
 	Controller.cs \
 	CredentialsWidget.cs \
 	Edit.cs \
-	gtk-gui/CmisSync.CredentialsWidget.cs \
-	gtk-gui/CmisSync.Setting.cs \
-	gtk-gui/CmisSync.TransmissionWindow.cs \
-	gtk-gui/CmisSync.Widgets.ProxyWidget.cs \
-	gtk-gui/CmisSync.Widgets.TransmissionWidget.cs \
-	gtk-gui/CmisSync.Widgets.UrlWidget.cs \
-	gtk-gui/generated.cs \
 	Notification/NotificationUtils.cs \
 	ProxyWidget.cs \
 	RepositoryMenuItem.cs \
@@ -52,6 +47,15 @@ SOURCES =  \
 	UI.cs \
 	UIHelpers.cs \
 	UrlWidget.cs \
+	gtk-gui/CmisSync.CredentialsWidget.cs \
+	gtk-gui/CmisSync.Setting.cs \
+	gtk-gui/CmisSync.TransmissionWindow.cs \
+	gtk-gui/CmisSync.Widgets.BandwidthLimitWidget.cs \
+	gtk-gui/CmisSync.Widgets.BandwidthSettingsWidget.cs \
+	gtk-gui/CmisSync.Widgets.ProxyWidget.cs \
+	gtk-gui/CmisSync.Widgets.TransmissionWidget.cs \
+	gtk-gui/CmisSync.Widgets.UrlWidget.cs \
+	gtk-gui/generated.cs \
 	Utils.cs
 
 RESOURCES = $(RESOURCES_RESOURCES)

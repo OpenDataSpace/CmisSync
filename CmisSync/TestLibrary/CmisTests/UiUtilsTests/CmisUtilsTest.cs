@@ -34,9 +34,9 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class CmisUtilsTest {
-        [Test, Category("Fast")]
+        [Test]
         public void BandwidthFormatTest() {
             long bitPerSecond = 1;
             double bitPerSecondDouble = 1d;
@@ -70,13 +70,13 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
             Assert.True(Utils.FormatBandwidth(bitPerSecond).Replace(',', '.').Contains("1.1 GBit/s"), Utils.FormatBandwidth(bitPerSecond));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FormatIntegerPercentTest() {
             int p = 5;
             Assert.AreEqual("5.0 %", Utils.FormatPercent(p).Replace(',', '.'));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FormatDoublePercentTest() {
             double p = 5.03;
             Assert.AreEqual("5.0 %", Utils.FormatPercent(p).Replace(',', '.'));
@@ -86,7 +86,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
             Assert.AreEqual("0.1 %", Utils.FormatPercent(p).Replace(',', '.'));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CreateUserAgent() {
             var useragent = Utils.CreateUserAgent();
             Assert.That(useragent.Contains(Backend.Version));
@@ -94,7 +94,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
             Assert.That(useragent.Contains(CultureInfo.CurrentCulture.Name));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CreateUserAgentWithGivenAppName([Values("TestApp")]string name) {
             var useragent = Utils.CreateUserAgent(name);
             Assert.That(useragent.Contains(Backend.Version));
@@ -103,7 +103,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
             Assert.That(useragent.Contains(name));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CreateRegexFromIgnoreAllWildcard() {
             var regex = Utils.IgnoreLineToRegex("*");
             Assert.That(regex.IsMatch(string.Empty));
@@ -112,7 +112,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
             Assert.That(regex.IsMatch("stuff.txt"));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CreateRegexFromIgnoreDotsAtTheBeginningWildcard() {
             var regex = Utils.IgnoreLineToRegex(".*");
             Assert.That(!regex.IsMatch(string.Empty));
@@ -122,7 +122,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
             Assert.That(regex.IsMatch(".git"));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CreateRegexFromIgnoreTildeAtTheBeginningWildcard() {
             var regex = Utils.IgnoreLineToRegex("~*");
             Assert.That(regex.IsMatch("~test"));
@@ -131,7 +131,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
             Assert.That(!regex.IsMatch(".~"));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CreateRegexFromIgnoreTempFilesWildcard() {
             var regex = Utils.IgnoreLineToRegex("*.tmp");
             Assert.That(regex.IsMatch("~test.tmp"));
@@ -140,7 +140,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
             Assert.That(!regex.IsMatch("tmp.test"));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void IgnoreFolderByWildard() {
             var wildcards = new List<string>();
             wildcards.Add(".*");
@@ -148,7 +148,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests {
             Assert.That(Utils.IsInvalidFolderName(".test", wildcards), Is.True, ".test is not a valid folder name");
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void CreateMultipleServerCredentialsBasedOnTheGivenOne() {
             var userName = "User";
             var originalUrl = "https://demo.deutsche-wolke.de/wrongStuff";

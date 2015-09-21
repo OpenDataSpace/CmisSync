@@ -24,27 +24,27 @@ namespace TestLibrary.ConfigTests {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class DefaultSettingsTests {
-        [Test, Category("Fast")]
+        [Test]
         public void GetInstance() {
             var config = DefaultEntries.Defaults;
             Assert.That(config, Is.Not.Null);
             Assert.That(Is.ReferenceEquals(config, DefaultEntries.Defaults));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void GetName() {
             var config = DefaultEntries.Defaults;
             Assert.That(config.Name, Is.Not.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void GetUrl() {
             Assert.That(DefaultEntries.Defaults.Url, Is.Not.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void GetBinding() {
             var binding = DefaultEntries.Defaults.Binding;
             Assert.That(binding, Is.Null.Or.EqualTo(DotCMIS.BindingType.AtomPub).Or.EqualTo(DotCMIS.BindingType.Browser));

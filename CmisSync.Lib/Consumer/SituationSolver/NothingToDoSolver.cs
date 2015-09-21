@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
@@ -28,21 +27,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Nothing to do solver, does nothing.
     /// </summary>
-    public class NothingToDoSolver : ISolver
-    {
+    public class NothingToDoSolver : ISolver {
         /// <summary>
         /// Does nothing
         /// </summary>
-        /// <param name='localFile'>
-        /// Local file.
-        /// </param>
-        /// <param name='remoteId'>
-        /// Remote identifier.
-        /// </param>
+        /// <param name='localFileSystemInfo'>Local file.</param>
+        /// <param name='remoteId'>Remote identifier.</param>
         /// <param name="localContent">Hint if the local content has been changed.</param>
         /// <param name="remoteContent">Information if the remote content has been changed.</param>
         public virtual void Solve(
-            IFileSystemInfo localFile,
+            IFileSystemInfo localFileSystemInfo,
             IObjectId remoteId,
             ContentChangeType localContent,
             ContentChangeType remoteContent)

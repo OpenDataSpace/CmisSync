@@ -54,22 +54,25 @@ namespace CmisSync.Lib.SelectiveIgnore {
         /// <param name="e">The event to handle.</param>
         /// <returns>true if handled</returns>
         public override bool Handle(ISyncEvent e) {
-            if (e is IFilterableRemoteObjectEvent) {
-                var ev = e as IFilterableRemoteObjectEvent;
-
-                if (ev.RemoteObject is IFolder) {
-                    if (this.storage.IsIgnored(ev.RemoteObject as IFolder) == IgnoredState.INHERITED) {
-                        if (e is IFilterableLocalPathEvent) {
-                            var filterablePathEvent = e as IFilterableLocalPathEvent;
-                            if (filterablePathEvent.LocalPath != null && this.storage.IsIgnoredPath(filterablePathEvent.LocalPath) == IgnoredState.NOT_IGNORED) {
+            var filterableRemoteObjectEvent = e as IFilterableRemoteObjectEvent;
+            if (filterableRemoteObjectEvent != null) {
+                var remoteObject = filterableRemoteObjectEvent.RemoteObject;
+                var remoteFolder = remoteObject as IFolder;
+                var remoteDoc = remoteObject as IDocument;
+                if (remoteFolder != null) {
+                    if (this.storage.IsIgnored(remoteFolder) == IgnoredState.Inherited) {
+                        var filterablePathEvent = e as IFilterableLocalPathEvent;
+                        if (filterablePathEvent != null) {
+                            var localPath = filterablePathEvent.LocalPath;
+                            if (localPath != null && this.storage.IsIgnoredPath(localPath) == IgnoredState.NotIgnored) {
                                 return false;
                             }
                         }
 
                         return true;
                     }
-                } else if (ev.RemoteObject is IDocument) {
-                    if (this.storage.IsIgnored(ev.RemoteObject as IDocument) == IgnoredState.INHERITED) {
+                } else if (remoteDoc != null) {
+                    if (this.storage.IsIgnored(remoteDoc) == IgnoredState.Inherited) {
                         return true;
                     }
                 }
@@ -78,7 +81,7 @@ namespace CmisSync.Lib.SelectiveIgnore {
             if (e is IFilterableLocalPathEvent) {
                 var path = (e as IFilterableLocalPathEvent).LocalPath;
                 if (path != null) {
-                    if (this.storage.IsIgnoredPath(path) == IgnoredState.INHERITED) {
+                    if (this.storage.IsIgnoredPath(path) == IgnoredState.Inherited) {
                         return true;
                     }
                 }

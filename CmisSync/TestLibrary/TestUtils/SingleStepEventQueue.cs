@@ -20,6 +20,7 @@
 namespace TestLibrary {
     using System;
     using System.Collections.Concurrent;
+    using System.Threading;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
@@ -34,6 +35,7 @@ namespace TestLibrary {
         private IEventCounter categoryCounter;
         private SyncEventHandler dropAllFsEventsHandler;
         private bool isDroppingAllFsEvents = false;
+
         public ISyncEventManager Manager;
         public ConcurrentQueue<ISyncEvent> Queue = new ConcurrentQueue<ISyncEvent>();
 

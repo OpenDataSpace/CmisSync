@@ -43,15 +43,15 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests {
     // This more of a "rapid szenario creation" class
     // Please do write predictable unit tests for all fixes (IT here is not enough)
 
-    // Default timeout per test is 15 minutes
-    [TestFixture, Timeout(900000), TestName("SelectiveIgnore")]
+    // Default timeout per test is 1 minute
+    [TestFixture, Timeout(60000), TestName("SelectiveIgnore"), Category("SelectiveIgnore"), Category("Slow")]
     public class CrudIT : BaseFullRepoTest {
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        [Test]
         public void SelectiveIgnoreSupportTest() {
             this.session.SupportsSelectiveIgnore();
         }
 
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        [Test]
         public void IgnoreRemoteFolder() {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             var folder = this.remoteRootDir.CreateFolder("ignored");
@@ -65,7 +65,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests {
             Assert.That(underTest.AreAllChildrenIgnored(), Is.True);
         }
 
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        [Test]
         public void RemoteIgnoredFolderIsSynced() {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             var folderName = "ignored";
@@ -81,7 +81,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests {
             Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories(), Is.Empty);
         }
 
-        [Test, Category("Slow"), Category("SelectiveIgnore"), Timeout(60000)]
+        [Test]
         public void RemoteFolderIsSyncedAndChangedToIgnored([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
@@ -116,7 +116,7 @@ ignored
             Assert.That(new FolderTree(localTree), Is.EqualTo(new FolderTree(this.localRootDir.GetDirectories()[0])));
         }
 
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        [Test]
         public void DeleteLocalFolderAfterRemoteIgnore([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
@@ -142,7 +142,7 @@ ignored
             Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
         }
 
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        [Test]
         public void IgnoreMultipleDeviceIds() {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             var folder = this.remoteRootDir.CreateFolder("folder");
@@ -156,7 +156,7 @@ ignored
             Assert.That(folder.AreAllChildrenIgnored(), Is.True);
         }
 
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        [Test]
         public void StopIgnoringFolderForThisDeviceId() {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             var folder = this.remoteRootDir.CreateFolder("folder");
@@ -175,7 +175,7 @@ ignored
             Assert.That(folder.IgnoredDevices(), Is.Empty);
         }
 
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        [Test]
         public void RemoveMultipleDeviceIds() {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             var folder = this.remoteRootDir.CreateFolder("folder");
@@ -190,7 +190,7 @@ ignored
             }
         }
 
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        [Test]
         public void SetIgnorePropertyChangesModificationDate() {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             this.session.EnsureServerCanUpdateModificationDate();

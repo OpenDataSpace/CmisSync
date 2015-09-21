@@ -31,7 +31,7 @@ namespace CmisSync.Lib.Streams {
         private long position;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.ChunkedStream"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Streams.ChunkedStream"/> class.
         /// </summary>
         /// <param name="stream">Stream to chunk.</param>
         /// <param name="chunk">The chunksize.</param>
@@ -48,16 +48,16 @@ namespace CmisSync.Lib.Streams {
         /// Gets a value indicating whether this and the source stream can be read.
         /// </summary>
         /// <value><c>true</c> if this instance can read; otherwise, <c>false</c>.</value>
-        public override bool CanRead { get
-            { return this.source.CanRead; }
+        public override bool CanRead {
+            get { return this.source.CanRead; }
         }
 
         /// <summary>
         /// Gets a value indicating whether this and the source stream can written.
         /// </summary>
         /// <value><c>true</c> if this instance can write; otherwise, <c>false</c>.</value>
-        public override bool CanWrite { get
-            { return this.source.CanWrite; }
+        public override bool CanWrite {
+            get { return this.source.CanWrite; }
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace CmisSync.Lib.Streams {
 
             set {
                 if (value < 0 || value > this.chunkSize) {
-                    throw new System.ArgumentOutOfRangeException(string.Format("Position {0} not in [0,{1}]", value, this.chunkSize));
+                    throw new ArgumentOutOfRangeException("Position", string.Format("Position {0} not in [0,{1}]", value, this.chunkSize));
                 }
 
                 this.source.Position = this.ChunkPosition + value;

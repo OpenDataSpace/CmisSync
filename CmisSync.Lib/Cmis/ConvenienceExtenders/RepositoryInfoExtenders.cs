@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="CmisRepositoryInfoConvenienceExtenders.cs" company="GRAU DATA AG">
+// <copyright file="RepositoryInfoExtenders.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -25,7 +25,7 @@ namespace CmisSync.Lib.Cmis {
     /// <summary>
     /// Cmis repository info convenience extenders.
     /// </summary>
-    public static class CmisRepositoryInfoConvenienceExtenders {
+    public static class RepositoryInfoExtenders {
         /// <summary>
         /// Creates a string containing all needed properties of a repository info from remote. If passed repoInfo is null, an empty string is returned.
         /// </summary>

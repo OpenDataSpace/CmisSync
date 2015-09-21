@@ -72,6 +72,10 @@ namespace CmisSync.Lib.Config {
         /// <returns>The hash algorithm.</returns>
         /// <param name="name">Name of the has algorithm.</param>
         public static HashAlgorithm CreateHashAlgorithm(string name) {
+            if (name == null) {
+                return HashAlgorithm.Create();
+            }
+
             name = name.ToLower();
             if (name.Equals("sha1") || name.Equals("sha-1")) {
                 return SHA1.Create();
@@ -120,6 +124,10 @@ namespace CmisSync.Lib.Config {
         /// <param name="hashAlgorithm">Hash algorithm.</param>
         /// <param name="file">File to be hashed.</param>
         public static byte[] CalculateChecksum(string hashAlgorithm, IFileInfo file) {
+            if (file == null) {
+                throw new ArgumentNullException("file");
+            }
+
             using (var stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.Read)) {
                 return CalculateChecksum(hashAlgorithm, stream);
             }

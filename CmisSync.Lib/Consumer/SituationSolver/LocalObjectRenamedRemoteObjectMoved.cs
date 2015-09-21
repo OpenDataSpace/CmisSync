@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     using System.IO;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
@@ -29,6 +30,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
+    /// <summary>
+    /// Local object renamed remote object moved solver.
+    /// </summary>
     public class LocalObjectRenamedRemoteObjectMoved : AbstractEnhancedSolver {
         private readonly ISolver renameRenameSolver;
         private readonly ISolver changeChangeSolver;
@@ -56,6 +60,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
+            if (remoteId == null) {
+                throw new ArgumentNullException("remoteId");
+            }
+
+            if (localFileSystemInfo == null) {
+                throw new ArgumentNullException("localFileSystemInfo");
+            }
+
             var savedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
             string oldPath = localFileSystemInfo.FullName;
             string oldName = (remoteId as ICmisObject).Name;
