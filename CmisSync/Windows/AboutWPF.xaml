@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="248" d:DesignWidth="620">
+             d:DesignHeight="248" d:DesignWidth="640">
     <Grid>
         <Canvas x:Name="canvas" HorizontalAlignment="Left" Height="248" Margin="0,0,0,0" VerticalAlignment="Top" Width="620">
             <Image x:Name="image" HorizontalAlignment="Left" Height="260" VerticalAlignment="Top" Width="640"/>
