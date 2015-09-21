@@ -70,6 +70,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
+            if (remoteId == null) {
+                throw new ArgumentNullException("remoteId");
+            }
+
             var localFile = localFileSystemInfo as IFileInfo;
             var remoteDocument = remoteId as IDocument;
             if (localFile != null && remoteDocument != null) {

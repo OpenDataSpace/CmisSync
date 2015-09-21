@@ -1218,7 +1218,7 @@ namespace TestLibrary.IntegrationTests {
 
             this.AddStartNextSyncEvent();
 
-            using (var stream = file.CreateText()) {
+            using (var stream = file.AppendText()) {
                 stream.WriteLine("blubb");
             };
 

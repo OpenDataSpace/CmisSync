@@ -83,6 +83,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 throw new ArgumentNullException("localFileSystemInfo");
             }
 
+            if (remoteId == null) {
+                throw new ArgumentNullException("remoteId");
+            }
+
             var fullName = localFileSystemInfo.FullName;
             if (!localFileSystemInfo.Exists) {
                 throw new ArgumentException("Given local path does not exists: " + fullName);
