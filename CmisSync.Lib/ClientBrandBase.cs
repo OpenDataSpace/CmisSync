@@ -62,16 +62,16 @@ namespace CmisSync.Lib {
         /// <param name="credentials"></param>
         /// <returns>Whether the CMIS server holds the client brand files</returns>
         public bool TestServer(ServerCredentials credentials) {
-            IRepository repo = this.GetRepo(credentials);
+            var repo = this.GetRepo(credentials);
             if (repo == null) {
                 return false;
             }
 
             try {
-                ISession session = repo.CreateSession();
+                var session = repo.CreateSession();
                 foreach (string path in this.PathList) {
                     try {
-                        IDocument doc = session.GetObjectByPath(path) as IDocument;
+                        var doc = session.GetObjectByPath(path) as IDocument;
                         if (doc == null) {
                             return false;
                         }
@@ -100,7 +100,7 @@ namespace CmisSync.Lib {
                 return false;
             }
 
-            IRepository repo = this.GetRepo(credentials);
+            var repo = this.GetRepo(credentials);
             if (repo == null) {
                 return false;
             }
@@ -130,7 +130,7 @@ namespace CmisSync.Lib {
             }
 
             try {
-                IDocument doc = this.session.GetObjectByPath(pathname) as IDocument;
+                var doc = this.session.GetObjectByPath(pathname) as IDocument;
                 if (doc == null || doc.LastModificationDate == null) {
                     return false;
                 }
@@ -157,12 +157,12 @@ namespace CmisSync.Lib {
             }
 
             try {
-                IDocument doc = this.session.GetObjectByPath(pathname) as IDocument;
+                var doc = this.session.GetObjectByPath(pathname) as IDocument;
                 if (doc == null) {
                     return false;
                 }
 
-                DotCMIS.Data.IContentStream contentStream = doc.GetContentStream();
+                var contentStream = doc.GetContentStream();
                 if (contentStream == null) {
                     return false;
                 }
@@ -178,11 +178,11 @@ namespace CmisSync.Lib {
         }
 
         private IRepository GetRepo(ServerCredentials credentials) {
-            Dictionary<string, string> parameters = CmisUtils.GetCmisParameters(credentials);
+            var parameters = CmisUtils.GetCmisParameters(credentials);
             try {
-                ISessionFactory factory = SessionFactory.NewInstance();
-                IList<IRepository> repos = factory.GetRepositories(parameters);
-                foreach (IRepository repo in repos) {
+                var factory = SessionFactory.NewInstance();
+                var repos = factory.GetRepositories(parameters);
+                foreach (var repo in repos) {
                     if (repo.Name == this.RepoName) {
                         return repo;
                     }

@@ -66,7 +66,7 @@ namespace TestLibrary.IntegrationTests {
         /// <summary>
         /// Test CMIS server connection
         /// </summary>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Ignore("Erratic")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void TestServer(
             string canonical_name,
             string localPath,
@@ -92,7 +92,7 @@ namespace TestLibrary.IntegrationTests {
         /// <summary>
         /// Test Client Brand
         /// </summary>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Ignore("Erratic")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void TestClientBrand(
             string canonical_name,
             string localPath,
