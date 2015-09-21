@@ -61,7 +61,7 @@ namespace CmisSync {
             Title      = string.Format(Properties_Resources.About, Properties_Resources.ApplicationName);
             ResizeMode = ResizeMode.NoResize;
             Height     = 288;
-            Width      = 640;
+            Width      = 660;
             Icon = UIHelpers.GetImageSource("app", "ico");
             
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
