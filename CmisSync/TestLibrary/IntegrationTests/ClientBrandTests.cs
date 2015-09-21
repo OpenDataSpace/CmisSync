@@ -77,7 +77,7 @@ namespace TestLibrary.IntegrationTests {
             string repositoryId,
             string binding)
         {
-            ServerCredentials credentials = new ServerCredentials() {
+            var credentials = new ServerCredentials() {
                 Address = new Uri(url),
                 Binding = binding,
                 UserName = user,
@@ -103,7 +103,7 @@ namespace TestLibrary.IntegrationTests {
             string repositoryId,
             string binding)
         {
-            ServerCredentials credentials = new ServerCredentials() {
+            var credentials = new ServerCredentials() {
                 Address = new Uri(url),
                 Binding = binding,
                 UserName = user,
@@ -134,9 +134,9 @@ namespace TestLibrary.IntegrationTests {
             private List<string> pathList = new List<string>();
 
             public ClientBrand(ServerCredentials credentials, string repositoryId, string remoteFolderPath) {
-                Dictionary<string, string> parameters = CmisUtils.GetCmisParameters(credentials);
-                ISessionFactory factory = SessionFactory.NewInstance();
-                IList<IRepository> repos = factory.GetRepositories(parameters);
+                var parameters = CmisUtils.GetCmisParameters(credentials);
+                var factory = SessionFactory.NewInstance();
+                var repos = factory.GetRepositories(parameters);
                 foreach (IRepository repo in repos) {
                     if (repo.Id == repositoryId) {
                         this.repository = repo;
