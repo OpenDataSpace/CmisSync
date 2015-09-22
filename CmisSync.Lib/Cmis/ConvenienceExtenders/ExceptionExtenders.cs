@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="ITransmissionManager.cs" company="GRAU DATA AG">
+// <copyright file="ExceptionExtenders.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,21 +16,31 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-
-namespace CmisSync.Lib.FileTransmission {
+﻿
+namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
     using System;
 
+    using DotCMIS.Exceptions;
+
     /// <summary>
-    /// Interface for a transmission manager. It is the main factory for new Transmission objects and the management interface for all running transmissions.
+    /// Exception convenience extenders.
     /// </summary>
-    public interface ITransmissionManager {
+    public static class ExceptionExtenders {
         /// <summary>
-        /// Creates a new the transmission object and adds it to the manager. The manager decides when to and how the transmission gets removed from it.
+        /// Determines if a virus detection exception is the reason for the CmisContraintException.
         /// </summary>
-        /// <returns>The transmission.</returns>
-        /// <param name="type">Transmission type.</param>
-        /// <param name="path">Full path.</param>
-        /// <param name="cachePath">Cache path.</param>
-        Transmission CreateTransmission(TransmissionType type, string path, string cachePath = null);
+        /// <returns><c>true</c> if the given exception seems to be a virus dectection exception; otherwise, <c>false</c>.</returns>
+        /// <param name="ex">Cmis constraint Exception.</param>
+        public static bool IsVirusDetectionException(this CmisConstraintException ex) {
+            if (ex == null) {
+                throw new ArgumentNullException("ex");
+            }
+
+            if (!string.IsNullOrEmpty(ex.ErrorContent) && ex.ErrorContent.ToLower().Contains("infected file")) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
 }

@@ -33,17 +33,36 @@ namespace CmisSync.Lib.Events {
         /// </summary>
         /// <param name="url">URL of the successful connection</param>
         /// <param name="session">Session instance.</param>
-        public SuccessfulLoginEvent(Uri url, ISession session) {
+        /// <param name="rootFolder">Remote sync root folder of the configured sync repository.</param>
+        /// <param name="privateWorkingCopySupported">Indicates if the given session supports private working copies.</param>
+        /// <param name="selectiveSyncSupported">Indicates if the given session supports selective sync.</param>
+        /// <param name="changeEventsSupported">Indicates if the given session supports content changes.</param>
+        public SuccessfulLoginEvent(
+            Uri url,
+            ISession session,
+            IFolder rootFolder,
+            bool privateWorkingCopySupported,
+            bool selectiveSyncSupported,
+            bool changeEventsSupported)
+        {
             if (url == null) {
-                throw new ArgumentNullException("Given Url is null");
+                throw new ArgumentNullException("url");
             }
 
             if (session == null) {
-                throw new ArgumentNullException("Given session is null");
+                throw new ArgumentNullException("session");
+            }
+
+            if (rootFolder == null) {
+                throw new ArgumentNullException("rootFolder");
             }
 
             this.url = url;
             this.Session = session;
+            this.RootFolder = rootFolder;
+            this.PrivateWorkingCopySupported = privateWorkingCopySupported;
+            this.SelectiveSyncSupported = selectiveSyncSupported;
+            this.ChangeEventsSupported = changeEventsSupported;
         }
 
         /// <summary>
@@ -51,6 +70,30 @@ namespace CmisSync.Lib.Events {
         /// </summary>
         /// <value>The session.</value>
         public ISession Session { get; private set; }
+
+        /// <summary>
+        /// Gets the root folder for the synchronization process.
+        /// </summary>
+        /// <value>The root folder.</value>
+        public IFolder RootFolder { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the session supports private working copy.
+        /// </summary>
+        /// <value><c>true</c> if private working copy supported; otherwise, <c>false</c>.</value>
+        public bool PrivateWorkingCopySupported { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the session supports selective sync.
+        /// </summary>
+        /// <value><c>true</c> if supports selective sync; otherwise, <c>false</c>.</value>
+        public bool SelectiveSyncSupported { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the session supportes content change events.
+        /// </summary>
+        /// <value><c>true</c> if change events supported; otherwise, <c>false</c>.</value>
+        public bool ChangeEventsSupported { get; private set; }
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.SuccessfulLoginEvent"/>.

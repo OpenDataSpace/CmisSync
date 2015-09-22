@@ -53,18 +53,11 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Producer.Crawler.DescendantsTreeBuilder"/> class.
         /// </summary>
-        /// <param name='storage'>
-        /// The MetadataStorage.
-        /// </param>
-        /// <param name='remoteFolder'>
-        /// Remote folder.
-        /// </param>
-        /// <param name='localFolder'>
-        /// Local folder.
-        /// </param>
-        /// <param name='filter'>
-        /// Aggregated Filters.
-        /// </param>
+        /// <param name='storage'>The Metadata storage.</param>
+        /// <param name='remoteFolder'>Remote folder.</param>
+        /// <param name='localFolder'>Local folder.</param>
+        /// <param name='filter'>Aggregated Filters.</param>
+        /// <param name="ignoredStorage">Storage of all ignored entities.</param>
         /// <exception cref='ArgumentNullException'>
         /// <attribution license="cc4" from="Microsoft" modified="false" /><para>The exception that is thrown when a
         /// null reference (Nothing in Visual Basic) is passed to a method that does not accept it as a valid argument. </para>
@@ -77,23 +70,23 @@ namespace CmisSync.Lib.Producer.Crawler {
             IIgnoredEntitiesStorage ignoredStorage)
         {
             if (remoteFolder == null) {
-                throw new ArgumentNullException("Given remoteFolder is null");
+                throw new ArgumentNullException("remoteFolder");
             }
 
             if (localFolder == null) {
-                throw new ArgumentNullException("Given localFolder is null");
+                throw new ArgumentNullException("localFolder");
             }
 
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage");
             }
 
             if (filter == null) {
-                throw new ArgumentNullException("Given filter is null");
+                throw new ArgumentNullException("filter");
             }
 
             if (ignoredStorage == null) {
-                throw new ArgumentNullException("Given storage to save ignored entries is null");
+                throw new ArgumentNullException("ignoredStorage");
             }
 
             this.storage = storage;
@@ -111,26 +104,39 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// <param name="parent">Parent directory.</param>
         /// <param name="filter">Filter for files.</param>
         public static IObjectTree<IFileSystemInfo> GetLocalDirectoryTree(IDirectoryInfo parent, IFilterAggregator filter) {
-            var children = new List<IObjectTree<IFileSystemInfo>>();
-            foreach (var child in parent.GetDirectories()) {
-                string reason;
-                if (!filter.InvalidFolderNamesFilter.CheckFolderName(child.Name, out reason) && !filter.FolderNamesFilter.CheckFolderName(child.Name, out reason)) {
-                    children.Add(GetLocalDirectoryTree(child, filter));
-                } else {
-                    Logger.Info(reason);
-                }
+            if (parent == null) {
+                throw new ArgumentNullException("parent");
             }
 
-            foreach (var file in parent.GetFiles()) {
-                string reason;
-                if (!filter.FileNamesFilter.CheckFile(file.Name, out reason)) {
-                    children.Add(new ObjectTree<IFileSystemInfo> {
-                        Item = file,
-                        Children = new List<IObjectTree<IFileSystemInfo>>()
-                    });
-                } else {
-                    Logger.Info(reason);
+            if (filter == null) {
+                throw new ArgumentNullException("filter");
+            }
+
+            var children = new List<IObjectTree<IFileSystemInfo>>();
+            try {
+                foreach (var child in parent.GetDirectories()) {
+                    string reason;
+                    if (!filter.InvalidFolderNamesFilter.CheckFolderName(child.Name, out reason) && !filter.FolderNamesFilter.CheckFolderName(child.Name, out reason) && !filter.SymlinkFilter.IsSymlink(child, out reason)) {
+                        children.Add(GetLocalDirectoryTree(child, filter));
+                    } else {
+                        Logger.Info(reason);
+                    }
                 }
+
+                foreach (var file in parent.GetFiles()) {
+                    string reason;
+                    if (!filter.FileNamesFilter.CheckFile(file.Name, out reason) && !filter.SymlinkFilter.IsSymlink(file, out reason)) {
+                        children.Add(new ObjectTree<IFileSystemInfo> {
+                            Item = file,
+                            Children = new List<IObjectTree<IFileSystemInfo>>()
+                        });
+                    } else {
+                        Logger.Info(reason);
+                    }
+                }
+            } catch (System.IO.PathTooLongException) {
+                Logger.Fatal(string.Format("One or more children paths of \"{0}\" are to long to be synchronized, synchronization is impossible since the problem is fixed", parent.FullName));
+                throw;
             }
 
             IObjectTree<IFileSystemInfo> tree = new ObjectTree<IFileSystemInfo> {
@@ -147,19 +153,36 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// <param name="parent">Parent folder.</param>
         /// <param name="descendants">Descendants of remote object.</param>
         /// <param name="filter">Filter of ignored or invalid files and folder</param>
-        public static IObjectTree<IFileableCmisObject> GetRemoteDirectoryTree(IFolder parent, IList<ITree<IFileableCmisObject>> descendants, IFilterAggregator filter, IIgnoredEntitiesStorage ignoredStorage, IPathMatcher matcher) {
-            IList<IObjectTree<IFileableCmisObject>> children = new List<IObjectTree<IFileableCmisObject>>();
+        /// <param name="ignoredStorage">Storage of all ignored entities.</param>
+        /// <param name="matcher">Path matcher.</param>
+        public static IObjectTree<IFileableCmisObject> GetRemoteDirectoryTree(
+            IFolder parent,
+            IList<ITree<IFileableCmisObject>> descendants,
+            IFilterAggregator filter,
+            IIgnoredEntitiesStorage ignoredStorage,
+            IPathMatcher matcher)
+        {
+            if (filter == null) {
+                throw new ArgumentNullException("filter");
+            }
+
+            if (ignoredStorage == null) {
+                throw new ArgumentNullException("ignoredStorage");
+            }
+
+            var children = new List<IObjectTree<IFileableCmisObject>>();
             if (descendants != null) {
                 foreach (var child in descendants) {
-                    if (child.Item is IFolder) {
+                    var folder = child.Item as IFolder;
+                    var doc = child.Item as IDocument;
+                    if (folder != null) {
                         string reason;
-                        var folder = child.Item as IFolder;
                         if (!filter.FolderNamesFilter.CheckFolderName(folder.Name, out reason) && !filter.InvalidFolderNamesFilter.CheckFolderName(folder.Name, out reason)) {
                             if (folder.AreAllChildrenIgnored()) {
                                 ignoredStorage.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(new IgnoredEntity(folder, matcher));
                                 Logger.Info(string.Format("Folder {0} with Id {1} is ignored", folder.Name, folder.Id));
                                 children.Add(new ObjectTree<IFileableCmisObject> {
-                                    Item = child.Item,
+                                    Item = folder,
                                     Children = new List<IObjectTree<IFileableCmisObject>>()
                                 });
                             } else {
@@ -169,11 +192,11 @@ namespace CmisSync.Lib.Producer.Crawler {
                         } else {
                             Logger.Info(reason);
                         }
-                    } else if (child.Item is IDocument) {
+                    } else if (doc != null) {
                         string reason;
-                        if (!filter.FileNamesFilter.CheckFile(child.Item.Name, out reason)) {
+                        if (!filter.FileNamesFilter.CheckFile(doc.Name, out reason)) {
                             children.Add(new ObjectTree<IFileableCmisObject> {
-                                Item = child.Item,
+                                Item = doc,
                                 Children = new List<IObjectTree<IFileableCmisObject>>()
                             });
                         } else {
@@ -198,7 +221,7 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// The trees as a struct.
         /// </returns>
         public DescendantsTreeCollection BuildTrees() {
-            IObjectTree<IMappedObject> storedTree = null;
+            IList<IMappedObject> storedObjects = null;
             IObjectTree<IFileSystemInfo> localTree = null;
             IObjectTree<IFileableCmisObject> remoteTree = null;
 
@@ -212,10 +235,14 @@ namespace CmisSync.Lib.Producer.Crawler {
             // Wait until all tasks are finished
             Task.WaitAll(tasks);
             */
+            Logger.Debug("Crawling local fs");
             localTree = GetLocalDirectoryTree(this.localFolder, this.filter);
+            Logger.Debug("Crawling remote fs");
             remoteTree = GetRemoteDirectoryTree(this.remoteFolder, this.remoteFolder.GetDescendants(-1), this.filter, this.ignoredStorage, this.matcher);
-            storedTree = this.storage.GetObjectTree();
-            return new DescendantsTreeCollection(storedTree, localTree, remoteTree);
+            Logger.Debug("Building stored tree");
+            storedObjects = this.storage.GetObjectList();
+            Logger.Debug("Finished building trees");
+            return new DescendantsTreeCollection(storedObjects, localTree, remoteTree);
         }
     }
 }

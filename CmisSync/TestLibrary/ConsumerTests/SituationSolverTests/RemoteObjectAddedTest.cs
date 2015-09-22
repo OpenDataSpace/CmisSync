@@ -23,6 +23,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System.Security.Cryptography;
     using System.Text;
 
+    using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.FileTransmission;
@@ -54,22 +55,24 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private Mock<IFileTransmissionStorage> transmissionStorage;
         private RemoteObjectAdded underTest;
         private Mock<IFileSystemInfoFactory> fsFactory;
+        private ITransmissionFactory transmissionFactory;
 
         [SetUp]
         public void SetUp() {
             this.path = Path.Combine(Path.GetTempPath(), this.objectName);
             this.manager = new TransmissionManager();
+            this.transmissionFactory = this.manager.CreateFactory();
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();
             this.fsFactory = new Mock<IFileSystemInfoFactory>(MockBehavior.Strict);
-            this.underTest = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.manager, this.fsFactory.Object);
+            this.underTest = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionFactory, this.fsFactory.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorTakesQueue() {
-            new RemoteObjectAdded(this.session.Object, this.storage.Object, null, this.manager);
+            new RemoteObjectAdded(this.session.Object, this.storage.Object, null, this.transmissionFactory);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -78,46 +81,60 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFolderAdded([Values(true, false)]bool childrenAreIgnored) {
+        public void RemoteFolderAdded(
+            [Values(true, false)]bool childrenAreIgnored,
+            [Values(true, false)]bool extendedAttributesAvailable,
+            [Values(true, false)]bool throwExceptionOnUpdateModificationDate,
+            [Values(true, false)]bool readOnly)
+        {
+            var localModificationDate = DateTime.Now - TimeSpan.FromDays(1);
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.SetupAllProperties();
             dirInfo.Setup(d => d.FullName).Returns(this.path);
             dirInfo.Setup(d => d.Name).Returns(this.objectName);
             dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>());
-            dirInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(false);
+            dirInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(extendedAttributesAvailable);
+            dirInfo.SetupProperty(dir => dir.LastWriteTimeUtc, localModificationDate);
+            if (throwExceptionOnUpdateModificationDate) {
+                dirInfo.SetupSet(d => d.LastWriteTimeUtc = It.IsAny<DateTime>()).Throws(new IOException("Another process is using this folder"));
+            }
 
-            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(this.id, this.objectName, this.path, this.parentId, this.lastChangeToken, ignored: childrenAreIgnored);
+            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(
+                this.id,
+                this.objectName,
+                this.path,
+                this.parentId,
+                this.lastChangeToken,
+                ignored: childrenAreIgnored,
+                readOnly: readOnly);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
             this.underTest.Solve(dirInfo.Object, remoteObject.Object);
 
             dirInfo.Verify(d => d.Create(), Times.Once());
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.objectName, this.parentId, this.lastChangeToken, false, this.creationDate, ignored: childrenAreIgnored);
+            dirInfo.VerifySet(d => d.ReadOnly = It.Is<bool>(r => r == readOnly), readOnly ? Times.Once() : Times.Never());
+            this.storage.VerifySavedMappedObject(
+                MappedObjectType.Folder,
+                this.id,
+                this.objectName,
+                this.parentId,
+                this.lastChangeToken,
+                extendedAttributesAvailable,
+                lastLocalModification: throwExceptionOnUpdateModificationDate ? localModificationDate : this.creationDate,
+                lastRemoteModification: this.creationDate,
+                ignored: childrenAreIgnored,
+                readOnly: readOnly);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
-            dirInfo.VerifySet(d => d.Uuid = It.IsAny<Guid?>(), Times.Never());
+            dirInfo.VerifySet(d => d.Uuid = It.IsAny<Guid?>(), extendedAttributesAvailable ? Times.Once() : Times.Never());
+            if (extendedAttributesAvailable) {
+                dirInfo.VerifySet(d => d.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
+            }
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFolderAddedAndExtendedAttributesAreAvailable([Values(true, false)]bool childrenAreIgnored) {
-            var dirInfo = new Mock<IDirectoryInfo>();
-            dirInfo.SetupAllProperties();
-            dirInfo.Setup(d => d.FullName).Returns(this.path);
-            dirInfo.Setup(d => d.Name).Returns(this.objectName);
-            dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>());
-            dirInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(true);
-
-            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(this.id, this.objectName, this.path, this.parentId, this.lastChangeToken, ignored: childrenAreIgnored);
-            remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
-
-            this.underTest.Solve(dirInfo.Object, remoteObject.Object);
-            dirInfo.Verify(d => d.Create(), Times.Once());
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate, ignored: childrenAreIgnored);
-            dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
-            dirInfo.VerifySet(d => d.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
-        }
-
-        [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFileAddedAndExtendedAttributesAreAvailable() {
+        public void RemoteFileAddedAndExtendedAttributesAreAvailable(
+            [Values(true, false)]bool readOnly)
+        {
             var fileInfo = new Mock<IFileInfo>();
             var cacheFileInfo = this.fsFactory.SetupDownloadCacheFile();
             var parentDir = Mock.Of<IDirectoryInfo>(d => d.FullName == Path.GetTempPath());
@@ -141,6 +158,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
                 Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.id, this.objectName, this.parentId, content.Length, content, this.lastChangeToken);
                 remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
+                remoteObject.SetupReadOnly(readOnly);
 
                 this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
@@ -148,12 +166,15 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 cacheFileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
                 cacheFileInfo.Verify(f => f.MoveTo(this.path), Times.Once());
                 fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
-                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate, this.creationDate, expectedHash, content.Length);
+                fileInfo.VerifySet(f => f.ReadOnly = true, readOnly ? Times.Once() : Times.Never());
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate, this.creationDate, expectedHash, content.Length, readOnly: readOnly);
             }
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFileAddedAndExceptionOnModificationDateIsThrown() {
+        public void RemoteFileAddedAndExceptionOnModificationDateIsThrown(
+            [Values(true, false)]bool readOnly)
+        {
             var fileInfo = new Mock<IFileInfo>();
             var cacheFileInfo = this.fsFactory.SetupDownloadCacheFile();
             var parentDir = Mock.Of<IDirectoryInfo>(d => d.FullName == Path.GetTempPath());
@@ -180,6 +201,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
                 Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.id, this.objectName, this.parentId, content.Length, content, this.lastChangeToken);
                 remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
+                remoteObject.SetupReadOnly(readOnly);
 
                 this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
@@ -187,7 +209,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 cacheFileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
                 cacheFileInfo.Verify(f => f.MoveTo(this.path), Times.Once());
                 fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
-                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, modification, this.creationDate, expectedHash, content.Length);
+                fileInfo.VerifySet(f => f.ReadOnly = true, readOnly ? Times.Once() : Times.Never());
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, modification, this.creationDate, expectedHash, content.Length, readOnly: readOnly);
             }
         }
 

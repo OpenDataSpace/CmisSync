@@ -21,8 +21,26 @@ namespace CmisSync.Lib.Streams {
     using System;
     using System.IO;
 
+    /// <summary>
+    /// Stream convenience extensions.
+    /// </summary>
     public static class StreamConvenienceExtensions {
+        /// <summary>
+        /// Copies stream content to output stream until given byte count is reached.
+        /// </summary>
+        /// <param name="input">Input stream.</param>
+        /// <param name="output">Output stream.</param>
+        /// <param name="bufferSize">Buffer size.</param>
+        /// <param name="bytes">Bytes to be copied from input stream to output stream.</param>
         public static void CopyTo(this Stream input, Stream output, int bufferSize, int bytes) {
+            if (input == null) {
+                throw new ArgumentNullException("input");
+            }
+
+            if (output == null) {
+                throw new ArgumentNullException("output");
+            }
+
             byte[] buffer = new byte[bufferSize];
             int read;
             while (bytes > 0 && (read = input.Read(buffer, 0, Math.Min(buffer.Length, bytes))) > 0) {

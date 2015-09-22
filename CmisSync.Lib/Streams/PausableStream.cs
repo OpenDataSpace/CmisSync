@@ -77,10 +77,6 @@ namespace CmisSync.Lib.Streams {
             return this.Stream.Read(buffer, offset, count);
         }
 
-        public override void Close() {
-            base.Close();
-        }
-
         /// <summary>
         /// Pause this stream until resume is called.
         /// </summary>

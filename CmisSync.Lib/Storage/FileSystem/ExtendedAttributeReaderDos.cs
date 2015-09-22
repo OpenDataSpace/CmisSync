@@ -255,8 +255,9 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <param name="path">Sets attribute of this path.</param>
         /// <param name="key">Key of the attribute, which should be set.</param>
         /// <param name="value">The value to set.</param>
-        public void SetExtendedAttribute(string path, string key, string value, bool restoreLastModificationDate = false) {
-            if (restoreLastModificationDate) {
+        /// <param name="restoreModificationDate">If <c>true</c> the modification date is restored after setting extended attribute.</param>
+        public void SetExtendedAttribute(string path, string key, string value, bool restoreModificationDate = false) {
+            if (restoreModificationDate) {
                 this.SetExtendedAttributeAndRestoreLastModificationDate(path, key, value);
             } else {
 #if ! __MonoCS__

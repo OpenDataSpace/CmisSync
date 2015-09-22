@@ -61,6 +61,10 @@ namespace CmisSync.Lib.Filter {
             set {
                 lock (this.wildCardLock) {
                     this.wildcards.Clear();
+                    if (value == null) {
+                        value = new List<string>();
+                    }
+
                     foreach (var required in this.requiredWildcards) {
                         if (!value.Contains(required)) {
                             this.wildcards.Add(Utils.IgnoreLineToRegex(required));

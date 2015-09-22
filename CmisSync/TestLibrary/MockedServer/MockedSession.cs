@@ -65,6 +65,18 @@ namespace TestLibrary.MockedServer {
 
         public IObjectFactory ObjectFactory { get; set; }
 
+        public void Delete(string objectId) {
+            if (!this.Objects.Remove(objectId)) {
+                throw new CmisObjectNotFoundException();
+            }
+        }
+
+        public void AddObjects(params ICmisObject[] objects) {
+            foreach (var obj in objects) {
+                this.Objects[obj.Id] = obj;
+            }
+        }
+
         private ICmisObject GetObjectByPath(string path) {
             var obj = this.Objects.First((o) => (o.Value is IFileableCmisObject && (o.Value as IFileableCmisObject).Paths.Contains(path))).Value;
             if (obj == null) {
@@ -80,18 +92,6 @@ namespace TestLibrary.MockedServer {
             }
 
             return this.Objects[objectId];
-        }
-
-        public void Delete(string objectId) {
-            if (!this.Objects.Remove(objectId)) {
-                throw new CmisObjectNotFoundException();
-            }
-        }
-
-        public void AddObjects(params ICmisObject[] objects) {
-            foreach (var obj in objects) {
-                this.Objects[obj.Id] = obj;
-            }
         }
     }
 }

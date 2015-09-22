@@ -75,11 +75,6 @@ namespace CmisSync.Lib.Storage.Database.Entities {
     [Serializable]
     public class MappedObject : IMappedObject {
         /// <summary>
-        /// The extended attribute key.
-        /// </summary>
-        public static readonly string ExtendedAttributeKey = "DSS-UUID";
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="MappedObject"/> class.
         /// </summary>
         [Obsolete("Must not be used manually. This constructor should be used for serialization only.", true)]
@@ -96,17 +91,18 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// <param name="parentId">Parent identifier.</param>
         /// <param name="changeToken">Change token.</param>
         /// <param name="contentSize">Size of the content. Only exists on Documents.</param>
+        /// <param name="readOnly">Readonly flag of the mapped object.</param>
         public MappedObject(string name, string remoteId, MappedObjectType type, string parentId, string changeToken, long contentSize = -1, bool readOnly = false) {
             if (string.IsNullOrEmpty(name)) {
-                throw new ArgumentNullException("Given name is null or empty");
+                throw new ArgumentNullException("name", "Given name is null or empty");
             }
 
             if (string.IsNullOrEmpty(remoteId)) {
-                throw new ArgumentNullException("Given remote ID is null");
+                throw new ArgumentNullException("remoteId");
             }
 
             if (type == MappedObjectType.Unkown) {
-                throw new ArgumentException("Given type is unknown but must be set to a known type");
+                throw new ArgumentException("Given type is unknown but must be set to a known type", "type");
             } else {
                 this.Type = type;
             }
@@ -144,6 +140,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
                 this.Ignored = data.Ignored;
                 this.IsReadOnly = data.IsReadOnly;
                 this.Retries = data.Retries ?? new Dictionary<OperationType, int>();
+                this.LastTimeStoredInStorage = data.LastTimeStoredInStorage;
                 if (data.LastChecksum == null) {
                     this.LastChecksum = null;
                 } else {
@@ -160,6 +157,10 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// A IFolder fetched via cmis.
         /// </param>
         public MappedObject(IFolder remoteFolder) {
+            if (remoteFolder == null) {
+                throw new ArgumentNullException("remoteFolder");
+            }
+
             this.RemoteObjectId = remoteFolder.Id;
             this.ParentId = remoteFolder.ParentId;
             this.LastChangeToken = remoteFolder.ChangeToken;
@@ -270,7 +271,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         public long LastContentSize { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Data.MappedObject"/> is ignored.
+        /// Gets or sets a value indicating whether this <see cref="MappedObject"/> is ignored.
         /// </summary>
         /// <value><c>true</c> if ignored; otherwise, <c>false</c>.</value>
         public bool Ignored { get; set; }
@@ -278,8 +279,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// <summary>
         /// Gets or sets a value indicating whether this instance is read only.
         /// </summary>
-        /// <value>true</value>
-        /// <c>false</c>
+        /// <value><c>true</c> if this object is readonly, otherwise <c>false</c></value>
         [DefaultValue(false)]
         public bool IsReadOnly { get; set; }
 
@@ -296,14 +296,20 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         public Dictionary<OperationType, int> Retries { get; set; }
 
         /// <summary>
-        /// Determines whether the specified <see cref="System.Object"/> is equal to the current <see cref="CmisSync.Lib.Data.MappedObjectData"/>.
+        /// Gets or sets the last time when this object has been stored in the storage.
+        /// </summary>
+        /// <value>The last stored datetime.</value>
+        public DateTime? LastTimeStoredInStorage { get; set; }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object"/> is equal to the current <see cref="MappedObject"/>.
         /// </summary>
         /// <param name='obj'>
-        /// The <see cref="System.Object"/> to compare with the current <see cref="CmisSync.Lib.Data.MappedObjectData"/>.
+        /// The <see cref="System.Object"/> to compare with the current <see cref="MappedObject"/>.
         /// </param>
         /// <returns>
         /// <c>true</c> if the specified <see cref="System.Object"/> is equal to the current
-        /// <see cref="CmisSync.Lib.Data.MappedObject"/>; otherwise, <c>false</c>.
+        /// <see cref="MappedObject"/>; otherwise, <c>false</c>.
         /// </returns>
         public override bool Equals(object obj) {
             // If parameter is null return false.
@@ -334,7 +340,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         }
 
         /// <summary>
-        /// Serves as a hash function for a <see cref="CmisSync.Lib.Data.MappedObject"/> object.
+        /// Serves as a hash function for a <see cref="MappedObject"/> object.
         /// </summary>
         /// <returns>
         /// A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
@@ -345,9 +351,9 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         }
 
         /// <summary>
-        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Data.MappedObject"/>.
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="MappedObject"/>.
         /// </summary>
-        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Data.MappedObject"/>.</returns>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="MappedObject"/>.</returns>
         public override string ToString() {
             return string.Format(
                 "[MappedObject: ParentId={0}, Type={1}, RemoteObjectId={2}, LastChangeToken={3}, LastRemoteWriteTimeUtc={4}, LastLocalWriteTimeUtc={5}, LastChecksum={6}, ChecksumAlgorithmName={7}, Name={8}, Description={9}, Guid={10}, LastContentSize={11}, Ignored={12}, ReadOnly={13}]",

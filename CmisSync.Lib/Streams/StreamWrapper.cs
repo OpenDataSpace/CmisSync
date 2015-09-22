@@ -36,7 +36,7 @@ namespace CmisSync.Lib.Streams {
         /// </param>
         public StreamWrapper(Stream stream) {
             if (stream == null) {
-                throw new ArgumentNullException("Given stream must not be null");
+                throw new ArgumentNullException("stream");
             }
 
             this.Stream = stream;
@@ -206,16 +206,6 @@ namespace CmisSync.Lib.Streams {
         /// </param>
         public override void Write(byte[] buffer, int offset, int count) {
             this.Stream.Write(buffer, offset, count);
-        }
-
-        /// <summary>
-        /// Dispose the wrapper instance, not the wrapped stream object.
-        /// </summary>
-        /// <param name='disposing'>
-        /// Disposes the wrapper object.
-        /// </param>
-        protected override void Dispose(bool disposing) {
-            base.Dispose(disposing);
         }
         #endregion
     }

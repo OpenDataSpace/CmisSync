@@ -36,7 +36,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     /// </summary>
     public class LocalObjectChangedRemoteObjectChangedWithPWC : AbstractEnhancedSolverWithPWC {
         private readonly ISolver fallbackSolver;
-        private readonly TransmissionManager transmissionManager;
+        private readonly ITransmissionFactory transmissionManager;
 
         /// <summary>
         /// Initializes a new instance of the
@@ -51,15 +51,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            TransmissionManager manager,
+            ITransmissionFactory manager,
             ISolver localObjectChangedRemoteObjectChangedFallbackSolver) : base(session, storage, transmissionStorage)
         {
             if (localObjectChangedRemoteObjectChangedFallbackSolver == null) {
-                throw new ArgumentNullException("Given fallback solver is null");
-            }
-
-            if (!session.ArePrivateWorkingCopySupported()) {
-                throw new ArgumentException("Given session does not support pwc updates");
+                throw new ArgumentNullException("localObjectChangedRemoteObjectChangedFallbackSolver", "Given fallback solver is null");
             }
 
             this.fallbackSolver = localObjectChangedRemoteObjectChangedFallbackSolver;
@@ -79,14 +75,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
-            if (!(localFileSystemInfo is IFileInfo)) {
+            var localFile = localFileSystemInfo as IFileInfo;
+            if (localFile == null) {
                 this.fallbackSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
                 return;
             }
 
-            IFileInfo localFile = localFileSystemInfo as IFileInfo;
-            IDocument remoteDocument = remoteId as IDocument;
-
+            var remoteDocument = remoteId as IDocument;
             if (remoteContent != ContentChangeType.NONE) {
                 this.fallbackSolver.Solve(localFile, remoteId, localContent, remoteContent);
                 return;
@@ -94,25 +89,29 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
             bool updateLocalDate = false;
             bool updateRemoteDate = false;
-            var obj = this.Storage.GetObjectByRemoteId(remoteDocument.Id);
+            var remoteDocumentId = remoteDocument.Id;
+            var obj = this.Storage.GetObjectByRemoteId(remoteDocumentId);
 
             if (localFile.IsContentChangedTo(obj, true)) {
                 updateRemoteDate = true;
+                var fullName = localFile.FullName;
                 try {
-                    var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                    var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UploadModifiedFile, fullName);
                     obj.LastChecksum = UploadFileWithPWC(localFile, ref remoteDocument, transmission);
                     obj.ChecksumAlgorithmName = "SHA-1";
                     obj.LastContentSize = remoteDocument.ContentStreamLength ?? localFile.Length;
-                    if (remoteDocument.Id != obj.RemoteObjectId) {
+                    remoteDocumentId = remoteDocument.Id;
+                    if (remoteDocumentId != obj.RemoteObjectId) {
                         this.TransmissionStorage.RemoveObjectByRemoteObjectId(obj.RemoteObjectId);
-                        obj.RemoteObjectId = remoteDocument.Id;
+                        obj.RemoteObjectId = remoteDocumentId;
                     }
                 } catch (Exception ex) {
-                    if (ex.InnerException is CmisPermissionDeniedException) {
-                        OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", localFile.FullName));
+                    var inner = ex.InnerException;
+                    if (inner is CmisPermissionDeniedException) {
+                        OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", fullName));
                         return;
-                    } else if (ex.InnerException is CmisStorageException) {
-                        OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: StorageException", localFile.FullName), ex);
+                    } else if (inner is CmisStorageException) {
+                        OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: StorageException", fullName), ex);
                         return;
                     }
 
@@ -120,7 +119,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 }
             } else {
                 //  just date sync
-                if (remoteDocument.LastModificationDate != null && localFile.LastWriteTimeUtc < remoteDocument.LastModificationDate) {
+                var lastRemoteModification = remoteDocument.LastModificationDate;
+                if (lastRemoteModification != null && localFile.LastWriteTimeUtc < lastRemoteModification) {
                     updateLocalDate = true;
                 } else {
                     updateRemoteDate = true;
@@ -133,7 +133,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 } else if (updateRemoteDate) {
                     remoteDocument.UpdateLastWriteTimeUtc(localFile.LastWriteTimeUtc);
                 } else {
-                    throw new ArgumentException();
+                    throw new ArgumentException("Algorithm failure");
                 }
             }
 

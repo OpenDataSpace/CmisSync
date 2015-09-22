@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -38,8 +37,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class LocalObjectRenamedRemoteObjectRenamedTest
-    {
+    public class LocalObjectRenamedRemoteObjectRenamedTest {
         private readonly string fullNamePrefix = Path.Combine("full", "path");
         private readonly string oldName = "oldName";
         private readonly string folderId = "folderId";
@@ -63,7 +61,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.InitializeMappedFileOnStorage();
             var transmissionManager = new TransmissionManager();
             var fsFactory = Mock.Of<IFileSystemInfoFactory>();
-            this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(this.session.Object, this.storage.Object, null, transmissionManager, fsFactory);
+            this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(this.session.Object, this.storage.Object, null, transmissionManager.CreateFactory(), fsFactory);
             this.underTest = new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.changeSolver.Object);
         }
 

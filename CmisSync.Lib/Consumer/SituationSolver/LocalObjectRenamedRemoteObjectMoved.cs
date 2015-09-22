@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     using System.IO;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
@@ -29,6 +30,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
+    /// <summary>
+    /// Local object renamed remote object moved solver.
+    /// </summary>
     public class LocalObjectRenamedRemoteObjectMoved : AbstractEnhancedSolver {
         private readonly ISolver renameRenameSolver;
         private readonly ISolver changeChangeSolver;
@@ -39,11 +43,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ISolver changeChangeSolver) : base(session, storage)
         {
             if (renameSolver == null) {
-                throw new ArgumentNullException("Given solver for rename rename situation is null");
+                throw new ArgumentNullException("renameSolver", "Given solver for rename rename situation is null");
             }
 
             if (changeChangeSolver == null) {
-                throw new ArgumentNullException("Given solver for change change situation is null");
+                throw new ArgumentNullException("changeChangeSolver", "Given solver for change change situation is null");
             }
 
             this.changeChangeSolver = changeChangeSolver;
@@ -56,6 +60,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
+            if (remoteId == null) {
+                throw new ArgumentNullException("remoteId");
+            }
+
+            if (localFileSystemInfo == null) {
+                throw new ArgumentNullException("localFileSystemInfo");
+            }
+
             var savedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
             string oldPath = localFileSystemInfo.FullName;
             string oldName = (remoteId as ICmisObject).Name;

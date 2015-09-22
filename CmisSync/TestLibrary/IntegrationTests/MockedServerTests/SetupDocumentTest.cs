@@ -117,7 +117,7 @@ namespace TestLibrary.IntegrationTests.MockedServerTests {
                 underTest.Object.Rename(newName, (bool)refresh);
             }
 
-            Assert.That(underTest.Name, Is.EqualTo(newName));
+            Assert.That(underTest.Object.Name, Is.EqualTo(newName));
             Assert.That(underTest.Object.ChangeToken, Is.Not.EqualTo(oldChangeToken));
             contentChangeHandler.Verify(h => h(underTest, It.Is<IChangeEvent>(e => e.ChangeType == ChangeType.Updated && e.ObjectId == underTest.Object.Id)), Times.Once());
         }
@@ -158,6 +158,24 @@ namespace TestLibrary.IntegrationTests.MockedServerTests {
 
             Assert.That(session.Objects, withSession ? Is.Empty : Is.Not.Empty);
             contentChangeHandler.Verify(h => h(underTest, It.Is<IChangeEvent>(e => e.ChangeType == ChangeType.Deleted && e.ObjectId == underTest.Object.Id)), Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        public void AppendContentThreeTimes() {
+            string content = "Content";
+            int expectedLength = 3 * content.Length;
+            var contentChangeHandler = new Mock<ContentChangeEventHandler>();
+            var underTest = new MockedDocument("name");
+            underTest.ContentChanged += contentChangeHandler.Object;
+
+            underTest.Object.AppendContent(content, false);
+            contentChangeHandler.Verify(h => h(underTest, It.Is<IChangeEvent>(e => e.ChangeType == ChangeType.Updated && e.ObjectId == underTest.Object.Id)), Times.Never);
+            underTest.Object.AppendContent(content, true);
+            contentChangeHandler.Verify(h => h(underTest, It.Is<IChangeEvent>(e => e.ChangeType == ChangeType.Updated && e.ObjectId == underTest.Object.Id)), Times.Once);
+            underTest.Object.AppendContent(content, true);
+            contentChangeHandler.Verify(h => h(underTest, It.Is<IChangeEvent>(e => e.ChangeType == ChangeType.Updated && e.ObjectId == underTest.Object.Id)), Times.Exactly(2));
+
+            Assert.That(underTest.Object.ContentStreamLength, Is.EqualTo(expectedLength));
         }
     }
 }

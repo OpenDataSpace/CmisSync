@@ -5,6 +5,7 @@ namespace CmisSync.Widgets
 	public partial class UrlWidget
 	{
 		private global::Gtk.VBox vbox1;
+		
 		private global::Gtk.Entry urlEntry;
 
 		protected virtual void Build ()

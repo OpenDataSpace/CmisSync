@@ -40,14 +40,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="changeSolver">Local object changed and remote object changed situation solver.</param>
+        /// <param name="changeChangeSolver">Local object changed and remote object changed situation solver.</param>
         public LocalObjectChangedRemoteObjectMoved(
             ISession session,
             IMetaDataStorage storage,
             ISolver changeChangeSolver) : base(session, storage)
         {
             if (changeChangeSolver == null) {
-                throw new ArgumentNullException("Given solver for the conflict situation of local and remote change is null");
+                throw new ArgumentNullException("changeChangeSolver", "Given solver for the conflict situation of local and remote change is null");
             }
 
             this.changeChangeSolver = changeChangeSolver;
@@ -59,6 +59,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
+            if (remoteId == null) {
+                throw new ArgumentNullException("remoteId");
+            }
+
             var savedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
             string newPath = remoteId is IFolder ? this.Storage.Matcher.CreateLocalPath(remoteId as IFolder) : this.Storage.Matcher.CreateLocalPath(remoteId as IDocument);
             if (remoteId is IFolder) {
@@ -77,9 +81,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 OperationsLogger.Info(string.Format("Moved local file {0} to {1}", oldPath, newPath));
             }
 
+            localFileSystemInfo.TryToSetReadOnlyStateIfDiffers(from: remoteId as ICmisObject);
             savedObject.Name = (remoteId as ICmisObject).Name;
             savedObject.Ignored = (remoteId as ICmisObject).AreAllChildrenIgnored();
             savedObject.ParentId = remoteId is IFolder ? (remoteId as IFolder).ParentId : (remoteId as IDocument).Parents[0].Id;
+            savedObject.IsReadOnly = localFileSystemInfo.ReadOnly;
             this.Storage.SaveMappedObject(savedObject);
 
             this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);

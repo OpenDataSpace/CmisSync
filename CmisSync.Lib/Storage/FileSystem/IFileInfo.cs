@@ -40,26 +40,26 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <summary>
         /// Open the specified file.
         /// </summary>
-        /// <param name="open">Open mode.</param>
+        /// <param name="mode">Open mode.</param>
         /// <returns>Stream of the content.</returns>
-        Stream Open(FileMode open);
+        Stream Open(FileMode mode);
 
         /// <summary>
         /// Open the specified file with the open and access mode.
         /// </summary>
-        /// <param name="open">Open mode.</param>
+        /// <param name="mode">Open mode.</param>
         /// <param name="access">Access Mode.</param>
         /// <returns>Stream of the content</returns>
-        Stream Open(FileMode open, FileAccess access);
+        Stream Open(FileMode mode, FileAccess access);
 
         /// <summary>
         /// Open the specified file with given open, access and share mode.
         /// </summary>
-        /// <param name="open">Open mode.</param>
+        /// <param name="mode">Open mode.</param>
         /// <param name="access">Access mode.</param>
         /// <param name="share">Share mode.</param>
         /// <returns>Stream of the content</returns>
-        Stream Open(FileMode open, FileAccess access, FileShare share);
+        Stream Open(FileMode mode, FileAccess access, FileShare share);
 
         /// <summary>
         /// Moves to target file.

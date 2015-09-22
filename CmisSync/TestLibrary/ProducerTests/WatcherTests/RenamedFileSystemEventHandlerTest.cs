@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 #if ! __COCOA__
-namespace TestLibrary.ProducerTests.WatcherTests
-{
+namespace TestLibrary.ProducerTests.WatcherTests {
     using System;
     using System.IO;
 
@@ -33,9 +32,8 @@ namespace TestLibrary.ProducerTests.WatcherTests
 
     using TestUtils;
 
-    [TestFixture]
-    public class RenamedFileSystemEventHandlerTest
-    {
+    [TestFixture, Category("Fast")]
+    public class RenamedFileSystemEventHandlerTest {
         private static readonly string RootPath = Path.GetTempPath();
         private readonly string oldName = "Cat";
         private readonly string newName = "Dog";
@@ -49,23 +47,22 @@ namespace TestLibrary.ProducerTests.WatcherTests
             this.fsFactory = new Mock<IFileSystemInfoFactory>();
         }
 
-        [Test, Category("Fast")]
-        public void ConstructorTakesQueueAndFileSystemFactory()
-        {
+        [Test]
+        public void ConstructorTakesQueueAndFileSystemFactory() {
             new RenamedFileSystemEventHandler(Mock.Of<ISyncEventQueue>(), this.fsFactory.Object);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorTakesQueue() {
             new RenamedFileSystemEventHandler(Mock.Of<ISyncEventQueue>());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorThrowsExceptionIfQueueIsNull() {
             Assert.Throws<ArgumentNullException>(() => new RenamedFileSystemEventHandler(null));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void HandleRenameFolderEvent() {
             var handler = new RenamedFileSystemEventHandler(this.queue.Object, this.fsFactory.Object);
             string newPath = Path.Combine(RootPath, this.newName);
@@ -82,7 +79,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             this.queue.VerifyThatNoOtherEventIsAddedThan<FSMovedEvent>();
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void HandleRenameFileEvent() {
             var handler = new RenamedFileSystemEventHandler(this.queue.Object, this.fsFactory.Object);
             string newPath = Path.Combine(RootPath, this.newName);
@@ -99,7 +96,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             this.queue.VerifyThatNoOtherEventIsAddedThan<FSMovedEvent>();
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void HandleRenameEventOfNonExistingPath() {
             var handler = new RenamedFileSystemEventHandler(this.queue.Object, this.fsFactory.Object);
             string newPath = Path.Combine(RootPath, this.newName);
@@ -111,19 +108,18 @@ namespace TestLibrary.ProducerTests.WatcherTests
             this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Once);
         }
 
-        [Test, Category("Fast")]
-        public void RenamedEventArgsConstructor()
-        {
+        [Test]
+        public void RenamedEventArgsConstructor() {
             var args = this.CreateEvent(this.oldName, this.newName);
             Assert.That(args.FullPath, Is.EqualTo(Path.Combine(RootPath, this.newName)));
             Assert.That(args.OldFullPath, Is.EqualTo(Path.Combine(RootPath, this.oldName)));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void HandleExceptionsByInvokingCrawlSync() {
             var handler = new RenamedFileSystemEventHandler(this.queue.Object, this.fsFactory.Object);
             string newPath = Path.Combine(RootPath, this.newName);
-            this.fsFactory.Setup(f => f.IsDirectory(newPath)).Throws(new Exception("IOException"));
+            this.fsFactory.Setup(f => f.IsDirectory(newPath)).Throws<IOException>();
 
             handler.Handle(null, this.CreateEvent(this.oldName, this.newName));
 
@@ -131,8 +127,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Once);
         }
 
-        private RenamedEventArgs CreateEvent(string oldName, string newName)
-        {
+        private RenamedEventArgs CreateEvent(string oldName, string newName) {
 #if __MonoCS__
             return new RenamedEventArgs(WatcherChangeTypes.Renamed, RootPath, newName, Path.Combine(RootPath, oldName));
 #else

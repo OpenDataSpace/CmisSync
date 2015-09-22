@@ -16,11 +16,16 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace CmisSync.Lib.Queueing {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
+
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -30,6 +35,11 @@ namespace CmisSync.Lib.Queueing {
     public class SyncEventManager : ISyncEventManager {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventManager));
         private List<SyncEventHandler> handler = new List<SyncEventHandler>();
+
+        /// <summary>
+        /// Occurs when an exception is thrown on an ISyncEventManager handling a given ISyncEvent from queue.
+        /// </summary>
+        public event EventHandler<ThreadExceptionEventArgs> OnException;
 
         /// <summary>
         /// Adds the event handler to the manager.
@@ -59,12 +69,18 @@ namespace CmisSync.Lib.Queueing {
         public void Handle(ISyncEvent e) {
             for (int i = this.handler.Count - 1; i >= 0; i--) {
                 var h = this.handler[i];
-                if (h.Handle(e)) {
-                    if (!(e is IRemoveFromLoggingEvent)) {
-                        Logger.Debug(string.Format("Event {0} was handled by {1}", e.ToString(), h.GetType()));
-                    }
+                try {
+                    if (h.Handle(e)) {
+                        if (!(e is IRemoveFromLoggingEvent)) {
+                            Logger.Debug(string.Format("Event {0} was handled by {1}", e.ToString(), h.GetType()));
+                        }
 
-                    return;
+                        return;
+                    }
+                } catch (AbstractInteractionNeededException interactionNeeded) {
+                    this.RaiseOnException(interactionNeeded);
+                } catch (CmisConnectionException connectionException) {
+                    this.RaiseOnException(connectionException);
                 }
             }
         }
@@ -77,6 +93,17 @@ namespace CmisSync.Lib.Queueing {
         /// </param>
         public void RemoveEventHandler(SyncEventHandler handler) {
             this.handler.Remove(handler);
+        }
+
+        private void RaiseOnException(Exception e) {
+            var handler = this.OnException;
+            if (handler != null) {
+                try {
+                    handler(this, new ThreadExceptionEventArgs(e));
+                } catch (Exception ex) {
+                    Logger.Debug("Error on informing exception listener on Queue", ex);
+                }
+            }
         }
     }
 }

@@ -24,11 +24,17 @@ namespace CmisSync.Lib.Queueing {
 
     using CmisSync.Lib.Events;
 
-    public class QueuedEventsCounter : IObservable<int>, IEventCounter{
+    /// <summary>
+    /// Queued events counter.
+    /// </summary>
+    public class QueuedEventsCounter : IObservable<int>, IEventCounter {
         private List<IObserver<int>> fullCounterObservers;
-        private int fullCounter = 0;
-        private bool disposed = false;
+        private int fullCounter;
+        private bool disposed;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.QueuedEventsCounter"/> class.
+        /// </summary>
         public QueuedEventsCounter() {
             this.fullCounterObservers = new List<IObserver<int>>();
         }
@@ -40,7 +46,7 @@ namespace CmisSync.Lib.Queueing {
         /// <returns>A reference to an interface that allows observers to stop receiving notifications before the provider has finished sending them.</returns>
         public virtual IDisposable Subscribe(IObserver<int> observer) {
             if (observer == null) {
-                throw new ArgumentNullException("Given observer is null");
+                throw new ArgumentNullException("observer");
             }
 
             if (!this.fullCounterObservers.Contains(observer)) {
@@ -50,6 +56,10 @@ namespace CmisSync.Lib.Queueing {
             return new Unsubscriber<int>(this.fullCounterObservers, observer);
         }
 
+        /// <summary>
+        /// Decrease the counter if event fits.
+        /// </summary>
+        /// <param name="e">Countable event.</param>
         public void Decrease(ICountableEvent e) {
             int fullcounter = Interlocked.Decrement(ref this.fullCounter);
             foreach (var observer in this.fullCounterObservers) {
@@ -57,6 +67,10 @@ namespace CmisSync.Lib.Queueing {
             }
         }
 
+        /// <summary>
+        /// Increase the counter if event fits.
+        /// </summary>
+        /// <param name="e">Countable event.</param>
         public void Increase(ICountableEvent e) {
             int fullcounter = Interlocked.Increment(ref this.fullCounter);
             foreach (var observer in this.fullCounterObservers) {
@@ -64,6 +78,15 @@ namespace CmisSync.Lib.Queueing {
             }
         }
 
+        /// <summary>
+        /// Releases all resource used by the <see cref="CmisSync.Lib.Queueing.QueuedEventsCounter"/> object.
+        /// </summary>
+        /// <remarks>Call <see cref="Dispose"/> when you are finished using the
+        /// <see cref="CmisSync.Lib.Queueing.QueuedEventsCounter"/>. The <see cref="Dispose"/> method leaves the
+        /// <see cref="CmisSync.Lib.Queueing.QueuedEventsCounter"/> in an unusable state. After calling
+        /// <see cref="Dispose"/>, you must release all references to the
+        /// <see cref="CmisSync.Lib.Queueing.QueuedEventsCounter"/> so the garbage collector can reclaim the memory that
+        /// the <see cref="CmisSync.Lib.Queueing.QueuedEventsCounter"/> was occupying.</remarks>
         public void Dispose() {
             if (this.disposed) {
                 return;

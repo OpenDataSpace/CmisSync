@@ -1,5 +1,5 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="HashAlgorithmReuse.cs" company="GRAU DATA AG">
+//-----------------------------------------------------------------------
+// <copyright file="InteractionNeededExceptionTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,11 +16,23 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-
-namespace CmisSync.Lib.HashAlgorithm {
+﻿
+namespace TestLibrary.ExceptionTests {
     using System;
-    using System.Security.Cryptography;
 
-    interface HashAlgorithmReuse : ICloneable {
+    using CmisSync.Lib.Exceptions;
+
+    using NUnit.Framework;
+
+    using Moq;
+
+    [TestFixture, Category("Fast")]
+    public class InteractionNeededExceptionTest {
+        [Test]
+        public void ExceptionLevelIsInfo() {
+            Assert.That(new InteractionNeededException().Level, Is.EqualTo(ExceptionLevel.Info));
+            Assert.That(new InteractionNeededException("msg").Level, Is.EqualTo(ExceptionLevel.Info));
+            Assert.That(new InteractionNeededException("msg", Mock.Of<Exception>()).Level, Is.EqualTo(ExceptionLevel.Info));
+        }
     }
 }

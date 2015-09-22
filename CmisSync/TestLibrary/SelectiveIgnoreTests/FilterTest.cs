@@ -105,7 +105,7 @@ namespace TestLibrary.SelectiveIgnoreTests
         public void FilterRemoteObjectCreatedEvents() {
             this.SetupMocks();
             var doc = Mock.Of<IDocument>();
-            this.storage.Setup(s => s.IsIgnored(doc)).Returns(IgnoredState.INHERITED);
+            this.storage.Setup(s => s.IsIgnored(doc)).Returns(IgnoredState.Inherited);
             var fileEvent = new FileEvent(null, doc) { Remote = MetaDataChangeType.CREATED };
 
             Assert.That(this.underTest.Handle(fileEvent), Is.True);
@@ -161,9 +161,9 @@ namespace TestLibrary.SelectiveIgnoreTests
 
         private void SetupMocks() {
             this.storage = new Mock<IIgnoredEntitiesStorage>();
-            this.storage.Setup(s => s.IsIgnoredPath(this.ignoredPath)).Returns(IgnoredState.IGNORED);
-            this.storage.Setup(s => s.IsIgnoredPath(It.Is<string>(path => path.StartsWith(this.ignoredPath) && path != this.ignoredPath))).Returns(IgnoredState.INHERITED);
-            this.storage.Setup(s => s.IsIgnoredPath(It.Is<string>(path => !path.StartsWith(this.ignoredPath)))).Returns(IgnoredState.NOT_IGNORED);
+            this.storage.Setup(s => s.IsIgnoredPath(this.ignoredPath)).Returns(IgnoredState.Ignored);
+            this.storage.Setup(s => s.IsIgnoredPath(It.Is<string>(path => path.StartsWith(this.ignoredPath) && path != this.ignoredPath))).Returns(IgnoredState.Inherited);
+            this.storage.Setup(s => s.IsIgnoredPath(It.Is<string>(path => !path.StartsWith(this.ignoredPath)))).Returns(IgnoredState.NotIgnored);
             this.underTest = new SelectiveIgnoreFilter(this.storage.Object);
         }
     }

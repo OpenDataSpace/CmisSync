@@ -439,4 +439,19 @@ Dies kann bei der Synchronisation zu Konfliktdateien führen.</value>
   <data name="SyncStatusPaused" xml:space="preserve">
     <value>Synchronisation ist pausiert</value>
   </data>
+  <data name="Bandwidth" xml:space="preserve">
+    <value>Bandbreite</value>
+  </data>
+  <data name="ConfigBrokenMessage" xml:space="preserve">
+    <value>Bitte die Konfiguration anpassen.</value>
+  </data>
+  <data name="ConfigBrokenTitle" xml:space="preserve">
+    <value>Die Konfiguration von "{0}" ist nicht in Ordnung</value>
+  </data>
+  <data name="VirusDetectedMessage" xml:space="preserve">
+    <value>Infizierte Datei: "{0}"</value>
+  </data>
+  <data name="VirusDetectedTitle" xml:space="preserve">
+    <value>Virus entdeckt!</value>
+  </data>
 </root>

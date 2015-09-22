@@ -18,7 +18,9 @@
 //-----------------------------------------------------------------------
 
 namespace CmisSync.Lib.Storage.FileSystem {
+    using System;
     using System.IO;
+    using System.Security.AccessControl;
 
     /// <summary>
     /// Wrapper for DirectoryInfo
@@ -104,11 +106,28 @@ namespace CmisSync.Lib.Storage.FileSystem {
         }
 
         /// <summary>
-        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.FileSystem.DirectoryInfoWrapper"/>.
+        /// Tries to set permission to read write access to the directory and its children
         /// </summary>
-        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.FileSystem.DirectoryInfoWrapper"/>.</returns>
-        public override string ToString() {
-            return string.Format("[{0}]", this.original.FullName);
+        public void TryToSetReadWritePermissionRecursively() {
+#if !__MonoCS__
+            try {
+                this.ReadOnly = false;
+            } catch (Exception e) {
+                Console.WriteLine(e);
+            }
+
+            foreach (var file in this.GetFiles()) {
+                try {
+                    file.ReadOnly = false;
+                } catch (Exception e) {
+                    Console.WriteLine(e);
+                }
+            }
+
+            foreach (var dir in this.GetDirectories()) {
+                dir.TryToSetReadWritePermissionRecursively();
+            }
+#endif
         }
     }
 }

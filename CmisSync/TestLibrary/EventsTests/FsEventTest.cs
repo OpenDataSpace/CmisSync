@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.EventsTests
-{
+namespace TestLibrary.EventsTests {
     using System;
     using System.IO;
 
@@ -27,11 +26,9 @@ namespace TestLibrary.EventsTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class FsEventTest
-    {
+    public class FsEventTest {
         [Test, Category("Fast")]
-        public void Constructor()
-        {
+        public void Constructor() {
             string name = "test";
             string path = Path.Combine(Path.GetTempPath(), name);
             var e = new FSEvent(WatcherChangeTypes.Created, path, false);
@@ -40,14 +37,12 @@ namespace TestLibrary.EventsTests
         }
 
         [Test, Category("Fast")]
-        public void ConstructorThrowsExceptionInNullPath()
-        {
+        public void ConstructorThrowsExceptionInNullPath() {
             Assert.Throws<ArgumentNullException>(() => new FSEvent(WatcherChangeTypes.Created, null, false));
         }
 
         [Test, Category("Medium")]
-        public void FsEventStoresDirectoryState()
-        {
+        public void FsEventStoresDirectoryState() {
             var path = Path.Combine(Path.GetTempPath(), "newPath");
             Directory.CreateDirectory(path);
             var e = new FSEvent(WatcherChangeTypes.Created, path, true);
@@ -56,8 +51,7 @@ namespace TestLibrary.EventsTests
         }
 
         [Test, Category("Medium")]
-        public void FsEventExtractsDirectoryName()
-        {
+        public void FsEventExtractsDirectoryName() {
             string name = "newPath";
             var path = Path.Combine(Path.GetTempPath(), name);
             Directory.CreateDirectory(path);

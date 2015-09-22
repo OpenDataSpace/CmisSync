@@ -28,15 +28,26 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
     using DotCMIS.Client;
 
+    /// <summary>
+    /// Local object changed remote object renamed solver.
+    /// </summary>
     public class LocalObjectChangedRemoteObjectRenamed : AbstractEnhancedSolver {
         private readonly ISolver changeChangeSolver;
+
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectChangedRemoteObjectRenamed"/> class.
+        /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="changeChangeSolver">Local change remote change solver.</param>
         public LocalObjectChangedRemoteObjectRenamed(
             ISession session,
             IMetaDataStorage storage,
             ISolver changeChangeSolver) : base(session, storage)
         {
             if (changeChangeSolver == null) {
-                throw new ArgumentNullException("Given solver for the situation of local and remote changes is null");
+                throw new ArgumentNullException("changeChangeSolver", "Given solver for the situation of local and remote changes is null");
             }
 
             this.changeChangeSolver = changeChangeSolver;
@@ -48,6 +59,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
+            if (remoteId == null) {
+                throw new ArgumentNullException("remoteId");
+            }
+
+            if (localFileSystemInfo == null) {
+                throw new ArgumentNullException("localFileSystemInfo");
+            }
+
             // Rename local object and call change/change solver
             var savedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
             string oldPath = localFileSystemInfo.FullName;

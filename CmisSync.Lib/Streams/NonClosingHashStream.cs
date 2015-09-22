@@ -51,7 +51,7 @@ namespace CmisSync.Lib.Streams {
         /// </param>
         public NonClosingHashStream(Stream stream, HashAlgorithm hashAlg, CryptoStreamMode mode) : base(stream) {
             if (hashAlg == null) {
-                throw new ArgumentNullException("Given hash algorithm must not be null");
+                throw new ArgumentNullException("hashAlg");
             }
 
             this.hashAlg = hashAlg;

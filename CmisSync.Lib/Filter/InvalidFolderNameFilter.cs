@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Filter
-{
+namespace CmisSync.Lib.Filter {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -27,8 +26,7 @@ namespace CmisSync.Lib.Filter
     /// <summary>
     /// Invalid folder name filter.
     /// </summary>
-    public class InvalidFolderNameFilter
-    {
+    public class InvalidFolderNameFilter {
         /// <summary>
         /// Regular expression to check whether a folder name is valid or not.
         /// </summary>

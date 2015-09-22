@@ -19,10 +19,12 @@
 
 namespace CmisSync {
     using System;
+    using System.ComponentModel;
 
     using CmisSync.Lib.Config;
 
-    [System.ComponentModel.ToolboxItem(true)]
+    [ToolboxItem(true)]
+    [CLSCompliant(false)]
     public partial class CredentialsWidget : Gtk.Bin {
         public event EventHandler Changed;
         public string UserName {

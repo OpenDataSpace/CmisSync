@@ -16,8 +16,8 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.PathMatcher
-{
+
+namespace CmisSync.Lib.PathMatcher {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -30,8 +30,7 @@ namespace CmisSync.Lib.PathMatcher
     /// Interface of a path matcher.
     /// A Path matcher is used to simplify the relation between a local and a remote file/folder.
     /// </summary>
-    public interface IPathMatcher
-    {
+    public interface IPathMatcher {
         /// <summary>
         /// Gets the local target root path.
         /// </summary>

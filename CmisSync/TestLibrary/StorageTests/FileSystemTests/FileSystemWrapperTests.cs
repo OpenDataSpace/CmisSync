@@ -34,7 +34,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
 
     [TestFixture]
     public class FileSystemWrapperTests {
-        private static readonly IFileSystemInfoFactory Factory = new FileSystemInfoFactory();
+        private static readonly IFileSystemInfoFactory Factory = new FileSystemInfoFactory(ignoreReadOnlyByDefault: false);
         private DirectoryInfo testFolder;
         private DirectoryInfo testFolderOnOtherFS = null;
 
@@ -194,15 +194,38 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         }
 
         [Test, Category("Medium")]
-        public void DeleteTrue() {
-            string fileName = "test1";
-            string fullPath = Path.Combine(this.testFolder.FullName, fileName);
+        public void DeleteEmptyDir(
+            [Values(true, false)]bool recursive)
+        {
+            string dirName = "test1";
+            string fullPath = Path.Combine(this.testFolder.FullName, dirName);
             IDirectoryInfo dirInfo = Factory.CreateDirectoryInfo(fullPath);
             dirInfo.Create();
             Assert.That(dirInfo.Exists, Is.True);
-            dirInfo.Delete(true);
+            dirInfo.Delete(recursive);
             dirInfo.Refresh();
             Assert.That(dirInfo.Exists, Is.False);
+        }
+
+        [Test, Category("Medium")]
+        public void DeleteDirTreeRecursive(
+            [Values(true, false)]bool readOnlyLeafs)
+        {
+            var factory = new FileSystemInfoFactory(ignoreReadOnlyByDefault: true);
+            string dirName = "dir";
+            string leafDirName = "leaf";
+            string basePath = Path.Combine(this.testFolder.FullName, dirName);
+            var dirInfo = factory.CreateDirectoryInfo(basePath);
+            var leafInfo = factory.CreateDirectoryInfo(Path.Combine(basePath, leafDirName));
+            dirInfo.Create();
+            leafInfo.Create();
+            leafInfo.ReadOnly = readOnlyLeafs;
+            dirInfo.ReadOnly = true;
+            dirInfo.Delete(true);
+            dirInfo.Refresh();
+            leafInfo.Refresh();
+            Assert.That(dirInfo.Exists, Is.False);
+            Assert.That(leafInfo.Exists, Is.False);
         }
 
         [Test, Category("Medium")]
@@ -336,6 +359,15 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             this.SkipIfExtendedAttributesAreNotAvailable();
             var underTest = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "folder"));
             underTest.Create();
+
+            Assert.That(underTest.Uuid, Is.Null);
+        }
+
+        [Test, Category("Medium")]
+        public void UuidIsNullIfNothingIsStoredInFile() {
+            this.SkipIfExtendedAttributesAreNotAvailable();
+            var underTest = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "file"));
+            using (underTest.Open(FileMode.CreateNew));
 
             Assert.That(underTest.Uuid, Is.Null);
         }
@@ -604,6 +636,23 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         }
 
         [Test, Category("Medium")]
+        public void ReadOnlyFlagIsNotRecursive() {
+            var dir = Factory.CreateDirectoryInfo(this.testFolder.FullName);
+            Assert.That(dir.ReadOnly, Is.False);
+            var subDir = Factory.CreateDirectoryInfo(Path.Combine(dir.FullName,"bla"));
+            subDir.Create();
+            dir.ReadOnly = true;
+            subDir.Refresh();
+            Assert.That(dir.ReadOnly, Is.True);
+            Assert.That(subDir.ReadOnly, Is.False);
+            subDir.ReadOnly = true;
+            dir.ReadOnly = false;
+            subDir.Refresh();
+            Assert.That(dir.ReadOnly, Is.False);
+            Assert.That(subDir.ReadOnly, Is.True);
+        }
+
+        [Test, Category("Medium")]
         public void RenameOfReadOnlyDirFails() {
             var dir = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "cat"));
             dir.Create();
@@ -685,12 +734,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             var uuid = Guid.NewGuid();
             file.Uuid = uuid;
             file.ReadOnly = true;
-            try {
-                file.Uuid = Guid.NewGuid();
-                Assert.Fail("Setting a Uuid to a read only file must fail, but didn't");
-            } catch (IOException) {
-            }
-
+            Assert.Catch<IOException>(() => file.Uuid = Guid.NewGuid(), "Setting a Uuid to a read only file must fail, but didn't");
             Assert.That(file.Uuid, Is.EqualTo(uuid));
             Assert.That(file.ReadOnly, Is.True);
         }
@@ -719,14 +763,19 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             using (file.Open(FileMode.CreateNew)) { }
             file.LastWriteTimeUtc = past;
             file.ReadOnly = true;
-            try {
-                file.LastWriteTimeUtc = DateTime.UtcNow;
-                Assert.Fail("Setting last write time utc must fail on a read only file, but didn't");
-            } catch (UnauthorizedAccessException) {
-            }
+            Assert.Throws<UnauthorizedAccessException>(() => file.LastWriteTimeUtc = DateTime.UtcNow, "Setting last write time utc must fail on a read only file, but didn't");
 
             Assert.That(file.LastWriteTimeUtc, Is.EqualTo(past).Within(1).Seconds);
             Assert.That(file.ReadOnly, Is.True);
+        }
+
+        [Test, Category("Medium")]
+        public void NormalFolderAndFilesAreNoSymlink() {
+            var dir = Factory.CreateDirectoryInfo(this.testFolder.FullName);
+            Assert.That(dir.IsSymlink, Is.False);
+            var file = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "file"));
+            using (file.Open(FileMode.CreateNew)) { }
+            Assert.That(file.IsSymlink, Is.False);
         }
 
 #if !__MonoCS__
@@ -739,6 +788,20 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             Assert.That(securityAccount.IsAccountSid(), Is.True);
         }
 #endif
+
+#if !__MonoCS__
+        [Test, Category("Medium")]
+        public void CreateWrapperOnNetworkShare([Values("\\\\server\\share\\")]string uncPath) {
+            var wrapper = new DirectoryInfoWrapper(new DirectoryInfo(uncPath));
+            Assert.That(wrapper.FSType, Is.EqualTo(FSType.Unknown));
+        }
+#endif
+
+        [Test, Category("Medium")]
+        public void DetectDriveInfo() {
+            var wrapper = new DirectoryInfoWrapper(new DirectoryInfo(Path.Combine(this.testFolder.FullName, "cat")));
+            Assert.That(wrapper.FSType, Is.Not.EqualTo(FSType.Unknown));
+        }
 
         [Ignore("Windows only and needs second partition as target fs")]
         [Test, Category("Medium")]

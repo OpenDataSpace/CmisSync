@@ -65,23 +65,25 @@ namespace TestLibrary.TestUtils {
             }
         }
 
-        public static void SetupParent(this Mock<IDocument> doc, IFolder parent) {
+        public static Mock<IDocument> SetupParent(this Mock<IDocument> doc, IFolder parent) {
             List<IFolder> parents = new List<IFolder>();
             parents.Add(parent);
             doc.Setup(d => d.Parents).Returns(parents);
+            return doc;
         }
 
-        public static void SetupPath(this Mock<IDocument> doc, params string[] path) {
+        public static Mock<IDocument> SetupPath(this Mock<IDocument> doc, params string[] path) {
             List<string> paths = new List<string>(path);
             doc.Setup(d => d.Paths).Returns(paths);
+            return doc;
         }
 
-        public static void SetupContentStreamHash(this Mock<IDocument> doc, byte[] hash, string type = "SHA-1") {
+        public static Mock<IDocument> SetupContentStreamHash(this Mock<IDocument> doc, byte[] hash, string type = "SHA-1") {
             var hashString = string.Format("{{{0}}}{1}", type.ToLower(), BitConverter.ToString(hash).Replace("-", string.Empty));
-            doc.SetupContentStreamHash(hashString);
+            return doc.SetupContentStreamHash(hashString);
         }
 
-        public static void SetupContentStreamHash(this Mock<IDocument> doc, string hashString) {
+        public static Mock<IDocument> SetupContentStreamHash(this Mock<IDocument> doc, string hashString) {
             var properties = new List<IProperty>();
             IList<object> values = new List<object>();
             values.Add(hashString);
@@ -93,9 +95,10 @@ namespace TestLibrary.TestUtils {
 
             properties.Add(property);
             doc.Setup(d => d.Properties).Returns(properties);
+            return doc;
         }
 
-        public static void SetupUpdateModificationDate(this Mock<IDocument> doc, DateTime? oldDate = null) {
+        public static Mock<IDocument> SetupUpdateModificationDate(this Mock<IDocument> doc, DateTime? oldDate = null) {
             doc.Setup(d => d.LastModificationDate).Returns(oldDate);
             doc.Setup(d => d.UpdateProperties(
                 It.Is<IDictionary<string, object>>(dic => dic.ContainsKey(PropertyIds.LastModificationDate)), true))
@@ -103,9 +106,10 @@ namespace TestLibrary.TestUtils {
                     (dict, b) =>
                     doc.Setup(d => d.LastModificationDate).Returns((DateTime?)dict[PropertyIds.LastModificationDate]))
                 .Returns(doc.Object);
+            return doc;
         }
 
-        public static void SetupCheckout(this Mock<IDocument> doc, Mock<IDocument> docPWC, string newChangeToken, string newObjectId = null) {
+        public static Mock<IDocument> SetupCheckout(this Mock<IDocument> doc, Mock<IDocument> docPWC, string newChangeToken, string newObjectId = null) {
             doc.Setup(d => d.CheckOut()).Returns(() => {
                 doc.Setup(d => d.IsVersionSeriesCheckedOut).Returns(true);
                 doc.Setup(d => d.VersionSeriesCheckedOutId).Returns(docPWC.Object.Id);
@@ -122,6 +126,7 @@ namespace TestLibrary.TestUtils {
                     return Mock.Of<IObjectId>(o => o.Id == doc.Object.Id);
                 }
             });
+            return doc;
         }
 
         public static void VerifySetContentStream(this Mock<IDocument> doc, bool overwrite = true, bool refresh = true, string mimeType = null) {

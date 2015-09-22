@@ -32,7 +32,8 @@ namespace CmisSync.Lib.Streams {
         private PausableStream pause;
         private AbortableStream abort;
         private ProgressStream progress;
-        private bool disposed = false;
+        private BandwidthLimitedStream bandwidthLimit;
+        private bool disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Streams.TransmissionStream"/> class.
@@ -41,17 +42,18 @@ namespace CmisSync.Lib.Streams {
         /// <param name="transmission">Transmission object to be notified about changes and listened to events as well.</param>
         public TransmissionStream(Stream wrappedStream, Transmission transmission) {
             if (transmission == null) {
-                throw new ArgumentNullException("Given transmission is null");
+                throw new ArgumentNullException("transmission");
             }
 
             this.abort = new AbortableStream(wrappedStream);
             this.pause = new PausableStream(this.abort);
-            this.bandwidthNotify = new BandwidthNotifyingStream(this.pause);
+            this.bandwidthLimit = new BandwidthLimitedStream(this.pause);
+            this.bandwidthNotify = new BandwidthNotifyingStream(this.bandwidthLimit);
             this.progress = new ProgressStream(this.bandwidthNotify);
             this.abort.PropertyChanged += (object sender, PropertyChangedEventArgs e) => {
                 var a = sender as AbortableStream;
                 if (e.PropertyName == Utils.NameOf(() => a.Exception)) {
-                    transmission.Status = TransmissionStatus.ABORTED;
+                    transmission.Status = TransmissionStatus.Aborted;
                     transmission.FailedException = a.Exception;
                 }
             };
@@ -72,18 +74,30 @@ namespace CmisSync.Lib.Streams {
             transmission.PropertyChanged += (object sender, PropertyChangedEventArgs e) => {
                 var t = sender as Transmission;
                 if (e.PropertyName == Utils.NameOf(() => t.Status)) {
-                    if (t.Status == TransmissionStatus.ABORTING) {
+                    if (t.Status == TransmissionStatus.Aborting) {
                         this.abort.Abort();
                         this.pause.Resume();
-                    } else if (t.Status == TransmissionStatus.PAUSED) {
+                    } else if (t.Status == TransmissionStatus.Paused) {
                         this.pause.Pause();
-                    } else if (t.Status == TransmissionStatus.TRANSMITTING) {
+                    } else if (t.Status == TransmissionStatus.Transmitting) {
                         this.pause.Resume();
+                    }
+                } else if (e.PropertyName == Utils.NameOf(() => t.MaxBandwidth)) {
+                    if (t.MaxBandwidth > 0) {
+                        this.bandwidthLimit.ReadLimit = t.MaxBandwidth;
+                        this.bandwidthLimit.WriteLimit = t.MaxBandwidth;
+                    } else {
+                        this.bandwidthLimit.DisableLimits();
                     }
                 }
             };
-            if (transmission.Status == TransmissionStatus.ABORTING || transmission.Status == TransmissionStatus.ABORTED) {
+            if (transmission.Status == TransmissionStatus.Aborting || transmission.Status == TransmissionStatus.Aborted) {
                 this.abort.Abort();
+            }
+
+            if (transmission.MaxBandwidth > 0) {
+                this.bandwidthLimit.ReadLimit = transmission.MaxBandwidth;
+                this.bandwidthLimit.WriteLimit = transmission.MaxBandwidth;
             }
         }
 
@@ -148,6 +162,10 @@ namespace CmisSync.Lib.Streams {
             }
 
             set {
+                if (this.disposed) {
+                    throw new ObjectDisposedException(this.GetType().Name);
+                }
+
                 this.progress.Position = value;
             }
         }
@@ -156,6 +174,10 @@ namespace CmisSync.Lib.Streams {
         /// Flush the wrapped instance.
         /// </summary>
         public override void Flush() {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             this.progress.Flush();
         }
 
@@ -181,6 +203,10 @@ namespace CmisSync.Lib.Streams {
         /// State passed to the wrapped instance.
         /// </param>
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             return this.progress.BeginRead(buffer, offset, count, callback, state);
         }
 
@@ -197,6 +223,10 @@ namespace CmisSync.Lib.Streams {
         /// The result of the call passed to the wrapped instance.
         /// </returns>
         public override long Seek(long offset, SeekOrigin origin) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             return this.progress.Seek(offset, origin);
         }
 
@@ -216,6 +246,10 @@ namespace CmisSync.Lib.Streams {
         /// The result of the call passed to the wrapped instance.
         /// </returns>
         public override int Read(byte[] buffer, int offset, int count) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             return this.progress.Read(buffer, offset, count);
         }
 
@@ -226,6 +260,10 @@ namespace CmisSync.Lib.Streams {
         /// Value passed to the wrapped instance.
         /// </param>
         public override void SetLength(long value) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             this.progress.SetLength(value);
         }
 
@@ -242,10 +280,18 @@ namespace CmisSync.Lib.Streams {
         /// Count passed to the wrapped instance.
         /// </param>
         public override void Write(byte[] buffer, int offset, int count) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             this.progress.Write(buffer, offset, count);
         }
         #endregion
 
+        /// <summary>
+        /// Dispose the transmission stream by disposing all internal streams.
+        /// </summary>
+        /// <param name="disposing">If set to <c>true</c> all stream will be disposed.</param>
         protected override void Dispose(bool disposing) {
             if (!this.disposed) {
                 if (disposing) {

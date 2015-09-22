@@ -89,7 +89,7 @@ namespace TestLibrary.SelectiveIgnoreTests
 
             Assert.That(this.underTest.Handle(createdEvent), Is.False);
 
-            this.ignoreStorage.Verify(s => s.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(It.Is<IIgnoredEntity>(e => e.LocalPath == this.localPath && e.ObjectId == this.folderId)));
+            this.ignoreStorage.Verify(s => s.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(It.Is<AbstractIgnoredEntity>(e => e.LocalPath == this.localPath && e.ObjectId == this.folderId)));
             this.queue.VerifyThatNoEventIsAdded();
         }
 
@@ -103,7 +103,7 @@ namespace TestLibrary.SelectiveIgnoreTests
 
             Assert.That(this.underTest.Handle(createdEvent), Is.False);
 
-            this.ignoreStorage.Verify(s => s.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(It.IsAny<IIgnoredEntity>()), Times.Never());
+            this.ignoreStorage.Verify(s => s.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(It.IsAny<AbstractIgnoredEntity>()), Times.Never());
             this.queue.VerifyThatNoEventIsAdded();
         }
 
@@ -120,7 +120,7 @@ namespace TestLibrary.SelectiveIgnoreTests
 
             Assert.That(this.underTest.Handle(changeEvent), Is.False);
 
-            this.ignoreStorage.Verify(s => s.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(It.Is<IIgnoredEntity>(e => e.LocalPath == this.localPath && e.ObjectId == this.folderId)));
+            this.ignoreStorage.Verify(s => s.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(It.Is<AbstractIgnoredEntity>(e => e.LocalPath == this.localPath && e.ObjectId == this.folderId)));
             this.queue.VerifyThatNoEventIsAdded();
         }
 
@@ -134,7 +134,7 @@ namespace TestLibrary.SelectiveIgnoreTests
 
             Assert.That(this.underTest.Handle(changeEvent), Is.False);
 
-            this.ignoreStorage.Verify(s => s.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(It.IsAny<IIgnoredEntity>()), Times.Never());
+            this.ignoreStorage.Verify(s => s.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(It.IsAny<AbstractIgnoredEntity>()), Times.Never());
             this.queue.VerifyThatNoEventIsAdded();
         }
 
@@ -144,12 +144,12 @@ namespace TestLibrary.SelectiveIgnoreTests
             var changedObject = MockOfIFolderUtil.CreateRemoteFolderMock(this.folderId, this.folderName, this.remotePath, Guid.NewGuid().ToString());
             var changeEvent = new ContentChangeEvent(ChangeType.Updated, this.folderId);
             this.session.Setup(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>())).Returns(changedObject.Object);
-            this.ignoreStorage.Setup(i => i.IsIgnoredId(this.folderId)).Returns(IgnoredState.IGNORED);
+            this.ignoreStorage.Setup(i => i.IsIgnoredId(this.folderId)).Returns(IgnoredState.Ignored);
             changeEvent.UpdateObject(this.session.Object);
 
             Assert.That(this.underTest.Handle(changeEvent), Is.False);
 
-            this.ignoreStorage.Verify(s => s.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(It.IsAny<IIgnoredEntity>()), Times.Never());
+            this.ignoreStorage.Verify(s => s.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(It.IsAny<AbstractIgnoredEntity>()), Times.Never());
             this.ignoreStorage.Verify(s => s.Remove(this.folderId));
             this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Once());
             this.queue.VerifyThatNoOtherEventIsAddedThan<StartNextSyncEvent>();
@@ -169,7 +169,7 @@ namespace TestLibrary.SelectiveIgnoreTests
         [Test, Category("Fast"), Category("SelectiveIgnore")]
         public void DeleteEventForAFormerIgnoredObject() {
             this.SetUpMocks();
-            this.ignoreStorage.Setup(i => i.IsIgnoredId(this.folderId)).Returns(IgnoredState.IGNORED);
+            this.ignoreStorage.Setup(i => i.IsIgnoredId(this.folderId)).Returns(IgnoredState.Ignored);
             var deleteEvent = new ContentChangeEvent(ChangeType.Deleted, this.folderId);
 
             Assert.That(this.underTest.Handle(deleteEvent), Is.False);

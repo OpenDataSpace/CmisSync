@@ -16,15 +16,22 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Queueing
-{
+
+namespace CmisSync.Lib.Queueing {
+    using System;
+    using System.Threading;
+
     using CmisSync.Lib.Events;
 
     /// <summary>
     /// Sync event manager which has a list of all Handlers and forwards events to them.
     /// </summary>
-    public interface ISyncEventManager
-    {
+    public interface ISyncEventManager {
+        /// <summary>
+        /// Occurs when an exception is thrown on handling a given ISyncEvent from queue.
+        /// </summary>
+        event EventHandler<ThreadExceptionEventArgs> OnException;
+
         /// <summary>
         /// Adds the event handler to the manager.
         /// </summary>

@@ -40,9 +40,9 @@ namespace TestLibrary.IntegrationTests {
     using TestUtils;
 
     /// <summary>
-    /// Client Brand integration tests. Each method tests one specific test case. The test got to be finished after 15 mins, otherwise the test will fail.
+    /// Client Brand integration tests. Each method tests one specific test case. The test got to be finished after 1 min, otherwise the test will fail.
     /// </summary>
-    [TestFixture, Timeout(900000), Category("Branding")]
+    [TestFixture, Timeout(60000), Category("Branding")]
     class ClientBrandTests : IsTestWithConfiguredLog4Net {
         /// <summary>
         /// Disable HTTPS Verification
@@ -66,7 +66,7 @@ namespace TestLibrary.IntegrationTests {
         /// <summary>
         /// Test CMIS server connection
         /// </summary>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Ignore("Erratic")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void TestServer(
             string canonical_name,
             string localPath,
@@ -77,7 +77,7 @@ namespace TestLibrary.IntegrationTests {
             string repositoryId,
             string binding)
         {
-            ServerCredentials credentials = new ServerCredentials() {
+            var credentials = new ServerCredentials() {
                 Address = new Uri(url),
                 Binding = binding,
                 UserName = user,
@@ -92,7 +92,7 @@ namespace TestLibrary.IntegrationTests {
         /// <summary>
         /// Test Client Brand
         /// </summary>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Ignore("Erratic")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void TestClientBrand(
             string canonical_name,
             string localPath,
@@ -103,7 +103,7 @@ namespace TestLibrary.IntegrationTests {
             string repositoryId,
             string binding)
         {
-            ServerCredentials credentials = new ServerCredentials() {
+            var credentials = new ServerCredentials() {
                 Address = new Uri(url),
                 Binding = binding,
                 UserName = user,
@@ -134,9 +134,9 @@ namespace TestLibrary.IntegrationTests {
             private List<string> pathList = new List<string>();
 
             public ClientBrand(ServerCredentials credentials, string repositoryId, string remoteFolderPath) {
-                Dictionary<string, string> parameters = CmisUtils.GetCmisParameters(credentials);
-                ISessionFactory factory = SessionFactory.NewInstance();
-                IList<IRepository> repos = factory.GetRepositories(parameters);
+                var parameters = CmisUtils.GetCmisParameters(credentials);
+                var factory = SessionFactory.NewInstance();
+                var repos = factory.GetRepositories(parameters);
                 foreach (IRepository repo in repos) {
                     if (repo.Id == repositoryId) {
                         this.repository = repo;

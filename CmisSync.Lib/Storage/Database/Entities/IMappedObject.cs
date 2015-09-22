@@ -99,7 +99,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         MappedObjectType Type { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Data.IMappedObject"/> is ignored.
+        /// Gets or sets a value indicating whether this <see cref="IMappedObject"/> is ignored.
         /// </summary>
         /// <value><c>true</c> if ignored; otherwise, <c>false</c>.</value>
         bool Ignored { get; set; }
@@ -117,5 +117,11 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// </summary>
         /// <value><c>true</c> if this instance is read only; otherwise, <c>false</c>.</value>
         bool IsReadOnly { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last time when this object has been stored in the storage.
+        /// </summary>
+        /// <value>The last stored datetime.</value>
+        DateTime? LastTimeStoredInStorage { get; set; }
     }
 }

@@ -9,6 +9,7 @@ MAINTAINERCLEANFILES = Makefile.in
 EXTRA_DIST = OpenDataSpaceDotCMIS
 
 all-local:
+	nuget restore OpenDataSpaceDotCMIS/DotCMIS.sln
 	xbuild OpenDataSpaceDotCMIS/DotCMIS/DotCMIS.csproj /t:Rebuild
 	cp -f OpenDataSpaceDotCMIS/DotCMIS/bin/Debug/DotCMIS.* .
 	

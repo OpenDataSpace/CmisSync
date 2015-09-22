@@ -46,11 +46,11 @@ namespace CmisSync.Lib.Filter {
         /// <param name="session">Session instance.</param>
         public IgnoreAlreadyHandledContentChangeEventsFilter(IMetaDataStorage storage, ISession session) {
             if (storage == null) {
-                throw new ArgumentNullException("Given storage instance is null");
+                throw new ArgumentNullException("storage");
             }
 
             if (session == null) {
-                throw new ArgumentNullException("Given session instance is null");
+                throw new ArgumentNullException("session");
             }
 
             this.storage = storage;
@@ -63,8 +63,8 @@ namespace CmisSync.Lib.Filter {
         /// <param name="e">Sync event</param>
         /// <returns><c>true</c> if the event has been already handled, otherwise <c>false</c></returns>
         public override bool Handle(ISyncEvent e) {
-            if (e is ContentChangeEvent) {
-                ContentChangeEvent change = e as ContentChangeEvent;
+            ContentChangeEvent change = e as ContentChangeEvent;
+            if (change != null) {
                 switch (change.Type) {
                 case ChangeType.Created:
                     return this.storage.GetObjectByRemoteId(change.ObjectId) != null;

@@ -32,9 +32,9 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <see cref="CmisSync.Lib.Storage.FileSystem.ReadOnlyIgnoringFileSystemInfoDecorator"/> class.
         /// </summary>
         /// <param name="info">Decorated file system info instance.</param>
-        public ReadOnlyIgnoringFileSystemInfoDecorator(IFileSystemInfo info) {
+        protected ReadOnlyIgnoringFileSystemInfoDecorator(IFileSystemInfo info) {
             if (info == null) {
-                throw new ArgumentNullException("Given file system info instance is null");
+                throw new ArgumentNullException("info");
             }
 
             this.fileSystemInfo = info;
@@ -109,6 +109,13 @@ namespace CmisSync.Lib.Storage.FileSystem {
         }
 
         /// <summary>
+        /// Gets a value indicating whether this instance is a symlink.
+        /// </summary>
+        public bool IsSymlink {
+            get { return this.fileSystemInfo.IsSymlink; }
+        }
+
+        /// <summary>
         /// Refresh the loaded information of this instance.
         /// </summary>
         public void Refresh() {
@@ -143,22 +150,32 @@ namespace CmisSync.Lib.Storage.FileSystem {
         }
 
         /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.FileSystem.ReadOnlyIgnoringDirectoryInfoDecorator"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.FileSystem.ReadOnlyIgnoringDirectoryInfoDecorator"/>.</returns>
+        public override string ToString() {
+            return this.fileSystemInfo.ToString();
+        }
+
+        /// <summary>
         /// Disables read only before executing action end reenables read only after it.
         /// </summary>
         /// <param name="writeOperation">Write operation.</param>
-        protected void DisableAndEnableReadOnlyForOperation(Action writeOperation) {
-            this.Refresh();
-            bool readOnly = this.ReadOnly;
-            if (readOnly) {
-                this.ReadOnly = false;
+        public void DisableAndEnableReadOnlyForOperation(Action writeOperation) {
+            if (writeOperation == null) {
+                throw new ArgumentNullException("writeOperation");
             }
 
-            try {
-                writeOperation();
-            } finally {
-                if (readOnly) {
+            this.Refresh();
+            if (this.ReadOnly) {
+                this.ReadOnly = false;
+                try {
+                    writeOperation();
+                } finally {
                     this.ReadOnly = true;
                 }
+            } else {
+                writeOperation();
             }
         }
     }

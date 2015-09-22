@@ -28,26 +28,44 @@ namespace CmisSync.Lib.SelectiveIgnore {
     using DotCMIS.Client;
     using DotCMIS.Enums;
 
+    /// <summary>
+    /// Selective ignore event transformer.
+    /// Transforms incomming events based on given ignored entries in collection.
+    /// E.g. transforms move events to deleted or added if source or target is ignored.
+    /// </summary>
     public class SelectiveIgnoreEventTransformer : SyncEventHandler {
         private ISyncEventQueue queue;
         private IIgnoredEntitiesCollection ignores;
 
-        public SelectiveIgnoreEventTransformer(IIgnoredEntitiesCollection ignores, ISyncEventQueue queue) {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.SelectiveIgnore.SelectiveIgnoreEventTransformer"/> class.
+        /// </summary>
+        /// <param name="ignores">Ignores collection.</param>
+        /// <param name="queue">Event Queue to pass the transformed events to.</param>
+        public SelectiveIgnoreEventTransformer(
+            IIgnoredEntitiesCollection ignores,
+            ISyncEventQueue queue)
+        {
             if (queue == null) {
-                throw new ArgumentNullException("Given queue is empty");
+                throw new ArgumentNullException("queue");
             }
 
             if (ignores == null) {
-                throw new ArgumentNullException("Given queue is empty");
+                throw new ArgumentNullException("ignores");
             }
 
             this.ignores = ignores;
             this.queue = queue;
         }
 
+        /// <summary>
+        /// Handle FSMovedEvents or ContentChange events and transforms them into correct create or delete.
+        /// </summary>
+        /// <param name="e">The event to handle.</param>
+        /// <returns>true if handled</returns>
         public override bool Handle(ISyncEvent e) {
-            if (e is FSMovedEvent) {
-                var movedEvent = e as FSMovedEvent;
+            var movedEvent = e as FSMovedEvent;
+            if (movedEvent != null) {
                 if (this.IsInsideIgnoredPath(movedEvent.OldPath) && !this.IsInsideIgnoredPath(movedEvent.LocalPath)) {
                     this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, movedEvent.LocalPath, movedEvent.IsDirectory));
                     return true;
@@ -57,10 +75,10 @@ namespace CmisSync.Lib.SelectiveIgnore {
                 }
             }
 
-            if (e is ContentChangeEvent) {
-                var contentChangeEvent = e as ContentChangeEvent;
+            var contentChangeEvent = e as ContentChangeEvent;
+            if (contentChangeEvent != null) {
                 if (contentChangeEvent.Type != ChangeType.Deleted) {
-                    var state = IgnoredState.NOT_IGNORED;
+                    var state = IgnoredState.NotIgnored;
                     var cmisObject = contentChangeEvent.CmisObject;
                     if (cmisObject is IFolder) {
                         state = this.ignores.IsIgnored(cmisObject as IFolder);
@@ -68,7 +86,7 @@ namespace CmisSync.Lib.SelectiveIgnore {
                         state = this.ignores.IsIgnored(cmisObject as IDocument);
                     }
 
-                    if (state == IgnoredState.INHERITED) {
+                    if (state == IgnoredState.Inherited) {
                         this.queue.AddEvent(new ContentChangeEvent(ChangeType.Deleted, contentChangeEvent.ObjectId));
                         return true;
                     }
@@ -79,7 +97,7 @@ namespace CmisSync.Lib.SelectiveIgnore {
         }
 
         private bool IsInsideIgnoredPath(string path) {
-            return this.ignores.IsIgnoredPath(path) == IgnoredState.INHERITED;
+            return this.ignores.IsIgnoredPath(path) == IgnoredState.Inherited;
         }
     }
 }

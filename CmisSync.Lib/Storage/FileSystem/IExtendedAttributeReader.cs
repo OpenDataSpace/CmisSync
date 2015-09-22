@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.FileSystem
-{
+namespace CmisSync.Lib.Storage.FileSystem {
     using System;
     using System.Collections.Generic;
     using System.Runtime.Serialization;
@@ -26,8 +25,7 @@ namespace CmisSync.Lib.Storage.FileSystem
     /// <summary>
     /// Extended attribute reader interface
     /// </summary>
-    public interface IExtendedAttributeReader
-    {
+    public interface IExtendedAttributeReader {
         /// <summary>
         /// Gets the extended attribute.
         /// </summary>

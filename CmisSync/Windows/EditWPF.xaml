@@ -7,11 +7,6 @@
              mc:Ignorable="d" Height="400" Width="620">
     <Grid HorizontalAlignment="Left" Width="445" Margin="165,30,0,30">
         <TabControl x:Name="tab" Margin="0,0,0,10">
-            <!--  GUI workaround to remove ignore folder
-            <TabItem x:Name="tabItemSelection" Header="AddingFolder">
-                <Grid/>
-            </TabItem>
-            -->
             <TabItem x:Name="tabItemCredentials" Header="Credentials">
                 <Grid>
                     <TextBlock x:Name="addressLabel" HorizontalAlignment="Left" Margin="10,40,0,0" TextWrapping="NoWrap" Text="addressLabel" VerticalAlignment="Top"/>
@@ -24,6 +19,20 @@
                     <TextBlock x:Name="passwordHelp" HorizontalAlignment="Left" Margin="220,145,0,0" TextWrapping="NoWrap" Text="passwordHelp" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
+            <TabItem x:Name="tabItemBandwidth" Header="Features">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="49*"/>
+                        <ColumnDefinition Width="386*"/>
+                    </Grid.ColumnDefinitions>
+                    <GroupBox x:Name="uploadLimitBox" Header="Upload Limit" Margin="10,10,10,0" VerticalAlignment="Top" Height="60" Grid.ColumnSpan="2">
+                        <local:BandwidthLimitWidget x:Name="uploadLimitWidget" HorizontalAlignment="Left" Height="63" VerticalAlignment="Top" Width="403" Margin="0,0,0,-12"/>
+                    </GroupBox>
+                    <GroupBox x:Name="downloadLimitBox" Header="Download Limit" HorizontalAlignment="Left" Margin="10,75,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2" Height="60" Width="415">
+                        <local:BandwidthLimitWidget x:Name="downloadLimitWidget" HorizontalAlignment="Left" Height="73" VerticalAlignment="Top" Width="403"/>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
         </TabControl>
         <StackPanel Orientation="Horizontal" RenderTransformOrigin="0.5,0.5" FlowDirection="RightToLeft" Margin="0,0,-10,-31" VerticalAlignment="Bottom" Height="31">
             <StackPanel.Resources>
@@ -32,8 +41,8 @@
                     <Setter Property="Padding" Value="10,0,10,0" />
                 </Style>
             </StackPanel.Resources>
+            <Button x:Name="cancelButton" Content="DiscardChanges" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10,0,0,11"/>
             <Button x:Name="finishButton" Content="SaveChanges" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <Button x:Name="cancelButton" Content="DiscardChanges" HorizontalAlignment="Left" VerticalAlignment="Top"/>
         </StackPanel>
     </Grid>
 </UserControl>

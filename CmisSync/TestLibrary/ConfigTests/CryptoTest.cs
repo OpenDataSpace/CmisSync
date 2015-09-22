@@ -23,9 +23,9 @@ namespace TestLibrary.ConfigTests {
     using CmisSync.Lib.Config;
 
     using NUnit.Framework;
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class CryptoTest {
-        [Test, Category("Fast")]
+        [Test]
         public void EncryptAndDecryptStrings() {
             string[] test_pws = { string.Empty, "test", "Whatever", "Something to try" };
             foreach (string pass in test_pws) {
@@ -34,7 +34,7 @@ namespace TestLibrary.ConfigTests {
             }
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void EncryptedIsDifferentToPlaintext() {
             string plain = "Testtesttest";
             string encrypted = Crypto.Obfuscate(plain);

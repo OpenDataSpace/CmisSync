@@ -39,10 +39,10 @@ namespace CmisSync.Lib.Storage.Database {
     /// Meta data storage.
     /// </summary>
     public class MetaDataStorage : IMetaDataStorage {
-        private static readonly string PropertyTable = "properties";
-        private static readonly string MappedObjectsTable = "objects";
-        private static readonly string MappedObjectsGuidsTable = "guids";
-        private static readonly string ChangeLogTokenKey = "ChangeLogToken";
+        private const string PropertyTable = "properties";
+        private const string MappedObjectsTable = "objects";
+        private const string MappedObjectsGuidsTable = "guids";
+        private const string ChangeLogTokenKey = "ChangeLogToken";
 
         private static readonly ILog Logger = LogManager.GetLogger(typeof(MetaDataStorage));
 
@@ -51,14 +51,14 @@ namespace CmisSync.Lib.Storage.Database {
         /// <summary>
         /// The db engine.
         /// </summary>
-        private DBreezeEngine engine = null;
+        private DBreezeEngine engine;
 
         /// <summary>
         /// The path matcher.
         /// </summary>
-        private IPathMatcher matcher = null;
+        private IPathMatcher matcher;
 
-        private bool fullValidationOnEachManipulation = false;
+        private bool fullValidationOnEachManipulation;
 
         static MetaDataStorage() {
             DBreezeInitializerSingleton.Init();
@@ -76,24 +76,31 @@ namespace CmisSync.Lib.Storage.Database {
         /// <param name='fullValidation'>
         /// Enables a complete DB validation after each db manipulation
         /// </param>
+        /// <param name="disableInitialValidation">
+        /// Disables initial validation of the object structure.
+        /// </param>
         [CLSCompliant(false)]
-        public MetaDataStorage(DBreezeEngine engine, IPathMatcher matcher, bool fullValidation) {
+        public MetaDataStorage(DBreezeEngine engine, IPathMatcher matcher, bool fullValidation, bool disableInitialValidation = false) {
             if (engine == null) {
-                throw new ArgumentNullException("Given DBreeze engine instance is null");
+                throw new ArgumentNullException("engine");
             }
 
             if (matcher == null) {
-                throw new ArgumentNullException("Given Matcher is null");
+                throw new ArgumentNullException("matcher");
             }
 
             this.engine = engine;
             this.matcher = matcher;
             this.fullValidationOnEachManipulation = fullValidation;
 
-            try {
-                this.ValidateObjectStructure();
-            } catch(InvalidDataException e) {
-                Logger.Fatal("Database object structure is invalid", e);
+            if (!disableInitialValidation) {
+                try {
+                    Logger.Debug("Starting DB Validation");
+                    this.ValidateObjectStructure();
+                    Logger.Debug("Finished DB Validation");
+                } catch (InvalidDataException e) {
+                    Logger.Fatal("Database object structure is invalid", e);
+                }
             }
         }
 
@@ -141,15 +148,16 @@ namespace CmisSync.Lib.Storage.Database {
         /// </param>
         public IMappedObject GetObjectByLocalPath(IFileSystemInfo path) {
             if (path == null) {
-                throw new ArgumentNullException("Given path is null");
+                throw new ArgumentNullException("path");
             }
 
-            if (!this.matcher.CanCreateRemotePath(path.FullName)) {
-                throw new ArgumentException(string.Format("Given path \"{0}\" is not able to be matched on remote path", path.FullName));
+            var fullName = path.FullName;
+            if (!this.matcher.CanCreateRemotePath(fullName)) {
+                throw new ArgumentException(string.Format("Given path \"{0}\" is not able to be matched on remote path", fullName), "path");
             }
 
             using (var tran = this.engine.GetTransaction()) {
-                string relativePath = this.matcher.GetRelativeLocalPath(path.FullName);
+                string relativePath = this.matcher.GetRelativeLocalPath(fullName);
                 List<string> pathSegments = new List<string>(relativePath.Split(Path.DirectorySeparatorChar));
                 List<MappedObject> objects = new List<MappedObject>();
                 foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable)) {
@@ -233,16 +241,26 @@ namespace CmisSync.Lib.Storage.Database {
         public void SaveMappedObject(IMappedObject obj) {
             string id = this.GetId(obj);
             using(var tran = this.engine.GetTransaction()) {
-                var byteGuid = obj.Guid.ToByteArray();
+                var guid = obj.Guid;
+                var byteGuid = guid.ToByteArray();
                 var row = tran.Select<byte[], string>(MappedObjectsGuidsTable, byteGuid);
                 if (row.Exists && row.Value != id) {
                     tran.Rollback();
-                    throw new DublicateGuidException(string.Format("An entry with Guid {0} already exists", obj.Guid));
+                    throw new DublicateGuidException(string.Format("An entry with Guid {0} already exists", guid));
                 }
 
+                if (this.fullValidationOnEachManipulation && obj.ParentId != null) {
+                    DbCustomSerializer<MappedObject> value = tran.Select<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, obj.ParentId).Value;
+                    if (value == null) {
+                        tran.Rollback();
+                        throw new InvalidDataException();
+                    }
+                }
+
+                obj.LastTimeStoredInStorage = DateTime.UtcNow;
                 tran.Insert<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, id, obj as MappedObject);
-                if (!obj.Guid.Equals(Guid.Empty)) {
-                    tran.Insert<byte[], string>(MappedObjectsGuidsTable, obj.Guid.ToByteArray(), id);
+                if (!guid.Equals(Guid.Empty)) {
+                    tran.Insert<byte[], string>(MappedObjectsGuidsTable, byteGuid, id);
                 }
 
                 tran.Commit();
@@ -297,14 +315,10 @@ namespace CmisSync.Lib.Storage.Database {
         /// <summary>
         /// Gets the remote path.
         /// </summary>
-        /// <returns>
-        /// The remote path.
-        /// </returns>
-        /// <param name='obj'>
-        /// The MappedObject instance.
-        /// </param>
-        public string GetRemotePath(IMappedObject obj) {
-            string id = this.GetId(obj);
+        /// <returns>The remote path.</returns>
+        /// <param name='mappedObject'>The MappedObject instance.</param>
+        public string GetRemotePath(IMappedObject mappedObject) {
+            string id = this.GetId(mappedObject);
             using(var tran = this.engine.GetTransaction()) {
                 string[] segments = this.GetRelativePathSegments(tran, id);
                 StringBuilder pathBuilder = new StringBuilder(this.matcher.RemoteTargetRootPath);
@@ -382,9 +396,9 @@ namespace CmisSync.Lib.Storage.Database {
         }
 
         /// <summary>
-        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.FileSystem.MetaDataStorage"/>.
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="MetaDataStorage"/>.
         /// </summary>
-        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.FileSystem.MetaDataStorage"/>.</returns>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="MetaDataStorage"/>.</returns>
         public override string ToString() {
             string list = string.Empty;
             using (var tran = this.engine.GetTransaction()) {
@@ -441,25 +455,19 @@ namespace CmisSync.Lib.Storage.Database {
         /// Validates the object structure.
         /// </summary>
         public void ValidateObjectStructure() {
-            MappedObject root = null;
-            List<MappedObject> objects = new List<MappedObject>();
-            using(var tran = this.engine.GetTransaction()) {
-                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable)) {
-                    var value = row.Value;
-                    if (value == null) {
-                        continue;
+            var objects = this.GetObjectList() ?? new List<IMappedObject>();
+            var objectsDict = new Dictionary<string, IList<IMappedObject>>();
+            IMappedObject root = null;
+            foreach (var obj in objects) {
+                var parentId = obj.ParentId;
+                if (parentId != null) {
+                    if (!objectsDict.ContainsKey(parentId)) {
+                        objectsDict[parentId] = new List<IMappedObject>();
                     }
 
-                    var data = value.Get;
-                    if (data == null) {
-                        continue;
-                    }
-
-                    if (data.ParentId == null) {
-                        root = data;
-                    } else {
-                        objects.Add(data);
-                    }
+                    objectsDict[parentId].Add(obj);
+                } else {
+                    root = obj;
                 }
             }
 
@@ -474,11 +482,13 @@ namespace CmisSync.Lib.Storage.Database {
                 }
             }
 
-            this.RemoveChildrenRecursively(objects, root);
-            if (objects.Count > 0) {
+            this.RemoveChildrenRecursively(objectsDict, root);
+            if (objectsDict.Count > 0) {
                 var sb = new StringBuilder();
-                foreach(var obj in objects) {
-                    sb.Append(obj).Append(Environment.NewLine);
+                foreach (var objs in objectsDict.Values) {
+                    foreach (var obj in objs) {
+                        sb.Append(obj).Append(Environment.NewLine);
+                    }
                 }
 
                 throw new InvalidDataException(
@@ -515,13 +525,12 @@ namespace CmisSync.Lib.Storage.Database {
         }
 
         /// <summary>
-        /// Gets the tree of mapped objects.
+        /// Gets a list of all mapped objects.
         /// </summary>
-        /// <returns>The object tree.</returns>
-        public IObjectTree<IMappedObject> GetObjectTree() {
-            MappedObject root = null;
-            List<MappedObject> objects = new List<MappedObject>();
-            using(var tran = this.engine.GetTransaction()) {
+        /// <returns>The object list.</returns>
+        public IList<IMappedObject> GetObjectList() {
+            var objects = new List<IMappedObject>();
+            using (var tran = this.engine.GetTransaction()) {
                 foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable)) {
                     var value = row.Value;
                     if (value == null) {
@@ -533,19 +542,11 @@ namespace CmisSync.Lib.Storage.Database {
                         continue;
                     }
 
-                    if (data.ParentId == null) {
-                        root = data;
-                    } else {
-                        objects.Add(data);
-                    }
+                    objects.Add(data);
                 }
             }
 
-            if (root == null) {
-                return null;
-            }
-
-            return this.GetSubTree(objects, root);
+            return objects.Count > 0 ? objects : null;
         }
 
         private IObjectTree<IMappedObject> GetSubTree(List<MappedObject> nodes, MappedObject parent) {
@@ -563,14 +564,17 @@ namespace CmisSync.Lib.Storage.Database {
             return tree;
         }
 
-        private void RemoveChildrenRecursively(List<MappedObject> objects, MappedObject root) {
-            var children = objects.FindAll(o => o.ParentId == root.RemoteObjectId);
-            foreach (var child in children) {
-                objects.Remove(child);
-                if (child.Type == MappedObjectType.Folder) {
-                    this.RemoveChildrenRecursively(objects, child);
+        private void RemoveChildrenRecursively(IDictionary<string, IList<IMappedObject>> objects, IMappedObject root) {
+            IList<IMappedObject> children;
+            if (objects.TryGetValue(root.RemoteObjectId, out children)) {
+                foreach (var child in children) {
+                    if (child.Type == MappedObjectType.Folder) {
+                        this.RemoveChildrenRecursively(objects, child);
+                    }
                 }
             }
+
+            objects.Remove(root.RemoteObjectId);
         }
 
         private string PrintFindLines(List<MappedObject> objects, MappedObject parent, string prefix) {
@@ -598,12 +602,12 @@ namespace CmisSync.Lib.Storage.Database {
         /// </param>
         private string GetId(IMappedObject obj) {
             if (obj == null) {
-                throw new ArgumentNullException("The given obj is null");
+                throw new ArgumentNullException("obj");
             }
 
             string id = obj.RemoteObjectId;
             if (id == null) {
-                throw new ArgumentException("The given object has no remote object id");
+                throw new ArgumentException("The given object has no remote object id", "obj");
             }
 
             return id;

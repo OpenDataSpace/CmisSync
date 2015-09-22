@@ -38,6 +38,7 @@ namespace TestLibrary.IntegrationTests {
     using DotCMIS.Binding;
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -51,7 +52,10 @@ namespace TestLibrary.IntegrationTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture, Timeout(900000)]
+    /// <summary>
+    /// Base full repo test times out as default after 1 min. Please override this by inherited test cases if needed.
+    /// </summary>
+    [TestFixture, Timeout(60000)]
     public abstract class BaseFullRepoTest : IsTestWithConfiguredLog4Net, IDisposable {
         protected RepoInfo repoInfo;
         protected DirectoryInfo localRootDir;
@@ -82,6 +86,14 @@ namespace TestLibrary.IntegrationTests {
             }
         }
 
+        protected ISessionFactory SessionFactory { get; set; }
+
+        protected IAuthenticationProvider AuthProvider { get; set; }
+
+        protected string TestName { get; private set; }
+
+        protected Guid TestUuid { get; private set; }
+
         public void Dispose() {
             this.Dispose(true);
             GC.SuppressFinalize(this);
@@ -108,15 +120,18 @@ namespace TestLibrary.IntegrationTests {
 
         [SetUp]
         public void Init() {
-            string testName = this.GetType().Name;
+            this.remoteRootDir = null;
+            this.TestName = this.GetType().Name;
             object[] attributes = this.GetType().GetCustomAttributes(true);
             foreach (var attr in attributes) {
                 if (attr is TestNameAttribute) {
-                    testName = (attr as TestNameAttribute).Name;
+                    this.TestName = (attr as TestNameAttribute).Name;
                 }
             }
 
-            this.subfolder = testName + "_" + Guid.NewGuid().ToString();
+            this.TestUuid = Guid.NewGuid();
+
+            this.subfolder = this.TestName + "_" + this.TestUuid.ToString();
             Console.WriteLine("Working on " + this.subfolder);
 
             // RepoInfo
@@ -127,7 +142,8 @@ namespace TestLibrary.IntegrationTests {
                 Address = new XmlUri(new Uri(config[3].ToString())),
                 User = config[4].ToString(),
                 RepositoryId = config[6].ToString(),
-                Binding = config[7] != null ? config[7].ToString() : BindingType.AtomPub
+                Binding = config[7] != null ? config[7].ToString() : BindingType.AtomPub,
+                HttpMaximumRetries = 0
             };
             this.repoInfo.RemotePath = this.repoInfo.RemotePath.Replace("//", "/");
             this.repoInfo.SetPassword(config[5].ToString());
@@ -166,9 +182,15 @@ namespace TestLibrary.IntegrationTests {
             cmisParameters[SessionParameter.Password] = this.repoInfo.GetPassword().ToString();
             cmisParameters[SessionParameter.RepositoryId] = this.repoInfo.RepositoryId;
             cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
+            cmisParameters[SessionParameter.MaximumRequestRetries] = "0";
 
-            SessionFactory factory = SessionFactory.NewInstance();
-            this.session = factory.CreateSession(cmisParameters);
+            // Sets the http connection timeout to 50 sec
+            cmisParameters[SessionParameter.ConnectTimeout] = "50000";
+            // Sets the http read timeout to 60 sec
+            cmisParameters[SessionParameter.ReadTimeout] = "60000";
+
+            this.SessionFactory = this.SessionFactory ?? DotCMIS.Client.Impl.SessionFactory.NewInstance();
+            this.session = this.SessionFactory.CreateSession(cmisParameters, null, null, null);
             this.ContentChangesActive = this.session.AreChangeEventsSupported();
             IFolder root = (IFolder)this.session.GetObjectByPath(config[2].ToString());
             this.remoteRootDir = root.CreateFolder(this.subfolder);
@@ -188,13 +210,30 @@ namespace TestLibrary.IntegrationTests {
                 this.localRootDir.Delete(true);
             }
 
-            this.remoteRootDir.Refresh();
-            this.remoteRootDir.DeleteTree(true, null, true);
+            if (this.remoteRootDir != null) {
+                // https://mantis.dataspace.cc/view.php?id=4706
+                // https://mantis.dataspace.cc/view.php?id=4707
+                /* if (this.session.IsPrivateWorkingCopySupported()) {
+                    foreach (var checkedOutDoc in this.remoteRootDir.GetCheckedOutDocs()) {
+                        try {
+                            checkedOutDoc.CancelCheckOut();
+                        } catch (CmisVersioningException ex) {
+                            Console.WriteLine(ex.ToLogString());
+                        }
+                    }
+                }*/
+
+                this.remoteRootDir.Refresh();
+                this.remoteRootDir.DeleteTree(true, null, true);
+            }
+
             this.repo.Dispose();
 
             if (repoDBException != null) {
                 throw new Exception(repoDBException.Message, repoDBException);
             }
+
+            this.SessionFactory = null;
         }
 
         protected void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue = null, int timeout = 10000) {
@@ -227,7 +266,7 @@ namespace TestLibrary.IntegrationTests {
         }
 
         protected void EnsureThatPrivateWorkingCopySupportIsAvailable() {
-            if (!this.session.ArePrivateWorkingCopySupported()) {
+            if (!this.session.IsPrivateWorkingCopySupported()) {
                 Assert.Ignore("This session does not support updates on private working copies");
             }
         }
@@ -262,7 +301,7 @@ namespace TestLibrary.IntegrationTests {
 
         protected void AssertThatContentHashIsEqualToExceptedIfSupported(IDocument doc, string content) {
             if (this.session.IsContentStreamHashSupported()) {
-                Assert.That(doc.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(content), Is.True);
+                Assert.That(doc.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(content), Is.True, "Timout exceeded");
             }
         }
 
@@ -281,19 +320,40 @@ namespace TestLibrary.IntegrationTests {
         }
 
         protected class BlockingSingleConnectionScheduler : CmisSync.Lib.Queueing.ConnectionScheduler {
-            public BlockingSingleConnectionScheduler(ConnectionScheduler original) : base(original) {
+            public bool RetryOnFailure { get; set; }
+            private readonly int priority;
+            public BlockingSingleConnectionScheduler(ConnectionScheduler original, IAuthenticationProvider authProvider = null, ISessionFactory sessionFactory = null) : base(original) {
+                if (authProvider != null) {
+                    this.AuthProvider = authProvider;
+                }
+
+                if (sessionFactory != null) {
+                    this.SessionFactory = sessionFactory;
+                }
+
+                this.priority = original.Priority;
             }
 
             public override void Start() {
-                if (!base.Connect()) {
-                    Assert.Fail("Connection failed");
+                while (!base.Connect()) {
+                    if (!this.RetryOnFailure) {
+                        Assert.Fail("Connection failed");
+                    }
+                }
+            }
+
+            public override int Priority {
+                get {
+                    return this.priority;
                 }
             }
         }
 
         protected class CmisRepoMock : CmisSync.Lib.Cmis.Repository {
             public SingleStepEventQueue SingleStepQueue;
-
+            public IAuthenticationProvider AuthProvider;
+            public ISessionFactory SessionFactory;
+            public bool UseRetryingConnectionScheduler { get; set; }
             public CmisRepoMock(RepoInfo repoInfo, ActivityListenerAggregator activityListener, SingleStepEventQueue queue) : base(repoInfo, activityListener, true, queue) {
                 this.SingleStepQueue = queue;
             }
@@ -310,7 +370,9 @@ namespace TestLibrary.IntegrationTests {
 
             public override void Initialize() {
                 ConnectionScheduler original = this.connectionScheduler;
-                this.connectionScheduler = new BlockingSingleConnectionScheduler(original);
+                this.Queue.EventManager.RemoveEventHandler(original);
+                this.connectionScheduler = new BlockingSingleConnectionScheduler(original, this.AuthProvider, this.SessionFactory) { RetryOnFailure = this.UseRetryingConnectionScheduler};
+                this.Queue.EventManager.AddEventHandler(this.connectionScheduler);
                 original.Dispose();
                 base.Initialize();
                 this.Queue.EventManager.RemoveEventHandler(this.Scheduler);

@@ -19,6 +19,7 @@
 
 namespace CmisSync.Lib.Queueing {
     using System;
+    using System.Threading;
 
     using CmisSync.Lib.Events;
 
@@ -27,7 +28,16 @@ namespace CmisSync.Lib.Queueing {
     /// This queue also notifies listener about changes on categories or all countable events.
     /// </summary>
     public interface ICountingQueue : IDisposableSyncEventQueue {
+        /// <summary>
+        /// Gets the full counter.
+        /// </summary>
+        /// <value>The full counter.</value>
         IObservable<int> FullCounter { get; }
+
+        /// <summary>
+        /// Gets the category counter.
+        /// </summary>
+        /// <value>The category counter.</value>
         IObservable<Tuple<EventCategory, int>> CategoryCounter { get; }
     }
 }

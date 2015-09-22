@@ -20,7 +20,9 @@
 namespace CmisSync.Lib.Producer.Crawler {
     using System;
 
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.SelectiveIgnore;
@@ -51,6 +53,7 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// <param name="storage">Meta data storage.</param>
         /// <param name="filter">Aggregated filter.</param>
         /// <param name="activityListener">Activity listner.</param>
+        /// <param name="ignoredStorage">Ignored entities storage.</param>
         public DescendantsCrawler(
             ISyncEventQueue queue,
             IFolder remoteFolder,
@@ -62,23 +65,23 @@ namespace CmisSync.Lib.Producer.Crawler {
             : base(queue)
         {
             if (remoteFolder == null) {
-                throw new ArgumentNullException("Given remoteFolder is null");
+                throw new ArgumentNullException("remoteFolder");
             }
 
             if (localFolder == null) {
-                throw new ArgumentNullException("Given localFolder is null");
+                throw new ArgumentNullException("localFolder");
             }
 
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage");
             }
 
             if (filter == null) {
-                throw new ArgumentNullException("Given filter is null");
+                throw new ArgumentNullException("filter");
             }
 
             if (activityListener == null) {
-                throw new ArgumentNullException("Given activityListener is null");
+                throw new ArgumentNullException("activityListener");
             }
 
             this.activityListener = activityListener;
@@ -119,7 +122,7 @@ namespace CmisSync.Lib.Producer.Crawler {
             : base(queue)
         {
             if (activityListener == null) {
-                throw new ArgumentNullException("Given activityListener is null");
+                throw new ArgumentNullException("activityListener");
             }
 
             this.activityListener = activityListener;
@@ -134,30 +137,49 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// <param name="e">The event to handle.</param>
         /// <returns>true if handled</returns>
         public override bool Handle(ISyncEvent e) {
-            if (e is StartNextSyncEvent) {
-                Logger.Debug("Starting DecendantsCrawlSync upon " + e);
-                using (var activity = new ActivityListenerResource(this.activityListener)) {
-                    this.CrawlDescendants();
-                }
+            var startNextSync = e as StartNextSyncEvent;
+            if (startNextSync != null) {
+                try {
+                    Logger.Debug("Starting DecendantsCrawlSync upon " + e);
+                    using (var activity = new ActivityListenerResource(this.activityListener)) {
+                        this.CrawlDescendants();
+                    }
 
-                this.Queue.AddEvent(new FullSyncCompletedEvent(e as StartNextSyncEvent));
-                return true;
+                    this.Queue.AddEvent(new FullSyncCompletedEvent(e as StartNextSyncEvent));
+                    return true;
+                } catch (InteractionNeededException interaction) {
+                    this.Queue.AddEvent(new InteractionNeededEvent(interaction));
+                    throw;
+                } catch (Exception retryException) {
+                    Logger.Info("Failed to crawl descendants (trying again):", retryException);
+                    this.Queue.AddEvent(new StartNextSyncEvent(fullSyncRequested: startNextSync.FullSyncRequested) {
+                        LastTokenOnServer = startNextSync.LastTokenOnServer
+                    });
+                    return false;
+                }
             }
 
             return false;
         }
 
         private void CrawlDescendants() {
-            DescendantsTreeCollection trees = this.treebuilder.BuildTrees();
-            if (Logger.IsDebugEnabled) {
-                Logger.Debug(string.Format("LocalTree:  {0} Elements", trees.LocalTree.ToList().Count));
-                Logger.Debug(string.Format("RemoteTree: {0} Elements", trees.RemoteTree.ToList().Count));
-                Logger.Debug(string.Format("StoredTree: {0} Elements", trees.StoredTree.ToList().Count));
+            try {
+                DescendantsTreeCollection trees = this.treebuilder.BuildTrees();
+                if (Logger.IsDebugEnabled) {
+                    Logger.Debug(string.Format("LocalTree:  {0} Elements", trees.LocalTree.ToList().Count));
+                    Logger.Debug(string.Format("RemoteTree: {0} Elements", trees.RemoteTree.ToList().Count));
+                    Logger.Debug(string.Format("StoredTree: {0} Elements", trees.StoredObjects.Count));
+                }
+
+                Logger.Debug("Create events");
+                CrawlEventCollection events = this.eventGenerator.GenerateEvents(trees);
+                Logger.Debug("Events created");
+                this.notifier.MergeEventsAndAddToQueue(events);
+                Logger.Debug("Events merged and added to queue");
+            } catch (System.IO.PathTooLongException e) {
+                string msg = "Crawl Sync aborted because a local path is too long. Please take a look into the log to figure out the reason.";
+                throw new InteractionNeededException(msg, e) { Title = "Local path is too long", Description = msg };
             }
-
-            CrawlEventCollection events = this.eventGenerator.GenerateEvents(trees);
-
-            this.notifier.MergeEventsAndAddToQueue(events);
         }
     }
 }

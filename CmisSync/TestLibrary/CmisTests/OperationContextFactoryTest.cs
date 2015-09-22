@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.CmisTests
-{
+namespace TestLibrary.CmisTests {
     using System;
     using System.Collections.Generic;
 
@@ -33,12 +32,10 @@ namespace TestLibrary.CmisTests
 
     using TestUtils;
 
-    [TestFixture]
-    public class OperationContextFactoryTest
-    {
-        [Test, Category("Fast")]
-        public void CreateContentChangeEventContext()
-        {
+    [TestFixture, Category("Fast")]
+    public class OperationContextFactoryTest {
+        [Test]
+        public void CreateContentChangeEventContext() {
             var result = Mock.Of<IOperationContext>();
             var session = this.CreateSessionMock(result);
 
@@ -48,9 +45,8 @@ namespace TestLibrary.CmisTests
             Assert.That(context, Is.EqualTo(result));
         }
 
-        [Test, Category("Fast")]
-        public void CreateCrawlerContext()
-        {
+        [Test]
+        public void CreateCrawlerContext() {
             var result = Mock.Of<IOperationContext>();
             var session = this.CreateSessionMock(result);
 
@@ -61,9 +57,8 @@ namespace TestLibrary.CmisTests
             Assert.That(context, Is.EqualTo(result));
         }
 
-        [Test, Category("Fast")]
-        public void CreateDefaultContext()
-        {
+        [Test]
+        public void CreateDefaultContext() {
             var result = Mock.Of<IOperationContext>();
             var session = this.CreateSessionMock(result);
 
@@ -74,9 +69,8 @@ namespace TestLibrary.CmisTests
             Assert.That(context, Is.EqualTo(result));
         }
 
-        [Test, Category("Fast")]
-        public void CreateNonCachingAndPathIncludingContext()
-        {
+        [Test]
+        public void CreateNonCachingAndPathIncludingContext() {
             var result = Mock.Of<IOperationContext>();
             var session = this.CreateSessionMock(result);
 
@@ -88,8 +82,7 @@ namespace TestLibrary.CmisTests
             Assert.That(context, Is.EqualTo(result));
         }
 
-        private Mock<ISession> CreateSessionMock(IOperationContext result)
-        {
+        private Mock<ISession> CreateSessionMock(IOperationContext result) {
             Mock<ISession> sessionMock = new Mock<ISession>();
             sessionMock.Setup(s => s.CreateOperationContext(
                 It.IsAny<HashSet<string>>(),

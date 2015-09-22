@@ -43,7 +43,7 @@ namespace CmisSync.Lib.Producer.Watcher {
         /// <param name="fsFactory">File system factory.</param>
         public RenamedFileSystemEventHandler(ISyncEventQueue queue, IFileSystemInfoFactory fsFactory = null) {
             if (queue == null) {
-                throw new ArgumentNullException("Given queue is null");
+                throw new ArgumentNullException("queue");
             }
 
             this.queue = queue;
@@ -56,15 +56,20 @@ namespace CmisSync.Lib.Producer.Watcher {
         /// <param name="source">source object</param>
         /// <param name="e">Rename event from file system watcher</param>
         public virtual void Handle(object source, RenamedEventArgs e) {
+            if (e == null) {
+                throw new ArgumentNullException("e");
+            }
+
             try {
-                bool? isDirectory = this.fsFactory.IsDirectory(e.FullPath);
+                var fullPath = e.FullPath;
+                bool? isDirectory = this.fsFactory.IsDirectory(fullPath);
 
                 if (isDirectory == null) {
                     this.queue.AddEvent(new StartNextSyncEvent(true));
                     return;
                 }
 
-                this.queue.AddEvent(new FSMovedEvent(e.OldFullPath, e.FullPath, (bool)isDirectory));
+                this.queue.AddEvent(new FSMovedEvent(e.OldFullPath, fullPath, (bool)isDirectory));
             } catch (Exception ex) {
                 Logger.Warn(string.Format("Processing RenamedEventArgs {0} produces Exception => force crawl sync", e.ToString()), ex);
                 this.queue.AddEvent(new StartNextSyncEvent(true));

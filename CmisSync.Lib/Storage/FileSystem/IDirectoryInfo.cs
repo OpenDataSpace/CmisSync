@@ -62,5 +62,10 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// </summary>
         /// <param name="destDirName">Destination directory path.</param>
         void MoveTo(string destDirName);
+
+        /// <summary>
+        /// Tries to set permission to read write access to the directory and its children
+        /// </summary>
+        void TryToSetReadWritePermissionRecursively();
     }
 }

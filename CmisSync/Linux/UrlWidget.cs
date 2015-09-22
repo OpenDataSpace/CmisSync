@@ -19,9 +19,11 @@
 
 namespace CmisSync.Widgets {
     using System;
+    using System.ComponentModel;
     using System.Text.RegularExpressions;
 
-    [System.ComponentModel.ToolboxItem(true)]
+    [ToolboxItem(true)]
+    [CLSCompliant(false)]
     public partial class UrlWidget : Gtk.Bin {
         private bool isValidUrl = true;
 

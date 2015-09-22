@@ -52,40 +52,52 @@ namespace CmisSync.Lib.Filter {
         private InvalidFolderNameFilter invalidFolderNameFilter;
 
         /// <summary>
+        /// The symlink filter.
+        /// </summary>
+        private SymlinkFilter symlinkFilter;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ReportingFilter"/> class.
         /// </summary>
         /// <param name="queue">Sync Event Queue to put work on.</param>
         /// <param name="ignoredFoldersFilter">Ignored folders filter.</param>
         /// <param name="ignoredFileNameFilter">Ignored file name filter.</param>
         /// <param name="ignoredFolderNameFilter">Ignored folder name filter.</param>
-        /// <param name="invalidFoderNameFilter">Invalid folder name filter</param> 
+        /// <param name="invalidFoderNameFilter">Invalid folder name filter.</param>
+        /// <param name="symlinkFilter">Symbolic link filter.</param>
         public ReportingFilter(
             ISyncEventQueue queue,
             IgnoredFoldersFilter ignoredFoldersFilter,
             IgnoredFileNamesFilter ignoredFileNameFilter,
             IgnoredFolderNameFilter ignoredFolderNameFilter,
-            InvalidFolderNameFilter invalidFoderNameFilter) : base(queue)
+            InvalidFolderNameFilter invalidFoderNameFilter,
+            SymlinkFilter symlinkFilter) : base(queue)
         {
             if (ignoredFoldersFilter == null) {
-                throw new ArgumentNullException("Given folder filter is null");
+                throw new ArgumentNullException("ignoredFoldersFilter");
             }
 
             if (ignoredFileNameFilter == null) {
-                throw new ArgumentNullException("Given file name filter is null");
+                throw new ArgumentNullException("ignoredFileNameFilter");
             }
 
             if (ignoredFolderNameFilter == null) {
-                throw new ArgumentNullException("Given folder name filter is null");
+                throw new ArgumentNullException("ignoredFolderNameFilter");
             }
 
             if (invalidFoderNameFilter == null) {
-                throw new ArgumentNullException("Given invalid folder name filter is null");
+                throw new ArgumentNullException("invalidFoderNameFilter");
+            }
+
+            if (symlinkFilter == null) {
+                throw new ArgumentNullException("symlinkFilter");
             }
 
             this.ignoredFoldersFilter = ignoredFoldersFilter;
             this.ignoredFileNameFilter = ignoredFileNameFilter;
             this.ignoredFolderNameFilter = ignoredFolderNameFilter;
             this.invalidFolderNameFilter = invalidFoderNameFilter;
+            this.symlinkFilter = symlinkFilter;
         }
 
         /// <summary>
@@ -128,6 +140,22 @@ namespace CmisSync.Lib.Filter {
                             Logger.Info(reason);
                             return true;
                         }
+                    }
+                }
+
+                var localFolderObjectEvent = e as FolderEvent;
+                if (localFolderObjectEvent != null) {
+                    if (this.symlinkFilter.IsSymlink(localFolderObjectEvent.LocalFolder, out reason)) {
+                        Logger.Info(reason);
+                        return true;
+                    }
+                }
+
+                var localFileObjectEvent = e as FileEvent;
+                if (localFileObjectEvent != null) {
+                    if (this.symlinkFilter.IsSymlink(localFileObjectEvent.LocalFile, out reason)) {
+                        Logger.Info(reason);
+                        return true;
                     }
                 }
             } catch (System.IO.DirectoryNotFoundException) {

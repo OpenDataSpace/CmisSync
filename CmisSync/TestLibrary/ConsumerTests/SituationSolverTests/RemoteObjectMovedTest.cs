@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -36,6 +35,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using NUnit.Framework;
 
     using TestLibrary.TestUtils;
+
     [TestFixture]
     public class RemoteObjectMovedTest {
         private Mock<ISession> session;
@@ -59,7 +59,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void MoveFolderToNewLocation([Values(true, false)]bool childrenAreIgnored) {
+        public void MoveFolderToNewLocation(
+            [Values(true, false)]bool childrenAreIgnored,
+            [Values(true, false)]bool remoteWasReadOnly,
+            [Values(true, false)]bool remoteIsReadOnly)
+        {
             DateTime modifiedDate = DateTime.UtcNow.AddMinutes(1);
             string oldFolderName = "a";
             string subFolderName = "sub";
@@ -76,10 +80,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             dirInfo.Setup(d => d.FullName).Returns(oldPath);
             dirInfo.Setup(d => d.Name).Returns(oldFolderName);
             dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>(p => p.FullName == Path.GetTempPath()));
+            dirInfo.SetupProperty(d => d.ReadOnly, remoteWasReadOnly);
 
             Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, newFolderName, newPath, subFolderId, lastChangeToken, childrenAreIgnored);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)modifiedDate);
-
+            remoteObject.SetupReadOnly(remoteIsReadOnly);
             var mappedFolder = Mock.Of<IMappedObject>(
                 f =>
                 f.Name == oldFolderName &&
@@ -89,7 +94,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 f.Type == MappedObjectType.Folder &&
                 f.ParentId == parentId &&
                 f.Guid == Guid.NewGuid() &&
-                f.LastContentSize == -1);
+                f.LastContentSize == -1 &&
+                f.IsReadOnly == remoteWasReadOnly);
             var mappedSubFolder = Mock.Of<IMappedObject>(
                 f =>
                 f.Name == subFolderName &&
@@ -106,12 +112,15 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.underTest.Solve(dirInfo.Object, remoteObject.Object);
 
             dirInfo.Verify(d => d.MoveTo(It.Is<string>(p => p.Equals(newPath))), Times.Once());
-
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, newFolderName, subFolderId, lastChangeToken, lastRemoteModification: modifiedDate, ignored: childrenAreIgnored);
+            dirInfo.VerifySet(d => d.ReadOnly = remoteIsReadOnly, remoteWasReadOnly != remoteIsReadOnly ? Times.Once() : Times.Never());
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, newFolderName, subFolderId, lastChangeToken, lastRemoteModification: modifiedDate, ignored: childrenAreIgnored, readOnly: remoteIsReadOnly);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void MoveFileToNewLocation() {
+        public void MoveFileToNewLocation(
+            [Values(true, false)]bool remoteWasReadOnly,
+            [Values(true, false)]bool remoteIsReadOnly)
+        {
             DateTime modifiedDate = DateTime.UtcNow.AddMinutes(1);
             string oldFileName = "a";
             string subFolderName = "sub";
@@ -128,11 +137,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             fileInfo.Setup(d => d.FullName).Returns(oldPath);
             fileInfo.Setup(d => d.Name).Returns(oldFileName);
             fileInfo.Setup(d => d.Directory).Returns(Mock.Of<IDirectoryInfo>(p => p.FullName == Path.GetTempPath()));
-
+            fileInfo.SetupProperty(f => f.ReadOnly, remoteWasReadOnly);
             var fileParents = new List<IFolder>();
             fileParents.Add(Mock.Of<IFolder>(f => f.Id == subFolderId));
             Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, newFileName, (string)null, changeToken: lastChangeToken);
-            remoteObject.Setup(f => f.Parents).Returns(fileParents);
+            remoteObject.SetupReadOnly(remoteIsReadOnly).Setup(f => f.Parents).Returns(fileParents);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)modifiedDate);
 
             var mappedFile = Mock.Of<IMappedObject>(
@@ -142,7 +151,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 f.LastChangeToken == "oldToken" &&
                 f.LastRemoteWriteTimeUtc == DateTime.UtcNow &&
                 f.Type == MappedObjectType.File &&
-                f.ParentId == parentId);
+                f.ParentId == parentId &&
+                f.Guid == Guid.NewGuid() &&
+                f.IsReadOnly == remoteWasReadOnly);
             var mappedSubFolder = Mock.Of<IMappedObject>(
                 f =>
                 f.Name == subFolderName &&
@@ -157,11 +168,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
             fileInfo.Verify(d => d.MoveTo(It.Is<string>(p => p.Equals(newPath))), Times.Once());
+            fileInfo.VerifySet(f => f.ReadOnly = remoteIsReadOnly, remoteWasReadOnly != remoteIsReadOnly ? Times.Once() : Times.Never());
 
-            this.storage.Verify(
-                s => s.SaveMappedObject(
-                It.Is<IMappedObject>(f => this.VerifySavedFolder(f, MappedObjectType.File, id, newFileName, subFolderId, lastChangeToken, modifiedDate))),
-                Times.Once());
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, id, newFileName, subFolderId, lastChangeToken, lastRemoteModification: modifiedDate, readOnly: remoteIsReadOnly, contentSize: 0);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -208,17 +217,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             dirInfo.Verify(d => d.MoveTo(It.IsAny<string>()), Times.Never());
 
-            this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
-        }
-
-        private bool VerifySavedFolder(IMappedObject folder, MappedObjectType type, string id, string name, string parentId, string changeToken, DateTime modifiedTime) {
-            Assert.That(folder.Type, Is.EqualTo(type));
-            Assert.That(folder.RemoteObjectId, Is.EqualTo(id));
-            Assert.That(folder.ParentId, Is.EqualTo(parentId));
-            Assert.That(folder.Name, Is.EqualTo(name));
-            Assert.That(folder.LastChangeToken, Is.EqualTo(changeToken));
-            Assert.That(folder.LastRemoteWriteTimeUtc, Is.EqualTo(modifiedTime));
-            return true;
+            this.storage.VerifyThatNoObjectIsManipulated();
         }
     }
 }

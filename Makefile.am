@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I build/m4/cmissync -I build/m4/shamrock
 
-basedirs = build Extras CmisSync.Lib DataSpaceSync.Console
+basedirs = build Extras CmisSync.Lib DataSpaceSync.Console DiagnoseTool
 FATBUILD_MAKEFILE=Makefile.fatbuild
 
 SUBDIRS = $(basedirs) $(GUISUBDIRS)
@@ -28,10 +28,12 @@ bootstrap:
 	TEMP=$(shell mktemp -du 2>/dev/null || mktemp -d -u -t 'nuget') nuget restore CmisSync/Linux/CmisSync.sln
 	mkdir -p bin
 	cp packages/NUnit.2.6.4/lib/nunit.framework.dll bin/
-	cp packages/Newtonsoft.Json.6.0.8/lib/net40/Newtonsoft.Json.dll bin/
+	cp packages/Newtonsoft.Json.7.0.1/lib/net40/Newtonsoft.Json.dll bin/
 	cp packages/log4net.2.0.3/lib/net40-client/log4net.dll bin/
-	cp packages/DBreeze.1.71.0/lib/net40/DBreeze.dll bin/
-	cp packages/Moq.4.2.1409.1722/lib/net40/Moq.dll bin/
+	cp packages/DBreeze.1.71.1/lib/net40/DBreeze.dll bin/
+	cp packages/Moq.4.2.1507.0118/lib/net40/Moq.dll bin/
+	cp packages/Toxiproxy.Net.1.2.11/lib/net45/Toxiproxy.Net.dll bin/
+	cp packages/RestSharp.105.2.1/lib/net45/RestSharp.dll bin/
 
 install-exec-local:
 	$(INSTALL) -m 0755 $(JSON_PATH) $(DESTDIR)$(pkglibdir)
@@ -70,7 +72,10 @@ debian-package: tmpinst
 apple-package:
 	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release -t:Clean
 	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release
+	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build DiagnoseTool/Mac/DiagnoseTool/DiagnoseTool.sln -c:Release -t:Clean
+	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build DiagnoseTool/Mac/DiagnoseTool/DiagnoseTool.sln -c:Release
 	(cd build; sh dmg-creator.sh ../bin/DataSpaceSync.app/; cd ..)
+	(cd build; sh dmg-creator.sh ../DiagnoseTool/Mac/DiagnoseTool/bin/Release/DiagnoseTool.app/; cd ..)
 
 rpm-package: PACKAGE_TARGET := rpm-package
 rpm-package: tmpinst

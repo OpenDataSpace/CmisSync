@@ -1,21 +1,3 @@
-//-----------------------------------------------------------------------
-// <copyright file="EditWizard.designer.cs" company="GRAU DATA AG">
-//
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General private License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-//
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-//   GNU General private License for more details.
-//
-//   You should have received a copy of the GNU General private License
-//   along with this program. If not, see http://www.gnu.org/licenses/.
-//
-// </copyright>
-//-----------------------------------------------------------------------
 // WARNING
 //
 // This file has been generated automatically by Xamarin Studio to store outlets and
@@ -37,10 +19,22 @@ namespace CmisSync
 		MonoMac.AppKit.NSTextField AddressText { get; set; }
 
 		[Outlet]
+		MonoMac.AppKit.NSTabViewItem BandwidthTabView { get; set; }
+
+		[Outlet]
 		MonoMac.AppKit.NSButton CancelButton { get; set; }
 
 		[Outlet]
 		MonoMac.AppKit.NSTabViewItem CredentialsTab { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSBox DownloadLimitBox { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSButton DownloadLimitCheckBox { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSTextField DownloadLimitTextField { get; set; }
 
 		[Outlet]
 		MonoMac.AppKit.NSButton FinishButton { get; set; }
@@ -73,10 +67,22 @@ namespace CmisSync
 		MonoMac.AppKit.NSTabView TabView { get; set; }
 
 		[Outlet]
+		MonoMac.AppKit.NSBox UploadLimitBox { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSButton UploadLimitCheckBox { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSTextField UploadLimitTextField { get; set; }
+
+		[Outlet]
 		MonoMac.AppKit.NSTextField UserLabel { get; set; }
 
 		[Outlet]
 		MonoMac.AppKit.NSTextField UserText { get; set; }
+
+		[Action ("DownloadLimitClicked:")]
+		partial void DownloadLimitClicked (MonoMac.Foundation.NSObject sender);
 
 		[Action ("OnCancel:")]
 		partial void OnCancel (MonoMac.Foundation.NSObject sender);
@@ -86,9 +92,17 @@ namespace CmisSync
 
 		[Action ("OnPasswordChanged:")]
 		partial void OnPasswordChanged (MonoMac.Foundation.NSObject sender);
+
+		[Action ("UploadLimitClicked:")]
+		partial void UploadLimitClicked (MonoMac.Foundation.NSObject sender);
 		
 		void ReleaseDesignerOutlets ()
 		{
+			if (BandwidthTabView != null) {
+				BandwidthTabView.Dispose ();
+				BandwidthTabView = null;
+			}
+
 			if (AddressLabel != null) {
 				AddressLabel.Dispose ();
 				AddressLabel = null;
@@ -107,6 +121,21 @@ namespace CmisSync
 			if (CredentialsTab != null) {
 				CredentialsTab.Dispose ();
 				CredentialsTab = null;
+			}
+
+			if (DownloadLimitBox != null) {
+				DownloadLimitBox.Dispose ();
+				DownloadLimitBox = null;
+			}
+
+			if (DownloadLimitCheckBox != null) {
+				DownloadLimitCheckBox.Dispose ();
+				DownloadLimitCheckBox = null;
+			}
+
+			if (DownloadLimitTextField != null) {
+				DownloadLimitTextField.Dispose ();
+				DownloadLimitTextField = null;
 			}
 
 			if (FinishButton != null) {
@@ -157,6 +186,21 @@ namespace CmisSync
 			if (TabView != null) {
 				TabView.Dispose ();
 				TabView = null;
+			}
+
+			if (UploadLimitBox != null) {
+				UploadLimitBox.Dispose ();
+				UploadLimitBox = null;
+			}
+
+			if (UploadLimitCheckBox != null) {
+				UploadLimitCheckBox.Dispose ();
+				UploadLimitCheckBox = null;
+			}
+
+			if (UploadLimitTextField != null) {
+				UploadLimitTextField.Dispose ();
+				UploadLimitTextField = null;
 			}
 
 			if (UserLabel != null) {

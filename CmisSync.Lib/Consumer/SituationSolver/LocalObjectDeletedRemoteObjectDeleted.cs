@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
@@ -28,8 +27,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Local object deleted remote object deleted.
     /// </summary>
-    public class LocalObjectDeletedRemoteObjectDeleted : AbstractEnhancedSolver
-    {
+    public class LocalObjectDeletedRemoteObjectDeleted : AbstractEnhancedSolver {
         /// <summary>
         /// Initializes a new instance of the
         /// <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectDeletedRemoteObjectDeleted"/> class.
@@ -42,17 +40,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <summary>
         /// Solve the specified situation by using localFile and remote object.
         /// </summary>
-        /// <param name="localFile">Local file.</param>
+        /// <param name="localFileSystemInfo">Local file.</param>
         /// <param name="remoteId">Remote identifier or object.</param>
         /// <param name="localContent">Hint if the local content has been changed.</param>
         /// <param name="remoteContent">Information if the remote content has been changed.</param>
         public override void Solve(
-            IFileSystemInfo localFile,
+            IFileSystemInfo localFileSystemInfo,
             IObjectId remoteId,
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
-            var mappedObject = this.Storage.GetObjectByLocalPath(localFile);
+            var mappedObject = this.Storage.GetObjectByLocalPath(localFileSystemInfo);
             this.Storage.RemoveObject(mappedObject);
         }
     }

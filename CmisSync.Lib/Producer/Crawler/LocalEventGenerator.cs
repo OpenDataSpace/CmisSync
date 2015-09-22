@@ -16,6 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace CmisSync.Lib.Producer.Crawler {
     using System;
     using System.Collections.Generic;
@@ -41,9 +42,14 @@ namespace CmisSync.Lib.Producer.Crawler {
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Producer.Crawler.LocalEventGenerator"/> class.
+        /// </summary>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="fsFactory">File system info factory.</param>
         public LocalEventGenerator(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) {
             if (storage == null) {
-                throw new ArgumentNullException("Given storage is null");
+                throw new ArgumentNullException("storage");
             }
 
             this.storage = storage;
@@ -57,33 +63,19 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// <summary>
         /// Creates the local events and returns the creationEvents, the other Events are stored in the eventMap, handled objects are removed from storedObjects
         /// </summary>
-        /// <returns>
-        /// The local events.
-        /// </returns>
-        /// <param name='storedObjects'>
-        /// Stored objects.
-        /// </param>
-        /// <param name='localTree'>
-        /// Local tree.
-        /// </param>
-        /// <param name='eventMap'>
-        /// Event map.
-        /// </param>
-        public List<AbstractFolderEvent> CreateEvents(
-            List<IMappedObject> storedObjects,
+        /// <returns>The local events.</returns>
+        /// <param name='storedObjects'>Stored objects.</param>
+        /// <param name='localTree'>Local tree.</param>
+        /// <param name='eventMap'>Event map.</param>
+        /// <param name="handledStoredObjects">Already handled stored objects.</param>
+        /// <param name="creationEvents">List of all creation events.</param>
+        public void CreateEvents(
+            IDictionary<Guid, IMappedObject> storedObjects,
             IObjectTree<IFileSystemInfo> localTree,
             Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap,
-            ISet<IMappedObject> handledStoredObjects)
+            ISet<IMappedObject> handledStoredObjects,
+            ref List<AbstractFolderEvent> creationEvents)
         {
-            List<AbstractFolderEvent> creationEvents = new List<AbstractFolderEvent>();
-            var parent = localTree.Item;
-            IMappedObject storedParent = null;
-            Guid? guid = parent.Uuid;
-
-            if (guid != null) {
-                storedParent = storedObjects.Find(o => o.Guid.Equals((Guid)guid));
-            }
-
             foreach (var child in localTree.Children) {
                 IMappedObject storedMappedChild = this.FindStoredObjectByFileSystemInfo(storedObjects, child.Item);
                 if (storedMappedChild != null) {
@@ -102,6 +94,14 @@ namespace CmisSync.Lib.Producer.Crawler {
                     } else {
                         // Moved, Renamed, Updated or Equal
                         AbstractFolderEvent correspondingRemoteEvent = GetCorrespondingRemoteEvent(eventMap, storedMappedChild);
+                        var parent = localTree.Item;
+                        IMappedObject storedParent = null;
+                        Guid? guid = parent.Uuid;
+
+                        if (guid != null) {
+                            storedObjects.TryGetValue((Guid)guid, out storedParent);
+                        }
+
                         AbstractFolderEvent createdEvent = this.CreateLocalEventBasedOnStorage(child.Item, storedParent, storedMappedChild);
 
                         eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(createdEvent, correspondingRemoteEvent);
@@ -112,10 +112,8 @@ namespace CmisSync.Lib.Producer.Crawler {
                     creationEvents.Add(this.GenerateCreatedEvent(child.Item));
                 }
 
-                creationEvents.AddRange(this.CreateEvents(storedObjects, child, eventMap, handledStoredObjects));
+                this.CreateEvents(storedObjects, child, eventMap, handledStoredObjects, ref creationEvents);
             }
-
-            return creationEvents;
         }
 
         private static AbstractFolderEvent GetCorrespondingRemoteEvent(
@@ -135,13 +133,18 @@ namespace CmisSync.Lib.Producer.Crawler {
             return FileOrFolderEventFactory.CreateEvent(null, fsInfo, localChange: MetaDataChangeType.CREATED, src: this);
         }
 
-        private AbstractFolderEvent CreateLocalEventBasedOnStorage(IFileSystemInfo fsObject, IMappedObject storedParent, IMappedObject storedMappedChild) {
+        private AbstractFolderEvent CreateLocalEventBasedOnStorage(
+            IFileSystemInfo fsObject,
+            IMappedObject storedParent,
+            IMappedObject storedMappedChild)
+        {
             AbstractFolderEvent createdEvent = null;
-            if (storedParent == null) {
-                throw new ArgumentNullException("stored parent is null. Stored child: " + storedMappedChild.ToString() + Environment.NewLine + "local object is: " + fsObject.FullName);
+/*            if (storedParent == null) {
+                throw new ArgumentNullException("storedParent", "stored parent is null. Stored child: " + storedMappedChild.ToString() + Environment.NewLine + "local object is: " + fsObject.FullName);
             }
+            */
 
-            if (storedMappedChild.ParentId == storedParent.RemoteObjectId) {
+            if (storedParent != null && storedMappedChild.ParentId == storedParent.RemoteObjectId) {
                 // Renamed, Updated or Equal
                 #if __COCOA__
                 if (fsObject.Name.Normalize(NormalizationForm.FormD) == storedMappedChild.Name.Normalize(NormalizationForm.FormD) && fsObject.LastWriteTimeUtc == storedMappedChild.LastLocalWriteTimeUtc) {
@@ -165,13 +168,15 @@ namespace CmisSync.Lib.Producer.Crawler {
             return createdEvent;
         }
 
-        private IMappedObject FindStoredObjectByFileSystemInfo(List<IMappedObject> storedObjects, IFileSystemInfo fsInfo) {
-            Guid? childGuid = fsInfo.Uuid;
-            if (childGuid != null) {
-               return storedObjects.Find(o => o.Guid == (Guid)childGuid);
+        private IMappedObject FindStoredObjectByFileSystemInfo(IDictionary<Guid, IMappedObject> storedObjects, IFileSystemInfo fsInfo) {
+            Guid? guid = fsInfo.Uuid;
+            if (guid != null) {
+                IMappedObject storedObject = null;
+                storedObjects.TryGetValue((Guid)guid, out storedObject);
+                return storedObject;
+            } else {
+                return null;
             }
-
-            return null;
         }
     }
 }

@@ -17,12 +17,12 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.PathMatcherTests
-{
+namespace TestLibrary.PathMatcherTests {
     using System;
     using System.IO;
 
     using CmisSync.Lib.PathMatcher;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 
@@ -30,250 +30,223 @@ namespace TestLibrary.PathMatcherTests
 
     using NUnit.Framework;
 
-    [TestFixture]
-    public class PathMatcherTest
-    {
+    using TestUtils;
+
+    [TestFixture, Category("Fast")]
+    public class PathMatcherTest {
         private string localpath = null;
         private string remotepath = null;
 
         [SetUp]
-        public void SetUp()
-        {
+        public void SetUp() {
             this.localpath = Path.GetTempPath();
             this.remotepath = "/remote/path/on/server";
         }
 
-        [Test, Category("Fast")]
-        public void ContructorFailsIfLocalPathIsNull() {
-            Assert.Throws<ArgumentException>(() => new PathMatcher(null, this.remotepath));
+        [Test]
+        public void ContructorFailsIfLocalPathIsNull([Values(null, "")]string invalidPath) {
+            Assert.Throws<ArgumentException>(() => new PathMatcher(invalidPath, this.remotepath));
         }
 
-        [Test, Category("Fast")]
-        public void ConstructorFailsIfBothPathsAreNull() {
-            Assert.Throws<ArgumentException>(() => new PathMatcher(null, null));
+        [Test]
+        public void ConstructorFailsIfBothPathsAreNull(
+            [Values(null, "")]string invalidPath,
+            [Values(null, "")]string invalidPath2)
+        {
+            Assert.Throws<ArgumentException>(() => new PathMatcher(invalidPath, invalidPath2));
         }
 
-        [Test, Category("Fast")]
-        public void ConstructorFailsIfRemotePathIsNull() {
-            Assert.Throws<ArgumentException>(() => new PathMatcher(this.localpath, null));
+        [Test]
+        public void ConstructorFailsIfRemotePathIsNull([Values(null, "")]string invalidPath) {
+            Assert.Throws<ArgumentException>(() => new PathMatcher(this.localpath, invalidPath));
         }
 
-        [Test, Category("Fast")]
-        public void ConstructorFailsIfLocalPathIsAnEmptyString() {
-            Assert.Throws<ArgumentException>(() => new PathMatcher(string.Empty, this.remotepath));
-        }
-
-        [Test, Category("Fast")]
-        public void ConstructorFailsIfRemotePathIsAnEmptyString() {
-            Assert.Throws<ArgumentException>(() => new PathMatcher(this.localpath, string.Empty));
-        }
-
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorTakesLocalAndRemotePath() {
-            var matcher = new PathMatcher(this.localpath, this.remotepath);
-            Assert.AreEqual(this.localpath, matcher.LocalTargetRootPath);
-            this.AssertPathEqual(this.remotepath, matcher.RemoteTargetRootPath);
+            var underTest = new PathMatcher(this.localpath, this.remotepath);
+            Assert.That(underTest.LocalTargetRootPath, Is.EqualTo(this.localpath));
+            this.AssertPathEqual(this.remotepath, underTest.RemoteTargetRootPath);
         }
 
-        [Test, Category("Fast")]
-        public void MatchesTest()
-        {
-            var matcher = new PathMatcher(this.localpath, this.remotepath);
-            Assert.IsTrue(matcher.Matches(this.localpath, this.remotepath));
+        [Test]
+        public void MatchesTest() {
+            var underTest = new PathMatcher(this.localpath, this.remotepath);
+            Assert.That(underTest.Matches(this.localpath, this.remotepath), Is.True);
             string sameSubfolder = "bla";
-            Assert.IsTrue(matcher.Matches(Path.Combine(this.localpath, sameSubfolder), this.remotepath + "/" + sameSubfolder));
+            Assert.That(underTest.Matches(Path.Combine(this.localpath, sameSubfolder), this.remotepath + "/" + sameSubfolder), Is.True);
             sameSubfolder = Path.Combine("sub", "folder");
-            Assert.IsTrue(matcher.Matches(Path.Combine(this.localpath, sameSubfolder), this.remotepath + "/" + sameSubfolder));
+            Assert.That(underTest.Matches(Path.Combine(this.localpath, sameSubfolder), this.remotepath + "/" + sameSubfolder), Is.True);
             string anotherFolder = "another";
-            Assert.IsFalse(matcher.Matches(Path.Combine(this.localpath, sameSubfolder), this.remotepath + "/" + anotherFolder));
+            Assert.That(underTest.Matches(Path.Combine(this.localpath, sameSubfolder), this.remotepath + "/" + anotherFolder), Is.False);
             string subfolderOfSame = Path.Combine(sameSubfolder, "sub");
-            Assert.IsFalse(matcher.Matches(Path.Combine(this.localpath, sameSubfolder), this.remotepath + "/" + subfolderOfSame));
-            Assert.IsFalse(matcher.Matches(Path.Combine(this.localpath, subfolderOfSame), this.remotepath + "/" + sameSubfolder));
+            Assert.That(underTest.Matches(Path.Combine(this.localpath, sameSubfolder), this.remotepath + "/" + subfolderOfSame), Is.False);
+            Assert.That(underTest.Matches(Path.Combine(this.localpath, subfolderOfSame), this.remotepath + "/" + sameSubfolder), Is.False);
             string wrongStartingFolder = "wrong";
-            try
-            {
-                matcher.Matches(Path.Combine(this.localpath, wrongStartingFolder), wrongStartingFolder);
-                Assert.Fail("Should throw exception on wrong path start");
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-            }
-
-            try
-            {
-                matcher.Matches(wrongStartingFolder, wrongStartingFolder);
-                Assert.Fail("Should throw exception on wrong path start");
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-            }
-
-            try
-            {
-                matcher.Matches(wrongStartingFolder, this.remotepath + "/" + wrongStartingFolder);
-                Assert.Fail("Should throw exception on wrong path start");
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-            }
+            Assert.Throws<ArgumentOutOfRangeException>(() => underTest.Matches(Path.Combine(this.localpath, wrongStartingFolder), wrongStartingFolder));
+            Assert.Throws<ArgumentOutOfRangeException>(() => underTest.Matches(wrongStartingFolder, wrongStartingFolder));
+            Assert.Throws<ArgumentOutOfRangeException>(() => underTest.Matches(wrongStartingFolder, this.remotepath + "/" + wrongStartingFolder));
         }
 
-        [Test, Category("Fast")]
-        public void CanCreateLocalPathTest()
-        {
+        [Test]
+        public void CanCreateLocalPathTest() {
             string remote = this.remotepath + "/test";
             string wrong = "/wrong/path/on/server/test";
-            var matcher = new PathMatcher(this.localpath, this.remotepath);
-            Assert.IsTrue(matcher.CanCreateLocalPath(this.remotepath));
-            Assert.IsTrue(matcher.CanCreateLocalPath(remote));
-            Assert.IsFalse(matcher.CanCreateLocalPath(wrong));
-            var remoteFolder = new Mock<IFolder>();
+            var underTest = new PathMatcher(this.localpath, this.remotepath);
+            Assert.That(underTest.CanCreateLocalPath(this.remotepath), Is.True);
+            Assert.That(underTest.CanCreateLocalPath(remote), Is.True);
+            Assert.That(underTest.CanCreateLocalPath(wrong), Is.False);
+            var remoteFolder = new Mock<IFolder>(MockBehavior.Strict);
             remoteFolder.Setup(f => f.Path).Returns(this.remotepath + "/test2");
-            Assert.IsTrue(matcher.CanCreateLocalPath(remoteFolder.Object));
-            var wrongFolder = new Mock<IFolder>();
+            Assert.That(underTest.CanCreateLocalPath(remoteFolder.Object), Is.True);
+            var wrongFolder = new Mock<IFolder>(MockBehavior.Strict);
             wrongFolder.Setup(f => f.Path).Returns(wrong + "/test2");
-            Assert.IsFalse(matcher.CanCreateLocalPath(wrongFolder.Object));
+            Assert.That(underTest.CanCreateLocalPath(wrongFolder.Object), Is.False);
         }
 
-        [Test, Category("Fast")]
-        public void CanCreateRemotePathTest()
-        {
+        [Test]
+        public void CanCreateRemotePathTest() {
             string local = Path.Combine(this.localpath, "test");
             string wrong = Path.Combine("wrong", "path", "on", "client", "test");
-            var matcher = new PathMatcher(this.localpath, this.remotepath);
-            Assert.IsTrue(matcher.CanCreateRemotePath(this.localpath));
-            Assert.IsTrue(matcher.CanCreateRemotePath(local));
-            Assert.IsFalse(matcher.CanCreateRemotePath(wrong));
+            var underTest = new PathMatcher(this.localpath, this.remotepath);
+            Assert.That(underTest.CanCreateRemotePath(this.localpath), Is.True);
+            Assert.That(underTest.CanCreateRemotePath(local), Is.True);
+            Assert.That(underTest.CanCreateRemotePath(wrong), Is.False);
             var localFolder = new DirectoryInfo(Path.Combine(this.localpath, "test2"));
-            Assert.IsTrue(matcher.CanCreateRemotePath(localFolder));
+            Assert.That(underTest.CanCreateRemotePath(localFolder), Is.True);
             var wrongFolder = new DirectoryInfo(wrong);
-            Assert.IsFalse(matcher.CanCreateRemotePath(wrongFolder));
+            Assert.That(underTest.CanCreateRemotePath(wrongFolder), Is.False);
         }
 
-        [Test, Category("Fast")]
-        public void CreateLocalPathTest()
-        {
-            var matcher = new PathMatcher(this.localpath, this.remotepath);
-            string result = matcher.CreateLocalPath(this.remotepath);
-            Assert.AreEqual(this.localpath, result);
+        [Test]
+        public void CreateLocalPathTest() {
+            var underTest = new PathMatcher(this.localpath, this.remotepath);
+            string result = underTest.CreateLocalPath(this.remotepath);
+            Assert.That(result, Is.EqualTo(this.localpath));
             string subfolder = "sub";
-            result = matcher.CreateLocalPath(this.remotepath + "/" + subfolder);
-            Assert.AreEqual(Path.Combine(this.localpath, subfolder), result);
+            result = underTest.CreateLocalPath(this.remotepath + "/" + subfolder);
+            Assert.That(result, Is.EqualTo(Path.Combine(this.localpath, subfolder)));
             subfolder = "sub/sub";
-            result = matcher.CreateLocalPath(this.remotepath + "/" + subfolder);
-            Assert.AreEqual(Path.Combine(this.localpath, "sub", "sub"), result);
-            try 
-            {
-                matcher.CreateLocalPath("wrong folder");
-                Assert.Fail();
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-            }
+            result = underTest.CreateLocalPath(this.remotepath + "/" + subfolder);
+            Assert.That(result, Is.EqualTo(Path.Combine(this.localpath, "sub", "sub")));
+            Assert.Throws<ArgumentOutOfRangeException>(() => underTest.CreateLocalPath("wrong folder"));
         }
 
-        [Test, Category("Fast")]
-        public void CreateRemotePathTest()
-        {
-            var matcher = new PathMatcher(this.localpath, this.remotepath);
-            string result = matcher.CreateRemotePath(this.localpath);
+        [Test]
+        public void CreateRemotePathTest() {
+            var underTest = new PathMatcher(this.localpath, this.remotepath);
+            string result = underTest.CreateRemotePath(this.localpath);
             this.AssertPathEqual(this.remotepath, result);
             string subfolder = "sub";
-            result = matcher.CreateRemotePath(Path.Combine(this.localpath, subfolder));
-            Assert.AreEqual(this.remotepath + "/" + subfolder, result);
+            result = underTest.CreateRemotePath(Path.Combine(this.localpath, subfolder));
+            Assert.That(result, Is.EqualTo(this.remotepath + "/" + subfolder));
             subfolder = "sub/sub";
-            result = matcher.CreateRemotePath(Path.Combine(this.localpath, "sub", "sub"));
-            Assert.AreEqual(this.remotepath + "/" + subfolder, result);
-            try
-            {
-                matcher.CreateRemotePath(Path.Combine("wrong", "folder"));
-                Assert.Fail();
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-            }
+            result = underTest.CreateRemotePath(Path.Combine(this.localpath, "sub", "sub"));
+            Assert.That(result, Is.EqualTo(this.remotepath + "/" + subfolder));
+            Assert.Throws<ArgumentOutOfRangeException>(() => underTest.CreateRemotePath(Path.Combine("wrong", "folder")));
         }
 
-        [Test, Category("Fast")]
-        public void CrossPathCreatingTest()
-        {
-            var matcher = new PathMatcher(this.localpath, this.remotepath);
-            string result = matcher.CreateRemotePath(this.localpath);
+        [Test]
+        public void CrossPathCreatingTest() {
+            var underTest = new PathMatcher(this.localpath, this.remotepath);
+            string result = underTest.CreateRemotePath(this.localpath);
             this.AssertPathEqual(this.remotepath, result);
-            result = matcher.CreateLocalPath(result);
+            result = underTest.CreateLocalPath(result);
             this.AssertPathEqual(this.localpath, result);
 
-            result = matcher.CreateRemotePath(Path.Combine(this.localpath, "sub"));
-            result = matcher.CreateLocalPath(result);
+            result = underTest.CreateRemotePath(Path.Combine(this.localpath, "sub"));
+            result = underTest.CreateLocalPath(result);
             this.AssertPathEqual(Path.Combine(this.localpath, "sub"), result);
 
-            result = matcher.CreateLocalPath(this.remotepath + "/sub");
-            result = matcher.CreateRemotePath(result);
+            result = underTest.CreateLocalPath(this.remotepath + "/sub");
+            result = underTest.CreateRemotePath(result);
             this.AssertPathEqual(this.remotepath + "/sub", result);
         }
 
-        [Test, Category("Fast")]
-        public void GetRelativePath()
-        {
-            var matcher = new PathMatcher(this.localpath, this.remotepath);
+        [Test]
+        public void GetRelativePath() {
+            var underTest = new PathMatcher(this.localpath, this.remotepath);
             string folderName = "new";
             string newLocalPath = Path.Combine(this.localpath, folderName);
 
-            Assert.That(matcher.GetRelativeLocalPath(newLocalPath), Is.EqualTo(folderName));
+            Assert.That(underTest.GetRelativeLocalPath(newLocalPath), Is.EqualTo(folderName));
         }
 
-        [Test, Category("Fast")]
-        public void GetRelativePathDoesNotStartWithSlash()
-        {
+        [Test]
+        public void GetRelativePathDoesNotStartWithSlash() {
             this.localpath = this.localpath.EndsWith(Path.DirectorySeparatorChar.ToString()) ? this.localpath.Substring(0, this.localpath.Length - 1) : this.localpath;
-            var matcher = new PathMatcher(this.localpath, "/");
+            var underTest = new PathMatcher(this.localpath, "/");
             string folderName = "new";
 
-            Assert.That(matcher.GetRelativeLocalPath(Path.Combine(this.localpath, folderName)).StartsWith(Path.DirectorySeparatorChar.ToString()), Is.False);
-        }
-        
-        [Test, Category("Fast")]
-        public void RootFolderCanBeRemotelyCreatedWithoutTrailingDenominator()
-        {
-            var matcher = new PathMatcher(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar.ToString(), "/");
-
-            Assert.That(matcher.CanCreateRemotePath(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar)), Is.True);
+            Assert.That(underTest.GetRelativeLocalPath(Path.Combine(this.localpath, folderName)).StartsWith(Path.DirectorySeparatorChar.ToString()), Is.False);
         }
 
-        [Test, Category("Fast")]
-        public void RootFolderCanBeRemotelyCreatedWithTrailingDenominator()
-        {
-            var matcher = new PathMatcher(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar), "/");
-
-            Assert.That(matcher.CanCreateRemotePath(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar.ToString()), Is.True);
+        [Test]
+        public void RootFolderCanBeRemotelyCreatedWithoutTrailingDenominator() {
+            var underTest = new PathMatcher(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar.ToString(), "/");
+            Assert.That(underTest.CanCreateRemotePath(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar)), Is.True);
         }
 
-        [Test, Category("Fast")]
-        public void RootFolderMatchesItselfWithTrailingDenominator()
-        {
-            var matcher = new PathMatcher(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar), "/");
-
-            Assert.That(matcher.CanCreateRemotePath(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar.ToString()), Is.True);
+        [Test]
+        public void RootFolderCanBeRemotelyCreatedWithTrailingDenominator() {
+            var underTest = new PathMatcher(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar), "/");
+            Assert.That(underTest.CanCreateRemotePath(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar.ToString()), Is.True);
         }
 
-        [Test, Category("Fast")]
-        public void RootFolderMatchesItselfWithoutTrailingDenominator()
-        {
-            var matcher = new PathMatcher(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar.ToString(), "/");
-
-            Assert.That(matcher.CanCreateRemotePath(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar)), Is.True);
+        [Test]
+        public void RootFolderMatchesItselfWithTrailingDenominator() {
+            var underTest = new PathMatcher(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar), "/");
+            Assert.That(underTest.CanCreateRemotePath(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar.ToString()), Is.True);
         }
 
-        [Test, Category("Fast")]
-        public void GetRootFolderRelativePathWithoutTrailingDenominator()
-        {
-            var matcher = new PathMatcher(Path.GetTempPath(), "/tmp");
-
-            Assert.That(matcher.GetRelativeLocalPath(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar)), Is.EqualTo("."));
+        [Test]
+        public void RootFolderMatchesItselfWithoutTrailingDenominator() {
+            var underTest = new PathMatcher(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar.ToString(), "/");
+            Assert.That(underTest.CanCreateRemotePath(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar)), Is.True);
         }
 
-        private void AssertPathEqual(string left, string right)
-        {
+        [Test]
+        public void GetRootFolderRelativePathWithoutTrailingDenominator() {
+            var underTest = new PathMatcher(Path.GetTempPath(), "/tmp");
+            Assert.That(underTest.GetRelativeLocalPath(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar)), Is.EqualTo("."));
+        }
+
+        [Test]
+        public void CanCreateLocalPathFailsOnNullPath() {
+            var underTest = new PathMatcher(this.localpath, this.remotepath);
+            Assert.Throws<ArgumentNullException>(() => underTest.CanCreateLocalPath((string)null));
+            Assert.Throws<ArgumentNullException>(() => underTest.CanCreateLocalPath((IFolder)null));
+            Assert.Throws<ArgumentNullException>(() => underTest.CanCreateLocalPath((IDocument)null));
+        }
+
+        [Test]
+        public void CanCreateRemotePathFailsOnNullPath() {
+            var underTest = new PathMatcher(this.localpath, this.remotepath);
+            Assert.Throws<ArgumentNullException>(() => underTest.CanCreateRemotePath((string)null));
+            Assert.Throws<ArgumentNullException>(() => underTest.CanCreateRemotePath((DirectoryInfo)null));
+            Assert.Throws<ArgumentNullException>(() => underTest.CanCreateRemotePath((FileInfo)null));
+        }
+
+        [Test]
+        public void GetRelativeLocalPathFailsOnNullPath() {
+            var underTest = new PathMatcher(this.localpath, this.remotepath);
+            Assert.Throws<ArgumentNullException>(() => underTest.GetRelativeLocalPath(null));
+        }
+
+        [Test]
+        public void MatchesFailsOnNullPath() {
+            var underTest = new PathMatcher(this.localpath, this.remotepath);
+            Assert.Throws<ArgumentNullException>(() => underTest.Matches((string)null, new Mock<IFolder>(MockBehavior.Strict).SetupPath("path").Object));
+            Assert.Throws<ArgumentNullException>(() => underTest.Matches((string)null, (IFolder)null));
+            Assert.Throws<ArgumentNullException>(() => underTest.Matches((string)null, "ignoreThis"));
+            Assert.Throws<ArgumentNullException>(() => underTest.Matches((string)null, (string)null));
+            Assert.Throws<ArgumentNullException>(() => underTest.Matches((IDirectoryInfo)null, new Mock<IFolder>(MockBehavior.Strict).Object));
+            Assert.Throws<ArgumentNullException>(() => underTest.Matches((IDirectoryInfo)null, (IFolder)null));
+            Assert.Throws<ArgumentNullException>(() => underTest.Matches("", (IFolder)null));
+            Assert.Throws<ArgumentNullException>(() => underTest.Matches("", (string)null));
+            Assert.Throws<ArgumentNullException>(() => underTest.Matches(new Mock<IDirectoryInfo>(MockBehavior.Strict).Object, (IFolder)null));
+        }
+
+        private void AssertPathEqual(string left, string right) {
             if (right.EndsWith("/") && !left.EndsWith("/")) {
                 Assert.That(right, Is.EqualTo(left + "/"));
             } else if (!right.EndsWith("/") && left.EndsWith("/")) {

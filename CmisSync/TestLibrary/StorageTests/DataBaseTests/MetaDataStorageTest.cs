@@ -226,6 +226,16 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
+        public void StoreDateOnStoringMappedObject([Values(true, false)]bool withValidation) {
+            var underTest = new MetaDataStorage(this.engine, this.matcher, withValidation);
+            IMappedObject obj = new MappedObject("obj", "remoteId", MappedObjectType.File, null, null);
+            Assert.That(obj.LastTimeStoredInStorage, Is.Null);
+            underTest.SaveMappedObject(obj);
+            obj = underTest.GetObjectByRemoteId("remoteId");
+            Assert.That(obj.LastTimeStoredInStorage, Is.EqualTo(DateTime.UtcNow).Within(1).Seconds);
+        }
+
+        [Test, Category("Fast")]
         public void SaveFileObjectAndGetObjectReturnsEqualObject([Values(true, false)]bool withValidation) {
             var storage = new MetaDataStorage(this.engine, this.matcher, withValidation);
             string remoteId = "remoteId";
@@ -542,39 +552,34 @@ namespace TestLibrary.StorageTests.DataBaseTests {
         }
 
         [Test, Category("Fast")]
-        public void GetObjectTreeReturnsNullIfNoEntryExists([Values(true, false)]bool withValidation) {
+        public void GetObjectListReturnsNullIfNoEntryExists([Values(true, false)]bool withValidation) {
             IMetaDataStorage storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>(), withValidation);
-            Assert.That(storage.GetObjectTree(), Is.Null);
+            Assert.That(storage.GetObjectList(), Is.Null);
         }
 
         [Test, Category("Fast")]
-        public void GetObjectTreeReturnsOneItemWithEmptyChildrenList([Values(true, false)]bool withValidation) {
+        public void GetObjectListReturnsOneItemInList([Values(true, false)]bool withValidation) {
             var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>(), withValidation);
             var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
             storage.SaveMappedObject(rootFolder);
 
-            var tree = storage.GetObjectTree();
-            Assert.That(tree.Item, Is.EqualTo(rootFolder));
-            Assert.That(tree.Children, Is.Empty);
+            var list = storage.GetObjectList();
+            Assert.That(list.First(), Is.EqualTo(rootFolder));
+            Assert.That(list.Count, Is.EqualTo(1));
         }
 
         [Test, Category("Fast")]
-        public void GetObjectTreeReturnsTreeEqualToFolderStructure([Values(true, false)]bool withValidation) {
+        public void GetObjectList([Values(true, false)]bool withValidation) {
             var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>(), withValidation);
             var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
-            var child1Folder = new MappedObject("sub1", "subId1", MappedObjectType.Folder, "rootId", "token");
-            var child2File = new MappedObject("sub2", "subId2", MappedObjectType.File, "subId1", "token");
+            var anotherFolder = new MappedObject("other", "anotherId", MappedObjectType.Folder, "rootId", "token");
             storage.SaveMappedObject(rootFolder);
-            storage.SaveMappedObject(child1Folder);
-            storage.SaveMappedObject(child2File);
+            storage.SaveMappedObject(anotherFolder);
 
-            var tree = storage.GetObjectTree();
-
-            Assert.That(tree.Item, Is.EqualTo(rootFolder));
-            Assert.That(tree.Children.Count, Is.EqualTo(1));
-            Assert.That(tree.Children[0].Item, Is.EqualTo(child1Folder));
-            Assert.That(tree.Children[0].Children.Count, Is.EqualTo(1));
-            Assert.That(tree.Children[0].Children[0].Item, Is.EqualTo(child2File));
+            var list = storage.GetObjectList();
+            Assert.That(list.Count, Is.EqualTo(2));
+            Assert.That(list.Contains(rootFolder));
+            Assert.That(list.Contains(anotherFolder));
         }
 
         [Test, Category("Fast")]

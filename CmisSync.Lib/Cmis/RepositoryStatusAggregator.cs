@@ -28,7 +28,7 @@ namespace CmisSync.Lib.Cmis {
     public class RepositoryStatusAggregator : INotifyPropertyChanged {
         private Dictionary<INotifyRepositoryPropertyChanged, PropertyChangedEventHandler> repos = new Dictionary<INotifyRepositoryPropertyChanged, PropertyChangedEventHandler>();
         private SyncStatus status = SyncStatus.Disconnected;
-        private int changesFound = 0;
+        private int changesFound;
         private DateTime? lastFinishedSync = null;
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace CmisSync.Lib.Cmis {
         /// <param name="propertyName">Property name.</param>
         private void NotifyPropertyChanged(string propertyName) {
             if (string.IsNullOrEmpty(propertyName)) {
-                throw new ArgumentNullException("Given property name is null");
+                throw new ArgumentNullException("propertyName");
             }
 
             var handler = this.PropertyChanged;
