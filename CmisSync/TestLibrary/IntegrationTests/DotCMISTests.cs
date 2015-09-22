@@ -837,7 +837,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(root.FolderParent, Is.Null);
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Timeout(900000)]
         public void SetOneGigabyteAsContentStream(
             string canonical_name,
             string localPath,
@@ -848,7 +848,7 @@ namespace TestLibrary.IntegrationTests {
             string repositoryId,
             string binding)
         {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding, connectTimeout: "600000", readTimeout: "600000");
 
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
@@ -861,8 +861,7 @@ namespace TestLibrary.IntegrationTests {
                 if (doc != null) {
                     doc.Delete(true);
                 }
-            } catch (CmisObjectNotFoundException)
-            {
+            } catch (CmisObjectNotFoundException) {
             }
 
             IDocument emptyDoc = folder.CreateDocument(properties, null, null);
@@ -926,7 +925,9 @@ namespace TestLibrary.IntegrationTests {
             Password password,
             string url,
             string repoId,
-            string binding)
+            string binding,
+            string connectTimeout = null,
+            string readTimeout = null)
         {
             var cmisParameters = new Dictionary<string, string>();
             if (binding.Equals(BindingType.AtomPub, StringComparison.OrdinalIgnoreCase)) {
@@ -942,8 +943,8 @@ namespace TestLibrary.IntegrationTests {
             cmisParameters[SessionParameter.RepositoryId] = repoId;
 
             // Sets the Connect Timeout to 10 secs
-            cmisParameters[SessionParameter.ConnectTimeout] = DefaultHttpTimeOut;
-            cmisParameters[SessionParameter.ReadTimeout] = DefaultHttpTimeOut;
+            cmisParameters[SessionParameter.ConnectTimeout] = connectTimeout ?? DefaultHttpTimeOut;
+            cmisParameters[SessionParameter.ReadTimeout] = readTimeout ?? DefaultHttpTimeOut;
 
             var session = SessionFactory.NewInstance().CreateSession(cmisParameters);
             var filters = new HashSet<string>();
