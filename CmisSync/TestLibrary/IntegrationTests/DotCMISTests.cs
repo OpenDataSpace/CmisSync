@@ -658,7 +658,7 @@ namespace TestLibrary.IntegrationTests {
             string repositoryId,
             string binding)
         {
-            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding, "180000", "180000");
 
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
@@ -882,7 +882,9 @@ namespace TestLibrary.IntegrationTests {
             Password password,
             string url,
             string repoId,
-            string binding)
+            string binding,
+            string connectTimeout = null,
+            string readTimeout = null)
         {
             var cmisParameters = new Dictionary<string, string>();
             if (binding.Equals(BindingType.AtomPub, StringComparison.OrdinalIgnoreCase)) {
@@ -898,8 +900,8 @@ namespace TestLibrary.IntegrationTests {
             cmisParameters[SessionParameter.RepositoryId] = repoId;
 
             // Sets the Connect Timeout to 10 secs
-            cmisParameters[SessionParameter.ConnectTimeout] = DefaultHttpTimeOut;
-            cmisParameters[SessionParameter.ReadTimeout] = DefaultHttpTimeOut;
+            cmisParameters[SessionParameter.ConnectTimeout] = connectTimeout ?? DefaultHttpTimeOut;
+            cmisParameters[SessionParameter.ReadTimeout] = readTimeout ?? DefaultHttpTimeOut;
 
             var session = SessionFactory.NewInstance().CreateSession(cmisParameters);
             var filters = new HashSet<string>();
