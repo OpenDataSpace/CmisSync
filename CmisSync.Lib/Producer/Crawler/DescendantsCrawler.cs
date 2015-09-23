@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Producer.Crawler {
     using System;
 
     using CmisSync.Lib.Consumer;
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.Filter;
@@ -176,6 +177,13 @@ namespace CmisSync.Lib.Producer.Crawler {
                 Logger.Debug("Events created");
                 this.notifier.MergeEventsAndAddToQueue(events);
                 Logger.Debug("Events merged and added to queue");
+                var localRoot = trees.LocalTree.Item;
+                var remoteRoot = trees.RemoteTree.Item;
+                bool localIsReadOnly = localRoot.ReadOnly;
+                bool remoteIsReadOnly = remoteRoot.IsReadOnly();
+                if (localIsReadOnly != remoteIsReadOnly) {
+                    localRoot.ReadOnly = remoteIsReadOnly;
+                }
             } catch (System.IO.PathTooLongException e) {
                 string msg = "Crawl Sync aborted because a local path is too long. Please take a look into the log to figure out the reason.";
                 throw new InteractionNeededException(msg, e) { Title = "Local path is too long", Description = msg };
