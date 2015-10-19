@@ -41,6 +41,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
 
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
+    using DotCMIS.Exceptions;
 
     using Moq;
 
@@ -630,6 +631,16 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
 
             Assert.That(this.localFolder.Object.ReadOnly, Is.EqualTo(remoteIsReadOnly));
             this.localFolder.VerifySet((l) => l.ReadOnly = remoteIsReadOnly, localIsReadOnly != remoteIsReadOnly ? Times.Once() : Times.Never());
+        }
+
+        [Test]
+        public void ConnectionExceptionsAreThrownWithoutPassingAnythingToQueue() {
+            this.SetUpMocks();
+            this.remoteFolder.Setup(f => f.GetDescendants(It.IsAny<int>())).Throws<CmisConnectionException>();
+            var underTest = this.CreateCrawler();
+
+            Assert.Throws<CmisConnectionException>(() => underTest.Handle(new StartNextSyncEvent()));
+            this.queue.VerifyThatNoEventIsAdded();
         }
 
         #region boilerplatecode

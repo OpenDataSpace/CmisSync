@@ -32,6 +32,7 @@ namespace CmisSync.Lib.Producer.Crawler {
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -150,6 +151,9 @@ namespace CmisSync.Lib.Producer.Crawler {
                     return true;
                 } catch (InteractionNeededException interaction) {
                     this.Queue.AddEvent(new InteractionNeededEvent(interaction));
+                    throw;
+                } catch (CmisConnectionException connectionInterrupted) {
+                    Logger.Debug("Connection lost on descendants crawl.", connectionInterrupted);
                     throw;
                 } catch (Exception retryException) {
                     Logger.Info("Failed to crawl descendants (trying again):", retryException);
