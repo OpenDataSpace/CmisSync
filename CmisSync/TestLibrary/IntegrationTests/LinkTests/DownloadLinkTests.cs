@@ -56,5 +56,59 @@ namespace TestLibrary.IntegrationTests.LinkTests {
 
             VerifyThatLinkIsEqualToGivenParamsAndContainsUrl(link, subject, notifyAboutLinkUsage, withExpiration, LinkType.DownloadLink);
         }
+
+        [Test, Pairwise]
+        public void UpdateDownloadLink(
+            [Values(true, false)]bool withExpiration,
+            [Values(null, "password")]string password,
+            [Values(null, "", "justDropThis@test.dataspace.cc", "justDropThis@test.dataspace.cc,alsoDropThis@test.dataspace.cc")]string mail,
+            [Values(null, "", "mailSubject")]string subject,
+            [Values(null, "", "message")]string message,
+            [Values(true, false)]bool notifyAboutLinkUsage)
+        {
+            var doc = this.remoteRootDir.CreateDocument("testfile.bin", "test content");
+            IList<string> mails = mail == null ? null : new List<string>(mail.Split(','));
+            var link = session.CreateDownloadLink(objectIds: doc.Id);
+            link.UpdateLink(
+                withExpiration ? (TimeSpan?)new TimeSpan(1,0,0) : (TimeSpan?)null,
+                password: password,
+                mailAddresses: mails,
+                subject: subject,
+                message: message,
+                notifyAboutLinkUsage: notifyAboutLinkUsage
+            );
+            VerifyThatLinkIsEqualToGivenParamsAndContainsUrl(link, subject, notifyAboutLinkUsage, withExpiration, LinkType.DownloadLink);
+        }
+
+        [Test, Pairwise]
+        public void UpdateDownloadLinkWithAlreadySetAttributes(
+            [Values(true, false)]bool withExpiration,
+            [Values(null, "password")]string password,
+            [Values(null, "", "justDropThis@test.dataspace.cc", "justDropThis@test.dataspace.cc,alsoDropThis@test.dataspace.cc")]string mail,
+            [Values(null, "", "mailSubject")]string subject,
+            [Values(null, "", "message")]string message,
+            [Values(true, false)]bool notifyAboutLinkUsage)
+        {
+            var doc = this.remoteRootDir.CreateDocument("testfile.bin", "test content");
+            IList<string> mails = mail == null ? null : new List<string>(mail.Split(','));
+            IList<string> oldmails = new List<string>("oldmail@test.dataspace.cc".Split(','));
+            var link = session.CreateDownloadLink(
+                (TimeSpan?)new TimeSpan(2,0,0),
+                password: "anotherPW",
+                mailAddresses: oldmails,
+                subject: "old subject",
+                message: "old message",
+                notifyAboutLinkUsage: !notifyAboutLinkUsage,
+                objectIds: doc.Id);
+            link.UpdateLink(
+                withExpiration ? (TimeSpan?)new TimeSpan(1,0,0) : (TimeSpan?)null,
+                password: password,
+                mailAddresses: mails,
+                subject: subject,
+                message: message,
+                notifyAboutLinkUsage: notifyAboutLinkUsage
+            );
+            VerifyThatLinkIsEqualToGivenParamsAndContainsUrl(link, subject, notifyAboutLinkUsage, withExpiration, LinkType.DownloadLink);
+        }
     }
 }

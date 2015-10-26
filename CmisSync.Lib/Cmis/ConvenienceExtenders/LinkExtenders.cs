@@ -269,6 +269,56 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         }
 
         /// <summary>
+        /// Updates the link.
+        /// </summary>
+        /// <returns>The updated link.</returns>
+        /// <param name="link">Link.</param>
+        /// <param name="expirationIn">Expiration in.</param>
+        /// <param name="password">Link password.</param>
+        /// <param name="mailAddresses">Mail addresses.</param>
+        /// <param name="subject">Mail subject.</param>
+        /// <param name="message">Mail message.</param>
+        /// <param name="notifyAboutLinkUsage">If set to <c>true</c> notify about link usage.</param>
+        public static ICmisObject UpdateLink(
+            this ICmisObject link,
+            TimeSpan? expirationIn = null,
+            string password = null,
+            IList<string> mailAddresses = null,
+            string subject = null,
+            string message = null,
+            bool notifyAboutLinkUsage = true)
+        {
+            IDictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(GdsLinkNotificationPropertyName, notifyAboutLinkUsage);
+            if (expirationIn != null) {
+                properties.Add("cmis:rm_expirationDate", DateTime.UtcNow + (TimeSpan)(expirationIn));
+            }
+
+            if (subject != null) {
+                properties.Add(GdsLinkSubjectPropertyName, subject);
+            }
+
+            if (message != null) {
+                properties.Add(GdsLinkMessagePropertyName, message);
+            }
+
+            if (mailAddresses != null) {
+                properties.Add(GdsLinkMailPropertyName, new List<string>(mailAddresses));
+            }
+
+            if (password != null) {
+                using (var hashAlg = SHA256Managed.Create()) {
+                    properties.Add(GdsLinkPasswordPropertyName, hashAlg.ComputeHash(Encoding.UTF8.GetBytes(password)).ToHexString().ToLower());
+                }
+            } else {
+                properties.Add(GdsLinkPasswordPropertyName, string.Empty);
+            }
+
+            link.UpdateProperties(properties, true);
+            return link;
+        }
+
+        /// <summary>
         /// Gets the link URL of the given link item.
         /// </summary>
         /// <returns>The URL.</returns>
