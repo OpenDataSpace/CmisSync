@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 #if !__MonoCS__
-namespace TestLibrary.StorageTests.FileSystemTests
-{
+namespace TestLibrary.StorageTests.FileSystemTests {
     using System;
     using System.IO;
     using CmisSync.Lib.Storage.FileSystem;
@@ -30,13 +29,11 @@ namespace TestLibrary.StorageTests.FileSystemTests
     using TestLibrary.IntegrationTests;
 
     [TestFixture]
-    public class ExtendedAttributeReaderDosTest
-    {
+    public class ExtendedAttributeReaderDosTest {
         private string path = string.Empty;
 
         [SetUp]
-        public void SetUp()
-        {
+        public void SetUp() {
             var config = ITUtils.GetConfig();
             string localPath = config[1].ToString();
             this.path = Path.Combine(localPath, Path.GetRandomFileName());
@@ -47,26 +44,23 @@ namespace TestLibrary.StorageTests.FileSystemTests
         }
 
         [TearDown]
-        public void CleanUp()
-        {
+        public void CleanUp() {
             if (File.Exists(path)) {
                 File.Delete(path);
             }
 
             if (Directory.Exists(path)) {
-                Directory.Delete(path);
+                Directory.Delete(path, true);
             }
         }
 
         [Test, Category("Fast")]
-        public void DefaultConstructorWorks()
-        {
+        public void DefaultConstructorWorks() {
             new ExtendedAttributeReaderDos();
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
-        public void GetNullAttributeFromNewFile()
-        {
+        public void GetNullAttributeFromNewFile() {
             using (File.Create(path));
             string key = "test";
             var reader = new ExtendedAttributeReaderDos();
@@ -74,8 +68,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
-        public void SetAttributeToFile()
-        {
+        public void SetAttributeToFile() {
             using (File.Create(path));
             string key = "test";
             string value = "value";
@@ -85,8 +78,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
-        public void OverwriteAttributeOnFile()
-        {
+        public void OverwriteAttributeOnFile() {
             using (File.Create(path));
             string key = "test";
             string value = "value";
@@ -98,8 +90,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
-        public void RemoveAttributeFromFile()
-        {
+        public void RemoveAttributeFromFile() {
             using (File.Create(path));
             string key = "test";
             string value = "value";
@@ -111,8 +102,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
-        public void ListAttributesOfFile()
-        {
+        public void ListAttributesOfFile() {
             using (File.Create(path));
             string key = "test";
             string value = "value";
@@ -124,8 +114,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
-        public void GetNullAttributeFromNewFolder()
-        {
+        public void GetNullAttributeFromNewFolder() {
             Directory.CreateDirectory(path);
             string key = "test";
             var reader = new ExtendedAttributeReaderDos();
@@ -133,8 +122,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
-        public void GetNullAttributeFromNewFolderIfTrailingSlashesAreAvailable()
-        {
+        public void GetNullAttributeFromNewFolderIfTrailingSlashesAreAvailable() {
             Directory.CreateDirectory(path);
             string key = "test";
             var reader = new ExtendedAttributeReaderDos();
@@ -142,8 +130,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
-        public void SetAttributeToFolder()
-        {
+        public void SetAttributeToFolder() {
             Directory.CreateDirectory(path);
             string key = "test";
             string value = "value";
@@ -153,8 +140,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
-        public void OverwriteAttributeOnFolder()
-        {
+        public void OverwriteAttributeOnFolder() {
             Directory.CreateDirectory(path);
             string key = "test";
             string value = "value";
@@ -166,8 +152,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
-        public void RemoveAttributeFromFolder()
-        {
+        public void RemoveAttributeFromFolder() {
             Directory.CreateDirectory(path);
             string key = "test";
             string value = "value";
@@ -179,8 +164,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
-        public void ListAttributesOfFolder()
-        {
+        public void ListAttributesOfFolder() {
             Directory.CreateDirectory(path);
             string key = "test";
             string value = "value";
@@ -192,15 +176,13 @@ namespace TestLibrary.StorageTests.FileSystemTests
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
-        public void CheckAvailableOnPath()
-        {
+        public void CheckAvailableOnPath() {
             var reader = new ExtendedAttributeReaderDos();
             reader.IsFeatureAvailable(Environment.CurrentDirectory);
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
-        public void RemoveExtendedAttributeOfDirectoryByPassingNull()
-        {
+        public void RemoveExtendedAttributeOfDirectoryByPassingNull() {
             Directory.CreateDirectory(path);
             string key = "test";
             var reader = new ExtendedAttributeReaderDos();
@@ -210,8 +192,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
-        public void RemoveExtendedAttributeOfFileByPassingNull()
-        {
+        public void RemoveExtendedAttributeOfFileByPassingNull() {
             using (File.Create(path));
             string key = "test";
             var reader = new ExtendedAttributeReaderDos();
@@ -221,27 +202,51 @@ namespace TestLibrary.StorageTests.FileSystemTests
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
-        public void SetExtendedAttributeOnNonExistingFileThrowsIOException()
-        {
+        public void SetExtendedAttributeOnNonExistingFileThrowsIOException() {
             string key = "test";
             var reader = new ExtendedAttributeReaderDos();
             Assert.Throws<FileNotFoundException>(() => reader.SetExtendedAttribute(path, key, null));
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
-        public void GetExtendedAttributeOnNonExistingFileThrowsIOException()
-        {
+        public void GetExtendedAttributeOnNonExistingFileThrowsIOException() {
             string key = "test";
             var reader = new ExtendedAttributeReaderDos();
             Assert.Throws<FileNotFoundException>(() => reader.GetExtendedAttribute(path, key));
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
-        public void RemoveExtendedAttributeOnNonExistingFileThrowsIOException()
-        {
+        public void RemoveExtendedAttributeOnNonExistingFileThrowsIOException() {
             string key = "test";
             var reader = new ExtendedAttributeReaderDos();
             Assert.Throws<FileNotFoundException>(() => reader.RemoveExtendedAttribute(path, key));
+        }
+
+        /// <summary>
+        /// Remove this test if replaced if long path supporting reader is implemented
+        /// </summary>
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
+        [Ignore("Test is not implemented correctly, or system doesn't throw exception")]
+        public void ThrowPathToLongExceptionIfTooLongPathShouldBeRead() {
+            string key = "DSS-UUID";
+            string subFolderName = "folder";
+            string fileName = "file.bin";
+            string longPath = Path.GetFullPath(path);
+            while (longPath.Length < 248 - (subFolderName.Length)) {
+                longPath = Path.Combine(longPath, subFolderName);
+            }
+
+            Assert.That(longPath.Length, Is.LessThan(248));
+            Directory.CreateDirectory(longPath);
+
+            string filePath = Path.Combine(longPath, fileName);
+            Assert.That(filePath.Length, Is.LessThan(260));
+            Assert.That(filePath.Length + key.Length + 1, Is.GreaterThan(260));
+
+            using (File.Create(filePath));
+
+            var underTest = new ExtendedAttributeReaderDos();
+            Assert.Throws<PathTooLongException>(() => underTest.GetExtendedAttribute(path, key));
         }
     }
 }
