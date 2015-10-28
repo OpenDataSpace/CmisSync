@@ -127,8 +127,8 @@ namespace CmisSync.Lib.Storage.FileSystem {
             public readonly long Size;
         }
 
-        private static string GetLastErrorMessage() {
-            int errorCode = Marshal.GetLastWin32Error();
+        private static string GetLastErrorMessage(int? errorCodeOfLastError = null) {
+            int errorCode = errorCodeOfLastError ?? Marshal.GetLastWin32Error();
             var lpBuffer = new StringBuilder(0x200);
             if (0 != FormatMessage(0x3200, IntPtr.Zero, errorCode, 1033, lpBuffer, lpBuffer.Capacity, IntPtr.Zero)) {
                 return lpBuffer.ToString();
@@ -142,7 +142,13 @@ namespace CmisSync.Lib.Storage.FileSystem {
             // Otherwise we get an Access denied, if the  path points to a directory.
             SafeFileHandle handle = CreateFile(path, access, share, IntPtr.Zero, mode, FILE_FLAGS.BackupSemantics, IntPtr.Zero);
             if (handle.IsInvalid) {
-                throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", GetLastErrorMessage(), path));
+                int errorCode = Marshal.GetLastWin32Error();
+                // If ERROR_PATH_NOT_FOUND and Path is longer than 260 chars => throw PathTooLongException
+                if (errorCode == 3 && path.Length > 260) {
+                    throw new PathTooLongException(string.Format("Reading extended attributes from path \"{0}\" is not supported yet", path));
+                } else {
+                    throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", GetLastErrorMessage(errorCode), path));
+                }
             }
 
             return handle;
