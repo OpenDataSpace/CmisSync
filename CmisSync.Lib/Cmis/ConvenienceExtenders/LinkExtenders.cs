@@ -311,7 +311,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
                     properties.Add(GdsLinkPasswordPropertyName, hashAlg.ComputeHash(Encoding.UTF8.GetBytes(password)).ToHexString().ToLower());
                 }
             } else {
-                properties.Add(GdsLinkPasswordPropertyName, string.Empty);
+                properties.Add(GdsLinkPasswordPropertyName, null);
             }
 
             link.UpdateProperties(properties, true);

@@ -90,13 +90,14 @@ namespace TestLibrary.IntegrationTests.LinkTests {
             [Values(true, false)]bool notifyAboutLinkUsage)
         {
             var doc = this.remoteRootDir.CreateDocument("testfile.bin", "test content");
+            string oldSubject = "old subject";
             IList<string> mails = mail == null ? null : new List<string>(mail.Split(','));
             IList<string> oldmails = new List<string>("oldmail@test.dataspace.cc".Split(','));
             var link = session.CreateDownloadLink(
                 (TimeSpan?)new TimeSpan(2,0,0),
                 password: "anotherPW",
                 mailAddresses: oldmails,
-                subject: "old subject",
+                subject: oldSubject,
                 message: "old message",
                 notifyAboutLinkUsage: !notifyAboutLinkUsage,
                 objectIds: doc.Id);
@@ -108,7 +109,12 @@ namespace TestLibrary.IntegrationTests.LinkTests {
                 message: message,
                 notifyAboutLinkUsage: notifyAboutLinkUsage
             );
-            VerifyThatLinkIsEqualToGivenParamsAndContainsUrl(link, subject, notifyAboutLinkUsage, withExpiration, LinkType.DownloadLink);
+            VerifyThatLinkIsEqualToGivenParamsAndContainsUrl(
+                link: link,
+                subject: subject ?? oldSubject,
+                notifyAboutLinkUsage: notifyAboutLinkUsage,
+                withExpiration: withExpiration,
+                type: LinkType.DownloadLink);
         }
     }
 }
