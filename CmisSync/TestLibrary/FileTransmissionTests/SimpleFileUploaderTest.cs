@@ -53,7 +53,7 @@ namespace TestLibrary.FileTransmissionTests {
 
         [SetUp]
         public void SetUp() {
-            this.transmission = new Transmission(TransmissionType.UPLOAD_NEW_FILE, "testfile");
+            this.transmission = new Transmission(TransmissionType.UploadNewFile, "testfile");
             this.transmission.AddDefaultConstraints();
             this.fileLength = 1024 * 1024;
             this.localContent = new byte[this.fileLength];
@@ -126,7 +126,7 @@ namespace TestLibrary.FileTransmissionTests {
                 .Returns(new Mock<IObjectId>().Object);
             this.mockedMemStream.Setup(memstream => memstream.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback(() => Thread.Sleep(100));
             this.transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
-                Assert.That((sender as Transmission).Status, Is.Not.EqualTo(TransmissionStatus.FINISHED));
+                Assert.That((sender as Transmission).Status, Is.Not.EqualTo(TransmissionStatus.Finished));
             };
             try {
                 Task t;
@@ -139,7 +139,7 @@ namespace TestLibrary.FileTransmissionTests {
             } catch (AggregateException e) {
                 Assert.IsInstanceOf(typeof(UploadFailedException), e.InnerException);
                 Assert.IsInstanceOf(typeof(AbortException), e.InnerException.InnerException);
-                Assert.That(this.transmission.Status, Is.EqualTo(TransmissionStatus.ABORTED));
+                Assert.That(this.transmission.Status, Is.EqualTo(TransmissionStatus.Aborted));
                 return;
             }
 

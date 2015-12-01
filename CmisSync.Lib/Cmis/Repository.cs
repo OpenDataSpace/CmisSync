@@ -30,9 +30,11 @@ namespace CmisSync.Lib.Cmis {
     using CmisSync.Lib;
     using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.PathMatcher;
@@ -58,7 +60,6 @@ namespace CmisSync.Lib.Cmis {
     /// Synchronized CMIS repository.
     /// </summary>
     public class Repository : AbstractNotifyingRepository, IDisposable, IObserver<Tuple<EventCategory, int>> {
-
         /// <summary>
         /// The storage.
         /// </summary>
@@ -115,7 +116,7 @@ namespace CmisSync.Lib.Cmis {
         /// <summary>
         /// Track whether <c>Dispose</c> has been called.
         /// </summary>
-        private bool disposed = false;
+        private bool disposed;
 
         /// <summary>
         /// The auth provider.
@@ -127,15 +128,19 @@ namespace CmisSync.Lib.Cmis {
         /// </summary>
         private ISessionFactory sessionFactory;
 
+        private ITransmissionFactory transmissionFactory;
+
         private ContentChangeEventTransformer transformer;
 
         private DBreezeEngine db;
+
+        private DBreezeConfiguration dbConfig;
 
         private IFileSystemInfoFactory fileSystemFactory;
 
         private ActivityListenerAggregator activityListener;
 
-        private int connectionExceptionsFound = 0;
+        private int connectionExceptionsFound;
 
         private IDisposable unsubscriber;
 
@@ -178,14 +183,17 @@ namespace CmisSync.Lib.Cmis {
             }
 
             this.Queue = queue;
-            this.Queue.EventManager.AddEventHandler(rootFolderMonitor);
-            this.Queue.EventManager.AddEventHandler(new DebugLoggingHandler());
+            var eventManager = this.Queue.EventManager;
+            new ConnectionInterruptedHandler(eventManager, this.Queue);
+            eventManager.AddEventHandler(this.rootFolderMonitor);
+            eventManager.AddEventHandler(new DebugLoggingHandler());
 
             // Create Database connection
-            this.db = new DBreezeEngine(new DBreezeConfiguration {
+            this.dbConfig = new DBreezeConfiguration {
                 DBreezeDataFolderName = inMemory ? string.Empty : repoInfo.GetDatabasePath(),
                 Storage = inMemory ? DBreezeConfiguration.eStorage.MEMORY : DBreezeConfiguration.eStorage.DISK
-            });
+            };
+            this.db = new DBreezeEngine(this.dbConfig);
 
             // Create session dependencies
             this.sessionFactory = SessionFactory.NewInstance();
@@ -209,16 +217,17 @@ namespace CmisSync.Lib.Cmis {
                 this.ignoredFolderNameFilter,
                 this.invalidFolderNameFilter,
                 symlinkFilter);
-            this.Queue.EventManager.AddEventHandler(this.reportingFilter);
+            this.transmissionFactory = new TransmissionFactory(this, activityListener.TransmissionManager);
+            eventManager.AddEventHandler(this.reportingFilter);
             this.alreadyAddedFilter = new IgnoreAlreadyHandledFsEventsFilter(this.storage, this.fileSystemFactory);
-            this.Queue.EventManager.AddEventHandler(this.alreadyAddedFilter);
+            eventManager.AddEventHandler(this.alreadyAddedFilter);
 
             // Add handler for repo config changes
-            this.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(0, this.RepoInfoChanged));
+            eventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(0, this.RepoInfoChanged));
 
             // Add periodic sync procedures scheduler
             this.Scheduler = new SyncScheduler(this.Queue, repoInfo.PollInterval);
-            this.Queue.EventManager.AddEventHandler(this.Scheduler);
+            eventManager.AddEventHandler(this.Scheduler);
 
             // Add File System Watcher
             #if __COCOA__
@@ -227,26 +236,26 @@ namespace CmisSync.Lib.Cmis {
             this.WatcherProducer = new NetWatcher(new FileSystemWatcher(this.LocalPath), this.Queue, this.storage);
             #endif
             this.WatcherConsumer = new WatcherConsumer(this.Queue);
-            this.Queue.EventManager.AddEventHandler(this.WatcherConsumer);
+            eventManager.AddEventHandler(this.WatcherConsumer);
 
             // Add transformer
             this.transformer = new ContentChangeEventTransformer(this.Queue, this.storage, this.fileSystemFactory);
-            this.Queue.EventManager.AddEventHandler(this.transformer);
+            eventManager.AddEventHandler(this.transformer);
 
             // Add local fetcher
             var localFetcher = new LocalObjectFetcher(this.storage.Matcher, this.fileSystemFactory);
-            this.Queue.EventManager.AddEventHandler(localFetcher);
+            eventManager.AddEventHandler(localFetcher);
 
             this.ignoredStorage = new IgnoredEntitiesStorage(new IgnoredEntitiesCollection(), this.storage);
 
-            this.Queue.EventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.fileTransmissionStorage, this.ignoredStorage, this.RepoInfo, this.filters, activityListener, this.fileSystemFactory));
+            eventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.fileTransmissionStorage, this.ignoredStorage, this.RepoInfo, this.filters, activityListener, this.transmissionFactory, this.fileSystemFactory));
 
-            this.Queue.EventManager.AddEventHandler(new DelayRetryAndNextSyncEventHandler(this.Queue));
+            eventManager.AddEventHandler(new DelayRetryAndNextSyncEventHandler(this.Queue));
 
             this.connectionScheduler = new ConnectionScheduler(this.RepoInfo, this.Queue, this.sessionFactory, this.authProvider);
 
-            this.Queue.EventManager.AddEventHandler(this.connectionScheduler);
-            this.Queue.EventManager.AddEventHandler(
+            eventManager.AddEventHandler(this.connectionScheduler);
+            eventManager.AddEventHandler(
                 new GenericSyncEventHandler<SuccessfulLoginEvent>(
                 10000,
                 delegate(ISyncEvent e) {
@@ -255,7 +264,7 @@ namespace CmisSync.Lib.Cmis {
 
                 return false;
             }));
-            this.Queue.EventManager.AddEventHandler(
+            eventManager.AddEventHandler(
                 new GenericSyncEventHandler<ConfigurationNeededEvent>(
                 10000,
                 delegate(ISyncEvent e) {
@@ -265,6 +274,14 @@ namespace CmisSync.Lib.Cmis {
                 return false;
             }));
             this.unsubscriber = this.Queue.CategoryCounter.Subscribe(this);
+            eventManager.OnException += (sender, e) => {
+                ExceptionType type = ExceptionType.Unknown;
+                if (e.Exception is VirusDetectedException) {
+                    type = ExceptionType.FileUploadBlockedDueToVirusDetected;
+                }
+
+                this.PassExceptionToListener(ExceptionLevel.Warning, type, e.Exception);
+            };
         }
 
         /// <summary>
@@ -304,6 +321,10 @@ namespace CmisSync.Lib.Cmis {
         /// Stop syncing momentarily.
         /// </summary>
         public void Suspend() {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             if (!this.RepoStatusFlags.Paused) {
                 this.RepoStatusFlags.Paused = true;
                 this.Status = this.RepoStatusFlags.Status;
@@ -327,6 +348,10 @@ namespace CmisSync.Lib.Cmis {
         /// Restart syncing.
         /// </summary>
         public void Resume() {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             if (this.RepoStatusFlags.Paused) {
                 this.RepoStatusFlags.Paused = false;
                 this.Status = this.RepoStatusFlags.Status;
@@ -358,6 +383,10 @@ namespace CmisSync.Lib.Cmis {
         /// Initialize the scheduled background sync processes.
         /// </summary>
         public virtual void Initialize() {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             this.connectionScheduler.Start();
 
             // Enable FS Watcher events
@@ -367,43 +396,62 @@ namespace CmisSync.Lib.Cmis {
             this.Scheduler.Start();
         }
 
+        /// <summary>
+        /// Just ignores on completed events.
+        /// </summary>
         public void OnCompleted() {
         }
 
-        public void OnError(Exception e) {
+        /// <summary>
+        /// Ignores on error events.
+        /// </summary>
+        /// <param name="error">Error.</param>
+        public void OnError(Exception error) {
         }
 
-        public virtual void OnNext(Tuple<EventCategory, int> changeCounter) {
-            if (changeCounter.Item1 == EventCategory.DetectedChange) {
-                if (changeCounter.Item2 > 0) {
-                    lock(this.counterLock) {
-                        this.NumberOfChanges = changeCounter.Item2;
+        /// <summary>
+        /// Is called if any EventCategory counter is changed.
+        /// </summary>
+        /// <param name="value">The changed value.</param>
+        public virtual void OnNext(Tuple<EventCategory, int> value) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
+            if (value == null) {
+                return;
+            }
+
+            if (value.Item1 == EventCategory.DetectedChange) {
+                if (value.Item2 > 0) {
+                    lock (this.counterLock) {
+                        this.NumberOfChanges = value.Item2;
                     }
                 } else {
-                    lock(this.counterLock) {
+                    lock (this.counterLock) {
                         this.NumberOfChanges = 0;
                         this.LastFinishedSync = this.Status == SyncStatus.Idle ? DateTime.Now : this.LastFinishedSync;
                     }
                 }
-            } else if (changeCounter.Item1 == EventCategory.SyncRequested || changeCounter.Item1 == EventCategory.PeriodicSync) {
-                lock(this.counterLock) {
-                    if (changeCounter.Item1 == EventCategory.SyncRequested) {
-                        this.RepoStatusFlags.SyncRequested = changeCounter.Item2 > 0;
+            } else if (value.Item1 == EventCategory.SyncRequested || value.Item1 == EventCategory.PeriodicSync) {
+                lock (this.counterLock) {
+                    if (value.Item1 == EventCategory.SyncRequested) {
+                        this.RepoStatusFlags.SyncRequested = value.Item2 > 0;
                         this.Status = this.RepoStatusFlags.Status;
                     }
 
-                    if (changeCounter.Item2 <= 0 && this.Status == SyncStatus.Idle) {
+                    if (value.Item2 <= 0 && this.Status == SyncStatus.Idle) {
                         this.LastFinishedSync = DateTime.Now;
                     }
                 }
-            } else if (changeCounter.Item1 == EventCategory.ConnectionException) {
-                lock(this.connectionExceptionCounterLock) {
-                    if (changeCounter.Item2 > this.connectionExceptionsFound) {
+            } else if (value.Item1 == EventCategory.ConnectionException) {
+                lock (this.connectionExceptionCounterLock) {
+                    if (value.Item2 > this.connectionExceptionsFound) {
                         this.RepoStatusFlags.Connected = false;
                         this.Status = this.RepoStatusFlags.Status;
                     }
 
-                    this.connectionExceptionsFound = changeCounter.Item2;
+                    this.connectionExceptionsFound = value.Item2;
                 }
             }
         }
@@ -413,9 +461,9 @@ namespace CmisSync.Lib.Cmis {
         /// </summary>
         /// <param name="disposing">If set to <c>true</c> disposing.</param>
         protected virtual void Dispose(bool disposing) {
-            Suspend();
-
             if (!this.disposed) {
+                this.Scheduler.Stop();
+                this.Queue.Suspend();
                 this.connectionScheduler.Dispose();
                 this.Scheduler.Dispose();
                 this.WatcherProducer.Dispose();
@@ -423,10 +471,15 @@ namespace CmisSync.Lib.Cmis {
 
                 if (disposing) {
                     bool transmissionRun = false;
+
+                    // Maximum timeout is 10 sec (5 for aborting transmissions and 5 for stopping queue)
+                    int timeout = 5000;
                     do {
                         if (transmissionRun) {
                             Thread.Sleep(10);
+                            timeout -= 10;
                         }
+
                         transmissionRun = false;
                         List<Transmission> transmissions = this.activityListener.TransmissionManager.ActiveTransmissionsAsList();
                         foreach (Transmission transmission in transmissions) {
@@ -440,9 +493,9 @@ namespace CmisSync.Lib.Cmis {
                                 transmission.Abort();
                             }
                         }
-                    } while (transmissionRun);
+                    } while (transmissionRun && timeout > 0);
 
-                    int timeout = 5000;
+                    timeout = 5000;
                     if (!this.Queue.WaitForStopped(timeout)) {
                         Logger.Debug(string.Format("Event Queue of {0} has not been closed in {1} miliseconds", this.RemoteUrl.ToString(), timeout));
                     }
@@ -451,6 +504,10 @@ namespace CmisSync.Lib.Cmis {
                     this.authProvider.Dispose();
                     if (this.db != null) {
                         this.db.Dispose();
+                    }
+
+                    if (this.dbConfig != null) {
+                        this.dbConfig.Dispose();
                     }
 
                     if (this.unsubscriber != null) {
@@ -462,14 +519,19 @@ namespace CmisSync.Lib.Cmis {
             }
         }
 
+        /// <summary>
+        /// Creates a default EventManager and Queue.
+        /// </summary>
+        /// <returns>The queue.</returns>
         protected static ICountingQueue CreateQueue() {
             var manager = new SyncEventManager();
             return new SyncEventQueue(manager);
         }
 
         private bool RepoInfoChanged(ISyncEvent e) {
-            if (e is RepoConfigChangedEvent) {
-                this.RepoInfo = (e as RepoConfigChangedEvent).RepoInfo;
+            var configChanged = e as RepoConfigChangedEvent;
+            if (configChanged != null) {
+                this.RepoInfo = configChanged.RepoInfo;
                 this.ignoredFoldersFilter.IgnoredPaths = new List<string>(this.RepoInfo.GetIgnoredPaths());
                 this.ignoredFileNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames;
                 this.ignoredFolderNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames;

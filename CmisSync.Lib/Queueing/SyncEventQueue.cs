@@ -25,6 +25,7 @@ namespace CmisSync.Lib.Queueing {
     using System.Threading.Tasks;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
 
     using DotCMIS.Exceptions;
 
@@ -34,22 +35,23 @@ namespace CmisSync.Lib.Queueing {
     /// Sync event queue.
     /// </summary>
     public class SyncEventQueue : ICountingQueue {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventQueue));
+
         /// <summary>
         /// The full counter.
         /// </summary>
-        protected IEventCounter fullCounter;
+        private IEventCounter fullCounter;
 
         /// <summary>
         /// The category counter.
         /// </summary>
-        protected IEventCounter categoryCounter;
+        private IEventCounter categoryCounter;
 
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventQueue));
         private BlockingCollection<ISyncEvent> queue = new BlockingCollection<ISyncEvent>();
         private Task consumer;
         private AutoResetEvent suspendHandle = new AutoResetEvent(false);
-        private bool alreadyDisposed = false;
-        private bool suspend = false;
+        private bool alreadyDisposed;
+        private bool suspend;
         private object subscriberLock = new object();
 
         /// <summary>
@@ -58,7 +60,7 @@ namespace CmisSync.Lib.Queueing {
         /// <param name="manager">Manager holding the handler.</param>
         public SyncEventQueue(ISyncEventManager manager) {
             if (manager == null) {
-                throw new ArgumentException("manager may not be null");
+                throw new ArgumentNullException("manager");
             }
 
             this.fullCounter = new QueuedEventsCounter();
@@ -120,6 +122,10 @@ namespace CmisSync.Lib.Queueing {
         /// <param name="newEvent">New event.</param>
         /// <exception cref="InvalidOperationException">When Listener is already stopped</exception>
         public virtual void AddEvent(ISyncEvent newEvent) {
+            if (newEvent == null) {
+                throw new ArgumentNullException("newEvent");
+            }
+
             if (this.alreadyDisposed) {
                 Logger.Info(string.Format("Queue was already Disposed. Dropping Event: {0}", newEvent.ToString()));
                 return;
@@ -131,12 +137,13 @@ namespace CmisSync.Lib.Queueing {
             }
 
             try {
-                if (newEvent is ICountableEvent) {
-                    var category = (newEvent as ICountableEvent).Category;
+                var countableEvent = newEvent as ICountableEvent;
+                if (countableEvent != null) {
+                    var category = countableEvent.Category;
                     if (category != EventCategory.NoCategory) {
                         lock (this.subscriberLock) {
-                            this.categoryCounter.Increase(newEvent as ICountableEvent);
-                            this.fullCounter.Increase(newEvent as ICountableEvent);
+                            this.categoryCounter.Increase(countableEvent);
+                            this.fullCounter.Increase(countableEvent);
                         }
                     }
                 }
@@ -145,7 +152,7 @@ namespace CmisSync.Lib.Queueing {
                 if (!(newEvent is IRemoveFromLoggingEvent)) {
                     Logger.Debug(string.Format("Added Event: {0}", newEvent.ToString()));
                 }
-            } catch(InvalidOperationException) {
+            } catch (InvalidOperationException) {
                 Logger.Info(string.Format("Queue was already Stopped. Dropping Event: {0}", newEvent.ToString()));
             }
         }
@@ -181,9 +188,9 @@ namespace CmisSync.Lib.Queueing {
         /// Waits for stopped.
         /// </summary>
         /// <returns><c>true</c>, if stopped in period of timeout, <c>false</c> otherwise.</returns>
-        /// <param name="milisecondsTimeout">Miliseconds timeout.</param>
-        public bool WaitForStopped(int milisecondsTimeout) {
-            return this.consumer.Wait(milisecondsTimeout);
+        /// <param name="timeout">Miliseconds timeout.</param>
+        public bool WaitForStopped(int timeout) {
+            return this.consumer.Wait(timeout);
         }
 
         /// <summary>
@@ -267,18 +274,17 @@ namespace CmisSync.Lib.Queueing {
                         }
 
                         manager.Handle(syncEvent);
-                    } catch (CmisConnectionException connectionException) {
-                        this.AddEvent(new CmisConnectionExceptionEvent(connectionException));
-                    } catch(Exception e) {
+                    } catch (Exception e) {
                         Logger.Error(string.Format("Exception in EventHandler on Event {0}: ", syncEvent.ToString()), e);
                     }
 
-                    if (syncEvent is ICountableEvent) {
-                        var category = (syncEvent as ICountableEvent).Category;
+                    var countableEvent = syncEvent as ICountableEvent;
+                    if (countableEvent != null) {
+                        var category = countableEvent.Category;
                         if (category != EventCategory.NoCategory) {
                             lock (this.subscriberLock) {
-                                this.fullCounter.Decrease(syncEvent as ICountableEvent);
-                                this.categoryCounter.Decrease(syncEvent as ICountableEvent);
+                                this.fullCounter.Decrease(countableEvent);
+                                this.categoryCounter.Decrease(countableEvent);
                             }
                         }
                     }

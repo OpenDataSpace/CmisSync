@@ -31,11 +31,11 @@ namespace TestLibrary.EventsTests {
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class GenericSyncEventHandlerTest {
         private int priority = 666;
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorTakesInstanceName() {
             string name = "InstanceName";
             var handler = new GenericSyncEventHandler<ISyncEvent>(
@@ -44,7 +44,7 @@ namespace TestLibrary.EventsTests {
             Assert.That(handler.ToString().Contains(name));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorWorksWithNullName() {
             var handler = new GenericSyncEventHandler<ISyncEvent>(
                 delegate { return false; },
@@ -52,13 +52,13 @@ namespace TestLibrary.EventsTests {
             handler.ToString();
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ToStringReturnsAcceptedType() {
             var handler = new GenericSyncEventHandler<ISyncEvent>(delegate { return false; });
             Assert.That(handler.ToString().Contains("ISyncEvent"));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void PriorityTest() {
             var handler = new GenericSyncEventHandler<ISyncEvent>(
                 this.priority,
@@ -68,7 +68,7 @@ namespace TestLibrary.EventsTests {
             Assert.AreEqual(this.priority, handler.Priority);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void IgnoresUnexpectedEvents() {
             bool eventPassed = false;
             var handler = new GenericSyncEventHandler<FSEvent>(
@@ -82,7 +82,7 @@ namespace TestLibrary.EventsTests {
             Assert.IsFalse(eventPassed);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void HandleExpectedEvents() {
             bool eventPassed = false;
             var handler = new GenericSyncEventHandler<ConfigChangedEvent>(

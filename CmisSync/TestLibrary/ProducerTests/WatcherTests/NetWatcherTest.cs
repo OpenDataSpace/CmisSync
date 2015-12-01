@@ -35,7 +35,7 @@ namespace TestLibrary.ProducerTests.WatcherTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture]
+    [TestFixture, Category("Medium")]
     public class NetWatcherTest : BaseWatcherTest {
         private Mock<IMetaDataStorage> storage;
 
@@ -50,67 +50,54 @@ namespace TestLibrary.ProducerTests.WatcherTests {
             base.TearDown();
         }
 
-        [Test, Category("Medium")]
+        [Test]
         public void ConstructorSuccessTest() {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
-            using (var watcher = new NetWatcher(fswatcher, queue.Object, Mock.Of<IMetaDataStorage>()))
-            {
-                Assert.False(watcher.EnableEvents);
+            using (var watcher = new NetWatcher(fswatcher, queue.Object, Mock.Of<IMetaDataStorage>())) {
+                Assert.That(watcher.EnableEvents, Is.False);
             }
         }
 
-        [Test, Category("Medium")]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Test]
         public void ConstructorFailsWithNullWatcher() {
-            using (new NetWatcher(null, queue.Object, Mock.Of<IMetaDataStorage>()))
-            {
-            }
+            Assert.Throws<ArgumentNullException>(() => { using (new NetWatcher(null, queue.Object, Mock.Of<IMetaDataStorage>())); });
         }
 
-        [Test, Category("Medium")]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Test]
         public void ConstructorFailsWithNullQueue() {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
-            using (new NetWatcher(fswatcher, null, Mock.Of<IMetaDataStorage>()))
-            {
-            }
+            Assert.Throws<ArgumentNullException>(() => { using (new NetWatcher(fswatcher, null, Mock.Of<IMetaDataStorage>())); });
         }
 
-        [Test, Category("Medium")]
-        [ExpectedException(typeof(ArgumentException))]
+        [Test]
         public void ConstructorFailsWithWatcherOnNullPath() {
             var fswatcher = new Mock<FileSystemWatcher>().Object;
-            using (new NetWatcher(fswatcher, queue.Object, null))
-            {
-            }
+            Assert.Throws<ArgumentException>(() => { using (new NetWatcher(fswatcher, queue.Object, null)); });
         }
 
-        [Test, Category("Medium")]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [Test]
         public void ConstructorFailsWithNullStorage() {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
-            using (new NetWatcher(fswatcher, queue.Object, null))
-            {
-            }
+            Assert.Throws<ArgumentNullException>(() => { using (new NetWatcher(fswatcher, queue.Object, null)); });
         }
 
-        [Test, Category("Medium")]
+        [Test]
         public void ReportFSFileAddedEventTest() {
             this.ReportFSFileAddedEvent();
         }
 
-        [Test, Category("Medium")]
+        [Test]
         public void ReportFSFileChangedEventTest() {
             this.ReportFSFileChangedEvent();
         }
 
         // This test fails on current build slave, retest when these are FC20 or higher
-        [Test, Category("Medium"), Category("BrokenOnFC18"), Category("Erratic")]
+        [Test, Category("BrokenOnFC18")]
         public void ReportFSFileRenamedEventTest() {
             this.ReportFSFileRenamedEvent();
         }
 
-        [Test, Category("Medium")]
+        [Test]
         public void ReportFSFileMovedEventTest() {
             this.IgnoreIfExtendedAttributesAreNotAvailable();
             string oldPath = this.localFile.FullName;
@@ -118,41 +105,41 @@ namespace TestLibrary.ProducerTests.WatcherTests {
             this.ReportFSFileMovedEvent();
         }
 
-        [Test, Category("Medium")]
+        [Test]
         public void ReportFSFileRemovedEventTest() {
             this.storage.AddLocalFile(this.localFile.FullName, "id");
             this.ReportFSFileRemovedEvent();
         }
 
-        [Test, Category("Medium")]
+        [Test]
         public void ReportFSFolderAddedEventTest() {
             this.ReportFSFolderAddedEvent();
         }
 
-        [Test, Category("Medium")]
+        [Test]
         public void ReportFSFolderChangedEventTest() {
             this.ReportFSFolderChangedEvent();
         }
 
-        [Test, Category("Medium")]
+        [Test]
         public void ReportFSFolderRemovedEventTest() {
             this.storage.Setup(s => s.GetObjectByLocalPath(It.IsAny<IFileSystemInfo>())).Returns(Mock.Of<IMappedObject>(o => o.Type == MappedObjectType.Folder));
             this.ReportFSFolderRemovedEvent();
         }
 
-        [Test, Category("Medium")]
+        [Test]
         public void FSWatcherRootFolderRemovedTest() {
             this.storage.Setup(s => s.GetObjectByLocalPath(It.IsAny<IFileSystemInfo>())).Returns(Mock.Of<IMappedObject>(o => o.Type == MappedObjectType.Folder));
             this.ReportFSWatcherRootFolderRemoved();
         }
 
         // This test fails on current build slave, retest when these are FC20 or higher
-        [Test, Category("Medium"), Category("BrokenOnFC18"), Category("Erratic")]
+        [Test, Category("BrokenOnFC18")]
         public void ReportFSFolderRenamedEventTest() {
             this.ReportFSFolderRenamedEvent();
         }
 
-        [Test, Category("Medium")]
+        [Test]
         public void ReportFSFolderMovedEventTest() {
             this.IgnoreIfExtendedAttributesAreNotAvailable();
             string oldPath = this.localSubFolder.FullName;

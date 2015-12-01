@@ -51,7 +51,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
         private string localPath;
         private string remotePath;
-        private Mock<ITransmissionManager> manager;
+        private Mock<ITransmissionFactory> manager;
         private Mock<IMetaDataStorage> storage;
         private Mock<ISession> session;
         private LocalObjectChanged underTest;
@@ -62,7 +62,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         public void DefaultConstructorTest() {
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
-            new LocalObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null, Mock.Of<ITransmissionManager>());
+            new LocalObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null, Mock.Of<ITransmissionFactory>());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -135,7 +135,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                     remoteFile.Setup(f => f.LastModificationDate).Returns(newModificationDate);
                     remoteFile.Setup(f => f.ChangeToken).Returns(this.newChangeToken);
                 });
-                this.manager.SetupCreateTransmissionOnce(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.Object.FullName);
+                this.manager.SetupCreateTransmissionOnce(TransmissionType.UploadModifiedFile, localFile.Object.FullName);
 
                 this.underTest.Solve(localFile.Object, remoteFile.Object);
             }
@@ -191,7 +191,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                     remoteFile.Setup(f => f.ChangeToken).Returns(this.newChangeToken);
                 });
                 remoteFile.SetupUpdateModificationDate();
-                this.manager.SetupCreateTransmissionOnce(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.Object.FullName);
+                this.manager.SetupCreateTransmissionOnce(TransmissionType.UploadModifiedFile, localFile.Object.FullName);
 
                 this.underTest.Solve(localFile.Object, remoteFile.Object);
 
@@ -219,7 +219,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 this.storage.AddMappedFile(mappedObject);
                 var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.remoteId, this.objectName, this.parentId, fileLength, new byte[20], this.oldChangeToken);
                 remoteFile.SetupReadOnly();
-                this.manager.SetupCreateTransmissionOnce(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.Object.FullName);
+                this.manager.SetupCreateTransmissionOnce(TransmissionType.UploadModifiedFile, localFile.Object.FullName);
 
                 this.underTest.Solve(localFile.Object, remoteFile.Object);
 
@@ -243,7 +243,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 this.storage.AddMappedFile(mappedObject);
                 var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.remoteId, this.objectName, this.parentId, fileLength, new byte[20], this.oldChangeToken);
                 remoteFile.Setup(r => r.SetContentStream(It.IsAny<IContentStream>(), true, true)).Throws(new CmisStorageException());
-                this.manager.SetupCreateTransmissionOnce(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.Object.FullName);
+                this.manager.SetupCreateTransmissionOnce(TransmissionType.UploadModifiedFile, localFile.Object.FullName);
 
                 this.underTest.Solve(localFile.Object, remoteFile.Object);
 
@@ -297,7 +297,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         }
 
         private void SetUpMocks() {
-            this.manager = new Mock<ITransmissionManager>();
+            this.manager = new Mock<ITransmissionFactory>();
             this.storage = new Mock<IMetaDataStorage>();
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();

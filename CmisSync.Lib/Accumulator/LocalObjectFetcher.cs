@@ -73,35 +73,36 @@ namespace CmisSync.Lib.Accumulator {
         /// </param>
         /// <returns>always false</returns>
         public override bool Handle(ISyncEvent e) {
-            if (e is FolderEvent) {
-                var folderEvent = e as FolderEvent;
+            var folderEvent = e as FolderEvent;
+            if (folderEvent != null) {
                 if(folderEvent.LocalFolder != null) {
                     return false;
                 }
-
-                if (!this.matcher.CanCreateLocalPath(folderEvent.RemoteFolder.Path)) {
-                    Logger.Debug("Dropping FolderEvent for not accessable path: " + folderEvent.RemoteFolder.Path);
+                var path = folderEvent.RemoteFolder.Path;
+                if (!this.matcher.CanCreateLocalPath(path)) {
+                    Logger.Debug("Dropping FolderEvent for not accessable path: " + path);
                     return true;
                 }
 
                 Logger.Debug("Fetching local object for " + folderEvent);
-                string localPath = this.matcher.CreateLocalPath(folderEvent.RemoteFolder.Path);
+                string localPath = this.matcher.CreateLocalPath(path);
                 folderEvent.LocalFolder = this.fsFactory.CreateDirectoryInfo(localPath);
             }
 
-            if (e is FileEvent) {
-                var fileEvent = e as FileEvent;
+            var fileEvent = e as FileEvent;
+            if (fileEvent != null) {
                 if (fileEvent.LocalFile != null) {
                     return false;
                 }
 
-                if (!this.matcher.CanCreateLocalPath(fileEvent.RemoteFile.Paths[0])) {
-                    Logger.Debug("Dropping FileEvent for not accessable path: " + fileEvent.RemoteFile.Paths[0]);
+                var path = fileEvent.RemoteFile.Paths[0];
+                if (!this.matcher.CanCreateLocalPath(path)) {
+                    Logger.Debug("Dropping FileEvent for not accessable path: " + path);
                     return true;
                 }
 
                 Logger.Debug("Fetching local object for " + fileEvent);
-                string localPath = this.matcher.CreateLocalPath(fileEvent.RemoteFile.Paths[0]);
+                string localPath = this.matcher.CreateLocalPath(path);
                 fileEvent.LocalFile = this.fsFactory.CreateFileInfo(localPath);
             }
 

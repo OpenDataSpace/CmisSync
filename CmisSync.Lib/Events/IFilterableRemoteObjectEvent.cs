@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
 
     using DotCMIS.Client;
@@ -26,8 +25,7 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// This events are filterable by the containing remote object.
     /// </summary>
-    public interface IFilterableRemoteObjectEvent : ISyncEvent
-    {
+    public interface IFilterableRemoteObjectEvent : ISyncEvent {
         /// <summary>
         /// Gets the remote object.
         /// </summary>

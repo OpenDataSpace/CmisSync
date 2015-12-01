@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.PathMatcher
-{
+namespace CmisSync.Lib.PathMatcher {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -30,15 +29,13 @@ namespace CmisSync.Lib.PathMatcher
     /// <summary>
     /// Path matcher.
     /// </summary>
-    public class PathMatcher : IPathMatcher
-    {
+    public class PathMatcher : IPathMatcher {
         /// <summary>
         /// Initializes a new instance of the <see cref="PathMatcher"/> class.
         /// </summary>
         /// <param name="localTargetRootPath">Local target root path.</param>
         /// <param name="remoteTargetRootPath">Remote target root path.</param>
-        public PathMatcher(string localTargetRootPath, string remoteTargetRootPath)
-        {
+        public PathMatcher(string localTargetRootPath, string remoteTargetRootPath) {
             if (string.IsNullOrEmpty(localTargetRootPath)) {
                 throw new ArgumentException("Given local path is null or empty");
             }
@@ -76,8 +73,11 @@ namespace CmisSync.Lib.PathMatcher
         /// </summary>
         /// <returns>true if possible</returns>
         /// <param name="remoteFolder">Remote folder.</param>
-        public bool CanCreateLocalPath(IFolder remoteFolder)
-        {
+        public bool CanCreateLocalPath(IFolder remoteFolder) {
+            if (remoteFolder == null) {
+                throw new ArgumentNullException("remoteFolder");
+            }
+
             return this.CanCreateLocalPath(remoteFolder.Path);
         }
 
@@ -86,10 +86,12 @@ namespace CmisSync.Lib.PathMatcher
         /// </summary>
         /// <returns>true if possible</returns>
         /// <param name="remoteDocument">Remote document.</param>
-        public bool CanCreateLocalPath(IDocument remoteDocument)
-        {
-            foreach (string remotePath in remoteDocument.Paths)
-            {
+        public bool CanCreateLocalPath(IDocument remoteDocument) {
+            if (remoteDocument == null) {
+                throw new ArgumentNullException("remoteDocument");
+            }
+
+            foreach (string remotePath in remoteDocument.Paths) {
                 if (this.CanCreateLocalPath(remotePath)) {
                     return true;
                 }
@@ -103,8 +105,11 @@ namespace CmisSync.Lib.PathMatcher
         /// </summary>
         /// <returns>true if possible</returns>
         /// <param name="localFile">Local file.</param>
-        public bool CanCreateRemotePath(FileInfo localFile)
-        {
+        public bool CanCreateRemotePath(FileInfo localFile) {
+            if (localFile == null) {
+                throw new ArgumentNullException("localFile");
+            }
+
             return this.CanCreateRemotePath(localFile.FullName);
         }
 
@@ -113,8 +118,11 @@ namespace CmisSync.Lib.PathMatcher
         /// </summary>
         /// <returns>true if possible</returns>
         /// <param name="localDirectory">Local directory.</param>
-        public bool CanCreateRemotePath(DirectoryInfo localDirectory)
-        {
+        public bool CanCreateRemotePath(DirectoryInfo localDirectory) {
+            if (localDirectory == null) {
+                throw new ArgumentNullException("localDirectory");
+            }
+
             return this.CanCreateRemotePath(localDirectory.FullName);
         }
 
@@ -124,8 +132,11 @@ namespace CmisSync.Lib.PathMatcher
         /// <param name="localPath">Local path.</param>
         /// <returns>true if matches</returns>
         /// <param name="remoteFolder">Remote folder.</param>
-        public bool Matches(string localPath, IFolder remoteFolder)
-        {
+        public bool Matches(string localPath, IFolder remoteFolder) {
+            if (remoteFolder == null) {
+                throw new ArgumentNullException("remoteFolder");
+            }
+
             return this.Matches(localPath, remoteFolder.Path);
         }
 
@@ -135,8 +146,15 @@ namespace CmisSync.Lib.PathMatcher
         /// <returns>true if matches</returns>
         /// <param name="localFolder">Local folder.</param>
         /// <param name="remoteFolder">Remote folder.</param>
-        public bool Matches(IDirectoryInfo localFolder, IFolder remoteFolder)
-        {
+        public bool Matches(IDirectoryInfo localFolder, IFolder remoteFolder) {
+            if (localFolder == null) {
+                throw new ArgumentNullException("localFolder");
+            }
+
+            if (remoteFolder == null) {
+                throw new ArgumentNullException("remoteFolder");
+            }
+
             return this.Matches(localFolder.FullName, remoteFolder.Path);
         }
 
@@ -145,8 +163,11 @@ namespace CmisSync.Lib.PathMatcher
         /// </summary>
         /// <returns>The local path.</returns>
         /// <param name="remoteFolder">Remote folder.</param>
-        public string CreateLocalPath(IFolder remoteFolder)
-        {
+        public string CreateLocalPath(IFolder remoteFolder) {
+            if (remoteFolder == null) {
+                throw new ArgumentNullException("remoteFolder");
+            }
+
             return this.CreateLocalPath(remoteFolder.Path);
         }
 
@@ -155,8 +176,7 @@ namespace CmisSync.Lib.PathMatcher
         /// </summary>
         /// <returns>The local path.</returns>
         /// <param name="remoteDocument">Remote document.</param>
-        public string CreateLocalPath(IDocument remoteDocument)
-        {
+        public string CreateLocalPath(IDocument remoteDocument) {
             return this.CreateLocalPaths(remoteDocument)[0];
         }
 
@@ -165,8 +185,11 @@ namespace CmisSync.Lib.PathMatcher
         /// </summary>
         /// <returns>The remote pat.</returns>
         /// <param name="localDirectory">Local directory.</param>
-        public string CreateRemotePath(DirectoryInfo localDirectory)
-        {
+        public string CreateRemotePath(DirectoryInfo localDirectory) {
+            if (localDirectory == null) {
+                throw new ArgumentNullException("localDirectory");
+            }
+
             return this.CreateRemotePath(localDirectory.FullName);
         }
 
@@ -175,8 +198,11 @@ namespace CmisSync.Lib.PathMatcher
         /// </summary>
         /// <returns>The remote path.</returns>
         /// <param name="localFile">Local file.</param>
-        public string CreateRemotePath(FileInfo localFile)
-        {
+        public string CreateRemotePath(FileInfo localFile) {
+            if (localFile == null) {
+                throw new ArgumentNullException("localFile");
+            }
+
             return this.CreateRemotePath(localFile.FullName);
         }
 
@@ -185,8 +211,11 @@ namespace CmisSync.Lib.PathMatcher
         /// </summary>
         /// <returns>true if possible</returns>
         /// <param name="remotePath">Remote path.</param>
-        public bool CanCreateLocalPath(string remotePath)
-        {
+        public bool CanCreateLocalPath(string remotePath) {
+            if (remotePath == null) {
+                throw new ArgumentNullException("remotePath");
+            }
+
             if(!remotePath.EndsWith("/")) {
                 remotePath += "/";
             }
@@ -199,8 +228,11 @@ namespace CmisSync.Lib.PathMatcher
         /// </summary>
         /// <returns>true if possible</returns>
         /// <param name="localPath">Local path.</param>
-        public bool CanCreateRemotePath(string localPath)
-        {
+        public bool CanCreateRemotePath(string localPath) {
+            if (localPath == null) {
+                throw new ArgumentNullException("localPath");
+            }
+
             if(!localPath.EndsWith(Path.DirectorySeparatorChar.ToString())) {
                 localPath += Path.DirectorySeparatorChar.ToString();
             }
@@ -214,10 +246,23 @@ namespace CmisSync.Lib.PathMatcher
         /// <param name="localPath">Local path.</param>
         /// <param name="remotePath">Remote path.</param>
         /// <returns>true if the paths matches</returns>
-        public bool Matches(string localPath, string remotePath)
-        {
+        public bool Matches(string localPath, string remotePath) {
+            if (localPath == null) {
+                throw new ArgumentNullException("localPath");
+            }
+
+            if (remotePath == null) {
+                throw new ArgumentNullException("remotePath");
+            }
+
             if (!this.CanCreateRemotePath(localPath)) {
-                throw new ArgumentOutOfRangeException(string.Format("The given local path \"{0}\"does not start with the correct path \"{1}\"", localPath, this.LocalTargetRootPath));
+                var msg = string.Format(
+                    "The given local path \"{0}\"does not start with the correct path \"{1}\"",
+                    localPath,
+                    this.LocalTargetRootPath);
+                throw new ArgumentOutOfRangeException(
+                    "localPath",
+                    msg);
             }
 
             return localPath.Equals(this.CreateLocalPath(remotePath));
@@ -228,15 +273,23 @@ namespace CmisSync.Lib.PathMatcher
         /// </summary>
         /// <returns>The local paths.</returns>
         /// <param name="remoteDocument">Remote document.</param>
-        public List<string> CreateLocalPaths(IDocument remoteDocument)
-        {
-            if (!this.CanCreateLocalPath(remoteDocument)) {
-                throw new ArgumentOutOfRangeException(string.Format("Given remote document with Paths \"{0}\" has no path in the remote target folder \"{1}\"", remoteDocument.Paths, this.RemoteTargetRootPath));
+        public List<string> CreateLocalPaths(IDocument remoteDocument) {
+            if (remoteDocument == null) {
+                throw new ArgumentNullException("remoteDocument");
             }
 
-            List<string> localPaths = new List<string>();
-            foreach (string remotePath in remoteDocument.Paths)
-            {
+            if (!this.CanCreateLocalPath(remoteDocument)) {
+                var msg = string.Format(
+                    "Given remote document with Paths \"{0}\" has no path in the remote target folder \"{1}\"",
+                    remoteDocument.Paths,
+                    this.RemoteTargetRootPath);
+                throw new ArgumentOutOfRangeException(
+                    "remoteDocument",
+                    msg);
+            }
+
+            var localPaths = new List<string>();
+            foreach (string remotePath in remoteDocument.Paths) {
                 try {
                     localPaths.Add(this.CreateLocalPath(remotePath));
                 } catch (ArgumentException) {
@@ -251,10 +304,19 @@ namespace CmisSync.Lib.PathMatcher
         /// </summary>
         /// <returns>The local path.</returns>
         /// <param name="remotePath">Remote path.</param>
-        public string CreateLocalPath(string remotePath)
-        {
+        public string CreateLocalPath(string remotePath) {
+            if (remotePath == null) {
+                throw new ArgumentNullException("remotePath");
+            }
+
             if (!this.CanCreateLocalPath(remotePath)) {
-                throw new ArgumentOutOfRangeException(string.Format("Given remote object with Path \"{0}\" is not in the remote target folder \"{1}\"", remotePath, this.RemoteTargetRootPath));
+                var msg = string.Format(
+                    "Given remote object with Path \"{0}\" is not in the remote target folder \"{1}\"",
+                    remotePath,
+                    this.RemoteTargetRootPath);
+                throw new ArgumentOutOfRangeException(
+                    "remotePath",
+                    msg);
             }
 
             if (this.RemoteTargetRootPath.Equals(remotePath + "/")) {
@@ -271,10 +333,19 @@ namespace CmisSync.Lib.PathMatcher
         /// </summary>
         /// <returns>The remote path.</returns>
         /// <param name="localPath">Local path.</param>
-        public string CreateRemotePath(string localPath)
-        {
+        public string CreateRemotePath(string localPath) {
+            if (localPath == null) {
+                throw new ArgumentNullException("localPath");
+            }
+
             if (!this.CanCreateRemotePath(localPath)) {
-                throw new ArgumentOutOfRangeException(string.Format("Given local path \"{0}\" does not start with the correct path \"{1}\"", localPath, this.LocalTargetRootPath));
+                var msg = string.Format(
+                    "Given local path \"{0}\" does not start with the correct path \"{1}\"",
+                    localPath,
+                    this.LocalTargetRootPath);
+                throw new ArgumentOutOfRangeException(
+                    "localPath",
+                    msg);
             }
 
             string relativePath = localPath.Substring(this.LocalTargetRootPath.Length);
@@ -292,10 +363,19 @@ namespace CmisSync.Lib.PathMatcher
         /// </summary>
         /// <returns>The relative local path.</returns>
         /// <param name="localPath">Local path.</param>
-        public string GetRelativeLocalPath(string localPath)
-        {
+        public string GetRelativeLocalPath(string localPath) {
+            if (localPath == null) {
+                throw new ArgumentNullException("localPath");
+            }
+
             if (!this.CanCreateRemotePath(localPath)) {
-                throw new ArgumentOutOfRangeException(string.Format("Given local path \"{0}\" does not start with the correct path \"{1}\"", localPath, this.LocalTargetRootPath));
+                var msg = string.Format(
+                    "Given local path \"{0}\" does not start with the correct path \"{1}\"",
+                    localPath,
+                    this.LocalTargetRootPath);
+                throw new ArgumentOutOfRangeException(
+                    "localPath",
+                    msg);
             }
 
             if (this.LocalTargetRootPath.Equals(localPath + Path.DirectorySeparatorChar.ToString())) {

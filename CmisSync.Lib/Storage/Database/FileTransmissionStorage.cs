@@ -30,9 +30,9 @@ namespace CmisSync.Lib.Storage.Database {
     /// File transmission storage.
     /// </summary>
     public class FileTransmissionStorage : IFileTransmissionStorage {
-        private static readonly string FileTransmissionObjectsTable = "FileTransmissionObjects";
+        private const string FileTransmissionObjectsTable = "FileTransmissionObjects";
 
-        private DBreezeEngine engine = null;
+        private DBreezeEngine engine;
 
         static FileTransmissionStorage() {
             DBreezeInitializerSingleton.Init();
@@ -42,6 +42,7 @@ namespace CmisSync.Lib.Storage.Database {
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.Database.FileTransmissionStorage"/> class.
         /// </summary>
         /// <param name="engine">DBreeze engine. Must not be null.</param>
+        /// <param name="chunkSize">Upload chunk size.</param>
         [CLSCompliant(false)]
         public FileTransmissionStorage(DBreezeEngine engine, long chunkSize = CmisSync.Lib.Config.Config.DefaultChunkSize) {
             if (engine == null) {
@@ -62,6 +63,10 @@ namespace CmisSync.Lib.Storage.Database {
         /// <value>The size of the chunk.</value>
         public long ChunkSize { get; private set; }
 
+        /// <summary>
+        /// Gets the file transmission object list.
+        /// </summary>
+        /// <returns>The object list.</returns>
         public IList<IFileTransmissionObject> GetObjectList() {
             List<IFileTransmissionObject> objects = new List<IFileTransmissionObject>();
 
@@ -84,6 +89,10 @@ namespace CmisSync.Lib.Storage.Database {
             return objects;
         }
 
+        /// <summary>
+        /// Saves the object.
+        /// </summary>
+        /// <param name="obj">File transmission object.</param>
         public void SaveObject(IFileTransmissionObject obj) {
             if (obj == null) {
                 throw new ArgumentNullException("obj");
@@ -97,24 +106,31 @@ namespace CmisSync.Lib.Storage.Database {
                 throw new ArgumentException("empty string", "obj.LocalPath");
             }
 
-            if (obj.RemoteObjectId == null) {
+            var remoteId = obj.RemoteObjectId;
+            if (remoteId == null) {
                 throw new ArgumentNullException("obj.RemoteObjectId");
             }
 
-            if (string.IsNullOrEmpty(obj.RemoteObjectId)) {
+            if (string.IsNullOrEmpty(remoteId)) {
                 throw new ArgumentException("empty string", "obj.RemoteObjectId");
             }
 
-            if (!(obj is FileTransmissionObject)) {
+            var transmissionObject = obj as FileTransmissionObject;
+            if (transmissionObject == null) {
                 throw new ArgumentException("require FileTransmissionObject type", "obj");
             }
 
             using (var tran = this.engine.GetTransaction()) {
-                tran.Insert<string, DbCustomSerializer<FileTransmissionObject>>(FileTransmissionObjectsTable, obj.RemoteObjectId, obj as FileTransmissionObject);
+                tran.Insert<string, DbCustomSerializer<FileTransmissionObject>>(FileTransmissionObjectsTable, remoteId, transmissionObject);
                 tran.Commit();
             }
         }
 
+        /// <summary>
+        /// Gets the file transmission object by given remote object identifier.
+        /// </summary>
+        /// <returns>The file transmission object by given remote object identifier.</returns>
+        /// <param name="remoteObjectId">Remote object identifier.</param>
         public IFileTransmissionObject GetObjectByRemoteObjectId(string remoteObjectId) {
             using (var tran = this.engine.GetTransaction()) {
                 DbCustomSerializer<FileTransmissionObject> value = tran.Select<string, DbCustomSerializer<FileTransmissionObject>>(FileTransmissionObjectsTable, remoteObjectId).Value;
@@ -126,6 +142,11 @@ namespace CmisSync.Lib.Storage.Database {
             }
         }
 
+        /// <summary>
+        /// Gets the file transmission object by given local path.
+        /// </summary>
+        /// <returns>The file transmission object of given local path.</returns>
+        /// <param name="localPath">Local path.</param>
         public IFileTransmissionObject GetObjectByLocalPath(string localPath) {
             using (var tran = this.engine.GetTransaction()) {
                 foreach (var row in tran.SelectForward<string, DbCustomSerializer<FileTransmissionObject>>(FileTransmissionObjectsTable)) {
@@ -148,6 +169,10 @@ namespace CmisSync.Lib.Storage.Database {
             return null;
         }
 
+        /// <summary>
+        /// Removes the file transmission object by remote object identifier.
+        /// </summary>
+        /// <param name="remoteObjectId">Remote object identifier.</param>
         public void RemoveObjectByRemoteObjectId(string remoteObjectId) {
             if (remoteObjectId == null) {
                 throw new ArgumentNullException("remoteObjectId");

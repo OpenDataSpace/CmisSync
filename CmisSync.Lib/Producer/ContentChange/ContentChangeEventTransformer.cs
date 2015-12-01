@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Producer.ContentChange
-{
+namespace CmisSync.Lib.Producer.ContentChange {
     using System;
     using System.IO;
     using System.Linq;
@@ -51,17 +50,11 @@ namespace CmisSync.Lib.Producer.ContentChange
         private IFileSystemInfoFactory fsFactory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.ContentChangeEventTransformer"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Producer.ContentChange.ContentChangeEventTransformer"/> class.
         /// </summary>
-        /// <param name='queue'>
-        /// The ISyncEventQueue.
-        /// </param>
-        /// <param name='storage'>
-        /// The MetaDataStorage.
-        /// </param>
-        /// <param name='fsFactory'>
-        /// Fs factory can be null.
-        /// </param>
+        /// <param name='queue'>The ISyncEventQueue.</param>
+        /// <param name='storage'>The meta data storage.</param>
+        /// <param name='fsFactory'>Fs factory can be null.</param>
         /// <exception cref='ArgumentNullException'>
         /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
         /// </exception>
@@ -122,11 +115,11 @@ namespace CmisSync.Lib.Producer.ContentChange
                 if (obj != null) {
                     if (obj.Type == MappedObjectType.Folder) {
                         var dirInfo = this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(obj));
-                        Queue.AddEvent(new FolderEvent(dirInfo, null, this) { Remote = MetaDataChangeType.DELETED });
+                        this.Queue.AddEvent(new FolderEvent(dirInfo, null, this) { Remote = MetaDataChangeType.DELETED });
                         return;
                     } else {
                         var fileInfo = this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(obj));
-                        Queue.AddEvent(new FileEvent(fileInfo, null) { Remote = MetaDataChangeType.DELETED });
+                        this.Queue.AddEvent(new FileEvent(fileInfo, null) { Remote = MetaDataChangeType.DELETED });
                         return;
                     }
                 }
@@ -137,13 +130,12 @@ namespace CmisSync.Lib.Producer.ContentChange
 
         private void HandleAsIDocument(ContentChangeEvent contentChangeEvent) {
             IDocument doc = contentChangeEvent.CmisObject as IDocument;
-            switch(contentChangeEvent.Type)
-            {
+            switch(contentChangeEvent.Type) {
             case DotCMIS.Enums.ChangeType.Created:
             {
                 var fileEvent = new FileEvent(null, doc) { Remote = MetaDataChangeType.CREATED };
                 fileEvent.RemoteContent = doc.ContentStreamId == null ? ContentChangeType.NONE : ContentChangeType.CREATED;
-                Queue.AddEvent(fileEvent);
+                this.Queue.AddEvent(fileEvent);
                 break;
             }
 
@@ -168,7 +160,7 @@ namespace CmisSync.Lib.Producer.ContentChange
                     }
                 }
 
-                Queue.AddEvent(fileEvent);
+                this.Queue.AddEvent(fileEvent);
                 break;
             }
 
@@ -181,8 +173,9 @@ namespace CmisSync.Lib.Producer.ContentChange
                     fileEvent.Remote = MetaDataChangeType.CHANGED;
                     if (file != null) {
                         byte[] hash = doc.ContentStreamHash(file.ChecksumAlgorithmName);
-                        if (hash == null || !hash.SequenceEqual(file.LastChecksum)) {
-                            Logger.Debug(string.Format("SavedChecksum: {0} RemoteChecksum: {1}", Utils.ToHexString(file.LastChecksum), Utils.ToHexString(hash)));
+                        byte[] lastChecksum = file.LastChecksum;
+                        if (hash == null || !hash.SequenceEqual(lastChecksum)) {
+                            Logger.Debug(string.Format("SavedChecksum: {0} RemoteChecksum: {1}", Utils.ToHexString(lastChecksum), Utils.ToHexString(hash)));
                             fileEvent.RemoteContent = ContentChangeType.CHANGED;
                         } else {
                             fileEvent.RemoteContent = ContentChangeType.NONE;
@@ -196,7 +189,7 @@ namespace CmisSync.Lib.Producer.ContentChange
                     fileEvent.RemoteContent = ContentChangeType.CREATED;
                 }
 
-                Queue.AddEvent(fileEvent);
+                this.Queue.AddEvent(fileEvent);
                 break;
             }
             }
@@ -208,8 +201,7 @@ namespace CmisSync.Lib.Producer.ContentChange
             IMappedObject dir = this.storage.GetObjectByRemoteId(folder.Id);
             IDirectoryInfo dirInfo = (dir == null) ? null : this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(dir));
             var folderEvent = new FolderEvent(dirInfo, folder, this);
-            switch(contentChangeEvent.Type)
-            {
+            switch(contentChangeEvent.Type) {
             case DotCMIS.Enums.ChangeType.Created:
                 Logger.Debug("Created Folder Event");
                 folderEvent.Remote = MetaDataChangeType.CREATED;
@@ -222,7 +214,7 @@ namespace CmisSync.Lib.Producer.ContentChange
                 break;
             }
 
-            Queue.AddEvent(folderEvent);
+            this.Queue.AddEvent(folderEvent);
         }
     }
 }

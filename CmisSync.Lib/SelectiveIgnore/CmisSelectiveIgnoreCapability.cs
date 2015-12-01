@@ -17,21 +17,26 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.SelectiveIgnore
-{
+namespace CmisSync.Lib.SelectiveIgnore {
     using System;
 
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
-    public static class CmisSelectiveIgnoreCapability
-    {
+    /// <summary>
+    /// DotCMIS selective ignore capability.
+    /// </summary>
+    public static class CmisSelectiveIgnoreCapability {
         /// <summary>
         /// Determines if is server supports selective ignore feature.
         /// </summary>
         /// <returns><c>true</c> if is server able to selectivly ignore folders; otherwise, <c>false</c>.</returns>
         /// <param name="session">Cmis session.</param>
         public static bool SupportsSelectiveIgnore(this ISession session) {
+            if (session == null) {
+                throw new ArgumentNullException("session");
+            }
+
             try {
                 var type = session.GetTypeDefinition("gds:sync");
                 if (type == null) {

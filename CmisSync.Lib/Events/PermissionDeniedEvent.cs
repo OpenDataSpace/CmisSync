@@ -27,7 +27,7 @@ namespace CmisSync.Lib.Events {
     /// Permission denied event.
     /// </summary>
     public class PermissionDeniedEvent : ExceptionEvent {
-        private static readonly string HttpHeaderRetryAfter = "Retry-After";
+        private const string HttpHeaderRetryAfter = "Retry-After";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.PermissionDeniedEvent"/> class.
@@ -45,7 +45,7 @@ namespace CmisSync.Lib.Events {
                     try {
                         long seconds = Convert.ToInt64(value);
                         dates.Add(DateTime.UtcNow + TimeSpan.FromSeconds(seconds));
-                    } catch(FormatException) {
+                    } catch (FormatException) {
                         DateTime parsed;
                         if (DateTime.TryParse(value, out parsed)) {
                             dates.Add(parsed);

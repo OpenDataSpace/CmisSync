@@ -46,6 +46,7 @@ namespace CmisSync {
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Queueing;
@@ -101,14 +102,9 @@ namespace CmisSync {
         private Dictionary<string, Edit> edits = new Dictionary<string, Edit>();
 
         /// <summary>
-        /// All the info about the CmisSync synchronized folder being created.
-        /// </summary>
-        private RepoInfo repoInfo;
-
-        /// <summary>
         /// Is this controller disposed already?
         /// </summary>
-        private bool disposed = false;
+        private bool disposed;
 
         private RepositoryStatusAggregator statusAggregator = new RepositoryStatusAggregator();
 
@@ -613,7 +609,7 @@ namespace CmisSync {
                         string pathname = Path.Combine(config.GetConfigPath(), this.BrandConfigFolder, path.Substring(1));
                         Directory.CreateDirectory(Path.GetDirectoryName(pathname));
                         try {
-                            using (FileStream output = File.OpenWrite(pathname)) {
+                            using (FileStream output = File.Open(pathname, FileMode.Create, FileAccess.Write)) {
                                 if (!clientBrand.GetFile(path, output)) {
                                     success = false;
                                     break;
@@ -657,13 +653,16 @@ namespace CmisSync {
         private void AddRepository(RepoInfo repositoryInfo) {
             try {
                 Repository repo = new Repository(repositoryInfo, this.activityListenerAggregator);
-                this.transmissionManager.AddPathRepoMapping(repositoryInfo.LocalPath, repositoryInfo.DisplayName);
                 repo.ShowException += (object sender, RepositoryExceptionEventArgs e) => {
                     string msg = string.Empty;
                     switch (e.Type) {
                     case ExceptionType.LocalSyncTargetDeleted:
                         msg = string.Format(Properties_Resources.LocalRootFolderUnavailable, repositoryInfo.LocalPath);
                         break;
+                    case ExceptionType.FileUploadBlockedDueToVirusDetected:
+                        var file = (e.Exception as VirusDetectedException).AffectedFiles.First();
+                        this.ShowException(Properties_Resources.VirusDetectedTitle, string.Format(Properties_Resources.VirusDetectedMessage, file.FullName));
+                        return;
                     default:
                         msg = e.Exception != null ? e.Exception.Message : Properties_Resources.UnknownExceptionOccured;
                         break;
@@ -709,35 +708,37 @@ namespace CmisSync {
                     new GenericSyncEventHandler<SuccessfulLoginEvent>(
                     0,
                     delegate(ISyncEvent e) {
-                    this.SuccessfulLogin(repositoryInfo.DisplayName);
-                    return false;
+                        this.SuccessfulLogin(repositoryInfo.DisplayName);
+                        return false;
                 }));
                 repo.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<ConfigurationNeededEvent>(
                     1,
                     delegate(ISyncEvent e) {
-                    this.ShowException("The configuration of " + repo.Name + " is broken", "Please reconfigure the connection");
-                    return true;
+                        this.ShowException(string.Format(Properties_Resources.ConfigBrokenTitle, repo.Name), Properties_Resources.ConfigBrokenMessage);
+                        return true;
                 }));
                 repo.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<InteractionNeededEvent>(
                     1,
                     delegate(ISyncEvent e) {
-                    var interactionEvent = e as InteractionNeededEvent;
-                    this.ShowException(interactionEvent.Title, interactionEvent.Description);
+                        var interactionEvent = e as InteractionNeededEvent;
+                        if (!(interactionEvent.Exception is VirusDetectedException)) {
+                            this.ShowException(interactionEvent.Title, interactionEvent.Description);
+                        }
                     return true;
                 }));
                 repo.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<ExceptionEvent>(
                     0,
                     delegate(ISyncEvent e) {
-                    var ex = (e as ExceptionEvent).Exception;
-                    this.ShowException("Exception on " + repo.Name, ex.Message);
-                    return false;
+                        var ex = (e as ExceptionEvent).Exception;
+                        this.ShowException("Exception on " + repo.Name, ex.Message);
+                        return false;
                 }));
                 this.repositories.Add(repo);
                 this.statusAggregator.Add(repo);
                 repo.Initialize();
             } catch (ExtendedAttributeException extendedAttributeException) {
                 this.ShowException(
-                    string.Format(Properties_Resources.CannotSync, this.repoInfo.DisplayName),
+                    string.Format(Properties_Resources.CannotSync, repositoryInfo.DisplayName),
                     string.Format(Properties_Resources.ProblemWithFS, Environment.NewLine, extendedAttributeException.Message));
             }
         }
@@ -775,6 +776,8 @@ namespace CmisSync {
                 }
 
                 edit = new Edit(type, credentials, folder.DisplayName, folder.RemotePath, oldIgnores, folder.LocalPath);
+                edit.DownloadLimit = folder.DownloadLimit;
+                edit.UploadLimit = folder.UploadLimit;
                 this.edits.Add(reponame, edit);
 
                 edit.Controller.SaveFolderEvent += delegate {
@@ -785,6 +788,8 @@ namespace CmisSync {
                         }
 
                         folder.SetPassword(edit.Credentials.Password);
+                        folder.DownloadLimit = edit.DownloadLimit;
+                        folder.UploadLimit = edit.UploadLimit;
                         ConfigManager.CurrentConfig.Save();
                         foreach (Repository repo in this.repositories) {
                             if (repo.Name == reponame) {

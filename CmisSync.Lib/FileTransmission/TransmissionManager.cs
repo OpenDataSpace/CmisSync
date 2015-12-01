@@ -34,12 +34,11 @@ namespace CmisSync.Lib.Queueing {
     /// <summary>
     /// Transmission manager.
     /// </summary>
-    public class TransmissionManager : ITransmissionManager {
+    public class TransmissionManager : ITransmissionAggregator {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(TransmissionManager));
 
         private object collectionLock = new object();
         private ObservableCollection<Transmission> activeTransmissions = new ObservableCollection<Transmission>();
-        private Dictionary<string, string> pathToRepoNameMapping = new Dictionary<string, string>();
 
         /// <summary>
         /// Gets the active transmissions. This Collection can be obsered for changes.
@@ -66,37 +65,17 @@ namespace CmisSync.Lib.Queueing {
         }
 
         /// <summary>
-        /// Creates a new the transmission object and adds it to the manager. The manager decides when to and how the
-        /// transmission gets removed from it.
+        /// Adds the given transmission to the manager.
         /// </summary>
-        /// <returns>The transmission.</returns>
-        /// <param name="type">Transmission type.</param>
-        /// <param name="path">Full path.</param>
-        /// <param name="cachePath">Cache path.</param>
-        public Transmission CreateTransmission(TransmissionType type, string path, string cachePath = null) {
-            var transmission = new Transmission(type, path, cachePath);
-            lock (this.collectionLock) {
-                var entry = this.pathToRepoNameMapping.FirstOrDefault(t => path.StartsWith(t.Key));
-                transmission.Repository = entry.Value ?? string.Empty;
-                if (entry.Key != null) {
-                    transmission.RelativePath = path.Substring(entry.Key.Length).TrimStart(System.IO.Path.DirectorySeparatorChar);
-                }
-
-                transmission.PropertyChanged += this.TransmissionFinished;
-                this.activeTransmissions.Add(transmission);
+        /// <param name="transmission">Transmission instance.</param>
+        public void Add(Transmission transmission) {
+            if (transmission == null) {
+                throw new ArgumentNullException("transmission");
             }
 
-            return transmission;
-        }
-
-        /// <summary>
-        /// Adds the path repo mapping entry to internal storage.
-        /// </summary>
-        /// <param name="path">Local path.</param>
-        /// <param name="repoName">Repo name.</param>
-        public void AddPathRepoMapping(string path, string repoName) {
             lock (this.collectionLock) {
-                this.pathToRepoNameMapping[path] = repoName;
+                transmission.PropertyChanged += this.TransmissionFinished;
+                this.activeTransmissions.Add(transmission);
             }
         }
 
@@ -123,7 +102,7 @@ namespace CmisSync.Lib.Queueing {
 
             var transmission = sender as Transmission;
             if (transmission != null &&
-                (transmission.Status == TransmissionStatus.ABORTED || transmission.Status == TransmissionStatus.FINISHED)) {
+                (transmission.Status == TransmissionStatus.Aborted || transmission.Status == TransmissionStatus.Finished)) {
                 lock (this.collectionLock) {
                     this.activeTransmissions.Remove(transmission);
                     transmission.PropertyChanged -= this.TransmissionFinished;

@@ -513,4 +513,28 @@ This could lead to a lot of conflict files!</value>
   <data name="SyncStatusPaused" xml:space="preserve">
     <value>Synchronization is paused</value>
   </data>
+  <data name="Bandwidth" xml:space="preserve">
+    <value>Bandwidth</value>
+  </data>
+  <data name="DownloadLimit" xml:space="preserve">
+    <value>Download Limit</value>
+  </data>
+  <data name="UploadLimit" xml:space="preserve">
+    <value>Upload Limit</value>
+  </data>
+  <data name="TransmissionExceptionDetails" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="ConfigBrokenMessage" xml:space="preserve">
+    <value>Please reconfigure the connection</value>
+  </data>
+  <data name="ConfigBrokenTitle" xml:space="preserve">
+    <value>The configuration of "{0}" is broken</value>
+  </data>
+  <data name="VirusDetectedMessage" xml:space="preserve">
+    <value>Affected file: "{0}"</value>
+  </data>
+  <data name="VirusDetectedTitle" xml:space="preserve">
+    <value>Virus detected!</value>
+  </data>
 </root>

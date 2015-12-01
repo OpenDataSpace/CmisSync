@@ -3,12 +3,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.0</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{F0F479F3-8461-42B7-ABF1-19C4B41C6C1A}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>DiagnoseTool</RootNamespace>
     <AssemblyName>DiagnoseTool</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -34,7 +35,7 @@
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="DBreeze">
-      <HintPath>..\packages\DBreeze.1.71.0\lib\net40\DBreeze.dll</HintPath>
+      <HintPath>..\packages\DBreeze.1.71.1\lib\net40\DBreeze.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />

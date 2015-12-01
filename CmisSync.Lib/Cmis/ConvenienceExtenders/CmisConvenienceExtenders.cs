@@ -24,12 +24,9 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
     using System.Text;
 
     using CmisSync.Lib.Cmis;
-    using CmisSync.Lib.Config;
 
     using DotCMIS;
-    using DotCMIS.Binding;
     using DotCMIS.Client;
-    using DotCMIS.Client.Impl.Cache;
     using DotCMIS.Data.Impl;
     using DotCMIS.Enums;
     using DotCMIS.Exceptions;
@@ -198,6 +195,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             } else {
                 sb.AppendLine(string.Format("LastModified: {0}", obj.LastModificationDate));
             }
+
             sb.AppendLine(string.Format("ObjectType:   {0}", obj.ObjectType));
             sb.AppendLine(string.Format("BaseType:     {0}", obj.BaseType.DisplayName));
             if (obj is IFolder) {
@@ -267,7 +265,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
                 var devices = obj.IgnoredDevices();
                 if (deviceIds == null || deviceIds.Length == 0) {
                     if (devices.Remove("*") ||
-                        devices.Remove(ConfigManager.CurrentConfig.DeviceId.ToString().ToLower())) {
+                        devices.Remove(Config.ConfigManager.CurrentConfig.DeviceId.ToString().ToLower())) {
                         if (devices.Count > 0) {
                             Dictionary<string, object> properties = new Dictionary<string, object>();
                             properties.Add("gds:ignoreDeviceIds", devices);
@@ -355,7 +353,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="obj">Remote cmis object.</param>
         public static bool AreAllChildrenIgnored(this ICmisObject obj) {
             IList<string> devices = obj.IgnoredDevices();
-            if (devices.Contains("*") || devices.Contains(ConfigManager.CurrentConfig.DeviceId.ToString().ToLower())) {
+            if (devices.Contains("*") || devices.Contains(Config.ConfigManager.CurrentConfig.DeviceId.ToString().ToLower())) {
                 return true;
             } else {
                 return false;
@@ -460,44 +458,59 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             }
         }
 
-        public static ISession CreateSession(
-            this ISessionFactory factory,
-            RepoInfo repoInfo,
-            IObjectFactory objectFactory = null,
-            IAuthenticationProvider authenticationProvider = null,
-            ICache cache = null,
-            string appName = null)
+        /// <summary>
+        /// Creates download link.
+        /// </summary>
+        /// <returns>The download link.</returns>
+        /// <param name="session">CMIS Session.</param>
+        /// <param name="expirationIn">Expiration in.</param>
+        /// <param name="password">Link Password.</param>
+        /// <param name="mailAddress">Mail address.</param>
+        /// <param name="comment">Link comment.</param>
+        /// <param name="subject">Mail subject.</param>
+        /// <param name="message">Mail message.</param>
+        /// <param name="objectIds">Object identifiers of downloadable objects.</param>
+        public static Uri CreateDownloadLink(
+            this ISession session,
+            TimeSpan? expirationIn = null,
+            string password = null,
+            string mailAddress = null,
+            string comment = null,
+            string subject = null,
+            string message = null,
+            params string[] objectIds)
         {
-            return factory.CreateSession(repoInfo.AsSessionParameter(appName), objectFactory, authenticationProvider, cache);
-        }
-
-        public static ISession CreateSession(
-            this ISessionFactory factory,
-            RepoInfo repoInfo,
-            string appName = null)
-        {
-            return factory.CreateSession(repoInfo.AsSessionParameter(appName));
-        }
-
-        public static Dictionary<string, string> AsSessionParameter(this RepoInfo repoInfo, string appName = null) {
-            Dictionary<string, string> parameters = new Dictionary<string, string>();
-            if (repoInfo.Binding == DotCMIS.BindingType.AtomPub) {
-                parameters[SessionParameter.BindingType] = BindingType.AtomPub;
-                parameters[SessionParameter.AtomPubUrl] = repoInfo.Address.ToString();
-            } else if (repoInfo.Binding == DotCMIS.BindingType.Browser) {
-                parameters[SessionParameter.BindingType] = BindingType.Browser;
-                parameters[SessionParameter.BrowserUrl] = repoInfo.Address.ToString();
+            var properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisItem.GetCmisValue());
+            var idsSecondary = new List<string>(new string[] { "cmis:rm_clientMgtRetention", "gds:downloadLink" });
+            properties.Add(PropertyIds.SecondaryObjectTypeIds, idsSecondary);
+            properties.Add("cmis:rm_expirationDate", DateTime.UtcNow + (TimeSpan)(expirationIn ?? new TimeSpan(24, 0, 0)));
+            properties.Add("gds:objectIds", new List<string>(objectIds ?? new string[0]));
+            properties.Add("gds:comment", comment ?? string.Empty);
+            properties.Add("gds:subject", subject ?? string.Empty);
+            properties.Add("gds:message", message ?? string.Empty);
+            if (mailAddress != null) {
+                properties.Add("gds:emailAddress", mailAddress);
             }
 
-            parameters[SessionParameter.User] = repoInfo.User;
-            parameters[SessionParameter.Password] = repoInfo.GetPassword().ToString();
-            parameters[SessionParameter.RepositoryId] = repoInfo.RepositoryId;
-            parameters[SessionParameter.ConnectTimeout] = repoInfo.ConnectionTimeout.ToString();
-            parameters[SessionParameter.ReadTimeout] = repoInfo.ReadTimeout.ToString();
-            parameters[SessionParameter.DeviceIdentifier] = ConfigManager.CurrentConfig.DeviceId.ToString();
-            parameters[SessionParameter.UserAgent] = appName != null ? Utils.CreateUserAgent(appName) : Utils.CreateUserAgent();
-            parameters[SessionParameter.Compression] = bool.TrueString;
-            return parameters;
+            if (password != null) {
+                properties.Add("gds:password", password);
+            }
+
+            var id = session.CreateItem(properties, session.GetObject(session.RepositoryInfo.RootFolderId));
+            var link = session.GetObject(id);
+            var url = link.GetPropertyValue("gds:url") as string;
+            return url == null ? null : new Uri(url);
+        }
+
+        /// <summary>
+        /// Ares download links supported.
+        /// </summary>
+        /// <returns><c>true</c>, if download links are supported, <c>false</c> otherwise.</returns>
+        /// <param name="session">Cmis Session.</param>
+        public static bool AreDownloadLinksSupported(this ISession session) {
+            // TODO Specify and use type system to detect support correctly
+            return double.Parse(session.RepositoryInfo.CmisVersionSupported) >= 1.1;
         }
 
         /// <summary>

@@ -5,16 +5,27 @@ namespace CmisSync.Widgets
 	public partial class TransmissionWidget
 	{
 		private global::Gtk.EventBox eventBox;
+		
 		private global::Gtk.HBox mainBox;
+		
 		private global::Gtk.Image fileTypeImage;
+		
 		private global::Gtk.VBox midbox;
+		
 		private global::Gtk.Label fileNameLabel;
+		
 		private global::Gtk.ProgressBar transmissionProgressBar;
+		
 		private global::Gtk.HBox statusBox;
+		
 		private global::Gtk.Label statusDetailsLabel;
+		
 		private global::Gtk.Label bandwidthLabel;
+		
 		private global::Gtk.Label repoLabel;
+		
 		private global::Gtk.Label lastModificationLabel;
+		
 		private global::Gtk.Button openFileInFolderButton;
 
 		protected virtual void Build ()

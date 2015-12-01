@@ -27,7 +27,7 @@ namespace CmisSync.Lib.SelectiveIgnore {
     /// <summary>
     /// Ignored entity holds the ignored remote object id and the local path.
     /// </summary>
-    public class IgnoredEntity : IIgnoredEntity {
+    public class IgnoredEntity : AbstractIgnoredEntity {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.SelectiveIgnore.IgnoredEntity"/> class.
         /// </summary>

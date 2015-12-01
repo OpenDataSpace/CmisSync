@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
 
@@ -33,8 +32,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Local object deleted and the corresponding remote object is renamed or moved.
     /// </summary>
-    public class LocalObjectDeletedRemoteObjectRenamedOrMoved : AbstractEnhancedSolver
-    {
+    public class LocalObjectDeletedRemoteObjectRenamedOrMoved : AbstractEnhancedSolver {
         /// <summary>
         /// Initializes a new instance of the
         /// <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectDeletedRemoteObjectRenamedOrMoved"/> class.
@@ -49,16 +47,20 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <summary>
         /// Solve the specified situation by using the storage and remote object id to remove existing db entries and forces a crawl sync by throwing an IOException.
         /// </summary>
-        /// <param name="localFile">Deleted Local filesystem info instance.</param>
+        /// <param name="localFileSystemInfo">Deleted Local file system info instance.</param>
         /// <param name="remoteId">Remote identifier or object.</param>
         /// <param name="localContent">Hint if the local content has been changed. Is not used by this solver.</param>
         /// <param name="remoteContent">Information if the remote content has been changed. Is not used by this solver.</param>
         public override void Solve(
-            IFileSystemInfo localFile,
+            IFileSystemInfo localFileSystemInfo,
             IObjectId remoteId,
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
+            if (remoteId == null) {
+                throw new ArgumentNullException("remoteId");
+            }
+
             var mappedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
             this.Storage.RemoveObject(mappedObject);
             throw new IOException(

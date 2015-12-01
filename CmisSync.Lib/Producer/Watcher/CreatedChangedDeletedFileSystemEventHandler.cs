@@ -48,7 +48,7 @@ namespace CmisSync.Lib.Producer.Watcher {
         private long threshold;
         private object listLock = new object();
         private List<Tuple<FileSystemEventArgs, Guid, DateTime, bool>> events;
-        private bool disposed = false;
+        private bool disposed;
 
         /// <summary>
         /// Initializes a new instance of the
@@ -92,6 +92,10 @@ namespace CmisSync.Lib.Producer.Watcher {
         /// Reported changes.
         /// </param>
         public virtual void Handle(object source, FileSystemEventArgs e) {
+            if (e == null) {
+                throw new ArgumentNullException("e");
+            }
+
             try {
                 bool isDirectory = false;
                 if (e.ChangeType == WatcherChangeTypes.Deleted) {
@@ -115,7 +119,7 @@ namespace CmisSync.Lib.Producer.Watcher {
                             if (fsGuid != null) {
                                 uuid = (Guid)fsGuid;
                             }
-                        } catch(Exception) {
+                        } catch (Exception) {
                             uuid = Guid.Empty;
                         }
 

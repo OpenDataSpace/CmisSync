@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.FileTransmission
-{
+namespace CmisSync.Lib.FileTransmission {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -38,9 +37,8 @@ namespace CmisSync.Lib.FileTransmission
     /// <summary>
     /// Chunked downloader.
     /// </summary>
-    public class ChunkedDownloader : IFileDownloader
-    {
-        private bool disposed = false;
+    public class ChunkedDownloader : IFileDownloader {
+        private bool disposed;
         private object disposeLock = new object();
 
         /// <summary>
@@ -77,16 +75,28 @@ namespace CmisSync.Lib.FileTransmission
         /// <param name="hashAlg">Hash algoritm, which should be used to calculate hash of the uploaded stream content</param>
         /// <param name="update">Not or not yet used</param>
         /// <exception cref="IOException">On any disc or network io exception</exception>
-        /// <exception cref="DisposeException">If the remote object has been disposed before the dowload is finished</exception>
+        /// <exception cref="ObjectDisposedException">If the remote object has been disposed before the dowload is finished</exception>
         /// <exception cref="AbortException">If download is aborted</exception>
-        /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
+        /// <exception cref="DotCMIS.Exceptions.CmisBaseException">On exceptions thrown by the CMIS Server/Client</exception>
         public void DownloadFile(
             IDocument remoteDocument,
             Stream localFileStream,
             Transmission transmission,
             HashAlgorithm hashAlg,
-            UpdateChecksum update = null)
+            Action<byte[], long> update = null)
         {
+            if (localFileStream == null) {
+                throw new ArgumentNullException("localFileStream");
+            }
+
+            if (hashAlg == null) {
+                throw new ArgumentNullException("hashAlg");
+            }
+
+            if (remoteDocument == null) {
+                throw new ArgumentNullException("remoteDocument");
+            }
+
             {
                 byte[] buffer = new byte[8 * 1024];
                 int len;
@@ -150,9 +160,9 @@ namespace CmisSync.Lib.FileTransmission
         }
 
         private int DownloadNextChunk(IDocument remoteDocument, long offset, long remainingBytes, Transmission transmission, Stream outputstream, HashAlgorithm hashAlg) {
-            lock(this.disposeLock) {
+            lock (this.disposeLock) {
                 if (this.disposed) {
-                    transmission.Status = TransmissionStatus.ABORTED;
+                    transmission.Status = TransmissionStatus.Aborted;
                     throw new ObjectDisposedException(transmission.Path);
                 }
 

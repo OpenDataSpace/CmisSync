@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Cmis {
     using System.ComponentModel;
 
     using CmisSync.Lib.Config;
+    using CmisSync.Lib.Exceptions;
 
     /// <summary>
     /// Abstract repository class with all notifying components for the front end usage.
@@ -29,17 +30,22 @@ namespace CmisSync.Lib.Cmis {
     public abstract class AbstractNotifyingRepository : INotifyRepositoryPropertyChanged {
         private SyncStatus status = SyncStatus.Disconnected;
 
-        private int changesFound = 0;
+        private int changesFound;
 
         private DateTime? lastFinishedSync;
 
-        protected RepositoryStatus RepoStatusFlags = new RepositoryStatus();
+        /// <summary>
+        /// The repo status flags.
+        /// </summary>
+        protected readonly RepositoryStatus RepoStatusFlags = new RepositoryStatus();
 
         private RepoInfo repoInfo;
 
         private string localPath;
         private string name;
         private Uri url;
+        private long downloadLimit;
+        private long uploadLimit;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.AbstractNotifyingRepository"/> class.
@@ -167,6 +173,40 @@ namespace CmisSync.Lib.Cmis {
         }
 
         /// <summary>
+        /// Gets or sets the download limit.
+        /// </summary>
+        /// <value>The download limit.</value>
+        public long DownloadLimit {
+            get {
+                return this.downloadLimit;
+            }
+
+            protected set {
+                if (value != this.downloadLimit) {
+                    this.downloadLimit = value;
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.DownloadLimit));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the upload limit.
+        /// </summary>
+        /// <value>The upload limit.</value>
+        public long UploadLimit {
+            get {
+                return this.uploadLimit;
+            }
+
+            protected set {
+                if (value != this.uploadLimit) {
+                    this.uploadLimit = value;
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.UploadLimit));
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the synchronized folder's information.
         /// </summary>
         protected RepoInfo RepoInfo {
@@ -175,10 +215,17 @@ namespace CmisSync.Lib.Cmis {
             }
 
             set {
+                if (this.repoInfo != null) {
+                    this.repoInfo.Saved -= this.UpdateLimits;
+                }
+
                 this.repoInfo = value;
+                this.repoInfo.Saved += this.UpdateLimits;
                 this.Name = this.RepoInfo.DisplayName;
                 this.LocalPath = this.RepoInfo.LocalPath;
                 this.RemoteUrl = this.RepoInfo.Address;
+                this.DownloadLimit = this.RepoInfo.DownloadLimit;
+                this.UploadLimit = this.RepoInfo.UploadLimit;
             }
         }
 
@@ -187,10 +234,11 @@ namespace CmisSync.Lib.Cmis {
         /// </summary>
         /// <param name="level">Exception level.</param>
         /// <param name="type">Exception type.</param>
-        protected void PassExceptionToListener(ExceptionLevel level, ExceptionType type) {
+        /// <param name="source">Source exception.</param>
+        protected void PassExceptionToListener(ExceptionLevel level, ExceptionType type, Exception source = null) {
             var handler = this.ShowException;
             if (handler != null) {
-                handler(this, new RepositoryExceptionEventArgs(level, type));
+                handler(this, new RepositoryExceptionEventArgs(level, type, source));
             }
         }
 
@@ -207,6 +255,12 @@ namespace CmisSync.Lib.Cmis {
             if (handler != null) {
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
+        }
+
+        private void UpdateLimits(object sender, EventArgs args) {
+            var repoInfo = sender as RepoInfo ?? this.RepoInfo;
+            this.DownloadLimit = repoInfo.DownloadLimit;
+            this.UploadLimit = repoInfo.UploadLimit;
         }
     }
 }

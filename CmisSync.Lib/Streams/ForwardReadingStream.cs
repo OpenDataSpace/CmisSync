@@ -31,6 +31,11 @@ namespace CmisSync.Lib.Streams {
         private long pos = 0;
 
         /// <summary>
+        /// The stream has been disposed if this is true.
+        /// </summary>
+        private bool disposed;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Streams.ForwardReadingStream"/> class.
         /// </summary>
         /// <param name='nonSeekableStream'>
@@ -51,6 +56,10 @@ namespace CmisSync.Lib.Streams {
             }
 
             set {
+                if (this.disposed) {
+                    throw new ObjectDisposedException(this.GetType().Name);
+                }
+
                 base.Position = value;
                 this.pos = value;
             }
@@ -69,9 +78,25 @@ namespace CmisSync.Lib.Streams {
         /// Count.
         /// </param>
         public override int Read(byte[] buffer, int offset, int count) {
+            if (this.disposed) {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+
             int read = base.Read(buffer, offset, count);
             this.pos += read;
             return read;
+        }
+
+        /// <summary>
+        /// Dispose resources.
+        /// </summary>
+        /// <param name="disposing">If set to <c>true</c> disposing managed resources.</param>
+        protected override void Dispose(bool disposing) {
+            if (!this.disposed) {
+                this.disposed = true;
+                // Call base class implementation.
+                base.Dispose(disposing);
+            }
         }
     }
 }

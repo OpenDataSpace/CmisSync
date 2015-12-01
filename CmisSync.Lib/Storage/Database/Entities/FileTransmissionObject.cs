@@ -52,12 +52,8 @@ namespace CmisSync.Lib.Storage.Database.Entities {
                 throw new ArgumentNullException("remoteFile");
             }
 
-            if (remoteFile.Id == null) {
-                throw new ArgumentNullException("remoteFile.Id");
-            }
-
             if (string.IsNullOrEmpty(remoteFile.Id)) {
-                throw new ArgumentException("empty string", "remoteFile.Id");
+                throw new ArgumentException("empty id string", "remoteFile");
             }
 
             this.Type = type;

@@ -58,26 +58,14 @@ namespace CmisSync.Lib.FileTransmission {
         ///  Uploads the file.
         ///  Resumes an upload if the given localFileStream.Position is larger than zero.
         /// </summary>
-        /// <returns>
-        ///  The new CMIS document.
-        /// </returns>
-        /// <param name='remoteDocument'>
-        ///  Remote document where the local content should be uploaded to.
-        /// </param>
-        /// <param name='localFileStream'>
-        ///  Local file stream.
-        /// </param>
-        /// <param name='transmission'>
-        ///  Transmission status where the uploader should report its uploading status.
-        /// </param>
-        /// <param name='hashAlg'>
-        ///  Hash alg which should be used to calculate a checksum over the uploaded content.
-        /// </param>
-        /// <param name='overwrite'>
-        ///  If true, the local content will overwrite the existing content.
-        /// </param>
+        /// <returns>The new CMIS document.</returns>
+        /// <param name='remoteDocument'>Remote document where the local content should be uploaded to.</param>
+        /// <param name='localFileStream'>Local file stream.</param>
+        /// <param name='transmission'>Transmission status where the uploader should report its uploading status.</param>
+        /// <param name='hashAlg'>Hash alg which should be used to calculate a checksum over the uploaded content.</param>
+        /// <param name='overwrite'>If true, the local content will overwrite the existing content.</param>
         /// <param name="update">Is called on every new chunk, if not <c>null</c>.</param>
-        /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">
+        /// <exception cref="UploadFailedException">
         /// Contains the last successful remote document state. This is needed for continue a failed upload.
         /// </exception>
         public override IDocument UploadFile(
@@ -86,9 +74,21 @@ namespace CmisSync.Lib.FileTransmission {
             Transmission transmission,
             HashAlgorithm hashAlg,
             bool overwrite = true,
-            UpdateChecksum update = null)
+            Action<byte[], long> update = null)
         {
-            IDocument result = remoteDocument;
+            if (transmission == null) {
+                throw new ArgumentNullException("transmission");
+            }
+
+            if (localFileStream == null) {
+                throw new ArgumentNullException("localFileStream");
+            }
+
+            if (remoteDocument == null) {
+                throw new ArgumentNullException("remoteDocument");
+            }
+
+            var result = remoteDocument;
             for (long offset = localFileStream.Position; offset < localFileStream.Length; offset += this.ChunkSize) {
                 bool isFirstChunk = offset == 0;
                 bool isLastChunk = (offset + this.ChunkSize) >= localFileStream.Length;
@@ -100,7 +100,7 @@ namespace CmisSync.Lib.FileTransmission {
                     transmission.Position = offset;
                     chunkstream.ChunkPosition = offset;
 
-                    ContentStream contentStream = new ContentStream();
+                    var contentStream = new ContentStream();
                     contentStream.FileName = remoteDocument.Name;
                     contentStream.MimeType = Cmis.MimeType.GetMIMEType(remoteDocument.Name);
                     if (isLastChunk) {
@@ -116,7 +116,7 @@ namespace CmisSync.Lib.FileTransmission {
                         }
 
                         result.AppendContentStream(contentStream, isLastChunk, true);
-                        HashAlgorithmReuse reuse = hashAlg as HashAlgorithmReuse;
+                        var reuse = hashAlg as IReusableHashAlgorithm;
                         if (reuse != null && update != null) {
                             using (HashAlgorithm hash = (HashAlgorithm)reuse.Clone()) {
                                 hash.TransformFinalBlock(new byte[0], 0, 0);

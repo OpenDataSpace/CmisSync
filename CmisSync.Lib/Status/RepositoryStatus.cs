@@ -24,6 +24,11 @@ namespace CmisSync.Lib.Status {
     /// Repository status.
     /// </summary>
     public enum RepositoryStatus {
-        Initialize, Blocked, ConfigNeeded, SyncActivated, Paused, Deactivated
+        Initialize,
+        Blocked,
+        ConfigNeeded,
+        SyncActivated,
+        Paused,
+        Deactivated
     }
 }

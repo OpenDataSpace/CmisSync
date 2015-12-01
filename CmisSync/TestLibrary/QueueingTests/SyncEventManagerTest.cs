@@ -17,14 +17,16 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.QueueingTests
-{
+namespace TestLibrary.QueueingTests {
     using System;
     using System.IO;
 
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.Queueing;
+
+    using DotCMIS.Exceptions;
 
     using log4net;
     using log4net.Config;
@@ -35,18 +37,15 @@ namespace TestLibrary.QueueingTests
 
     using TestLibrary.TestUtils;
 
-    [TestFixture]
-    public class SyncEventManagerTest : IsTestWithConfiguredLog4Net
-    {
-        [Test, Category("Fast")]
-        public void DefaultConstructorWithoutParamWorks()
-        {
+    [TestFixture, Category("Fast")]
+    public class SyncEventManagerTest : IsTestWithConfiguredLog4Net {
+        [Test]
+        public void DefaultConstructorWithoutParamWorks() {
             new SyncEventManager();
         }
 
-        [Test, Category("Fast")]
-        public void AddHandlerTest()
-        {
+        [Test]
+        public void AddHandlerTest() {
             var handlerMock = new Mock<SyncEventHandler>();
             var mockedEvent = Mock.Of<ISyncEvent>();
 
@@ -57,9 +56,8 @@ namespace TestLibrary.QueueingTests
             handlerMock.Verify(foo => foo.Handle(mockedEvent), Times.Once());
         }
 
-        [Test, Category("Fast")]
-        public void BreaksIfHandlerSucceedsTest([Values(true, false)]bool highestFirst)
-        {
+        [Test]
+        public void BreaksIfHandlerSucceedsTest([Values(true, false)]bool highestFirst) {
             var handlerMock1 = new Mock<SyncEventHandler>() { CallBase = true };
             handlerMock1.Setup(foo => foo.Handle(It.IsAny<ISyncEvent>())).Returns(true);
             handlerMock1.Setup(foo => foo.Priority).Returns(2);
@@ -84,9 +82,8 @@ namespace TestLibrary.QueueingTests
             handlerMock2.Verify(foo => foo.Handle(eventMock.Object), Times.Never());
         }
 
-        [Test, Category("Fast")]
-        public void ContinueIfHandlerNotSucceedsTest()
-        {
+        [Test]
+        public void ContinueIfHandlerNotSucceedsTest() {
             var handlerMock1 = new Mock<SyncEventHandler>();
             handlerMock1.Setup(foo => foo.Handle(It.IsAny<ISyncEvent>())).Returns(false);
             handlerMock1.Setup(foo => foo.Priority).Returns(2);
@@ -105,9 +102,8 @@ namespace TestLibrary.QueueingTests
             handlerMock2.Verify(foo => foo.Handle(eventMock.Object), Times.Once());
         }
 
-        [Test, Category("Fast")]
-        public void FirstInsertedHandlerWithSamePrioWinsTest()
-        {
+        [Test]
+        public void FirstInsertedHandlerWithSamePrioWinsTest() {
             var handlerMock1 = new Mock<SyncEventHandler>() { CallBase = true };
             handlerMock1.Setup(foo => foo.Handle(It.IsAny<ISyncEvent>())).Returns(true);
             handlerMock1.Setup(foo => foo.Priority).Returns(1);
@@ -127,9 +123,8 @@ namespace TestLibrary.QueueingTests
             handlerMock2.Verify(foo => foo.Handle(eventMock.Object), Times.Never());
         }
 
-        [Test, Category("Fast")]
-        public void DeleteWorksCorrectlyTest()
-        {
+        [Test]
+        public void DeleteWorksCorrectlyTest() {
             var handlerMock1 = new Mock<SyncEventHandler>() { CallBase = true };
             handlerMock1.Setup(foo => foo.Handle(It.IsAny<ISyncEvent>())).Returns(false);
             handlerMock1.Setup(foo => foo.Priority).Returns(1);
@@ -154,6 +149,44 @@ namespace TestLibrary.QueueingTests
             handlerMock1.Verify(foo => foo.Handle(eventMock.Object), Times.Once());
             handlerMock2.Verify(foo => foo.Handle(eventMock.Object), Times.Never());
             handlerMock3.Verify(foo => foo.Handle(eventMock.Object), Times.Once());
+        }
+
+        [Test]
+        public void ConnectionExceptionsPassedToListener() {
+            var connectionException = new Mock<CmisConnectionException>().Object;
+            var underTest = new SyncEventManager();
+            int raised = 0;
+            underTest.OnException += (sender, e) => {
+                Assert.That(sender, Is.EqualTo(underTest));
+                Assert.That(e.Exception, Is.EqualTo(connectionException));
+                raised++;
+            };
+
+            underTest.AddEventHandler(new GenericSyncEventHandler<ISyncEvent>(1, delegate(ISyncEvent e) {
+                throw connectionException;
+            }));
+
+            underTest.Handle(Mock.Of<ISyncEvent>());
+            Assert.That(raised, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void InteractionExceptionPassedToListener() {
+            var interactionException = Mock.Of<AbstractInteractionNeededException>();
+            var underTest = new SyncEventManager();
+            int raised = 0;
+            underTest.OnException += (sender, e) => {
+                Assert.That(sender, Is.EqualTo(underTest));
+                Assert.That(e.Exception, Is.EqualTo(interactionException));
+                raised++;
+            };
+
+            underTest.AddEventHandler(new GenericSyncEventHandler<ISyncEvent>(1, delegate(ISyncEvent e) {
+                throw interactionException;
+            }));
+
+            underTest.Handle(Mock.Of<ISyncEvent>());
+            Assert.That(raised, Is.EqualTo(1));
         }
     }
 }

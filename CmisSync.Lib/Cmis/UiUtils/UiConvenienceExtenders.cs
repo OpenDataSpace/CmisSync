@@ -32,9 +32,18 @@ namespace CmisSync.Lib.Cmis.UiUtils {
     /// User interface convenience extenders.
     /// </summary>
     public static class UiConvenienceExtenders {
+        /// <summary>
+        /// Returns a new list of repositories without the hidden once.
+        /// </summary>
+        /// <returns>The hidden once.</returns>
+        /// <param name="repositories">List of repositories.</param>
+        /// <param name="hiddenNames">Hidden names.</param>
         public static IList<LogonRepositoryInfo> WithoutHiddenOnce(this IList<LogonRepositoryInfo> repositories, List<string> hiddenNames = null) {
             var result = new List<LogonRepositoryInfo>();
-            hiddenNames = hiddenNames ?? ConfigManager.CurrentConfig.HiddenRepoNames ?? new List<string>();
+            if (hiddenNames == null) {
+                hiddenNames = ConfigManager.CurrentConfig.HiddenRepoNames ?? new List<string>();
+            }
+
             foreach (var repo in repositories ?? result) {
                 if (!Utils.IsRepoNameHidden(repo.Name, hiddenNames.ToArray())) {
                     result.Add(repo);
@@ -44,6 +53,11 @@ namespace CmisSync.Lib.Cmis.UiUtils {
             return result;
         }
 
+        /// <summary>
+        /// Creates the fuzzy credentials.
+        /// </summary>
+        /// <returns>The fuzzy credentials.</returns>
+        /// <param name="normalCredentials">Normal credentials.</param>
         public static List<LoginCredentials> CreateFuzzyCredentials(this ServerCredentials normalCredentials) {
             var result = new List<LoginCredentials>();
             result.Add(new LoginCredentials {

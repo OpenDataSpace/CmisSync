@@ -1,18 +1,12 @@
-R: Gendarme.Rules.Design.MarkAssemblyWithAssemblyVersionRule
-A: DataSpaceSync, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-
-R: Gendarme.Rules.Design.MarkAssemblyWithAssemblyVersionRule
-A: CmisSync, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-
 #Configure setting
 R: Gendarme.Rules.BadPractice.AvoidVisibleConstantFieldRule
 T: CmisSync.Defines
 T: CmisSync.Lib.Defines
 T: CmisSync.Lib.Config.Config
 
-#Cross reference between CmisSync.Lib.Sync.CmisRepo and CmisSync.Lib.Sync.CmisRepo/SynchronizedFolder
-R: Gendarme.Rules.Correctness.DisposableFieldsShouldBeDisposedRule
-T: CmisSync.Lib.Sync.CmisRepo/SynchronizedFolder
+#Define
+R: Gendarme.Rules.Naming.AvoidNonAlphanumericIdentifierRule
+T: CmisSync.Lib.Defines
 
 #  http://blogs.msdn.com/b/pfxteam/archive/2012/03/25/10287435.aspx
 R: Gendarme.Rules.Correctness.DisposableFieldsShouldBeDisposedRule
@@ -130,6 +124,115 @@ M: System.Void CmisSync.Lib.Storage.Database.ObjectTree`1::set_Children
 (System.Collections.Generic.IList`1<CmisSync.Lib.Storage.Database.IObjectTree`1<T>>)
 M: CmisSync.Lib.Storage.Database.IObjectTree`1<DotCMIS.Client.IFileableCmisObject> CmisSync.Lib.Producer.Crawler.DescendantsCrawler::GetRemoteDirectoryTree(DotCMIS.Client.IFolder,System.Collections.Generic.IList`1<DotCMIS.Client.ITree`1<DotCMIS.Client.IFileableCmisObject>>,CmisSync.Lib.Filter.IFilterAggregator)
 M: System.IDisposable CmisSync.Lib.Queueing.SyncEventQueue::Subscribe(System.IObserver`1<System.Tuple`2<System.String,System.Int32>>)
+
+#Ignore AvoidRefAndOutParametersRule for filter
+R: Gendarme.Rules.Design.AvoidRefAndOutParametersRule
+N: CmisSync.Lib.Filter
+
+#Ignore AvoidReturningArraysOnPropertiesRule for byte[] containing a cryptographic hash
+R: Gendarme.Rules.Performance.AvoidReturningArraysOnPropertiesRule
+M: System.Byte[] CmisSync.Lib.Storage.Database.Entities.FileTransmissionObject::get_LastChecksum()
+M: System.Byte[] CmisSync.Lib.Storage.Database.Entities.FileTransmissionObject::get_LastChecksumPWC()
+M: System.Byte[] CmisSync.Lib.Storage.Database.Entities.IFileTransmissionObject::get_LastChecksum()
+M: System.Byte[] CmisSync.Lib.Storage.Database.Entities.IFileTransmissionObject::get_LastChecksumPWC()
+M: System.Byte[] CmisSync.Lib.Storage.Database.Entities.IMappedObject::get_LastChecksum()
+M: System.Byte[] CmisSync.Lib.Storage.Database.Entities.MappedObject::get_LastChecksum()
+
+#Ignore AvoidUnnecessarySpecializationRule because the Type itself is important as information
+R: Gendarme.Rules.Maintainability.AvoidUnnecessarySpecializationRule
+M: System.Boolean CmisSync.Lib.Cmis.ConvenienceExtenders.ExceptionExtenders::IsVirusDetectionException(DotCMIS.Exceptions.CmisConstraintException)
+M: System.Void CmisSync.Lib.Events.FullSyncCompletedEvent::.ctor(CmisSync.Lib.Events.StartNextSyncEvent)
+M: System.String CmisSync.Lib.Utils::NameOf(System.Linq.Expressions.Expression`1<System.Func`1<T>>)
+M: System.String CmisSync.Lib.Utils::NameOf(System.Linq.Expressions.Expression`1<System.Func`2<TModel,TProperty>>)
+
+#Ignore AvoidRefAndOutParametersRule for extension
+R: Gendarme.Rules.Design.AvoidRefAndOutParametersRule
+M: System.Boolean CmisSync.Lib.Storage.Database.Entities.IFileConvenienceExtenders::IsContentChangedTo(CmisSync.Lib.Storage.FileSystem.IFileInfo,CmisSync.Lib.Storage.Database.Entities.IMappedObject,System.Byte[]&,System.Boolean)
+
+#Ignore AvoidRefAndOutParametersRule for crawler because it is choosen based on performance reasons
+M: System.Void CmisSync.Lib.Producer.Crawler.LocalEventGenerator::CreateEvents(System.Collections.Generic.IDictionary`2<System.Guid,CmisSync.Lib.Storage.Database.Entities.IMappedObject>,CmisSync.Lib.Storage.Database.IObjectTree`1<CmisSync.Lib.Storage.FileSystem.IFileSystemInfo>,System.Collections.Generic.Dictionary`2<System.String,System.Tuple`2<CmisSync.Lib.Events.AbstractFolderEvent,CmisSync.Lib.Events.AbstractFolderEvent>>,System.Collections.Generic.ISet`1<CmisSync.Lib.Storage.Database.Entities.IMappedObject>,System.Collections.Generic.List`1<CmisSync.Lib.Events.AbstractFolderEvent>&)
+M: System.Void CmisSync.Lib.Producer.Crawler.RemoteEventGenerator::CreateEvents(System.Collections.Generic.IDictionary`2<System.String,CmisSync.Lib.Storage.Database.Entities.IMappedObject>,CmisSync.Lib.Storage.Database.IObjectTree`1<DotCMIS.Client.IFileableCmisObject>,System.Collections.Generic.Dictionary`2<System.String,System.Tuple`2<CmisSync.Lib.Events.AbstractFolderEvent,CmisSync.Lib.Events.AbstractFolderEvent>>,System.Collections.Generic.ISet`1<CmisSync.Lib.Storage.Database.Entities.IMappedObject>,System.Collections.Generic.List`1<CmisSync.Lib.Events.AbstractFolderEvent>&)
+
+#Ignore AvoidRedundancyInTypeNameRule in the following classes because it is easier to write the full name to get the context
+R: Gendarme.Rules.Naming.AvoidRedundancyInTypeNameRule
+T: CmisSync.Lib.Config.ConfigManager
+T: CmisSync.Lib.Config.ConfigMigration
+T: CmisSync.Lib.Filter.FilterAggregator
+T: CmisSync.Lib.Filter.IFilterAggregator
+T: CmisSync.Lib.Producer.ContentChange.ContentChangeEventAccumulator
+T: CmisSync.Lib.Producer.ContentChange.ContentChangeEventTransformer
+T: CmisSync.Lib.Producer.Watcher.IWatcherProducer
+T: CmisSync.Lib.Producer.Watcher.WatcherConsumer
+T: CmisSync.Lib.SelectiveIgnore.SelectiveIgnoreEventTransformer
+T: CmisSync.Lib.SelectiveIgnore.SelectiveIgnoreFilter
+T: CmisSync.Lib.Storage.FileSystem.FileSystemInfoFactory
+T: CmisSync.Lib.Storage.FileSystem.FileSystemInfoWrapper
+T: CmisSync.Lib.Storage.FileSystem.IFileSystemInfo
+T: CmisSync.Lib.Storage.FileSystem.IFileSystemInfoFactory
+T: CmisSync.Lib.Storage.FileSystem.IFileSystemWatcher
+
+#Ignore AvoidDeepNamespaceHierarchyRule for PWC and Database Entities
+R: Gendarme.Rules.Naming.AvoidDeepNamespaceHierarchyRule
+N: CmisSync.Lib.Consumer.SituationSolver.PWC
+N: CmisSync.Lib.Storage.Database.Entities
+
+#Ignore AvoidLackOfCohesionOfMethodsRule
+R: Gendarme.Rules.Maintainability.AvoidLackOfCohesionOfMethodsRule
+A: CmisSync.Lib
+
+#Ignore AvoidUnusedParametersRule on code which is not available on every platform
+R: Gendarme.Rules.Performance.AvoidUnusedParametersRule
+M: System.String CmisSync.Lib.Config.Crypto::WindowsObfuscate(System.String)
+M: System.String CmisSync.Lib.Config.Crypto::WindowsDeobfuscate(System.String)
+M: System.Void CmisSync.Lib.Storage.FileSystem.ExtendedAttributeReaderDos::SetExtendedAttributeAndRestoreLastModificationDate(System.String,System.String,System.String)
+
+#Ignore UsePreferredTermsRule for the term Login
+R: Gendarme.Rules.Naming.UsePreferredTermsRule
+T: CmisSync.Lib.Cmis.UiUtils.LoginCredentials
+T: CmisSync.Lib.Cmis.UiUtils.LoginExceptionType
+T: CmisSync.Lib.Cmis.UiUtils.LoginException
+T: CmisSync.Lib.Events.SuccessfulLoginEvent
+M: System.Boolean CmisSync.Lib.Config.ProxySettings::get_LoginRequired()
+M: System.Void CmisSync.Lib.Config.ProxySettings::set_LoginRequired(System.Boolean)
+
+#Ignore UseSingularNameInEnumsUnlessAreFlagsRule if singular is equal to plural
+R: Gendarme.Rules.Naming.UseSingularNameInEnumsUnlessAreFlagsRule
+T: CmisSync.Lib.Cmis.SyncStatus
+T: CmisSync.Lib.FileTransmission.TransmissionStatus
+T: CmisSync.Lib.Status.RepositoryStatus
+
+#Ignore WriteStaticFieldFromInstanceMethodRule on DBreezeInitializerSingleton because it is designed as a singleton already, so it seems to be a false positive
+R: Gendarme.Rules.Concurrency.WriteStaticFieldFromInstanceMethodRule
+M: System.Void CmisSync.Lib.Storage.Database.DBreezeInitializerSingleton::.ctor()
+
+
+#Ignore AvoidVisibleFieldsRule which are only visible for test reasons
+R: Gendarme.Rules.Design.AvoidVisibleFieldsRule
+T: CmisSync.Lib.Cmis.Repository
+T: CmisSync.Lib.Consumer.SyncMechanism
+
+#Ignore CheckParametersNullityInVisibleMethodsRule for reflection code
+R: Gendarme.Rules.Correctness.CheckParametersNullityInVisibleMethodsRule
+M: System.String CmisSync.Lib.Utils::NameOf(System.Linq.Expressions.Expression`1<System.Func`1<T>>)
+M: System.String CmisSync.Lib.Utils::NameOf(System.Linq.Expressions.Expression`1<System.Func`2<TModel,TProperty>>)
+
+#Ignore PreferUriOverStringRule where a string is needed to handle user input
+R: Gendarme.Rules.Design.PreferUriOverStringRule
+M: System.String CmisSync.Lib.Config.DefaultEntries::get_Url()
+
+#Ignore PreferXmlAbstractionsRule for log4net configuration
+R: Gendarme.Rules.Design.PreferXmlAbstractionsRule
+M: System.Xml.XmlNode CmisSync.Lib.Config.Config::get_Log4Net()
+M: System.Void CmisSync.Lib.Config.Config::set_Log4Net(System.Xml.XmlNode)
+M: System.Void CmisSync.Lib.Config.Config::SetLog4NetConfig(System.Xml.XmlNode)
+
+#Ignore UseFileOpenOnlyWithFileAccessRule because it is needed by a wrapper to wrap interfaces correctly
+R: Gendarme.Rules.BadPractice.UseFileOpenOnlyWithFileAccessRule
+M: System.IO.Stream CmisSync.Lib.Storage.FileSystem.FileInfoWrapper::Open(System.IO.FileMode)
+
+#Ignore AvoidFloatingPointEqualityRule on uncritical section
+R: Gendarme.Rules.Correctness.AvoidFloatingPointEqualityRule
+M: System.Boolean CmisSync.Lib.Queueing.SyncScheduler::Handle(CmisSync.Lib.Events.ISyncEvent)
 
 # TryParseRule should not give any warning in test library
 R: Gendarme.Rules.BadPractice.PreferTryParseRule

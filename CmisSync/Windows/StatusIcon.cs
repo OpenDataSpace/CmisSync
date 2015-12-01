@@ -67,8 +67,8 @@ namespace CmisSync {
         /// </summary>
         public StatusIcon() {
             // Create the menu.
-            CreateAnimationFrames();
-            CreateMenu();
+            this.CreateAnimationFrames();
+            this.CreateMenu();
 
             // Setup the status icon.
             this.trayicon.Icon = animationFrames[0];
@@ -91,11 +91,15 @@ namespace CmisSync {
             };
 
             Program.Controller.ShowException += delegate(string title, string message) {
-                this.trayicon.ShowBalloonTip(
-                    30000,
-                    title,
-                    message,
-                    ToolTipIcon.Warning);
+                if (!string.IsNullOrEmpty(message)) {
+                    BeginInvoke((Action)delegate {
+                        this.trayicon.ShowBalloonTip(
+                            30000,
+                            title,
+                            message,
+                            ToolTipIcon.Warning);
+                    });
+                }
             };
 
             Program.Controller.AlertNotificationRaised += delegate(string title, string message) {
@@ -160,7 +164,7 @@ namespace CmisSync {
                         }
 
                         if (icon_frame > 0) {
-                            this.trayicon.Icon = animationFrames[icon_frame];
+                            this.trayicon.Icon = this.animationFrames[icon_frame < this.animationFrames.Length ? icon_frame : this.animationFrames.Length - 1];
                             return;
                         }
 
@@ -169,7 +173,7 @@ namespace CmisSync {
                             return;
                         }
 
-                        this.trayicon.Icon = animationFrames[icon_frame];
+                        this.trayicon.Icon = this.animationFrames[icon_frame];
                         return;
                     });
                 }
@@ -308,11 +312,11 @@ namespace CmisSync {
         /// </summary>
         private void CreateAnimationFrames() {
             this.animationFrames = new Icon[] {
-                UIHelpers.GetIcon ("process-syncing-i"),
-                UIHelpers.GetIcon ("process-syncing-ii"),
-                UIHelpers.GetIcon ("process-syncing-iii"),
-                UIHelpers.GetIcon ("process-syncing-iiii"),
-                UIHelpers.GetIcon ("process-syncing-iiiii")
+                UIHelpers.GetIcon("process-syncing-i"),
+                UIHelpers.GetIcon("process-syncing-ii"),
+                UIHelpers.GetIcon("process-syncing-iii"),
+                UIHelpers.GetIcon("process-syncing-iiii"),
+                UIHelpers.GetIcon("process-syncing-iiiii")
             };
         }
 

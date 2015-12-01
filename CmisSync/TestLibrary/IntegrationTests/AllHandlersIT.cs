@@ -24,9 +24,11 @@ namespace TestLibrary.IntegrationTests {
 
     using CmisSync.Lib;
     using CmisSync.Lib.Accumulator;
+    using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Producer.ContentChange;
@@ -62,10 +64,12 @@ namespace TestLibrary.IntegrationTests {
         private readonly string localRoot = Path.GetTempPath();
         private readonly string remoteRoot = "remoteroot";
 
+
         private readonly bool isPropertyChangesSupported = false;
         private readonly int maxNumberOfContentChanges = 1000;
 
         private DBreezeEngine engine;
+        private Mock<IFolder> remoteFolder;
 
         [TestFixtureSetUp]
         public void ClassInit() {
@@ -86,12 +90,12 @@ namespace TestLibrary.IntegrationTests {
         }
 
         [Test, Category("Medium")]
-        public void RunFakeEvent() {
+        public void RunFakeEvent([Values(true, false)]bool pwcIsSupported) {
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
             var observer = new ObservableHandler();
             var storage = this.GetInitializedStorage();
-            var queue = this.CreateQueue(session, storage, observer);
+            var queue = this.CreateQueue(session, storage, observer, pwcIsSupported);
             var myEvent = new Mock<ISyncEvent>();
             queue.AddEvent(myEvent.Object);
             queue.Run();
@@ -99,7 +103,7 @@ namespace TestLibrary.IntegrationTests {
         }
 
         [Test, Category("Medium")]
-        public void RunStartNewSyncEvent() {
+        public void RunStartNewSyncEvent([Values(true, false)]bool pwcIsSupported) {
             string rootFolderName = "/";
             string rootFolderId = "root";
             var storage = this.GetInitializedStorage();
@@ -109,14 +113,14 @@ namespace TestLibrary.IntegrationTests {
             session.SetupChangeLogToken("default");
             session.SetupTypeSystem();
             var observer = new ObservableHandler();
-            var queue = this.CreateQueue(session, storage, observer);
+            var queue = this.CreateQueue(session, storage, observer, pwcIsSupported);
             queue.RunStartSyncEvent();
             Assert.That(observer.List.Count, Is.EqualTo(1));
             Assert.That(observer.List[0], Is.TypeOf(typeof(FullSyncCompletedEvent)));
         }
 
         [Test, Category("Medium")]
-        public void RunFSEventFileDeleted() {
+        public void RunFSEventFileDeleted([Values(true, false)]bool pwcIsSupported) {
             var storage = this.GetInitializedStorage();
             var path = new Mock<IFileInfo>();
             var name = "a";
@@ -133,7 +137,7 @@ namespace TestLibrary.IntegrationTests {
             IDocument remote = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, name, (string)null, changeToken: "changeToken").Object;
             session.Setup(s => s.GetObject(id, It.IsAny<IOperationContext>())).Returns(remote);
             var myEvent = new FSEvent(WatcherChangeTypes.Deleted, path.Object.FullName, false);
-            var queue = this.CreateQueue(session, storage);
+            var queue = this.CreateQueue(session, storage, pwcIsSupported);
             queue.AddEvent(myEvent);
             queue.Run();
 
@@ -142,7 +146,7 @@ namespace TestLibrary.IntegrationTests {
         }
 
         [Test, Category("Medium")]
-        public void RunFSEventFolderDeleted() {
+        public void RunFSEventFolderDeleted([Values(true, false)]bool pwcIsSupported) {
             var storage = this.GetInitializedStorage();
             var path = new Mock<IFileInfo>();
             var name = "a";
@@ -159,7 +163,7 @@ namespace TestLibrary.IntegrationTests {
             IFolder remote = MockOfIFolderUtil.CreateRemoteFolderMock(id, name, (string)null, changetoken: "changeToken").Object;
             session.Setup(s => s.GetObject(id, It.IsAny<IOperationContext>())).Returns(remote);
             var myEvent = new FSEvent(WatcherChangeTypes.Deleted, path.Object.FullName, true);
-            var queue = this.CreateQueue(session, storage);
+            var queue = this.CreateQueue(session, storage, pwcIsSupported);
             queue.AddEvent(myEvent);
             queue.Run();
 
@@ -168,7 +172,7 @@ namespace TestLibrary.IntegrationTests {
         }
 
         [Test, Category("Medium")]
-        public void ContentChangeIndicatesFolderDeletionOfExistingFolder() {
+        public void ContentChangeIndicatesFolderDeletionOfExistingFolder([Values(true, false)]bool pwcIsSupported) {
             var storage = this.GetInitializedStorage();
             var name = "a";
             string path = Path.Combine(this.localRoot, name);
@@ -184,14 +188,14 @@ namespace TestLibrary.IntegrationTests {
 
             Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted, id);
             session.SetupTypeSystem();
-            var queue = this.CreateQueue(session, storage, fsFactory.Object);
+            var queue = this.CreateQueue(session, storage, fsFactory.Object, pwcIsSupported);
             queue.RunStartSyncEvent();
             dirInfo.Verify(d => d.Delete(false), Times.Once());
             Assert.That(storage.GetObjectByRemoteId(id), Is.Null);
         }
 
         [Test, Category("Medium")]
-        public void ContentChangeIndicatesFolderRenameOfExistingFolder() {
+        public void ContentChangeIndicatesFolderRenameOfExistingFolder([Values(true, false)]bool pwcIsSupported) {
             var storage = this.GetInitializedStorage();
             string name = "a";
             string newName = "b";
@@ -217,7 +221,7 @@ namespace TestLibrary.IntegrationTests {
             Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Updated, id, newName, this.remoteRoot + "/" + newName, parentId, lastChangeToken);
             session.SetupTypeSystem();
 
-            var queue = this.CreateQueue(session, storage, fsFactory.Object);
+            var queue = this.CreateQueue(session, storage, fsFactory.Object, pwcIsSupported);
             dirInfo.Setup(d => d.MoveTo(It.IsAny<string>()))
                 .Callback(() => {
                     queue.AddEvent(Mock.Of<IFSMovedEvent>(fs => fs.IsDirectory == true && fs.OldPath == path && fs.LocalPath == newPath && fs.Type == WatcherChangeTypes.Renamed));
@@ -238,7 +242,7 @@ namespace TestLibrary.IntegrationTests {
         }
 
         [Test, Category("Medium")]
-        public void ContentChangeIndicatesFolderCreation() {
+        public void ContentChangeIndicatesFolderCreation([Values(true, false)]bool pwcIsSupported) {
             string rootFolderName = "/";
             string rootFolderId = "root";
             string folderName = "folder";
@@ -253,7 +257,7 @@ namespace TestLibrary.IntegrationTests {
             var storage = this.GetInitializedStorage();
             storage.ChangeLogToken = "oldtoken";
             storage.SaveMappedObject(new MappedObject(rootFolderName, rootFolderId, MappedObjectType.Folder, null, "oldtoken"));
-            var queue = this.CreateQueue(session, storage, fsFactory.Object);
+            var queue = this.CreateQueue(session, storage, fsFactory.Object, pwcIsSupported);
             var fsFolderCreatedEvent = new Mock<IFSEvent>();
             fsFolderCreatedEvent.Setup(f => f.IsDirectory).Returns(true);
             fsFolderCreatedEvent.Setup(f => f.LocalPath).Returns(Path.Combine(this.localRoot, folderName));
@@ -273,7 +277,7 @@ namespace TestLibrary.IntegrationTests {
         }
 
         [Test, Category("Medium")]
-        public void ContentChangeIndicatesFolderMove() {
+        public void ContentChangeIndicatesFolderMove([Values(true, false)]bool pwcIsSupported) {
             // Moves /a/b to /b
             string rootFolderId = "rootId";
             string folderAName = "a";
@@ -298,7 +302,7 @@ namespace TestLibrary.IntegrationTests {
             var mappedBObject = new MappedObject(folderBName, folderBId, MappedObjectType.Folder, folderAId, storage.ChangeLogToken);
             storage.SaveMappedObject(mappedBObject);
 
-            var queue = this.CreateQueue(session, storage, fsFactory.Object);
+            var queue = this.CreateQueue(session, storage, fsFactory.Object, pwcIsSupported);
 
             queue.RunStartSyncEvent();
 
@@ -314,12 +318,12 @@ namespace TestLibrary.IntegrationTests {
         }
         #endregion
 
-        private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage) {
-            return this.CreateQueue(session, storage, new ObservableHandler());
+        private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage, bool pwcSupported) {
+            return this.CreateQueue(session, storage, new ObservableHandler(), pwcSupported);
         }
 
-        private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory) {
-            return this.CreateQueue(session, storage, new ObservableHandler(), fsFactory);
+        private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory, bool pwcSupported) {
+            return this.CreateQueue(session, storage, new ObservableHandler(), pwcSupported, fsFactory);
         }
 
         private IMetaDataStorage GetInitializedStorage() {
@@ -327,7 +331,7 @@ namespace TestLibrary.IntegrationTests {
             return new MetaDataStorage(this.engine, matcher, true);
         }
 
-        private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage, ObservableHandler observer, IFileSystemInfoFactory fsFactory = null) {
+        private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage, ObservableHandler observer, bool pwcIsSupported, IFileSystemInfoFactory fsFactory = null) {
             var manager = new SyncEventManager();
             SingleStepEventQueue queue = new SingleStepEventQueue(manager);
 
@@ -358,6 +362,7 @@ namespace TestLibrary.IntegrationTests {
             var remoteDetection = new RemoteSituationDetection();
             var transmissionManager = new TransmissionManager();
             var activityAggregator = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), transmissionManager);
+            var transmissionFactory = transmissionManager.CreateFactory();
 
             var ignoreFolderFilter = new IgnoredFoldersFilter();
             var ignoreFolderNameFilter = new IgnoredFolderNameFilter();
@@ -365,11 +370,12 @@ namespace TestLibrary.IntegrationTests {
             var invalidFolderNameFilter = new InvalidFolderNameFilter();
             var filterAggregator = new FilterAggregator(ignoreFileNamesFilter, ignoreFolderNameFilter, invalidFolderNameFilter, ignoreFolderFilter);
 
-            var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage, Mock.Of<IFileTransmissionStorage>(), activityAggregator, filterAggregator);
+            var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage, Mock.Of<IFileTransmissionStorage>(), activityAggregator, filterAggregator, transmissionFactory, pwcIsSupported);
             manager.AddEventHandler(syncMechanism);
 
-            var remoteFolder = MockSessionUtil.CreateCmisFolder();
-            remoteFolder.Setup(r => r.Path).Returns(this.remoteRoot);
+            this.remoteFolder = MockSessionUtil.CreateCmisFolder();
+            this.remoteFolder.Setup(r => r.Path).Returns(this.remoteRoot);
+            this.remoteFolder.SetupId("root");
             var localFolder = new Mock<IDirectoryInfo>();
             localFolder.Setup(f => f.FullName).Returns(this.localRoot);
             var generator = new CrawlEventGenerator(storage, fsFactory);

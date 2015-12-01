@@ -26,6 +26,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.HashAlgorithm;
     using CmisSync.Lib.Storage.Database;
@@ -35,6 +36,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
     using DotCMIS;
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -53,11 +55,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage) : base(session, storage, transmissionStorage) {
             if (transmissionStorage == null) {
-                throw new ArgumentNullException("Given transmission storage is null");
-            }
-
-            if (!session.ArePrivateWorkingCopySupported()) {
-                throw new ArgumentException("Given session does not support private working copies");
+                throw new ArgumentNullException("transmissionStorage");
             }
         }
 
@@ -99,7 +97,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             return remotePWCDocument;
         }
 
-        private void SaveRemotePWCDocument(IFileInfo localFile, IDocument remoteDocument, IDocument remotePWCDocument, byte[] checksum, Transmission transmissionEvent) {
+        private void SaveRemotePWCDocument(
+            IFileInfo localFile,
+            IDocument remoteDocument,
+            IDocument remotePWCDocument,
+            byte[] checksum,
+            Transmission transmissionEvent)
+        {
             if (remotePWCDocument == null) {
                 return;
             }
@@ -119,10 +123,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
         /// <returns>The SHA-1 hash of the uploaded file content.</returns>
         /// <param name="localFile">Local file.</param>
         /// <param name="doc">Remote document.</param>
-        /// <param name="transmissionManager">Transmission manager.</param>
-        /// <param name="transmissionEvent">File Transmission event.</param>
+        /// <param name="transmission">File transmission object.</param>
         /// <param name="mappedObject">Mapped object saved in <c>Storage</c></param>
         protected byte[] UploadFileWithPWC(IFileInfo localFile, ref IDocument doc, Transmission transmission, IMappedObject mappedObject = null) {
+            if (doc == null) {
+                throw new ArgumentNullException("doc");
+            }
+
+            if (transmission == null) {
+                throw new ArgumentNullException("transmission");
+            }
+
             byte[] checksum = null;
             var docPWC = this.LoadRemotePWCDocument(doc, ref checksum);
 
@@ -132,10 +143,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     using (var hashAlg = new SHA1Managed()) {
                         int bufsize = 8 * 1024;
                         byte[] buffer = new byte[bufsize];
-                        for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault();) {
+                        var remoteContentLength = docPWC.ContentStreamLength.GetValueOrDefault();
+                        long offset = 0;
+                        while (offset < remoteContentLength) {
                             int readsize = bufsize;
-                            if (readsize + offset > docPWC.ContentStreamLength.GetValueOrDefault()) {
-                                readsize = (int)(docPWC.ContentStreamLength.GetValueOrDefault() - offset);
+                            if (readsize + offset > remoteContentLength) {
+                                readsize = (int)(remoteContentLength - offset);
                             }
 
                             readsize = file.Read(buffer, 0, readsize);
@@ -162,10 +175,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                         using (var hashstream = new NonClosingHashStream(file, hashAlg, CryptoStreamMode.Read)) {
                             int bufsize = 8 * 1024;
                             byte[] buffer = new byte[bufsize];
-                            for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault();) {
+                            long offset = 0;
+                            var remoteContentLength = docPWC.ContentStreamLength.GetValueOrDefault();
+                            while ( offset < remoteContentLength) {
                                 int readsize = bufsize;
-                                if (readsize + offset > docPWC.ContentStreamLength.GetValueOrDefault()) {
-                                    readsize = (int)(docPWC.ContentStreamLength.GetValueOrDefault() - offset);
+                                if (readsize + offset > remoteContentLength) {
+                                    readsize = (int)(remoteContentLength - offset);
                                 }
 
                                 readsize = hashstream.Read(buffer, 0, readsize);
@@ -177,7 +192,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                         }
 
                         var document = doc;
-                        uploader.UploadFile(docPWC, file, transmission, hashAlg, false, (byte[] checksumUpdate, long length) => this.SaveRemotePWCDocument(localFile, document, docPWC, checksumUpdate, transmission));
+                        uploader.UploadFile(
+                            remoteDocument: docPWC,
+                            localFileStream: file,
+                            transmission: transmission,
+                            hashAlg: hashAlg,
+                            overwrite: false,
+                            update: (byte[] checksumUpdate, long length) => this.SaveRemotePWCDocument(localFile, document, docPWC, checksumUpdate, transmission));
                         hash = hashAlg.Hash;
                     } catch (Exception ex) {
                         transmission.FailedException = ex;
@@ -189,12 +210,28 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
                 var properties = new Dictionary<string, object>();
                 properties.Add(PropertyIds.LastModificationDate, localFile.LastWriteTimeUtc);
-                doc = this.Session.GetObject(docPWC.CheckIn(true, properties, null, string.Empty)) as IDocument;
+                try {
+                    doc = this.Session.GetObject(docPWC.CheckIn(true, properties, null, string.Empty)) as IDocument;
 
-                // Refresh is required, or DotCMIS will use cached one only
-                doc.Refresh();
+                    // Refresh is required, or DotCMIS will use cached one only
+                    doc.Refresh();
+                } catch (CmisConstraintException constraint) {
+                    var uploadFailed = new UploadFailedException(constraint, doc);
+                    transmission.FailedException = uploadFailed;
+                    if (constraint.IsVirusDetectionException()) {
+                        var virusException = new VirusDetectedException(constraint);
+                        virusException.AffectedFiles.Add(localFile);
+                        throw virusException;
+                    } else {
+                        throw uploadFailed;
+                    }
+                } catch (Exception ex) {
+                    var uploadFailed = new UploadFailedException(ex, doc);
+                    transmission.FailedException = uploadFailed;
+                    throw uploadFailed;
+                }
 
-                transmission.Status = TransmissionStatus.FINISHED;
+                transmission.Status = TransmissionStatus.Finished;
                 return hash;
             }
         }

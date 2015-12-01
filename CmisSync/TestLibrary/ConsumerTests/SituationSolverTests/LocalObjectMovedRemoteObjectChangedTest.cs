@@ -17,14 +17,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.IO;
 
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -40,8 +40,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestUtils;
 
     [TestFixture]
-    public class LocalObjectMovedRemoteObjectChangedTest
-    {
+    public class LocalObjectMovedRemoteObjectChangedTest {
         private readonly string newParentsName = "newParent";
         private readonly string newParentsId = "newParentId";
         private readonly string oldParentsName = "oldParent";
@@ -202,13 +201,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 this.session.Object,
                 this.storage.Object,
                 null,
-                this.manager,
+                this.manager.CreateFactory(),
                 this.fsFactory.Object);
             var changeSolverForRenameSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(
                 this.session.Object,
                 this.storage.Object,
                 null,
-                this.manager,
+                this.manager.CreateFactory(),
                 this.fsFactory.Object);
             this.renameSolver = new Mock<LocalObjectRenamedRemoteObjectChanged>(
                 this.session.Object,

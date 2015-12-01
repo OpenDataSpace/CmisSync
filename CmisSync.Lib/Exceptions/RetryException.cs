@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer
-{
+namespace CmisSync.Lib.Exceptions {
     using System;
     using System.Collections.Generic;
     using System.Runtime.Serialization;
@@ -28,21 +27,18 @@ namespace CmisSync.Lib.Consumer
     /// Retry exception.
     /// </summary>
     [Serializable]
-    public class RetryException : Exception
-    {
+    public class RetryException : Exception {
         /// <summary>
         /// Initializes a new instance of the <see cref="RetryException"/> class.
         /// </summary>
-        public RetryException() : base("Retry exception")
-        {
+        public RetryException() : base("Retry exception") {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RetryException"/> class.
         /// </summary>
         /// <param name="msg">Retry message.</param>
-        public RetryException(string msg) : base(msg)
-        {
+        public RetryException(string msg) : base(msg) {
         }
 
         /// <summary>
@@ -50,8 +46,7 @@ namespace CmisSync.Lib.Consumer
         /// </summary>
         /// <param name="message">Retry message.</param>
         /// <param name="inner">Inner exception.</param>
-        public RetryException(string message, Exception inner) : base(message, inner)
-        {
+        public RetryException(string message, Exception inner) : base(message, inner) {
         }
 
         /// <summary>
@@ -59,8 +54,7 @@ namespace CmisSync.Lib.Consumer
         /// </summary>
         /// <param name="info">Serialization info.</param>
         /// <param name="context">Streaming context.</param>
-        protected RetryException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
+        protected RetryException(SerializationInfo info, StreamingContext context) : base(info, context) {
         }
     }
 }

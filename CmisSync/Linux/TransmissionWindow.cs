@@ -25,6 +25,7 @@ namespace CmisSync {
 
     using CmisSync.Widgets;
 
+    [CLSCompliant(false)]
     public partial class TransmissionWindow : Gtk.Window {
         private TransmissionController controller = new TransmissionController();
         private Dictionary<Transmission, TransmissionWidget> widgets = new Dictionary<Transmission, TransmissionWidget>();

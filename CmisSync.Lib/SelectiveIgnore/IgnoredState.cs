@@ -27,16 +27,16 @@ namespace CmisSync.Lib.SelectiveIgnore {
         /// <summary>
         /// This object is not ignored.
         /// </summary>
-        NOT_IGNORED,
+        NotIgnored,
 
         /// <summary>
         /// This object is ignored.
         /// </summary>
-        IGNORED,
+        Ignored,
 
         /// <summary>
         /// This object is a sub/child object of an ignored object
         /// </summary>
-        INHERITED
+        Inherited
     }
 }

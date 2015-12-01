@@ -25,6 +25,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.HashAlgorithm;
     using CmisSync.Lib.Queueing;
@@ -49,6 +50,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
         private static readonly ILog Logger = LogManager.GetLogger(typeof(AbstractEnhancedSolver));
 
+        private bool? serverCanModifyDateTimes = null;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.AbstractEnhancedSolver"/> class.
         /// </summary>
@@ -72,7 +75,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             this.Session = session;
             this.Storage = storage;
             this.TransmissionStorage = transmissionStorage;
-            this.ServerCanModifyDateTimes = this.Session.IsServerAbleToUpdateModificationDate();
         }
 
         /// <summary>
@@ -91,8 +93,24 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// Gets a value indicating whether this cmis server can modify date times.
         /// </summary>
         /// <value><c>true</c> if server can modify date times; otherwise, <c>false</c>.</value>
-        protected bool ServerCanModifyDateTimes { get; private set; }
+        protected bool ServerCanModifyDateTimes {
+            get {
+                if (this.serverCanModifyDateTimes == null) {
+                    try {
+                        this.serverCanModifyDateTimes = this.Session.IsServerAbleToUpdateModificationDate();
+                    } catch (CmisBaseException) {
+                        return false;
+                    }
+                }
 
+                return this.serverCanModifyDateTimes.GetValueOrDefault();
+            }
+        }
+
+        /// <summary>
+        /// Gets the transmission storage.
+        /// </summary>
+        /// <value>The transmission storage.</value>
         protected IFileTransmissionStorage TransmissionStorage { get; private set; }
 
         /// <summary>
@@ -108,7 +126,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ContentChangeType localContent,
             ContentChangeType remoteContent);
 
-        private void SaveCacheFile(IFileInfo target, IDocument remoteDocument, byte[] hash, long length, Transmission transmissionEvent) {
+        private void SaveCacheFile(
+            IFileInfo target,
+            IDocument remoteDocument,
+            byte[] hash,
+            long length,
+            Transmission transmissionEvent)
+        {
             if (this.TransmissionStorage == null) {
                 return;
             }
@@ -174,7 +198,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             }
         }
 
-        protected byte[] DownloadCacheFile(IFileInfo target, IDocument remoteDocument, Transmission transmission, IFileSystemInfoFactory fsFactory) {
+        protected byte[] DownloadCacheFile(
+            IFileInfo target,
+            IDocument remoteDocument,
+            Transmission transmission,
+            IFileSystemInfoFactory fsFactory)
+        {
             if (!this.LoadCacheFile(target, remoteDocument, fsFactory)) {
                 if (target.Exists) {
                     target.Delete();
@@ -185,7 +214,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 using (var filestream = target.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
                 using (var downloader = ContentTaskUtils.CreateDownloader()) {
                     try {
-                        downloader.DownloadFile(remoteDocument, filestream, transmission, hashAlg, (byte[] checksumUpdate, long length) => this.SaveCacheFile(target, remoteDocument, checksumUpdate, length, transmission));
+                        downloader.DownloadFile(
+                            remoteDocument,
+                            filestream,
+                            transmission,
+                            hashAlg,
+                            (byte[] checksumUpdate, long length) => this.SaveCacheFile(target, remoteDocument, checksumUpdate, length, transmission));
                         if (this.TransmissionStorage != null) {
                             this.TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
                         }
@@ -200,17 +234,41 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             }
         }
 
-        protected byte[] DownloadChanges(IFileInfo target, IDocument remoteDocument, IMappedObject obj, IFileSystemInfoFactory fsFactory, ITransmissionManager transmissionManager, ILog logger) {
+        protected byte[] DownloadChanges(
+            IFileInfo target,
+            IDocument remoteDocument,
+            IMappedObject obj,
+            IFileSystemInfoFactory fsFactory,
+            ITransmissionFactory transmissionFactory,
+            ILog logger)
+        {
+            if (logger == null) {
+                throw new ArgumentNullException("logger");
+            }
+
+            if (fsFactory == null) {
+                throw new ArgumentNullException("fsFactory");
+            }
+
+            if (transmissionFactory == null) {
+                throw new ArgumentNullException("transmissionFactory");
+            }
+
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
             // Download changes
             byte[] hash = null;
 
             var cacheFile = fsFactory.CreateDownloadCacheFileInfo(target);
-            var transmission = transmissionManager.CreateTransmission(TransmissionType.DOWNLOAD_MODIFIED_FILE, target.FullName, cacheFile.FullName);
+            var targetFullName = target.FullName;
+            var transmission = transmissionFactory.CreateTransmission(TransmissionType.DownloadModifiedFile, targetFullName, cacheFile.FullName);
             hash = this.DownloadCacheFile(cacheFile, remoteDocument, transmission, fsFactory);
             obj.ChecksumAlgorithmName = "SHA-1";
 
             try {
-                var backupFile = fsFactory.CreateFileInfo(target.FullName + ".bak.sync");
+                var backupFile = fsFactory.CreateFileInfo(targetFullName + ".bak.sync");
                 Guid? uuid = target.Uuid;
                 cacheFile.Replace(target, backupFile, true);
                 try {
@@ -232,18 +290,19 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
                 if (!obj.LastChecksum.SequenceEqual(checksumOfOldFile)) {
                     var conflictFile = fsFactory.CreateConflictFileInfo(target);
-                    backupFile.MoveTo(conflictFile.FullName);
-                    OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1} and created conflict file {2}", target.FullName, remoteDocument.Id, conflictFile.FullName));
+                    var conflictFileName = conflictFile.FullName;
+                    backupFile.MoveTo(conflictFileName);
+                    OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1} and created conflict file {2}", targetFullName, remoteDocument.Id, conflictFileName));
                 } else {
                     backupFile.Delete();
-                    OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1}", target.FullName, remoteDocument.Id));
+                    OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1}", targetFullName, remoteDocument.Id));
                 }
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 transmission.FailedException = ex;
                 throw;
             }
 
-            transmission.Status = TransmissionStatus.FINISHED;
+            transmission.Status = TransmissionStatus.Finished;
             return hash;
         }
 
@@ -253,12 +312,19 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <returns>The SHA-1 hash of the uploaded file content.</returns>
         /// <param name="localFile">Local file.</param>
         /// <param name="doc">Remote document.</param>
-        /// <param name="transmissionManager">Transmission manager.</param>
-        /// <param name="transmissionEvent">File Transmission event.</param>
+        /// <param name="transmission">File Transmission.</param>
         protected byte[] UploadFile(IFileInfo localFile, IDocument doc, Transmission transmission) {
+            if (transmission == null) {
+                throw new ArgumentNullException("transmission");
+            }
+
+            if (localFile == null) {
+                throw new ArgumentNullException("localFile");
+            }
+
             using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
                 byte[] hash = null;
-                IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
+                using (var uploader = FileTransmission.ContentTaskUtils.CreateUploader())
                 using (var hashAlg = new SHA1Managed()) {
                     try {
                         uploader.UploadFile(doc, file, transmission, hashAlg);
@@ -269,12 +335,21 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     }
                 }
 
-                transmission.Status = TransmissionStatus.FINISHED;
+                transmission.Status = TransmissionStatus.Finished;
                 return hash;
             }
         }
 
+        /// <summary>
+        /// Writes the or use UUID if supported.
+        /// </summary>
+        /// <returns>The or use UUID if supported.</returns>
+        /// <param name="info">Info.</param>
         protected Guid WriteOrUseUuidIfSupported(IFileSystemInfo info) {
+            if (info == null) {
+                throw new ArgumentNullException("info");
+            }
+
             Guid uuid = Guid.Empty;
             if (info.IsExtendedAttributeAvailable()) {
                 try {
@@ -297,17 +372,27 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             return uuid;
         }
 
+        /// <summary>
+        /// Gets the parent of a IFileInfo or a IDirectoryInfo instance.
+        /// </summary>
+        /// <returns>The parent.</returns>
+        /// <param name="fileInfo">File info.</param>
         protected IDirectoryInfo GetParent(IFileSystemInfo fileInfo) {
             return fileInfo is IDirectoryInfo ? (fileInfo as IDirectoryInfo).Parent : (fileInfo as IFileInfo).Directory;
         }
 
+        /// <summary>
+        /// Determines whether one parent of the given instance is read only.
+        /// </summary>
+        /// <returns><c>true</c> if one of the instance's parents is read only; otherwise, <c>false</c>.</returns>
+        /// <param name="localFileSystemInfo">Local file system info.</param>
         protected bool IsParentReadOnly(IFileSystemInfo localFileSystemInfo) {
             var parent = this.GetParent(localFileSystemInfo);
             while (parent != null && parent.Exists) {
                 string parentId = Storage.GetRemoteId(parent);
                 if (parentId != null) {
                     var remoteObject = this.Session.GetObject(parentId);
-                    if (remoteObject.CanCreateFolder() == false && remoteObject.CanCreateDocument() == false) {
+                    if (remoteObject.IsReadOnly()) {
                         return true;
                     }
 
@@ -328,10 +413,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <param name="localFile">Local file which produces a CmisConstraintException on the server.</param>
         /// <param name="e">The returned CmisConstraintException returned by the server.</param>
         protected void EnsureThatLocalFileNameContainsLegalCharacters(IFileSystemInfo localFile, CmisConstraintException e) {
-            if (!Utils.IsValidISO885915(localFile.Name)) {
-                OperationsLogger.Warn(string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFile.Name), e);
-                throw new InteractionNeededException(string.Format("Server denied creation of {0}", localFile.Name), e) {
-                    Title = string.Format("Server denied creation of {0}", localFile.Name),
+            if (localFile == null) {
+                throw new ArgumentNullException("localFile");
+            }
+
+            var name = localFile.Name;
+            if (!Utils.IsValidISO885915(name)) {
+                OperationsLogger.Warn(string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", name), e);
+                throw new InteractionNeededException(string.Format("Server denied creation of {0}", name), e) {
+                    Title = string.Format("Server denied creation of {0}", name),
                     Description = string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFile.FullName)
                 };
             }

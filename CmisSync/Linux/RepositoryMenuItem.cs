@@ -181,8 +181,9 @@ namespace CmisSync {
         /// After calling <see cref="Dispose"/>, you must release all references to the
         /// <see cref="CmisSync.RepositoryMenuItem"/> so the garbage collector can reclaim the memory that the
         /// <see cref="CmisSync.RepositoryMenuItem"/> was occupying.</remarks>
-        public void Dispose() {
+        public override void Dispose() {
             this.Dispose(true);
+            base.Dispose();
         }
 
         /// <summary>
@@ -256,7 +257,7 @@ namespace CmisSync {
             Application.Invoke(delegate {
                 try {
                     (this.statusItem.Child as Label).Text = message;
-                } catch(NullReferenceException) {
+                } catch (NullReferenceException) {
                 }
             });
         }
