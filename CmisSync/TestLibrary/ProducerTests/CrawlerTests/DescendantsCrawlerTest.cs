@@ -185,7 +185,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
         public void OneRemoteFolderAdded() {
             this.SetUpMocks();
             IFolder newRemoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("id", "name", "/name", this.remoteRootId).Object;
-            this.remoteFolder.SetupDescendants(newRemoteFolder);
+            this.remoteFolder.SetupChildren(newRemoteFolder);
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
@@ -197,7 +197,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
         public void OneRemoteFileAdded() {
             this.SetUpMocks();
             IDocument newRemoteDocument = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, "id", "name", this.remoteRootId).Object;
-            this.remoteFolder.SetupDescendants(newRemoteDocument);
+            this.remoteFolder.SetupChildren(newRemoteDocument);
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
@@ -245,8 +245,8 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
             this.SetUpMocks();
             var newRemoteSubFolder = MockOfIFolderUtil.CreateRemoteFolderMock("remoteSubFolder", "sub", "/name/sub", "remoteFolder");
             var newRemoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("remoteFolder", "name", "/name", this.remoteRootId);
-            newRemoteFolder.SetupDescendants(newRemoteSubFolder.Object);
-            this.remoteFolder.SetupDescendants(newRemoteFolder.Object);
+            newRemoteFolder.SetupChildren(newRemoteSubFolder.Object);
+            this.remoteFolder.SetupChildren(newRemoteFolder.Object);
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
@@ -365,7 +365,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
                 LastLocalWriteTimeUtc = this.lastLocalWriteTime
             };
             this.storage.SaveMappedObject(storedFolder);
-            this.remoteFolder.SetupDescendants(remoteSubFolder.Object);
+            this.remoteFolder.SetupChildren(remoteSubFolder.Object);
             this.localFolder.SetupFiles(newFile.Object, oldFile.Object);
 
             var crawler = this.CreateCrawler();
@@ -403,7 +403,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
             folder.Setup(f => f.LastWriteTimeUtc).Returns(changeTime);
             var storedFolder = new MappedObject(folderName, folderId, MappedObjectType.Folder, this.remoteRootId, changeToken) { Guid = folderGuid, LastLocalWriteTimeUtc = changeTime };
             this.storage.SaveMappedObject(storedFolder);
-            this.remoteFolder.SetupDescendants(remoteFile.Object, existingRemoteFolder.Object);
+            this.remoteFolder.SetupChildren(remoteFile.Object, existingRemoteFolder.Object);
             this.localFolder.SetupFilesAndDirectories(file.Object, folder.Object);
 
             var crawler = this.CreateCrawler();
@@ -432,7 +432,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
             this.localFolder.SetupDirectories(oldLocalFolder.Object);
             this.storage.SaveMappedObject(storedFolder);
             var renamedRemoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(folderId, newFolderName, this.remoteRootPath + newFolderName, this.remoteRootId, "newChangeToken");
-            this.remoteFolder.SetupDescendants(renamedRemoteFolder.Object);
+            this.remoteFolder.SetupChildren(renamedRemoteFolder.Object);
             Assert.That(this.CreateCrawler().Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(
                 q =>
@@ -466,7 +466,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
             this.localFolder.SetupFiles(oldLocalFile.Object);
             this.storage.SaveMappedObject(storedFile);
             var renamedRemoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, fileId, newFileName, this.remoteRootId, changeToken: "newChangeToken");
-            this.remoteFolder.SetupDescendants(renamedRemoteFile.Object);
+            this.remoteFolder.SetupChildren(renamedRemoteFile.Object);
             Assert.That(this.CreateCrawler().Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(
                 q =>
@@ -505,7 +505,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
             this.storage.SaveMappedObject(storedFile);
             var renamedRemoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, fileId, newFileName, this.remoteRootId, changeToken: "newChangeToken");
             renamedRemoteFile.SetupContentStreamHash(checksum, type);
-            this.remoteFolder.SetupDescendants(renamedRemoteFile.Object);
+            this.remoteFolder.SetupChildren(renamedRemoteFile.Object);
             Assert.That(this.CreateCrawler().Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(
                 q =>
@@ -548,8 +548,8 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
             this.storage.SaveMappedObject(storedTargetFolder);
             var targetFolder = MockOfIFolderUtil.CreateRemoteFolderMock("targetId", "target", this.remoteRootPath + "target", this.remoteRootId, "changeToken");
             var renamedRemoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(folderId, oldFolderName, this.remoteRootPath + oldFolderName, "targetId", "newChangeToken");
-            targetFolder.SetupDescendants(renamedRemoteFolder.Object);
-            this.remoteFolder.SetupDescendants(targetFolder.Object);
+            targetFolder.SetupChildren(renamedRemoteFolder.Object);
+            this.remoteFolder.SetupChildren(targetFolder.Object);
             Assert.That(this.CreateCrawler().Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(
                 q =>
@@ -636,7 +636,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests {
         [Test]
         public void ConnectionExceptionsAreThrownWithoutPassingAnythingToQueue() {
             this.SetUpMocks();
-            this.remoteFolder.Setup(f => f.GetDescendants(It.IsAny<int>())).Throws<CmisConnectionException>();
+            this.remoteFolder.Setup(f => f.GetChildren()).Throws<CmisConnectionException>();
             var underTest = this.CreateCrawler();
 
             Assert.Throws<CmisConnectionException>(() => underTest.Handle(new StartNextSyncEvent()));
