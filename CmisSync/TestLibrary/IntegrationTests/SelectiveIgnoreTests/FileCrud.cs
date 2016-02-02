@@ -142,6 +142,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests {
             folder.Refresh();
             folder.IgnoreAllChildren();
 
+            this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
 
