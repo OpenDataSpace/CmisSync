@@ -353,6 +353,7 @@
     <Compile Include="IntegrationTests\LinkTests\DownloadLinkTests.cs" />
     <Compile Include="IntegrationTests\LinkTests\UploadLinkTests.cs" />
     <Compile Include="IntegrationTests\LinkTests\BaseLinkTest.cs" />
+    <Compile Include="IntegrationTests\LinkTests\ListLinksTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

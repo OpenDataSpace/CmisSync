@@ -40,6 +40,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         private const string GdsLinkNotificationPropertyName = "gds:executeNotification";
         private const string GdsLinkPasswordPropertyName = "gds:password";
         private const string GdsLinkUrlPropertyName = "gds:url";
+        private const int MaximumLinksPerPage = 1000;
 
         /// <summary>
         /// Creates a download link.
@@ -400,6 +401,37 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             } else {
                 return type.GetCmisEnum<LinkType>();
             }
+        }
+
+        public static IOperationContext CreateLinkContext(this ISession session) {
+            HashSet<string> filter = new HashSet<string>();
+            filter.Add(PropertyIds.ObjectId);
+            filter.Add(GdsLinkTypePropertyName);
+            filter.Add(GdsLinkMessagePropertyName);
+            filter.Add(GdsLinkSubjectPropertyName);
+            filter.Add(GdsLinkMailPropertyName);
+            filter.Add(GdsLinkNotificationPropertyName);
+            filter.Add(GdsLinkPasswordPropertyName);
+            filter.Add(GdsLinkUrlPropertyName);
+            HashSet<string> renditions = new HashSet<string>();
+            renditions.Add("cmis:none");
+            return session.CreateOperationContext(
+                filter: filter,
+                includeAcls: false,
+                includeAllowableActions: false,
+                includePolicies: false,
+                includeRelationships: IncludeRelationshipsFlag.Both,
+                renditionFilter: renditions,
+                includePathSegments: false,
+                orderBy: null,
+                cacheEnabled: false,
+                maxItemsPerPage: MaximumLinksPerPage);
+        }
+
+        public static IItemEnumerable<IQueryResult> GetAllLinks(this ISession session, LinkType? ofType = null) {
+            string whereClause = string.Format(" AS X WHERE (X.{0} = \'{1}\')", GdsLinkTypePropertyName, ofType != null ? ofType.GetValueOrDefault().GetCmisValue() : string.Empty);
+            string statement = string.Format("SELECT * FROM {0}{1}", GdsLinkTypeName, ofType != null ? whereClause : string.Empty);
+            return session.Query(statement, false, session.CreateLinkContext());
         }
 
         /// <summary>
