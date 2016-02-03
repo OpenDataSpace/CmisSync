@@ -403,6 +403,125 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             }
         }
 
+        /// <summary>
+        /// Gets the link URL of the given link item.
+        /// </summary>
+        /// <returns>The URL.</returns>
+        /// <param name="linkItem">Link item.</param>
+        public static Uri GetUrl(this IQueryResult linkItem) {
+            if (linkItem == null) {
+                throw new ArgumentNullException("linkItem");
+            }
+
+            var url = linkItem.GetPropertyValueById(GdsLinkUrlPropertyName) as string;
+            return url == null ? null : new Uri(url);
+        }
+
+        /// <summary>
+        /// Gets the message of the giben link item.
+        /// </summary>
+        /// <returns>The message.</returns>
+        /// <param name="linkItem">Link item.</param>
+        public static string GetMessage(this IQueryResult linkItem) {
+            if (linkItem == null) {
+                throw new ArgumentNullException("linkItem");
+            }
+
+            return linkItem.GetPropertyValueById(GdsLinkMessagePropertyName) as string;
+        }
+
+        /// <summary>
+        /// Gets the subject of a link item.
+        /// </summary>
+        /// <returns>The link subject.</returns>
+        /// <param name="linkItem">Link item.</param>
+        public static string GetSubject(this IQueryResult linkItem) {
+            if (linkItem == null) {
+                throw new ArgumentNullException("linkItem");
+            }
+
+            return linkItem.GetPropertyValueById(GdsLinkSubjectPropertyName) as string;
+        }
+
+        /// <summary>
+        /// Gets the expiration date.
+        /// </summary>
+        /// <returns>The expiration date.</returns>
+        /// <param name="obj">Cmis object.</param>
+        public static DateTime? GetExpirationDate(this IQueryResult obj) {
+            if (obj == null) {
+                throw new ArgumentNullException("obj");
+            }
+
+            return obj.GetPropertyValueById("cmis:rm_expirationDate") as DateTime?;
+        }
+
+        /// <summary>
+        /// Gets the notification status.
+        /// </summary>
+        /// <returns>The notification status.</returns>
+        /// <param name="linkItem">Link item.</param>
+        public static bool? GetNotificationStatus(this IQueryResult linkItem) {
+            if (linkItem == null) {
+                throw new ArgumentNullException("linkItem");
+            }
+
+            return linkItem.GetPropertyValueById(GdsLinkNotificationPropertyName) as bool?;
+        }
+
+        /// <summary>
+        /// Gets the type of the link.
+        /// </summary>
+        /// <returns>The link type.</returns>
+        /// <param name="linkItem">Link item.</param>
+        public static LinkType? GetLinkType(this IQueryResult linkItem) {
+            if (linkItem == null) {
+                throw new ArgumentNullException("linkItem");
+            }
+
+            var type = linkItem.GetPropertyValueById(GdsLinkTypePropertyName) as string;
+            if (type == null) {
+                return null;
+            } else {
+                return type.GetCmisEnum<LinkType>();
+            }
+        }
+
+        /// <summary>
+        /// Gets the object id of the link.
+        /// </summary>
+        /// <returns>The link id.</returns>
+        /// <param name="linkItem">Link item.</param>
+        public static String GetId(this IQueryResult linkItem) {
+            if (linkItem == null) {
+                throw new ArgumentNullException("linkItem");
+            }
+
+            return linkItem.GetPropertyValueById(PropertyIds.ObjectId) as string;
+        }
+
+        /// <summary>
+        /// Gets the object id of the link.
+        /// </summary>
+        /// <returns>The link id.</returns>
+        /// <param name="linkItem">Link item.</param>
+        public static ICmisObject GetLinkItem(this IQueryResult linkItem, ISession session) {
+            if (linkItem == null) {
+                throw new ArgumentNullException("linkItem");
+            }
+
+            if (session == null) {
+                throw new ArgumentNullException("session");
+            }
+
+            return session.GetObject(linkItem.GetPropertyValueById(PropertyIds.ObjectId) as string);
+        }
+
+        /// <summary>
+        /// Creates the operatioon context for link queries.
+        /// </summary>
+        /// <returns>The link context.</returns>
+        /// <param name="session">Session to be used.</param>
         public static IOperationContext CreateLinkContext(this ISession session) {
             HashSet<string> filter = new HashSet<string>();
             filter.Add(PropertyIds.ObjectId);
@@ -428,6 +547,12 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
                 maxItemsPerPage: MaximumLinksPerPage);
         }
 
+        /// <summary>
+        /// Queries all links on the server and returns the results.
+        /// </summary>
+        /// <returns>All returned links.</returns>
+        /// <param name="session">Session to be used.</param>
+        /// <param name="ofType">Return only links of this type.</param>
         public static IItemEnumerable<IQueryResult> GetAllLinks(this ISession session, LinkType? ofType = null) {
             string whereClause = string.Format(" AS X WHERE (X.{0} = \'{1}\')", GdsLinkTypePropertyName, ofType != null ? ofType.GetValueOrDefault().GetCmisValue() : string.Empty);
             string statement = string.Format("SELECT * FROM {0}{1}", GdsLinkTypeName, ofType != null ? whereClause : string.Empty);
