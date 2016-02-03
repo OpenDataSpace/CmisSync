@@ -14,6 +14,7 @@ See [how to get started developing DataSpace Sync or CmisSync](https://github.co
 
 ### Integration Testing
 
+$ git submodule init
 $ git submodule update
 $ make -f Makefile.am
 $ ./configure --with-test-url=http://localhost:8080/cmis/atom11 --with-test-binding=atompub --with-test-repoid=0a03fd20-689b-11e3-942b-5254008eefc5 --with-test-remotepath=/tmp --with-test-localpath=$HOME/tmp --with-test-user=jenkins --with-test-password=********
