@@ -22,12 +22,9 @@ namespace TestLibrary.IntegrationTests.LinkTests {
             this.session.CreateUploadLink(targetFolder: folder);
 
             var results = new List<IQueryResult>(this.session.GetAllLinks());
+
             Assert.That(results.Count, Is.GreaterThanOrEqualTo(2));
-            foreach (var link in results) {
-                Assert.That(link.GetId(), Is.Not.Null.Or.Empty);
-                Assert.That(link.GetLinkType(), Is.EqualTo(LinkType.UploadLink).Or.EqualTo(LinkType.DownloadLink));
-                Assert.That(link.GetUrl().AbsoluteUri, Is.Not.Null.Or.Empty);
-            }
+            VerifyThatResultsAreValid(on: results);
         }
 
         [Test]
@@ -36,15 +33,17 @@ namespace TestLibrary.IntegrationTests.LinkTests {
             var doc = this.remoteRootDir.CreateDocument("testfile.bin", "test content");
             var folder = this.remoteRootDir.CreateFolder("uploadTarget");
             int linkCount = new List<IQueryResult>(this.session.GetAllLinks(ofType: type)).Count;
+            int expectedLinkCount = linkCount + 1;
             this.session.CreateDownloadLink(objectIds: doc.Id);
             this.session.CreateUploadLink(targetFolder: folder);
+
             var results = new List<IQueryResult>(this.session.GetAllLinks(ofType: type));
-            int expectedLinkCount = linkCount + 1;
+
             Assert.That(results.Count, Is.EqualTo(expectedLinkCount));
             VerifyThatResultsAreValid(on: results, andLinkType: Is.EqualTo(type));
         }
 
-        private void VerifyThatResultsAreValid(IList<IQueryResult> on, IResolveConstraint andLinkType = null) {
+        private static void VerifyThatResultsAreValid(IList<IQueryResult> on, IResolveConstraint andLinkType = null) {
             andLinkType = andLinkType ?? Is.EqualTo(LinkType.UploadLink).Or.EqualTo(LinkType.DownloadLink);
             foreach (var link in on) {
                 Assert.That(link.GetId(), Is.Not.Null.Or.Empty);
