@@ -39,7 +39,12 @@ namespace CmisSync.Lib.Cmis {
         /// <summary>
         /// The file upload is blocked due to virus detection on the server.
         /// </summary>
-        FileUploadBlockedDueToVirusDetected
+        FileUploadBlockedDueToVirusDetected,
+
+        /// <summary>
+        ///A connection has been lost.
+        /// </summary>
+        ConnectionException
     }
 
     /// <summary>

@@ -663,6 +663,8 @@ namespace CmisSync {
                         var file = (e.Exception as VirusDetectedException).AffectedFiles.First();
                         this.ShowException(Properties_Resources.VirusDetectedTitle, string.Format(Properties_Resources.VirusDetectedMessage, file.FullName));
                         return;
+                    case ExceptionType.ConnectionException:
+                        return;
                     default:
                         msg = e.Exception != null ? e.Exception.Message : Properties_Resources.UnknownExceptionOccured;
                         break;
@@ -682,6 +684,7 @@ namespace CmisSync {
                 };
                 repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>());
                 repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<ProxyAuthRequiredEvent, SuccessfulLoginEvent>());
+                repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<CmisConnectionExceptionEvent, SuccessfulLoginEvent>());
                 repo.Queue.EventManager.AddEventHandler(
                     new GenericSyncEventHandler<ProxyAuthRequiredEvent>(
                     0,
