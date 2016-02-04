@@ -27,7 +27,7 @@ namespace TestLibrary.IntegrationTests.NetworkFailuresTests {
 
     using Toxiproxy.Net;
 
-    [TestFixture, Category("Slow"), Timeout(60000)]
+    [TestFixture, Category("Slow")]
     public class CreateSessionWithToxiproxy : IsFullTestWithToxyProxy {
         [Test]
         public void ConnectToRepoAndSimulateConnectionProblems([Range(-1, 20)]int blockedRequest, [Values(10)]int numberOfSyncEvents) {

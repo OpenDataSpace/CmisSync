@@ -26,7 +26,7 @@ namespace TestLibrary.IntegrationTests.AllowableActionsTests {
 
     using TestUtils;
 
-    [TestFixture, Timeout(10000), TestName("AllowableActions")]
+    [TestFixture, TestName("AllowableActions")]
     public class ReadingActions : BaseFullRepoTest {
         [Test, Category("Slow")]
         public void NavigationServicesOnRoot() {

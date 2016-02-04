@@ -53,9 +53,9 @@ namespace TestLibrary.IntegrationTests {
     using TestLibrary.TestUtils;
 
     /// <summary>
-    /// Base full repo test times out as default after 1 min. Please override this by inherited test cases if needed.
+    /// Base full repo test times out as default after 2 minutes. Please override this by inherited test cases if needed.
     /// </summary>
-    [TestFixture, Timeout(60000)]
+    [TestFixture, Timeout(180000)]
     public abstract class BaseFullRepoTest : IsTestWithConfiguredLog4Net, IDisposable {
         protected RepoInfo repoInfo;
         protected DirectoryInfo localRootDir;

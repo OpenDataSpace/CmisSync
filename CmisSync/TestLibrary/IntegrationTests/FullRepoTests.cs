@@ -46,8 +46,7 @@ namespace TestLibrary.IntegrationTests {
 
     using TestLibrary.TestUtils;
 
-    // Default timeout per test is 1 minute
-    [TestFixture, Category("Slow"), Timeout(60000), TestName("FullRepo")]
+    [TestFixture, Category("Slow"), TestName("FullRepo")]
     public class FullRepoTests : BaseFullRepoTest {
         [Test]
         public void OneLocalFolderCreated() {
@@ -98,7 +97,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
         }
 
-        [Test, MaxTime(45000), Category("Conflict")]
+        [Test, Category("Conflict")]
         public void OneRemoteFolderIsDeletedAndOneUnsyncedFileExistsInTheCorrespondingLocalFolder() {
             string folderName = "Cat";
             string fileName = "localFile.bin";

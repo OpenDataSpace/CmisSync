@@ -33,7 +33,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture, Timeout(60000), TestName("FileCRUD"), Category("Slow"), Category("SelectiveIgnore")]
+    [TestFixture, TestName("FileCRUD"), Category("Slow"), Category("SelectiveIgnore")]
     public class FileCrud : BaseFullRepoTest {
         [Test]
         public void LocalFileIsCreatedInIgnoredFolder([Values(true, false)]bool contentChanges) {
