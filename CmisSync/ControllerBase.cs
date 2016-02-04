@@ -682,6 +682,7 @@ namespace CmisSync {
                 };
                 repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>());
                 repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<ProxyAuthRequiredEvent, SuccessfulLoginEvent>());
+                repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<CmisConnectionExceptionEvent, SuccessfulLoginEvent>());
                 repo.Queue.EventManager.AddEventHandler(
                     new GenericSyncEventHandler<ProxyAuthRequiredEvent>(
                     0,
