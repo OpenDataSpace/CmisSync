@@ -278,6 +278,8 @@ namespace CmisSync.Lib.Cmis {
                 ExceptionType type = ExceptionType.Unknown;
                 if (e.Exception is VirusDetectedException) {
                     type = ExceptionType.FileUploadBlockedDueToVirusDetected;
+                } else if (e.Exception is CmisConnectionException) {
+                    type = ExceptionType.ConnectionException;
                 }
 
                 this.PassExceptionToListener(ExceptionLevel.Warning, type, e.Exception);

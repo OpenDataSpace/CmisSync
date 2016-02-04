@@ -663,6 +663,8 @@ namespace CmisSync {
                         var file = (e.Exception as VirusDetectedException).AffectedFiles.First();
                         this.ShowException(Properties_Resources.VirusDetectedTitle, string.Format(Properties_Resources.VirusDetectedMessage, file.FullName));
                         return;
+                    case ExceptionType.ConnectionException:
+                        return;
                     default:
                         msg = e.Exception != null ? e.Exception.Message : Properties_Resources.UnknownExceptionOccured;
                         break;
