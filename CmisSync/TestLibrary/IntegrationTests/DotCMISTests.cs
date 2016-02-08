@@ -977,6 +977,44 @@ namespace TestLibrary.IntegrationTests {
         }
 
         /// <summary>
+        /// Tests that the creation of a basic session fails with the correct exception if the PW is wrong.
+        /// </summary>
+        /// <param name='canonical_name'>
+        /// Canonical_name.
+        /// </param>
+        /// <param name='localPath'>
+        /// Local path.
+        /// </param>
+        /// <param name='remoteFolderPath'>
+        /// Remote folder path.
+        /// </param>
+        /// <param name='url'>
+        /// URL.
+        /// </param>
+        /// <param name='user'>
+        /// User.
+        /// </param>
+        /// <param name='password'>
+        /// Password.
+        /// </param>
+        /// <param name='repositoryId'>
+        /// Repository identifier.
+        /// </param>
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
+        public void CreateSessionFailsWithWrongPasswordAndThrowsPermissionDeniedException(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId,
+            string binding)
+        {
+            Assert.Throws<CmisPermissionDeniedException>(() => CreateSession(user, password + "WRONG_END", url, repositoryId, binding));
+        }
+
+        /// <summary>
         /// Creates the session with device management and user agent.
         /// </summary>
         /// <param name='canonical_name'>
