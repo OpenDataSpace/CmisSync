@@ -69,7 +69,11 @@
         }
 
         [SetUp]
-        public void EnsureThatListingLinksIsSupported(LinkType? of = null) {
+        public void EnsureThatListingLinksIsSupported() {
+            EnsureThatListingLinksIsSupported(null);
+        }
+
+        public void EnsureThatListingLinksIsSupported(LinkType? of) {
             try {
                 new List<IQueryResult>(this.session.GetAllLinks(of));
             } catch (CmisNotSupportedException) {
