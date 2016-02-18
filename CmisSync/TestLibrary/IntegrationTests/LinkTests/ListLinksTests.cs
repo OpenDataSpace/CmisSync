@@ -16,6 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 ﻿namespace TestLibrary.IntegrationTests.LinkTests {
     using System;
     using System.Collections.Generic;
@@ -23,6 +24,7 @@
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
     using DotCMIS.Client;
+    using DotCMIS.Enums;
     using DotCMIS.Exceptions;
 
     using NUnit.Framework;
@@ -56,15 +58,22 @@
             var results = new List<IQueryResult>(this.session.GetAllLinks(ofType: type));
 
             Assert.That(results.Count, Is.EqualTo(expectedLinkCount));
-            VerifyThatResultsAreValid(on: results, andLinkType: Is.EqualTo(type));
+            VerifyThatResultsAreValid(on: results, andLinkTypeIs: type);
         }
 
-        private static void VerifyThatResultsAreValid(IList<IQueryResult> on, IResolveConstraint andLinkType = null) {
-            andLinkType = andLinkType ?? Is.EqualTo(LinkType.UploadLink).Or.EqualTo(LinkType.DownloadLink);
+        private void VerifyThatResultsAreValid(IList<IQueryResult> on, LinkType? andLinkTypeIs = null) {
             foreach (var link in on) {
                 Assert.That(link.GetId(), Is.Not.Null.Or.Empty);
-                Assert.That(link.GetLinkType(), andLinkType);
                 Assert.That(link.GetUrl().AbsoluteUri, Is.Not.Null.Or.Empty);
+                var linkType = link.GetLinkType();
+                if (andLinkTypeIs == null) {
+                    Assert.That(linkType, Is.EqualTo(LinkType.DownloadLink).Or.EqualTo(LinkType.UploadLink));
+                } else {
+                    Assert.That(linkType, Is.EqualTo(andLinkTypeIs));
+                }
+
+                ICmisObject item = link.GetLinkItem(this.session);
+                Assert.That(item.GetUrl(), Is.Not.Null);
             }
         }
 
@@ -75,9 +84,11 @@
 
         public void EnsureThatListingLinksIsSupported(LinkType? of) {
             try {
-                new List<IQueryResult>(this.session.GetAllLinks(of));
-            } catch (CmisNotSupportedException) {
-                Assert.Ignore("Server does not support to query links");
+                var linkList = this.session.GetAllLinks(of);
+                new List<IQueryResult>(linkList);
+            } catch (CmisNotSupportedException ex) {
+                Assert.Ignore("Server does not support to query links:" + ex.ErrorContent);
+            } catch (CmisObjectNotFoundException) {
             }
         }
     }
