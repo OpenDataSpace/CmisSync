@@ -20,10 +20,12 @@
 namespace CmisSync.Lib.Events {
     using System;
 
+    using CmisSync.Lib.Storage.FileSystem;
+
     /// <summary>
     /// Interface for all events which are able to be filtered by local path.
     /// </summary>
-    public interface IFilterableLocalPathEvent : ISyncEvent {
+    public interface IFilterableLocalPathEvent : IFilterableEvent {
         /// <summary>
         /// Gets the local path.
         /// </summary>

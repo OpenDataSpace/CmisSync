@@ -97,7 +97,7 @@ namespace TestLibrary.FilterTests {
             wildcards.Add(".*");
             var filter = new IgnoredFolderNameFilter(baseDir) { Wildcards = wildcards };
             string reason;
-            var path = Mock.Of<IDirectoryInfo>(dir => dir.FullName == Path.Combine(this.baseDir.FullName, ".test", "allowedPattern"));
+            var path = Path.Combine(this.baseDir.FullName, ".test", "allowedPattern");
             Assert.That(filter.CheckFolderPath(path, out reason), Is.True);
             Assert.That(string.IsNullOrEmpty(reason), Is.False);
         }
@@ -108,7 +108,7 @@ namespace TestLibrary.FilterTests {
             wildcards.Add(".*");
             var filter = new IgnoredFolderNameFilter(baseDir) { Wildcards = wildcards };
             string reason;
-            var path = Mock.Of<IDirectoryInfo>(dir => dir.FullName == Path.Combine(this.baseDir.FullName, "test", "allowedPattern"));
+            var path = Path.Combine(this.baseDir.FullName, "test", "allowedPattern");
             Assert.That(filter.CheckFolderPath(path, out reason), Is.False);
             Assert.That(string.IsNullOrEmpty(reason), Is.True);
         }

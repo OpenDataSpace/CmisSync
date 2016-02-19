@@ -61,12 +61,11 @@ namespace CmisSync.Lib.Filter {
             }
         }
 
-        public virtual bool CheckFolderPath(IDirectoryInfo localPath, out string reason) {
+        public virtual bool CheckFolderPath(string localPath, out string reason) {
             reason = string.Empty;
             if (localPath != null) {
-                string fullLocalPath = localPath.FullName;
-                if (fullLocalPath.StartsWith(basePath)) {
-                    string relativePath = fullLocalPath.Substring(basePath.Length).TrimStart(Path.DirectorySeparatorChar);
+                if (localPath.StartsWith(basePath)) {
+                    string relativePath = localPath.Substring(basePath.Length).TrimStart(Path.DirectorySeparatorChar);
                     foreach (string folderName in relativePath.Split(Path.DirectorySeparatorChar)) {
                         bool check = CheckFolderName(folderName, out reason);
                         if (check) {
@@ -79,6 +78,10 @@ namespace CmisSync.Lib.Filter {
             return false;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Filter.IgnoredFolderNameFilter"/> class.
+        /// </summary>
+        /// <param name="localBasePath">Local base path. All folder names below this base path won't be checked.</param>
         public IgnoredFolderNameFilter(IDirectoryInfo localBasePath) {
             if (localBasePath == null) {
                 throw new ArgumentNullException("localBasePath");
