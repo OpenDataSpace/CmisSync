@@ -126,7 +126,7 @@ namespace CmisSync {
                 };
 
                 this.version_text_field = new NSTextField() {
-                    StringValue     = string.Format(Properties_Resources.Version, Controller.RunningVersion, Controller.CreateTime.GetValueOrDefault().ToString("d")),
+                    StringValue     = string.Format(Properties_Resources.Version, Controller.RunningVersion),
                     Frame           = new RectangleF(295, 140, 318, 22),
                     BackgroundColor = NSColor.White,
                     Bordered        = false,
