@@ -88,8 +88,7 @@ namespace CmisSync {
                     "<span font_size='small' fgcolor='#729fcf'>{0}</span>",
                     string.Format(
                     Properties_Resources.Version,
-                    this.Controller.RunningVersion,
-                    this.Controller.CreateTime.GetValueOrDefault().ToString("d"))),
+                    this.Controller.RunningVersion)),
                 Xalign = 0
             };
 
