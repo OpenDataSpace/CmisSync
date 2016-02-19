@@ -23,12 +23,13 @@ namespace TestLibrary.FilterTests {
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Filter;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using Moq;
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast"), Category("EventFilter")]
     public class ReportingFilterTest {
         private IgnoredFoldersFilter ignoreFoldersFilter;
         private IgnoredFileNamesFilter ignoreFileNamesFilter;
@@ -42,13 +43,13 @@ namespace TestLibrary.FilterTests {
         public void SetUpFilter() {
             this.ignoreFoldersFilter = Mock.Of<IgnoredFoldersFilter>();
             this.ignoreFileNamesFilter = Mock.Of<IgnoredFileNamesFilter>();
-            this.ignoreFolderNamesFilter = Mock.Of<IgnoredFolderNameFilter>();
+            this.ignoreFolderNamesFilter = new Mock<IgnoredFolderNameFilter>(Mock.Of<IDirectoryInfo>()).Object;
             this.invalidFolderNameFilter = Mock.Of<InvalidFolderNameFilter>();
             this.symlinkFilter = Mock.Of<SymlinkFilter>();
             this.queue = new Mock<ISyncEventQueue>();
         }
 
-        [Test, Category("Fast"), Category("EventFilter")]
+        [Test]
         public void ConstructorTakesAllFilter() {
             new ReportingFilter(
                 this.queue.Object,
@@ -59,7 +60,7 @@ namespace TestLibrary.FilterTests {
                 this.symlinkFilter);
         }
 
-        [Test, Category("Fast"), Category("EventFilter")]
+        [Test]
         public void ConstructorThrowsExceptionIfQueueIsNull() {
             Assert.Throws<ArgumentNullException>(() => new ReportingFilter(
                 null,
@@ -70,7 +71,7 @@ namespace TestLibrary.FilterTests {
                 this.symlinkFilter));
         }
 
-        [Test, Category("Fast"), Category("EventFilter")]
+        [Test]
         public void ConstructorThrowsExceptionIfIgnoreFoldersFilterIsNull() {
             Assert.Throws<ArgumentNullException>(() => new ReportingFilter(
                 this.queue.Object,
@@ -81,7 +82,7 @@ namespace TestLibrary.FilterTests {
                 this.symlinkFilter));
         }
 
-        [Test, Category("Fast"), Category("EventFilter")]
+        [Test]
         public void ConstructorThrowsExceptionIfIgnoreFileNamesFilterIsNull() {
             Assert.Throws<ArgumentNullException>(() => new ReportingFilter(
                 this.queue.Object,
@@ -92,7 +93,7 @@ namespace TestLibrary.FilterTests {
                 this.symlinkFilter));
         }
 
-        [Test, Category("Fast"), Category("EventFilter")]
+        [Test]
         public void ConstructorThrowsExceptionIfIgnoreFolderNameFilterIsNull() {
             Assert.Throws<ArgumentNullException>(() => new ReportingFilter(
                 this.queue.Object,
@@ -103,7 +104,7 @@ namespace TestLibrary.FilterTests {
                 this.symlinkFilter));
         }
 
-        [Test, Category("Fast"), Category("EventFilter")]
+        [Test]
         public void ConstructorThrowsExceptionIfInvalidFolderNameFilterIsNull() {
             Assert.Throws<ArgumentNullException>(() => new ReportingFilter(
                 this.queue.Object,
@@ -114,7 +115,7 @@ namespace TestLibrary.FilterTests {
                 this.symlinkFilter));
         }
 
-        [Test, Category("Fast"), Category("EventFilter")]
+        [Test]
         public void ConstructorThrowsExceptionIfSymlinkFilterIsNull() {
             Assert.Throws<ArgumentNullException>(() => new ReportingFilter(
                 this.queue.Object,
@@ -125,7 +126,7 @@ namespace TestLibrary.FilterTests {
                 null));
         }
 
-        [Test, Category("Fast"), Category("EventFilter")]
+        [Test]
         public void HandleFilterableFileNameEvent() {
             var filter = this.CreateFilter();
             var filterableNameEvent = Mock.Of<IFilterableNameEvent>(e => e.Name == "name");

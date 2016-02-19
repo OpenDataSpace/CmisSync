@@ -23,10 +23,13 @@ namespace CmisSync.Lib.Filter {
     using System.IO;
     using System.Text.RegularExpressions;
 
+    using CmisSync.Lib.Storage.FileSystem;
+
     /// <summary>
     /// Ignored folder name filter.
     /// </summary>
     public class IgnoredFolderNameFilter {
+        private string basePath;
         /// <summary>
         /// The lock to prevent multiple parallel access on the wildcard list
         /// </summary>
@@ -56,6 +59,32 @@ namespace CmisSync.Lib.Filter {
                     }
                 }
             }
+        }
+
+        public virtual bool CheckFolderPath(IDirectoryInfo localPath, out string reason) {
+            reason = string.Empty;
+            if (localPath != null) {
+                string fullLocalPath = localPath.FullName;
+                if (fullLocalPath.StartsWith(basePath)) {
+                    string relativePath = fullLocalPath.Substring(basePath.Length).TrimStart(Path.DirectorySeparatorChar);
+                    foreach (string folderName in relativePath.Split(Path.DirectorySeparatorChar)) {
+                        bool check = CheckFolderName(folderName, out reason);
+                        if (check) {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public IgnoredFolderNameFilter(IDirectoryInfo localBasePath) {
+            if (localBasePath == null) {
+                throw new ArgumentNullException("localBasePath");
+            }
+
+            this.basePath = localBasePath.FullName;
         }
 
         /// <summary>

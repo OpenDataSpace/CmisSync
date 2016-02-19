@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.FilterTests
-{
+namespace TestLibrary.FilterTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -32,18 +31,15 @@ namespace TestLibrary.FilterTests
 
     using NUnit.Framework;
 
-    [TestFixture]
-    public class IgnoredFoldersFilterTest
-    {
-        [Test, Category("Fast"), Category("EventFilter")]
-        public void NormalConstructor()
-        {
+    [TestFixture, Category("Fast"), Category("EventFilter")]
+    public class IgnoredFoldersFilterTest {
+        [Test]
+        public void NormalConstructor() {
             new IgnoredFoldersFilter();
         }
 
-        [Test, Category("Fast"), Category("EventFilter")]
-        public void AllowCorrectPaths()
-        {
+        [Test]
+        public void AllowCorrectPaths() {
             var filter = new IgnoredFoldersFilter();
 
             string reason;
@@ -51,9 +47,8 @@ namespace TestLibrary.FilterTests
             Assert.That(string.IsNullOrEmpty(reason), Is.True);
         }
 
-        [Test, Category("Fast"), Category("EventFilter")]
-        public void ForbidIgnoredFolderNames()
-        {
+        [Test]
+        public void ForbidIgnoredFolderNames() {
             var ignoredFolder = new List<string>();
             ignoredFolder.Add(Path.GetTempPath());
             var filter = new IgnoredFoldersFilter { IgnoredPaths = ignoredFolder };

@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.FilterTests
-{
+namespace TestLibrary.FilterTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -32,30 +31,26 @@ namespace TestLibrary.FilterTests
 
     using NUnit.Framework;
 
-    [TestFixture]
-    public class IgnoreFileNamesFilterTest
-    {
-        [Test, Category("Fast"), Category("EventFilter")]
-        public void DefaultConstrutorAddsRequiredFilter()
-        {
+    [TestFixture, Category("Fast"), Category("EventFilter")]
+    public class IgnoreFileNamesFilterTest {
+        [Test]
+        public void DefaultConstrutorAddsRequiredFilter() {
             var filter = new IgnoredFileNamesFilter();
             string reason;
             Assert.That(filter.CheckFile("bla.sync", out reason), Is.True);
             Assert.That(reason, Is.Not.Null);
         }
 
-        [Test, Category("Fast"), Category("EventFilter")]
-        public void AllowCorrectEventsTest()
-        {
+        [Test]
+        public void AllowCorrectEventsTest() {
             var filter = new IgnoredFileNamesFilter();
             string reason;
             Assert.That(filter.CheckFile("testfile", out reason), Is.False);
             Assert.That(string.IsNullOrEmpty(reason), Is.True);
         }
 
-        [Test, Category("Fast"), Category("EventFilter")]
-        public void HandleIgnoredFileNamesTest()
-        {
+        [Test]
+        public void HandleIgnoredFileNamesTest() {
             List<string> wildcards = new List<string>();
             wildcards.Add("*~");
             var filter = new IgnoredFileNamesFilter { Wildcards = wildcards };

@@ -206,7 +206,9 @@ namespace CmisSync.Lib.Cmis {
             // Add ignore file/folder filter
             this.ignoredFoldersFilter = new IgnoredFoldersFilter { IgnoredPaths = new List<string>(repoInfo.GetIgnoredPaths()) };
             this.ignoredFileNameFilter = new IgnoredFileNamesFilter { Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames };
-            this.ignoredFolderNameFilter = new IgnoredFolderNameFilter { Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames };
+            this.ignoredFolderNameFilter = new IgnoredFolderNameFilter(this.fileSystemFactory.CreateDirectoryInfo(this.LocalPath)) {
+                Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames
+            };
             this.invalidFolderNameFilter = new InvalidFolderNameFilter();
             var symlinkFilter = new SymlinkFilter();
             this.filters = new FilterAggregator(this.ignoredFileNameFilter, this.ignoredFolderNameFilter, this.invalidFolderNameFilter, this.ignoredFoldersFilter, symlinkFilter);
