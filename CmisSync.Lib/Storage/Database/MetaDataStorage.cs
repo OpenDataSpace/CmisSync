@@ -646,5 +646,43 @@ namespace CmisSync.Lib.Storage.Database {
                 this.ValidateObjectStructure();
             }
         }
+
+        public void RemoveAllNonTreeObjects() {
+            var objects = this.GetObjectList() ?? new List<IMappedObject>();
+            var objectsDict = new Dictionary<string, IList<IMappedObject>>();
+            IMappedObject root = null;
+            foreach (var obj in objects) {
+                var parentId = obj.ParentId;
+                if (parentId != null) {
+                    if (!objectsDict.ContainsKey(parentId)) {
+                        objectsDict[parentId] = new List<IMappedObject>();
+                    }
+
+                    objectsDict[parentId].Add(obj);
+                } else {
+                    root = obj;
+                }
+            }
+
+            if (root == null) {
+                if (objects.Count == 0) {
+                    return;
+                } else {
+                    throw new InvalidDataException(
+                        string.Format(
+                        "root object is missing but {0} objects are stored",
+                        objects.Count));
+                }
+            }
+
+            this.RemoveChildrenRecursively(objectsDict, root);
+            if (objectsDict.Count > 0) {
+                foreach (var objs in objectsDict.Values) {
+                    foreach (var obj in objs) {
+                        this.RemoveObject(obj);
+                    }
+                }
+            }
+        }
     }
 }
