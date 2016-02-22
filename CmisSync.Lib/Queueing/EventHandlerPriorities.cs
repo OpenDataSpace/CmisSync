@@ -93,7 +93,7 @@ namespace CmisSync.Lib.Queueing {
 
             // Accumulates events needed for SyncStrategy
             map[typeof(RemoteObjectFetcher)] = HIGH;
-            map[typeof(LocalObjectFetcher)] = HIGH;
+            map[typeof(LocalObjectFetcher)] = FILTER + 1;
 
             // SelectedIgnore filter and transformer do need the fetched objects and must be called before the NORMAL category
             map[typeof(IgnoreFlagChangeDetection)] = NORMAL + 3;

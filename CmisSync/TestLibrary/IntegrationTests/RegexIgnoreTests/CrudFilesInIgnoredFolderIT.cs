@@ -59,5 +59,19 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
             remoteIgnoredFolder.Refresh();
             Assert.That(remoteIgnoredFolder.GetChildren().TotalNumItems, Is.EqualTo(0));
         }
+
+        [Test]
+        public void CreateRemoteFileInIgnoredFolder([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
+            var ignoredFolder = this.localRootDir.CreateSubdirectory(Path.Combine(localRootDir.FullName, ".ignored"));
+            this.InitializeAndRunRepo();
+            var remoteIgnoredFolder = remoteRootDir.CreateFolder(".ignored");
+            remoteIgnoredFolder.CreateDocument("file.bin", "content");
+            this.WaitForRemoteChanges();
+            this.AddStartNextSyncEvent();
+            this.repo.Run();
+            remoteRootDir.Refresh();
+            Assert.That(ignoredFolder.GetFileSystemInfos(), Is.Empty);
+        }
     }
 }
