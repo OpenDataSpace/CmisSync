@@ -61,6 +61,12 @@ namespace CmisSync.Lib.Filter {
             }
         }
 
+        /// <summary>
+        /// Checks the folder path. And returns true if path contains a name with any ignored regex.
+        /// </summary>
+        /// <returns><c>true</c>, if folder path should be ignored, <c>false</c> otherwise.</returns>
+        /// <param name="localPath">Local path.</param>
+        /// <param name="reason">Reason for the ignored state.</param>
         public virtual bool CheckFolderPath(string localPath, out string reason) {
             reason = string.Empty;
             if (localPath != null) {

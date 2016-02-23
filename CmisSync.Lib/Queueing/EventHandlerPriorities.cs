@@ -25,6 +25,7 @@ namespace CmisSync.Lib.Queueing {
     using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Filter;
+    using CmisSync.Lib.Filter.RegexIgnore;
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Crawler;
     using CmisSync.Lib.Producer.Watcher;
@@ -93,11 +94,12 @@ namespace CmisSync.Lib.Queueing {
 
             // Accumulates events needed for SyncStrategy
             map[typeof(RemoteObjectFetcher)] = HIGH;
-            map[typeof(LocalObjectFetcher)] = FILTER + 1;
+            map[typeof(LocalObjectFetcher)] = HIGH;
 
             // SelectedIgnore filter and transformer do need the fetched objects and must be called before the NORMAL category
             map[typeof(IgnoreFlagChangeDetection)] = NORMAL + 3;
             map[typeof(SelectiveIgnoreEventTransformer)] = NORMAL + 2;
+            map[typeof(RegexIgnoreEventTransformer)] = NORMAL + 2;
             map[typeof(SelectiveIgnoreFilter)] = NORMAL + 1;
 
             map[typeof(ContentChangeEventTransformer)] = NORMAL;
