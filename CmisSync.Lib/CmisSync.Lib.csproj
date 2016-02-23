@@ -337,6 +337,7 @@
     <Compile Include="Cmis\ConvenienceExtenders\LinkType.cs" />
     <Compile Include="Exceptions\QuotaExceededException.cs" />
     <Compile Include="Filter\RegexIgnore\RegexIgnoreEventTransformer.cs" />
+    <Compile Include="Filter\RegexIgnore\RegexIgnoreFilter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

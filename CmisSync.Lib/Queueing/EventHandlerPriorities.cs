@@ -101,6 +101,7 @@ namespace CmisSync.Lib.Queueing {
             map[typeof(SelectiveIgnoreEventTransformer)] = NORMAL + 2;
             map[typeof(RegexIgnoreEventTransformer)] = NORMAL + 2;
             map[typeof(SelectiveIgnoreFilter)] = NORMAL + 1;
+            map[typeof(RegexIgnoreFilter)] = NORMAL + 1;
 
             map[typeof(ContentChangeEventTransformer)] = NORMAL;
             map[typeof(SyncScheduler)] = NORMAL;
