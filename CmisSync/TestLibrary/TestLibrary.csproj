@@ -355,6 +355,7 @@
     <Compile Include="IntegrationTests\LinkTests\BaseLinkTest.cs" />
     <Compile Include="IntegrationTests\LinkTests\ListLinksTests.cs" />
     <Compile Include="IntegrationTests\RegexIgnoreTests\CrudFilesInIgnoredFolderIT.cs" />
+    <Compile Include="IntegrationTests\RegexIgnoreTests\RenameIgnoredFolderIT.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

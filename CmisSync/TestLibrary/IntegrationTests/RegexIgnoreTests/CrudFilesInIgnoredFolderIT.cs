@@ -32,10 +32,10 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
         [Test]
         public void CreateFileInIgnoredFolder([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
-            var ignoredFolder = this.localRootDir.CreateSubdirectory(Path.Combine(localRootDir.FullName, ".ignored"));
+            var ignoredLocalFolder = this.localRootDir.CreateSubdirectory(Path.Combine(localRootDir.FullName, ".ignored"));
             this.InitializeAndRunRepo();
             Assert.That(remoteRootDir.GetChildren().TotalNumItems, Is.EqualTo(0));
-            var file = new FileInfo(Path.Combine(ignoredFolder.FullName, "file.bin"));
+            var file = new FileInfo(Path.Combine(ignoredLocalFolder.FullName, "file.bin"));
             using (file.Create());
             this.WaitUntilQueueIsNotEmpty();
             this.AddStartNextSyncEvent();
