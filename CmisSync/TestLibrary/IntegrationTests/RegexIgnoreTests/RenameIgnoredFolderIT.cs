@@ -33,33 +33,20 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
     [TestFixture, TestName("RenameIgnoredFolder"), Category("RegexIgnore"), Category("Slow"), Timeout(180000)]
     public class RenameIgnoredFolderIT : BaseFullRepoTest {
         [Test]
-        public void RenameLocalIgnoredFolderToNotIgnoredFolder([Values(true, false)]bool contentChanges) {
-            string ignoredName = ".Ignored";
-            string normalName = "NotIgnoredFolder";
-            this.ContentChangesActive = contentChanges;
-            var ignoredLocalFolder = this.localRootDir.CreateSubdirectory(ignoredName);
-            this.InitializeAndRunRepo();
-            Assert.That(this.remoteRootDir.GetChildren().TotalNumItems, Is.EqualTo(0));
-
-            ignoredLocalFolder.MoveTo(Path.Combine(this.localRootDir.FullName, normalName));
-
-            this.WaitUntilQueueIsNotEmpty();
-            this.AddStartNextSyncEvent();
-            this.repo.Run();
-
-            this.remoteRootDir.Refresh();
-            Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(normalName));
-        }
-
-        [Test]
-        public void RenameLocalIgnoredFolderWithContentToNotIgnoredFolder([Values(true, false)]bool contentChanges) {
+        public void RenameLocalIgnoredFolderToNotIgnoredFolder(
+            [Values(true, false)]bool contentChanges,
+            [Values(true, false)]bool withFileInside)
+        {
             string ignoredName = ".Ignored";
             string fileName = "file.bin";
             string normalName = "NotIgnoredFolder";
             this.ContentChangesActive = contentChanges;
             var ignoredLocalFolder = this.localRootDir.CreateSubdirectory(ignoredName);
             var file = new FileInfo(Path.Combine(ignoredLocalFolder.FullName, fileName));
-            using (file.Create());
+            if (withFileInside) {
+                using (file.Create());
+            }
+
             this.InitializeAndRunRepo();
             Assert.That(this.remoteRootDir.GetChildren().TotalNumItems, Is.EqualTo(0));
 
@@ -72,7 +59,43 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
             this.remoteRootDir.Refresh();
             var remoteFolder = this.remoteRootDir.GetChildren().First() as IFolder;
             Assert.That(remoteFolder.Name, Is.EqualTo(normalName));
-            Assert.That(remoteFolder.GetChildren().First().Name, Is.EqualTo(fileName));
+            if (withFileInside) {
+                Assert.That(remoteFolder.GetChildren().First().Name, Is.EqualTo(fileName));
+            } else {
+                Assert.That(remoteFolder.GetChildren().TotalNumItems, Is.EqualTo(0));
+            }
+        }
+
+        [Test]
+        public void RenameRemoteIgnoredFolderToNotIgnoredFolder(
+            [Values(true, false)]bool contentChanges,
+            [Values(true, false)]bool withFileInside)
+        {
+            string ignoredName = ".Ignored";
+            string fileName = "file.bin";
+            string normalName = "NotIgnoredFolder";
+            this.ContentChangesActive = contentChanges;
+            var ignoredRemoteFolder = this.remoteRootDir.CreateFolder(ignoredName);
+            if (withFileInside) {
+                ignoredRemoteFolder.CreateDocument(fileName, string.Empty);
+            }
+
+            this.InitializeAndRunRepo();
+            Assert.That(this.localRootDir.GetFileSystemInfos(), Is.Empty);
+
+            ignoredRemoteFolder.Rename(normalName);
+
+            this.WaitForRemoteChanges();
+            this.AddStartNextSyncEvent();
+            this.repo.Run();
+
+            var localFolder = this.localRootDir.GetDirectories().First();
+            Assert.That(localFolder.Name, Is.EqualTo(normalName));
+            if (withFileInside) {
+                Assert.That(localFolder.GetFiles().First().Name, Is.EqualTo(fileName));
+            } else {
+                Assert.That(localFolder.GetFileSystemInfos(), Is.Empty);
+            }
         }
     }
 }

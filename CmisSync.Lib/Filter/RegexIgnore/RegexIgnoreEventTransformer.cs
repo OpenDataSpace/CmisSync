@@ -82,10 +82,11 @@ namespace CmisSync.Lib.Filter.RegexIgnore {
             var movedEvent = e as FSMovedEvent;
             if (movedEvent != null) {
                 if (IsInsideIgnoredPath(movedEvent.OldPath) && !IsInsideIgnoredPath(movedEvent.LocalPath)) {
-                    this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, movedEvent.LocalPath, movedEvent.IsDirectory));
+                    queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, movedEvent.LocalPath, movedEvent.IsDirectory));
+                    queue.AddEvent(new StartNextSyncEvent(true));
                     return true;
                 } else if (IsInsideIgnoredPath(movedEvent.LocalPath) && !IsInsideIgnoredPath(movedEvent.OldPath)) {
-                    this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, movedEvent.OldPath, movedEvent.IsDirectory));
+                    queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, movedEvent.OldPath, movedEvent.IsDirectory));
                     return true;
                 }
             }
@@ -98,9 +99,10 @@ namespace CmisSync.Lib.Filter.RegexIgnore {
                     var storedObject = storage.GetObjectByRemoteId(objectId);
                     if (storedObject == null) {
                         queue.AddEvent(new ContentChangeEvent(ChangeType.Created, objectId));
+                        queue.AddEvent(new StartNextSyncEvent(true));
                         return true;
                     } else {
-                        var localPath = this.matcher.CreateLocalPath(cmisObject.Paths[0]);
+                        var localPath = matcher.CreateLocalPath(cmisObject.Paths[0]);
                         if (IsInsideIgnoredPath(localPath)) {
                             queue.AddEvent(new ContentChangeEvent(ChangeType.Deleted, objectId));
                             return true;
@@ -114,7 +116,7 @@ namespace CmisSync.Lib.Filter.RegexIgnore {
 
         private bool IsInsideIgnoredPath(string path) {
             string reason;
-            return this.filter.CheckFolderPath(path, out reason);
+            return filter.CheckFolderPath(path, out reason);
         }
     }
 }
