@@ -902,6 +902,7 @@ namespace TestLibrary.IntegrationTests {
             // Sets the Connect Timeout to 10 secs
             cmisParameters[SessionParameter.ConnectTimeout] = connectTimeout ?? DefaultHttpTimeOut;
             cmisParameters[SessionParameter.ReadTimeout] = readTimeout ?? DefaultHttpTimeOut;
+            cmisParameters[SessionParameter.MaximumRequestRetries] = "0";
 
             var session = SessionFactory.NewInstance().CreateSession(cmisParameters);
             var filters = new HashSet<string>();
