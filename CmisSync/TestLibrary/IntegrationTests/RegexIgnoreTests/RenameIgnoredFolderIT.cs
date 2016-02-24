@@ -24,6 +24,8 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
+    using DotCMIS.Client;
+
     using NUnit.Framework;
 
     using TestLibrary.TestUtils;
@@ -47,6 +49,30 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
 
             this.remoteRootDir.Refresh();
             Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(normalName));
+        }
+
+        [Test]
+        public void RenameLocalIgnoredFolderWithContentToNotIgnoredFolder([Values(true, false)]bool contentChanges) {
+            string ignoredName = ".Ignored";
+            string fileName = "file.bin";
+            string normalName = "NotIgnoredFolder";
+            this.ContentChangesActive = contentChanges;
+            var ignoredLocalFolder = this.localRootDir.CreateSubdirectory(ignoredName);
+            var file = new FileInfo(Path.Combine(ignoredLocalFolder.FullName, fileName));
+            using (file.Create());
+            this.InitializeAndRunRepo();
+            Assert.That(this.remoteRootDir.GetChildren().TotalNumItems, Is.EqualTo(0));
+
+            ignoredLocalFolder.MoveTo(Path.Combine(this.localRootDir.FullName, normalName));
+
+            this.WaitUntilQueueIsNotEmpty();
+            this.AddStartNextSyncEvent();
+            this.repo.Run();
+
+            this.remoteRootDir.Refresh();
+            var remoteFolder = this.remoteRootDir.GetChildren().First() as IFolder;
+            Assert.That(remoteFolder.Name, Is.EqualTo(normalName));
+            Assert.That(remoteFolder.GetChildren().First().Name, Is.EqualTo(fileName));
         }
     }
 }
