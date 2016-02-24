@@ -46,7 +46,7 @@ namespace TestLibrary.IntegrationTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture, Category("Slow"), TestName("FullRepo")]
+    [TestFixture, Category("Slow"), TestName("FullRepo"), Timeout(180000)]
     public class FullRepoTests : BaseFullRepoTest {
         [Test]
         public void OneLocalFolderCreated() {

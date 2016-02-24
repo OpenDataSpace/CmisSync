@@ -30,7 +30,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture, TestName("RenameIT"), Category("Slow"), Category("SelectiveIgnore")]
+    [TestFixture, TestName("RenameIT"), Category("Slow"), Category("SelectiveIgnore"), Timeout(180000)]
     public class RenameIT : BaseFullRepoTest {
         [Test]
         public void RenameRemoteIgnoredFolderRenamesAlsoLocalFolder([Values(true, false)]bool contentChanges) {

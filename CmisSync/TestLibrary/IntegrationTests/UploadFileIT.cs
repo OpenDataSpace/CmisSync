@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.IntegrationTests
-{
+namespace TestLibrary.IntegrationTests {
     using System;
     using System.IO;
     using System.Security.Cryptography;
@@ -38,8 +37,7 @@ namespace TestLibrary.IntegrationTests
     using TestLibrary.TestUtils;
 
     [TestFixture, Ignore("Future Issue")]
-    public class UploadFileIT : NeedsLocalFileSystemFolder
-    {
+    public class UploadFileIT : NeedsLocalFileSystemFolder {
         [TestFixtureSetUp]
         public void SetUpFixture() {
             this.TestFixtureSetUp();

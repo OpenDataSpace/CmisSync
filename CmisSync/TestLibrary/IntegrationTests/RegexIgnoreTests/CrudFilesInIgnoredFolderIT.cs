@@ -27,7 +27,7 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture, TestName("CrudFilesInIgnoredFolder"), Category("RegexIgnore"), Category("Slow")]
+    [TestFixture, TestName("CrudFilesInIgnoredFolder"), Category("RegexIgnore"), Category("Slow"), Timeout(180000)]
     public class CrudFilesInIgnoredFolderIT : BaseFullRepoTest {
         [Test]
         public void CreateFileInIgnoredFolder([Values(true, false)]bool contentChanges) {

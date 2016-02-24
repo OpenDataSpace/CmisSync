@@ -32,7 +32,7 @@ namespace TestLibrary.IntegrationTests.LinkTests {
 
     using TestUtils;
 
-    [TestFixture, TestName("DownloadLink")]
+    [TestFixture, TestName("DownloadLink"), Timeout(180000)]
     public class DownloadLinkTests : BaseLinkTest {
         [Test, Pairwise]
         public void CreateDownloadLink(

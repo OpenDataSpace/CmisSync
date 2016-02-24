@@ -33,7 +33,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
     using NUnit.Framework;
 
     using TestUtils;
-    [TestFixture, Category("Slow"), TestName("PWC")]
+    [TestFixture, Category("Slow"), TestName("PWC"), Timeout(180000)]
     public class UploadChangedContent : BaseFullRepoTest {
         [Test, Ignore("Not yet implemented")]
         public void UploadFileChangeContentAbortUpdateContinueUpload() {

@@ -29,7 +29,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture, TestName("MoveIT"), Category("Slow"), Category("SelectiveIgnore")]
+    [TestFixture, TestName("MoveIT"), Category("Slow"), Category("SelectiveIgnore"), Timeout(180000)]
     public class MoveIT : BaseFullRepoTest {
         [Test]
         public void MoveRemoteFolderTreeInsideIgnoredFolder([Values(true, false)]bool contentChanges) {

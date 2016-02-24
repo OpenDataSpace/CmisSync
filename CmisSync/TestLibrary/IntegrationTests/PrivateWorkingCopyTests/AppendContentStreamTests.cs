@@ -31,7 +31,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
 
     using TestUtils;
 
-    [TestFixture, Category("Slow"), TestName("PWC")]
+    [TestFixture, Category("Slow"), TestName("PWC"), Timeout(180000)]
     public class AppendContentStreamTests : BaseFullRepoTest {
         private readonly string fileName = "fileName.bin";
         private readonly string content = "content";

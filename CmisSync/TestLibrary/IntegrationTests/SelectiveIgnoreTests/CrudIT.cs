@@ -43,7 +43,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests {
     // This more of a "rapid szenario creation" class
     // Please do write predictable unit tests for all fixes (IT here is not enough)
 
-    [TestFixture, TestName("SelectiveIgnore"), Category("SelectiveIgnore"), Category("Slow")]
+    [TestFixture, TestName("SelectiveIgnore"), Category("SelectiveIgnore"), Category("Slow"), Timeout(180000)]
     public class CrudIT : BaseFullRepoTest {
         [Test]
         public void SelectiveIgnoreSupportTest() {

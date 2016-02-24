@@ -30,7 +30,7 @@
     using NUnit.Framework;
     using NUnit.Framework.Constraints;
 
-    [TestFixture, TestName("ListLinks")]
+    [TestFixture, TestName("ListLinks"), Timeout(180000)]
     public class ListLinksTests : BaseLinkTest {
         [Test]
         public void ListLinks() {
