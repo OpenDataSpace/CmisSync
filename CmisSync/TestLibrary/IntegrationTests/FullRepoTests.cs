@@ -463,7 +463,7 @@ namespace TestLibrary.IntegrationTests {
             string changeToken = doc.ChangeToken;
             doc.SetContent(content);
 
-            this.WaitForRemoteChanges();
+            this.WaitForRemoteChanges(sleepDuration: 15000);
 
             this.AddStartNextSyncEvent();
             this.repo.Run();
