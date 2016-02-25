@@ -87,7 +87,7 @@ namespace TestLibrary.IntegrationTests {
             ServicePointManager.ServerCertificateValidationCallback = null;
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Timeout(20000)]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Timeout(60000)]
         public void GetRepositories(
             string canonical_name,
             string localPath,
