@@ -29,13 +29,15 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
 
     [TestFixture, TestName("CrudFilesInIgnoredFolder"), Category("RegexIgnore"), Category("Slow"), Timeout(180000)]
     public class CrudFilesInIgnoredFolderIT : BaseFullRepoTest {
+        private static readonly string ignoredName = ".ignored";
+        private static readonly string fileName = "file.bin";
         [Test]
         public void CreateFileInIgnoredFolder([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
-            var ignoredLocalFolder = this.localRootDir.CreateSubdirectory(Path.Combine(localRootDir.FullName, ".ignored"));
+            var ignoredLocalFolder = CreateIgnoredLocalDirectoryPath();
             this.InitializeAndRunRepo();
             Assert.That(remoteRootDir.GetChildren().TotalNumItems, Is.EqualTo(0));
-            var file = new FileInfo(Path.Combine(ignoredLocalFolder.FullName, "file.bin"));
+            var file = new FileInfo(Path.Combine(ignoredLocalFolder.FullName, fileName));
             using (file.Create());
             this.WaitUntilQueueIsNotEmpty();
             this.AddStartNextSyncEvent();
@@ -47,10 +49,10 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
         [Test]
         public void CreateFileInIgnoredFolderWhichAlsoExistsOnServer([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
-            var ignoredFolder = this.localRootDir.CreateSubdirectory(Path.Combine(localRootDir.FullName, ".ignored"));
-            var remoteIgnoredFolder = remoteRootDir.CreateFolder(".ignored");
+            var ignoredLocalFolder = CreateIgnoredLocalDirectoryPath();
+            var remoteIgnoredFolder = remoteRootDir.CreateFolder(ignoredName);
             this.InitializeAndRunRepo();
-            var file = new FileInfo(Path.Combine(ignoredFolder.FullName, "file.bin"));
+            var file = new FileInfo(Path.Combine(ignoredLocalFolder.FullName, fileName));
             using (file.Create());
             this.WaitUntilQueueIsNotEmpty();
             this.AddStartNextSyncEvent();
@@ -63,15 +65,19 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
         [Test]
         public void CreateRemoteFileInIgnoredFolder([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
-            var ignoredFolder = this.localRootDir.CreateSubdirectory(Path.Combine(localRootDir.FullName, ".ignored"));
+            var ignoredLocalFolder = CreateIgnoredLocalDirectoryPath();
             this.InitializeAndRunRepo();
-            var remoteIgnoredFolder = remoteRootDir.CreateFolder(".ignored");
-            remoteIgnoredFolder.CreateDocument("file.bin", "content");
+            var remoteIgnoredFolder = remoteRootDir.CreateFolder(ignoredName);
+            remoteIgnoredFolder.CreateDocument(fileName, string.Empty);
             this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
             remoteRootDir.Refresh();
-            Assert.That(ignoredFolder.GetFileSystemInfos(), Is.Empty);
+            Assert.That(ignoredLocalFolder.GetFileSystemInfos(), Is.Empty);
+        }
+
+        private DirectoryInfo CreateIgnoredLocalDirectoryPath() {
+            return Directory.CreateDirectory(localRootDir.FullName.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar + ignoredName);
         }
     }
 }
