@@ -356,6 +356,7 @@
     <Compile Include="IntegrationTests\LinkTests\ListLinksTests.cs" />
     <Compile Include="IntegrationTests\RegexIgnoreTests\CrudFilesInIgnoredFolderIT.cs" />
     <Compile Include="IntegrationTests\RegexIgnoreTests\RenameIgnoredFolderIT.cs" />
+    <Compile Include="IntegrationTests\ValidNamesTests\WindowsNamesIT.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -399,5 +400,6 @@
     <Folder Include="TestUtils\ToxiproxyUtils\" />
     <Folder Include="IntegrationTests\LinkTests\" />
     <Folder Include="IntegrationTests\RegexIgnoreTests\" />
+    <Folder Include="IntegrationTests\ValidNamesTests\" />
   </ItemGroup>
 </Project>
