@@ -16,12 +16,10 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     /// <summary>
     /// Events implementing this Interface are removed from default Logging.
     /// </summary>
-    public interface IRemoveFromLoggingEvent
-    {
+    public interface IRemoveFromLoggingEvent {
     }
 }
