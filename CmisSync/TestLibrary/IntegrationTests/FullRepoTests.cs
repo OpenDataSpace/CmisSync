@@ -623,7 +623,7 @@ namespace TestLibrary.IntegrationTests {
             folder.Refresh();
             Assert.That(localFolder.Name, Is.EqualTo(folder.Name));
             Assert.That(folder.Name, Is.EqualTo(oldName));
-            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
+            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0), "Number of changes is not zero");
         }
 
         [Test]
