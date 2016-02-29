@@ -40,7 +40,7 @@ namespace TestLibrary.IntegrationTests.ContentHashTests {
             var doc = this.remoteRootDir.CreateDocument("file.txt", content);
             doc.DeleteContentStream(true);
 
-            doc.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(string.Empty);
+            doc.AssertThatIfContentHashExistsItIsEqualTo(string.Empty);
         }
 
         [Test, Category("Slow")]
@@ -58,7 +58,7 @@ namespace TestLibrary.IntegrationTests.ContentHashTests {
 
             doc.DeleteContentStream(true);
 
-            doc.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(string.Empty);
+            doc.AssertThatIfContentHashExistsItIsEqualTo(string.Empty);
         }
     }
 }
