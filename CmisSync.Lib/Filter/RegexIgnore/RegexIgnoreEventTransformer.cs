@@ -83,7 +83,7 @@ namespace CmisSync.Lib.Filter.RegexIgnore {
             if (movedEvent != null) {
                 if (IsInsideIgnoredPath(movedEvent.OldPath) && !IsInsideIgnoredPath(movedEvent.LocalPath)) {
                     queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, movedEvent.LocalPath, movedEvent.IsDirectory));
-                    queue.AddEvent(new StartNextSyncEvent(true));
+                    queue.AddEvent(new StartNextSyncEvent(fullSyncRequested: true));
                     return true;
                 } else if (IsInsideIgnoredPath(movedEvent.LocalPath) && !IsInsideIgnoredPath(movedEvent.OldPath)) {
                     queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, movedEvent.OldPath, movedEvent.IsDirectory));
@@ -99,7 +99,7 @@ namespace CmisSync.Lib.Filter.RegexIgnore {
                     var storedObject = storage.GetObjectByRemoteId(objectId);
                     if (storedObject == null) {
                         queue.AddEvent(new ContentChangeEvent(ChangeType.Created, objectId));
-                        queue.AddEvent(new StartNextSyncEvent(true));
+                        queue.AddEvent(new StartNextSyncEvent(fullSyncRequested: true));
                         return true;
                     } else {
                         var localPath = matcher.CreateLocalPath(cmisObject.Paths[0]);
