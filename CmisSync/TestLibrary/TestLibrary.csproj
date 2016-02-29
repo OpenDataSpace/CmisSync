@@ -360,6 +360,7 @@
     <Compile Include="IntegrationTests\RegexIgnoreTests\MoveIgnoredFolderIT.cs" />
     <Compile Include="IntegrationTests\RegexIgnoreTests\MoveIgnoredFileIT.cs" />
     <Compile Include="IntegrationTests\RegexIgnoreTests\BaseRegexIgnoreTest.cs" />
+    <Compile Include="FilterTests\RegexFilterTests\RegexIgnoreEventTransformerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -404,5 +405,6 @@
     <Folder Include="IntegrationTests\LinkTests\" />
     <Folder Include="IntegrationTests\RegexIgnoreTests\" />
     <Folder Include="IntegrationTests\ValidNamesTests\" />
+    <Folder Include="FilterTests\RegexFilterTests\" />
   </ItemGroup>
 </Project>

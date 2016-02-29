@@ -103,6 +103,7 @@ SOURCES =  \
 	FilterTests/IgnoredFolderNamesFilterTest.cs \
 	FilterTests/IgnoredFoldersFilterTest.cs \
 	FilterTests/InvalidFolderNameFilterTest.cs \
+	FilterTests/RegexFilterTests/RegexIgnoreEventTransformerTest.cs \
 	FilterTests/ReportingFilterTest.cs \
 	FilterTests/RepositoryRootDeletedDetectionTest.cs \
 	FilterTests/SymlinkFilterTest.cs \
