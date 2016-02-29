@@ -53,7 +53,7 @@ namespace TestLibrary.IntegrationTests {
     using TestLibrary.TestUtils;
 
     /// <summary>
-    /// Base full repo test times out as default after 2 minutes. Please override this by inherited test cases if needed.
+    /// Base full repo test times out as default after 3 minutes. Please override this by inherited test cases if needed.
     /// </summary>
     [TestFixture, Timeout(180000)]
     public abstract class BaseFullRepoTest : IsTestWithConfiguredLog4Net, IDisposable {
@@ -184,10 +184,10 @@ namespace TestLibrary.IntegrationTests {
             cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
             cmisParameters[SessionParameter.MaximumRequestRetries] = "0";
 
-            // Sets the http connection timeout to 50 sec
-            cmisParameters[SessionParameter.ConnectTimeout] = "50000";
-            // Sets the http read timeout to 60 sec
-            cmisParameters[SessionParameter.ReadTimeout] = "60000";
+            // Sets the http connection timeout to 120 sec
+            cmisParameters[SessionParameter.ConnectTimeout] = "120000";
+            // Sets the http read timeout to 180 sec
+            cmisParameters[SessionParameter.ReadTimeout] = "180000";
 
             this.SessionFactory = this.SessionFactory ?? DotCMIS.Client.Impl.SessionFactory.NewInstance();
             this.session = this.SessionFactory.CreateSession(cmisParameters, null, null, null);

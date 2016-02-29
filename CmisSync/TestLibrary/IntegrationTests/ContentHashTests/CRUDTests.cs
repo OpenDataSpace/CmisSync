@@ -29,7 +29,7 @@ namespace TestLibrary.IntegrationTests.ContentHashTests {
 
     using TestUtils;
 
-    [TestFixture, Timeout(180000), TestName("HashCRUD")]
+    [TestFixture, Timeout(360000), TestName("HashCRUD")]
     public class CRUDTests : BaseFullRepoTest {
         [Test, Category("Slow")]
         public void CreateDocAndImmediatelyDeleteContent() {
@@ -40,7 +40,7 @@ namespace TestLibrary.IntegrationTests.ContentHashTests {
             var doc = this.remoteRootDir.CreateDocument("file.txt", content);
             doc.DeleteContentStream(true);
 
-            doc.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(string.Empty, 120);
+            doc.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(string.Empty);
         }
 
         [Test, Category("Slow")]
@@ -58,7 +58,7 @@ namespace TestLibrary.IntegrationTests.ContentHashTests {
 
             doc.DeleteContentStream(true);
 
-            doc.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(string.Empty, 120);
+            doc.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(string.Empty);
         }
     }
 }
