@@ -357,6 +357,9 @@
     <Compile Include="IntegrationTests\RegexIgnoreTests\CrudFilesInIgnoredFolderIT.cs" />
     <Compile Include="IntegrationTests\RegexIgnoreTests\RenameIgnoredFolderIT.cs" />
     <Compile Include="IntegrationTests\ValidNamesTests\WindowsNamesIT.cs" />
+    <Compile Include="IntegrationTests\RegexIgnoreTests\MoveIgnoredFolderIT.cs" />
+    <Compile Include="IntegrationTests\RegexIgnoreTests\MoveIgnoredFileIT.cs" />
+    <Compile Include="IntegrationTests\RegexIgnoreTests\BaseRegexIgnoreTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

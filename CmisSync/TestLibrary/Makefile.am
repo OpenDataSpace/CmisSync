@@ -134,7 +134,10 @@ SOURCES =  \
 	IntegrationTests/PrivateWorkingCopyTests/CancelCheckOutTest.cs \
 	IntegrationTests/PrivateWorkingCopyTests/CreateDocumentTests.cs \
 	IntegrationTests/PrivateWorkingCopyTests/UploadChangedContent.cs \
+	IntegrationTests/RegexIgnoreTests/BaseRegexIgnoreTest.cs \
 	IntegrationTests/RegexIgnoreTests/CrudFilesInIgnoredFolderIT.cs \
+	IntegrationTests/RegexIgnoreTests/MoveIgnoredFileIT.cs \
+	IntegrationTests/RegexIgnoreTests/MoveIgnoredFolderIT.cs \
 	IntegrationTests/RegexIgnoreTests/RenameIgnoredFolderIT.cs \
 	IntegrationTests/RepositoryStatusIT.cs \
 	IntegrationTests/RepositoryUtilsTests.cs \
