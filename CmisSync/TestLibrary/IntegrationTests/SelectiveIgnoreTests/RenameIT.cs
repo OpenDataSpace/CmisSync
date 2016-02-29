@@ -121,6 +121,9 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests {
             this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
+            this.WaitForRemoteChanges();
+            this.AddStartNextSyncEvent();
+            this.repo.Run();
 
             this.remoteRootDir.Refresh();
 
