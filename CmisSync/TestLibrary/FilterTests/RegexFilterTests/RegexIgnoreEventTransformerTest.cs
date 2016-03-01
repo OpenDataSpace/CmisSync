@@ -16,9 +16,10 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-﻿
+
 namespace TestLibrary.FilterTests.RegexFilterTests {
     using System;
+    using System.Collections.Generic;
     using System.IO;
 
     using CmisSync.Lib.Events;
@@ -28,7 +29,10 @@ namespace TestLibrary.FilterTests.RegexFilterTests {
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
 
+    using DotCMIS.Enums;
+    using DotCMIS.Client;
     using Moq;
 
     using NUnit.Framework;
@@ -43,6 +47,9 @@ namespace TestLibrary.FilterTests.RegexFilterTests {
         private Mock<IPathMatcher> matcher;
         private string oldPath;
         private string newPath;
+        private string remoteObjectId;
+        private string newRemotePath;
+        private ContentChangeEvent updateEvent;
 
         [Test]
         public void Constructor() {
@@ -106,9 +113,30 @@ namespace TestLibrary.FilterTests.RegexFilterTests {
             queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => e.LocalPath.Equals(moved.LocalPath) && e.Type == WatcherChangeTypes.Created && e.IsDirectory == isDirectory)), Times.Once());
         }
 
-        private RegexIgnoreEventTransformer SetUpMocksAndCreateTransformer(bool movedElement) {
+        [Test]
+        public void TransformsRemoteUpdateEventToDeletedEventIfTargetIsIgnored() {
+            var underTest = SetUpMocksAndCreateTransformer();
+            storage.Setup(s => s.GetObjectByRemoteId(remoteObjectId)).Returns(Mock.Of<IMappedObject>());
+            string reason;
+            this.filter.Setup(f => f.CheckFolderPath(newPath, out reason)).Returns(true);
+
+            Assert.That(underTest.Handle(updateEvent), Is.True);
+
+            queue.VerifyThatNoOtherEventIsAddedThan<ContentChangeEvent>();
+            queue.Verify(q => q.AddEvent(It.IsAny<ContentChangeEvent>()), Times.Once());
+            queue.Verify(q => q.AddEvent(It.Is<ContentChangeEvent>(e => e.Type == ChangeType.Deleted && e.ObjectId == remoteObjectId)));
+        }
+
+        private RegexIgnoreEventTransformer SetUpMocksAndCreateTransformer(bool movedElement = false) {
             this.oldPath = movedElement ? new DirectoryInfo("sourcePath").FullName : new FileInfo("sourcePath").FullName;
             this.newPath = "targetPath";
+            this.newRemotePath = "matchingRemotePath";
+            this.remoteObjectId = Guid.NewGuid().ToString();
+            this.updateEvent = new ContentChangeEvent(ChangeType.Updated, remoteObjectId);
+            var session = new Mock<ISession>();
+            session.Setup(s => s.GetObject(remoteObjectId, It.IsAny<IOperationContext>())).Returns(
+                Mock.Of<IFileableCmisObject>(o => o.Id == remoteObjectId && o.Paths == new List<string>(new string[] { this.newRemotePath })));
+            updateEvent.UpdateObject(session.Object);
             SetUpMocks();
             return new RegexIgnoreEventTransformer(
                 filter.Object, queue.Object, matcher.Object, storage.Object);
@@ -119,6 +147,7 @@ namespace TestLibrary.FilterTests.RegexFilterTests {
             this.filter = new Mock<IgnoredFolderNameFilter>(Mock.Of<IDirectoryInfo>());
             this.storage = new Mock<IMetaDataStorage>();
             this.matcher = new Mock<IPathMatcher>();
+            this.matcher.Setup(m => m.CreateLocalPath(this.newRemotePath)).Returns(this.newPath);
         }
     }
 }
