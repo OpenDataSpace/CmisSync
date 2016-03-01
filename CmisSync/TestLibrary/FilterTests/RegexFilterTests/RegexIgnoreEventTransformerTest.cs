@@ -41,41 +41,43 @@ namespace TestLibrary.FilterTests.RegexFilterTests {
         private Mock<IgnoredFolderNameFilter> filter;
         private Mock<IMetaDataStorage> storage;
         private Mock<IPathMatcher> matcher;
+        private string oldPath;
+        private string newPath;
+
         [Test]
         public void Constructor() {
-            var underTest = SetUpMocksAndCreateTransformer();
+            SetUpMocks();
+            var underTest = new RegexIgnoreEventTransformer(filter.Object, queue.Object, matcher.Object, storage.Object);
             Assert.That(underTest.Priority, Is.Positive);
         }
 
         [Test]
         public void ConstructorFailsIfFilterIsNull() {
-            SetUpMocksAndCreateTransformer();
+            SetUpMocks();
             Assert.Throws<ArgumentNullException>(() => new RegexIgnoreEventTransformer(null, queue.Object, matcher.Object, storage.Object));
         }
 
         [Test]
         public void ConstructorFailsIfQueueIsNull() {
-            SetUpMocksAndCreateTransformer();
+            SetUpMocks();
             Assert.Throws<ArgumentNullException>(() => new RegexIgnoreEventTransformer(filter.Object, null, matcher.Object, storage.Object));
         }
 
         [Test]
         public void ConstructorFailsIfMatcherIsNull() {
-            SetUpMocksAndCreateTransformer();
+            SetUpMocks();
             Assert.Throws<ArgumentNullException>(() => new RegexIgnoreEventTransformer(filter.Object, queue.Object, null, storage.Object));
         }
 
         [Test]
         public void ConstructorFailsIfStorageIsNull() {
-            SetUpMocksAndCreateTransformer();
+            SetUpMocks();
             Assert.Throws<ArgumentNullException>(() => new RegexIgnoreEventTransformer(filter.Object, queue.Object, matcher.Object, null));
         }
 
         [Test]
         public void TransformsFSMoveEventToDeletedEventIfTargetIsIgnored([Values(true, false)]bool isDirectory) {
-            var underTest = SetUpMocksAndCreateTransformer();
-            var oldPath = isDirectory ? new DirectoryInfo("sourcePath").FullName : new FileInfo("sourcePath").FullName;
-            var newPath = "targetPath";
+            var underTest = SetUpMocksAndCreateTransformer(movedElement: isDirectory);
             FSMovedEvent moved = new FSMovedEvent(oldPath, newPath, isDirectory);
             string reason;
             this.filter.Setup(f => f.CheckFolderPath(moved.LocalPath, out reason)).Returns(true);
@@ -90,10 +92,8 @@ namespace TestLibrary.FilterTests.RegexFilterTests {
         }
 
         [Test]
-        public void TransformsFSMoveEventToCreatedEventAndTriggerCrawlSyncIfSourceIsIgnored([Values(true, false)]bool isDirectory) {
-            var underTest = SetUpMocksAndCreateTransformer();
-            var oldPath = isDirectory ? new DirectoryInfo("sourcePath").FullName : new FileInfo("sourcePath").FullName;
-            var newPath = "targetPath";
+        public void TransformsFSMoveEventToCreatedEventAndTriggersCrawlSyncIfSourceIsIgnored([Values(true, false)]bool isDirectory) {
+            var underTest = SetUpMocksAndCreateTransformer(movedElement: isDirectory);
             FSMovedEvent moved = new FSMovedEvent(oldPath, newPath, isDirectory);
             string reason;
             this.filter.Setup(f => f.CheckFolderPath(moved.LocalPath, out reason)).Returns(false);
@@ -106,13 +106,19 @@ namespace TestLibrary.FilterTests.RegexFilterTests {
             queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => e.LocalPath.Equals(moved.LocalPath) && e.Type == WatcherChangeTypes.Created && e.IsDirectory == isDirectory)), Times.Once());
         }
 
-        private RegexIgnoreEventTransformer SetUpMocksAndCreateTransformer() {
+        private RegexIgnoreEventTransformer SetUpMocksAndCreateTransformer(bool movedElement) {
+            this.oldPath = movedElement ? new DirectoryInfo("sourcePath").FullName : new FileInfo("sourcePath").FullName;
+            this.newPath = "targetPath";
+            SetUpMocks();
+            return new RegexIgnoreEventTransformer(
+                filter.Object, queue.Object, matcher.Object, storage.Object);
+        }
+
+        private void SetUpMocks() {
             this.queue = new Mock<ISyncEventQueue>();
             this.filter = new Mock<IgnoredFolderNameFilter>(Mock.Of<IDirectoryInfo>());
             this.storage = new Mock<IMetaDataStorage>();
             this.matcher = new Mock<IPathMatcher>();
-            return new RegexIgnoreEventTransformer(
-                filter.Object, queue.Object, matcher.Object, storage.Object);
         }
     }
 }
