@@ -96,8 +96,7 @@ namespace CmisSync.Lib.Filter.RegexIgnore {
                 if (contentChangeEvent.Type == ChangeType.Updated) {
                     var cmisObject = contentChangeEvent.CmisObject as IFileableCmisObject;
                     var objectId = cmisObject.Id;
-                    var storedObject = storage.GetObjectByRemoteId(objectId);
-                    if (storedObject == null) {
+                    if (storage.GetObjectByRemoteId(objectId) == null) {
                         queue.AddEvent(new ContentChangeEvent(ChangeType.Created, objectId));
                         queue.AddEvent(new StartNextSyncEvent(fullSyncRequested: true));
                         return true;
