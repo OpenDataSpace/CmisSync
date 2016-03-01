@@ -96,8 +96,11 @@ namespace TestLibrary.TestUtils {
             this.Name = name ?? dir.Name;
             this.IsFile = false;
             this.LocalId = dir.Uuid == null ? null : dir.Uuid.GetValueOrDefault().ToString();
-            foreach (var child in dir.GetDirectories()) {
-                this.children.Add(new FolderTree(child));
+            foreach (var subDir in dir.GetDirectories()) {
+                this.children.Add(new FolderTree(subDir));
+            }
+            foreach (var file in dir.GetFiles()) {
+                this.children.Add(new FolderTree(file));
             }
 
             this.children.Sort((FolderTree x, FolderTree y) => x.Name.CompareTo(y.Name));
