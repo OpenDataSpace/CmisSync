@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
-{
+namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests {
     using System;
     using System.IO;
     using System.Security.Cryptography;
@@ -33,8 +32,7 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
     using TestUtils;
 
     [TestFixture]
-    public class IFileConvenienceExtendersTest
-    {
+    public class IFileConvenienceExtendersTest {
         private static readonly string fileName = "fileName";
         private static readonly string fullName = Path.Combine(Path.GetTempPath(), fileName);
         private Mock<IFileInfo> fileInfo;
