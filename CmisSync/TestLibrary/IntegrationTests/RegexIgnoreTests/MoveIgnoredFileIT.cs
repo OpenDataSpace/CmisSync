@@ -39,7 +39,7 @@
             this.ContentChangesActive = contentChanges;
             string notIgnoredName = "normalFolder";
             var ignoredLocalFolder = CreateIgnoredLocalDirectoryPath();
-            var notIgnoredLocalFolder = localRootDir.CreateSubdirectory(Path.Combine(this.localRootDir.FullName, notIgnoredName));
+            var notIgnoredLocalFolder = Directory.CreateDirectory(Path.Combine(this.localRootDir.FullName, notIgnoredName));
             var file = new FileInfo(Path.Combine(ignoredLocalFolder.FullName, fileName));
             using (file.Create());
             this.InitializeAndRunRepo();
