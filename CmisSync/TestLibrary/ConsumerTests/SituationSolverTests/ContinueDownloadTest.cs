@@ -48,7 +48,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private readonly string parentId = "parentId";
         private readonly string changeToken = "changeToken";
         private readonly long chunkSize = 8 * 1024;
-        private readonly byte[] emptyHash = SHA1.Create().ComputeHash(new byte[0]);
         private int chunkCount = 4;
 
         private Mock<ISession> session;

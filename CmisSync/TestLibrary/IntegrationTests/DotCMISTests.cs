@@ -203,9 +203,6 @@ namespace TestLibrary.IntegrationTests {
         {
             string subFolderName = "subFolder";
             string fileName = "testFile.bin";
-            string subFolderPath = remoteFolderPath.TrimEnd('/') + "/" + subFolderName;
-            string filePath = subFolderPath + "/" + fileName;
-
             var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             if (!session.IsPrivateWorkingCopySupported()) {
                 Assert.Ignore("PWCs are not supported");
