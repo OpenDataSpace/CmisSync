@@ -301,14 +301,7 @@ namespace TestLibrary.IntegrationTests {
 
             DateTime modificationDate = fileInfo.LastWriteTimeUtc;
 
-            this.InitializeAndRunRepo();
-
-            this.WaitForRemoteChanges();
-            this.AddStartNextSyncEvent();
-            this.repo.Run();
-            this.WaitForRemoteChanges();
-            this.AddStartNextSyncEvent();
-            this.repo.Run();
+            InitializeAndRunRepo();
 
             var children = this.remoteRootDir.GetChildren();
             Assert.That(children.TotalNumItems, Is.EqualTo(1));
@@ -318,14 +311,14 @@ namespace TestLibrary.IntegrationTests {
             doc.SetContent(content, true, true);
             Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length), "ContentStream not set correctly");
 
-            this.WaitForRemoteChanges();
-            this.AddStartNextSyncEvent();
-            this.repo.Run();
+            WaitForRemoteChanges();
+            AddStartNextSyncEvent();
+            repo.Run();
 
             doc.Refresh();
             Assert.That((this.localRootDir.GetFiles().First().LastWriteTimeUtc - (DateTime)doc.LastModificationDate).Seconds, Is.Not.GreaterThan(1));
             Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(content.Length));
-            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
+            AssertThatEventCounterIsZero();
         }
 
         [Test]
@@ -355,7 +348,7 @@ namespace TestLibrary.IntegrationTests {
             var doc = this.remoteRootDir.GetChildren().First() as IDocument;
             Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
             Assert.That(doc.Name, Is.EqualTo(newName));
-            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
+            AssertThatEventCounterIsZero();
         }
 
         [Test]
@@ -397,7 +390,7 @@ namespace TestLibrary.IntegrationTests {
                 }
             }
 
-            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
+            AssertThatEventCounterIsZero();
         }
 
         [Test]
@@ -697,7 +690,7 @@ namespace TestLibrary.IntegrationTests {
 
             Assert.That(this.localRootDir.GetFiles()[0].Length, Is.EqualTo(content.Length));
             Assert.That((this.remoteRootDir.GetChildren().First() as IDocument).ContentStreamLength, Is.EqualTo(content.Length));
-            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
+            AssertThatEventCounterIsZero();
         }
 
         [Ignore("https://mantis.dataspace.cc/view.php?id=4285")]
