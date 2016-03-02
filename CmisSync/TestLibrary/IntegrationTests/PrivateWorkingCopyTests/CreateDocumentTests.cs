@@ -64,9 +64,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(this.fileName));
             Assert.That(newDocument.Name, Is.EqualTo(this.fileName));
             Assert.That(newDocument.ContentStreamLength, Is.EqualTo(this.content.Length));
-            if (this.session.IsContentStreamHashSupported()) {
-                Assert.That(newDocument.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(content), Is.True);
-            }
+            AssertThatContentHashIsEqualToExceptedIfSupported(newDocument, content);
         }
 
         [Test]

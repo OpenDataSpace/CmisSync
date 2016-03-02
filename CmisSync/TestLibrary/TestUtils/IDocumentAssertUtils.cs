@@ -47,19 +47,15 @@ namespace TestLibrary.TestUtils {
         }
 
         public static bool VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(this IDocument doc, string content, int timeoutInSeconds = 3600) {
-            doc.AssertThatIfContentHashExistsItIsEqualTo(content);
             int loops = 0;
             while (doc.ContentStreamHash() == null && loops < timeoutInSeconds) {
                 loops++;
                 Thread.Sleep(1000);
                 doc.Refresh();
-                doc.AssertThatIfContentHashExistsItIsEqualTo(content);
-                if (doc.ContentStreamHash() != null) {
-                    return true;
-                }
             }
 
-            return false;
+            doc.AssertThatIfContentHashExistsItIsEqualTo(content);
+            return doc.ContentStreamHash() != null;
         }
 
         public static byte[] ComputeSha1Hash(string content) {
