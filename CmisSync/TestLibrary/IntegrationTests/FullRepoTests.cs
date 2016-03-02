@@ -49,15 +49,6 @@ namespace TestLibrary.IntegrationTests {
     [TestFixture, Category("Slow"), TestName("FullRepo"), Timeout(180000)]
     public class FullRepoTests : BaseFullRepoTest {
         [Test]
-        public void OneLocalFolderCreated() {
-            this.localRootDir.CreateSubdirectory("Cat");
-
-            this.InitializeAndRunRepo();
-            var children = this.remoteRootDir.GetChildren();
-            Assert.AreEqual(children.TotalNumItems, 1);
-        }
-
-        [Test]
         public void OneLocalFolderRemoved() {
             this.localRootDir.CreateSubdirectory("Cat");
 
@@ -80,6 +71,7 @@ namespace TestLibrary.IntegrationTests {
 
             Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(1));
             Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("Cat"));
+            AssertThatFolderStructureIsEqual();
         }
 
         [Test]
@@ -95,6 +87,7 @@ namespace TestLibrary.IntegrationTests {
 
             Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(0));
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
+            AssertThatFolderStructureIsEqual();
         }
 
         [Test, Category("Conflict")]
@@ -140,6 +133,7 @@ namespace TestLibrary.IntegrationTests {
 
             Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(1));
             Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("Dog"));
+            AssertThatFolderStructureIsEqual();
         }
 
         [Test]
@@ -159,6 +153,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("target"));
             Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories().Length, Is.EqualTo(1));
             Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories()[0].Name, Is.EqualTo("Cat"));
+            AssertThatFolderStructureIsEqual();
         }
 
         [Test]
@@ -180,91 +175,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("target"));
             Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories().Length, Is.EqualTo(1));
             Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories()[0].Name, Is.EqualTo("Cat"));
-        }
-
-        [Test]
-        public void OneLocalFileCreated([Values(false)]bool contentChanges) {
-            this.ContentChangesActive = contentChanges;
-            string fileName = "file";
-            string content = "content";
-            var filePath = Path.Combine(this.localRootDir.FullName, fileName);
-            var fileInfo = new FileInfo(filePath);
-            using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.Write(content);
-            }
-
-            fileInfo.Refresh();
-            Assert.That(fileInfo.Length, Is.EqualTo(content.Length));
-            DateTime modificationDate = fileInfo.LastWriteTimeUtc;
-
-            this.InitializeAndRunRepo();
-            this.remoteRootDir.Refresh();
-            var children = this.remoteRootDir.GetChildren();
-            Assert.That(children.TotalNumItems, Is.EqualTo(1));
-            var child = children.First();
-            Assert.That(child, Is.InstanceOf(typeof(IDocument)));
-            var doc = child as IDocument;
-            Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length), "Remote content stream has wrong length");
-            this.AssertThatContentHashIsEqualToExceptedIfSupported(doc, content);
-            Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
-        }
-
-        [Test]
-        public void TwoLocalFilesCreatedWithCommonSubnamePart([Values(false)]bool contentChanges) {
-            this.ContentChangesActive = contentChanges;
-            string fileName1 = "gpio.h";
-            string fileName2 = "io.h";
-            string content = "content";
-            var filePath = Path.Combine(this.localRootDir.FullName, fileName1);
-            var fileInfo = new FileInfo(filePath);
-            using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.Write(content);
-            }
-
-            var filePath2 = Path.Combine(this.localRootDir.FullName, fileName2);
-            var fileInfo2 = new FileInfo(filePath2);
-            using (StreamWriter sw = fileInfo2.CreateText()) {
-                sw.Write(content);
-            }
-
-            this.InitializeAndRunRepo();
-            this.remoteRootDir.Refresh();
-            var children = this.remoteRootDir.GetChildren();
-            Assert.That(children.TotalNumItems, Is.EqualTo(2));
-        }
-
-        [Test]
-        public void OneLocalFileCreatedAndModificationDateIsSynced() {
-            if (!this.session.IsServerAbleToUpdateModificationDate()) {
-                Assert.Ignore("Server does not support the synchronization of modification dates");
-            }
-
-            string fileName = "file";
-            string content = "content";
-            var filePath = Path.Combine(this.localRootDir.FullName, fileName);
-            var fileInfo = new FileInfo(filePath);
-            using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.Write(content);
-            }
-
-            DateTime modificationDate = DateTime.UtcNow - TimeSpan.FromHours(1);
-            fileInfo.LastWriteTimeUtc = modificationDate;
-            modificationDate = fileInfo.LastWriteTimeUtc;
-
-            DateTime creationDate = DateTime.UtcNow - TimeSpan.FromDays(1);
-            fileInfo.CreationTimeUtc = creationDate;
-            creationDate = fileInfo.CreationTimeUtc;
-
-            this.InitializeAndRunRepo();
-            var children = this.remoteRootDir.GetChildren();
-            Assert.That(children.TotalNumItems, Is.EqualTo(1));
-            var child = children.First();
-            Assert.That(child, Is.InstanceOf(typeof(IDocument)));
-            var doc = child as IDocument;
-            Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
-            this.AssertThatDatesAreEqual(doc.LastModificationDate, modificationDate, "Modification date is not equal");
-            this.AssertThatDatesAreEqual(doc.CreationDate, creationDate, "Creation Date is not equal");
-            Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
+            AssertThatFolderStructureIsEqual();
         }
 
         [Test]
@@ -982,50 +893,6 @@ namespace TestLibrary.IntegrationTests {
             AssertThatFolderStructureIsEqual();
         }
 
-        [Test, Timeout(360000), MaxTime(300000)]
-        public void OneFileIsCopiedAFewTimes([Values(true, false)]bool contentChanges, [Values(1,2,5,10)]int times) {
-            this.ContentChangesActive = contentChanges;
-            FileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
-            var fileNames = new List<string>();
-            string fileName = "file";
-            string content = "content";
-            this.remoteRootDir.CreateDocument(fileName + ".bin", content);
-            this.InitializeAndRunRepo();
-
-            var file = this.localRootDir.GetFiles().First();
-            fileNames.Add(file.FullName);
-            var fileInfo = fsFactory.CreateFileInfo(file.FullName);
-            Guid uuid = (Guid)fileInfo.Uuid;
-            for (int i = 0; i < times; i++) {
-                var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, string.Format("{0}{1}.bin", fileName, i)));
-                file.CopyTo(fileCopy.FullName);
-                Thread.Sleep(50);
-                fileCopy.Refresh();
-                fileCopy.Uuid = uuid;
-                fileNames.Add(fileCopy.FullName);
-            }
-
-            Thread.Sleep(500);
-
-            this.AddStartNextSyncEvent(forceCrawl: true);
-            this.repo.Run();
-
-            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(fileNames.Count));
-            foreach (var localFile in this.localRootDir.GetFiles()) {
-                Assert.That(fileNames.Contains(localFile.FullName));
-                var syncedFileInfo = fsFactory.CreateFileInfo(localFile.FullName);
-                Assert.That(syncedFileInfo.Length, Is.EqualTo(content.Length));
-                if (localFile.FullName.Equals(file.FullName)) {
-                    Assert.That(syncedFileInfo.Uuid, Is.EqualTo(uuid));
-                } else {
-                    Assert.That(syncedFileInfo.Uuid, Is.Not.Null);
-                    Assert.That(syncedFileInfo.Uuid, Is.Not.EqualTo(uuid));
-                }
-            }
-
-            AssertThatEventCounterIsZero();
-        }
-
         [Test]
         public void OneFileIsCopiedAndTheCopyIsRemoved([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
@@ -1111,24 +978,6 @@ namespace TestLibrary.IntegrationTests {
         }
 
         [Test]
-        public void SyncLocalSavedMails() {
-            string mailName1 = "mail1.msg";
-            var mailPath1 = Path.Combine(this.localRootDir.FullName, mailName1);
-            var mailInfo1 = new FileInfo(mailPath1);
-            using (StreamWriter sw = mailInfo1.CreateText());
-            string mailName2 = "mail2.eml";
-            var mailPath2 = Path.Combine(this.localRootDir.FullName, mailName2);
-            var mailInfo2 = new FileInfo(mailPath2);
-            using (StreamWriter sw = mailInfo2.CreateText());
-
-            this.repo.Initialize();
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
-            this.repo.Run();
-
-            AssertThatFolderStructureIsEqual();
-        }
-
-        [Test]
         public void OneLocalFileIsRemovedAndChangedRemotely([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string fileName = "file.bin";
@@ -1196,33 +1045,6 @@ namespace TestLibrary.IntegrationTests {
             remoteDoc.Refresh();
             Assert.That(remoteDoc.Parents.First().Name, Is.EqualTo(folderName));
             AssertThatFolderStructureIsEqual();
-        }
-
-        [Test]
-        public void CreateFileWithOldModificationDate() {
-            this.InitializeAndRunRepo();
-            var file = new FileInfo(Path.Combine(this.localRootDir.FullName, "oldFile.bin"));
-            using (var stream = file.CreateText()) {
-                stream.WriteLine("text");
-            };
-            var oldDate = DateTime.UtcNow - TimeSpan.FromHours(2);
-            file.LastWriteTimeUtc = oldDate;
-            this.repo.Run();
-            this.remoteRootDir.Refresh();
-            var remoteFile = this.remoteRootDir.GetChildren().First() as IDocument;
-            Assert.That(remoteFile.LastModificationDate, Is.EqualTo(oldDate).Within(2).Seconds);
-
-            this.AddStartNextSyncEvent();
-
-            using (var stream = file.AppendText()) {
-                stream.WriteLine("blubb");
-            };
-
-            oldDate = DateTime.UtcNow - TimeSpan.FromHours(1);
-            file.LastWriteTimeUtc = oldDate;
-            this.repo.Run();
-            remoteFile.Refresh();
-            Assert.That(remoteFile.LastModificationDate, Is.EqualTo(oldDate).Within(2).Seconds);
         }
 
         [Test, Ignore("Ignore this until the server does not change the changetoken on move operation")]

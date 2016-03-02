@@ -146,6 +146,8 @@ SOURCES =  \
 	IntegrationTests/SelectiveIgnoreTests/FileCrud.cs \
 	IntegrationTests/SelectiveIgnoreTests/MoveIT.cs \
 	IntegrationTests/SelectiveIgnoreTests/RenameIT.cs \
+	IntegrationTests/SyncScenarioITs/CreateLocalFileIT.cs \
+	IntegrationTests/SyncScenarioITs/CreateLocalFolderIT.cs \
 	IntegrationTests/TestNameAttribute.cs \
 	IntegrationTests/UploadFileIT.cs \
 	IntegrationTests/UploadSlowWrittenFile.cs \
