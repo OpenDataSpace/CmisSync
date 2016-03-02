@@ -205,5 +205,48 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
 
             AssertThatEventCounterIsZero();
         }
+
+        /// <summary>
+        /// Creates the hundred files and sync.
+        /// </summary>
+        [Test, Timeout(1800000), MaxTime(1800000), Ignore("Just for benchmarks")]
+        public void CreateHundredFilesAndSync() {
+            DateTime modificationDate = DateTime.UtcNow - TimeSpan.FromDays(1);
+            DateTime creationDate = DateTime.UtcNow - TimeSpan.FromDays(2);
+            int count = 100;
+
+            this.InitializeAndRunRepo();
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+
+            for (int i = 1; i <= count; i++) {
+                var filePath = Path.Combine(this.localRootDir.FullName, string.Format("file_{0}.bin", i.ToString()));
+                var fileInfo = new FileInfo(filePath);
+                using (StreamWriter sw = fileInfo.CreateText()) {
+                    sw.Write(string.Format("content of file \"{0}\"", filePath));
+                }
+
+                fileInfo.Refresh();
+                fileInfo.CreationTimeUtc = creationDate;
+                fileInfo.LastWriteTimeUtc = modificationDate;
+            }
+
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+
+            this.repo.Run();
+
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
+            if (this.session.IsServerAbleToUpdateModificationDate()) {
+                foreach (var remoteFile in this.remoteRootDir.GetChildren()) {
+                    this.AssertThatDatesAreEqual(modificationDate, remoteFile.LastModificationDate, string.Format("remote modification date of {0}", remoteFile.Name));
+                    this.AssertThatDatesAreEqual(creationDate, remoteFile.CreationDate, string.Format("remote creation date of {0}", remoteFile.Name));
+                }
+
+                foreach (var localFile in this.localRootDir.GetFiles()) {
+                    this.AssertThatDatesAreEqual(modificationDate, localFile.LastWriteTimeUtc, string.Format("local modification date of {0}", localFile.Name));
+                    this.AssertThatDatesAreEqual(creationDate, localFile.CreationTimeUtc, string.Format("local creation date of {0}", localFile.Name));
+                }
+            }
+        }
+
     }
 }

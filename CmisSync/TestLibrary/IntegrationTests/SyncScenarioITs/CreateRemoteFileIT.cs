@@ -44,7 +44,6 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
         [Test]
         public void OneRemoteFileCreatedAfterSyncIsInitialized([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
-
             InitializeAndRunRepo();
 
             var doc = this.remoteRootDir.CreateDocument(defaultFileName, defaultContent);
@@ -55,14 +54,28 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             AssertThatOneFileIsSynced(doc);
         }
 
-        private void AssertThatOneFileIsSynced(IDocument doc) {
-            var children = this.localRootDir.GetFiles();
+        [Test]
+        public void OneEmptyRemoteFileCreated([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
+            InitializeAndRunRepo();
+
+            var doc = this.remoteRootDir.CreateDocument(defaultFileName, (string)null);
+            WaitForRemoteChanges();
+            AddStartNextSyncEvent();
+            repo.Run();
+
+            AssertThatOneFileIsSynced(doc, string.Empty);
+        }
+
+        private void AssertThatOneFileIsSynced(IDocument doc, string content = null) {
+            content = content ?? defaultContent;
+            var children = this.localRootDir.GetFileSystemInfos();
             Assert.That(children.Length, Is.EqualTo(1));
             var child = children.First();
             Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
-            Assert.That(child.Length, Is.EqualTo(defaultContent.Length));
+            Assert.That((child as FileInfo).Length, Is.EqualTo(content.Length));
             doc.Refresh();
-            doc.AssertThatIfContentHashExistsItIsEqualTo(defaultContent);
+            doc.AssertThatIfContentHashExistsItIsEqualTo(content);
             AssertThatEventCounterIsZero();
         }
     }

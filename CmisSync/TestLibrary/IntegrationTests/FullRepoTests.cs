@@ -77,87 +77,6 @@ namespace TestLibrary.IntegrationTests {
             Assert.That((this.remoteRootDir.GetChildren().First() as IFolder).GetChildren().Count(), Is.EqualTo(1));
         }
 
-        [Test]
-        public void OneRemoteFolderIsRenamedAndOneCrawlSyncShouldDetectIt() {
-            var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
-
-            this.InitializeAndRunRepo();
-
-            remoteFolder.Refresh();
-            remoteFolder.Rename("Dog", true);
-
-            this.AddStartNextSyncEvent(forceCrawl: true);
-            this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.Run();
-
-            Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(1));
-            Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("Dog"));
-            AssertThatFolderStructureIsEqual();
-        }
-
-        [Test]
-        public void OneRemoteFolderIsMovedIntoAnotherRemoteFolderAndDetectedByCrawler() {
-            var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
-            var remoteTargetFolder = this.remoteRootDir.CreateFolder("target");
-
-            this.InitializeAndRunRepo();
-
-            remoteFolder.Move(this.remoteRootDir, remoteTargetFolder);
-
-            this.AddStartNextSyncEvent(forceCrawl: true);
-
-            this.repo.Run();
-
-            Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(1));
-            Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("target"));
-            Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories().Length, Is.EqualTo(1));
-            Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories()[0].Name, Is.EqualTo("Cat"));
-            AssertThatFolderStructureIsEqual();
-        }
-
-        [Test]
-        public void OneRemoteFolderIsMovedIntoAnotherRemoteFolderAndDetectedByContentChange() {
-            this.EnsureThatContentChangesAreSupported();
-            var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
-            var remoteTargetFolder = this.remoteRootDir.CreateFolder("target");
-
-            this.InitializeAndRunRepo();
-
-            remoteFolder.Move(this.remoteRootDir, remoteTargetFolder);
-            this.WaitForRemoteChanges();
-
-            this.AddStartNextSyncEvent();
-
-            this.repo.Run();
-
-            Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(1));
-            Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("target"));
-            Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories().Length, Is.EqualTo(1));
-            Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories()[0].Name, Is.EqualTo("Cat"));
-            AssertThatFolderStructureIsEqual();
-        }
-
-        [Test]
-        public void OneEmptyRemoteFileCreated([Values(true, false)]bool contentChanges) {
-            this.ContentChangesActive = contentChanges;
-            this.InitializeAndRunRepo();
-            string fileName = "file";
-            var doc = this.remoteRootDir.CreateDocument(fileName, (string)null);
-
-            this.WaitForRemoteChanges();
-            this.AddStartNextSyncEvent();
-            this.repo.Run();
-
-            var children = this.localRootDir.GetFiles();
-            Assert.That(children.Length, Is.EqualTo(1));
-            var child = children.First();
-            Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
-            Assert.That(child.Length, Is.EqualTo(0));
-            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
-            doc.Refresh();
-            doc.AssertThatIfContentHashExistsItIsEqualTo(new byte[0]);
-        }
-
         // Timeout is set to 10 minutes for 10 x 1 MB file
         [Test, Timeout(600000), MaxTime(600000)]
         public void ManyRemoteFilesCreated([Values(10)]int fileNumber) {
@@ -389,76 +308,6 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(folder.Name, Is.EqualTo(oldName));
             AssertThatEventCounterIsZero();
             AssertThatFolderStructureIsEqual();
-        }
-
-        [Test]
-        public void OneLocalFileContentIsChanged([Values(true, false)]bool contentChanges) {
-            this.ContentChangesActive = contentChanges;
-            string fileName = "file.bin";
-            string content = "cat";
-            byte[] newContent = Encoding.UTF8.GetBytes("new born citty");
-            this.remoteRootDir.CreateDocument(fileName, content);
-
-            this.InitializeAndRunRepo();
-
-            using (var filestream = this.localRootDir.GetFiles().First().Open(FileMode.Truncate, FileAccess.Write, FileShare.None)) {
-                filestream.Write(newContent, 0, newContent.Length);
-            }
-
-            DateTime modificationDate = this.localRootDir.GetFiles().First().LastWriteTimeUtc;
-
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
-            this.AddStartNextSyncEvent();
-            this.repo.Run();
-
-            var remoteDoc = this.remoteRootDir.GetChildren().First() as IDocument;
-            var localDoc = this.localRootDir.GetFiles().First();
-            Assert.That(remoteDoc.ContentStreamLength, Is.EqualTo(newContent.Length));
-            remoteDoc.AssertThatIfContentHashExistsItIsEqualTo(newContent);
-            Assert.That(localDoc.Length, Is.EqualTo(newContent.Length));
-            Assert.That(localDoc.LastWriteTimeUtc, Is.EqualTo(modificationDate));
-        }
-
-        /// <summary>
-        /// Creates the hundred files and sync.
-        /// </summary>
-        [Test, Timeout(1800000), MaxTime(1800000), Ignore("Just for benchmarks")]
-        public void CreateHundredFilesAndSync() {
-            DateTime modificationDate = DateTime.UtcNow - TimeSpan.FromDays(1);
-            DateTime creationDate = DateTime.UtcNow - TimeSpan.FromDays(2);
-            int count = 100;
-
-            this.InitializeAndRunRepo();
-            this.repo.SingleStepQueue.SwallowExceptions = true;
-
-            for (int i = 1; i <= count; i++) {
-                var filePath = Path.Combine(this.localRootDir.FullName, string.Format("file_{0}.bin", i.ToString()));
-                var fileInfo = new FileInfo(filePath);
-                using (StreamWriter sw = fileInfo.CreateText()) {
-                    sw.Write(string.Format("content of file \"{0}\"", filePath));
-                }
-
-                fileInfo.Refresh();
-                fileInfo.CreationTimeUtc = creationDate;
-                fileInfo.LastWriteTimeUtc = modificationDate;
-            }
-
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
-
-            this.repo.Run();
-
-            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
-            if (this.session.IsServerAbleToUpdateModificationDate()) {
-                foreach (var remoteFile in this.remoteRootDir.GetChildren()) {
-                    this.AssertThatDatesAreEqual(modificationDate, remoteFile.LastModificationDate, string.Format("remote modification date of {0}", remoteFile.Name));
-                    this.AssertThatDatesAreEqual(creationDate, remoteFile.CreationDate, string.Format("remote creation date of {0}", remoteFile.Name));
-                }
-
-                foreach (var localFile in this.localRootDir.GetFiles()) {
-                    this.AssertThatDatesAreEqual(modificationDate, localFile.LastWriteTimeUtc, string.Format("local modification date of {0}", localFile.Name));
-                    this.AssertThatDatesAreEqual(creationDate, localFile.CreationTimeUtc, string.Format("local creation date of {0}", localFile.Name));
-                }
-            }
         }
 
         [Test]
@@ -724,26 +573,6 @@ namespace TestLibrary.IntegrationTests {
             if (this.session.IsServerAbleToUpdateModificationDate()) {
                 AssertThatDatesAreEqual(file.LastWriteTimeUtc, doc.LastModificationDate);
             }
-        }
-
-        [Test]
-        public void OneRemoteFolderIsRenamedToLowerCase([Values(true, false)]bool contentChanges) {
-            this.ContentChangesActive = contentChanges;
-            string oldFolderName = "A";
-            string newFolderName = oldFolderName.ToLower();
-            var folder = this.remoteRootDir.CreateFolder(oldFolderName);
-
-            this.InitializeAndRunRepo();
-
-            folder.Refresh();
-            folder.Rename(newFolderName);
-            this.WaitForRemoteChanges();
-
-            this.AddStartNextSyncEvent();
-            this.repo.Run();
-
-            AssertThatEventCounterIsZero();
-            AssertThatFolderStructureIsEqual();
         }
 
         [Test]

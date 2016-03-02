@@ -30,6 +30,8 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
 
     using NUnit.Framework;
 
+    using TestLibrary.TestUtils;
+
     [TestFixture, Category("Slow"), TestName("UpdateLocalFile"), Timeout(180000)]
     public class UpdateLocalFileIT : AbstractBaseSyncScenarioIT {
         private readonly string newFileName = "renamedFile.bin";
@@ -96,7 +98,7 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             this.ContentChangesActive = contentChanges;
             this.remoteRootDir.CreateDocument(defaultFileName, defaultContent);
             Thread.Sleep(100);
-            this.InitializeAndRunRepo(swallowExceptions: true);
+            InitializeAndRunRepo(swallowExceptions: true);
 
             var file = this.localRootDir.GetFiles().First();
             using (var stream = file.AppendText()) {
@@ -108,9 +110,9 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             file.MoveTo(Path.Combine(this.localRootDir.FullName, newFileName));
             file.Refresh();
 
-            this.WaitUntilQueueIsNotEmpty();
-            this.AddStartNextSyncEvent();
-            this.repo.Run();
+            WaitUntilQueueIsNotEmpty();
+            AddStartNextSyncEvent();
+            repo.Run();
 
             this.remoteRootDir.Refresh();
             var document = this.remoteRootDir.GetChildren().First() as IDocument;
@@ -169,7 +171,34 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             folderD.Refresh();
             Assert.That(folderD.GetFileSystemInfos().Count(), Is.EqualTo(folderD.GetFiles().Count()));
             Assert.That(folderD.GetFiles().First().Name, Is.EqualTo(fileNameA));
-            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
+            AssertThatEventCounterIsZero();
+        }
+
+        [Test]
+        public void OneLocalFileContentIsChanged([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
+            byte[] newContent = Encoding.UTF8.GetBytes("new born citty");
+            this.remoteRootDir.CreateDocument(defaultFileName, defaultContent);
+
+            InitializeAndRunRepo();
+
+            using (var filestream = this.localRootDir.GetFiles().First().Open(FileMode.Truncate, FileAccess.Write, FileShare.None)) {
+                filestream.Write(newContent, 0, newContent.Length);
+            }
+
+            DateTime modificationDate = this.localRootDir.GetFiles().First().LastWriteTimeUtc;
+
+            WaitUntilQueueIsNotEmpty();
+            AddStartNextSyncEvent();
+            repo.Run();
+
+            var remoteDoc = this.remoteRootDir.GetChildren().First() as IDocument;
+            var localDoc = this.localRootDir.GetFiles().First();
+            Assert.That(remoteDoc.ContentStreamLength, Is.EqualTo(newContent.Length));
+            remoteDoc.AssertThatIfContentHashExistsItIsEqualTo(newContent);
+            Assert.That(localDoc.Length, Is.EqualTo(newContent.Length));
+            Assert.That(localDoc.LastWriteTimeUtc, Is.EqualTo(modificationDate));
+            AssertThatEventCounterIsZero();
         }
     }
 }
