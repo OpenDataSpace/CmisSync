@@ -59,6 +59,7 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
             this.repo.Run();
 
             AssertThatFolderStructureIsEqual();
+            AssertThatEventCounterIsZero();
         }
 
         [Test]
@@ -82,6 +83,7 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
             this.repo.Run();
 
             AssertThatFolderStructureIsEqual();
+            AssertThatEventCounterIsZero();
         }
     }
 }
