@@ -623,7 +623,8 @@ namespace TestLibrary.IntegrationTests {
             folder.Refresh();
             Assert.That(localFolder.Name, Is.EqualTo(folder.Name));
             Assert.That(folder.Name, Is.EqualTo(oldName));
-            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0), "Number of changes is not zero");
+            AssertThatEventCounterIsZero();
+            AssertThatFolderStructureIsEqual();
         }
 
         [Test]
@@ -977,7 +978,8 @@ namespace TestLibrary.IntegrationTests {
             var doc = (this.remoteRootDir.GetChildren().First() as IFolder).GetChildren().First() as IDocument;
             Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
             Assert.That(doc.Name, Is.EqualTo("doc"));
-            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
+            AssertThatEventCounterIsZero();
+            AssertThatFolderStructureIsEqual();
         }
 
         [Test, Timeout(360000), MaxTime(300000)]
@@ -1021,7 +1023,7 @@ namespace TestLibrary.IntegrationTests {
                 }
             }
 
-            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
+            AssertThatEventCounterIsZero();
         }
 
         [Test]
@@ -1084,7 +1086,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(file.Length, Is.EqualTo(newContent.Length));
             Assert.That(file.Length, Is.EqualTo(doc.ContentStreamLength));
             if (this.session.IsServerAbleToUpdateModificationDate()) {
-                this.AssertThatDatesAreEqual(file.LastWriteTimeUtc, doc.LastModificationDate);
+                AssertThatDatesAreEqual(file.LastWriteTimeUtc, doc.LastModificationDate);
             }
         }
 
@@ -1104,11 +1106,8 @@ namespace TestLibrary.IntegrationTests {
             this.AddStartNextSyncEvent();
             this.repo.Run();
 
-            folder.Refresh();
-            Assert.That(this.localRootDir.GetDirectories().Count(), Is.EqualTo(1));
-            Assert.That(this.localRootDir.GetDirectories().First().Name, Is.EqualTo(newFolderName).Or.EqualTo(oldFolderName));
-            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
-            Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(newFolderName));
+            AssertThatEventCounterIsZero();
+            AssertThatFolderStructureIsEqual();
         }
 
         [Test]
@@ -1126,10 +1125,7 @@ namespace TestLibrary.IntegrationTests {
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
             this.repo.Run();
 
-            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(2));
-            foreach (var mail in this.remoteRootDir.GetChildren()) {
-                Assert.That(mail.Name, Is.EqualTo(mailName1).Or.EqualTo(mailName2));
-            }
+            AssertThatFolderStructureIsEqual();
         }
 
         [Test]
@@ -1199,6 +1195,7 @@ namespace TestLibrary.IntegrationTests {
 
             remoteDoc.Refresh();
             Assert.That(remoteDoc.Parents.First().Name, Is.EqualTo(folderName));
+            AssertThatFolderStructureIsEqual();
         }
 
         [Test]
