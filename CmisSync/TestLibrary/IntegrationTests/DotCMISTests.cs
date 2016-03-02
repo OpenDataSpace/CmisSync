@@ -853,8 +853,8 @@ namespace TestLibrary.IntegrationTests {
     /// </summary>
     [TestFixture, Timeout(60000), Category("Slow")]
     public class DotCMISSessionTests {
-        // HTTP Read and Connection Timeout set to 10 secs
-        private static readonly string DefaultHttpTimeOut = "10000";
+        // HTTP Read and Connection Timeout set to 30 secs
+        private static readonly string DefaultHttpTimeOut = "30000";
 
         /// <summary>
         /// Creates a cmis Atom Pub session with the given credentials.
