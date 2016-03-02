@@ -364,6 +364,7 @@
     <Compile Include="IntegrationTests\SyncScenarioITs\CreateLocalFileIT.cs" />
     <Compile Include="IntegrationTests\SyncScenarioITs\CreateLocalFolderIT.cs" />
     <Compile Include="IntegrationTests\SyncScenarioITs\UpdateLocalFileIT.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\CreateRemoteFolderIT.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

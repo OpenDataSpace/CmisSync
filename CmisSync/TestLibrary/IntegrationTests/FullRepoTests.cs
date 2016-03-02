@@ -63,16 +63,6 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
         }
 
-        [Test]
-        public void OneRemoteFolderCreated() {
-            this.remoteRootDir.CreateFolder("Cat");
-
-            this.InitializeAndRunRepo();
-
-            Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(1));
-            Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("Cat"));
-            AssertThatFolderStructureIsEqual();
-        }
 
         [Test]
         public void OneRemoteFolderIsDeleted() {
