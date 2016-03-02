@@ -55,8 +55,7 @@ namespace TestLibrary.IntegrationTests {
             string fileName = "localFile.bin";
             var folder = this.remoteRootDir.CreateFolder(folderName);
             folder.CreateDocument("foo.bin", "bar");
-            this.InitializeAndRunRepo();
-            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.InitializeAndRunRepo(swallowExceptions: true);
 
             using (var file = File.Open(Path.Combine(this.localRootDir.GetDirectories().First().FullName, fileName), FileMode.Create)) {
             }
@@ -65,7 +64,7 @@ namespace TestLibrary.IntegrationTests {
             (this.remoteRootDir.GetChildren().First() as IFolder).DeleteTree(false, null, true);
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
 
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            this.WaitUntilQueueIsNotEmpty();
 
             this.repo.Run();
 
@@ -87,7 +86,7 @@ namespace TestLibrary.IntegrationTests {
 
             this.localRootDir.GetFiles().First().Delete();
 
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            this.WaitUntilQueueIsNotEmpty();
 
             this.repo.Run();
 
@@ -144,7 +143,7 @@ namespace TestLibrary.IntegrationTests {
             fileInfo.Refresh();
             long expectedLength = fileInfo.Length;
 
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            this.WaitUntilQueueIsNotEmpty();
 
             this.AddStartNextSyncEvent();
             this.repo.Run();
@@ -168,7 +167,7 @@ namespace TestLibrary.IntegrationTests {
             this.localRootDir.GetFiles().First().MoveTo(Path.Combine(this.localRootDir.FullName, localName));
             this.remoteRootDir.GetChildren().First().Rename(remoteName);
 
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            this.WaitUntilQueueIsNotEmpty();
 
             this.AddStartNextSyncEvent();
             this.repo.Run();
@@ -576,7 +575,7 @@ namespace TestLibrary.IntegrationTests {
             doc.Move(this.remoteRootDir, b);
 
             this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            this.WaitUntilQueueIsNotEmpty();
             this.AddStartNextSyncEvent();
             this.repo.Run();
 
@@ -629,7 +628,7 @@ namespace TestLibrary.IntegrationTests {
             folder1.MoveTo(folder1.FullName + "_renamed");
             folder2.MoveTo(fullName1);
             new DirectoryInfo(fullName1 + "_renamed").MoveTo(fullName2);
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            this.WaitUntilQueueIsNotEmpty();
 
             this.AddStartNextSyncEvent();
             this.repo.SingleStepQueue.SwallowExceptions = true;
