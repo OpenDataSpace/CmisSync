@@ -305,6 +305,15 @@ namespace TestLibrary.IntegrationTests {
             }
         }
 
+        protected void AssertThatEventCounterIsZero() {
+            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0), string.Format("Number of changes is not zero:\n{0}", this.repo.SingleStepQueue.Queue.ToArray().ToString()));
+        }
+
+        protected void AssertThatFolderStructureIsEqual() {
+            this.remoteRootDir.Refresh();
+            Assert.That(new FolderTree(this.remoteRootDir, "."), Is.EqualTo(new FolderTree(this.localRootDir, ".")));
+        }
+
         protected virtual void Dispose(bool disposing) {
             if (this.disposed) {
                 return;
