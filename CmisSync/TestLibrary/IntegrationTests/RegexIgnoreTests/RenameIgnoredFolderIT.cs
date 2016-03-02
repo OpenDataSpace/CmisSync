@@ -53,10 +53,12 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
 
             ignoredLocalFolder.MoveTo(Path.Combine(this.localRootDir.FullName, normalName));
 
-            this.WaitUntilQueueIsNotEmpty();
-            this.repo.Run();
-            Thread.Sleep(3000);
-            this.repo.Run();
+            WaitUntilQueueIsNotEmpty();
+            AddStartNextSyncEvent();
+            repo.Run();
+            WaitForRemoteChanges(sleepDuration: 15000);
+            AddStartNextSyncEvent();
+            repo.Run();
 
             AssertThatFolderStructureIsEqual();
             AssertThatEventCounterIsZero();
