@@ -42,7 +42,7 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             AddStartNextSyncEvent();
             repo.Run();
 
-            Assert.That(this.localRootDir.GetFileSystemInfos, Is.Empty);
+            Assert.That(this.localRootDir.GetFileSystemInfos(), Is.Empty);
             AssertThatFolderStructureIsEqual();
             AssertThatEventCounterIsZero();
         }
