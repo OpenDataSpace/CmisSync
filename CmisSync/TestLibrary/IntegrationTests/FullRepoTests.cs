@@ -77,32 +77,6 @@ namespace TestLibrary.IntegrationTests {
             Assert.That((this.remoteRootDir.GetChildren().First() as IFolder).GetChildren().Count(), Is.EqualTo(1));
         }
 
-        // Timeout is set to 10 minutes for 10 x 1 MB file
-        [Test, Timeout(600000), MaxTime(600000)]
-        public void ManyRemoteFilesCreated([Values(10)]int fileNumber) {
-            string content = new string('A', 1024 * 1024);
-            for (int i = 0; i < fileNumber; ++i) {
-                string fileName = "file" + i.ToString();
-                this.remoteRootDir.CreateDocument(fileName, content);
-            }
-
-            this.InitializeAndRunRepo();
-
-            var localFiles = this.localRootDir.GetFiles();
-            Assert.That(localFiles.Length, Is.EqualTo(fileNumber));
-            foreach (var localFile in localFiles) {
-                Assert.That(localFile, Is.InstanceOf(typeof(FileInfo)));
-                Assert.That(localFile.Length, Is.EqualTo(content.Length));
-            }
-
-            var remoteFiles = this.remoteRootDir.GetChildren();
-            Assert.That(remoteFiles.TotalNumItems, Is.EqualTo(fileNumber));
-            foreach (IDocument remoteFile in remoteFiles.OfType<IDocument>()) {
-                Assert.That(remoteFile.ContentStreamLength, Is.EqualTo(content.Length));
-                remoteFile.AssertThatIfContentHashExistsItIsEqualTo(content);
-            }
-        }
-
         [Test]
         public void OneRemoteFileContentIsDeleted([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;

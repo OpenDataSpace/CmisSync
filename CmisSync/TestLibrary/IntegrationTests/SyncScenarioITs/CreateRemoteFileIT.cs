@@ -67,6 +67,35 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             AssertThatOneFileIsSynced(doc, string.Empty);
         }
 
+        // Timeout is set to 10 minutes for 10 x 1 MB file
+        [Test, Timeout(600000), MaxTime(600000)]
+        public void CreateMultipleRemoteFiles([Values(10)]int fileNumber) {
+            string content = new string('A', 1024 * 1024);
+            for (int i = 0; i < fileNumber; ++i) {
+                string fileName = "file" + i.ToString();
+                this.remoteRootDir.CreateDocument(fileName, content);
+            }
+
+            InitializeAndRunRepo();
+
+            var localFiles = this.localRootDir.GetFileSystemInfos();
+            Assert.That(localFiles.Length, Is.EqualTo(fileNumber));
+            foreach (var localFile in localFiles) {
+                Assert.That(localFile, Is.InstanceOf(typeof(FileInfo)));
+                Assert.That((localFile as FileInfo).Length, Is.EqualTo(content.Length));
+            }
+
+            var remoteFiles = this.remoteRootDir.GetChildren();
+            Assert.That(remoteFiles.TotalNumItems, Is.EqualTo(fileNumber));
+            foreach (IDocument remoteFile in remoteFiles.OfType<IDocument>()) {
+                Assert.That(remoteFile.ContentStreamLength, Is.EqualTo(content.Length));
+                remoteFile.AssertThatIfContentHashExistsItIsEqualTo(content);
+            }
+
+            AssertThatEventCounterIsZero();
+            AssertThatFolderStructureIsEqual();
+        }
+
         private void AssertThatOneFileIsSynced(IDocument doc, string content = null) {
             content = content ?? defaultContent;
             var children = this.localRootDir.GetFileSystemInfos();
