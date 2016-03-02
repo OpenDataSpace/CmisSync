@@ -209,14 +209,14 @@ namespace TestLibrary.IntegrationTests {
             var source = this.remoteRootDir.CreateFolder(oldParentName);
             var folder = source.CreateFolder(oldName);
             var target = this.remoteRootDir.CreateFolder(newParentName);
-            this.InitializeAndRunRepo(swallowExceptions: true);
+            InitializeAndRunRepo(swallowExceptions: true);
 
             folder.Refresh();
             folder.Move(source, target);
 
-            this.WaitForRemoteChanges();
-            this.AddStartNextSyncEvent();
-            this.repo.Run();
+            WaitForRemoteChanges(sleepDuration: 15000);
+            AddStartNextSyncEvent();
+            repo.Run();
 
             var localSource = this.localRootDir.GetDirectories(oldParentName).First();
             var localTarget = this.localRootDir.GetDirectories(newParentName).First();
