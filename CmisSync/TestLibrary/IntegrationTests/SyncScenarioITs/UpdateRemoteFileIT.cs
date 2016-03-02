@@ -47,14 +47,16 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             Assert.That(oldChangeToken, Is.Not.EqualTo(newChangeToken));
             Assert.That(doc.ContentStreamLength, Is.Null.Or.EqualTo(0));
             doc.AssertThatIfContentHashExistsItIsEqualTo(string.Empty, string.Format("old hash was {0}", hash != null ? Utils.ToHexString(hash) : "null"));
-            WaitForRemoteChanges();
+            WaitForRemoteChanges(sleepDuration: 15000);
             AddStartNextSyncEvent();
             repo.Run();
 
-            var children = this.localRootDir.GetFiles();
+            var children = this.localRootDir.GetFileSystemInfos();
             Assert.That(children.Length, Is.EqualTo(1));
-            var child = children.First();
-            Assert.That(child.Length, Is.EqualTo(0), child.ToString());
+            var file = children.First();
+            Assert.That(file, Is.InstanceOf(typeof(FileInfo)));
+            Assert.That((file as FileInfo).Length, Is.EqualTo(0));
+            AssertThatFolderStructureIsEqual();
             AssertThatEventCounterIsZero();
         }
 
@@ -76,6 +78,7 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             var file = this.localRootDir.GetFileSystemInfos().First();
             Assert.That(file, Is.InstanceOf(typeof(FileInfo)));
             Assert.That((file as FileInfo).Length, Is.EqualTo(newContent.Length));
+            AssertThatFolderStructureIsEqual();
             AssertThatEventCounterIsZero();
         }
     }
