@@ -68,6 +68,7 @@ namespace TestLibrary.IntegrationTests {
         private string subfolder;
         private bool contentChanges;
         private bool disposed = false;
+        private string lastestChangeLogToken;
 
         ~BaseFullRepoTest() {
             this.Dispose(false);
@@ -242,8 +243,7 @@ namespace TestLibrary.IntegrationTests {
             }
 
             int waited = 0;
-            while (queue.Queue.IsEmpty)
-            {
+            while (queue.Queue.IsEmpty) {
                 int interval = 20;
 
                 // Wait for event to kick in
@@ -256,7 +256,18 @@ namespace TestLibrary.IntegrationTests {
         }
 
         protected void WaitForRemoteChanges(int sleepDuration = 5000) {
-            Thread.Sleep(this.ContentChangesActive ? sleepDuration : 0);
+            int noChangesUntil = sleepDuration;
+            while (noChangesUntil > 0) {
+                var changes = this.session.GetContentChanges(this.lastestChangeLogToken, false, 1000);
+                if (changes.LatestChangeLogToken != this.lastestChangeLogToken) {
+                    this.lastestChangeLogToken = changes.LatestChangeLogToken;
+                    noChangesUntil = sleepDuration;
+                } else {
+                    noChangesUntil -= 1000;
+                }
+
+                Thread.Sleep(this.ContentChangesActive ? 1000 : 0);
+            }
         }
 
         protected void EnsureThatContentChangesAreSupported() {
@@ -289,6 +300,9 @@ namespace TestLibrary.IntegrationTests {
             this.repo.Initialize();
             this.repo.SingleStepQueue.SwallowExceptions = swallowExceptions;
             this.repo.Run();
+            if (this.ContentChangesActive) {
+                this.lastestChangeLogToken = this.session.RepositoryInfo.LatestChangeLogToken;
+            }
         }
 
         protected void AddStartNextSyncEvent(bool forceCrawl = false) {
