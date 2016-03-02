@@ -363,6 +363,7 @@
     <Compile Include="FilterTests\RegexFilterTests\RegexIgnoreEventTransformerTest.cs" />
     <Compile Include="IntegrationTests\SyncScenarioITs\CreateLocalFileIT.cs" />
     <Compile Include="IntegrationTests\SyncScenarioITs\CreateLocalFolderIT.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\UpdateLocalFileIT.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

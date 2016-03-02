@@ -179,70 +179,6 @@ namespace TestLibrary.IntegrationTests {
         }
 
         [Test]
-        public void OneLocalFileRenamed() {
-            string fileName = "file";
-            string newFileName = "renamedFile";
-            string content = "content";
-            var filePath = Path.Combine(this.localRootDir.FullName, fileName);
-            var fileInfo = new FileInfo(filePath);
-            using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.Write(content);
-            }
-
-            this.InitializeAndRunRepo();
-
-            fileInfo.MoveTo(Path.Combine(this.localRootDir.FullName, newFileName));
-            DateTime modificationDate = fileInfo.LastWriteTimeUtc;
-
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
-
-            this.repo.Run();
-
-            var children = this.remoteRootDir.GetChildren();
-            Assert.That(children.TotalNumItems, Is.EqualTo(1));
-            var child = children.First();
-            Assert.That(child, Is.InstanceOf(typeof(IDocument)));
-            var doc = child as IDocument;
-            Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
-            Assert.That(doc.Name, Is.EqualTo(newFileName));
-            Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
-        }
-
-        [Test]
-        public void OneLocalFileRenamedAndMoved() {
-            string fileName = "file";
-            string newFileName = "renamedFile";
-            string folderName = "folder";
-            string content = "content";
-            var filePath = Path.Combine(this.localRootDir.FullName, fileName);
-            var fileInfo = new FileInfo(filePath);
-            using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.Write(content);
-            }
-
-            this.repo.SingleStepQueue.SwallowExceptions = true;
-
-            this.InitializeAndRunRepo();
-            new DirectoryInfo(Path.Combine(this.localRootDir.FullName, folderName)).Create();
-            fileInfo.MoveTo(Path.Combine(this.localRootDir.FullName, folderName, newFileName));
-            DateTime modificationDate = fileInfo.LastWriteTimeUtc;
-
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
-
-            this.repo.Run();
-
-            var children = this.remoteRootDir.GetChildren();
-            Assert.That(children.TotalNumItems, Is.EqualTo(1));
-            var child = children.First();
-            Assert.That(child, Is.InstanceOf(typeof(IFolder)));
-            Assert.That((child as IFolder).GetChildren().TotalNumItems, Is.EqualTo(1));
-            var doc = (child as IFolder).GetChildren().First() as IDocument;
-            Assert.That(doc.ContentStreamLength, Is.EqualTo(fileInfo.Length), "ContentStream not set");
-            Assert.That(doc.Name, Is.EqualTo(newFileName));
-            Assert.That(this.localRootDir.GetDirectories().First().GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
-        }
-
-        [Test]
         public void OneLocalFileIsRemoved() {
             string fileName = "removingFile.bin";
             string content = string.Empty;
@@ -609,42 +545,6 @@ namespace TestLibrary.IntegrationTests {
         }
 
         [Test]
-        public void OneLocalFileIsChangedAndRenamed([Values(true, false)]bool contentChanges) {
-            this.ContentChangesActive = contentChanges;
-            string fileName = "file.bin";
-            string newFileName = "file_1.bin";
-            string content = "cat";
-            this.remoteRootDir.CreateDocument(fileName, content);
-            Thread.Sleep(100);
-            this.InitializeAndRunRepo(swallowExceptions: true);
-
-            var file = this.localRootDir.GetFiles().First();
-            using (var stream = file.AppendText()) {
-                stream.Write(content);
-            }
-
-            long length = Encoding.UTF8.GetBytes(content).Length * 2;
-
-            file.MoveTo(Path.Combine(this.localRootDir.FullName, newFileName));
-            file.Refresh();
-
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
-            this.AddStartNextSyncEvent();
-            this.repo.Run();
-
-            this.remoteRootDir.Refresh();
-            var document = this.remoteRootDir.GetChildren().First() as IDocument;
-            file = this.localRootDir.GetFiles().First();
-
-            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(1));
-            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
-            Assert.That(document.Name, Is.EqualTo(newFileName));
-            Assert.That(file.Name, Is.EqualTo(newFileName));
-            Assert.That(file.Length, Is.EqualTo(length));
-            Assert.That(document.ContentStreamLength, Is.EqualTo(length));
-        }
-
-        [Test]
         public void OneRemoteFileIsChangedAndRenamed([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string fileName = "file.bin";
@@ -810,54 +710,6 @@ namespace TestLibrary.IntegrationTests {
                 }
             }
 
-            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
-        }
-
-        [Test]
-        public void LocalFilesMovedToEachOthersLocationInLocalFolderTree([Values(false)]bool contentChanges, [Values("a", "Z")]string folderName) {
-            this.ContentChangesActive = contentChanges;
-            string fileNameA = "testfile.bin";
-            string fileNameB = "anotherFile.bin";
-            string contentA = "text";
-            string contentB = "another text";
-            var sourceFolderA = this.remoteRootDir.CreateFolder(folderName).CreateFolder("folder").CreateFolder("B");
-            sourceFolderA.CreateDocument(fileNameA, contentA);
-
-            var sourceFolderB = this.remoteRootDir.CreateFolder("C").CreateFolder("Folder").CreateFolder("D");
-            sourceFolderB.CreateDocument(fileNameB, contentB);
-
-            this.InitializeAndRunRepo(swallowExceptions: false);
-            this.repo.SingleStepQueue.DropAllLocalFileSystemEvents = true;
-            var rootDirs = this.localRootDir.GetDirectories();
-            var folderA = rootDirs.First().Name == folderName ? rootDirs.First() : rootDirs.Last();
-            var folderC = rootDirs.First().Name == "C" ? rootDirs.First() : rootDirs.Last();
-            var folderB = folderA.GetDirectories().First().GetDirectories().First();
-            var folderD = folderC.GetDirectories().First().GetDirectories().First();
-            var fileToBeMovedA = folderB.GetFiles().First();
-            var fileToBeMovedB = folderD.GetFiles().First();
-            fileToBeMovedA.MoveTo(Path.Combine(folderD.FullName, fileNameA));
-            fileToBeMovedB.MoveTo(Path.Combine(folderB.FullName, fileNameB));
-            this.AddStartNextSyncEvent();
-            this.repo.Run();
-
-            this.remoteRootDir.Refresh();
-            var remoteRootDirs = this.remoteRootDir.GetChildren();
-            var first = remoteRootDirs.First();
-            var last = remoteRootDirs.Last();
-            var remoteFolderC = first.Name == "C" ? first as IFolder : last as IFolder;
-            Assert.That(remoteFolderC.Name, Is.EqualTo("C"));
-            var remoteFolderFolder = remoteFolderC.GetChildren().First() as IFolder;
-            var remoteFolderD = remoteFolderFolder.GetChildren().First() as IFolder;
-            remoteFolderD.Refresh();
-            var remoteFile = remoteFolderD.GetChildren().First() as IDocument;
-
-            Assert.That(remoteFile.Name, Is.EqualTo(fileNameA));
-            Assert.That(remoteFile.ContentStreamLength, Is.EqualTo(contentA.Length));
-            folderB.Refresh();
-            Assert.That(folderB.GetFiles().First().Name, Is.Not.EqualTo(fileNameA));
-            folderD.Refresh();
-            Assert.That(folderD.GetFileSystemInfos().Count(), Is.EqualTo(folderD.GetFiles().Count()));
-            Assert.That(folderD.GetFiles().First().Name, Is.EqualTo(fileNameA));
             Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 
