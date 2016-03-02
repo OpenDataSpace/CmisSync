@@ -153,6 +153,7 @@ SOURCES =  \
 	IntegrationTests/SyncScenarioITs/CreateRemoteFolderIT.cs \
 	IntegrationTests/SyncScenarioITs/RemoveLocalFileIT.cs \
 	IntegrationTests/SyncScenarioITs/UpdateLocalFileIT.cs \
+	IntegrationTests/SyncScenarioITs/UpdateRemoteFileIT.cs \
 	IntegrationTests/SyncScenarioITs/UpdateRemoteFolderIT.cs \
 	IntegrationTests/TestNameAttribute.cs \
 	IntegrationTests/UploadFileIT.cs \

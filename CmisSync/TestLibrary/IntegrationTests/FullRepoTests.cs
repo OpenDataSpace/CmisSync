@@ -78,59 +78,6 @@ namespace TestLibrary.IntegrationTests {
         }
 
         [Test]
-        public void OneRemoteFileContentIsDeleted([Values(true, false)]bool contentChanges) {
-            this.ContentChangesActive = contentChanges;
-
-            string fileName = "file";
-            string content = "content";
-            var doc = this.remoteRootDir.CreateDocument(fileName, content);
-
-            this.InitializeAndRunRepo();
-
-            doc.Refresh();
-            doc.AssertThatIfContentHashExistsItIsEqualTo(content);
-            byte[] hash = doc.ContentStreamHash();
-            string oldChangeToken = doc.ChangeToken;
-            doc.DeleteContentStream(true);
-            string newChangeToken = doc.ChangeToken;
-            Assert.That(oldChangeToken, Is.Not.EqualTo(newChangeToken));
-            Assert.That(doc.ContentStreamLength, Is.Null.Or.EqualTo(0));
-            doc.AssertThatIfContentHashExistsItIsEqualTo(string.Empty, string.Format("old hash was {0}", hash != null ? Utils.ToHexString(hash) : "null"));
-            this.WaitForRemoteChanges();
-            this.AddStartNextSyncEvent();
-            this.repo.Run();
-
-            var children = this.localRootDir.GetFiles();
-            Assert.That(children.Length, Is.EqualTo(1));
-            var child = children.First();
-            Assert.That(child.Length, Is.EqualTo(0), child.ToString());
-        }
-
-        [Test]
-        public void OneRemoteFileUpdated([Values(true, false)]bool contentChanges) {
-            this.ContentChangesActive = contentChanges;
-            string fileName = "file.bin";
-            string content = "cat";
-            var doc = this.remoteRootDir.CreateDocument(fileName, content);
-
-            this.InitializeAndRunRepo();
-
-            content += content;
-            doc.Refresh();
-            string changeToken = doc.ChangeToken;
-            doc.SetContent(content);
-
-            this.WaitForRemoteChanges(sleepDuration: 15000);
-
-            this.AddStartNextSyncEvent();
-            this.repo.Run();
-
-            var file = this.localRootDir.GetFiles().First();
-            Assert.That(file, Is.InstanceOf(typeof(FileInfo)));
-            Assert.That(file.Length, Is.EqualTo(content.Length));
-        }
-
-        [Test]
         public void RemoteCreatedFileIsDeletedLocally() {
             string fileName = "file.bin";
             string content = "cat";
