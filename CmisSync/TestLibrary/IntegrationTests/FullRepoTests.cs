@@ -246,7 +246,7 @@ namespace TestLibrary.IntegrationTests {
             long length = (long)document.ContentStreamLength;
             document.Rename(newFileName);
 
-            this.WaitForRemoteChanges();
+            this.WaitForRemoteChanges(sleepDuration: 15000);
             this.AddStartNextSyncEvent();
             this.repo.Run();
 
@@ -310,7 +310,7 @@ namespace TestLibrary.IntegrationTests {
             doc.SetContent(content, true, true);
             Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length), "ContentStream not set correctly");
 
-            WaitForRemoteChanges();
+            WaitForRemoteChanges(sleepDuration: 15000);
             AddStartNextSyncEvent();
             repo.Run();
 

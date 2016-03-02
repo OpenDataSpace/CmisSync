@@ -851,10 +851,10 @@ namespace TestLibrary.IntegrationTests {
     /// <summary>
     /// Dot CMIS session tests. Each log in process must be able to be executed in 60 seconds, otherwise the tests will fail.
     /// </summary>
-    [TestFixture, Timeout(60000), Category("Slow")]
+    [TestFixture, Timeout(70000), Category("Slow")]
     public class DotCMISSessionTests {
-        // HTTP Read and Connection Timeout set to 30 secs
-        private static readonly string DefaultHttpTimeOut = "30000";
+        // HTTP Read and Connection Timeout set to 60 secs
+        private static readonly string DefaultHttpTimeOut = "60000";
 
         /// <summary>
         /// Creates a cmis Atom Pub session with the given credentials.

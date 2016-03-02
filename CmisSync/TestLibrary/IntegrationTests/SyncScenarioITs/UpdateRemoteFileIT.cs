@@ -71,7 +71,7 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             doc.Refresh();
             doc.SetContent(newContent);
 
-            WaitForRemoteChanges();
+            WaitForRemoteChanges(sleepDuration: 15000);
             AddStartNextSyncEvent();
             repo.Run();
 
