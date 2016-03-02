@@ -21,6 +21,7 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
     using System;
     using System.IO;
     using System.Linq;
+    using System.Threading;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
@@ -31,7 +32,7 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
     using TestLibrary.TestUtils;
 
     [TestFixture, TestName("RenameIgnoredFolder"), Category("RegexIgnore"), Category("Slow"), Timeout(180000)]
-    public class RenameIgnoredFolderIT : BaseFullRepoTest {
+    public class RenameIgnoredFolderIT : BaseRegexIgnoreTest {
         private readonly string ignoredName = ".Ignored";
         private readonly string fileName = "file.bin";
         private readonly string normalName = "NotIgnoredFolder";
@@ -53,11 +54,11 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
             ignoredLocalFolder.MoveTo(Path.Combine(this.localRootDir.FullName, normalName));
 
             this.WaitUntilQueueIsNotEmpty();
-            this.AddStartNextSyncEvent();
+            this.repo.Run();
+            Thread.Sleep(3000);
             this.repo.Run();
 
-            this.remoteRootDir.Refresh();
-            Assert.That(new FolderTree(this.remoteRootDir, "."), Is.EqualTo(new FolderTree(this.localRootDir, ".")));
+            AssertThatFolderStructureIsEqual();
         }
 
         [Test]
@@ -80,7 +81,7 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
             this.AddStartNextSyncEvent();
             this.repo.Run();
 
-            Assert.That(new FolderTree(this.remoteRootDir, "."), Is.EqualTo(new FolderTree(this.localRootDir, ".")));
+            AssertThatFolderStructureIsEqual();
         }
     }
 }
