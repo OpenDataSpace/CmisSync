@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="CreateRemoteFolderIT.cs" company="GRAU DATA AG">
+// <copyright file="CreateRemoteFileIT.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -24,40 +24,45 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
+    using DotCMIS.Client;
+
     using NUnit.Framework;
 
-    [TestFixture, Category("Slow"), TestName("CreateRemoteFolder"), Timeout(180000)]
-    public class CreateRemoteFolderIT : AbstractBaseSyncScenarioIT {
+    using TestLibrary.TestUtils;
+
+    [TestFixture, Category("Slow"), TestName("CreateRemoteFile"), Timeout(180000)]
+    public class CreateRemoteFileIT : AbstractBaseSyncScenarioIT {
         [Test]
-        public void OneRemoteFolderCreatedBeforeSyncInit() {
-            this.remoteRootDir.CreateFolder(defaultFolderName);
+        public void OneRemoteFileCreatedBeforeSyncIsInitialized() {
+            var doc = this.remoteRootDir.CreateDocument(defaultFileName, defaultContent);
 
             InitializeAndRunRepo();
 
-            AssertThatOnlyOneFolderIsCreatedAndBothSidesAreInSync();
+            AssertThatOneFileIsSynced(doc);
         }
 
         [Test]
-        public void OneRemoteFolderCreatedAfterSyncInit([Values(true, false)]bool contentChanges) {
+        public void OneRemoteFileCreatedAfterSyncIsInitialized([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
 
             InitializeAndRunRepo();
-            this.remoteRootDir.Refresh();
-            this.remoteRootDir.CreateFolder(defaultFolderName);
+
+            var doc = this.remoteRootDir.CreateDocument(defaultFileName, defaultContent);
             WaitForRemoteChanges();
             AddStartNextSyncEvent();
             repo.Run();
 
-            AssertThatOnlyOneFolderIsCreatedAndBothSidesAreInSync();
+            AssertThatOneFileIsSynced(doc);
         }
 
-        private void AssertThatOnlyOneFolderIsCreatedAndBothSidesAreInSync() {
-            var localDirs = this.localRootDir.GetFileSystemInfos();
-            Assert.That(localDirs.Length, Is.EqualTo(1));
-            var localDir = localDirs.First() as DirectoryInfo;
-            Assert.That(localDir.Name, Is.EqualTo(defaultFolderName));
-            Assert.That(localDir.GetFileSystemInfos(), Is.Empty);
-            AssertThatFolderStructureIsEqual();
+        private void AssertThatOneFileIsSynced(IDocument doc) {
+            var children = this.localRootDir.GetFiles();
+            Assert.That(children.Length, Is.EqualTo(1));
+            var child = children.First();
+            Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
+            Assert.That(child.Length, Is.EqualTo(defaultContent.Length));
+            doc.Refresh();
+            doc.AssertThatIfContentHashExistsItIsEqualTo(defaultContent);
             AssertThatEventCounterIsZero();
         }
     }

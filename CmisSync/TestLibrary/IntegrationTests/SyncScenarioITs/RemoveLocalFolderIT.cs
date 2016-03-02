@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="CreateLocalFolderIT.cs" company="GRAU DATA AG">
+// <copyright file="RemoveLocalFolderIT.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -21,41 +21,22 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
     using System;
     using System.Linq;
 
-    using DotCMIS.Client;
-
     using NUnit.Framework;
 
-    [TestFixture, Category("Slow"), TestName("CreateLocalFolder"), Timeout(180000)]
-    public class CreateLocalFolderIT : AbstractBaseSyncScenarioIT {
+    [TestFixture, Category("Slow"), TestName("RemoveLocalFolder"), Timeout(180000)]
+    public class RemoveLocalFolderIT : AbstractBaseSyncScenarioIT {
         [Test]
-        public void OneLocalFolderCreatedBeforeSyncIsInitialized() {
+        public void OneLocalFolderRemoved() {
             this.localRootDir.CreateSubdirectory(defaultFolderName);
-
             InitializeAndRunRepo();
-            var children = this.remoteRootDir.GetChildren();
-            Assert.That(children.First().Name, Is.EqualTo(defaultFolderName));
             AssertThatFolderStructureIsEqual();
-            AssertThatEventCounterIsZero();
-        }
 
-        [Test]
-        public void OneLocalFolderCreatedAfterSyncInitialized([Values(true, false)]bool contentChanges) {
-            this.ContentChangesActive = contentChanges;
-            InitializeAndRunRepo();
-
-            this.localRootDir.CreateSubdirectory(defaultFolderName);
+            this.localRootDir.GetDirectories().First().Delete();
             WaitUntilQueueIsNotEmpty();
-            AddStartNextSyncEvent();
-            repo.Run();
-            WaitForRemoteChanges();
-            AddStartNextSyncEvent();
             repo.Run();
 
-            var children = this.remoteRootDir.GetChildren();
-            Assert.That(children.TotalNumItems, Is.EqualTo(1));
-            var remoteFolder = children.First() as IFolder;
-            Assert.That(remoteFolder.Name, Is.EqualTo(defaultFolderName));
-            Assert.That(remoteFolder.GetChildren().TotalNumItems, Is.EqualTo(0));
+            this.remoteRootDir.Refresh();
+            Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
             AssertThatFolderStructureIsEqual();
             AssertThatEventCounterIsZero();
         }

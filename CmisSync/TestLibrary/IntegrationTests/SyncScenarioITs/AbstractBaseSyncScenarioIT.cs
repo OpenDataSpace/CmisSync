@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="BaseRegexIgnoreTest.cs" company="GRAU DATA AG">
+// <copyright file="AbstractBaseSyncScenarioIT.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,14 +16,13 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-
-﻿namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
+﻿
+namespace TestLibrary.IntegrationTests.SyncScenarioITs {
     using System;
-    using System.IO;
 
-    public abstract class BaseRegexIgnoreTest : BaseFullRepoTest {
-        protected DirectoryInfo CreateIgnoredLocalDirectoryPath(string ignoredName = null) {
-            return Directory.CreateDirectory(localRootDir.FullName.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar + (ignoredName ?? ("." + Guid.NewGuid().ToString())));
-        }
+    public abstract class AbstractBaseSyncScenarioIT : BaseFullRepoTest {
+        protected readonly string defaultContent = "content";
+        protected readonly string defaultFolderName = "folder";
+        protected readonly string defaultFileName = "file.bin";
     }
 }

@@ -146,8 +146,10 @@ SOURCES =  \
 	IntegrationTests/SelectiveIgnoreTests/FileCrud.cs \
 	IntegrationTests/SelectiveIgnoreTests/MoveIT.cs \
 	IntegrationTests/SelectiveIgnoreTests/RenameIT.cs \
+	IntegrationTests/SyncScenarioITs/AbstractBaseSyncScenarioIT.cs \
 	IntegrationTests/SyncScenarioITs/CreateLocalFileIT.cs \
 	IntegrationTests/SyncScenarioITs/CreateLocalFolderIT.cs \
+	IntegrationTests/SyncScenarioITs/CreateRemoteFileIT.cs \
 	IntegrationTests/SyncScenarioITs/CreateRemoteFolderIT.cs \
 	IntegrationTests/SyncScenarioITs/RemoveLocalFileIT.cs \
 	IntegrationTests/SyncScenarioITs/UpdateLocalFileIT.cs \
@@ -229,6 +231,9 @@ SOURCES =  \
 	QueueingTests/DebugLoggingHandlerTest.cs \
 	QueueingTests/DelayRetryAndNextSyncEventHandlerTest.cs \
 	QueueingTests/EventManagerInitializerTest.cs \
+        IntegrationTests/SyncScenarioITs/RemoveLocalFolderIT.cs \
+        IntegrationTests/SyncScenarioITs/RemoveRemoteFileIT.cs \
+        IntegrationTests/SyncScenarioITs/RemoveRemoteFolderIT.cs \
 	QueueingTests/SyncEventManagerTest.cs \
 	QueueingTests/SyncEventQueueTest.cs \
 	SelectiveIgnoreTests/EventTransformerTest.cs \

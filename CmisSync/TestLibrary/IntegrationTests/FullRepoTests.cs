@@ -48,36 +48,6 @@ namespace TestLibrary.IntegrationTests {
 
     [TestFixture, Category("Slow"), TestName("FullRepo"), Timeout(180000)]
     public class FullRepoTests : BaseFullRepoTest {
-        [Test]
-        public void OneLocalFolderRemoved() {
-            this.localRootDir.CreateSubdirectory("Cat");
-
-            this.InitializeAndRunRepo();
-
-            this.localRootDir.GetDirectories().First().Delete();
-
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue, 15000);
-
-            this.repo.Run();
-
-            Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
-        }
-
-        [Test]
-        public void OneRemoteFolderIsDeleted() {
-            this.remoteRootDir.CreateFolder("Cat");
-
-            this.InitializeAndRunRepo();
-
-            (this.remoteRootDir.GetChildren().First() as IFolder).DeleteTree(true, null, true);
-
-            this.AddStartNextSyncEvent(forceCrawl: true);
-            this.repo.Run();
-
-            Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(0));
-            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
-            AssertThatFolderStructureIsEqual();
-        }
 
         [Test, Category("Conflict")]
         public void OneRemoteFolderIsDeletedAndOneUnsyncedFileExistsInTheCorrespondingLocalFolder() {
@@ -165,24 +135,6 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories().Length, Is.EqualTo(1));
             Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories()[0].Name, Is.EqualTo("Cat"));
             AssertThatFolderStructureIsEqual();
-        }
-
-        [Test]
-        public void OneRemoteFileCreated([Values(true, false)]bool contentChanges) {
-            this.ContentChangesActive = contentChanges;
-            string fileName = "file";
-            string content = "content";
-            var doc = this.remoteRootDir.CreateDocument(fileName, content);
-
-            this.InitializeAndRunRepo();
-
-            var children = this.localRootDir.GetFiles();
-            Assert.That(children.Length, Is.EqualTo(1));
-            var child = children.First();
-            Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
-            Assert.That(child.Length, Is.EqualTo(content.Length));
-            doc.Refresh();
-            doc.AssertThatIfContentHashExistsItIsEqualTo(content);
         }
 
         [Test]

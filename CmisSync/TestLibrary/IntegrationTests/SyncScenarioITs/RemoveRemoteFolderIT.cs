@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="CreateRemoteFolderIT.cs" company="GRAU DATA AG">
+// <copyright file="RemoveRemoteFolderIT.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -19,44 +19,30 @@
 ﻿
 namespace TestLibrary.IntegrationTests.SyncScenarioITs {
     using System;
-    using System.IO;
     using System.Linq;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
+    using DotCMIS.Client;
+
     using NUnit.Framework;
 
-    [TestFixture, Category("Slow"), TestName("CreateRemoteFolder"), Timeout(180000)]
-    public class CreateRemoteFolderIT : AbstractBaseSyncScenarioIT {
+    [TestFixture, Category("Slow"), TestName("RemoveRemoteFolder"), Timeout(180000)]
+    public class RemoveRemoteFolderIT : AbstractBaseSyncScenarioIT {
         [Test]
-        public void OneRemoteFolderCreatedBeforeSyncInit() {
-            this.remoteRootDir.CreateFolder(defaultFolderName);
-
-            InitializeAndRunRepo();
-
-            AssertThatOnlyOneFolderIsCreatedAndBothSidesAreInSync();
-        }
-
-        [Test]
-        public void OneRemoteFolderCreatedAfterSyncInit([Values(true, false)]bool contentChanges) {
+        public void OneRemoteFolderIsDeleted([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
-
-            InitializeAndRunRepo();
-            this.remoteRootDir.Refresh();
             this.remoteRootDir.CreateFolder(defaultFolderName);
+            InitializeAndRunRepo();
+            AssertThatFolderStructureIsEqual();
+
+            (this.remoteRootDir.GetChildren().First() as IFolder).DeleteTree(true, null, true);
+
             WaitForRemoteChanges();
             AddStartNextSyncEvent();
             repo.Run();
 
-            AssertThatOnlyOneFolderIsCreatedAndBothSidesAreInSync();
-        }
-
-        private void AssertThatOnlyOneFolderIsCreatedAndBothSidesAreInSync() {
-            var localDirs = this.localRootDir.GetFileSystemInfos();
-            Assert.That(localDirs.Length, Is.EqualTo(1));
-            var localDir = localDirs.First() as DirectoryInfo;
-            Assert.That(localDir.Name, Is.EqualTo(defaultFolderName));
-            Assert.That(localDir.GetFileSystemInfos(), Is.Empty);
+            Assert.That(this.localRootDir.GetFileSystemInfos, Is.Empty);
             AssertThatFolderStructureIsEqual();
             AssertThatEventCounterIsZero();
         }

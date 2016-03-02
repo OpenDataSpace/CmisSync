@@ -31,17 +31,15 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
     using NUnit.Framework;
 
     [TestFixture, Category("Slow"), TestName("UpdateLocalFile"), Timeout(180000)]
-    public class UpdateLocalFileIT : BaseFullRepoTest {
-        private readonly string fileName = "file.bin";
-        private readonly string content = "content";
+    public class UpdateLocalFileIT : AbstractBaseSyncScenarioIT {
         private readonly string newFileName = "renamedFile.bin";
 
         [Test]
         public void OneLocalFileRenamed() {
-            var filePath = Path.Combine(this.localRootDir.FullName, fileName);
+            var filePath = Path.Combine(this.localRootDir.FullName, defaultFileName);
             var fileInfo = new FileInfo(filePath);
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.Write(content);
+                sw.Write(defaultContent);
             }
 
             this.InitializeAndRunRepo();
@@ -65,18 +63,17 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
 
         [Test]
         public void OneLocalFileRenamedAndMoved() {
-            string folderName = "folder";
-            var filePath = Path.Combine(this.localRootDir.FullName, fileName);
+            var filePath = Path.Combine(this.localRootDir.FullName, defaultFileName);
             var fileInfo = new FileInfo(filePath);
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.Write(content);
+                sw.Write(defaultContent);
             }
 
             this.repo.SingleStepQueue.SwallowExceptions = true;
 
             this.InitializeAndRunRepo();
-            new DirectoryInfo(Path.Combine(this.localRootDir.FullName, folderName)).Create();
-            fileInfo.MoveTo(Path.Combine(this.localRootDir.FullName, folderName, newFileName));
+            new DirectoryInfo(Path.Combine(this.localRootDir.FullName, defaultFolderName)).Create();
+            fileInfo.MoveTo(Path.Combine(this.localRootDir.FullName, defaultFolderName, newFileName));
             DateTime modificationDate = fileInfo.LastWriteTimeUtc;
 
             this.WaitUntilQueueIsNotEmpty();
@@ -97,16 +94,16 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
         [Test]
         public void OneLocalFileIsChangedAndRenamed([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
-            this.remoteRootDir.CreateDocument(fileName, content);
+            this.remoteRootDir.CreateDocument(defaultFileName, defaultContent);
             Thread.Sleep(100);
             this.InitializeAndRunRepo(swallowExceptions: true);
 
             var file = this.localRootDir.GetFiles().First();
             using (var stream = file.AppendText()) {
-                stream.Write(content);
+                stream.Write(defaultContent);
             }
 
-            long length = Encoding.UTF8.GetBytes(content).Length * 2;
+            long length = Encoding.UTF8.GetBytes(defaultContent).Length * 2;
 
             file.MoveTo(Path.Combine(this.localRootDir.FullName, newFileName));
             file.Refresh();
@@ -130,7 +127,7 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
         [Test]
         public void LocalFilesMovedToEachOthersLocationInLocalFolderTree([Values(false)]bool contentChanges, [Values("a", "Z")]string folderName) {
             this.ContentChangesActive = contentChanges;
-            string fileNameA = "testfile.bin";
+            string fileNameA = defaultFileName;
             string fileNameB = "anotherFile.bin";
             string contentA = "text";
             string contentB = "another text";

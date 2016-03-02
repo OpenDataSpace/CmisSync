@@ -28,14 +28,11 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
     using NUnit.Framework;
 
     [TestFixture, Category("Slow"), TestName("RemoveLocalFile"), Timeout(180000)]
-    public class RemoveLocalFileIT : BaseFullRepoTest {
-        private readonly string fileName = "removingFile.bin";
-        private readonly string content = "content";
-
+    public class RemoveLocalFileIT : AbstractBaseSyncScenarioIT {
         [Test]
         public void OneLocalFileIsRemoved() {
-            var filePath = Path.Combine(this.localRootDir.FullName, fileName);
-            this.remoteRootDir.CreateDocument(fileName, content);
+            var filePath = Path.Combine(this.localRootDir.FullName, defaultFileName);
+            this.remoteRootDir.CreateDocument(defaultFileName, defaultContent);
 
             InitializeAndRunRepo();
 

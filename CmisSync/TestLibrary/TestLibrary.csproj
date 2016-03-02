@@ -366,6 +366,11 @@
     <Compile Include="IntegrationTests\SyncScenarioITs\UpdateLocalFileIT.cs" />
     <Compile Include="IntegrationTests\SyncScenarioITs\CreateRemoteFolderIT.cs" />
     <Compile Include="IntegrationTests\SyncScenarioITs\RemoveLocalFileIT.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\RemoveRemoteFolderIT.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\RemoveRemoteFileIT.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\RemoveLocalFolderIT.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\AbstractBaseSyncScenarioIT.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\CreateRemoteFileIT.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

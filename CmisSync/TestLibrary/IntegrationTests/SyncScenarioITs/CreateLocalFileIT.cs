@@ -32,21 +32,19 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
     using NUnit.Framework;
 
     [TestFixture, Category("Slow"), TestName("CreateLocalFile"), Timeout(180000)]
-    public class CreateLocalFileIT : BaseFullRepoTest {
-        private readonly string content = "content";
+    public class CreateLocalFileIT : AbstractBaseSyncScenarioIT {
 
         [Test]
         public void OneLocalFileCreated([Values(false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
-            string fileName = "file";
-            var filePath = Path.Combine(this.localRootDir.FullName, fileName);
+            var filePath = Path.Combine(this.localRootDir.FullName, defaultFileName);
             var fileInfo = new FileInfo(filePath);
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.Write(content);
+                sw.Write(defaultContent);
             }
 
             fileInfo.Refresh();
-            Assert.That(fileInfo.Length, Is.EqualTo(content.Length));
+            Assert.That(fileInfo.Length, Is.EqualTo(defaultContent.Length));
             DateTime modificationDate = fileInfo.LastWriteTimeUtc;
 
             this.InitializeAndRunRepo();
@@ -56,8 +54,8 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             var child = children.First();
             Assert.That(child, Is.InstanceOf(typeof(IDocument)));
             var doc = child as IDocument;
-            Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length), "Remote content stream has wrong length");
-            this.AssertThatContentHashIsEqualToExceptedIfSupported(doc, content);
+            Assert.That(doc.ContentStreamLength, Is.EqualTo(defaultContent.Length), "Remote content stream has wrong length");
+            this.AssertThatContentHashIsEqualToExceptedIfSupported(doc, defaultContent);
             Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
             AssertThatEventCounterIsZero();
             AssertThatFolderStructureIsEqual();
@@ -71,13 +69,13 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             var filePath = Path.Combine(this.localRootDir.FullName, fileName1);
             var fileInfo = new FileInfo(filePath);
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.Write(content);
+                sw.Write(defaultContent);
             }
 
             var filePath2 = Path.Combine(this.localRootDir.FullName, fileName2);
             var fileInfo2 = new FileInfo(filePath2);
             using (StreamWriter sw = fileInfo2.CreateText()) {
-                sw.Write(content);
+                sw.Write(defaultContent);
             }
 
             this.InitializeAndRunRepo();
@@ -139,11 +137,10 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
                 Assert.Ignore("Server does not support the synchronization of modification dates");
             }
 
-            string fileName = "file";
-            var filePath = Path.Combine(this.localRootDir.FullName, fileName);
+            var filePath = Path.Combine(this.localRootDir.FullName, defaultFileName);
             var fileInfo = new FileInfo(filePath);
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.Write(content);
+                sw.Write(defaultContent);
             }
 
             DateTime modificationDate = DateTime.UtcNow - TimeSpan.FromHours(1);
@@ -172,7 +169,7 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             FileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
             var fileNames = new List<string>();
             string fileName = "file";
-            this.remoteRootDir.CreateDocument(fileName + ".bin", content);
+            this.remoteRootDir.CreateDocument(fileName + ".bin", defaultContent);
             this.InitializeAndRunRepo();
 
             var file = this.localRootDir.GetFiles().First();
@@ -197,7 +194,7 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             foreach (var localFile in this.localRootDir.GetFiles()) {
                 Assert.That(fileNames.Contains(localFile.FullName));
                 var syncedFileInfo = fsFactory.CreateFileInfo(localFile.FullName);
-                Assert.That(syncedFileInfo.Length, Is.EqualTo(content.Length));
+                Assert.That(syncedFileInfo.Length, Is.EqualTo(defaultContent.Length));
                 if (localFile.FullName.Equals(file.FullName)) {
                     Assert.That(syncedFileInfo.Uuid, Is.EqualTo(uuid));
                 } else {
