@@ -63,7 +63,6 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
         }
 
-
         [Test]
         public void OneRemoteFolderIsDeleted() {
             this.remoteRootDir.CreateFolder("Cat");
@@ -166,30 +165,6 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories().Length, Is.EqualTo(1));
             Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories()[0].Name, Is.EqualTo("Cat"));
             AssertThatFolderStructureIsEqual();
-        }
-
-        [Test]
-        public void OneLocalFileIsRemoved() {
-            string fileName = "removingFile.bin";
-            string content = string.Empty;
-            var filePath = Path.Combine(this.localRootDir.FullName, fileName);
-            this.remoteRootDir.CreateDocument(fileName, content);
-
-            this.InitializeAndRunRepo();
-
-            // Stabilize test by waiting for all delayed fs events
-            Thread.Sleep(500);
-
-            // Process the delayed fs events
-            this.repo.Run();
-
-            new FileInfo(filePath).Delete();
-
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
-
-            this.repo.Run();
-
-            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
         }
 
         [Test]
