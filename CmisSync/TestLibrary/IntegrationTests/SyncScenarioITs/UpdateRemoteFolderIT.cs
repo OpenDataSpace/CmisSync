@@ -76,7 +76,7 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
 
             folder.Refresh();
             folder.Rename(newFolderName);
-            WaitForRemoteChanges();
+            WaitForRemoteChanges(sleepDuration: 15000);
             AddStartNextSyncEvent();
             repo.Run();
 
