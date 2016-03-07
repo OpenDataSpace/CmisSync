@@ -320,7 +320,7 @@ namespace TestLibrary.IntegrationTests {
         }
 
         protected void AssertThatEventCounterIsZero() {
-            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0), string.Format("Number of changes is not zero:\n{0}", this.repo.SingleStepQueue.Queue.ToArray().ToString()));
+            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0), string.Format("Number of changes is not zero:\n{0}", this.repo.SingleStepQueue.PrintAllEvents()));
         }
 
         protected void AssertThatFolderStructureIsEqual() {
