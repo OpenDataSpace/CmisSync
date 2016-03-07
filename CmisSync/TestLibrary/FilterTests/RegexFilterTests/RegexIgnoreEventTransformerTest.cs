@@ -127,6 +127,23 @@ namespace TestLibrary.FilterTests.RegexFilterTests {
             queue.Verify(q => q.AddEvent(It.Is<ContentChangeEvent>(e => e.Type == ChangeType.Deleted && e.ObjectId == remoteObjectId)));
         }
 
+        [Test]
+        public void TransformsRemoteUpdateEventToCreatedEventIfSourceWasIgnored([Values(true, false)]bool isDirectory) {
+            var underTest = SetUpMocksAndCreateTransformer(movedElement: isDirectory);
+            storage.Setup(s => s.GetObjectByRemoteId(remoteObjectId)).Returns((IMappedObject)null);
+            string reason;
+            this.filter.Setup(f => f.CheckFolderPath(newPath, out reason)).Returns(true);
+
+            Assert.That(underTest.Handle(updateEvent), Is.True);
+
+            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(isDirectory ? 2 : 1));
+            queue.Verify(q => q.AddEvent(It.IsAny<ContentChangeEvent>()), Times.Once());
+            queue.Verify(q => q.AddEvent(It.Is<ContentChangeEvent>(e => e.Type == ChangeType.Created && e.ObjectId == remoteObjectId)));
+            if (isDirectory) {
+                queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Once());
+            }
+        }
+
         private RegexIgnoreEventTransformer SetUpMocksAndCreateTransformer(bool movedElement = false) {
             this.oldPath = movedElement ? new DirectoryInfo("sourcePath").FullName : new FileInfo("sourcePath").FullName;
             this.newPath = "targetPath";
@@ -134,12 +151,17 @@ namespace TestLibrary.FilterTests.RegexFilterTests {
             this.remoteObjectId = Guid.NewGuid().ToString();
             this.updateEvent = new ContentChangeEvent(ChangeType.Updated, remoteObjectId);
             var session = new Mock<ISession>();
-            session.Setup(s => s.GetObject(remoteObjectId, It.IsAny<IOperationContext>())).Returns(
-                Mock.Of<IFileableCmisObject>(o => o.Id == remoteObjectId && o.Paths == new List<string>(new string[] { this.newRemotePath })));
+            IFileableCmisObject mockedObject = null;
+            if (movedElement) {
+                mockedObject = Mock.Of<IFolder>(o => o.Id == remoteObjectId && o.Paths == new List<string>(new string[] { this.newRemotePath }));
+            } else {
+                mockedObject = Mock.Of<IDocument>(o => o.Id == remoteObjectId && o.Paths == new List<string>(new string[] { this.newRemotePath }));
+            }
+
+            session.Setup(s => s.GetObject(remoteObjectId, It.IsAny<IOperationContext>())).Returns(mockedObject);
             updateEvent.UpdateObject(session.Object);
             SetUpMocks();
-            return new RegexIgnoreEventTransformer(
-                filter.Object, queue.Object, matcher.Object, storage.Object);
+            return new RegexIgnoreEventTransformer(filter.Object, queue.Object, matcher.Object, storage.Object);
         }
 
         private void SetUpMocks() {

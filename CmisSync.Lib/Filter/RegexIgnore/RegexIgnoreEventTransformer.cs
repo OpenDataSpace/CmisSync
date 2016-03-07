@@ -98,7 +98,9 @@ namespace CmisSync.Lib.Filter.RegexIgnore {
                     var objectId = cmisObject.Id;
                     if (storage.GetObjectByRemoteId(objectId) == null) {
                         queue.AddEvent(new ContentChangeEvent(ChangeType.Created, objectId));
-                        queue.AddEvent(new StartNextSyncEvent(fullSyncRequested: true));
+                        if (cmisObject is IFolder) {
+                            queue.AddEvent(new StartNextSyncEvent(fullSyncRequested: true));
+                        }
                         return true;
                     } else {
                         var localPath = matcher.CreateLocalPath(cmisObject.Paths[0]);
