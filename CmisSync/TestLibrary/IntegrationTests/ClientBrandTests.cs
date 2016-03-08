@@ -26,6 +26,7 @@ namespace TestLibrary.IntegrationTests {
     using System.Text;
 
     using CmisSync.Lib;
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Cmis.UiUtils;
     using CmisSync.Lib.Config;
 
@@ -34,6 +35,8 @@ namespace TestLibrary.IntegrationTests {
     using DotCMIS.Client.Impl;
     using DotCMIS.Data.Impl;
     using DotCMIS.Enums;
+
+    using log4net;
 
     using NUnit.Framework;
 
@@ -44,6 +47,8 @@ namespace TestLibrary.IntegrationTests {
     /// </summary>
     [TestFixture, Timeout(60000), Category("Branding")]
     class ClientBrandTests : IsTestWithConfiguredLog4Net {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(ClientBrandTests));
+
         /// <summary>
         /// Disable HTTPS Verification
         /// </summary>
@@ -183,7 +188,8 @@ namespace TestLibrary.IntegrationTests {
                     try {
                         IDocument doc = this.session.GetObjectByPath(path) as IDocument;
                         doc.DeleteAllVersions();
-                    } catch (Exception) {
+                    } catch (Exception e) {
+                        Logger.Debug("Failed to delete doc: ", e);
                     }
                 }
             }
@@ -191,18 +197,9 @@ namespace TestLibrary.IntegrationTests {
             private void CreateFiles() {
                 foreach (string path in this.pathList) {
                     try {
-                        string filename = Path.GetFileName(path);
-                        Dictionary<string, object> properties = new Dictionary<string, object>();
-                        properties.Add(PropertyIds.Name, filename);
-                        properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
-                        ContentStream contentStream = new ContentStream();
-                        contentStream.FileName = filename;
-                        contentStream.MimeType = "application/octet-stream";
-                        contentStream.Length = path.Length;
-                        contentStream.Stream = new MemoryStream(Encoding.UTF8.GetBytes(path));
-
-                        this.folder.CreateDocument(properties, contentStream, null);
-                    } catch (Exception) {
+                        this.folder.CreateDocument(Path.GetFileName(path), Encoding.UTF8.GetBytes(path), false);
+                    } catch (Exception e) {
+                        Logger.Debug("Failing to create doc: ", e);
                     }
                 }
             }

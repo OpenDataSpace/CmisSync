@@ -30,7 +30,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture, Timeout(60000), TestName("RenameIT"), Category("Slow"), Category("SelectiveIgnore")]
+    [TestFixture, TestName("RenameIT"), Category("Slow"), Category("SelectiveIgnore"), Timeout(180000)]
     public class RenameIT : BaseFullRepoTest {
         [Test]
         public void RenameRemoteIgnoredFolderRenamesAlsoLocalFolder([Values(true, false)]bool contentChanges) {
@@ -118,6 +118,9 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests {
 
             this.localRootDir.GetDirectories()[0].MoveTo(Path.Combine(this.localRootDir.FullName, folderName));
             this.WaitUntilQueueIsNotEmpty();
+            this.WaitForRemoteChanges();
+            this.AddStartNextSyncEvent();
+            this.repo.Run();
             this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();

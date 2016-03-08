@@ -21,12 +21,13 @@ namespace TestLibrary.FilterTests {
     using System;
 
     using CmisSync.Lib.Filter;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using Moq;
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class FilterAggregatorTest {
         private IgnoredFileNamesFilter arg0;
         private IgnoredFolderNameFilter arg1;
@@ -36,12 +37,12 @@ namespace TestLibrary.FilterTests {
         [SetUp]
         public void CreateFilter() {
             arg0 = new IgnoredFileNamesFilter();
-            arg1 = new IgnoredFolderNameFilter();
+            arg1 = new IgnoredFolderNameFilter(Mock.Of<IDirectoryInfo>());
             arg2 = new InvalidFolderNameFilter();
             arg3 = new IgnoredFoldersFilter();
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorSetAllFilter([Values(true, false, null)]bool? passSymlinkFilter) {
             SymlinkFilter symlinkFilter = passSymlinkFilter == true ? new SymlinkFilter() : null;
             var filter = passSymlinkFilter == false ? new FilterAggregator(this.arg0, this.arg1, this.arg2, this.arg3) : new FilterAggregator(this.arg0, this.arg1, this.arg2, this.arg3, symlinkFilter);
@@ -56,22 +57,22 @@ namespace TestLibrary.FilterTests {
             }
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorThrowsExceptionIfFilter0IsNull() {
             Assert.Throws<ArgumentNullException>(() => new FilterAggregator(null, this.arg1, this.arg2, this.arg3));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorThrowsExceptionIfFilter1IsNull() {
             Assert.Throws<ArgumentNullException>(() => new FilterAggregator(this.arg0, null, this.arg2, this.arg3));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorThrowsExceptionIfFilter2IsNull() {
             Assert.Throws<ArgumentNullException>(() => new FilterAggregator(this.arg0, this.arg1, null, this.arg3));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorThrowsExceptionIfFilter3IsNull() {
             Assert.Throws<ArgumentNullException>(() => new FilterAggregator(this.arg0, this.arg1, this.arg2, null));
         }

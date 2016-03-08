@@ -34,30 +34,30 @@ namespace TestLibrary.FilterTests {
 
     using TestLibrary.TestUtils;
 
-    [TestFixture]
+    [TestFixture, Category("Fast")]
     public class IgnoreAlreadyHandledFsEventsFilterTest {
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorTakesStorage() {
             new IgnoreAlreadyHandledFsEventsFilter(Mock.Of<IMetaDataStorage>());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorThrowsExceptionIfStorageIsNull() {
             Assert.Throws<ArgumentNullException>(() => new IgnoreAlreadyHandledFsEventsFilter(null));
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void ConstructorTakesStorageAndFsFactory() {
             new IgnoreAlreadyHandledFsEventsFilter(Mock.Of<IMetaDataStorage>(), Mock.Of<IFileSystemInfoFactory>());
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FilterIgnoresNonFsEvents() {
             var filter = new IgnoreAlreadyHandledFsEventsFilter(Mock.Of<IMetaDataStorage>(), Mock.Of<IFileSystemInfoFactory>());
             Assert.That(filter.Handle(Mock.Of<ISyncEvent>()), Is.False);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FilterIgnoresNonExistingPaths() {
             var storage = new Mock<IMetaDataStorage>();
             var fsFactory = new Mock<IFileSystemInfoFactory>();
@@ -66,7 +66,7 @@ namespace TestLibrary.FilterTests {
             Assert.That(filter.Handle(fsEvent), Is.False);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FilterHandlesAlreadyExistingFolderEntries() {
             string path = "path";
             var storage = new Mock<IMetaDataStorage>();
@@ -82,7 +82,7 @@ namespace TestLibrary.FilterTests {
             Assert.That(filter.Handle(fsEvent.Object), Is.True);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FilterHandlesAlreadyMovedFolderEntries() {
             string path = "path";
             string oldPath = "oldpath";
@@ -98,7 +98,7 @@ namespace TestLibrary.FilterTests {
             Assert.That(filter.Handle(moveEvent), Is.True);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FilterHandlesAlreadyExistingFileEntries() {
             string path = "path";
             var storage = new Mock<IMetaDataStorage>();
@@ -116,7 +116,7 @@ namespace TestLibrary.FilterTests {
             Assert.That(filter.Handle(fsEvent.Object), Is.True);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FilterDeleteFsEventsIfNoCorrespondingElementExistsInStorage() {
             string path = "path";
             var filter = new IgnoreAlreadyHandledFsEventsFilter(Mock.Of<IMetaDataStorage>(), Mock.Of<IFileSystemInfoFactory>());
@@ -128,7 +128,7 @@ namespace TestLibrary.FilterTests {
             Assert.That(filter.Handle(fsEvent.Object), Is.True);
         }
 
-        [Test, Category("Fast")]
+        [Test]
         public void FilterDeletesFsEventsIfLocalFileSystemContainsTheElementOfTheStorage() {
             string path = "path";
             Guid guid = Guid.NewGuid();

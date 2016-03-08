@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.FilterTests
-{
+namespace TestLibrary.FilterTests {
     using System;
     using System.IO;
 
@@ -31,42 +30,26 @@ namespace TestLibrary.FilterTests
 
     using NUnit.Framework;
 
-    [TestFixture]
-    public class InvalidFolderNameFilterTest
-    {
-        [Test, Category("Fast"), Category("EventFilter")]
+    [TestFixture, Category("Fast"), Category("EventFilter")]
+    public class InvalidFolderNameFilterTest {
+        [Test]
         public void DefaultConstructor() {
             new InvalidFolderNameFilter();
         }
 
-        [Test, Category("Fast"), Category("EventFilter")]
-        public void InvalidFolderNames() {
+        [Test]
+        public void InvalidFolderNames([Values("*", "?", ":", "test Test/ test", @"test Test\ test")]string invalidName) {
             InvalidFolderNameFilter filter = new InvalidFolderNameFilter();
             string reason;
-            Assert.That(filter.CheckFolderName("*", out reason), Is.True);
-            Assert.That(string.IsNullOrEmpty(reason), Is.False, reason);
-
-            Assert.That(filter.CheckFolderName("?", out reason), Is.True);
-            Assert.That(string.IsNullOrEmpty(reason), Is.False, reason);
-
-            Assert.That(filter.CheckFolderName(":", out reason), Is.True);
-            Assert.That(string.IsNullOrEmpty(reason), Is.False, reason);
-
-            Assert.That(filter.CheckFolderName("test Test/ test", out reason), Is.True);
-            Assert.That(string.IsNullOrEmpty(reason), Is.False, reason);
-
-            Assert.That(filter.CheckFolderName(@"test Test\ test", out reason), Is.True);
+            Assert.That(filter.CheckFolderName(invalidName, out reason), Is.True);
             Assert.That(string.IsNullOrEmpty(reason), Is.False, reason);
         }
 
-        [Test, Category("Fast"), Category("EventFilter")]
-        public void ValidFolderNames() {
+        [Test]
+        public void ValidFolderNames([Values("test", "test_test")]string validName) {
             InvalidFolderNameFilter filter = new InvalidFolderNameFilter();
             string reason;
-            Assert.That(filter.CheckFolderName("test", out reason), Is.False);
-            Assert.That(string.IsNullOrEmpty(reason), Is.True, reason);
-
-            Assert.That(filter.CheckFolderName("test_test", out reason), Is.False);
+            Assert.That(filter.CheckFolderName(validName, out reason), Is.False);
             Assert.That(string.IsNullOrEmpty(reason), Is.True, reason);
         }
     }

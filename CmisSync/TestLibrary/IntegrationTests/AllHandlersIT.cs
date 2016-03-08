@@ -363,9 +363,10 @@ namespace TestLibrary.IntegrationTests {
             var transmissionManager = new TransmissionManager();
             var activityAggregator = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), transmissionManager);
             var transmissionFactory = transmissionManager.CreateFactory();
-
+            var localFolder = new Mock<IDirectoryInfo>();
+            localFolder.Setup(f => f.FullName).Returns(this.localRoot);
             var ignoreFolderFilter = new IgnoredFoldersFilter();
-            var ignoreFolderNameFilter = new IgnoredFolderNameFilter();
+            var ignoreFolderNameFilter = new IgnoredFolderNameFilter(localFolder.Object);
             var ignoreFileNamesFilter = new IgnoredFileNamesFilter();
             var invalidFolderNameFilter = new InvalidFolderNameFilter();
             var filterAggregator = new FilterAggregator(ignoreFileNamesFilter, ignoreFolderNameFilter, invalidFolderNameFilter, ignoreFolderFilter);
@@ -376,8 +377,6 @@ namespace TestLibrary.IntegrationTests {
             this.remoteFolder = MockSessionUtil.CreateCmisFolder();
             this.remoteFolder.Setup(r => r.Path).Returns(this.remoteRoot);
             this.remoteFolder.SetupId("root");
-            var localFolder = new Mock<IDirectoryInfo>();
-            localFolder.Setup(f => f.FullName).Returns(this.localRoot);
             var generator = new CrawlEventGenerator(storage, fsFactory);
             var ignoreStorage = new IgnoredEntitiesStorage(new IgnoredEntitiesCollection(), storage);
             var treeBuilder = new DescendantsTreeBuilder(storage, remoteFolder.Object, localFolder.Object, filterAggregator, ignoreStorage);

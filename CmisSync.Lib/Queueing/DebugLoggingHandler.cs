@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Queueing
-{
+namespace CmisSync.Lib.Queueing {
     using System;
 
     using CmisSync.Lib.Events;
@@ -28,8 +27,7 @@ namespace CmisSync.Lib.Queueing
     /// <summary>
     /// Debug logging handler. Does nothing else then calling each toString method of every incoming event.
     /// </summary>
-    public class DebugLoggingHandler : SyncEventHandler
-    {
+    public class DebugLoggingHandler : SyncEventHandler {
         /// <summary>
         /// The logger.
         /// </summary>
@@ -44,10 +42,9 @@ namespace CmisSync.Lib.Queueing
         /// <returns>
         /// <c>false</c>
         /// </returns>
-        public override bool Handle(ISyncEvent e)
-        {
-            if(!(e is IRemoveFromLoggingEvent)) {
-                Logger.Debug("Incomming Event: " + e.ToString());
+        public override bool Handle(ISyncEvent e) {
+            if (!(e is IRemoveFromLoggingEvent)) {
+                Logger.Debug("Incoming Event: " + e.ToString());
             }
 
             return false;

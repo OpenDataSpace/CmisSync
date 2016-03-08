@@ -353,6 +353,26 @@
     <Compile Include="IntegrationTests\LinkTests\DownloadLinkTests.cs" />
     <Compile Include="IntegrationTests\LinkTests\UploadLinkTests.cs" />
     <Compile Include="IntegrationTests\LinkTests\BaseLinkTest.cs" />
+    <Compile Include="IntegrationTests\LinkTests\ListLinksTests.cs" />
+    <Compile Include="IntegrationTests\RegexIgnoreTests\CrudFilesInIgnoredFolderIT.cs" />
+    <Compile Include="IntegrationTests\RegexIgnoreTests\RenameIgnoredFolderIT.cs" />
+    <Compile Include="IntegrationTests\ValidNamesTests\WindowsNamesIT.cs" />
+    <Compile Include="IntegrationTests\RegexIgnoreTests\MoveIgnoredFolderIT.cs" />
+    <Compile Include="IntegrationTests\RegexIgnoreTests\MoveIgnoredFileIT.cs" />
+    <Compile Include="IntegrationTests\RegexIgnoreTests\BaseRegexIgnoreTest.cs" />
+    <Compile Include="FilterTests\RegexFilterTests\RegexIgnoreEventTransformerTest.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\CreateLocalFileIT.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\CreateLocalFolderIT.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\UpdateLocalFileIT.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\CreateRemoteFolderIT.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\RemoveLocalFileIT.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\RemoveRemoteFolderIT.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\RemoveRemoteFileIT.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\RemoveLocalFolderIT.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\AbstractBaseSyncScenarioIT.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\CreateRemoteFileIT.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\UpdateRemoteFolderIT.cs" />
+    <Compile Include="IntegrationTests\SyncScenarioITs\UpdateRemoteFileIT.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -395,5 +415,9 @@
     <Folder Include="IntegrationTests\NetworkFailuresTests\" />
     <Folder Include="TestUtils\ToxiproxyUtils\" />
     <Folder Include="IntegrationTests\LinkTests\" />
+    <Folder Include="IntegrationTests\RegexIgnoreTests\" />
+    <Folder Include="IntegrationTests\ValidNamesTests\" />
+    <Folder Include="FilterTests\RegexFilterTests\" />
+    <Folder Include="IntegrationTests\SyncScenarioITs\" />
   </ItemGroup>
 </Project>

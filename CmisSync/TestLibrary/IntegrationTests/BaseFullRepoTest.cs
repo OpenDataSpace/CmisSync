@@ -53,9 +53,9 @@ namespace TestLibrary.IntegrationTests {
     using TestLibrary.TestUtils;
 
     /// <summary>
-    /// Base full repo test times out as default after 1 min. Please override this by inherited test cases if needed.
+    /// Base full repo test times out as default after 3 minutes. Please override this by inherited test cases if needed.
     /// </summary>
-    [TestFixture, Timeout(60000)]
+    [TestFixture, Timeout(180000)]
     public abstract class BaseFullRepoTest : IsTestWithConfiguredLog4Net, IDisposable {
         protected RepoInfo repoInfo;
         protected DirectoryInfo localRootDir;
@@ -68,6 +68,7 @@ namespace TestLibrary.IntegrationTests {
         private string subfolder;
         private bool contentChanges;
         private bool disposed = false;
+        private string lastestChangeLogToken;
 
         ~BaseFullRepoTest() {
             this.Dispose(false);
@@ -184,10 +185,10 @@ namespace TestLibrary.IntegrationTests {
             cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
             cmisParameters[SessionParameter.MaximumRequestRetries] = "0";
 
-            // Sets the http connection timeout to 50 sec
-            cmisParameters[SessionParameter.ConnectTimeout] = "50000";
-            // Sets the http read timeout to 60 sec
-            cmisParameters[SessionParameter.ReadTimeout] = "60000";
+            // Sets the http connection timeout to 120 sec
+            cmisParameters[SessionParameter.ConnectTimeout] = "120000";
+            // Sets the http read timeout to 180 sec
+            cmisParameters[SessionParameter.ReadTimeout] = "180000";
 
             this.SessionFactory = this.SessionFactory ?? DotCMIS.Client.Impl.SessionFactory.NewInstance();
             this.session = this.SessionFactory.CreateSession(cmisParameters, null, null, null);
@@ -242,8 +243,7 @@ namespace TestLibrary.IntegrationTests {
             }
 
             int waited = 0;
-            while (queue.Queue.IsEmpty)
-            {
+            while (queue.Queue.IsEmpty) {
                 int interval = 20;
 
                 // Wait for event to kick in
@@ -256,7 +256,18 @@ namespace TestLibrary.IntegrationTests {
         }
 
         protected void WaitForRemoteChanges(int sleepDuration = 5000) {
-            Thread.Sleep(this.ContentChangesActive ? sleepDuration : 0);
+            int noChangesUntil = sleepDuration;
+            while (noChangesUntil > 0) {
+                var changes = this.session.GetContentChanges(this.lastestChangeLogToken, false, 1000);
+                if (changes.LatestChangeLogToken != this.lastestChangeLogToken) {
+                    this.lastestChangeLogToken = changes.LatestChangeLogToken;
+                    noChangesUntil = sleepDuration;
+                } else {
+                    noChangesUntil -= 1000;
+                }
+
+                Thread.Sleep(this.ContentChangesActive ? 1000 : 0);
+            }
         }
 
         protected void EnsureThatContentChangesAreSupported() {
@@ -289,6 +300,9 @@ namespace TestLibrary.IntegrationTests {
             this.repo.Initialize();
             this.repo.SingleStepQueue.SwallowExceptions = swallowExceptions;
             this.repo.Run();
+            if (this.ContentChangesActive) {
+                this.lastestChangeLogToken = this.session.RepositoryInfo.LatestChangeLogToken;
+            }
         }
 
         protected void AddStartNextSyncEvent(bool forceCrawl = false) {
@@ -303,6 +317,15 @@ namespace TestLibrary.IntegrationTests {
             if (this.session.IsContentStreamHashSupported()) {
                 Assert.That(doc.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(content), Is.True, "Timout exceeded");
             }
+        }
+
+        protected void AssertThatEventCounterIsZero() {
+            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0), string.Format("Number of changes is not zero:\n{0}", this.repo.SingleStepQueue.PrintAllEvents()));
+        }
+
+        protected void AssertThatFolderStructureIsEqual() {
+            this.remoteRootDir.Refresh();
+            Assert.That(new FolderTree(this.remoteRootDir, "."), Is.EqualTo(new FolderTree(this.localRootDir, ".")));
         }
 
         protected virtual void Dispose(bool disposing) {

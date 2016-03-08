@@ -16,8 +16,8 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Consumer
-{
+
+namespace CmisSync.Lib.Consumer {
     using System;
 
     using CmisSync.Lib.Events;
@@ -64,8 +64,7 @@ namespace CmisSync.Lib.Consumer
     /// <typeparam name="T">
     /// Type of folderevent to detect sitation upon
     /// </typeparam>
-    public interface ISituationDetection<T> where T : AbstractFolderEvent
-    {
+    public interface ISituationDetection<T> where T : AbstractFolderEvent {
         /// <summary>
         /// Analyse the specified actualEvent.
         /// </summary>

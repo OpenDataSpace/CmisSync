@@ -21,20 +21,21 @@ namespace TestLibrary.TestUtils {
     using System;
 
     using CmisSync.Lib.Filter;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using Moq;
 
     public static class MockOfIFilterAggregatorUtil {
         public static Mock<IFilterAggregator> CreateFilterAggregator() {
             string reason;
+            var folderNameFilter = new Mock<IgnoredFolderNameFilter>(Mock.Of<IDirectoryInfo>());
+            folderNameFilter.Setup(i => i.CheckFolderName(It.IsAny<string>(), out reason)).Returns(false);
             var filter = Mock.Of<IFilterAggregator>(
                 f =>
                 f.FileNamesFilter == Mock.Of<IgnoredFileNamesFilter>(
                 i =>
                 i.CheckFile(It.IsAny<string>(), out reason) == false) &&
-                f.FolderNamesFilter == Mock.Of<IgnoredFolderNameFilter>(
-                i =>
-                i.CheckFolderName(It.IsAny<string>(), out reason) == false) &&
+                f.FolderNamesFilter == folderNameFilter.Object &&
                 f.InvalidFolderNamesFilter == Mock.Of<InvalidFolderNameFilter>(
                 i =>
                 i.CheckFolderName(It.IsAny<string>(), out reason) == false) &&

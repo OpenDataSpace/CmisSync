@@ -29,7 +29,7 @@ namespace TestLibrary.IntegrationTests.NetworkFailuresTests {
 
     using Toxiproxy.Net;
 
-    [TestFixture, Timeout(60000), Category("Toxiproxy")]
+    [TestFixture, Category("Toxiproxy")]
     public class CRUDSyncTests : IsFullTestWithToxyProxy{
         [Test]
         public void RemoteFolderCreated(

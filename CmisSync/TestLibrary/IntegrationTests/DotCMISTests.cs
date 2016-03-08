@@ -203,9 +203,6 @@ namespace TestLibrary.IntegrationTests {
         {
             string subFolderName = "subFolder";
             string fileName = "testFile.bin";
-            string subFolderPath = remoteFolderPath.TrimEnd('/') + "/" + subFolderName;
-            string filePath = subFolderPath + "/" + fileName;
-
             var session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             if (!session.IsPrivateWorkingCopySupported()) {
                 Assert.Ignore("PWCs are not supported");
@@ -854,10 +851,10 @@ namespace TestLibrary.IntegrationTests {
     /// <summary>
     /// Dot CMIS session tests. Each log in process must be able to be executed in 60 seconds, otherwise the tests will fail.
     /// </summary>
-    [TestFixture, Timeout(60000), Category("Slow")]
+    [TestFixture, Timeout(70000), Category("Slow")]
     public class DotCMISSessionTests {
-        // HTTP Read and Connection Timeout set to 10 secs
-        private static readonly string DefaultHttpTimeOut = "10000";
+        // HTTP Read and Connection Timeout set to 60 secs
+        private static readonly string DefaultHttpTimeOut = "60000";
 
         /// <summary>
         /// Creates a cmis Atom Pub session with the given credentials.
@@ -902,6 +899,7 @@ namespace TestLibrary.IntegrationTests {
             // Sets the Connect Timeout to 10 secs
             cmisParameters[SessionParameter.ConnectTimeout] = connectTimeout ?? DefaultHttpTimeOut;
             cmisParameters[SessionParameter.ReadTimeout] = readTimeout ?? DefaultHttpTimeOut;
+            cmisParameters[SessionParameter.MaximumRequestRetries] = "0";
 
             var session = SessionFactory.NewInstance().CreateSession(cmisParameters);
             var filters = new HashSet<string>();
@@ -974,6 +972,44 @@ namespace TestLibrary.IntegrationTests {
             string binding)
         {
             CreateSession(user, password, url, repositoryId, binding);
+        }
+
+        /// <summary>
+        /// Tests that the creation of a basic session fails with the correct exception if the PW is wrong.
+        /// </summary>
+        /// <param name='canonical_name'>
+        /// Canonical_name.
+        /// </param>
+        /// <param name='localPath'>
+        /// Local path.
+        /// </param>
+        /// <param name='remoteFolderPath'>
+        /// Remote folder path.
+        /// </param>
+        /// <param name='url'>
+        /// URL.
+        /// </param>
+        /// <param name='user'>
+        /// User.
+        /// </param>
+        /// <param name='password'>
+        /// Password.
+        /// </param>
+        /// <param name='repositoryId'>
+        /// Repository identifier.
+        /// </param>
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
+        public void CreateSessionFailsWithWrongPasswordAndThrowsPermissionDeniedException(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId,
+            string binding)
+        {
+            Assert.Throws<CmisPermissionDeniedException>(() => CreateSession(user, password + "WRONG_END", url, repositoryId, binding));
         }
 
         /// <summary>

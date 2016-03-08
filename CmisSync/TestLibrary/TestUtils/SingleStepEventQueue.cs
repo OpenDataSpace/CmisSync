@@ -174,5 +174,14 @@ namespace TestLibrary {
                 return (IObservable<Tuple<EventCategory, int>>)this.categoryCounter;
             }
         }
+
+        public string PrintAllEvents() {
+            string result = string.Empty;
+            foreach (var x in this.Queue.ToArray()) {
+                result += x.ToString() + "\n";
+            }
+
+            return result;
+        }
     }
 }

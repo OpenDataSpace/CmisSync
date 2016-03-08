@@ -42,18 +42,28 @@ namespace DiagnoseTool {
     using log4net;
 
     class MainClass {
+        private static bool removeAllIllegalEntriesFromDB = false;
         public static void Main(string[] args) {
             try {
-                var config = ConfigManager.CurrentConfig;
+                foreach (var arg in args) {
+                    if (arg.Equals("--removeIllegalEntries", StringComparison.InvariantCultureIgnoreCase)) {
+                        removeAllIllegalEntriesFromDB = true;
+                    }
+                }
 
+                var config = ConfigManager.CurrentConfig;
                 foreach (var repoInfo in config.Folders) {
                     using (var dbEngine = new DBreezeEngine(repoInfo.GetDatabasePath())) {
                         Console.WriteLine(string.Format("Checking {0} and DB Path \"{1}\"", repoInfo.DisplayName, repoInfo.GetDatabasePath()));
+                        var storage = new MetaDataStorage(dbEngine, new PathMatcher(repoInfo.LocalPath, repoInfo.RemotePath), false);
                         try {
-                            var storage = new MetaDataStorage(dbEngine, new PathMatcher(repoInfo.LocalPath, repoInfo.RemotePath), false);
                             storage.ValidateObjectStructure();
                         } catch (Exception e) {
                             Console.WriteLine("Database object structure is invalid: " + e.Message + Environment.NewLine + e.StackTrace);
+                            if (removeAllIllegalEntriesFromDB) {
+                                Console.WriteLine("Removing non tree objects from DB");
+                                storage.RemoveAllNonTreeObjects();
+                            }
                         }
                     }
                 }
@@ -67,7 +77,7 @@ namespace DiagnoseTool {
                             var remoteFolder = session.GetObjectByPath(repoInfo.RemotePath) as IFolder;
                             var filterAggregator = new FilterAggregator(
                                 new IgnoredFileNamesFilter(),
-                                new IgnoredFolderNameFilter(),
+                                new IgnoredFolderNameFilter(new DirectoryInfoWrapper(new DirectoryInfo(repoInfo.LocalPath))),
                                 new InvalidFolderNameFilter(),
                                 new IgnoredFoldersFilter());
                             var treeBuilder = new DescendantsTreeBuilder(

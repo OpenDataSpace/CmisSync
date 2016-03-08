@@ -61,7 +61,7 @@ namespace CmisSync.Lib.Queueing {
         private IFilterAggregator filter;
         private ActivityListenerAggregator activityListener;
         private IIgnoredEntitiesStorage ignoredStorage;
-        private SelectiveIgnoreEventTransformer transformer;
+        private SelectiveIgnoreEventTransformer selectiveIgnoreTransformer;
         private SelectiveIgnoreFilter selectiveIgnoreFilter;
         private IgnoreFlagChangeDetection ignoreChangeDetector;
         private ITransmissionFactory transmissionFactory;
@@ -168,8 +168,8 @@ namespace CmisSync.Lib.Queueing {
                     eventManager.RemoveEventHandler(this.selectiveIgnoreFilter);
                 }
 
-                if (this.transformer != null) {
-                    eventManager.RemoveEventHandler(this.transformer);
+                if (this.selectiveIgnoreTransformer != null) {
+                    eventManager.RemoveEventHandler(this.selectiveIgnoreTransformer);
                 }
 
                 if (this.ignoreChangeDetector != null) {
@@ -195,8 +195,8 @@ namespace CmisSync.Lib.Queueing {
 
                 if (successfulLoginEvent.SelectiveSyncSupported) {
                     // Transforms events of ignored folders
-                    this.transformer = new SelectiveIgnoreEventTransformer(this.ignoredStorage, this.Queue);
-                    eventManager.AddEventHandler(this.transformer);
+                    this.selectiveIgnoreTransformer = new SelectiveIgnoreEventTransformer(this.ignoredStorage, this.Queue);
+                    eventManager.AddEventHandler(this.selectiveIgnoreTransformer);
 
                     // Filters events of ignored folders
                     this.selectiveIgnoreFilter = new SelectiveIgnoreFilter(this.ignoredStorage);

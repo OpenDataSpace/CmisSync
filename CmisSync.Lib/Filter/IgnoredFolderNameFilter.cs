@@ -23,10 +23,13 @@ namespace CmisSync.Lib.Filter {
     using System.IO;
     using System.Text.RegularExpressions;
 
+    using CmisSync.Lib.Storage.FileSystem;
+
     /// <summary>
     /// Ignored folder name filter.
     /// </summary>
     public class IgnoredFolderNameFilter {
+        private string basePath;
         /// <summary>
         /// The lock to prevent multiple parallel access on the wildcard list
         /// </summary>
@@ -56,6 +59,41 @@ namespace CmisSync.Lib.Filter {
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Checks the folder path. And returns true if path contains a name with any ignored regex.
+        /// </summary>
+        /// <returns><c>true</c>, if folder path should be ignored, <c>false</c> otherwise.</returns>
+        /// <param name="localPath">Local path.</param>
+        /// <param name="reason">Reason for the ignored state.</param>
+        public virtual bool CheckFolderPath(string localPath, out string reason) {
+            reason = string.Empty;
+            if (localPath != null) {
+                if (localPath.StartsWith(basePath)) {
+                    string relativePath = localPath.Substring(basePath.Length).TrimStart(Path.DirectorySeparatorChar);
+                    foreach (string folderName in relativePath.Split(Path.DirectorySeparatorChar)) {
+                        bool check = CheckFolderName(folderName, out reason);
+                        if (check) {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Filter.IgnoredFolderNameFilter"/> class.
+        /// </summary>
+        /// <param name="localBasePath">Local base path. All folder names below this base path won't be checked.</param>
+        public IgnoredFolderNameFilter(IDirectoryInfo localBasePath) {
+            if (localBasePath == null) {
+                throw new ArgumentNullException("localBasePath");
+            }
+
+            this.basePath = localBasePath.FullName;
         }
 
         /// <summary>

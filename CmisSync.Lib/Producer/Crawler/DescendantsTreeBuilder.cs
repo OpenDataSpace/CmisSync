@@ -151,13 +151,11 @@ namespace CmisSync.Lib.Producer.Crawler {
         /// </summary>
         /// <returns>The remote directory tree.</returns>
         /// <param name="parent">Parent folder.</param>
-        /// <param name="descendants">Descendants of remote object.</param>
         /// <param name="filter">Filter of ignored or invalid files and folder</param>
         /// <param name="ignoredStorage">Storage of all ignored entities.</param>
         /// <param name="matcher">Path matcher.</param>
         public static IObjectTree<IFileableCmisObject> GetRemoteDirectoryTree(
             IFolder parent,
-            IList<ITree<IFileableCmisObject>> descendants,
             IFilterAggregator filter,
             IIgnoredEntitiesStorage ignoredStorage,
             IPathMatcher matcher)
@@ -171,10 +169,11 @@ namespace CmisSync.Lib.Producer.Crawler {
             }
 
             var children = new List<IObjectTree<IFileableCmisObject>>();
-            if (descendants != null) {
-                foreach (var child in descendants) {
-                    var folder = child.Item as IFolder;
-                    var doc = child.Item as IDocument;
+            var remoteChildren = parent.GetChildren();
+            if (remoteChildren != null) {
+                foreach (var child in remoteChildren) {
+                    var folder = child as IFolder;
+                    var doc = child as IDocument;
                     if (folder != null) {
                         string reason;
                         if (!filter.FolderNamesFilter.CheckFolderName(folder.Name, out reason) && !filter.InvalidFolderNamesFilter.CheckFolderName(folder.Name, out reason)) {
@@ -187,7 +186,7 @@ namespace CmisSync.Lib.Producer.Crawler {
                                 });
                             } else {
                                 ignoredStorage.Remove(folder.Id);
-                                children.Add(GetRemoteDirectoryTree(folder, child.Children, filter, ignoredStorage, matcher));
+                                children.Add(GetRemoteDirectoryTree(folder, filter, ignoredStorage, matcher));
                             }
                         } else {
                             Logger.Info(reason);
@@ -238,7 +237,7 @@ namespace CmisSync.Lib.Producer.Crawler {
             Logger.Debug("Crawling local fs");
             localTree = GetLocalDirectoryTree(this.localFolder, this.filter);
             Logger.Debug("Crawling remote fs");
-            remoteTree = GetRemoteDirectoryTree(this.remoteFolder, this.remoteFolder.GetDescendants(-1), this.filter, this.ignoredStorage, this.matcher);
+            remoteTree = GetRemoteDirectoryTree(this.remoteFolder, this.filter, this.ignoredStorage, this.matcher);
             Logger.Debug("Building stored tree");
             storedObjects = this.storage.GetObjectList();
             Logger.Debug("Finished building trees");

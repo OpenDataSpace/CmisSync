@@ -169,6 +169,8 @@ SOURCES =  \
 	Filter/IgnoredFolderNameFilter.cs \
 	Filter/IgnoredFoldersFilter.cs \
 	Filter/InvalidFolderNameFilter.cs \
+	Filter/RegexIgnore/RegexIgnoreEventTransformer.cs \
+	Filter/RegexIgnore/RegexIgnoreFilter.cs \
 	Filter/ReportingFilter.cs \
 	Filter/RepositoryRootDeletedDetection.cs \
 	Filter/SymlinkFilter.cs \

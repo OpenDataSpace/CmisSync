@@ -37,6 +37,7 @@ namespace CmisSync.Lib.Cmis {
     using CmisSync.Lib.Exceptions;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Filter;
+    using CmisSync.Lib.Filter.RegexIgnore;
     using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Watcher;
@@ -200,13 +201,16 @@ namespace CmisSync.Lib.Cmis {
             this.authProvider = AuthProviderFactory.CreateAuthProvider(repoInfo.AuthenticationType, repoInfo.Address, this.db);
 
             // Initialize storage
-            this.storage = new MetaDataStorage(this.db, new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath), inMemory);
+            IPathMatcher pathMatcher = new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath);
+            this.storage = new MetaDataStorage(this.db, pathMatcher, inMemory);
             this.fileTransmissionStorage = new FileTransmissionStorage(this.db, RepoInfo.ChunkSize);
 
             // Add ignore file/folder filter
             this.ignoredFoldersFilter = new IgnoredFoldersFilter { IgnoredPaths = new List<string>(repoInfo.GetIgnoredPaths()) };
             this.ignoredFileNameFilter = new IgnoredFileNamesFilter { Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames };
-            this.ignoredFolderNameFilter = new IgnoredFolderNameFilter { Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames };
+            this.ignoredFolderNameFilter = new IgnoredFolderNameFilter(this.fileSystemFactory.CreateDirectoryInfo(this.LocalPath)) {
+                Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames
+            };
             this.invalidFolderNameFilter = new InvalidFolderNameFilter();
             var symlinkFilter = new SymlinkFilter();
             this.filters = new FilterAggregator(this.ignoredFileNameFilter, this.ignoredFolderNameFilter, this.invalidFolderNameFilter, this.ignoredFoldersFilter, symlinkFilter);
@@ -219,6 +223,10 @@ namespace CmisSync.Lib.Cmis {
                 symlinkFilter);
             this.transmissionFactory = new TransmissionFactory(this, activityListener.TransmissionManager);
             eventManager.AddEventHandler(this.reportingFilter);
+            RegexIgnoreEventTransformer regexTransformer = new RegexIgnoreEventTransformer(this.ignoredFolderNameFilter, this.Queue, pathMatcher, this.storage);
+            RegexIgnoreFilter regexFilter = new RegexIgnoreFilter(pathMatcher, this.ignoredFolderNameFilter);
+            eventManager.AddEventHandler(regexFilter);
+            eventManager.AddEventHandler(regexTransformer);
             this.alreadyAddedFilter = new IgnoreAlreadyHandledFsEventsFilter(this.storage, this.fileSystemFactory);
             eventManager.AddEventHandler(this.alreadyAddedFilter);
 
@@ -278,6 +286,8 @@ namespace CmisSync.Lib.Cmis {
                 ExceptionType type = ExceptionType.Unknown;
                 if (e.Exception is VirusDetectedException) {
                     type = ExceptionType.FileUploadBlockedDueToVirusDetected;
+                } else if (e.Exception is CmisConnectionException) {
+                    type = ExceptionType.ConnectionException;
                 }
 
                 this.PassExceptionToListener(ExceptionLevel.Warning, type, e.Exception);

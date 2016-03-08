@@ -39,13 +39,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
     [TestFixture, Category("Fast"), Category("Solver")]
     public class RemoteObjectDeletedTest {
         private readonly string name = "a";
-        private readonly string path = Path.Combine(Path.GetTempPath(), "a");
+        private readonly string basePath = Path.GetTempPath();
+        private string path;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private RemoteObjectDeleted underTest;
         private Mock<IFilterAggregator> filters;
         private IgnoredFileNamesFilter fileNameFilter;
         private IgnoredFolderNameFilter folderNameFilter;
+
+        [SetUp]
+        public void setUpDir() {
+            path = Path.Combine(basePath, name);
+        }
 
         [Test]
         public void DefaultConstructorTest() {
@@ -223,7 +229,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.storage = new Mock<IMetaDataStorage>();
             this.filters = new Mock<IFilterAggregator>();
             this.fileNameFilter = new IgnoredFileNamesFilter();
-            this.folderNameFilter = new IgnoredFolderNameFilter();
+            var baseDir = Mock.Of<IDirectoryInfo>(dir => dir.FullName == this.basePath);
+            this.folderNameFilter = new IgnoredFolderNameFilter(baseDir);
             this.filters.Setup(f => f.FileNamesFilter).Returns(this.fileNameFilter);
             this.filters.Setup(f => f.FolderNamesFilter).Returns(this.folderNameFilter);
             this.underTest = new RemoteObjectDeleted(this.session.Object, this.storage.Object, this.filters.Object);

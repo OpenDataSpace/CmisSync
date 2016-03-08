@@ -103,6 +103,7 @@ SOURCES =  \
 	FilterTests/IgnoredFolderNamesFilterTest.cs \
 	FilterTests/IgnoredFoldersFilterTest.cs \
 	FilterTests/InvalidFolderNameFilterTest.cs \
+	FilterTests/RegexFilterTests/RegexIgnoreEventTransformerTest.cs \
 	FilterTests/ReportingFilterTest.cs \
 	FilterTests/RepositoryRootDeletedDetectionTest.cs \
 	FilterTests/SymlinkFilterTest.cs \
@@ -134,15 +135,30 @@ SOURCES =  \
 	IntegrationTests/PrivateWorkingCopyTests/CancelCheckOutTest.cs \
 	IntegrationTests/PrivateWorkingCopyTests/CreateDocumentTests.cs \
 	IntegrationTests/PrivateWorkingCopyTests/UploadChangedContent.cs \
+	IntegrationTests/RegexIgnoreTests/BaseRegexIgnoreTest.cs \
+	IntegrationTests/RegexIgnoreTests/CrudFilesInIgnoredFolderIT.cs \
+	IntegrationTests/RegexIgnoreTests/MoveIgnoredFileIT.cs \
+	IntegrationTests/RegexIgnoreTests/MoveIgnoredFolderIT.cs \
+	IntegrationTests/RegexIgnoreTests/RenameIgnoredFolderIT.cs \
 	IntegrationTests/RepositoryStatusIT.cs \
 	IntegrationTests/RepositoryUtilsTests.cs \
 	IntegrationTests/SelectiveIgnoreTests/CrudIT.cs \
 	IntegrationTests/SelectiveIgnoreTests/FileCrud.cs \
 	IntegrationTests/SelectiveIgnoreTests/MoveIT.cs \
 	IntegrationTests/SelectiveIgnoreTests/RenameIT.cs \
+	IntegrationTests/SyncScenarioITs/AbstractBaseSyncScenarioIT.cs \
+	IntegrationTests/SyncScenarioITs/CreateLocalFileIT.cs \
+	IntegrationTests/SyncScenarioITs/CreateLocalFolderIT.cs \
+	IntegrationTests/SyncScenarioITs/CreateRemoteFileIT.cs \
+	IntegrationTests/SyncScenarioITs/CreateRemoteFolderIT.cs \
+	IntegrationTests/SyncScenarioITs/RemoveLocalFileIT.cs \
+	IntegrationTests/SyncScenarioITs/UpdateLocalFileIT.cs \
+	IntegrationTests/SyncScenarioITs/UpdateRemoteFileIT.cs \
+	IntegrationTests/SyncScenarioITs/UpdateRemoteFolderIT.cs \
 	IntegrationTests/TestNameAttribute.cs \
 	IntegrationTests/UploadFileIT.cs \
 	IntegrationTests/UploadSlowWrittenFile.cs \
+	IntegrationTests/ValidNamesTests/WindowsNamesIT.cs \
 	IntegrationTests/VirusDetectionTests/VirusDetectionTests.cs \
 	MockedServer/IContentChangeEventNotifier.cs \
 	MockedServer/MockOfIAclCapabilities.cs \
@@ -217,6 +233,9 @@ SOURCES =  \
 	QueueingTests/DebugLoggingHandlerTest.cs \
 	QueueingTests/DelayRetryAndNextSyncEventHandlerTest.cs \
 	QueueingTests/EventManagerInitializerTest.cs \
+        IntegrationTests/SyncScenarioITs/RemoveLocalFolderIT.cs \
+        IntegrationTests/SyncScenarioITs/RemoveRemoteFileIT.cs \
+        IntegrationTests/SyncScenarioITs/RemoveRemoteFolderIT.cs \
 	QueueingTests/SyncEventManagerTest.cs \
 	QueueingTests/SyncEventQueueTest.cs \
 	SelectiveIgnoreTests/EventTransformerTest.cs \

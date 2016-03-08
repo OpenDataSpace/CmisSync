@@ -34,7 +34,7 @@ namespace TestLibrary.IntegrationTests.VirusDetectionTests {
 
     using TestUtils;
 
-    [TestFixture, Timeout(60000), TestName("VirusDetection"), Category("Slow"), Category("VirusDetection")]
+    [TestFixture, TestName("VirusDetection"), Category("Slow"), Category("VirusDetection"), Timeout(180000)]
     public class VirusDetectionTests : BaseFullRepoTest {
         private readonly string fileName = "eicar.bin";
 

@@ -88,7 +88,7 @@ namespace DiagnoseTool {
                         var remoteFolder = session.GetObjectByPath(folder.RemotePath) as IFolder;
                         var filterAggregator = new FilterAggregator(
                             new IgnoredFileNamesFilter(),
-                            new IgnoredFolderNameFilter(),
+                            new IgnoredFolderNameFilter(new DirectoryInfoWrapper(new DirectoryInfo(folder.LocalPath))),
                             new InvalidFolderNameFilter(),
                             new IgnoredFoldersFilter());
                         var treeBuilder = new DescendantsTreeBuilder(

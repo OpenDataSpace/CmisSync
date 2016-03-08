@@ -34,12 +34,12 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
 
     using TestUtils;
 
-    [TestFixture, Category("Slow"), Timeout(30000), TestName("PWC")]
+    [TestFixture, Category("Slow"), TestName("PWC"), Timeout(180000)]
     public class CreateDocumentTests : BaseFullRepoTest {
         private readonly string fileName = "fileName.bin";
         private readonly string content = "content";
 
-        [Test, MaxTime(5000)]
+        [Test]
         public void CreateCheckedOutDocument([Values(true, false)]bool withPropertiesOnCheckIn, [Values(true, false)]bool deleteExistingContentStream) {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
 
@@ -64,12 +64,10 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(this.fileName));
             Assert.That(newDocument.Name, Is.EqualTo(this.fileName));
             Assert.That(newDocument.ContentStreamLength, Is.EqualTo(this.content.Length));
-            if (this.session.IsContentStreamHashSupported()) {
-                Assert.That(newDocument.VerifyThatIfTimeoutIsExceededContentHashIsEqualTo(content), Is.True);
-            }
+            AssertThatContentHashIsEqualToExceptedIfSupported(newDocument, content);
         }
 
-        [Test, MaxTime(5000)]
+        [Test]
         public void CreateCheckedOutDocumentAndCancelCheckout([Values(true, false)]bool settingContent) {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
 
@@ -84,7 +82,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(this.remoteRootDir.GetChildren().TotalNumItems, Is.EqualTo(0));
         }
 
-        [Test, MaxTime(10000)]
+        [Test]
         public void CreateCheckedOutDocumentAndDoNotCheckIn() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             this.remoteRootDir.CreateDocument(this.fileName, (string)null, checkedOut: true);
@@ -92,7 +90,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(this.remoteRootDir.GetChildren().TotalNumItems, Is.EqualTo(0));
         }
 
-        [Test, MaxTime(10000)]
+        [Test]
         public void CreateCheckedOutDocumentMustFailIfDocumentAlreadyExists() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             string fileName = "file.bin";
@@ -100,7 +98,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.Throws<CmisNameConstraintViolationException>(() => this.remoteRootDir.CreateDocument(fileName, "other content", true));
         }
 
-        [Test, MaxTime(8000)]
+        [Test]
         public void CreateDocumentViaPwcCheckInWithLastModificationDate() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             string fileName = "file.bin";
@@ -113,7 +111,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(doc.LastModificationDate, Is.EqualTo(past).Within(1).Seconds);
         }
 
-        [Test, MaxTime(10000)]
+        [Test]
         public void CreateTooDocumentsInTwoFoldersWithTheSameName() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             string fileName = "file.bin";
@@ -126,7 +124,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(2));
         }
 
-        [Test, MaxTime(10000)]
+        [Test]
         public void CreateTooDocumentsWithTheSameSubName() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             string fileName1 = "gpio.h";

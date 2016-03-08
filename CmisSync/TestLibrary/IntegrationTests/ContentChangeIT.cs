@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.IntegrationTests
-{
+namespace TestLibrary.IntegrationTests {
     using System;
     using System.Collections.Generic;
 
@@ -42,16 +41,14 @@ namespace TestLibrary.IntegrationTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class ContentChangeIT : IsTestWithConfiguredLog4Net
-    {
+    public class ContentChangeIT : IsTestWithConfiguredLog4Net {
         private static readonly string DefaultId = "defaultId";
 
         private readonly bool isPropertyChangesSupported = false;
         private readonly int maxNumberOfContentChanges = 1000;
 
         [Test, Category("Fast"), Category("ContentChange")]
-        public void RemoteSecurityChangeOfExistingFile()
-        {
+        public void RemoteSecurityChangeOfExistingFile() {
             Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
             var path = Mock.Of<IFileInfo>(f => f.FullName == "path");
             storage.AddLocalFile(path, DefaultId);
@@ -65,8 +62,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
-        public void RemoteDocumentCreationWithContent()
-        {
+        public void RemoteDocumentCreationWithContent() {
             Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
 
             Mock<ISession> session = MockSessionUtil.GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Created, DefaultId, "someStreamId");
@@ -77,8 +73,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
-        public void LocallyNotExistingRemoteDocumentUpdated()
-        {
+        public void LocallyNotExistingRemoteDocumentUpdated() {
             Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
 
             Mock<ISession> session = MockSessionUtil.GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Updated, DefaultId, null);
@@ -89,8 +84,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
-        public void RemoteDeletionChangeTest()
-        {
+        public void RemoteDeletionChangeTest() {
             Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
             var file = Mock.Of<IFileInfo>(f => f.FullName == "path");
             storage.AddLocalFile(file, DefaultId);
@@ -102,8 +96,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
-        public void RemoteFolderCreation()
-        {
+        public void RemoteFolderCreation() {
             Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
 
             Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created);
@@ -113,8 +106,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
-        public void RemoteFolderDeletionWithoutLocalFolder()
-        {
+        public void RemoteFolderDeletionWithoutLocalFolder() {
             Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
 
             Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted);

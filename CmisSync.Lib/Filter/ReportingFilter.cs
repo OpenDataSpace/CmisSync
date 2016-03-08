@@ -143,6 +143,16 @@ namespace CmisSync.Lib.Filter {
                     }
                 }
 
+                var localPathEvent = e as IFilterableLocalPathEvent;
+                if (localPathEvent != null) {
+                    var localPath = localPathEvent.LocalPath;
+                    if (this.ignoredFolderNameFilter.CheckFolderPath(localPath, out reason)) {
+                        this.Queue.AddEvent(new RequestIgnoredEvent(e, reason, this));
+                        Logger.Info(reason);
+                        return true;
+                    }
+                }
+
                 var localFolderObjectEvent = e as FolderEvent;
                 if (localFolderObjectEvent != null) {
                     if (this.symlinkFilter.IsSymlink(localFolderObjectEvent.LocalFolder, out reason)) {
