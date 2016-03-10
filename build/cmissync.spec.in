@@ -32,6 +32,18 @@ Requires: curl
 %description common
 Common files for %{name}
 
+%post common
+touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
+
+%postun common
+if [ $1 -eq 0 ] ; then
+    touch --no-create %{_datadir}/icons/hicolor &>/dev/null
+    gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+fi
+
+%posttrans common
+gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+
 %package dynamic
 Summary: A DataSpace Sync tool
 Group: Applications/Internet
