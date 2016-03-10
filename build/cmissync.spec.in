@@ -35,7 +35,7 @@ Common files for %{name}
 %package dynamic
 Summary: A DataSpace Sync tool
 Group: Applications/Internet
-Requires: mono-core >= 3.4
+Requires: mono-core >= 4.0
 Requires: gtk-sharp2
 Requires: notify-sharp
 Requires: libappindicator-sharp
@@ -53,6 +53,10 @@ More information is available at http://graudata.com/ .
 rm -rf %{buildroot}
 mkdir -p %{buildroot}
 cp -av * %{buildroot}
+# Remove stuff, only required for testing
+rm -f %{buildroot}%{_libdir}/dataspace-sync/TestLibrary*
+rm -f %{buildroot}%{_libdir}/dataspace-sync/nunit.framework*
+rm -f %{buildroot}%{_libdir}/dataspace-sync/Moq*
 
 %clean
 rm -rf $RPM_BUILD_ROOT
