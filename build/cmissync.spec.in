@@ -39,6 +39,7 @@ Requires: mono-core >= 4.0
 Requires: gtk-sharp2
 Requires: notify-sharp
 Requires: libappindicator-sharp
+Requires: libappindicator
 Requires: %{name}-common = %{version}-%{release}
 
 %description dynamic
