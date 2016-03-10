@@ -1,3 +1,6 @@
 [submodule "Extras/OpenDataSpaceDotCMIS"]
 	path = Extras/OpenDataSpaceDotCMIS
 	url = https://github.com/OpenDataSpace/chemistry-dotcmis.git
+[submodule "Extras/dataspace-client-sharp"]
+	path = Extras/dataspace-client-sharp
+	url = https://github.com/OpenDataSpace/dataspace-client-sharp.git
