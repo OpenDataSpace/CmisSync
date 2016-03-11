@@ -69,7 +69,7 @@ CmisSync.%.resources: $(srcdir)/../Properties/%.resx
 bin_SCRIPTS = dataspacesync
 
 Applicationsdir = $(datadir)/applications
-dist_Applications_DATA = dataspacesync.desktop 
+dist_Applications_DATA = dataspacesync.desktop dataspacesync-logview.desktop
 
 EXTRA_DIST = README.md
 

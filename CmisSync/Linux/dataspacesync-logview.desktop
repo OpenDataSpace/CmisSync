@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=DataSpace Sync Log
+Exec=tail -f %f
+Terminal=true
+NoDisplay=true
+Name[en_US]=DataSpace Sync Log
