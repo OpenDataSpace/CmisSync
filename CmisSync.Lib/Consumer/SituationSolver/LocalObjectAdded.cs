@@ -28,12 +28,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Producer.Watcher;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
+
+    using DataSpace.Common.Transmissions;
 
     using DotCMIS;
     using DotCMIS.Client;
@@ -151,7 +152,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                         mapped.LastChecksum = this.UploadFile(localFile, addedDoc, transmission);
                         mapped.ChecksumAlgorithmName = "SHA-1";
                     } catch (Exception ex) {
-                        var uploadException = ex as UploadFailedException;
+                        var uploadException = ex as CmisSync.Lib.FileTransmission.UploadFailedException;
                         if (uploadException != null) {
                             var inner = uploadException.InnerException;
                             if (inner is CmisStorageException) {
@@ -179,7 +180,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 } else {
                     transmission.Length = 0;
                     transmission.Position = 0;
-                    transmission.Status = TransmissionStatus.Finished;
+                    transmission.Status = Status.Finished;
                 }
             }
 

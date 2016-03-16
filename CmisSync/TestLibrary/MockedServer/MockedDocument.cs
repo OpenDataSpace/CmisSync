@@ -23,7 +23,7 @@ namespace TestLibrary.MockedServer {
     using System.IO;
     using System.Linq;
 
-    using CmisSync.Lib.Streams;
+    using DataSpace.Common.Streams;
 
     using DotCMIS;
     using DotCMIS.Client;

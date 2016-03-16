@@ -26,10 +26,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
     using CmisSync.Lib.Consumer.SituationSolver.PWC;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
+
+    using DataSpace.Common.Transmissions;
 
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -105,7 +106,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
             Assert.That(hash, Is.EqualTo(expectedHash));
             checkedOutDoc.Verify(d => d.CheckIn(true, It.IsAny<IDictionary<string, object>>(), It.IsAny<IContentStream>(), It.IsAny<string>()), Times.Once);
-            Assert.That(transmission.Status, Is.EqualTo(TransmissionStatus.Finished));
+            Assert.That(transmission.Status, Is.EqualTo(Status.Finished));
         }
 
         [Test, Category("Fast")]
@@ -150,10 +151,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             checkedOutDoc.Setup(d => d.CheckIn(true, It.IsAny<IDictionary<string, object>>(), It.IsAny<IContentStream>(), It.IsAny<string>())).Throws<CmisConstraintException>();
 
             var doc = mockedDoc.Object;
-            var exception = Assert.Throws<UploadFailedException>(() => underTest.CallUploadFileWithPWC(localFile.Object, ref doc, this.transmission, null));
+            var exception = Assert.Throws<CmisSync.Lib.FileTransmission.UploadFailedException>(() => underTest.CallUploadFileWithPWC(localFile.Object, ref doc, this.transmission, null));
 
             checkedOutDoc.Verify(d => d.CheckIn(true, It.IsAny<IDictionary<string, object>>(), It.IsAny<IContentStream>(), It.IsAny<string>()), Times.Once);
-            Assert.That(transmission.Status, Is.EqualTo(TransmissionStatus.Aborted));
+            Assert.That(transmission.Status, Is.EqualTo(Status.Aborted));
             Assert.That(exception.InnerException, Is.TypeOf<CmisConstraintException>());
         }
 

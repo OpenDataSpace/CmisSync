@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace DataSpaceSync.Console
-{
+namespace DataSpaceSync.Console {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -33,8 +32,7 @@ namespace DataSpaceSync.Console
     using log4net;
     using log4net.Config;
 
-    class ActivityListener : IActivityListener
-    {
+    class ActivityListener : IActivityListener {
         public void ActivityStarted()
         {
         }
@@ -44,8 +42,7 @@ namespace DataSpaceSync.Console
         }
     }
 
-    class Program
-    {
+    class Program {
         /// <summary>
         /// Mutex checking whether CmisSync is already running or not.
         /// </summary>
@@ -65,8 +62,7 @@ namespace DataSpaceSync.Console
         /// The entry point of the program, where the program control starts and ends.
         /// </summary>
         /// <param name="args">The command-line arguments.</param>
-        static void Main(string[] args)
-        {
+        static void Main(string[] args) {
             // Only allow one instance of DataSpace Sync (on Windows)
             if (!programMutex.WaitOne(0, false)) {
                 System.Console.WriteLine("DataSpaceSync is already running.");

@@ -61,6 +61,10 @@
       <Project>{2C914413-B31C-4362-93C7-1AE34F09112A}</Project>
       <Name>CmisSync.Lib</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Extras\dataspace-client-sharp\DataSpace\DataSpace.csproj">
+      <Project>{558B5501-6944-4CC2-A830-0BBC25D7C848}</Project>
+      <Name>DataSpace</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <PreBuildEvent>Mkdir "$(ProjectDir)$(OutDir)x86"

@@ -16,7 +16,6 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using CmisSync.Lib;
 
 namespace TestLibrary.FileTransmissionTests {
     using System;
@@ -26,11 +25,14 @@ namespace TestLibrary.FileTransmissionTests {
     using System.Threading;
     using System.Threading.Tasks;
 
+    using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
-    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
+
+    using DataSpace.Common.Transmissions;
 
     using DotCMIS.Client;
     using DotCMIS.Data;

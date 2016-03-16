@@ -32,7 +32,8 @@ namespace TestLibrary.IntegrationTests {
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Config;
-    using CmisSync.Lib.Streams;
+
+    using DataSpace.Common.Streams;
 
     using DotCMIS;
     using DotCMIS.Client;

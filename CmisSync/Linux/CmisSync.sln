@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLibrary", "..\TestLibra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiagnoseTool", "..\..\DiagnoseTool\DiagnoseTool.csproj", "{F0F479F3-8461-42B7-ABF1-19C4B41C6C1A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataSpace", "..\..\Extras\dataspace-client-sharp\DataSpace\DataSpace.csproj", "{558B5501-6944-4CC2-A830-0BBC25D7C848}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|Any CPU = Release|Any CPU
@@ -33,6 +35,14 @@ Global
 		{529EF90F-A34C-4426-A4F9-65113AC23841}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{529EF90F-A34C-4426-A4F9-65113AC23841}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{529EF90F-A34C-4426-A4F9-65113AC23841}.Release|Any CPU.Build.0 = Release|Any CPU
+		{558B5501-6944-4CC2-A830-0BBC25D7C848}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{558B5501-6944-4CC2-A830-0BBC25D7C848}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{558B5501-6944-4CC2-A830-0BBC25D7C848}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{558B5501-6944-4CC2-A830-0BBC25D7C848}.Debug|x86.Build.0 = Debug|Any CPU
+		{558B5501-6944-4CC2-A830-0BBC25D7C848}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{558B5501-6944-4CC2-A830-0BBC25D7C848}.Release|Any CPU.Build.0 = Release|Any CPU
+		{558B5501-6944-4CC2-A830-0BBC25D7C848}.Release|x86.ActiveCfg = Release|Any CPU
+		{558B5501-6944-4CC2-A830-0BBC25D7C848}.Release|x86.Build.0 = Release|Any CPU
 		{728483AA-E34B-4441-BF2C-C8BC2901E4E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{728483AA-E34B-4441-BF2C-C8BC2901E4E0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F0F479F3-8461-42B7-ABF1-19C4B41C6C1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -51,7 +61,6 @@ Global
 		{009FDCD7-1D57-4202-BB6D-8477D8C6B8EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = CmisSync.csproj
 		Policies = $0
 		$0.TextStylePolicy = $1
 		$1.inheritsSet = null
@@ -60,7 +69,6 @@ Global
 		$2.AnonymousMethodBraceStyle = NextLine
 		$2.StatementBraceStyle = NextLine
 		$2.ElseNewLinePlacement = NewLine
-		$2.ElseIfNewLinePlacement = SameLine
 		$2.CatchNewLinePlacement = NewLine
 		$2.FinallyNewLinePlacement = NewLine
 		$2.WhileNewLinePlacement = NewLine
@@ -81,5 +89,6 @@ Global
 		$3.inheritsScope = text/plain
 		$3.scope = text/plain
 		outputpath = ..\..\bin
+		StartupItem = CmisSync.csproj
 	EndGlobalSection
 EndGlobal

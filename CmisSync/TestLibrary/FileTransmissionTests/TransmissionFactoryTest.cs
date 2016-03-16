@@ -16,16 +16,16 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-﻿using System.ComponentModel;
-using CmisSync.Lib;
-
 
 namespace TestLibrary.FileTransmissionTests {
     using System;
 
+    using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.FileTransmission;
+
+    using DataSpace.Common.Transmissions;
 
     using Moq;
 
@@ -104,7 +104,7 @@ namespace TestLibrary.FileTransmissionTests {
             var underTest = new TransmissionFactory(repo, aggregator.Object);
 
             var transmission = underTest.CreateTransmission(type, "path");
-            transmission.Status = TransmissionStatus.Finished;
+            transmission.Status = Status.Finished;
             repo.Update(new RepoInfo { DisplayName = repoName, DownloadLimit = downloadLimit, UploadLimit = uploadLimit });
 
             Assert.That(transmission.MaxBandwidth, Is.EqualTo(0));

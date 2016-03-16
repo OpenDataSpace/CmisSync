@@ -24,6 +24,8 @@ namespace CmisSync.Lib.FileTransmission {
 
     using CmisSync.Lib.Events;
 
+    using DataSpace.Common.Transmissions;
+
     using DotCMIS.Client;
 
     /// <summary>

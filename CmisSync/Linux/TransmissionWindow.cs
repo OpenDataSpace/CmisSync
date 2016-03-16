@@ -21,7 +21,7 @@ namespace CmisSync {
     using System;
     using System.Collections.Generic;
 
-    using CmisSync.Lib.FileTransmission;
+    using DataSpace.Common.Transmissions;
 
     using CmisSync.Widgets;
 

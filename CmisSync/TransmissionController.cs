@@ -27,7 +27,8 @@ namespace CmisSync {
 
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.FileTransmission;
+
+    using DataSpace.Common.Transmissions;
 
     public static class TransmissionExtensions {
         public static void AddRelativePathAndRepository(this Transmission transmission) {

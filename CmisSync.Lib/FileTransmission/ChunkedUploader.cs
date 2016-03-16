@@ -24,7 +24,9 @@ namespace CmisSync.Lib.FileTransmission {
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.HashAlgorithm;
-    using CmisSync.Lib.Streams;
+
+    using DataSpace.Common.Streams;
+    using DataSpace.Common.Transmissions;
 
     using DotCMIS.Client;
     using DotCMIS.Data.Impl;

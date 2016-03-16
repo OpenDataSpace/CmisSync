@@ -24,7 +24,9 @@ namespace CmisSync.Lib.FileTransmission {
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.HashAlgorithm;
-    using CmisSync.Lib.Streams;
+
+    using DataSpace.Common.Streams;
+    using DataSpace.Common.Transmissions;
 
     using DotCMIS.Client;
 
@@ -109,7 +111,7 @@ namespace CmisSync.Lib.FileTransmission {
                 while ((len = remoteStream.Read(buffer, 0, buffer.Length)) > 0) {
                     lock (this.disposeLock) {
                         if (this.disposed) {
-                            transmission.Status = TransmissionStatus.Aborted;
+                            transmission.Status = Status.Aborted;
                             throw new ObjectDisposedException(transmission.Path);
                         }
 

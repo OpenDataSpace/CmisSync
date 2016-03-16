@@ -24,6 +24,8 @@ namespace CmisSync.Lib.FileTransmission {
 
     using CmisSync.Lib.Cmis;
 
+    using DataSpace.Common.Transmissions;
+
     /// <summary>
     /// Transmission factory creates Transmission instances and registers them on the aggregator.
     /// </summary>
@@ -107,7 +109,7 @@ namespace CmisSync.Lib.FileTransmission {
         private void TransmissionFinished(object sender, PropertyChangedEventArgs e) {
             var t = sender as Transmission;
             if (e.PropertyName == Utils.NameOf(() => t.Status)) {
-                if (t.Status == TransmissionStatus.Aborted || t.Status == TransmissionStatus.Finished) {
+                if (t.Status == Status.Aborted || t.Status == Status.Finished) {
                     lock (this.collectionLock) {
                         this.transmissions.Remove(t);
                         t.PropertyChanged -= this.TransmissionFinished;

@@ -6,10 +6,13 @@ CLEANFILES = -r DotCMIS.* \
 
 MAINTAINERCLEANFILES = Makefile.in
 
-EXTRA_DIST = OpenDataSpaceDotCMIS
+EXTRA_DIST = OpenDataSpaceDotCMIS \
+			 dataspace-client-sharp
 
 all-local:
 	nuget restore OpenDataSpaceDotCMIS/DotCMIS.sln
 	xbuild OpenDataSpaceDotCMIS/DotCMIS/DotCMIS.csproj /t:Rebuild
 	cp -f OpenDataSpaceDotCMIS/DotCMIS/bin/Debug/DotCMIS.* .
-	
+	nuget restore dataspace-client-sharp/dataspace-client-sharp.sln
+	xbuild dataspace-client-sharp/DataSpace/DataSpace.csproj /t:Rebuild
+	cp -f dataspace-client-sharp/DataSpace/bin/Debug/DataSpace.* .

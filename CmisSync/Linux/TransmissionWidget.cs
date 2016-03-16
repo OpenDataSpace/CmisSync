@@ -24,7 +24,8 @@ namespace CmisSync.Widgets {
     using System.Timers;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.FileTransmission;
+
+    using DataSpace.Common.Transmissions;
 
     [ToolboxItem(true)]
     [CLSCompliant(false)]
@@ -146,16 +147,16 @@ namespace CmisSync.Widgets {
             this.statusDetailsLabel.Markup = string.Format("<small>{0}{1}</small>", pos, size);
         }
 
-        private void UpdateStatus(TransmissionStatus status) {
+        private void UpdateStatus(Status status) {
             this.animation.Stop();
             switch (status) {
-            case TransmissionStatus.Finished:
+            case Status.Finished:
                 this.openFileInFolderButton.Sensitive = true;
                 this.Progress = 1.0;
                 this.bandwidthLabel.Markup = string.Empty;
                 this.midbox.Remove(this.transmissionProgressBar);
                 break;
-            case TransmissionStatus.Aborting:
+            case Status.Aborting:
                 this.animation.Start();
                 break;
             default:

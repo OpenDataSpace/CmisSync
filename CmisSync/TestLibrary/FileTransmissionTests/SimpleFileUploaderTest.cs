@@ -29,6 +29,8 @@ namespace TestLibrary.FileTransmissionTests {
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Events;
 
+    using DataSpace.Common.Transmissions;
+
     using DotCMIS.Client;
     using DotCMIS.Data;
     using DotCMIS.Exceptions;
@@ -126,7 +128,7 @@ namespace TestLibrary.FileTransmissionTests {
                 .Returns(new Mock<IObjectId>().Object);
             this.mockedMemStream.Setup(memstream => memstream.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback(() => Thread.Sleep(100));
             this.transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
-                Assert.That((sender as Transmission).Status, Is.Not.EqualTo(TransmissionStatus.Finished));
+                Assert.That((sender as Transmission).Status, Is.Not.EqualTo(Status.Finished));
             };
             try {
                 Task t;
@@ -139,7 +141,7 @@ namespace TestLibrary.FileTransmissionTests {
             } catch (AggregateException e) {
                 Assert.IsInstanceOf(typeof(UploadFailedException), e.InnerException);
                 Assert.IsInstanceOf(typeof(AbortException), e.InnerException.InnerException);
-                Assert.That(this.transmission.Status, Is.EqualTo(TransmissionStatus.Aborted));
+                Assert.That(this.transmission.Status, Is.EqualTo(Status.Aborted));
                 return;
             }
 

@@ -22,9 +22,10 @@ namespace TestLibrary.StorageTests.DataBaseTests {
     using System.Collections.Generic;
     using System.IO;
 
-    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
+
+    using DataSpace.Common.Transmissions;
 
     using DBreeze;
     using DBreeze.DataTypes;

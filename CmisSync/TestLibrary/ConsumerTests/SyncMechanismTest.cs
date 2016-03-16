@@ -28,13 +28,14 @@ namespace TestLibrary.ConsumerTests {
     using CmisSync.Lib.Consumer.SituationSolver.PWC;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Exceptions;
-    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Producer.Watcher;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
+
+    using DataSpace.Common.Transmissions;
 
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;

@@ -23,8 +23,9 @@ namespace TestLibrary.FileTransmissionTests {
     using System.Text;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
+
+    using DataSpace.Common.Transmissions;
 
     using Moq;
 
@@ -62,7 +63,7 @@ namespace TestLibrary.FileTransmissionTests {
             var trans = new Transmission(TransmissionType.DownloadNewFile, "path");
             underTest.Add(trans);
 
-            trans.Status = TransmissionStatus.Finished;
+            trans.Status = Status.Finished;
 
             Assert.That(underTest.ActiveTransmissions, Is.Empty);
         }
@@ -73,7 +74,7 @@ namespace TestLibrary.FileTransmissionTests {
             var trans = new Transmission(TransmissionType.DownloadNewFile, "path");
             underTest.Add(trans);
 
-            trans.Status = TransmissionStatus.Aborted;
+            trans.Status = Status.Aborted;
 
             Assert.That(underTest.ActiveTransmissions, Is.Empty);
         }
@@ -118,7 +119,7 @@ namespace TestLibrary.FileTransmissionTests {
                 Assert.That(e.OldItems.Count, Is.EqualTo(1));
                 Assert.That(e.OldItems[0], Is.EqualTo(trans));
             };
-            trans.Status = TransmissionStatus.Finished;
+            trans.Status = Status.Finished;
 
             Assert.That(eventCounter, Is.EqualTo(1));
         }

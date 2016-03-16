@@ -30,6 +30,8 @@ namespace TestLibrary.FileTransmissionTests {
     using CmisSync.Lib.Events;
     using CmisSync.Lib.HashAlgorithm;
 
+    using DataSpace.Common.Transmissions;
+
     using DotCMIS.Client;
     using DotCMIS.Data;
     using DotCMIS.Exceptions;
@@ -200,7 +202,7 @@ namespace TestLibrary.FileTransmissionTests {
         public void AbortWhileDownload() {
             this.mockedMemStream.Setup(memstream => memstream.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback(() => Thread.Sleep(1)).Returns(1);
             this.transmission.PropertyChanged += delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
-                Assert.That((sender as Transmission).Status, Is.Not.EqualTo(TransmissionStatus.Finished));
+                Assert.That((sender as Transmission).Status, Is.Not.EqualTo(Status.Finished));
             };
 
             try {
@@ -213,7 +215,7 @@ namespace TestLibrary.FileTransmissionTests {
                 Assert.Fail();
             } catch (AggregateException e) {
                 Assert.IsInstanceOf(typeof(AbortException), e.InnerException);
-                Assert.That(this.transmission.Status, Is.EqualTo(TransmissionStatus.Aborted));
+                Assert.That(this.transmission.Status, Is.EqualTo(Status.Aborted));
                 return;
             }
 

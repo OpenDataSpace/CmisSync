@@ -22,11 +22,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
+
+    using DataSpace.Common.Transmissions;
 
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
@@ -36,7 +37,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     /// </summary>
     public class LocalObjectChangedRemoteObjectChangedWithPWC : AbstractEnhancedSolverWithPWC {
         private readonly ISolver fallbackSolver;
-        private readonly ITransmissionFactory transmissionManager;
+        private readonly ITransmissionFactory transmissionFactory;
 
         /// <summary>
         /// Initializes a new instance of the
@@ -51,7 +52,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ITransmissionFactory manager,
+            ITransmissionFactory transmissionFactory,
             ISolver localObjectChangedRemoteObjectChangedFallbackSolver) : base(session, storage, transmissionStorage)
         {
             if (localObjectChangedRemoteObjectChangedFallbackSolver == null) {
@@ -59,7 +60,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             }
 
             this.fallbackSolver = localObjectChangedRemoteObjectChangedFallbackSolver;
-            this.transmissionManager = manager;
+            this.transmissionFactory = transmissionFactory;
         }
 
         /// <summary>
@@ -96,7 +97,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 updateRemoteDate = true;
                 var fullName = localFile.FullName;
                 try {
-                    var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UploadModifiedFile, fullName);
+                    var transmission = this.transmissionFactory.CreateTransmission(TransmissionType.UploadModifiedFile, fullName);
                     obj.LastChecksum = UploadFileWithPWC(localFile, ref remoteDocument, transmission);
                     obj.ChecksumAlgorithmName = "SHA-1";
                     obj.LastContentSize = remoteDocument.ContentStreamLength ?? localFile.Length;

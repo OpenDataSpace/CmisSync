@@ -23,7 +23,9 @@ namespace CmisSync.Lib.FileTransmission {
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Streams;
+
+    using DataSpace.Common.Streams;
+    using DataSpace.Common.Transmissions;
 
     using DotCMIS.Client;
     using DotCMIS.Data.Impl;

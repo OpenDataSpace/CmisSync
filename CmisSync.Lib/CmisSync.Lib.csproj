@@ -75,12 +75,6 @@
     <Compile Include="Cmis\DotCMISLogListener.cs" />
     <Compile Include="HttpProxyUtils.cs" />
     <Compile Include="IActivityListener.cs" />
-    <Compile Include="Streams\BandwidthLimitedStream.cs" />
-    <Compile Include="Streams\ForwardReadingStream.cs" />
-    <Compile Include="Streams\NonClosingHashStream.cs" />
-    <Compile Include="Streams\OffsetStream.cs" />
-    <Compile Include="Streams\ProgressStream.cs" />
-    <Compile Include="Streams\StreamWrapper.cs" />
     <Compile Include="Config\Config.cs" />
     <Compile Include="Config\ConfigManager.cs" />
     <Compile Include="Config\ConfigMigration.cs" />
@@ -101,7 +95,6 @@
     <Compile Include="Storage\FileSystem\IFileSystemInfo.cs" />
     <Compile Include="Storage\FileSystem\IFileSystemInfoFactory.cs" />
     <Compile Include="Storage\FileSystem\IFileSystemWatcher.cs" />
-    <Compile Include="Streams\ChunkedStream.cs" />
     <Compile Include="Cmis\OperationContextFactory.cs" />
     <Compile Include="Storage\Database\DBreezeInitializerSingleton.cs" />
     <Compile Include="Storage\Database\IMetaDataStorage.cs" />
@@ -292,19 +285,12 @@
     <Compile Include="Consumer\SituationSolver\PrivateWorkingCopy\AbstractEnhancedSolverWithPWC.cs" />
     <Compile Include="Consumer\SituationSolver\PrivateWorkingCopy\LocalObjectChangedRemoteObjectChangedWithPWC.cs" />
     <Compile Include="FileTransmission\TransmissionManager.cs" />
-    <Compile Include="FileTransmission\Transmission.cs" />
-    <Compile Include="Streams\AbortableStream.cs" />
-    <Compile Include="Streams\PausableStream.cs" />
-    <Compile Include="Streams\BandwidthNotifyingStream.cs" />
     <Compile Include="Filter\RepositoryRootDeletedDetection.cs" />
     <Compile Include="Cmis\RepositoryExceptionEventArgs.cs" />
-    <Compile Include="Streams\NotifyPropertyChangedStream.cs" />
-    <Compile Include="Streams\TransmissionStream.cs" />
     <Compile Include="Cmis\UiUtils\LoginCredentials.cs" />
     <Compile Include="Cmis\UiUtils\LogonRepositoryInfo.cs" />
     <Compile Include="Cmis\UiUtils\LoginException.cs" />
     <Compile Include="Cmis\UiUtils\UiConvenienceExtenders.cs" />
-    <Compile Include="Streams\StreamConvenienceExtensions.cs" />
     <Compile Include="Cmis\INotifyRepositoryPropertyChanged.cs" />
     <Compile Include="Cmis\AbstractNotifyingRepository.cs" />
     <Compile Include="Cmis\SyncStatus.cs" />
@@ -312,9 +298,7 @@
     <Compile Include="Storage\Database\IDotTreeWriter.cs" />
     <Compile Include="Filter\SymlinkFilter.cs" />
     <Compile Include="HashAlgorithm\IReusableHashAlgorithm.cs" />
-    <Compile Include="FileTransmission\ITransmissionFactory.cs" />
     <Compile Include="FileTransmission\TransmissionFactory.cs" />
-    <Compile Include="FileTransmission\ITransmissionAggregator.cs" />
     <Compile Include="Consumer\SituationSolver\FileSystemInfoConvenienceExtenders.cs" />
     <Compile Include="Exceptions\InteractionNeededException.cs" />
     <Compile Include="Exceptions\AbstractInteractionNeededException.cs" />
@@ -371,6 +355,10 @@
     <ProjectReference Include="..\Extras\OpenDataSpaceDotCMIS\DotCMIS\DotCMIS.csproj">
       <Project>{529EF90F-A34C-4426-A4F9-65113AC23841}</Project>
       <Name>DotCMIS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Extras\dataspace-client-sharp\DataSpace\DataSpace.csproj">
+      <Project>{558B5501-6944-4CC2-A830-0BBC25D7C848}</Project>
+      <Name>DataSpace</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

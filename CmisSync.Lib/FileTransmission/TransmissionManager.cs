@@ -29,6 +29,8 @@ namespace CmisSync.Lib.Queueing {
     using CmisSync.Lib.Events;
     using CmisSync.Lib.FileTransmission;
 
+    using DataSpace.Common.Transmissions;
+
     using log4net;
 
     /// <summary>
@@ -102,7 +104,7 @@ namespace CmisSync.Lib.Queueing {
 
             var transmission = sender as Transmission;
             if (transmission != null &&
-                (transmission.Status == TransmissionStatus.Aborted || transmission.Status == TransmissionStatus.Finished)) {
+                (transmission.Status == Status.Aborted || transmission.Status == Status.Finished)) {
                 lock (this.collectionLock) {
                     this.activeTransmissions.Remove(transmission);
                     transmission.PropertyChanged -= this.TransmissionFinished;

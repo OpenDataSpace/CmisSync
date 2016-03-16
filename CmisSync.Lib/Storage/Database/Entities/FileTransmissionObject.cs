@@ -22,7 +22,8 @@ namespace CmisSync.Lib.Storage.Database.Entities {
     using System.IO;
     using System.Linq;
 
-    using CmisSync.Lib.FileTransmission;
+    using DataSpace.Common.Transmissions;
+
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;

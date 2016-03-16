@@ -26,11 +26,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
+
+    using DataSpace.Common.Streams;
+    using DataSpace.Common.Transmissions;
 
     using DotCMIS.Client;
 
@@ -256,7 +258,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             var remoteDocument = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.objectId, this.objectName, this.parentId, this.fileContent.Length, this.fileContent, this.changeToken);
             remoteDocument.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
-            Assert.Throws<AbortException>(() => solver.Solve(this.localFile.Object, remoteDocument.Object, localContent, remoteContent));
+            Assert.Throws<AbortedException>(() => solver.Solve(this.localFile.Object, remoteDocument.Object, localContent, remoteContent));
 
             this.cacheFile.Verify(f => f.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None), Times.Once());
             this.cacheFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Never());

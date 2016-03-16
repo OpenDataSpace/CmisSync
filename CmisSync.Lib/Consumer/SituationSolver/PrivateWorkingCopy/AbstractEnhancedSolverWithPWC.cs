@@ -32,7 +32,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Streams;
+
+    using DataSpace.Common.Streams;
+    using DataSpace.Common.Transmissions;
 
     using DotCMIS;
     using DotCMIS.Client;
@@ -231,7 +233,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     throw uploadFailed;
                 }
 
-                transmission.Status = TransmissionStatus.Finished;
+                transmission.Status = Status.Finished;
                 return hash;
             }
         }

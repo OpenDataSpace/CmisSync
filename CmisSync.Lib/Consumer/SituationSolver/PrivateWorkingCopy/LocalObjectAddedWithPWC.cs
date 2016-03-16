@@ -26,11 +26,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
+
+    using DataSpace.Common.Transmissions;
 
     using DotCMIS;
     using DotCMIS.Client;
@@ -46,7 +47,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     /// </summary>
     public class LocalObjectAddedWithPWC : AbstractEnhancedSolverWithPWC {
         private readonly ISolver folderOrEmptyFileAddedSolver;
-        private readonly ITransmissionFactory transmissionManager;
+        private readonly ITransmissionFactory transmissionFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.PWC.LocalObjectAddedWithPWC"/> class.
@@ -60,7 +61,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ITransmissionFactory manager,
+            ITransmissionFactory transmissionFactory,
             ISolver localFolderOrEmptyFileAddedSolver) : base(session, storage, transmissionStorage)
         {
             if (localFolderOrEmptyFileAddedSolver == null) {
@@ -68,7 +69,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             }
 
             this.folderOrEmptyFileAddedSolver = localFolderOrEmptyFileAddedSolver;
-            this.transmissionManager = manager;
+            this.transmissionFactory = transmissionFactory;
         }
 
         /// <summary>
@@ -116,7 +117,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
                 Guid uuid = this.WriteOrUseUuidIfSupported(localFile);
 
-                var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UploadNewFile, fullName);
+                var transmission = this.transmissionFactory.CreateTransmission(TransmissionType.UploadNewFile, fullName);
 
                 MappedObject mapped = new MappedObject(
                     localFile.Name,
@@ -140,7 +141,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     mapped.ChecksumAlgorithmName = "SHA-1";
                     mapped.RemoteObjectId = remoteDocument.Id;
                 } catch (Exception ex) {
-                    var uploadException = ex as UploadFailedException;
+                    var uploadException = ex as CmisSync.Lib.FileTransmission.UploadFailedException;
                     if (uploadException != null) {
                         var inner = uploadException.InnerException;
                         if (inner is CmisStorageException) {

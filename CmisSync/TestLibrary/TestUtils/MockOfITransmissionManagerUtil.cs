@@ -23,8 +23,9 @@ namespace TestLibrary.TestUtils {
     using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
-    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
+
+    using DataSpace.Common.Transmissions;
 
     using Moq;
 
@@ -87,7 +88,7 @@ namespace TestLibrary.TestUtils {
                 aggregator = new TransmissionManager();
             }
 
-            return new TransmissionFactory(repo, aggregator);
+            return new CmisSync.Lib.FileTransmission.TransmissionFactory(repo, aggregator);
         }
 
         public static ITransmissionFactory CreateFactory(this ITransmissionAggregator aggregator, AbstractNotifyingRepository repo = null) {
@@ -95,7 +96,7 @@ namespace TestLibrary.TestUtils {
                 repo = new Mock<AbstractNotifyingRepository>(new RepoInfo() { DisplayName = "mockedRepo" }).Object;
             }
 
-            return new TransmissionFactory(repo, aggregator);
+            return new CmisSync.Lib.FileTransmission.TransmissionFactory(repo, aggregator);
         }
     }
 }

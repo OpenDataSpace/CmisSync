@@ -9,7 +9,8 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(MONOMAC_LIBS) 
 	$(NUNIT_LIBS) \
 	$(DBREEZE_LIBS) \
 	$(MOQ_LIBS) \
-	$(TOXIPROXY_LIBS)
+	$(TOXIPROXY_LIBS) \
+	$(DATASPACE_LIBS)
 
 SOURCES =  \
 	AccumulatorTests/LocalObjectFetcherTest.cs \
@@ -94,7 +95,6 @@ SOURCES =  \
 	FileTransmissionTests/SimpleFileDownloaderTest.cs \
 	FileTransmissionTests/SimpleFileUploaderTest.cs \
 	FileTransmissionTests/TransmissionManagerTest.cs \
-	FileTransmissionTests/TransmissionTest.cs \
 	FilterTests/FilterAggregatorTest.cs \
 	FilterTests/GenericHandleDublicatedEventsFilterTest.cs \
 	FilterTests/IgnoreAlreadyHandledContentChangeEventsFilterTest.cs \
@@ -261,13 +261,6 @@ SOURCES =  \
 	StorageTests/FileSystemTests/ReadOnlyIgnoringDecorator/IFileInfoDecoratorTest.cs \
 	StorageTests/FileSystemTests/ReadOnlyIgnoringDecorator/IFileSystemInfoDecoratorTest.cs \
 	StorageTests/FileSystemTests/Utf8FileNameNormalizationTest.cs \
-	StreamsTests/AbortableStreamTest.cs \
-	StreamsTests/BandwidthLimitedStreamTest.cs \
-	StreamsTests/ChunkedStreamTest.cs \
-	StreamsTests/NonClosingHashStreamTest.cs \
-	StreamsTests/OffsetStreamTest.cs \
-	StreamsTests/ProgressStreamTest.cs \
-	StreamsTests/TransmissionStreamTest.cs \
 	TestUtils/FolderTree.cs \
 	TestUtils/FolderTreeTest.cs \
 	TestUtils/IDocumentAssertUtils.cs \

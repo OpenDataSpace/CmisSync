@@ -217,11 +217,6 @@
     <Compile Include="StorageTests\FileSystemTests\FileSystemWrapperTests.cs" />
     <Compile Include="StorageTests\FileSystemTests\LongFileAndPathNameSupportTest.cs" />
     <Compile Include="StorageTests\FileSystemTests\Utf8FileNameNormalizationTest.cs" />
-    <Compile Include="StreamsTests\BandwidthLimitedStreamTest.cs" />
-    <Compile Include="StreamsTests\ChunkedStreamTest.cs" />
-    <Compile Include="StreamsTests\NonClosingHashStreamTest.cs" />
-    <Compile Include="StreamsTests\OffsetStreamTest.cs" />
-    <Compile Include="StreamsTests\ProgressStreamTest.cs" />
     <Compile Include="TestUtils\FolderTree.cs" />
     <Compile Include="TestUtils\FolderTreeTest.cs" />
     <Compile Include="TestUtils\IsTestWithConfiguredLog4Net.cs" />
@@ -263,14 +258,9 @@
     <Compile Include="TestUtils\IDocumentAssertUtils.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\PrivateWorkingCopyTests\LocalObjectChangedRemoteObjectChangedWithPWCTest.cs" />
     <Compile Include="TestUtils\MockOfIFileTransmissionStorageUtil.cs" />
-    <Compile Include="FileTransmissionTests\TransmissionTest.cs" />
     <Compile Include="FileTransmissionTests\TransmissionManagerTest.cs" />
     <Compile Include="TestUtils\MockOfITransmissionManagerUtil.cs" />
     <Compile Include="FilterTests\RepositoryRootDeletedDetectionTest.cs" />
-    <Compile Include="StreamsTests\AbortableStreamTest.cs" />
-    <Compile Include="StreamsTests\BandwidthNotifyingStreamTest.cs" />
-    <Compile Include="StreamsTests\PausableStreamTest.cs" />
-    <Compile Include="StreamsTests\TransmissionStreamTest.cs" />
     <Compile Include="CmisTests\UiUtilsTests\UiConvenienceExtendersTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\PrivateWorkingCopyTests\AbstractEnhancedSolverWithPWCTest.cs" />
     <Compile Include="IntegrationTests\ContentHashTests\CRUDTests.cs" />
@@ -382,6 +372,10 @@
     <ProjectReference Include="..\..\Extras\OpenDataSpaceDotCMIS\DotCMIS\DotCMIS.csproj">
       <Project>{529EF90F-A34C-4426-A4F9-65113AC23841}</Project>
       <Name>DotCMIS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Extras\dataspace-client-sharp\DataSpace\DataSpace.csproj">
+      <Project>{558B5501-6944-4CC2-A830-0BBC25D7C848}</Project>
+      <Name>DataSpace</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

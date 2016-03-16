@@ -47,6 +47,8 @@ namespace CmisSync.Lib.Cmis {
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
+    using DataSpace.Common.Transmissions;
+
     using DBreeze;
 
     using DotCMIS;

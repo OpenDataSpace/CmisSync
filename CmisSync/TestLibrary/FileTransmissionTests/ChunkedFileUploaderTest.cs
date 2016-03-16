@@ -29,6 +29,8 @@ namespace TestLibrary.FileTransmissionTests {
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Events;
 
+    using DataSpace.Common.Transmissions;
+
     using DotCMIS.Client;
     using DotCMIS.Data;
     using DotCMIS.Exceptions;

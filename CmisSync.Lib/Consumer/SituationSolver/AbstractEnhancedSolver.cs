@@ -26,13 +26,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Exceptions;
-    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.HashAlgorithm;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Streams;
+
+    using DataSpace.Common.Streams;
+    using DataSpace.Common.Transmissions;
 
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
@@ -212,7 +213,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
             using (var hashAlg = new SHA1Reuse()) {
                 using (var filestream = target.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
-                using (var downloader = ContentTaskUtils.CreateDownloader()) {
+                using (var downloader = CmisSync.Lib.FileTransmission.ContentTaskUtils.CreateDownloader()) {
                     try {
                         downloader.DownloadFile(
                             remoteDocument,
@@ -302,7 +303,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 throw;
             }
 
-            transmission.Status = TransmissionStatus.Finished;
+            transmission.Status = Status.Finished;
             return hash;
         }
 
@@ -335,7 +336,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     }
                 }
 
-                transmission.Status = TransmissionStatus.Finished;
+                transmission.Status = Status.Finished;
                 return hash;
             }
         }

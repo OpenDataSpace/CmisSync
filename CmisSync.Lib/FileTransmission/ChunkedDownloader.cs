@@ -27,7 +27,9 @@ namespace CmisSync.Lib.FileTransmission {
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
-    using CmisSync.Lib.Streams;
+
+    using DataSpace.Common.Streams;
+    using DataSpace.Common.Transmissions;
 
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -162,7 +164,7 @@ namespace CmisSync.Lib.FileTransmission {
         private int DownloadNextChunk(IDocument remoteDocument, long offset, long remainingBytes, Transmission transmission, Stream outputstream, HashAlgorithm hashAlg) {
             lock (this.disposeLock) {
                 if (this.disposed) {
-                    transmission.Status = TransmissionStatus.Aborted;
+                    transmission.Status = Status.Aborted;
                     throw new ObjectDisposedException(transmission.Path);
                 }
 

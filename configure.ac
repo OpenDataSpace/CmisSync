@@ -64,6 +64,9 @@ AC_SUBST(TOXIPROXY_LIBS,[[-r:\$\(top_srcdir\)/packages/Toxiproxy.Net.1.2.11/lib/
 AC_SUBST(DOTCMIS_LIBS,[[-r:\$\(top_srcdir\)/Extras/DotCMIS.dll]])
 AC_SUBST(DOTCMIS_PATH,[[\$\(top_srcdir\)/Extras/DotCMIS.dll]])
 
+AC_SUBST(DATASPACE_LIBS,[[-r:\$\(top_srcdir\)/Extras/DataSpace.dll]])
+AC_SUBST(DATASPACE_PATH,[[\$\(top_srcdir\)/Extras/DataSpace.dll]])
+
 CMISSYNC_CHECK_NOTIFY_SHARP
 CMISSYNC_CHECK_GTK_SHARP
 

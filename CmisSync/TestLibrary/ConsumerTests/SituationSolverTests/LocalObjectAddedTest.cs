@@ -35,6 +35,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
+    using DataSpace.Common.Transmissions;
+
     using DotCMIS.Client;
     using DotCMIS.Data;
     using DotCMIS.Enums;

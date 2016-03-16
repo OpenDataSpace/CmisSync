@@ -32,7 +32,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// <summary>
         /// Gets the type
         /// </summary>
-        TransmissionType Type { get; }
+        DataSpace.Common.Transmissions.TransmissionType Type { get; }
 
         /// <summary>
         /// Gets the local file path 

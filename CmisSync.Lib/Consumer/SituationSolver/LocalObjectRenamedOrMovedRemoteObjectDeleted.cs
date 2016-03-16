@@ -21,11 +21,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
 
-    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
+
+    using DataSpace.Common.Transmissions;
 
     using DotCMIS.Client;
 
@@ -39,9 +40,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ITransmissionFactory manager,
+            ITransmissionFactory transmissionFactory,
             ISolver secondSolver = null) : base(session, storage) {
-                this.secondSolver = secondSolver ?? new LocalObjectAdded(session, storage, transmissionStorage, manager);
+                this.secondSolver = secondSolver ?? new LocalObjectAdded(session, storage, transmissionStorage, transmissionFactory);
         }
 
         public override void Solve(

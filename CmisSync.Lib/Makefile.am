@@ -3,7 +3,7 @@ TARGET = library
 
 ASSEMBLY_INFO_SOURCE = Defines.cs
 
-LIBS = $(LOG4NET_LIBS) $(CONFIGLIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(WEBLIBS) $(MONOPOSIX) $(MONOMAC_LIBS) $(DBREEZE_LIBS)
+LIBS = $(LOG4NET_LIBS) $(CONFIGLIBS) $(DATASPACE_LIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(WEBLIBS) $(MONOPOSIX) $(MONOMAC_LIBS) $(DBREEZE_LIBS)
 
 SOURCES =  \
 	Accumulator/LocalObjectFetcher.cs \
@@ -151,11 +151,8 @@ SOURCES =  \
 	FileTransmission/ContentTaskUtils.cs \
 	FileTransmission/IFileDownloader.cs \
 	FileTransmission/IFileUploader.cs \
-	FileTransmission/ITransmissionAggregator.cs \
-	FileTransmission/ITransmissionFactory.cs \
 	FileTransmission/SimpleFileDownloader.cs \
 	FileTransmission/SimpleFileUploader.cs \
-	FileTransmission/Transmission.cs \
 	FileTransmission/TransmissionFactory.cs \
 	FileTransmission/TransmissionManager.cs \
 	FileTransmission/UploadFailedException.cs \
@@ -271,19 +268,6 @@ SOURCES =  \
 	Storage/FileSystem/ReadOnlyIgnoringFileInfoDecorator.cs \
 	Storage/FileSystem/ReadOnlyIgnoringFileSystemInfoDecorator.cs \
 	Storage/FileSystem/RestoreModificationDateException.cs \
-	Streams/AbortableStream.cs \
-	Streams/BandwidthLimitedStream.cs \
-	Streams/BandwidthNotifyingStream.cs \
-	Streams/ChunkedStream.cs \
-	Streams/ForwardReadingStream.cs \
-	Streams/NonClosingHashStream.cs \
-	Streams/NotifyPropertyChangedStream.cs \
-	Streams/OffsetStream.cs \
-	Streams/PausableStream.cs \
-	Streams/ProgressStream.cs \
-	Streams/StreamConvenienceExtensions.cs \
-	Streams/StreamWrapper.cs \
-	Streams/TransmissionStream.cs \
 	Utils.cs
 
 EXTRA_DIST = CmisSync.Lib.csproj StaticDefines.cs
