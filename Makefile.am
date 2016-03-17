@@ -28,12 +28,12 @@ bootstrap:
 	TEMP=$(shell mktemp -du 2>/dev/null || mktemp -d -u -t 'nuget') nuget restore CmisSync/Linux/CmisSync.sln
 	mkdir -p bin
 	cp packages/NUnit.2.6.4/lib/nunit.framework.dll bin/
-	cp packages/Newtonsoft.Json.7.0.1/lib/net40/Newtonsoft.Json.dll bin/
-	cp packages/log4net.2.0.3/lib/net40-client/log4net.dll bin/
-	cp packages/DBreeze.1.71.1/lib/net40/DBreeze.dll bin/
-	cp packages/Moq.4.2.1507.0118/lib/net40/Moq.dll bin/
+	cp packages/Newtonsoft.Json.8.0.3/lib/net45/Newtonsoft.Json.dll bin/
+	cp packages/log4net.2.0.5/lib/net45-full/log4net.dll bin/
+	cp packages/DBreeze.1.73.2/lib/net45/DBreeze.dll bin/
+	cp packages/Moq.4.2.1510.2205/lib/net40/Moq.dll bin/
 	cp packages/Toxiproxy.Net.1.2.11/lib/net45/Toxiproxy.Net.dll bin/
-	cp packages/RestSharp.105.2.1/lib/net45/RestSharp.dll bin/
+	cp packages/RestSharp.105.2.3/lib/net45/RestSharp.dll bin/
 
 install-exec-local:
 	$(INSTALL) -m 0755 $(JSON_PATH) $(DESTDIR)$(pkglibdir)
