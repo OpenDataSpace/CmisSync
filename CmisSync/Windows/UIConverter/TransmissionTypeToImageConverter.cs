@@ -24,9 +24,9 @@ namespace CmisSync.UIConverter {
     using System.Linq;
     using System.Text;
     using System.Windows.Data;
-
-    using CmisSync.Lib.FileTransmission;
     using System.Windows.Media.Imaging;
+
+    using DataSpace.Common.Transmissions;
 
     [ValueConversion(typeof(TransmissionType), typeof(BitmapFrame))]
     sealed class TypeToImageConverter : IValueConverter {

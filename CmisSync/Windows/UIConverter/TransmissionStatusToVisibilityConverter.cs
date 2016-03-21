@@ -30,12 +30,12 @@ namespace CmisSync.UIConverter {
     using System.Windows;
     using System.Windows.Data;
 
-    using CmisSync.Lib.FileTransmission;
+    using DataSpace.Common.Transmissions;
 
-    [ValueConversion(typeof(TransmissionStatus), typeof(Visibility))]
+    [ValueConversion(typeof(Status), typeof(Visibility))]
     sealed class TransmissionStatusToVisibilityConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
-            return ((TransmissionStatus)value == TransmissionStatus.Aborted || (TransmissionStatus)value == TransmissionStatus.Finished) ? Visibility.Collapsed : Visibility.Visible;
+            return ((Status)value == Status.Aborted || (Status)value == Status.Finished) ? Visibility.Collapsed : Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType,
