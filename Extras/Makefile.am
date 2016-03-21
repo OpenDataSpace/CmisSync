@@ -16,3 +16,4 @@ all-local:
 	nuget restore dataspace-client-sharp/dataspace-client-sharp.sln
 	xbuild dataspace-client-sharp/DataSpace/DataSpace.csproj /t:Rebuild
 	cp -f dataspace-client-sharp/DataSpace/bin/Debug/DataSpace.* .
+	nuget restore dataspace-client-sharp/DotCMIS/DotCMIS.sln
