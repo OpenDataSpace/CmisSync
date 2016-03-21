@@ -16,7 +16,6 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using CmisSync.Lib;
 
 namespace TestLibrary.FileTransmissionTests {
     using System;
@@ -25,10 +24,12 @@ namespace TestLibrary.FileTransmissionTests {
     using System.Threading;
     using System.Threading.Tasks;
 
+    using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Events;
 
+    using DataSpace.Common.Streams;
     using DataSpace.Common.Transmissions;
 
     using DotCMIS.Client;
@@ -140,7 +141,7 @@ namespace TestLibrary.FileTransmissionTests {
                 Assert.Fail();
             } catch (AggregateException e) {
                 Assert.IsInstanceOf(typeof(UploadFailedException), e.InnerException);
-                Assert.IsInstanceOf(typeof(AbortException), e.InnerException.InnerException);
+                Assert.IsInstanceOf(typeof(AbortedException), e.InnerException.InnerException);
                 Assert.That(this.transmission.Status, Is.EqualTo(Status.Aborted));
                 return;
             }

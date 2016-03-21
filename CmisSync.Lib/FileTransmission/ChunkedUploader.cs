@@ -126,11 +126,11 @@ namespace CmisSync.Lib.FileTransmission {
                             }
                         }
                     } catch (Exception e) {
-                        if (e is FileTransmission.AbortException) {
+                        if (e is AbortedException) {
                             throw;
                         }
 
-                        if (e.InnerException is FileTransmission.AbortException) {
+                        if (e.InnerException is AbortedException) {
                             throw e.InnerException;
                         }
 

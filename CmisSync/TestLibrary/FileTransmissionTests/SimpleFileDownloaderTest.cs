@@ -30,6 +30,7 @@ namespace TestLibrary.FileTransmissionTests {
     using CmisSync.Lib.Events;
     using CmisSync.Lib.HashAlgorithm;
 
+    using DataSpace.Common.Streams;
     using DataSpace.Common.Transmissions;
 
     using DotCMIS.Client;
@@ -214,7 +215,7 @@ namespace TestLibrary.FileTransmissionTests {
                 t.Wait();
                 Assert.Fail();
             } catch (AggregateException e) {
-                Assert.IsInstanceOf(typeof(AbortException), e.InnerException);
+                Assert.IsInstanceOf(typeof(AbortedException), e.InnerException);
                 Assert.That(this.transmission.Status, Is.EqualTo(Status.Aborted));
                 return;
             }

@@ -33,6 +33,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
+    using DataSpace.Common.Streams;
     using DataSpace.Common.Transmissions;
 
     using DotCMIS;
@@ -270,7 +271,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.localFile.Setup(f => f.Length).Returns(this.fileLength);
             this.localFile.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(stream.Object);
 
-            Assert.Throws<AbortException>(() => solver.Solve(this.localFile.Object, this.remoteDocument.Object, localContent, remoteContent));
+            Assert.Throws<AbortedException>(() => solver.Solve(this.localFile.Object, this.remoteDocument.Object, localContent, remoteContent));
             Assert.That(this.transmissionManager.ActiveTransmissions, Is.Empty);
         }
 

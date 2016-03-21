@@ -104,7 +104,6 @@
     <Compile Include="Storage\Database\EntryNotFoundException.cs" />
     <Compile Include="Storage\Database\Entities\IMappedObject.cs" />
     <Compile Include="Storage\Database\Entities\MappedObject.cs" />
-    <Compile Include="FileTransmission\AbortException.cs" />
     <Compile Include="FileTransmission\ChunkedDownloader.cs" />
     <Compile Include="FileTransmission\ChunkedUploader.cs" />
     <Compile Include="FileTransmission\IFileDownloader.cs" />
