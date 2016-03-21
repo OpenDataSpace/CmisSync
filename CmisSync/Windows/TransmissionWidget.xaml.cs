@@ -34,7 +34,7 @@ namespace CmisSync {
     using System.Windows.Navigation;
     using System.Windows.Shapes;
 
-    using CmisSync.Lib.FileTransmission;
+    using DataSpace.Common.Transmissions;
 
     /// <summary>
     /// Interaction logic for TransmissionWidget.xaml

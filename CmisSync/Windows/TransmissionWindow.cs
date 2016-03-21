@@ -30,7 +30,8 @@ namespace CmisSync {
     using System.Windows.Controls;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.FileTransmission;
+
+    using DataSpace.Common.Transmissions;
 
     /// <summary>
     /// Tranmission widget

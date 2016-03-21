@@ -25,12 +25,12 @@ namespace CmisSync.UIConverter {
     using System.Text;
     using System.Windows.Data;
 
-    using CmisSync.Lib.FileTransmission;
+    using DataSpace.Common.Transmissions;
 
-    [ValueConversion(typeof(TransmissionStatus), typeof(bool))]
+    [ValueConversion(typeof(Status), typeof(bool))]
     sealed class TransmissionStatusToDoneConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
-            return ((TransmissionStatus)value == TransmissionStatus.Aborted || (TransmissionStatus)value == TransmissionStatus.Finished);
+            return ((Status)value == Status.Aborted || (Status)value == Status.Finished);
         }
 
         public object ConvertBack(object value, Type targetType,
