@@ -28,6 +28,7 @@ namespace CmisSync.Lib {
     /// </summary>
     public static class HttpProxyUtils {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(HttpProxyUtils));
+        private static bool appRestartNeeded = false;
 
         /// <summary>
         /// Sets the default proxy for every HTTP request.
@@ -37,14 +38,20 @@ namespace CmisSync.Lib {
         /// <param name="throwExceptions">If set to <c>true</c> throw exceptions.</param>
         public static void SetDefaultProxy(Config.ProxySettings settings, bool throwExceptions = false) {
             try {
+                if (appRestartNeeded && settings.Selection == ProxySelection.SYSTEM) {
+                    throw new ProtocolViolationException("Restart App to be able to use the new proxy settings");
+                }
                 IWebProxy proxy = null;
                 switch (settings.Selection) {
-                    case Config.ProxySelection.SYSTEM:
-                        proxy = WebRequest.GetSystemWebProxy();
-                        break;
                     case Config.ProxySelection.CUSTOM:
                         proxy = new WebProxy(settings.Server);
+                        appRestartNeeded = true;
                         break;
+                    case ProxySelection.NOPROXY:
+                        appRestartNeeded = true;
+                        break;
+                    default:
+                        return;
                 }
 
                 if (settings.LoginRequired && proxy != null) {
