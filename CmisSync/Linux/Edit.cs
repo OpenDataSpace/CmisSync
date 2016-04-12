@@ -146,7 +146,10 @@ namespace CmisSync {
                 Address = this.Credentials.Address.ToString(),
                 UserName = this.Credentials.UserName
             };
-            credentialsWidget.Changed += (object sender, EventArgs e) => finish_button.Sensitive = true;
+            credentialsWidget.Changed += (object sender, EventArgs e) => {
+                finish_button.Sensitive = true;
+                this.Credentials.Password = credentialsWidget.Password;
+            };
             this.bandwidthSettingsWidget = new Widgets.BandwidthSettingsWidget() {};
             bandwidthSettingsWidget.Changed += (object sender, EventArgs e) => {
                 finish_button.Sensitive = true;
