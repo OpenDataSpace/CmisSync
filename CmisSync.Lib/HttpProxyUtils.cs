@@ -29,6 +29,7 @@ namespace CmisSync.Lib {
     public static class HttpProxyUtils {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(HttpProxyUtils));
         private static IWebProxy systemDefault;
+        private static bool isSystemDefaultSet = false;
         private static object l = new object();
 
         /// <summary>
@@ -36,10 +37,11 @@ namespace CmisSync.Lib {
         /// If this class is the only class, which touches the proxy settings, it is not needed to be called.
         /// </summary>
         public static void InitProxySwitchingSupport() {
-            if (systemDefault == null) {
+            if (!isSystemDefaultSet) {
                 lock(l) {
-                    if (systemDefault == null) {
+                    if (!isSystemDefaultSet) {
                         systemDefault = WebRequest.DefaultWebProxy;
+                        isSystemDefaultSet = true;
                     }
                 }
             }
