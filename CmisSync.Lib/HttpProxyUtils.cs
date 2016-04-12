@@ -28,7 +28,22 @@ namespace CmisSync.Lib {
     /// </summary>
     public static class HttpProxyUtils {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(HttpProxyUtils));
-        private static bool appRestartNeeded = false;
+        private static IWebProxy systemDefault;
+        private static object l = new object();
+
+        /// <summary>
+        /// Inits the proxy switching support. Must be called before any default proxy manipulation is done.
+        /// If this class is the only class, which touches the proxy settings, it is not needed to be called.
+        /// </summary>
+        public static void InitProxySwitchingSupport() {
+            if (systemDefault == null) {
+                lock(l) {
+                    if (systemDefault == null) {
+                        systemDefault = WebRequest.DefaultWebProxy;
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Sets the default proxy for every HTTP request.
@@ -37,28 +52,24 @@ namespace CmisSync.Lib {
         /// <param name="settings">proxy settings.</param>
         /// <param name="throwExceptions">If set to <c>true</c> throw exceptions.</param>
         public static void SetDefaultProxy(Config.ProxySettings settings, bool throwExceptions = false) {
+            InitProxySwitchingSupport();
             try {
-                if (appRestartNeeded && settings.Selection == ProxySelection.SYSTEM) {
-                    throw new ProtocolViolationException("Restart App to be able to use the new proxy settings");
-                }
-                IWebProxy proxy = null;
                 switch (settings.Selection) {
-                    case Config.ProxySelection.CUSTOM:
-                        proxy = new WebProxy(settings.Server);
-                        appRestartNeeded = true;
-                        break;
-                    case ProxySelection.NOPROXY:
-                        appRestartNeeded = true;
-                        break;
-                    default:
-                        return;
-                }
+                case ProxySelection.CUSTOM:
+                    IWebProxy proxy = new WebProxy(settings.Server);
+                    if (settings.LoginRequired) {
+                        proxy.Credentials = new NetworkCredential(settings.Username, Crypto.Deobfuscate(settings.ObfuscatedPassword));
+                    }
 
-                if (settings.LoginRequired && proxy != null) {
-                    proxy.Credentials = new NetworkCredential(settings.Username, Crypto.Deobfuscate(settings.ObfuscatedPassword));
+                    WebRequest.DefaultWebProxy = proxy;
+                    return;
+                case ProxySelection.NOPROXY:
+                    WebRequest.DefaultWebProxy = null;
+                    return;
+                case ProxySelection.SYSTEM:
+                    WebRequest.DefaultWebProxy = systemDefault;
+                    return;
                 }
-
-                WebRequest.DefaultWebProxy = proxy;
             } catch (Exception e) {
                 if (throwExceptions) {
                     throw;
