@@ -223,8 +223,8 @@ namespace CmisSync {
         /// <param name="path">Absolute path to the log file.</param>
         public void ShowLog(string path) {
             Process process = new Process();
-            process.StartInfo.FileName  = "x-terminal-emulator";
-            process.StartInfo.Arguments = "-title \"DataSpace Sync Log\" -e tail -f \"" + path + "\"";
+            process.StartInfo.FileName  = "gtk-launch";
+            process.StartInfo.Arguments = "dataspacesync-logview \"" + path + "\"";
             process.Start();
         }
     }
