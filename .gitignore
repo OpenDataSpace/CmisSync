@@ -49,5 +49,5 @@ TestResult.xml
 StyleCop.Cache
 gendarme.html
 testdir
-SOURCES
+packagebuild
 DiagnoseTool/Mac/DiagnoseTool/Info.plist

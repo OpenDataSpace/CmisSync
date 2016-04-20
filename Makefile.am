@@ -18,7 +18,7 @@ DISTCLEANFILES = \
 	intltool-update \
 	gnome-doc-utils.make
 
-CLEANFILES = -r $(top_builddir)/bin SOURCES SRPMS SPECS RPMS BUILD BUILDROOT tmpinst
+CLEANFILES = -r $(top_builddir)/bin tmpinst packagebuild
 
 MAINTAINERCLEANFILES = \
 	aclocal.m4 config.* configure install-sh ltmain* missing Makefile.in
@@ -58,13 +58,13 @@ uninstall-local:
 .PHONY: tmpinst
 tmpinst:
 	rm -rf tmpinst
+	rm -rf packagebuild
 	$(MAKE) DESTDIR=$(abs_top_builddir)/tmpinst install
 	cp $(FATBUILD_MAKEFILE) tmpinst$(pkglibdir)/Makefile
 	$(MAKE) LIBDIR=$(pkglibdir) PACKAGE_TARGET=$(PACKAGE_TARGET) -C tmpinst$(pkglibdir)
 	rm tmpinst$(pkglibdir)/Makefile
-	rm -rf SOURCES SRPMS SPECS RPMS BUILD BUILDROOT
-	mkdir SOURCES
-	tar cjCf tmpinst SOURCES/dataspacesync.tar.bz2 usr
+	mkdir -p packagebuild/SOURCES
+	tar cjCf tmpinst packagebuild/SOURCES/dataspacesync.tar.bz2 usr
 	rm -rf tmpinst
 
 debian-package: PACKAGE_TARGET := debian-package
@@ -82,9 +82,9 @@ apple-package:
 rpm-package: PACKAGE_TARGET := rpm-package
 rpm-package: tmpinst
 	rm -f *.rpm
-	rpmbuild -bb --define "_topdir $(abs_top_builddir)" --define "_libdir $(libdir)" build/cmissync.spec
-	mv `find RPMS -name "*.rpm"` .
-	rm -rf SOURCES SRPMS SPECS RPMS BUILD BUILDROOT
+	rpmbuild -bb --define "_topdir $(abs_top_builddir)/packagebuild" --define "_libdir $(libdir)" build/cmissync.spec
+	mv `find packagebuild/RPMS -name "*.rpm"` .
+	rm -rf packagebuild
 
 none:
 

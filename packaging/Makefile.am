@@ -1,5 +1,5 @@
 PACKAGE=dataspacesync
-TBZ=$(top_builddir)/SOURCES/dataspacesync.tar.bz2
+TBZ=$(top_builddir)/packagebuild/SOURCES/dataspacesync.tar.bz2
 
 all:
 
