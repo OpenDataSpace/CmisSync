@@ -14,6 +14,7 @@ See [how to get started developing DataSpace Sync or CmisSync](https://github.co
 
 ### Integration Testing
 
+```
 $ git submodule init
 $ git submodule update
 $ make -f Makefile.am
@@ -22,3 +23,4 @@ $ make
 $ cp -a Extras/DotCMIS.dll bin
 $ cp -a Extras/DotCMIS.dll.mdb bin
 $ ./nunit-console -labels -run=TestLibrary.IntegrationTests.PrivateWorkingCopyTests.CreateDocumentTests.CreateCheckedOutDocumentMustFailIfDocumentAlreadyExists bin/TestLibrary.dll
+```
