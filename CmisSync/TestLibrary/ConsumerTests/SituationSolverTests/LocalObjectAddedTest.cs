@@ -394,6 +394,26 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             Assert.Throws<FileNotFoundException>(() => solver.Solve(fileSystemInfo.Object, null));
         }
 
+        [Test]
+        public void SolverIgnoresAlreadyCreatedObjects() {
+            this.SetUpMocks();
+            string path = Path.Combine(Path.GetTempPath(), this.localObjectName);
+            var fileInfo = new Mock<IFileInfo>(MockBehavior.Strict);
+            var fileUuid = Guid.NewGuid();
+            fileInfo.Setup(f => f.Uuid).Returns(fileUuid);
+            fileInfo.Setup(f => f.Refresh());
+            fileInfo.Setup(f => f.Exists).Returns(true);
+            fileInfo.Setup(f => f.FullName).Returns(path);
+            this.storage.AddLocalFile(path, Guid.NewGuid().ToString(), fileUuid);
+            var underTest = new LocalObjectAdded(
+                new Mock<ISession>(MockBehavior.Strict).Object,
+                this.storage.Object,
+                new Mock<IFileTransmissionStorage>(MockBehavior.Strict).Object,
+                new Mock<ITransmissionFactory>(MockBehavior.Strict).Object);
+
+            underTest.Solve(fileInfo.Object, null);
+        }
+
         private IDirectoryInfo SetupParentFolder(string parentId) {
             var parentDirInfo = Mock.Of<IDirectoryInfo>(
                 d =>

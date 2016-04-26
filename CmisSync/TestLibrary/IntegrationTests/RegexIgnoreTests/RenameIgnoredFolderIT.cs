@@ -48,7 +48,7 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
                 using (file.Create());
             }
 
-            this.InitializeAndRunRepo();
+            this.InitializeAndRunRepo(swallowExceptions: true);
             Assert.That(this.remoteRootDir.GetChildren().TotalNumItems, Is.EqualTo(0));
 
             ignoredLocalFolder.MoveTo(Path.Combine(this.localRootDir.FullName, normalName));
@@ -83,6 +83,9 @@ namespace TestLibrary.IntegrationTests.RegexIgnoreTests {
             this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
+            WaitForRemoteChanges(sleepDuration: 15000);
+            AddStartNextSyncEvent();
+            repo.Run();
 
             AssertThatFolderStructureIsEqual();
             AssertThatEventCounterIsZero();
