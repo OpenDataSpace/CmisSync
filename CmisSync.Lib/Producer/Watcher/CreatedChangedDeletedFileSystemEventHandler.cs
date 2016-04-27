@@ -137,11 +137,17 @@ namespace CmisSync.Lib.Producer.Watcher {
 
         private void AddRecursive(IDirectoryInfo directoryInfo) {
             foreach (var fileInfo in directoryInfo.GetFiles()) {
-                Handle(this, new FileSystemEventArgs(WatcherChangeTypes.Created, directoryInfo.FullName, fileInfo.Name));
+                var uuid = fileInfo.Uuid;
+                if (uuid == null || uuid == Guid.Empty || storage.GetObjectByGuid((Guid)uuid) == null) {
+                    Handle(this, new FileSystemEventArgs(WatcherChangeTypes.Created, directoryInfo.FullName, fileInfo.Name));
+                }
             }
 
             foreach (var subDir in directoryInfo.GetDirectories()) {
-                Handle(this, new FileSystemEventArgs(WatcherChangeTypes.Created, directoryInfo.FullName, subDir.Name));
+                var uuid = subDir.Uuid;
+                if (uuid == null || uuid == Guid.Empty || storage.GetObjectByGuid((Guid)uuid) == null) {
+                    Handle(this, new FileSystemEventArgs(WatcherChangeTypes.Created, directoryInfo.FullName, subDir.Name));
+                }
             }
         }
 

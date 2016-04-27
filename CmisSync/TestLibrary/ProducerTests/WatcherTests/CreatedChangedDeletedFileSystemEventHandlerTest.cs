@@ -16,6 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 #if ! __COCOA__
 namespace TestLibrary.ProducerTests.WatcherTests {
     using System;
@@ -27,6 +28,7 @@ namespace TestLibrary.ProducerTests.WatcherTests {
     using CmisSync.Lib.Producer.Watcher;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
     using Moq;
@@ -364,6 +366,7 @@ namespace TestLibrary.ProducerTests.WatcherTests {
                 fsFactory.Setup(f => f.IsDirectory(filePath)).Returns((bool?)false);
                 fsFactory.Setup(f => f.IsDirectory(subDirPath)).Returns((bool?)true);
                 fsFactory.Setup(f => f.IsDirectory(subFilePath)).Returns((bool?)false);
+                storage.Setup(s => s.GetObjectByGuid(Guid.Empty)).Returns((IMappedObject)null);
 
                 var dirInfo = fsFactory.AddDirectory(path, Guid.Empty);
                 var subDir = fsFactory.AddDirectory(subDirPath, Guid.Empty);
@@ -380,6 +383,38 @@ namespace TestLibrary.ProducerTests.WatcherTests {
                 queue.Verify(q => q.AddEvent(It.Is<FSEvent>(f => f.IsDirectory == false && f.LocalPath == filePath && f.Name == "file.bin" && f.Type == WatcherChangeTypes.Created)));
                 queue.Verify(q => q.AddEvent(It.Is<FSEvent>(f => f.IsDirectory == false && f.LocalPath == subFilePath && f.Name == "subFile.bin" && f.Type == WatcherChangeTypes.Created)));
                 queue.Verify(q => q.AddEvent(It.IsAny<FSEvent>()), Times.Exactly(4));
+                queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
+            }
+        }
+
+        [Test, Category("Medium")]
+        public void DoNotAddContentWhichIsAlreadyInStorage() {
+            using (var underTest = CreateHandler()) {
+                var subDirPath = Path.Combine(path, "sub");
+                var filePath = Path.Combine(path, "file.bin");
+                var fileUuid = Guid.NewGuid();
+                var subFilePath = Path.Combine(subDirPath, "subFile.bin");
+
+                fsFactory.Setup(f => f.IsDirectory(path)).Returns((bool?)true);
+                fsFactory.Setup(f => f.IsDirectory(filePath)).Returns((bool?)false);
+                fsFactory.Setup(f => f.IsDirectory(subDirPath)).Returns((bool?)true);
+                fsFactory.Setup(f => f.IsDirectory(subFilePath)).Returns((bool?)false);
+                storage.Setup(s => s.GetObjectByGuid(fileUuid)).Returns(Mock.Of<IMappedObject>());
+
+                var dirInfo = fsFactory.AddDirectory(path, Guid.Empty);
+                var subDir = fsFactory.AddDirectory(subDirPath, Guid.Empty);
+                var file = fsFactory.AddFile(filePath, fileUuid);
+                var subFile = fsFactory.AddFile(subFilePath, Guid.Empty);
+                subDir.SetupFiles(subFile.Object);
+                dirInfo.SetupFilesAndDirectories(subDir.Object, file.Object);
+
+                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, Directory, Name));
+                WaitForThreshold();
+
+                queue.Verify(q => q.AddEvent(It.Is<FSEvent>(f => f.IsDirectory == true && f.LocalPath == path && f.Name == Name && f.Type == WatcherChangeTypes.Created)));
+                queue.Verify(q => q.AddEvent(It.Is<FSEvent>(f => f.IsDirectory == true && f.LocalPath == subDirPath && f.Name == "sub" && f.Type == WatcherChangeTypes.Created)));
+                queue.Verify(q => q.AddEvent(It.Is<FSEvent>(f => f.IsDirectory == false && f.LocalPath == subFilePath && f.Name == "subFile.bin" && f.Type == WatcherChangeTypes.Created)));
+                queue.Verify(q => q.AddEvent(It.IsAny<FSEvent>()), Times.Exactly(3));
                 queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
             }
         }
