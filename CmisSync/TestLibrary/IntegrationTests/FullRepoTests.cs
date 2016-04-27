@@ -226,6 +226,7 @@ namespace TestLibrary.IntegrationTests {
             folder.Refresh();
             Assert.That(localFolder.Name, Is.EqualTo(folder.Name));
             Assert.That(folder.Name, Is.EqualTo(oldName));
+            repo.Run();
             AssertThatEventCounterIsZero();
             AssertThatFolderStructureIsEqual();
         }
