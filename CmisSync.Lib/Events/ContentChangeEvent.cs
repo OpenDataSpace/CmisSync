@@ -82,7 +82,7 @@ namespace CmisSync.Lib.Events {
         /// A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.ContentChangeEvent"/>.
         /// </returns>
         public override string ToString() {
-            return string.Format("ContenChangeEvent with type \"{0}\" and ID \"{1}\"", this.Type, this.ObjectId);
+            return string.Format("ContentChangeEvent with type \"{0}\" and ID \"{1}\"", this.Type, this.ObjectId);
         }
 
         /// <summary>
