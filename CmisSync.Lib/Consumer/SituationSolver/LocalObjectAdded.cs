@@ -99,6 +99,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 throw new FileNotFoundException(string.Format("Local file/folder {0} has been renamed/moved/deleted", fullName));
             }
 
+            try {
+                var possiblyExistingUuid = localFileSystemInfo.Uuid;
+                if (possiblyExistingUuid != null) {
+                    if (Storage.GetObjectByGuid((Guid)possiblyExistingUuid) != null && Storage.GetObjectByLocalPath(localFileSystemInfo) != null) {
+                        Logger.Info(string.Format("Skipping creation of {0} because the object is already created", fullName));
+                        return;
+                    }
+                }
+            } catch (ExtendedAttributeException) {
+            }
+
             string parentId = Storage.GetRemoteId(this.GetParent(localFileSystemInfo));
             if (parentId == null) {
                 if (this.IsParentReadOnly(localFileSystemInfo)) {

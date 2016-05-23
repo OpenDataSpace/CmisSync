@@ -124,11 +124,30 @@ namespace CmisSync.Lib.Producer.Watcher {
                         }
 
                         this.AddEventToList(e, uuid, isDirectory);
+                        if (isDirectory) {
+                            AddRecursive(fsInfo as IDirectoryInfo);
+                        }
                     }
                 }
             } catch (Exception ex) {
                 Logger.Warn(string.Format("Processing file system event {0} produces exception => force crawl sync", e.ToString()), ex);
                 this.queue.AddEvent(new StartNextSyncEvent(true));
+            }
+        }
+
+        private void AddRecursive(IDirectoryInfo directoryInfo) {
+            foreach (var fileInfo in directoryInfo.GetFiles()) {
+                var uuid = fileInfo.Uuid;
+                if (uuid == null || uuid == Guid.Empty || storage.GetObjectByGuid((Guid)uuid) == null) {
+                    Handle(this, new FileSystemEventArgs(WatcherChangeTypes.Created, directoryInfo.FullName, fileInfo.Name));
+                }
+            }
+
+            foreach (var subDir in directoryInfo.GetDirectories()) {
+                var uuid = subDir.Uuid;
+                if (uuid == null || uuid == Guid.Empty || storage.GetObjectByGuid((Guid)uuid) == null) {
+                    Handle(this, new FileSystemEventArgs(WatcherChangeTypes.Created, directoryInfo.FullName, subDir.Name));
+                }
             }
         }
 

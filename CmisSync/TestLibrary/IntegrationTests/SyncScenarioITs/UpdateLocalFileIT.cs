@@ -71,9 +71,8 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
                 sw.Write(defaultContent);
             }
 
-            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.InitializeAndRunRepo(swallowExceptions: true);
 
-            this.InitializeAndRunRepo();
             new DirectoryInfo(Path.Combine(this.localRootDir.FullName, defaultFolderName)).Create();
             fileInfo.MoveTo(Path.Combine(this.localRootDir.FullName, defaultFolderName, newFileName));
             DateTime modificationDate = fileInfo.LastWriteTimeUtc;
@@ -91,6 +90,7 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             Assert.That(doc.ContentStreamLength, Is.EqualTo(fileInfo.Length), "ContentStream not set");
             Assert.That(doc.Name, Is.EqualTo(newFileName));
             Assert.That(this.localRootDir.GetDirectories().First().GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
+            AssertThatFolderStructureIsEqual();
         }
 
         [Test]

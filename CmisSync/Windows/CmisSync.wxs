@@ -7,7 +7,7 @@
     <Package Id='*' Keywords='Installer' Description="DataSpace Sync Setup" Manufacturer='GRAU DATA AG'
       InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
 
-    <Media Id='1' Cabinet='DataSpaceSync.cab' EmbedCab='yes' DiskPrompt='DataSpaceSyncCAB' />
+    <Media Id='1' Cabinet='DataSpaceSync.cab' EmbedCab='yes' DiskPrompt='DataSpaceSyncCAB' CompressionLevel='high'/>
     <Property Id='DiskPrompt' Value="DataSpace Sync Bundle CAB Installation" />
 
     <Directory Id='TARGETDIR' Name='SourceDir'>
