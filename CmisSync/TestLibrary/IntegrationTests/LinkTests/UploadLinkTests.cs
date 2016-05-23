@@ -54,7 +54,7 @@ namespace TestLibrary.IntegrationTests.LinkTests {
             VerifyThatLinkIsEqualToGivenParamsAndContainsUrl(link, subject, notifyAboutLinkUsage, withExpiration, LinkType.UploadLink);
         }
 
-        [Test, Ignore("https://mantis.dataspace.cc/view.php?id=4727")]
+        [Test]
         public void CreateUploadLinkWithDocumentIdMustFail() {
             var doc = this.remoteRootDir.CreateDocument("testFile.bin", "content");
             Assert.Catch<CmisBaseException>(() =>
