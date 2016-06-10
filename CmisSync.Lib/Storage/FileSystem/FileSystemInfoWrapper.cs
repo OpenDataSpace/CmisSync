@@ -52,7 +52,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
             case PlatformID.Win32NT:
                 reader = new ExtendedAttributeReaderDos();
 #if !__MonoCS__
-                actualUser = new NTAccount(Environment.UserName).Translate(typeof(SecurityIdentifier)) as SecurityIdentifier;
+                actualUser = System.Security.Principal.WindowsIdentity.GetCurrent().User;
 #endif
                 break;
             }
