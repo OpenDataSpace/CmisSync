@@ -375,6 +375,7 @@ namespace CmisSync {
                 return string.Empty;
             } catch (Exception e) {
                 this.UpdateAddProjectButtonEvent(false);
+                Logger.Info(e);
                 return e.Message;
             }
         }
