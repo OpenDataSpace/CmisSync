@@ -12,6 +12,7 @@
     <AssemblyName>DataSpaceSync</AssemblyName>
     <ReleaseVersion>
     </ReleaseVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,6 +32,9 @@
     <DefineConstants>__COCOA__</DefineConstants>
     <UseRefCounting>false</UseRefCounting>
     <DebugSymbols>true</DebugSymbols>
+    <HttpClientHandler>HttpClientHandler</HttpClientHandler>
+    <TlsProvider>Default</TlsProvider>
+    <LinkMode>None</LinkMode>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <Optimize>false</Optimize>
@@ -49,6 +53,9 @@
     <I18n>
     </I18n>
     <UseRefCounting>false</UseRefCounting>
+    <HttpClientHandler>HttpClientHandler</HttpClientHandler>
+    <TlsProvider>Default</TlsProvider>
+    <LinkMode>None</LinkMode>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
