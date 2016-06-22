@@ -453,7 +453,14 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             if (obj is IDocument) {
                 return obj.CanSetContentStream() == false && obj.CanDeleteObject() == false;
             } else {
-                return obj.CanCreateFolder() == false && obj.CanCreateDocument() == false;
+                if (obj.CanCreateFolder() == false && obj.CanCreateDocument() == false) {
+                    return true;
+                } else {
+                    if (obj is IFolder) {
+                        return obj.CanDeleteObject() == false || obj.CanMoveObject() == false;
+                    }
+                    return false;
+                }
             }
         }
 

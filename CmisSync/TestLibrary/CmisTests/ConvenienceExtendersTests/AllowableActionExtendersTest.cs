@@ -19,9 +19,11 @@
 ﻿
 namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
     using System;
+    using System.Collections.Generic;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
+    using DotCMIS;
     using DotCMIS.Client;
 
     using Moq;
@@ -113,6 +115,35 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
             underTest.SetupDefaultOperationContext(false, true);
 
             Assert.That(underTest.Object.AreAllowableActionsAvailable(), Is.True);
+        }
+
+        [Test]
+        public void IsReadOnlyIfFolderCannotBeMovedOrDeleted(
+            [Values(true, false, null)]bool? canBeMoved,
+            [Values(true, false, null)]bool? canBeDeleted)
+        {
+            var underTest = new Mock<IFolder>();
+            var actions = new List<string>();
+            actions.Add(Actions.CanGetAcl);
+            actions.Add(Actions.CanGetAppliedPolicies);
+            actions.Add(Actions.CanGetChildren);
+            actions.Add(Actions.CanUpdateProperties);
+            actions.Add(Actions.CanApplyAcl);
+            actions.Add(Actions.CanCreateDocument);
+            actions.Add(Actions.CanCreateFolder);
+            actions.Add(Actions.CanDeleteTree);
+            if (canBeMoved == true) {
+                actions.Add(Actions.CanMoveObject);
+            }
+
+            if (canBeDeleted == true) {
+                actions.Add(Actions.CanDeleteObject);
+            }
+
+            underTest.SetupAllowableActions(actions.ToArray());
+
+            bool readOnly = canBeMoved != true || canBeDeleted != true;
+            Assert.That(underTest.Object.IsReadOnly(), Is.EqualTo(readOnly));
         }
     }
 }
