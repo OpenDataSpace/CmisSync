@@ -216,6 +216,7 @@
     <Compile Include="StorageTests\FileSystemTests\ExtendedAttributeReaderUnixTest.cs" />
     <Compile Include="StorageTests\FileSystemTests\FileSystemWrapperTests.cs" />
     <Compile Include="StorageTests\FileSystemTests\LongFileAndPathNameSupportTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\NtfsACLsTest.cs" />
     <Compile Include="StorageTests\FileSystemTests\Utf8FileNameNormalizationTest.cs" />
     <Compile Include="StreamsTests\BandwidthLimitedStreamTest.cs" />
     <Compile Include="StreamsTests\ChunkedStreamTest.cs" />
