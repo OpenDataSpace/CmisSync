@@ -297,20 +297,25 @@ namespace TestLibrary.IntegrationTests {
         }
 
         protected void InitializeAndRunRepo(bool swallowExceptions = false) {
-            this.repo.Initialize();
-            this.repo.SingleStepQueue.SwallowExceptions = swallowExceptions;
-            this.repo.Run();
-            if (this.ContentChangesActive) {
-                this.lastestChangeLogToken = this.session.RepositoryInfo.LatestChangeLogToken;
+            repo.Initialize();
+            repo.SingleStepQueue.SwallowExceptions = swallowExceptions;
+            repo.Run();
+            if (ContentChangesActive) {
+                lastestChangeLogToken = session.RepositoryInfo.LatestChangeLogToken;
             }
         }
 
         protected void AddStartNextSyncEvent(bool forceCrawl = false) {
-            if (!this.ContentChangesActive) {
+            if (!ContentChangesActive) {
                 forceCrawl = true;
             }
 
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(forceCrawl));
+            repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(forceCrawl));
+        }
+
+        protected void AddStartNextSyncEventAndRun(bool forceCrawl = false) {
+            AddStartNextSyncEvent(forceCrawl);
+            repo.Run();
         }
 
         protected void AssertThatContentHashIsEqualToExceptedIfSupported(IDocument doc, string content) {

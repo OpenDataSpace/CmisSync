@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
     using System.Collections.Generic;
     using System.IO;
     using System.Runtime.InteropServices;
+    using System.Security;
     using System.Security.Permissions;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -146,6 +147,8 @@ namespace CmisSync.Lib.Storage.FileSystem {
                 // If ERROR_PATH_NOT_FOUND and Path is longer than 260 chars => throw PathTooLongException
                 if (errorCode == 3 && path.Length > 260) {
                     throw new PathTooLongException(string.Format("Reading extended attributes from path \"{0}\" is not supported yet", path));
+                } else if (errorCode == 5) {
+                    throw new ExtendedAttributeException("Access Denied", new SecurityException(string.Format("Creating FileHandle failed on path \"{0}\": Access Denied.", path)));
                 } else {
                     throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", GetLastErrorMessage(errorCode), path));
                 }
