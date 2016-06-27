@@ -76,7 +76,8 @@ namespace TestLibrary.IntegrationTests {
             ServerCredentials credentials = new ServerCredentials {
                 Address = new Uri(cmisServerUrl),
                 UserName = cmisUser,
-                Password = cmisPassword
+                Password = cmisPassword,
+                Binding = cmisServerUrl.Contains("atom") ? BindingType.AtomPub : BindingType.Browser
             };
 
             ProxySettings proxySettings = new ProxySettings();
