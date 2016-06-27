@@ -44,7 +44,7 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
                 sw.Write(defaultContent);
             }
 
-            this.InitializeAndRunRepo();
+            this.InitializeAndRunRepo(swallowExceptions: true);
 
             fileInfo.MoveTo(Path.Combine(this.localRootDir.FullName, newFileName));
             DateTime modificationDate = fileInfo.LastWriteTimeUtc;
