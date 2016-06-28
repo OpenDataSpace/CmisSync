@@ -35,6 +35,12 @@ namespace CmisSync.Lib.Storage.FileSystem {
         IDirectoryInfo Root { get; }
 
         /// <summary>
+        /// Gets or sets the ACL to mark the directory as move, rename and delete protected.
+        /// This property works on NTFS only.
+        /// </summary>
+        bool CanMoveOrRenameOrDelete { get; set; }
+
+        /// <summary>
         /// Creates a directory.
         /// </summary>
         void Create();

@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
     using System;
     using System.IO;
     using System.Security.AccessControl;
+    using System.Security.Principal;
 
     /// <summary>
     /// Wrapper for DirectoryInfo
@@ -52,6 +53,70 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <value>The root.</value>
         public IDirectoryInfo Root {
             get { return new DirectoryInfoWrapper(this.original.Root); }
+        }
+
+        /// <summary>
+        /// Gets or sets the ACL to mark the directory as move, rename and delete protected.
+        /// This property works on NTFS only.
+        /// </summary>
+        public bool CanMoveOrRenameOrDelete {
+            get {
+#if !__MonoCS__
+                var acls = this.original.GetAccessControl();
+                bool writeAttributes = true;
+                bool deleteFolder = true;
+                bool deleteSubFolder = true;
+                foreach (var entry in acls.GetAccessRules(true, false, typeof(SecurityIdentifier))) {
+                    if (entry.Equals(new FileSystemAccessRule(actualUser, FileSystemRights.WriteAttributes, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny))) {
+                        writeAttributes = false;
+                        continue;
+                    }
+
+                    if (entry.Equals(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny))) {
+                        deleteFolder = false;
+                        continue;
+                    }
+                }
+
+                var parent = this.original.Parent;
+                if (parent == null) {
+                    return !(writeAttributes == false && deleteFolder == false);
+                }
+
+                var parentAcls = this.original.Parent.GetAccessControl();
+                foreach (var entry in parentAcls.GetAccessRules(true, false, typeof(SecurityIdentifier))) {
+                    if (entry.Equals(new FileSystemAccessRule(actualUser, FileSystemRights.DeleteSubdirectoriesAndFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny))) {
+                        deleteSubFolder = false;
+                        break;
+                    }
+                }
+
+                return !(writeAttributes == false && deleteFolder == false && deleteSubFolder == false);
+#else
+                return true;
+#endif
+            }
+
+            set {
+#if !__MonoCS__
+                bool readOnly = ReadOnly;
+                var acls = this.original.GetAccessControl();
+                var parentAcls = this.original.Parent.GetAccessControl();
+                if (value) {
+                    acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.WriteAttributes, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                    acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                    parentAcls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.DeleteSubdirectoriesAndFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                } else {
+                    acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.WriteAttributes, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                    acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                    parentAcls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.DeleteSubdirectoriesAndFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                }
+
+                this.original.SetAccessControl(acls);
+                this.original.Parent.SetAccessControl(parentAcls);
+                ReadOnly = readOnly;
+#endif
+            }
         }
 
         /// <summary>
