@@ -225,6 +225,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     } else {
                         throw uploadFailed;
                     }
+                } catch (CmisStorageException storageException) {
+                    var uploadFailed = new UploadFailedException(storageException, doc);
+                    transmission.FailedException = uploadFailed;
+                    if (storageException.IsVirusScannerUnavailableException()) {
+                        var virusScannerUnavailable = new VirusScannerUnavailableException(storageException);
+                        transmission.FailedException = virusScannerUnavailable;
+                        throw virusScannerUnavailable;
+                    }
+
+                    throw uploadFailed;
                 } catch (Exception ex) {
                     var uploadFailed = new UploadFailedException(ex, doc);
                     transmission.FailedException = uploadFailed;
