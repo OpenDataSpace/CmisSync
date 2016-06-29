@@ -16,12 +16,14 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-﻿
+
 namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
     using System;
+    using System.Collections.Generic;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
+    using DotCMIS;
     using DotCMIS.Client;
 
     using Moq;
@@ -113,6 +115,36 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
             underTest.SetupDefaultOperationContext(false, true);
 
             Assert.That(underTest.Object.AreAllowableActionsAvailable(), Is.True);
+        }
+
+        [Test]
+        public void CanRenameMoveDeleteFolder([Values(true, false)]bool readOnly, [Values(true, false)]bool canBeMoved, [Values(true, false)]bool isRoot) {
+            var actions = new SortedSet<string>();
+            actions.Add(Actions.CanGetProperties);
+            actions.Add(Actions.CanGetChildren);
+            actions.Add(Actions.CanGetDescendants);
+            if (!isRoot) {
+                actions.Add(Actions.CanGetFolderParent);
+                actions.Add(Actions.CanGetObjectParents);
+            }
+            if (!readOnly) {
+                actions.Add(Actions.CanCreateDocument);
+                actions.Add(Actions.CanCreateFolder);
+                actions.Add(Actions.CanDeleteObject);
+                actions.Add(Actions.CanUpdateProperties);
+                actions.Add(Actions.CanDeleteTree);
+            }
+
+            if (canBeMoved) {
+                actions.Add(Actions.CanMoveObject);
+            }
+
+            string[] array = new string[actions.Count];
+            actions.CopyTo(array);
+            var underTest = new Mock<IFolder>().SetupAllowableActions(array);
+
+            Assert.That(underTest.Object.CanRenameAndMoveAndDelete(), Is.EqualTo(canBeMoved || readOnly));
+            Assert.That(underTest.Object.IsReadOnly(), Is.EqualTo(readOnly));
         }
     }
 }
