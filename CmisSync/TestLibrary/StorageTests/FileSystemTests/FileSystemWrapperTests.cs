@@ -31,6 +31,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
     using NUnit.Framework;
 
     using TestLibrary.ProducerTests.WatcherTests;
+    using System.Security.Principal;
 
     [TestFixture]
     public class FileSystemWrapperTests {
@@ -781,19 +782,36 @@ namespace TestLibrary.StorageTests.FileSystemTests {
 #if !__MonoCS__
         [Test, Category("Fast")]
         public void AclUser() {
-            var account = new System.Security.Principal.NTAccount(Environment.UserName);
-            Assert.That(account.ToString().Contains(Environment.UserName));
-            Assert.That(account.IsValidTargetType(typeof(System.Security.Principal.SecurityIdentifier)));
-            var securityAccount = account.Translate(typeof(System.Security.Principal.SecurityIdentifier)) as System.Security.Principal.SecurityIdentifier;
+            var account = WindowsIdentity.GetCurrent().User;
+            Assert.That(account.IsValidTargetType(typeof(SecurityIdentifier)));
+            var securityAccount = account.Translate(typeof(SecurityIdentifier)) as SecurityIdentifier;
             Assert.That(securityAccount.IsAccountSid(), Is.True);
         }
-#endif
 
-#if !__MonoCS__
         [Test, Category("Medium")]
         public void CreateWrapperOnNetworkShare([Values("\\\\server\\share\\")]string uncPath) {
             var wrapper = new DirectoryInfoWrapper(new DirectoryInfo(uncPath));
             Assert.That(wrapper.FSType, Is.EqualTo(FSType.Unknown));
+        }
+
+        [Test, Category("Medium")]
+        public void CannotDeleteReadOnlyFile() {
+            var dir = Factory.CreateDirectoryInfo(this.testFolder.FullName);
+            var underTest = Factory.CreateFileInfo(Path.Combine(dir.FullName, "readOnlyFile.bin"));
+            using(underTest.Open(FileMode.CreateNew));
+            underTest.ReadOnly = true;
+            Assert.Throws<UnauthorizedAccessException>(() => underTest.Delete());
+            Assert.That(underTest.Exists, Is.True);
+        }
+
+        [Test, Category("Medium")]
+        public void CannotDeleteReadOnlyDirectory() {
+            var dir = Factory.CreateDirectoryInfo(this.testFolder.FullName);
+            var underTest = Factory.CreateDirectoryInfo(Path.Combine(dir.FullName, "readOnlyDir"));
+            underTest.Create();
+            underTest.ReadOnly = true;
+            Assert.Throws<IOException>(() => underTest.Delete(false));
+            Assert.That(underTest.Exists, Is.True);
         }
 #endif
 

@@ -25,8 +25,9 @@ namespace TestLibrary.StorageTests.FileSystemTests {
     using System.Security.Principal;
 
     using NUnit.Framework;
+    using CmisSync.Lib.Storage.FileSystem;
 
-    [TestFixture, Ignore("Research not yet finished and test fixture is incomplete")]
+    [TestFixture]
     public class NtfsACLsTest {
         private SecurityIdentifier actualUser;
         private DirectoryInfo testFolder;
@@ -41,24 +42,36 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             string tempPath = Path.GetTempPath();
             var tempFolder = new DirectoryInfo(tempPath);
             Assert.That(tempFolder.Exists, Is.True);
-            this.testFolder = tempFolder.CreateSubdirectory(Guid.NewGuid().ToString()).CreateSubdirectory(Guid.NewGuid().ToString());
+            testFolder = tempFolder.CreateSubdirectory(Guid.NewGuid().ToString()).CreateSubdirectory(Guid.NewGuid().ToString());
+        }
+
+        [TearDown]
+        public void RemoveTestFolder() {
+            if (testFolder.Exists)
+            {
+                var dir = new DirectoryInfoWrapper(this.testFolder);
+                dir.CanMoveOrRenameOrDelete = true;
+                dir.ReadOnly = false;
+                testFolder.Delete(true);
+            }
+
+            if (testFolder.Parent.Exists)
+            {
+                testFolder.Parent.Delete(true);
+            }
         }
 
         [Test]
         public void RenameOrMoveOrRemoveFolderIsForbidden() {
-            var acls = testFolder.GetAccessControl();
-            acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.WriteAttributes, AccessControlType.Deny));
-            acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, AccessControlType.Deny));
-            testFolder.SetAccessControl(acls);
+            new DirectoryInfoWrapper(testFolder).CanMoveOrRenameOrDelete = false;
             var fullName = testFolder.FullName;
-            Console.WriteLine(fullName);
 
-            Assert.Throws<UnauthorizedAccessException>(() => testFolder.Delete());
+            Assert.Throws<IOException>(() => testFolder.Delete());
             Assert.That(testFolder.FullName, Is.EqualTo(fullName));
             Assert.That(testFolder.Exists, Is.True);
-            Assert.Throws<UnauthorizedAccessException>(() => testFolder.MoveTo(Path.Combine(testFolder.Parent.FullName, "anotherName" + Guid.NewGuid().ToString())));
+            Assert.Throws<IOException>(() => testFolder.MoveTo(Path.Combine(testFolder.Parent.FullName, "anotherName" + Guid.NewGuid().ToString())));
             Assert.That(testFolder.FullName, Is.EqualTo(fullName));
-            Assert.Throws<UnauthorizedAccessException>(() => testFolder.MoveTo(Path.Combine(testFolder.Parent.Parent.FullName, testFolder.Name)));
+            Assert.Throws<IOException>(() => testFolder.MoveTo(Path.Combine(testFolder.Parent.Parent.FullName, testFolder.Name)));
             Assert.That(testFolder.FullName, Is.EqualTo(fullName));
         }
     }
