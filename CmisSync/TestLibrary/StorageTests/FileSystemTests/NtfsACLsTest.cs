@@ -25,6 +25,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
     using System.Security.Principal;
 
     using NUnit.Framework;
+    using CmisSync.Lib.Storage.FileSystem;
 
     [TestFixture]
     public class NtfsACLsTest {
@@ -41,20 +42,29 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             string tempPath = Path.GetTempPath();
             var tempFolder = new DirectoryInfo(tempPath);
             Assert.That(tempFolder.Exists, Is.True);
-            this.testFolder = tempFolder.CreateSubdirectory(Guid.NewGuid().ToString()).CreateSubdirectory(Guid.NewGuid().ToString());
+            testFolder = tempFolder.CreateSubdirectory(Guid.NewGuid().ToString()).CreateSubdirectory(Guid.NewGuid().ToString());
+        }
+
+        [TearDown]
+        public void RemoveTestFolder() {
+            if (testFolder.Exists)
+            {
+                var dir = new DirectoryInfoWrapper(this.testFolder);
+                dir.CanMoveOrRenameOrDelete = true;
+                dir.ReadOnly = false;
+                testFolder.Delete(true);
+            }
+
+            if (testFolder.Parent.Exists)
+            {
+                testFolder.Parent.Delete(true);
+            }
         }
 
         [Test]
         public void RenameOrMoveOrRemoveFolderIsForbidden() {
-            var acls = testFolder.GetAccessControl();
-            acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.WriteAttributes, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
-            acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
-            testFolder.SetAccessControl(acls);
-            var parentAcls = testFolder.Parent.GetAccessControl();
-            parentAcls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.DeleteSubdirectoriesAndFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
-            testFolder.Parent.SetAccessControl(parentAcls);
+            new DirectoryInfoWrapper(testFolder).CanMoveOrRenameOrDelete = false;
             var fullName = testFolder.FullName;
-            Console.WriteLine(fullName);
 
             Assert.Throws<IOException>(() => testFolder.Delete());
             Assert.That(testFolder.FullName, Is.EqualTo(fullName));
