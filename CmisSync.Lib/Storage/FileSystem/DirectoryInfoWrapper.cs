@@ -66,15 +66,18 @@ namespace CmisSync.Lib.Storage.FileSystem {
                 bool writeAttributes = true;
                 bool deleteFolder = true;
                 bool deleteSubFolder = true;
-                foreach (var entry in acls.GetAccessRules(true, false, typeof(SecurityIdentifier))) {
-                    if (entry.Equals(new FileSystemAccessRule(actualUser, FileSystemRights.WriteAttributes, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny))) {
+                foreach (FileSystemAccessRule entry in acls.GetAccessRules(true, false, typeof(SecurityIdentifier))) {
+                    if (!entry.IsInherited &&
+                        entry.InheritanceFlags == InheritanceFlags.None &&
+                        entry.PropagationFlags == PropagationFlags.None &&
+                        entry.FileSystemRights.HasFlag(FileSystemRights.Delete) &&
+                        entry.FileSystemRights.HasFlag(FileSystemRights.WriteAttributes) &&
+                        entry.AccessControlType == AccessControlType.Deny &&
+                        entry.IdentityReference.Equals(actualUser))
+                    {
                         writeAttributes = false;
-                        continue;
-                    }
-
-                    if (entry.Equals(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny))) {
                         deleteFolder = false;
-                        continue;
+                        break;
                     }
                 }
 
@@ -84,8 +87,14 @@ namespace CmisSync.Lib.Storage.FileSystem {
                 }
 
                 var parentAcls = this.original.Parent.GetAccessControl();
-                foreach (var entry in parentAcls.GetAccessRules(true, false, typeof(SecurityIdentifier))) {
-                    if (entry.Equals(new FileSystemAccessRule(actualUser, FileSystemRights.DeleteSubdirectoriesAndFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny))) {
+                foreach (FileSystemAccessRule entry in parentAcls.GetAccessRules(true, false, typeof(SecurityIdentifier))) {
+                    if (!entry.IsInherited &&
+                        entry.InheritanceFlags == InheritanceFlags.None &&
+                        entry.PropagationFlags == PropagationFlags.None &&
+                        entry.FileSystemRights.HasFlag(FileSystemRights.DeleteSubdirectoriesAndFiles) &&
+                        entry.AccessControlType == AccessControlType.Deny &&
+                        entry.IdentityReference.Equals(actualUser))
+                    {
                         deleteSubFolder = false;
                         break;
                     }
