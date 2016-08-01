@@ -288,6 +288,8 @@ namespace CmisSync.Lib.Cmis {
                     type = ExceptionType.FileUploadBlockedDueToVirusDetected;
                 } else if (e.Exception is CmisConnectionException) {
                     type = ExceptionType.ConnectionException;
+                } else if (e.Exception is VirusScannerUnavailableException) {
+                    type = ExceptionType.RemoteVirusScannerIsUnavailable;
                 }
 
                 this.PassExceptionToListener(ExceptionLevel.Warning, type, e.Exception);

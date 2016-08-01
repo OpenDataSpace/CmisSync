@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     using System.IO;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
@@ -39,14 +40,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <param name="from">Takes the read only state from this remote object</param>
         /// <param name="andLogErrorsTo">Logs errors to the given logger or ignores errors if logger is null.</param>
         public static void TryToSetReadOnlyState(this IFileSystemInfo to, ICmisObject from, ILog andLogErrorsTo = null) {
-            if (from == null) {
-                throw new ArgumentNullException("from");
-            }
-
-            if (to == null) {
-                throw new ArgumentNullException("to");
-            }
-
+            EnsureArgumentsAreNotNull(to, from);
             try {
                 to.ReadOnly = from.IsReadOnly();
             } catch (IOException e) {
@@ -59,46 +53,91 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <summary>
         /// Sets the local read only state to the remote object if the local state is different to the remote state.
         /// </summary>
-        /// <param name="localState">Local state.</param>
-        /// <param name="from">From.</param>
-        /// <param name="andLogErrorsTo">And log errors to.</param>
-        public static void TryToSetReadOnlyStateIfDiffers(this IFileSystemInfo localState, ICmisObject from, ILog andLogErrorsTo = null) {
-            if (from == null) {
-                throw new ArgumentNullException("from");
+        /// <param name="to">Local file.</param>
+        /// <param name="from">Remote object.</param>
+        /// <param name="andLogErrorsTo">Logs errors to the given logger or ignores errors if logger is null.</param>
+        public static void TryToSetReadOnlyStateIfDiffers(this IFileSystemInfo to, ICmisObject from, ILog andLogErrorsTo = null) {
+            EnsureArgumentsAreNotNull(to, from);
+            if (from.IsReadOnly() != to.ReadOnly) {
+                to.TryToSetReadOnlyState(from: from, andLogErrorsTo: andLogErrorsTo);
             }
+        }
 
-            if (localState == null) {
-                throw new ArgumentNullException("localState");
-            }
-
-            if (from.IsReadOnly() != localState.ReadOnly) {
-                localState.TryToSetReadOnlyState(from: from, andLogErrorsTo: andLogErrorsTo);
-            }
+        /// <summary>
+        /// Tries to set meta data state from remote object to local object if differs.
+        /// </summary>
+        /// <param name="to">Local file or folder.</param>
+        /// <param name="from">Remote object.</param>
+        /// <param name="andLogErrorsTo">Logs errors to the given logger or ignores errors if logger is null.</param>
+        public static void TryToSetMetaDataStateIfDiffers(this IFileSystemInfo to, ICmisObject from, ILog andLogErrorsTo = null) {
+            EnsureArgumentsAreNotNull(to, from);
+            to.TryToSetReadOnlyStateIfDiffers(from, andLogErrorsTo);
+            to.TryToSetAccessControlIfRenameMoveDeletionBehaviourDiffers(from, andLogErrorsTo);
+            to.TryToSetLastWriteTimeUtcIfAvailable(from, andLogErrorsTo);
         }
 
         /// <summary>
         /// Tries to set last write time UTC from remote object to local file if available.
         /// </summary>
-        /// <param name="localFile">Local file.</param>
+        /// <param name="to">Local file.</param>
         /// <param name="from">Remote object.</param>
-        /// <param name="andLogErrorsTo">Logs error to given logger if not null.</param>
-        public static void TryToSetLastWriteTimeUtcIfAvailable(this IFileSystemInfo localFile, ICmisObject from, ILog andLogErrorsTo = null) {
-            if (localFile == null) {
-                throw new ArgumentNullException("localFile");
-            }
-
-            if (from == null) {
-                throw new ArgumentNullException("from");
-            }
-
+        /// <param name="andLogErrorsTo">Logs errors to the given logger or ignores errors if logger is null.</param>
+        public static void TryToSetLastWriteTimeUtcIfAvailable(this IFileSystemInfo to, ICmisObject from, ILog andLogErrorsTo = null) {
+            EnsureArgumentsAreNotNull(to, from);
             if (from.LastModificationDate != null) {
                 try {
-                    localFile.LastWriteTimeUtc = (DateTime)from.LastModificationDate;
+                    to.LastWriteTimeUtc = (DateTime)from.LastModificationDate;
                 } catch (IOException e) {
                     if (andLogErrorsTo != null) {
                         andLogErrorsTo.Debug("Couldn't set the server side modification date", e);
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Tries to set access control if rename move deletion behaviour differs.
+        /// </summary>
+        /// <param name="to">Local directory.</param>
+        /// <param name="from">Remote folder.</param>
+        /// <param name="andLogErrorsTo">Logs errors to the given logger or ignores errors if logger is null.</param>
+        public static void TryToSetAccessControlIfRenameMoveDeletionBehaviourDiffers(this IFileSystemInfo to, ICmisObject from, ILog andLogErrorsTo = null) {
+            EnsureArgumentsAreNotNull(to, from);
+            var dir = to as IDirectoryInfo;
+            var folder = from as IFolder;
+            if (dir != null && folder != null && !folder.IsReadOnly()) {
+                bool canRenameMoveDeleteOnRemote = folder.CanRenameAndMoveAndDelete();
+                if (dir.CanMoveOrRenameOrDelete != canRenameMoveDeleteOnRemote) {
+                    dir.CanMoveOrRenameOrDelete = canRenameMoveDeleteOnRemote;
+                }
+            }
+        }
+
+        public static bool MetaDataDiffers(this IFileSystemInfo to, ICmisObject from) {
+            EnsureArgumentsAreNotNull(to, from);
+            if (from.IsReadOnly() != to.ReadOnly) {
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool MetaDataDiffers(this IMappedObject to, ICmisObject from) {
+            EnsureArgumentsAreNotNull(to, from);
+            if (to.IsReadOnly != from.IsReadOnly()) {
+                return true;
+            }
+
+            return false;
+        }
+
+        private static void EnsureArgumentsAreNotNull(Object to, ICmisObject from) {
+            if (from == null) {
+                throw new ArgumentNullException("from");
+            }
+
+            if (to == null) {
+                throw new ArgumentNullException("to");
             }
         }
     }

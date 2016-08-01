@@ -45,7 +45,7 @@ namespace TestLibrary.IntegrationTests {
     /// <summary>
     /// Client Brand integration tests. Each method tests one specific test case. The test got to be finished after 1 min, otherwise the test will fail.
     /// </summary>
-    [TestFixture, Timeout(60000), Category("Branding")]
+    [TestFixture, Timeout(60000), Category("Branding"), Category("Slow")]
     class ClientBrandTests : IsTestWithConfiguredLog4Net {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ClientBrandTests));
 
@@ -71,7 +71,7 @@ namespace TestLibrary.IntegrationTests {
         /// <summary>
         /// Test CMIS server connection
         /// </summary>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void TestServer(
             string canonical_name,
             string localPath,
@@ -97,7 +97,7 @@ namespace TestLibrary.IntegrationTests {
         /// <summary>
         /// Test Client Brand
         /// </summary>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers")]
         public void TestClientBrand(
             string canonical_name,
             string localPath,

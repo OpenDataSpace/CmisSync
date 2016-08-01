@@ -211,11 +211,13 @@
     <Compile Include="StorageTests\DataBaseTests\MetaDataStorageTest.cs" />
     <Compile Include="StorageTests\DataBaseTests\PersistentCookieStorageTest.cs" />
     <Compile Include="StorageTests\FileSystemTests\DateTimeConverterTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\DirectoryInfoWrapperTest.cs" />
     <Compile Include="StorageTests\FileSystemTests\ExtendedAttributeChangesModificationDateTest.cs" />
     <Compile Include="StorageTests\FileSystemTests\ExtendedAttributeReaderDosTest.cs" />
     <Compile Include="StorageTests\FileSystemTests\ExtendedAttributeReaderUnixTest.cs" />
     <Compile Include="StorageTests\FileSystemTests\FileSystemWrapperTests.cs" />
     <Compile Include="StorageTests\FileSystemTests\LongFileAndPathNameSupportTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\NtfsACLsTest.cs" />
     <Compile Include="StorageTests\FileSystemTests\Utf8FileNameNormalizationTest.cs" />
     <Compile Include="StreamsTests\BandwidthLimitedStreamTest.cs" />
     <Compile Include="StreamsTests\ChunkedStreamTest.cs" />
@@ -405,20 +407,5 @@
   </Target>
   -->
   <ItemGroup />
-  <ItemGroup>
-    <Folder Include="IntegrationTests\PrivateWorkingCopyTests\" />
-    <Folder Include="IntegrationTests\ContentHashTests\" />
-    <Folder Include="IntegrationTests\MockedServerTests\" />
-    <Folder Include="MockedServer\MockedServices\" />
-    <Folder Include="StorageTests\FileSystemTests\ReadOnlyIgnoringDecorator\" />
-    <Folder Include="IntegrationTests\VirusDetectionTests\" />
-    <Folder Include="ExceptionTests\" />
-    <Folder Include="IntegrationTests\NetworkFailuresTests\" />
-    <Folder Include="TestUtils\ToxiproxyUtils\" />
-    <Folder Include="IntegrationTests\LinkTests\" />
-    <Folder Include="IntegrationTests\RegexIgnoreTests\" />
-    <Folder Include="IntegrationTests\ValidNamesTests\" />
-    <Folder Include="FilterTests\RegexFilterTests\" />
-    <Folder Include="IntegrationTests\SyncScenarioITs\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

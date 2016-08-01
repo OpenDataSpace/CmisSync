@@ -453,15 +453,25 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             if (obj is IDocument) {
                 return obj.CanSetContentStream() == false && obj.CanDeleteObject() == false;
             } else {
-                if (obj.CanCreateFolder() == false && obj.CanCreateDocument() == false) {
-                    return true;
-                } else {
-                    if (obj is IFolder) {
-                        return obj.CanDeleteObject() == false || obj.CanMoveObject() == false;
-                    }
-                    return false;
-                }
+                return obj.CanCreateFolder() == false && obj.CanCreateDocument() == false;
             }
+        }
+
+        /// <summary>
+        /// Determines if the folder can be renamed and moved and deleted. This is forbidden for shared folder and project rooms.
+        /// </summary>
+        /// <returns><c>true</c> if the folder can be renamed and moved and deleted; otherwise, <c>false</c>.</returns>
+        /// <param name="folder">CMIS folder.</param>
+        public static bool CanRenameAndMoveAndDelete(this IFolder folder) {
+            if (folder == null) {
+                throw new ArgumentNullException("folder");
+            }
+
+            return !(folder.CanCreateFolder() == true &&
+                folder.CanCreateDocument() == true &&
+                folder.CanGetChildren() == true &&
+                folder.CanGetProperties() == true &&
+                folder.CanMoveObject() == false);
         }
 
         /// <summary>

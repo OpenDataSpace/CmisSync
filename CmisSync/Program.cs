@@ -117,7 +117,7 @@ namespace CmisSync {
                     "designed to keep things simple and to stay out of your way." + n +
                     n +
                     "Version: " + CmisSync.Lib.Backend.Version + n +
-                    "Copyright (C) 2014 GRAU DATA AG" + n +
+                    "Copyright (C) 2016 GRAU DATA AG" + n +
                     "Copyright (C) 2010 Hylke Bons" + n +
                     "This program comes with ABSOLUTELY NO WARRANTY." + n +
                     n +

@@ -36,11 +36,20 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
                 throw new ArgumentNullException("ex");
             }
 
-            if (!string.IsNullOrEmpty(ex.ErrorContent) && ex.ErrorContent.ToLower().Contains("infected file")) {
-                return true;
-            } else {
-                return false;
+            return !string.IsNullOrEmpty(ex.ErrorContent) && ex.ErrorContent.ToLower().Contains("infected file");
+        }
+
+        /// <summary>
+        /// Determines if the storage exception is a virus scanner unavailable exception.
+        /// </summary>
+        /// <returns><c>true</c> if exception is a virus scanner unavailable exception; otherwise, <c>false</c>.</returns>
+        /// <param name="ex">CMIS storage exception.</param>
+        public static bool IsVirusScannerUnavailableException(this CmisStorageException ex) {
+            if (ex == null) {
+                throw new ArgumentNullException("ex");
             }
+
+            return !string.IsNullOrEmpty(ex.ErrorContent) && ex.ErrorContent.ToLower().Trim().StartsWith("icap service unavailable");
         }
     }
 }

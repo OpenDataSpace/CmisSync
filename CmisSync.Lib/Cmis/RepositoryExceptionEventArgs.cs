@@ -44,7 +44,12 @@ namespace CmisSync.Lib.Cmis {
         /// <summary>
         ///A connection has been lost.
         /// </summary>
-        ConnectionException
+        ConnectionException,
+
+        /// <summary>
+        /// The remote virus scanner is unavailable.
+        /// </summary>
+        RemoteVirusScannerIsUnavailable
     }
 
     /// <summary>

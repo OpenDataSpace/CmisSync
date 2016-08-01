@@ -47,7 +47,7 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             Assert.That(fileInfo.Length, Is.EqualTo(defaultContent.Length));
             DateTime modificationDate = fileInfo.LastWriteTimeUtc;
 
-            this.InitializeAndRunRepo();
+            InitializeAndRunRepo();
             this.remoteRootDir.Refresh();
             var children = this.remoteRootDir.GetChildren();
             Assert.That(children.TotalNumItems, Is.EqualTo(1));
@@ -78,7 +78,7 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
                 sw.Write(defaultContent);
             }
 
-            this.InitializeAndRunRepo();
+            InitializeAndRunRepo();
             this.remoteRootDir.Refresh();
             var children = this.remoteRootDir.GetChildren();
             Assert.That(children.TotalNumItems, Is.EqualTo(2));
@@ -98,7 +98,7 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             using (StreamWriter sw = mailInfo2.CreateText());
 
             this.repo.Initialize();
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            WaitUntilQueueIsNotEmpty();
             this.repo.Run();
 
             AssertThatFolderStructureIsEqual();
@@ -106,7 +106,7 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
 
         [Test]
         public void CreateFileWithOldModificationDate() {
-            this.InitializeAndRunRepo();
+            InitializeAndRunRepo();
             var file = new FileInfo(Path.Combine(this.localRootDir.FullName, "oldFile.bin"));
             using (var stream = file.CreateText()) {
                 stream.WriteLine("text");
@@ -151,7 +151,7 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             fileInfo.CreationTimeUtc = creationDate;
             creationDate = fileInfo.CreationTimeUtc;
 
-            this.InitializeAndRunRepo();
+            InitializeAndRunRepo();
             var children = this.remoteRootDir.GetChildren();
             Assert.That(children.TotalNumItems, Is.EqualTo(1));
             var child = children.First();
@@ -170,7 +170,7 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             var fileNames = new List<string>();
             string fileName = "file";
             this.remoteRootDir.CreateDocument(fileName + ".bin", defaultContent);
-            this.InitializeAndRunRepo();
+            InitializeAndRunRepo();
 
             var file = this.localRootDir.GetFiles().First();
             fileNames.Add(file.FullName);
@@ -215,8 +215,7 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
             DateTime creationDate = DateTime.UtcNow - TimeSpan.FromDays(2);
             int count = 100;
 
-            this.InitializeAndRunRepo();
-            this.repo.SingleStepQueue.SwallowExceptions = true;
+            InitializeAndRunRepo(swallowExceptions: true);
 
             for (int i = 1; i <= count; i++) {
                 var filePath = Path.Combine(this.localRootDir.FullName, string.Format("file_{0}.bin", i.ToString()));
@@ -230,7 +229,7 @@ namespace TestLibrary.IntegrationTests.SyncScenarioITs {
                 fileInfo.LastWriteTimeUtc = modificationDate;
             }
 
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            WaitUntilQueueIsNotEmpty();
 
             this.repo.Run();
 
