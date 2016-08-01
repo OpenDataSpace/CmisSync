@@ -145,6 +145,7 @@ SOURCES =  \
 	Exceptions/QuotaExceededException.cs \
 	Exceptions/RetryException.cs \
 	Exceptions/VirusDetectedException.cs \
+	Exceptions/VirusScannerUnavailableException.cs \
 	FileTransmission/AbortException.cs \
 	FileTransmission/ChunkedDownloader.cs \
 	FileTransmission/ChunkedUploader.cs \
