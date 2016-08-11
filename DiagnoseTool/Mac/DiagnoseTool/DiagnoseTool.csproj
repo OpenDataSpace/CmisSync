@@ -46,7 +46,7 @@
     <CodeSigningKey>3rd Party Mac Developer Application</CodeSigningKey>
     <EnableCodeSigning>true</EnableCodeSigning>
     <EnablePackageSigning>false</EnablePackageSigning>
-    <PackageSigningKey>Developer ID Installer</PackageSigningKey>
+    <PackageSigningKey>3rd Party Mac Developer Installer</PackageSigningKey>
     <Profiling>false</Profiling>
     <DefineConstants>__COCOA__</DefineConstants>
     <HttpClientHandler>HttpClientHandler</HttpClientHandler>
